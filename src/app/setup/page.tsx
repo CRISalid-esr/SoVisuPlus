@@ -30,7 +30,7 @@ export const metadata = {
 }
 
 export default async function SetupChecks() {
-  let dbStatus = 'unknown'
+  let dbStatus
 
   try {
     await prisma.$queryRaw`SELECT 1`
