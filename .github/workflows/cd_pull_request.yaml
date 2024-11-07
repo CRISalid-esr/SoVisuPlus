@@ -18,7 +18,7 @@ jobs:
           node-version: '22.9.0' # Specify your preferred Node.js version
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Run ESLint
         run: npm run lint
