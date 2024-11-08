@@ -21,6 +21,7 @@ import {
   ToggleOff,
   ToggleOn,
 } from '@mui/icons-material'
+import SpecialButton from '@/components/SpecialButton'
 
 const prisma = new PrismaClient()
 
@@ -75,8 +76,8 @@ export default async function SetupChecks() {
               </Typography>
             </CardContent>
             <CardActions>
-              <Button size='small'>Action 1</Button>
-              <Button size='small'>Action 2</Button>
+              <SpecialButton size='small'>Action 1</SpecialButton>
+              <SpecialButton size='small'>Action 2</SpecialButton>
             </CardActions>
           </Card>
 
