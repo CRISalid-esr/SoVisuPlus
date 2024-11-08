@@ -21,7 +21,8 @@ import {
   ToggleOff,
   ToggleOn,
 } from '@mui/icons-material'
-import SpecialButton from '@/components/SpecialButton'
+import StoreChecker from '@/components/StoreChecker'
+import React from 'react'
 
 const prisma = new PrismaClient()
 
@@ -32,7 +33,6 @@ export const metadata = {
 
 export default async function SetupChecks() {
   let dbStatus
-
   try {
     await prisma.$queryRaw`SELECT 1`
     dbStatus = 'connected'
@@ -47,14 +47,36 @@ export default async function SetupChecks() {
         App setup Checks
       </Typography>
 
-      <Paper sx={{ padding: 2, marginTop: 2 }}>
-        <Typography variant='h6'>Database Status</Typography>
-        <Alert severity={dbStatus === 'connected' ? 'success' : 'error'}>
-          {dbStatus === 'connected'
-            ? 'Database is accessible'
-            : 'Database is not accessible'}
-        </Alert>
-      </Paper>
+      <Card variant='outlined'>
+        <CardContent>
+          <Typography variant='h5' component='div'>
+            Database Status
+          </Typography>
+          <Typography variant='body2' color='text.secondary'>
+            Query the database server site to check if it is accessible
+          </Typography>
+        </CardContent>
+        <CardActions>
+          <Alert severity={dbStatus === 'connected' ? 'success' : 'error'}>
+            {dbStatus === 'connected'
+              ? 'Database is accessible'
+              : 'Database is not accessible'}
+          </Alert>
+        </CardActions>
+      </Card>
+      <Card variant='outlined'>
+        <CardContent>
+          <Typography variant='h5' component='div'>
+            State management checkup
+          </Typography>
+          <Typography variant='body2' color='text.secondary'>
+            Load data from database into app global state
+          </Typography>
+        </CardContent>
+        <CardActions>
+          <StoreChecker />
+        </CardActions>
+      </Card>
 
       <Paper sx={{ padding: 2, marginTop: 2 }}>
         <Typography variant='h6'>MUI Preview</Typography>
@@ -66,21 +88,6 @@ export default async function SetupChecks() {
             marginTop: 2,
           }}
         >
-          <Card variant='outlined'>
-            <CardContent>
-              <Typography variant='h5' component='div'>
-                Card Component
-              </Typography>
-              <Typography variant='body2' color='text.secondary'>
-                This is a sample card component with content.
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <SpecialButton size='small'>Action 1</SpecialButton>
-              <SpecialButton size='small'>Action 2</SpecialButton>
-            </CardActions>
-          </Card>
-
           <Divider />
 
           <Typography variant='h6'>Buttons</Typography>

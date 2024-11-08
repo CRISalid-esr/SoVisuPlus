@@ -20,7 +20,8 @@
     "@prisma/client": "^5.22.0",
     "next": "15.0.2",
     "react": "19.0.0-rc-02c0e824-20241028",
-    "react-dom": "19.0.0-rc-02c0e824-20241028"
+    "react-dom": "19.0.0-rc-02c0e824-20241028",
+    "zustand": "^5.0.1"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",
