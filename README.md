@@ -21,3 +21,18 @@ ALTER USER sovisuplus CREATEDB;
 CREATE DATABASE sovisuplus;
 GRANT ALL PRIVILEGES ON DATABASE sovisuplus to sovisuplus;
 ```
+4. Create a `.env` file in the root directory of the project and fill it with the following content:
+```env
+DATABASE_URL="postgresql://sovisuplus:**************@localhost:5432/sovisuplus"
+```
+5. Run the Prisma migration with `npx prisma migrate dev --name init`.
+6. Run the development server with `npm run dev`.
+
+### Docker Installation
+
+#### For staging environment
+
+1. Build the Docker image with `docker build -t sovisuplus:v0.1 -f ./docker/staging/Dockerfile .`
+2. Run the Docker container with `docker compose -f ./docker/staging/docker-compose.yml up -d`.
+3. The application is now available at `http://localhost:3002`.
+

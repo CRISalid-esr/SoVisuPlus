@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  svp-db:
+    image: postgres:16
+    container_name: svp-db
+    restart: always
+    environment:
+      POSTGRES_USER: sovisuplus
+      POSTGRES_PASSWORD: sovisuplus
+      POSTGRES_DB: sovisuplus
+    expose:
+      - 5432
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    networks:
+      - svp-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready  -d sovisuplus -U sovisuplus" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+  sovisuplus:
+    #    image: crisalidesr/sovisuplus:latest
+    image: sovisuplus:v0.1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sovisuplus
+    ports:
+      - 3002:3000
+      - 5555:5555
+    environment:
+      - DATABASE_URL=postgresql://sovisuplus:sovisuplus@svp-db:5432/sovisuplus?schema=public
+    depends_on:
+      svp-db:
+        condition: service_healthy
+    networks:
+      - svp-network
+networks:
+  svp-network:
+    driver: bridge

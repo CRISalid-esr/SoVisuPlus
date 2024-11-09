@@ -16,7 +16,7 @@ describe('StoreChecker', () => {
     render(<StoreChecker />)
 
     await waitFor(() => {
-      expect(screen.getByText('Publications loaded')).toBeInTheDocument()
+      expect(screen.getByText('Server data loaded')).toBeInTheDocument()
     })
   })
 })
