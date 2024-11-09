@@ -1,5 +1,3 @@
-// app/setup/page.tsx
-import { PrismaClient } from '@prisma/client'
 import {
   Alert,
   Box,
@@ -23,8 +21,8 @@ import {
 } from '@mui/icons-material'
 import StoreChecker from '@/components/StoreChecker'
 import React from 'react'
-
-const prisma = new PrismaClient()
+import { dbCheckup } from '@/lib/db_checkup'
+import Image from 'next/image'
 
 export const metadata = {
   title: 'Setup checks Checks',
@@ -32,14 +30,7 @@ export const metadata = {
 }
 
 export default async function SetupChecks() {
-  let dbStatus
-  try {
-    await prisma.$queryRaw`SELECT 1`
-    dbStatus = 'connected'
-  } catch (error) {
-    dbStatus = 'not connected'
-    console.log(error)
-  }
+  const { dbStatus, dbError } = await dbCheckup()
 
   return (
     <Box sx={{ padding: 4 }}>
@@ -50,7 +41,15 @@ export default async function SetupChecks() {
       <Card variant='outlined'>
         <CardContent>
           <Typography variant='h5' component='div'>
-            Database Status
+            {/*display icon from public/prisma.svg */}
+            Database checkup |
+            <Image
+              src='/prisma-2.svg'
+              alt='Vercel logomark'
+              style={{ marginLeft: 10, verticalAlign: 'middle' }}
+              width={100}
+              height={100}
+            />
           </Typography>
           <Typography variant='body2' color='text.secondary'>
             Query the database server site to check if it is accessible
@@ -60,14 +59,21 @@ export default async function SetupChecks() {
           <Alert severity={dbStatus === 'connected' ? 'success' : 'error'}>
             {dbStatus === 'connected'
               ? 'Database is accessible'
-              : 'Database is not accessible'}
+              : 'Database is not accessible : ' + dbError?.message}
           </Alert>
         </CardActions>
       </Card>
       <Card variant='outlined'>
         <CardContent>
           <Typography variant='h5' component='div'>
-            State management checkup
+            State management | Zustand
+            <Image
+              src='/zustand.png'
+              alt='Vercel logomark'
+              style={{ marginLeft: 10, verticalAlign: 'middle' }}
+              width={50}
+              height={50}
+            />
           </Typography>
           <Typography variant='body2' color='text.secondary'>
             Load data from database into app global state

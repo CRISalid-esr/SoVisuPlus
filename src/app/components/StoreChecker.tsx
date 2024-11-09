@@ -14,10 +14,10 @@ export default function StoreChecker() {
     })
   }, [fetchPublications])
   if (loading && !failure) {
-    return <Alert severity='info'>Waiting for publications...</Alert>
+    return <Alert severity='info'>Waiting for server data...</Alert>
   }
   if (failure) {
-    return <Alert severity='error'>Failed to load publications</Alert>
+    return <Alert severity='error'>Failed to load server data</Alert>
   }
-  return <Alert severity='success'>Publications loaded</Alert>
+  return <Alert severity='success'>Server data loaded</Alert>
 }
