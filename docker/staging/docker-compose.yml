@@ -22,7 +22,7 @@ services:
       retries: 10
   sovisuplus:
     #    image: crisalidesr/sovisuplus:latest
-    image: sovisuplus:v0.1
+    image: sovisuplus:v0.1-staging
     build:
       context: .
       dockerfile: Dockerfile
