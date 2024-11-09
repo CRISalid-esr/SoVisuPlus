@@ -24,6 +24,8 @@ jobs:
         with:
           push: true
           tags: crisalidesr/sovisuplus:v0.1-staging
+          context: .
+          file: ./docker/staging/Dockerfile
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             GIT_BRANCH=${{ github.ref_name }}
