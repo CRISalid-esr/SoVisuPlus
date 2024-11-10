@@ -26,7 +26,7 @@ import Image from 'next/image'
 import { Grid } from '@mui/system'
 
 export const metadata = {
-  title: 'Setup checks Checks',
+  title: 'Setup Checks',
   description: 'Setup checks for the application',
 }
 
@@ -35,16 +35,16 @@ export default async function SetupChecks() {
 
   return (
     <Box sx={{ padding: 4 }}>
-      <Grid container spacing={2}>
+      <Grid container spacing={3}>
         <Grid size={8}>
           <Typography variant='h4' component='h1' gutterBottom>
-            App Setup Checks
+            Setup Checks
           </Typography>
 
           <Card variant='outlined' sx={{ marginBottom: 2 }}>
             <CardContent>
               <Typography variant='h5' component='div'>
-                Deployment |
+                Deployment |{' '}
                 <Image
                   src='/docker.svg'
                   alt='Docker logo'
@@ -90,7 +90,7 @@ export default async function SetupChecks() {
           <Card variant='outlined' sx={{ marginBottom: 2 }}>
             <CardContent>
               <Typography variant='h5' component='div'>
-                Database Checkup |
+                Database Checkup |{' '}
                 <Image
                   src='/prisma.svg'
                   alt='Database logo'
@@ -115,7 +115,7 @@ export default async function SetupChecks() {
           <Card variant='outlined'>
             <CardContent>
               <Typography variant='h5' component='div'>
-                State Management |
+                State Management |{' '}
                 <Image
                   src='/zustand.png'
                   alt='Zustand logo'
@@ -136,8 +136,8 @@ export default async function SetupChecks() {
         </Grid>
 
         <Grid size={4}>
-          <Paper sx={{ padding: 2 }}>
-            <Typography variant='h4' component='h1' gutterBottom>
+          <Paper sx={{ padding: 3 }}>
+            <Typography variant='h5' gutterBottom>
               MUI Preview
             </Typography>
             <Box
