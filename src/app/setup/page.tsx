@@ -71,6 +71,14 @@ export default async function SetupChecks() {
                   <strong>DOCKER_DIGEST:</strong>{' '}
                   {process.env.DOCKER_DIGEST || 'Not Set'}
                 </Typography>
+                <Typography variant='body1'>
+                  <strong>GIT_BRANCH:</strong>{' '}
+                  {process.env.GIT_BRANCH || 'Not Set'}
+                </Typography>
+                <Typography variant='body1'>
+                  <strong>GIT_COMMIT:</strong>{' '}
+                  {process.env.GIT_COMMIT || 'Not Set'}
+                </Typography>
               </Box>
             </CardContent>
             <CardActions>

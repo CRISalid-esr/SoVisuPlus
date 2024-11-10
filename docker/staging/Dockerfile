@@ -13,6 +13,12 @@ WORKDIR /app
 COPY . .
 COPY .env.staging.sample .env.production
 
+ARG GIT_COMMIT
+ARG GIT_BRANCH
+
+ENV GIT_COMMIT=${GIT_COMMIT}
+ENV GIT_BRANCH=${GIT_BRANCH}
+
 USER root
 
 EXPOSE $PORT
