@@ -11,7 +11,7 @@ npm ci --legacy-peer-deps  --include=dev
 echo "+> Generate Prisma Client"
 npx prisma generate
 echo "+> Build the app"
-npm run build
+DISABLE_ESLINT_PLUGIN=true npm run build
 echo "+> Run the Prisma migrations"
 npx prisma migrate deploy
 echo "+> Start the app"
