@@ -23,7 +23,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: crisalidesr/sovisuplus:v0.1-dev
+          tags: crisalidesr/sovisuplus:v0.2-dev
           context: .
           file: ./docker/staging/Dockerfile
           build-args: |
