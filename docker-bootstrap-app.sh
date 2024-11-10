@@ -1,5 +1,9 @@
 #!/bin/sh
-echo "DATABASE_URL=$DATABASE_URL" > .env
+export DATABASE_URL=postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME?schema=public
+echo "DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME" >> .env
+echo "DOCKER_TAG=$DOCKER_TAG" >> .env
+echo "DOCKER_DIGEST=$DOCKER_DIGEST" > .env
+echo "DATABASE_URL=$DATABASE_URL" >> .env
 npm ci --legacy-peer-deps  --include=dev
 npx prisma generate
 DISABLE_ESLINT_PLUGIN=true npm run build

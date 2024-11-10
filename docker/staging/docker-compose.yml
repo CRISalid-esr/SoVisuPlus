@@ -21,8 +21,7 @@ services:
       timeout: 5s
       retries: 10
   sovisuplus:
-    #    image: crisalidesr/sovisuplus:latest
-    image: sovisuplus:v0.1-staging
+    image: crisalidesr/sovisuplus:v0.1-dev
     build:
       context: .
       dockerfile: Dockerfile
@@ -31,7 +30,11 @@ services:
       - 3002:3000
       - 5555:5555
     environment:
-      - DATABASE_URL=postgresql://sovisuplus:sovisuplus@svp-db:5432/sovisuplus?schema=public
+      - DB_NAME=sovisuplus
+      - DB_USER=sovisuplus
+      - DB_PASSWORD=sovisuplus
+      - DB_HOST=svp-db
+      - DB_PORT=5432
     depends_on:
       svp-db:
         condition: service_healthy
