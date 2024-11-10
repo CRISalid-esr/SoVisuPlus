@@ -24,6 +24,7 @@ import React from 'react'
 import { dbCheckup } from '@/lib/db_checkup'
 import Image from 'next/image'
 import { Grid } from '@mui/system'
+import Link from 'next/link'
 
 export const metadata = {
   title: 'Setup Checks',
@@ -36,6 +37,13 @@ export default async function SetupChecks() {
   return (
     <Box sx={{ padding: 4 }}>
       <Grid container spacing={3}>
+        <Grid size={12}>
+          <Link href='/' passHref>
+            <Button variant='contained' color='primary' sx={{ mb: 2 }}>
+              Back to Home
+            </Button>
+          </Link>
+        </Grid>
         <Grid size={8}>
           <Typography variant='h4' component='h1' gutterBottom>
             Setup Checks
