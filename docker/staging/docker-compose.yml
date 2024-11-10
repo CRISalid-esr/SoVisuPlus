@@ -21,8 +21,7 @@ services:
       timeout: 5s
       retries: 10
   sovisuplus:
-    #    image: crisalidesr/sovisuplus:latest
-    image: sovisuplus:v0.1-staging
+    image: crisalidesr/sovisuplus:v0.1-dev
     build:
       context: .
       dockerfile: Dockerfile
