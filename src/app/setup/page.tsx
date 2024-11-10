@@ -36,8 +36,7 @@ export default async function SetupChecks() {
   return (
     <Box sx={{ padding: 4 }}>
       <Grid container spacing={2}>
-        {/* Column for Setup Checks */}
-        <Grid xs={12} md={6}>
+        <Grid size={8}>
           <Typography variant='h4' component='h1' gutterBottom>
             App Setup Checks
           </Typography>
@@ -136,10 +135,11 @@ export default async function SetupChecks() {
           </Card>
         </Grid>
 
-        {/* Column for MUI Preview */}
-        <Grid xs={12} md={6}>
+        <Grid size={4}>
           <Paper sx={{ padding: 2 }}>
-            <Typography variant='h6'>MUI Preview</Typography>
+            <Typography variant='h4' component='h1' gutterBottom>
+              MUI Preview
+            </Typography>
             <Box
               sx={{
                 display: 'flex',
