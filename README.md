@@ -11,7 +11,9 @@ SoVisu+ is distributed under the terms of the [CeCILL v2.1 license](http://www.c
 ### Manual Installation
 
 1. Clone the repository
-2. Install the dependencies with `npm install`. To include dev dependencies, use `npm install --dev`.
+2. Install the dependencies with `npm install`. To include dev dependencies, use `npm install --dev`.<br />
+If you encounter issues while installing dependencies, such as peer dependency conflicts, try using the following command `npm install --legacy-peer-deps`.
+
 3. Install Postgresql and create a database.
 Prisma initial migration requires the CREATE DATABASE privilege.
 ```sql
@@ -21,6 +23,12 @@ ALTER USER sovisuplus CREATEDB;
 CREATE DATABASE sovisuplus;
 GRANT ALL PRIVILEGES ON DATABASE sovisuplus to sovisuplus;
 ```
+In case you are using PostgreSQL v15 the `CREATE` privilege do not grant  to everyone on the public schema by default.to resolve this problem try using the following command 
+
+```sql 
+GRANT CREATE ON SCHEMA public TO sovisuplus;
+```
+
 4. Create a `.env` file in the root directory of the project and fill it with the following content:
 ```env
 DATABASE_URL="postgresql://sovisuplus:**************@localhost:5432/sovisuplus"
