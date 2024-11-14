@@ -11,7 +11,11 @@ SoVisu+ is distributed under the terms of the [CeCILL v2.1 license](http://www.c
 ### Manual Installation
 
 1. Clone the repository
-2. Install the dependencies with `npm install`. To include dev dependencies, use `npm install --dev`.
+2. Install the dependencies with `npm install`. To include dev dependencies, use `npm install --dev`.<br />
+If you encounter issues while installing dependencies, It could be due to mismatched versions or compatibility problems between React, React DOM, and Material UI, You can use the command `npm install --legacy-peer-deps` to resolve the problem temporary. You can find below two links that describe the problem:<br>
+[mui/material-ui#44203](https://github.com/mui/material-ui/issues/44203)<br>
+[mui/material-ui#42428](https://github.com/mui/material-ui/pull/42428)
+
 3. Install Postgresql and create a database.
 Prisma initial migration requires the CREATE DATABASE privilege.
 ```sql
@@ -21,6 +25,12 @@ ALTER USER sovisuplus CREATEDB;
 CREATE DATABASE sovisuplus;
 GRANT ALL PRIVILEGES ON DATABASE sovisuplus to sovisuplus;
 ```
+In case you are using PostgreSQL v15 the `CREATE` privilege do not grant to everyone on the public schema by default. To resolve this problem you need to change the database owner using the following command 
+
+```sql 
+ALTER DATABASE sovisuplus OWNER TO sovisuplus ;
+```
+
 4. Create a `.env` file in the root directory of the project and fill it with the following content:
 ```env
 DATABASE_URL="postgresql://sovisuplus:**************@localhost:5432/sovisuplus"
