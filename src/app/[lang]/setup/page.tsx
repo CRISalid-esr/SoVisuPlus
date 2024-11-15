@@ -31,7 +31,7 @@ export const metadata = {
   description: 'Setup checks for the application',
 }
 
-export default async function SetupChecks({ params }: { params: { lang: string } }) {
+export default async function SetupChecks() {
   const { dbStatus, dbError } = await dbCheckup()
 
   return (
