@@ -1,17 +1,33 @@
 'use client'
-import Image from 'next/image'
-import { Box, Typography, Container, Button } from '@mui/material'
-import Link from 'next/link'
-import { t } from '@lingui/macro'
 import { Trans } from '@lingui/macro'
+import {
+  Box,
+  Button,
+  Container,
+  FormControl,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Typography,
+} from '@mui/material'
+import Image from 'next/image'
+import Link from 'next/link'
+import { use, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 type Props = {
   params: { lang: string }
 }
 
-export default async function Home({ params }: Props) {
-  const { lang } = await Promise.resolve(params)
+export default function Home({ params }: Props) {
+  const { lang } = params
 
+  const [currentLang, setCurrentLang] = useState(lang)
+  const router = useRouter()
+
+  const handleChange = (event: SelectChangeEvent) => {
+    router.push(`/${event.target.value}`)O
+  }
 
   return (
     <Container maxWidth='sm' sx={{ textAlign: 'center', mt: 8 }}>
@@ -27,6 +43,17 @@ export default async function Home({ params }: Props) {
       <Typography variant='h4' component='h1' gutterBottom>
         SoVisu+
       </Typography>
+      <FormControl variant='filled' sx={{ m: 1, minWidth: 120 }}>
+        <Select
+          labelId='demo-simple-select-filled-label'
+          id='demo-simple-select-filled'
+          value={currentLang}
+          onChange={handleChange}
+        >
+          <MenuItem value='en'>English</MenuItem>
+          <MenuItem value='fr'>Français</MenuItem>
+        </Select>
+      </FormControl>
       <Typography variant='h4' component='h1' gutterBottom>
         <Trans>Example text for translation</Trans>
       </Typography>
