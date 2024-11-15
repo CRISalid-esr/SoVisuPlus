@@ -9,6 +9,6 @@ type Props = {
 };
 
 export function LanguageProvider({ children, messages, locale }: Props) {
-  i18n.loadAndActivate({ locale, messages });
+  i18n.loadAndActivate({ locale, messages});
   return <I18nProvider i18n={i18n}>{children}</I18nProvider>;
 }

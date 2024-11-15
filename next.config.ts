@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
     middlewarePrefetch: 'flexible'
   },
   webpack: (config) => {
+     config.module.rules.push({
+      test: /\.po$/,
+      use: {
+        loader: '@lingui/loader'
+      }
+    }),
     config.resolve.alias['@'] = path.join(__dirname, 'src', 'app')
     return config
   },

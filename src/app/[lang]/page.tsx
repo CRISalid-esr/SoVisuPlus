@@ -1,7 +1,9 @@
-'use client';
+'use client'
 import Image from 'next/image'
 import { Box, Typography, Container, Button } from '@mui/material'
 import Link from 'next/link'
+import { t } from '@lingui/macro'
+import { Trans } from '@lingui/macro'
 
 type Props = {
   params: { lang: string }
@@ -9,6 +11,7 @@ type Props = {
 
 export default async function Home({ params }: Props) {
   const { lang } = await Promise.resolve(params)
+
 
   return (
     <Container maxWidth='sm' sx={{ textAlign: 'center', mt: 8 }}>
@@ -24,10 +27,13 @@ export default async function Home({ params }: Props) {
       <Typography variant='h4' component='h1' gutterBottom>
         SoVisu+
       </Typography>
+      <Typography variant='h4' component='h1' gutterBottom>
+        <Trans>Example text for translation</Trans>
+      </Typography>
       <Typography variant='subtitle1' gutterBottom>
         A Comprehensive App for Managing Scientific Output and Researcher
         Identifiers
-        </Typography> 
+      </Typography>
       <Typography variant='body2' color='textSecondary' sx={{ mb: 4 }}>
         Development instance
       </Typography>

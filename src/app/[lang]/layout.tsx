@@ -10,13 +10,14 @@ type Props = {
 }
 
 export default async function RootLayout({ params, children }: Props) {
-  const messages = { en: enMessages, es: frMessages }
+  const messages: { [key: string]: any } = { en: enMessages, fr: frMessages }
   const { lang } = await Promise.resolve(params)
+  
 
   return (
     <>
       <html lang={lang}>
-        <LanguageProvider locale={lang} messages={messages}>
+        <LanguageProvider locale={lang} messages={messages[lang]}>
           <AppRouterCacheProvider>
             <body>{children}</body>
           </AppRouterCacheProvider>
@@ -25,3 +26,4 @@ export default async function RootLayout({ params, children }: Props) {
     </>
   )
 }
+

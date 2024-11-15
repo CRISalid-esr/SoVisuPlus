@@ -1,1 +1,1 @@
-/*eslint-disable*/module.exports={messages:JSON.parse("{\"RauBq1\":\"Get started by editing <0>src/app/page.tsx</0>\",\"4Yq+pa\":\"Translated Text\"}")};
+/*eslint-disable*/module.exports={messages:JSON.parse("{\"vxXP9F\":\"Ēxēḿƥĺē ďē ţēxţē à ţŕàďũĩŕē\"}")};

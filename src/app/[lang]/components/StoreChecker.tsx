@@ -9,7 +9,6 @@ export default function StoreChecker() {
   const [failure, setFailure] = useState<boolean>(false)
   useEffect(() => {
     fetchPublications().then(() => {
-      console.log('Publications initialized')
       setFailure(false)
     })
   }, [fetchPublications])

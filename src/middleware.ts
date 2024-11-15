@@ -8,7 +8,6 @@ const supportedLocales = ['en', 'fr'];
 const defaultLocale = 'fr';
 
 export function middleware(request: NextRequest) {
-    console.log('Middleware running on:', request.nextUrl.pathname);
     const { pathname } = request.nextUrl;
 
   // Skip public files and API routes

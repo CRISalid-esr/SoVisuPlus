@@ -13,6 +13,10 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/app/[lang]/page.tsx:7
-msgid "Example text for translation"
-msgstr "Exemple de texte à traduire"
+#: src/app/[lang]/page.tsx:31
+#~ msgid "Example text for translation"
+#~ msgstr "Exemple de texte à traduire"
+
+#: src/app/[lang]/page.tsx:31
+msgid "home_page_temp_title"
+msgstr ""

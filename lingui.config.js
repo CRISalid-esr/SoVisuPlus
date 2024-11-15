@@ -1,8 +1,8 @@
 /** @type {import('@lingui/conf').LinguiConfig} */
 
 module.exports = {
-  locales: ['en', 'cs', 'fr', 'zu'],
-  pseudoLocale: 'zu',
+  locales: ['en','fr'],
+  pseudoLocale: 'fr',
   catalogs: [
     {
       path: 'src/locales/{locale}/messages',
