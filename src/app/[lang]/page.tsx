@@ -45,7 +45,7 @@ export default function Home({ params }: Props) {
         <Select
           labelId='demo-simple-select-filled-label'
           id='demo-simple-select-filled'
-          value={currentLang}
+          value={lang}
           onChange={handleChange}
         >
           <MenuItem value='en'>English</MenuItem>
