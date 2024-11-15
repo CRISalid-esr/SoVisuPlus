@@ -12,7 +12,6 @@ import {
 } from '@mui/material'
 import Image from 'next/image'
 import Link from 'next/link'
-import { use, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 type Props = {
@@ -22,11 +21,10 @@ type Props = {
 export default function Home({ params }: Props) {
   const { lang } = params
 
-  const [currentLang, setCurrentLang] = useState(lang)
   const router = useRouter()
 
   const handleChange = (event: SelectChangeEvent) => {
-    router.push(`/${event.target.value}`)O
+    router.push(`/${event.target.value}`)
   }
 
   return (

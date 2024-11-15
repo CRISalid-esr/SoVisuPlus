@@ -10,7 +10,7 @@ type Props = {
 }
 
 export default async function RootLayout({ params, children }: Props) {
-  const messages: { [key: string]: any } = { en: enMessages, fr: frMessages }
+  const messages: { [key: string]: Record<string, string> } = { en: enMessages, fr: frMessages }
   const { lang } = await Promise.resolve(params)
   
 
