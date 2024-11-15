@@ -1,5 +1,5 @@
 'use client'
-import useStore from '@/stores/global_store'
+import useStore from 'src/app/[lang]/stores/global_store'
 import { useEffect, useState } from 'react'
 import { Alert } from '@mui/material'
 

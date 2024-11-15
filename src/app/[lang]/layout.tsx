@@ -1,0 +1,27 @@
+import { LanguageProvider } from './LanguageProvider'
+import { messages as enMessages } from '@/locales/en/messages'
+import { messages as frMessages } from '@/locales/fr/messages'
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter'
+
+
+type Props = {
+  children: React.ReactNode
+  params: { lang: string }
+}
+
+export default async function Layout({ params, children }: Props) {
+  const messages = { en: enMessages, es: frMessages }
+  const { lang } = await Promise.resolve(params)
+
+  return (
+    <>
+      <html lang={lang}>
+        <LanguageProvider locale={lang} messages={messages}>
+          <AppRouterCacheProvider>
+            <body>{children}</body>
+          </AppRouterCacheProvider>
+        </LanguageProvider>
+      </html>
+    </>
+  )
+}
