@@ -3,7 +3,13 @@ import Image from 'next/image'
 import { Box, Typography, Container, Button } from '@mui/material'
 import Link from 'next/link'
 
-export default function Home({ params }: { params: { lang: string } }) {
+type Props = {
+  params: { lang: string }
+}
+
+export default async function Home({ params }: Props) {
+  const { lang } = await Promise.resolve(params)
+
   return (
     <Container maxWidth='sm' sx={{ textAlign: 'center', mt: 8 }}>
       <Box sx={{ mb: 4 }}>
@@ -26,7 +32,7 @@ export default function Home({ params }: { params: { lang: string } }) {
         Development instance
       </Typography>
       <Box sx={{ mt: 4 }}>
-        <Link href={`/${params.lang}/setup`} passHref>
+        <Link href={`/${lang}/setup`} passHref>
           <Button variant='contained' color='primary'>
             Application Health Checkup
           </Button>

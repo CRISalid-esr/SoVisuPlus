@@ -9,7 +9,7 @@ type Props = {
   params: { lang: string }
 }
 
-export default async function Layout({ params, children }: Props) {
+export default async function RootLayout({ params, children }: Props) {
   const messages = { en: enMessages, es: frMessages }
   const { lang } = await Promise.resolve(params)
 

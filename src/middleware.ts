@@ -4,8 +4,8 @@ import type { NextRequest } from 'next/server';
 
 // Define supported locales and the default locale
 const PUBLIC_FILE = /\.(.*)$/;
-const supportedLocales = ['en', 'es'];
-const defaultLocale = 'en';
+const supportedLocales = ['en', 'fr'];
+const defaultLocale = 'fr';
 
 export function middleware(request: NextRequest) {
     console.log('Middleware running on:', request.nextUrl.pathname);
