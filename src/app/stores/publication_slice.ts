@@ -22,7 +22,6 @@ export const addPublicationSlice: StateCreator<
     try {
       const response = await fetch('/api/publications'); // Replace with your API endpoint
       const jsonData: Publication[] = await response.json();
-      console.log("jsonData", jsonData);
       set({ publications: jsonData });
     } catch (error) {
       console.error('Failed to fetch publications', error);
