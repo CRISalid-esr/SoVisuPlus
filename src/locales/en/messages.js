@@ -1,1 +1,1 @@
-/*eslint-disable*/module.exports={messages:JSON.parse("{\"vxXP9F\":\"Example text for translation\"}")};
+/*eslint-disable*/module.exports={messages:JSON.parse("{\"I3M5pR\":\"SoVisu+\",\"OSLBz7\":\"Scientific Output Visualization. Management of scientific production and researcher digital identifiers.\"}")};

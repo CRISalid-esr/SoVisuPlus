@@ -53,11 +53,10 @@ export default function Home({ params }: Props) {
         </Select>
       </FormControl>
       <Typography variant='h4' component='h1' gutterBottom>
-        <Trans>Example text for translation</Trans>
+        <Trans>home_page_main_title</Trans>
       </Typography>
       <Typography variant='subtitle1' gutterBottom>
-        A Comprehensive App for Managing Scientific Output and Researcher
-        Identifiers
+        <Trans>home_page_subtitle</Trans>
       </Typography>
       <Typography variant='body2' color='textSecondary' sx={{ mb: 4 }}>
         Development instance

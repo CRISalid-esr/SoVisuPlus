@@ -1,1 +1,1 @@
-/*eslint-disable*/module.exports={messages:JSON.parse("{\"vxXP9F\":\"Ēxēḿƥĺē ďē ţēxţē à ţŕàďũĩŕē\"}")};
+/*eslint-disable*/module.exports={messages:JSON.parse("{\"I3M5pR\":\"SoVisu+\",\"OSLBz7\":\"Science ouverte visualisation. Gestion de la production scientifique et des identifiants numériques des chercheurs.\"}")};

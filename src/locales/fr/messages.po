@@ -1,22 +1,16 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2023-10-18 17:59+0300\n"
+"POT-Creation-Date: 2024-11-18 16:22+0100\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: fr\n"
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Plural-Forms: \n"
 
-#: src/app/[lang]/page.tsx:31
-#~ msgid "Example text for translation"
-#~ msgstr "Exemple de texte à traduire"
+#: src/app/[lang]/page.tsx:56
+msgid "home_page_main_title"
+msgstr "SoVisu+"
 
-#: src/app/[lang]/page.tsx:31
-msgid "home_page_temp_title"
-msgstr ""
+#: src/app/[lang]/page.tsx:59
+msgid "home_page_subtitle"
+msgstr "Science ouverte visualisation. Gestion de la production scientifique et des identifiants numériques des chercheurs."
