@@ -21,7 +21,7 @@ import {
 } from '@mui/icons-material'
 import StoreChecker from '@/components/StoreChecker'
 import React from 'react'
-import { dbCheckup } from '@/lib/db_checkup'
+import { dbCheckup } from 'src/app/lib/db_checkup'
 import Image from 'next/image'
 import { Grid } from '@mui/system'
 import Link from 'next/link'

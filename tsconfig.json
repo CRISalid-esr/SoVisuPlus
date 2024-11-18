@@ -25,14 +25,17 @@
     "baseUrl": ".",
     "paths": {
       "@/components/*": [
-        "src/app/components/*"
+        "src/app/[lang]/components/*"
       ],
       "@/lib/*": [
         "src/app/lib/*"
       ],
       "@/stores/*": [
         "src/app/stores/*"
-      ]
+      ],
+      "@/locales/*": [
+        "src/locales/*"
+      ],
     }
   },
   "include": [

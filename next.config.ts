@@ -4,7 +4,18 @@ import * as path from 'node:path'
 const nextConfig: NextConfig = {
   // for docker https://github.com/vercel/next.js/tree/canary/examples/with-docker
   // output: 'standalone',
+  reactStrictMode: true,
+  experimental: {
+    swcPlugins: [['@lingui/swc-plugin', {}]],
+    middlewarePrefetch: 'flexible'
+  },
   webpack: (config) => {
+     config.module.rules.push({
+      test: /\.po$/,
+      use: {
+        loader: '@lingui/loader'
+      }
+    }),
     config.resolve.alias['@'] = path.join(__dirname, 'src', 'app')
     return config
   },

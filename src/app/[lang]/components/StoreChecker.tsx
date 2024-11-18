@@ -1,5 +1,5 @@
 'use client'
-import useStore from '@/stores/global_store'
+import useStore from 'src/app/stores/global_store'
 import { useEffect, useState } from 'react'
 import { Alert } from '@mui/material'
 
@@ -9,7 +9,6 @@ export default function StoreChecker() {
   const [failure, setFailure] = useState<boolean>(false)
   useEffect(() => {
     fetchPublications().then(() => {
-      console.log('Publications initialized')
       setFailure(false)
     })
   }, [fetchPublications])
