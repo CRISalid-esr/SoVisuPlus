@@ -13,13 +13,20 @@ import {
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 type Props = {
-  params: { lang: string }
+  params: Promise<{ lang: string }>
 }
 
-export default function Home({ params }: Props) {
-  const { lang } = params
+export default   function  Home({ params }: Props) {
+   const [lang, setLang] = useState<string>('')
+
+  params.then((params) => {
+    setLang(params.lang)
+  }).catch((error) => {
+    console.error(error)
+  })
 
   const router = useRouter()
 
