@@ -28,10 +28,10 @@
         "src/app/[lang]/components/*"
       ],
       "@/lib/*": [
-        "src/app/[lang]/lib/*"
+        "src/app/lib/*"
       ],
       "@/stores/*": [
-        "src/app/[lang]/stores/*"
+        "src/app/stores/*"
       ],
       "@/locales/*": [
         "src/locales/*"
