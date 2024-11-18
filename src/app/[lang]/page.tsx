@@ -43,6 +43,7 @@ export default function Home({ params }: Props) {
       </Typography>
       <FormControl variant='filled' sx={{ m: 1, minWidth: 120 }}>
         <Select
+          variant='outlined'
           labelId='demo-simple-select-filled-label'
           id='demo-simple-select-filled'
           value={lang}
