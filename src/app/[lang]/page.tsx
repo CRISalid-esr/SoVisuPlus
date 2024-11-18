@@ -60,12 +60,12 @@ export default function Home({ params }: Props) {
         <Trans>home_page_subtitle</Trans>
       </Typography>
       <Typography variant='body2' color='textSecondary' sx={{ mb: 4 }}>
-        Development instance
+        <Trans>home_page_instance_name</Trans>
       </Typography>
       <Box sx={{ mt: 4 }}>
         <Link href={`/${lang}/setup`} passHref>
           <Button variant='contained' color='primary'>
-            Application Health Checkup
+            <Trans>home_page_checkup_link_label</Trans>
           </Button>
         </Link>
       </Box>

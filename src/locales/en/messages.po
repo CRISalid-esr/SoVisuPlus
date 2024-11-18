@@ -6,11 +6,25 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: en\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
 
-#: src/app/[lang]/page.tsx:56
+#: src/app/[lang]/page.tsx:63
+msgid "home_page_instance_name"
+msgstr "Development instance"
+
+#: src/app/[lang]/page.tsx:57
 msgid "home_page_main_title"
 msgstr "SoVisu+"
 
-#: src/app/[lang]/page.tsx:59
+#: src/app/[lang]/page.tsx:68
+msgid "home_page_checkup_link_label"
+msgstr "Go to application health checks"
+
+#: src/app/[lang]/page.tsx:60
 msgid "home_page_subtitle"
 msgstr "Scientific Output Visualization. Management of scientific production and researcher digital identifiers."
