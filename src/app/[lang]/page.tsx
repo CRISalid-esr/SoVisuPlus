@@ -52,14 +52,16 @@ export default function Home({ params }: Props) {
       </Typography>
       <FormControl variant='filled' sx={{ m: 1, minWidth: 120 }}>
         <Select
+          data-testid="language-select"
+          role='combobox'
           variant='outlined'
           labelId='demo-simple-select-filled-label'
           id='demo-simple-select-filled'
           value={lang}
           onChange={handleChange}
         >
-          <MenuItem value='en'>English</MenuItem>
-          <MenuItem value='fr'>Français</MenuItem>
+          <MenuItem data-testid="en"value='en'>English</MenuItem>
+          <MenuItem data-testid="fr" value='fr'>Français</MenuItem>
         </Select>
       </FormControl>
       <Typography variant='h4' component='h1' gutterBottom>
