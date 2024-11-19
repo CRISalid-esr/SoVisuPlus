@@ -19,14 +19,16 @@ type Props = {
   params: Promise<{ lang: string }>
 }
 
-export default   function  Home({ params }: Props) {
-   const [lang, setLang] = useState<string>('')
+export default function Home({ params }: Props) {
+  const [lang, setLang] = useState<string>('')
 
-  params.then((params) => {
-    setLang(params.lang)
-  }).catch((error) => {
-    console.error(error)
-  })
+  params
+    .then((params) => {
+      setLang(params.lang)
+    })
+    .catch((error) => {
+      console.error(error)
+    })
 
   const router = useRouter()
 
