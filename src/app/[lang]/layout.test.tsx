@@ -1,8 +1,3 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import RootLayout from './layout' // Adjust the import path
-import { LanguageProvider } from './LanguageProvider'
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter'
-
 // Mock imports
 jest.mock('./LanguageProvider', () => ({
   LanguageProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
