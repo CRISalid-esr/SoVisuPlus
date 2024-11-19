@@ -44,29 +44,24 @@ describe('Home Component', () => {
     })
 
     await waitFor(() => {
-      const select = document.getElementById(
-        'demo-simple-select-filled',
+      const selectOption = document.getElementById(
+        'language-select',
       ) as HTMLElement
-      expect(select).toHaveTextContent('English')
+      expect(selectOption).toHaveTextContent('English')
     })
 
-    const select = document.getElementById(
-      'demo-simple-select-filled',
+    const selectOption = document.getElementById(
+      'language-select',
     ) as HTMLElement
 
-    await waitFor(() => {
-   
-    })
+    fireEvent.mouseDown(selectOption)
+    const frOption = document.getElementById('fr') as HTMLElement
 
-    fireEvent.mouseDown(select)
-    const frOption = screen.getByTestId('fr')
     expect(frOption).toBeInTheDocument()
-    fireEvent.click(frOption)
-/*
-    await waitFor(() => {
-      expect(select).toHaveTextContent('Français')
-    })*/
+    expect(frOption).toHaveTextContent('Français')
 
+    fireEvent.click(frOption)
+  
     expect(pushMock).toHaveBeenCalledWith('/fr')
 
   })

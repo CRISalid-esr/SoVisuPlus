@@ -22,13 +22,13 @@ type Props = {
 export default function Home({ params }: Props) {
   const [lang, setLang] = useState<string>('')
 
-  params
-    .then((params) => {
-      setLang(params.lang)
-    })
-    .catch((error) => {
-      console.error(error)
-    })
+    params
+      .then((params) => {
+        setLang(params.lang)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
 
   const router = useRouter()
 
@@ -55,13 +55,13 @@ export default function Home({ params }: Props) {
           data-testid="language-select"
           role='combobox'
           variant='outlined'
-          labelId='demo-simple-select-filled-label'
-          id='demo-simple-select-filled'
+          labelId='language-select'
+          id='language-select'
           value={lang}
           onChange={handleChange}
         >
-          <MenuItem data-testid="en"value='en'>English</MenuItem>
-          <MenuItem data-testid="fr" value='fr'>Français</MenuItem>
+          <MenuItem id="en"value='en'>English</MenuItem>
+          <MenuItem id="fr" value='fr'>Français</MenuItem>
         </Select>
       </FormControl>
       <Typography variant='h4' component='h1' gutterBottom>
