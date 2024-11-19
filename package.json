@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
+    "type-check": "tsc --noEmit",
     "lingui:extract": "lingui extract",
     "lingui:compile": "lingui compile"
   },
