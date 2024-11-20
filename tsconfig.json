@@ -28,6 +28,9 @@
       "@/components/*": [
         "src/app/[lang]/components/*"
       ],
+      "@/utils/*": [
+        "src/app/utils/*"
+      ],
       "@/lib/*": [
         "src/app/lib/*"
       ],

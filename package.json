@@ -54,7 +54,6 @@
     "prettier": "^3.3.3",
     "prisma": "^5.22.0",
     "ts-jest": "^29.2.5",
-    "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "ts-node": "^10.9.2"
   }
 }

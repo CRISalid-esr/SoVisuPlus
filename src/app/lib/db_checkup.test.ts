@@ -20,7 +20,6 @@ jest.mock('@prisma/client', () => {
   
       const result = await dbCheckup();
 
-      console.log('result',result);
   
       expect(result.dbStatus).toBe('connected');
       expect(result.dbError).toBeNull();
