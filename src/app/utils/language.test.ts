@@ -47,6 +47,7 @@ describe('resolveLanguage', () => {
   })
 
   it('handles missing lang property in params', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const params = Promise.resolve({ lang: undefined } as any)
     const result = await resolveLanguage(params, messages)
 
