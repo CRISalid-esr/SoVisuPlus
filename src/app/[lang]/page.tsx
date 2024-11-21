@@ -19,14 +19,16 @@ type Props = {
   params: Promise<{ lang: string }>
 }
 
-export default   function  Home({ params }: Props) {
-   const [lang, setLang] = useState<string>('')
+export default function Home({ params }: Props) {
+  const [lang, setLang] = useState<string>('')
 
-  params.then((params) => {
-    setLang(params.lang)
-  }).catch((error) => {
-    console.error(error)
-  })
+    params
+      .then((params) => {
+        setLang(params.lang)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
 
   const router = useRouter()
 
@@ -50,14 +52,16 @@ export default   function  Home({ params }: Props) {
       </Typography>
       <FormControl variant='filled' sx={{ m: 1, minWidth: 120 }}>
         <Select
+          data-testid="language-select"
+          role='combobox'
           variant='outlined'
-          labelId='demo-simple-select-filled-label'
-          id='demo-simple-select-filled'
+          labelId='language-select'
+          id='language-select'
           value={lang}
           onChange={handleChange}
         >
-          <MenuItem value='en'>English</MenuItem>
-          <MenuItem value='fr'>Français</MenuItem>
+          <MenuItem id="en"value='en'>English</MenuItem>
+          <MenuItem id="fr" value='fr'>Français</MenuItem>
         </Select>
       </FormControl>
       <Typography variant='h4' component='h1' gutterBottom>
