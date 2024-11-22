@@ -1,6 +1,7 @@
 'use client';
 import { createTheme } from '@mui/material/styles';
-import { dark, light,colors } from './palatte'
+import { dark, light, colors } from './palatte'
+import breakpoints from './breakpoints'
 const lightTheme = createTheme({
   palette: {
     mode: 'light',
@@ -15,6 +16,7 @@ const darkTheme = createTheme({
     ...dark,
     ...colors
   },
+  breakpoints
 });
 
 export { lightTheme, darkTheme };
