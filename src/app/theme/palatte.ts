@@ -1,9 +1,11 @@
-const colors = {
+type ColorPalette = Record<string, string>;
+
+const colors: ColorPalette  = {
     primary0: '#000',
     primary10: "#00201D",
     primary20: "#003732",
     primary30: "#005049",
-    primary40: "#006D61",
+    primary40: "#006A61",
     primary50: "#2E847A",
     primary60: "#4C9E94",
     primary70: "#68B9AE",
@@ -90,7 +92,17 @@ const colors = {
     neutralVariant100: "#FFF",
 }
 
-const light = {
+
+interface Theme {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any;
+    primary: Record<string, string>;
+    secondary: Record<string, string>;
+    tertiary: Record<string, string>;
+    error: Record<string, string>;
+}
+
+const light: Theme = {
     onPrimary: colors.secondary100,
     primaryContainer: colors.primary90,
     onPrimaryContainer: colors.primary90,
@@ -133,7 +145,7 @@ const light = {
     scrim: colors.neutral0,
     shadows:colors.neutral0,
     primary: {
-        main: colors.primary50,
+        main: colors.primary40,
         light: colors.primary40,
         dark: colors.primary70,
     },
@@ -154,7 +166,7 @@ const light = {
     },
 }
 
-const dark = {
+const dark: Theme = {
     onPrimary: colors.secondary20,
     primaryContainer: colors.primary30,
     onPrimaryContainer: colors.primary90,
@@ -197,7 +209,7 @@ const dark = {
     scrim: colors.neutral0,
     shadows: colors.neutral0,
     primary: {
-        main: colors.primary50,
+        main: colors.primary80,
         light: colors.primary40,
         dark: colors.primary80,
     },

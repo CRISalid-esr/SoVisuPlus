@@ -40,13 +40,19 @@
       "@/locales/*": [
         "src/locales/*"
       ],
+      "@/theme/*": [
+        "src/theme/*"
+      ],
     }
   },
   "include": [
+    "types/**/*.d.ts",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "**/*.d.ts",
+    "src/theme/theme.d.ts"
   ],
   "exclude": [
     "node_modules"

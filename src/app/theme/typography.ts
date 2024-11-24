@@ -116,7 +116,7 @@ export const figmaTypography = {
         },
         small: {
             fontWeight: fontWeight.normal,
-            fontSize:fontWeight.normal
+            fontSize:fontSize.rem12px
         }
     },
 }
@@ -263,32 +263,26 @@ const muiTypography = {
         fontSize: figmaTypography.body.medium.fontSize,
     },
     body2: {
-        // @todo: validate this
         fontWeight: figmaTypography.body.small.fontWeight,
         fontSize: figmaTypography.body.small.fontSize,
     },
     subtitle1: {
-        // @todo: validate this
         fontWeight: figmaTypography.body.medium.fontWeight,
         fontSize: figmaTypography.body.medium.fontSize,
     },
     subtitle2: {
-        // @todo: validate this
         fontWeight: figmaTypography.body.small.fontWeight,
         fontSize: figmaTypography.body.small.fontSize,
     },
     button: {
-        // @todo: validate this
         fontWeight: figmaTypography.body.medium.fontWeight,
         fontSize: figmaTypography.body.medium.fontSize,
     },
     caption: {
-        // @todo: validate this
         fontWeight: figmaTypography.body.small.fontWeight,
         fontSize: figmaTypography.body.small.fontSize,
     },
     overline: {
-        // @todo: validate this
         fontWeight: figmaTypography.body.small.fontWeight,
         fontSize: figmaTypography.body.small.fontSize,
     },

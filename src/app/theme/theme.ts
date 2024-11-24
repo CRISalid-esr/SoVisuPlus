@@ -4,6 +4,10 @@ import { createTheme } from '@mui/material/styles';
 import { dark, light, colors } from './palatte'
 import breakpoints from './breakpoints'
 import typography from "./typography" // Custom and MUI default
+import {
+  pxToLineHeight, pxToRem, pxToThemeSpacing, responsiveFontSizes
+} from './utils'
+
 
 const lightTheme = createTheme({
   palette: {
@@ -12,7 +16,8 @@ const lightTheme = createTheme({
     ...colors
   },
   breakpoints,
-  typography
+  typography,
+  utils: { pxToLineHeight, pxToRem, pxToThemeSpacing, responsiveFontSizes },
 });
 
 const darkTheme = createTheme({
@@ -22,7 +27,8 @@ const darkTheme = createTheme({
     ...colors
   },
   breakpoints,
-  typography
+  typography,
+  utils: { pxToLineHeight, pxToRem, pxToThemeSpacing, responsiveFontSizes },
 });
 
 export { lightTheme, darkTheme };
