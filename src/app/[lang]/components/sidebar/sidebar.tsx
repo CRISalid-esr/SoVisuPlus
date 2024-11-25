@@ -138,7 +138,7 @@ export default function Sidebar({
                     }}
                   >
                     <Avatar
-                      src='/hideSidePanel.svg' // Replace with your image path
+                      src='/hideSidePanel.svg' 
                       alt='sidepanel'
                       sx={{ width: 24, height: 24 }}
                     />
@@ -453,9 +453,8 @@ export default function Sidebar({
                 }}
                 fullWidth
                 select
-                displayEmpty
                 value={lang}
-                onChange={handleChange}
+                onChange={(event) => handleChange(event as SelectChangeEvent)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position='start'>
