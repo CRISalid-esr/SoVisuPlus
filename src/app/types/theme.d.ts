@@ -93,6 +93,7 @@ declare module '@mui/material/styles' {
     scrim: string
     shadows: string
     white: string
+    gray950: string
   }
 
   interface PaletteOptions {
@@ -137,5 +138,6 @@ declare module '@mui/material/styles' {
     inversePrimary?: string
     scrim?: string
     shadows?: string
+    gray950?: string
   }
 }

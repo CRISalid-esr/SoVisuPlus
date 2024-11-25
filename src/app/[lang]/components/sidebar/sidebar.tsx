@@ -2,6 +2,7 @@
 
 import { Trans } from '@lingui/macro'
 import {
+  Backdrop,
   Drawer,
   IconButton,
   InputAdornment,
@@ -21,9 +22,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
+import CloseIcon from '@mui/icons-material/Close'
 
-import { BarChartSquare02 as BarChartSquare } from "@untitled-ui/icons-react";
-import { CheckDone01 as CheckDone } from "@untitled-ui/icons-react";
+import { BarChartSquare02 as BarChartSquare } from '@untitled-ui/icons-react'
+import { CheckDone01 as CheckDone } from '@untitled-ui/icons-react'
 import { LayersThree01 as LayerThere } from '@untitled-ui/icons-react'
 import { LifeBuoy01 as LifeBuoy } from '@untitled-ui/icons-react'
 import { LogOut01 as Logout } from '@untitled-ui/icons-react'
@@ -47,15 +49,15 @@ export default function Sidebar() {
     router.push(`/${event.target.value}/${pathWithoutLang}`)
   }
 
-
   return (
     <>
       <Drawer
         variant={isMobile ? 'temporary' : 'permanent'}
         open={open}
         sx={{
+          zIndex: 1200, // Ensure it's above other elements
           '& .MuiDrawer-paper': {
-            width: open ? (isMobile ? '80%' : 280) : 60, // Drawer width depending on whether it's open or collapsed
+            width: open ?  280 : 60, // Drawer width depending on whether it's open or collapsed
             transition: 'width 0.3s ease',
             boxSizing: 'border-box',
             backgroundColor: theme.palette.primary.main,
@@ -65,11 +67,34 @@ export default function Sidebar() {
           keepMounted: true, // Improve performance on mobile
         }}
       >
+          <Backdrop
+            open={open && isMobile}
+            style={{
+              opacity:1,
+              transition: 'none',
+              transitionDuration: '0s',
+              zIndex: 2, // Ensure it's above other elements
+            }}
+          >
+            <IconButton
+              onClick={handleToggleDrawer}
+              style={{
+                opacity: 1,
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                color: 'white',
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Backdrop>
         <Box
           sx={{
             marginTop: '32px',
             marginLeft: open ? '20px' : '0px',
             marginRight: open ? '20px' : '0px',
+            zIndex: 1201, // to ensure the drawer appears above the backdrop
           }}
         >
           <Box
@@ -172,13 +197,12 @@ export default function Sidebar() {
                   },
                   '& .MuiInputBase-input::placeholder': {
                     fontSize: theme.utils.pxToRem(16),
-                    fontWeight: theme.typography.fontWeightRegular  ,
-                    color:theme.palette.primary.main,
+                    fontWeight: theme.typography.fontWeightRegular,
+                    color: theme.palette.primary.main,
                     opacity: 1,
                     lineHeight: theme.typography.lineHeight.lineHeight24px,
                   },
                 }}
-          
                 placeholder='Chercher'
                 fullWidth
                 InputProps={{
@@ -202,11 +226,10 @@ export default function Sidebar() {
                       width: 24,
                       minWidth: 'unset',
                       cursor: 'pointer',
-                      
                     }}
                     onClick={handleToggleDrawer}
                   >
-                    <SearchSm  color={theme.palette.onPrimaryContainer} />
+                    <SearchSm color={theme.palette.onPrimaryContainer} />
                   </ListItemIcon>
                 </ListItem>
                 <ListItem />
@@ -455,7 +478,7 @@ export default function Sidebar() {
             ) : (
               <ListItem>
                 <ListItemIcon
-                 onClick={handleToggleDrawer}
+                  onClick={handleToggleDrawer}
                   sx={{
                     height: 24,
                     width: 24,
