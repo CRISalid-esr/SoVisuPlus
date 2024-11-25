@@ -62,6 +62,7 @@ declare module "@mui/material/styles" {
         inversePrimary: string;
         scrim: string;
         shadows: string;
+        white: string;
     }
 
     interface PaletteOptions {

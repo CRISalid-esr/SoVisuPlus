@@ -6,6 +6,18 @@ import React from 'react'
 import { resolveLanguage } from '@/utils/language'
 import { CssBaseline} from '@mui/material'
 import { ThemeProvider } from '@/app/[lang]/context/ThemeContext'
+import { Inter, Roboto } from 'next/font/google'
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+})
+
+const roboto = Roboto({
+  weight: ['400', '500', '700'], // Add the weights you want
+  subsets: ['latin'],
+  variable: '--font-roboto',
+})
 
 type Props = {
   children: React.ReactNode
@@ -25,7 +37,9 @@ export default async function RootLayout({ params, children }: Props) {
           <CssBaseline />
           <LanguageProvider locale={lang} messages={selectedMessages}>
             <AppRouterCacheProvider>
-              <body>{children}</body>
+              <body>
+                {children}
+              </body>
             </AppRouterCacheProvider>
           </LanguageProvider>
         </ThemeProvider>

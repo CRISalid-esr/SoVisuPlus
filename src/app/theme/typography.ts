@@ -45,7 +45,7 @@ const letterSpacing = {
 const fontWeight = {
     light: 300, // Use in MUI default
     normal: 400, // Use in MUI default - html normal standard 400
-    medium: 500, // Use in MUI default
+    medium: 600, // Use in MUI default
     bold: 700, // Use in MUI default - html bold standard 700
 }
 
@@ -77,7 +77,7 @@ const fontSize = {
  * Typography from figma
  */
 export const figmaTypography = {
-    fontFamily: '"Roboto", "Helvetica", "Arial", "sans-serif"',
+    fontFamily: 'Roboto, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
     fontWeight,
     heading: {
         h1: {
@@ -181,7 +181,7 @@ const themeCustomTypography = {
         fontSize: fontSize.rem14px,
         fontWeight: fontWeight.normal,
         lineHeight: lineHeight.lineHeight20px,
-        letterSpacing: letterSpacing['letterSpacing0.1']   
+        letterSpacing: letterSpacing['letterSpacing0.1'] ,
     },
     LabelLarge: {
         fontSize: fontSize.rem14px,
@@ -288,6 +288,6 @@ const muiTypography = {
     },
 }
 
-const typography = { ...muiTypography, ...themeCustomTypography,  lineHeight, letterSpacing, pxToRem }
+const typography = { ...muiTypography, ...themeCustomTypography, fontWeight, lineHeight, letterSpacing, pxToRem }
 
 export default typography

@@ -90,6 +90,7 @@ const colors: ColorPalette  = {
     neutralVariant95: "#ECF2F0",
     neutralVariant99: "#F2FFFC",
     neutralVariant100: "#FFF",
+    white: "#FFF",
 }
 
 
@@ -143,7 +144,8 @@ const light: Theme = {
     inverseOnSurface: colors.neutral95,
     inversePrimary: colors.primary80,
     scrim: colors.neutral0,
-    shadows:colors.neutral0,
+    shadows: colors.neutral0,
+    white: colors.white,
     primary: {
         main: colors.primary40,
         light: colors.primary40,
@@ -208,6 +210,7 @@ const dark: Theme = {
     inversePrimary: colors.primary40,
     scrim: colors.neutral0,
     shadows: colors.neutral0,
+    white:  colors.white,
     primary: {
         main: colors.primary80,
         light: colors.primary40,

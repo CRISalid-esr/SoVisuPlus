@@ -1,6 +1,6 @@
 'use client';
 import { createTheme } from '@mui/material/styles';
-
+import componentsOverride from "./overrides"
 import { dark, light, colors } from './palatte'
 import breakpoints from './breakpoints'
 import typography from "./typography" // Custom and MUI default
@@ -31,4 +31,6 @@ const darkTheme = createTheme({
   utils: { pxToLineHeight, pxToRem, pxToThemeSpacing, responsiveFontSizes },
 });
 
+darkTheme.components = componentsOverride(darkTheme)
+lightTheme.components = componentsOverride(lightTheme)
 export { lightTheme, darkTheme };

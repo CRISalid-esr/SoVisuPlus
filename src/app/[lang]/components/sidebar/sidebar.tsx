@@ -3,15 +3,16 @@
 import { Trans } from '@lingui/macro'
 import {
   Drawer,
-  FormControl,
   IconButton,
+  InputAdornment,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   MenuItem,
-  Select,
-  SelectChangeEvent
+  SelectChangeEvent,
+  TextField,
+  Typography,
 } from '@mui/material'
 import Avatar from '@mui/material/Avatar'
 import { useTheme } from '@mui/material/styles'
@@ -25,12 +26,12 @@ import {
   CheckDone,
   LayerThere,
   LifeBuoy,
+  Logout,
   Settings,
-  Users
+  Users,
 } from '../../../theme/icons'
 
-
-
+import { SearchLg, SearchSm } from '@untitled-ui/icons-react'
 export default function Sidebar() {
   const [open, setOpen] = useState(true) // Determines if the drawer is expanded or collapsed
   const pathname = usePathname() // Get the current path
@@ -46,8 +47,6 @@ export default function Sidebar() {
     const pathWithoutLang = pathname.split('/').slice(2).join('/') // Remove the current lang segment
     router.push(`/${event.target.value}/${pathWithoutLang}`)
   }
-
-
 
   return (
     <>
@@ -154,8 +153,169 @@ export default function Sidebar() {
             )}
           </Box>
           <Box>
-            <List>
-              <ListItem component={Link} href={`/${lang}/dashboard`}>
+            {open ? (
+              <TextField
+                sx={{
+                  height: '46px',
+                  backgroundColor: theme.palette.white,
+                  borderRadius: '8px',
+                  marginTop: '24px',
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      border: 'none', // Remove the border
+                    },
+                  },
+                  '& .MuiInputBase-input': {
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                  },
+                  '& .MuiInputBase-input::placeholder': {
+                    fontSize: theme.typography.fontSize.rem14px,
+                    fontWeight: theme.typography.fontWeight.normal,
+                    color: theme.palette.primary40,
+                    opacity: 1,
+                    lineHeight: theme.typography.lineHeight.lineHeight24px,
+                  },
+                }}
+          
+                placeholder='Chercher'
+                fullWidth
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position='start'>
+                      <SearchLg
+                        width={20}
+                        height={20}
+                        color={theme.palette.primary40}
+                      />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            ) : (
+              <List>
+                <ListItem component={Link} href={`/${lang}/dashboard`}>
+                  <ListItemIcon
+                    sx={{
+                      height: 24,
+                      width: 24,
+                      minWidth: 'unset',
+                      cursor: 'pointer',
+                      
+                    }}
+                    onClick={handleToggleDrawer}
+                  >
+                    <SearchSm  color={theme.palette.onPrimaryContainer} />
+                  </ListItemIcon>
+                </ListItem>
+                <ListItem />
+              </List>
+            )}
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              height: '100%',
+            }}
+          >
+            <Box>
+              <List>
+                <ListItem component={Link} href={`/${lang}/dashboard`}>
+                  <ListItemIcon
+                    sx={{
+                      height: 24,
+                      width: 24,
+                      minWidth: 'unset',
+                      marginRight: '12px',
+                    }}
+                  >
+                    <BarChartSquare color={theme.palette.onPrimaryContainer} />
+                  </ListItemIcon>
+                  {open && (
+                    <ListItemText
+                      sx={{
+                        color: theme.palette.onPrimaryContainer,
+                        '& .MuiTypography-root': {
+                          fontFamily: 'Inter, Roboto, sans-serif',
+                          fontSize: theme.typography.fontSize.rem16px,
+                          fontWeight: theme.typography.fontWeightMedium,
+                          lineHeight:
+                            theme.typography.lineHeight.lineHeight24px,
+                        },
+                      }}
+                      primary={<Trans>side_bar_dashboard</Trans>}
+                    />
+                  )}
+                </ListItem>
+                <ListItem
+                  component={Link}
+                  href={`/${lang}/dashboard/publications`}
+                >
+                  <ListItemIcon
+                    sx={{
+                      height: 24,
+                      width: 24,
+                      minWidth: 'unset',
+                      marginRight: '12px',
+                    }}
+                  >
+                    <LayerThere color={theme.palette.onPrimaryContainer} />
+                  </ListItemIcon>
+                  {open && (
+                    <ListItemText
+                      sx={{
+                        color: theme.palette.onPrimaryContainer,
+                        '& .MuiTypography-root': {
+                          fontFamily: 'Inter, Roboto, sans-serif',
+                          fontSize: theme.typography.fontSize.rem16px,
+                          fontWeight: theme.typography.fontWeightMedium,
+                          color: theme.palette.onPrimaryContainer,
+                          lineHeight:
+                            theme.typography.lineHeight.lineHeight24px,
+                        },
+                      }}
+                      primary={<Trans>side_bar_publications</Trans>}
+                    />
+                  )}
+                </ListItem>
+                <ListItem
+                  component={Link}
+                  href={`/${lang}/dashboard/expertise`}
+                >
+                  <ListItemIcon
+                    sx={{
+                      height: 24,
+                      width: 24,
+                      minWidth: 'unset',
+                      marginRight: '12px',
+                    }}
+                  >
+                    <CheckDone color={theme.palette.onPrimaryContainer} />
+                  </ListItemIcon>
+                  {open && (
+                    <ListItemText
+                      sx={{
+                        color: theme.palette.onPrimaryContainer,
+                        '& .MuiTypography-root': {
+                          fontFamily: 'Inter, Roboto, sans-serif',
+                          fontSize: theme.typography.fontSize.rem16px,
+                          fontWeight: theme.typography.fontWeightMedium,
+                          color: theme.palette.onPrimaryContainer,
+                          lineHeight:
+                            theme.typography.lineHeight.lineHeight24px,
+                        },
+                      }}
+                      primary={<Trans>side_bar_expertise</Trans>}
+                    />
+                  )}
+                </ListItem>
+              </List>
+            </Box>
+            <Box>
+              <ListItem component={Link} href={`/${lang}/dashboard/my-groups`}>
                 <ListItemIcon
                   sx={{
                     height: 24,
@@ -164,21 +324,27 @@ export default function Sidebar() {
                     marginRight: '12px',
                   }}
                 >
-                  <BarChartSquare color={theme.palette.onPrimaryContainer} />
+                  <Users color={theme.palette.onPrimaryContainer} />
                 </ListItemIcon>
                 {open && (
                   <ListItemText
                     sx={{
-                      fontSize: '24px',
                       color: theme.palette.onPrimaryContainer,
+                      '& .MuiTypography-root': {
+                        fontFamily: 'Inter, Roboto, sans-serif',
+                        fontSize: theme.typography.fontSize.rem16px,
+                        fontWeight: theme.typography.fontWeightMedium,
+                        color: theme.palette.onPrimaryContainer,
+                        lineHeight: theme.typography.lineHeight.lineHeight24px,
+                      },
                     }}
-                    primary={<Trans>side_bar_dashboard</Trans>}
+                    primary={<Trans>side_bar_my_groups</Trans>}
                   />
                 )}
               </ListItem>
               <ListItem
                 component={Link}
-                href={`/${lang}/dashboard/publications`}
+                href={`/${lang}/dashboard/institutions`}
               >
                 <ListItemIcon
                   sx={{
@@ -188,19 +354,28 @@ export default function Sidebar() {
                     marginRight: '12px',
                   }}
                 >
-                  <LayerThere color={theme.palette.onPrimaryContainer} />
+                  <LifeBuoy color={theme.palette.onPrimaryContainer} />
                 </ListItemIcon>
                 {open && (
                   <ListItemText
                     sx={{
-                      fontSize: '24px',
                       color: theme.palette.onPrimaryContainer,
+                      '& .MuiTypography-root': {
+                        fontFamily: 'Inter, Roboto, sans-serif',
+                        fontSize: theme.typography.fontSize.rem16px,
+                        fontWeight: theme.typography.fontWeightMedium,
+                        color: theme.palette.onPrimaryContainer,
+                        lineHeight: theme.typography.lineHeight.lineHeight24px,
+                      },
                     }}
-                    primary={<Trans>side_bar_publications</Trans>}
+                    primary={<Trans>side_bar_institutions</Trans>}
                   />
                 )}
               </ListItem>
-              <ListItem component={Link} href={`/${lang}/dashboard/expertise`}>
+              <ListItem
+                component={Link}
+                href={`/${lang}/dashboard/laboratories`}
+              >
                 <ListItemIcon
                   sx={{
                     height: 24,
@@ -209,92 +384,66 @@ export default function Sidebar() {
                     marginRight: '12px',
                   }}
                 >
-                  <CheckDone color={theme.palette.onPrimaryContainer} />
+                  <Settings color={theme.palette.onPrimaryContainer} />
                 </ListItemIcon>
                 {open && (
                   <ListItemText
                     sx={{
-                      fontSize: '24px',
                       color: theme.palette.onPrimaryContainer,
+                      '& .MuiTypography-root': {
+                        fontFamily: 'Inter, Roboto, sans-serif',
+                        fontSize: theme.typography.fontSize.rem16px,
+                        fontWeight: theme.typography.fontWeightMedium,
+                        color: theme.palette.onPrimaryContainer,
+                        lineHeight: theme.typography.lineHeight.lineHeight24px,
+                      },
                     }}
-                    primary={<Trans>side_bar_expertise</Trans>}
+                    primary={<Trans>side_bar_laboratories</Trans>}
                   />
                 )}
               </ListItem>
-            </List>
-          </Box>
-          <Box>
-            <ListItem component={Link} href={`/${lang}/dashboard/my-groups`}>
-              <ListItemIcon
-                sx={{
-                  height: 24,
-                  width: 24,
-                  minWidth: 'unset',
-                  marginRight: '12px',
-                }}
-              >
-                <Users color={theme.palette.onPrimaryContainer} />
-              </ListItemIcon>
-              {open && (
-                <ListItemText
-                  sx={{
-                    fontSize: '24px',
-                    color: theme.palette.onPrimaryContainer,
-                  }}
-                  primary={<Trans>side_bar_my_groups</Trans>}
-                />
-              )}
-            </ListItem>
-            <ListItem component={Link} href={`/${lang}/dashboard/institutions`}>
-              <ListItemIcon
-                sx={{
-                  height: 24,
-                  width: 24,
-                  minWidth: 'unset',
-                  marginRight: '12px',
-                }}
-              >
-                <LifeBuoy color={theme.palette.onPrimaryContainer} />
-              </ListItemIcon>
-              {open && (
-                <ListItemText
-                  sx={{
-                    fontSize: '24px',
-                    color: theme.palette.onPrimaryContainer,
-                  }}
-                  primary={<Trans>side_bar_institutions</Trans>}
-                />
-              )}
-            </ListItem>
-            <ListItem component={Link} href={`/${lang}/dashboard/laboratories`}>
-              <ListItemIcon
-                sx={{
-                  height: 24,
-                  width: 24,
-                  minWidth: 'unset',
-                  marginRight: '12px',
-                }}
-              >
-                <Settings color={theme.palette.onPrimaryContainer} />
-              </ListItemIcon>
-              {open && (
-                <ListItemText
-                  sx={{
-                    fontSize: '24px',
-                    color: theme.palette.onPrimaryContainer,
-                  }}
-                  primary={<Trans>side_bar_laboratories</Trans>}
-                />
-              )}
-            </ListItem>
+            </Box>
           </Box>
           <Box sx={{ minWidth: 200 }}>
-            <FormControl variant='filled' fullWidth>
-              <Select
+            {open ? (
+              <TextField
+                sx={{
+                  '& .MuiSelect-icon': {
+                    color: theme.palette.white,
+                  },
+                  marginTop: theme.typography.pxToRem(24),
+                  marginBottom: theme.typography.pxToRem(24),
+                  '& .MuiOutlinedInput-root': {
+                    fontSize: theme.typography.pxToRem(16),
+                    '& fieldset': {
+                      border: 'none', // Remove the border
+                    },
+                  },
+                  '& .MuiInputBase-input': {
+                    fontWeight: theme.typography.fontWeight.normal,
+                    color: theme.palette.white,
+                    opacity: 1,
+                    lineHeight: theme.typography.lineHeight.lineHeight24px,
+                  },
+                }}
+                fullWidth
+                select
                 displayEmpty
                 value={lang}
-                label='Options'
                 onChange={handleChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position='start'>
+                      <Image
+                        src='/icons/language.svg'
+                        alt='Crisalid logo'
+                        width={24}
+                        height={24}
+                        priority
+                      />
+                    </InputAdornment>
+                  ),
+                }}
               >
                 <MenuItem id='en' value='en'>
                   English
@@ -302,9 +451,120 @@ export default function Sidebar() {
                 <MenuItem id='fr' value='fr'>
                   Français
                 </MenuItem>
-              </Select>
-            </FormControl>
+              </TextField>
+            ) : (
+              <ListItem>
+                <ListItemIcon
+                 onClick={handleToggleDrawer}
+                  sx={{
+                    height: 24,
+                    width: 24,
+                    minWidth: 'unset',
+                    marginRight: '12px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Image
+                    src='/icons/language.svg'
+                    alt='Crisalid logo'
+                    width={24}
+                    height={24}
+                    priority
+                  />
+                </ListItemIcon>
+              </ListItem>
+            )}
           </Box>
+          {open ? (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-around',
+                alignItems: 'center',
+                borderTop: '1px solid',
+                borderColor: theme.palette.white,
+              }}
+            >
+              <Image
+                src='/avatar.png'
+                alt='Crisalid logo'
+                width={40}
+                height={40}
+                priority
+              />
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Typography
+                    variant='titleSmall'
+                    color={theme.palette.white}
+                    sx={{
+                      fontWeight: 600,
+                    }}
+                  >
+                    Antoine Dupont
+                  </Typography>
+                  <IconButton
+                    sx={{
+                      marginLeft: 'auto',
+                      paddingRight: '0px',
+                    }}
+                  >
+                    <Logout
+                      width={20}
+                      height={20}
+                      color={theme.palette.white}
+                    />
+                  </IconButton>
+                </Box>
+                <Typography
+                  sx={{
+                    fontSize: '12px',
+                    fontWeight: 400,
+                    lineHeight: '20px',
+                  }}
+                  color={theme.palette.white}
+                >
+                  antoine.dupont@univ-nantes.fr
+                </Typography>
+              </Box>
+            </Box>
+          ) : (
+            <ListItem>
+              <ListItemIcon
+                onClick={handleToggleDrawer}
+                sx={{
+                  height: 24,
+                  width: 24,
+                  minWidth: 'unset',
+                  marginRight: '12px',
+                  borderTop: '1px solid',
+                  borderColor: theme.palette.white,
+                  paddingTop: '24px',
+                  cursor: 'pointer',
+                }}
+              >
+                <Image
+                  src='/avatar.png'
+                  alt='Crisalid logo'
+                  width={24}
+                  height={24}
+                  priority
+                />
+              </ListItemIcon>
+            </ListItem>
+          )}
         </Box>
       </Drawer>
     </>
