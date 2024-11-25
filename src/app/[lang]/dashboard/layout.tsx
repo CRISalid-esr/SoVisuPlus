@@ -2,7 +2,7 @@
 import { Appbar } from '@/components/appbar'
 import { Sidebar } from '@/components/sidebar'
 import { useTheme } from '@mui/material/styles'
-import { useMediaQuery } from '@mui/system'
+import { Box, useMediaQuery } from '@mui/system'
 import { useState } from 'react'
 
 export default function DashboardLayout({
@@ -20,10 +20,22 @@ export default function DashboardLayout({
 
 
   return (
-    <div style={{ display: 'flex' }}>
-     {isMobile && <Appbar handleToggleDrawer={handleToggleDrawer} />}
-      <Sidebar handleToggleDrawer={handleToggleDrawer} open={open} />
-      <main style={{ flexGrow: 1, padding: '16px' }}>{children}</main>
-    </div>
+    <Box sx={{ display: 'flex', height: '100vh' }}>
+    {isMobile && <Appbar handleToggleDrawer={handleToggleDrawer} />}
+    {/* Sidebar will be conditionally rendered based on screen size */}
+    <Sidebar handleToggleDrawer={handleToggleDrawer} open={open} />
+
+    <Box
+      component="main"
+      sx={{
+        padding:0,
+        flexGrow: 1,
+        marginTop: isMobile ? '56px' : 0, // Adjust main content padding to account for Appbar on mobile
+        overflowY: 'auto', // Ensure content scrolls if necessary
+      }}
+    >
+      {children}
+    </Box>
+  </Box>
   )
 }

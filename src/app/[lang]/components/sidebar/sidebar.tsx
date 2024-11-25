@@ -1,6 +1,7 @@
 'use client'
 
 import { Trans } from '@lingui/macro'
+import CloseIcon from '@mui/icons-material/Close'
 import {
   Backdrop,
   Drawer,
@@ -21,16 +22,18 @@ import { Box, useMediaQuery } from '@mui/system'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import CloseIcon from '@mui/icons-material/Close'
 
-import { BarChartSquare02 as BarChartSquare } from '@untitled-ui/icons-react'
-import { CheckDone01 as CheckDone } from '@untitled-ui/icons-react'
-import { LayersThree01 as LayerThere } from '@untitled-ui/icons-react'
-import { LifeBuoy01 as LifeBuoy } from '@untitled-ui/icons-react'
-import { LogOut01 as Logout } from '@untitled-ui/icons-react'
-import { Settings01 as Settings } from '@untitled-ui/icons-react'
-import { User01 as Users } from '@untitled-ui/icons-react'
-import { SearchLg, SearchSm } from '@untitled-ui/icons-react'
+import {
+  BarChartSquare02 as BarChartSquare,
+  CheckDone01 as CheckDone,
+  LayersThree01 as LayerThere,
+  LifeBuoy01 as LifeBuoy,
+  LogOut01 as Logout,
+  SearchLg,
+  SearchSm,
+  Settings01 as Settings,
+  User01 as Users,
+} from '@untitled-ui/icons-react'
 
 export default function Sidebar({
   open,
@@ -138,7 +141,7 @@ export default function Sidebar({
                     }}
                   >
                     <Avatar
-                      src='/hideSidePanel.svg' 
+                      src='/hideSidePanel.svg'
                       alt='sidepanel'
                       sx={{ width: 24, height: 24 }}
                     />

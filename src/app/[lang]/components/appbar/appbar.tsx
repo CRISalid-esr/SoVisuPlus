@@ -20,11 +20,13 @@ export default function Appbar({
       position='static'
     >
       <Toolbar>
-        <Box sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          width: '100%',
-        }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            width: '100%',
+          }}
+        >
           <Box
             sx={{
               display: 'flex',
