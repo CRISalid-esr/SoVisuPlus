@@ -21,7 +21,6 @@ import { Box, useMediaQuery } from '@mui/system'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
 
 import { BarChartSquare02 as BarChartSquare } from '@untitled-ui/icons-react'
@@ -33,13 +32,16 @@ import { Settings01 as Settings } from '@untitled-ui/icons-react'
 import { User01 as Users } from '@untitled-ui/icons-react'
 import { SearchLg, SearchSm } from '@untitled-ui/icons-react'
 
-export default function Sidebar() {
-  const [open, setOpen] = useState(true) // Determines if the drawer is expanded or collapsed
+export default function Sidebar({
+  open,
+  handleToggleDrawer,
+}: {
+  open: boolean
+  handleToggleDrawer: () => void
+}) {
   const pathname = usePathname() // Get the current path
   const lang = pathname.split('/')[1] // Extract the `lang` dynamic segment
-  const handleToggleDrawer = () => {
-    setOpen((prev) => !prev)
-  }
+
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const router = useRouter()
@@ -57,7 +59,7 @@ export default function Sidebar() {
         sx={{
           zIndex: 1200, // Ensure it's above other elements
           '& .MuiDrawer-paper': {
-            width: open ?  280 : 60, // Drawer width depending on whether it's open or collapsed
+            width: open ? 280 : 60, // Drawer width depending on whether it's open or collapsed
             transition: 'width 0.3s ease',
             boxSizing: 'border-box',
             backgroundColor: theme.palette.primary.main,
@@ -67,28 +69,28 @@ export default function Sidebar() {
           keepMounted: true, // Improve performance on mobile
         }}
       >
-          <Backdrop
-            open={open && isMobile}
+        <Backdrop
+          open={open && isMobile}
+          style={{
+            opacity: 1,
+            transition: 'none',
+            transitionDuration: '0s',
+            zIndex: 2, // Ensure it's above other elements
+          }}
+        >
+          <IconButton
+            onClick={handleToggleDrawer}
             style={{
-              opacity:1,
-              transition: 'none',
-              transitionDuration: '0s',
-              zIndex: 2, // Ensure it's above other elements
+              opacity: 1,
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              color: 'white',
             }}
           >
-            <IconButton
-              onClick={handleToggleDrawer}
-              style={{
-                opacity: 1,
-                position: 'absolute',
-                top: '20px',
-                right: '20px',
-                color: 'white',
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Backdrop>
+            <CloseIcon />
+          </IconButton>
+        </Backdrop>
         <Box
           sx={{
             marginTop: '32px',
