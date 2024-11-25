@@ -9,12 +9,6 @@ export default function Select(theme: Theme) {
       },
       styleOverrides: {
         root: {
-          '&.MuiSelect-select': {
-            '&:focus': {
-              backgroundColor: "red",
-                },
-              color : "red",
-          },
         },
         icon: {
           color: theme.palette.text.secondary,

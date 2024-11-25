@@ -531,10 +531,11 @@ export default function Sidebar({
                   }}
                 >
                   <Typography
-                    variant='titleSmall'
                     color={theme.palette.white}
                     sx={{
-                      fontWeight: 600,
+                      fontWeight: theme.typography.fontWeightMedium,
+                      fontSize: theme.utils.pxToRem(16),
+                      lineHeight: theme.typography.lineHeight.lineHeight20px,
                     }}
                   >
                     Antoine Dupont

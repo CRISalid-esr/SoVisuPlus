@@ -140,4 +140,5 @@ declare module '@mui/material/styles' {
     shadows?: string
     gray950?: string
   }
+  
 }
