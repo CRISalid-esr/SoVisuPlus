@@ -7,11 +7,11 @@ declare module '@mui/material/styles' {
       pxToLineHeight: (fontSize: number, lineHeight: number) => string
       pxToThemeSpacing: (value: number, scaling?: number) => number
       pxToRem: (value: number) => string
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       responsiveFontSizes: (sizes: {
         sm: number
         md: number
         lg: number
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       }) => Record<string, any>
     }
     typography: {
@@ -42,11 +42,11 @@ declare module '@mui/material/styles' {
       pxToLineHeight?: (fontSize: number, lineHeight: number) => string
       pxToThemeSpacing?: (value: number, scaling?: number) => number
       pxToRem?: (value: number) => string
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       responsiveFontSizes?: (sizes: {
         sm: number
         md: number
         lg: number
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       }) => Record<string, any>
     }
   }

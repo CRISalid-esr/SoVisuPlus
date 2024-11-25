@@ -21,17 +21,16 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import {
-  BarChartSquare,
-  CheckDone,
-  LayerThere,
-  LifeBuoy,
-  Logout,
-  Settings,
-  Users,
-} from '../../../theme/icons'
 
+import { BarChartSquare02 as BarChartSquare } from "@untitled-ui/icons-react";
+import { CheckDone01 as CheckDone } from "@untitled-ui/icons-react";
+import { LayersThree01 as LayerThere } from '@untitled-ui/icons-react'
+import { LifeBuoy01 as LifeBuoy } from '@untitled-ui/icons-react'
+import { LogOut01 as Logout } from '@untitled-ui/icons-react'
+import { Settings01 as Settings } from '@untitled-ui/icons-react'
+import { User01 as Users } from '@untitled-ui/icons-react'
 import { SearchLg, SearchSm } from '@untitled-ui/icons-react'
+
 export default function Sidebar() {
   const [open, setOpen] = useState(true) // Determines if the drawer is expanded or collapsed
   const pathname = usePathname() // Get the current path
