@@ -48,6 +48,7 @@ export default function Sidebar() {
     router.push(`/${event.target.value}/${pathWithoutLang}`)
   }
 
+
   return (
     <>
       <Drawer
@@ -171,9 +172,9 @@ export default function Sidebar() {
                     alignItems: 'center',
                   },
                   '& .MuiInputBase-input::placeholder': {
-                    fontSize: theme.typography.fontSize.rem14px,
-                    fontWeight: theme.typography.fontWeight.normal,
-                    color: theme.palette.primary40,
+                    fontSize: theme.utils.pxToRem(16),
+                    fontWeight: theme.typography.fontWeightRegular  ,
+                    color:theme.palette.primary.main,
                     opacity: 1,
                     lineHeight: theme.typography.lineHeight.lineHeight24px,
                   },
@@ -187,7 +188,7 @@ export default function Sidebar() {
                       <SearchLg
                         width={20}
                         height={20}
-                        color={theme.palette.primary40}
+                        color={theme.palette.primary.main}
                       />
                     </InputAdornment>
                   ),
@@ -240,7 +241,7 @@ export default function Sidebar() {
                         color: theme.palette.onPrimaryContainer,
                         '& .MuiTypography-root': {
                           fontFamily: 'Inter, Roboto, sans-serif',
-                          fontSize: theme.typography.fontSize.rem16px,
+                          fontSize: theme.utils.pxToRem(16),
                           fontWeight: theme.typography.fontWeightMedium,
                           lineHeight:
                             theme.typography.lineHeight.lineHeight24px,
@@ -270,7 +271,7 @@ export default function Sidebar() {
                         color: theme.palette.onPrimaryContainer,
                         '& .MuiTypography-root': {
                           fontFamily: 'Inter, Roboto, sans-serif',
-                          fontSize: theme.typography.fontSize.rem16px,
+                          fontSize: theme.utils.pxToRem(16),
                           fontWeight: theme.typography.fontWeightMedium,
                           color: theme.palette.onPrimaryContainer,
                           lineHeight:
@@ -301,7 +302,7 @@ export default function Sidebar() {
                         color: theme.palette.onPrimaryContainer,
                         '& .MuiTypography-root': {
                           fontFamily: 'Inter, Roboto, sans-serif',
-                          fontSize: theme.typography.fontSize.rem16px,
+                          fontSize: theme.utils.pxToRem(16),
                           fontWeight: theme.typography.fontWeightMedium,
                           color: theme.palette.onPrimaryContainer,
                           lineHeight:
@@ -332,7 +333,7 @@ export default function Sidebar() {
                       color: theme.palette.onPrimaryContainer,
                       '& .MuiTypography-root': {
                         fontFamily: 'Inter, Roboto, sans-serif',
-                        fontSize: theme.typography.fontSize.rem16px,
+                        fontSize: theme.utils.pxToRem(16),
                         fontWeight: theme.typography.fontWeightMedium,
                         color: theme.palette.onPrimaryContainer,
                         lineHeight: theme.typography.lineHeight.lineHeight24px,
@@ -362,7 +363,7 @@ export default function Sidebar() {
                       color: theme.palette.onPrimaryContainer,
                       '& .MuiTypography-root': {
                         fontFamily: 'Inter, Roboto, sans-serif',
-                        fontSize: theme.typography.fontSize.rem16px,
+                        fontSize: theme.utils.pxToRem(16),
                         fontWeight: theme.typography.fontWeightMedium,
                         color: theme.palette.onPrimaryContainer,
                         lineHeight: theme.typography.lineHeight.lineHeight24px,
@@ -392,7 +393,7 @@ export default function Sidebar() {
                       color: theme.palette.onPrimaryContainer,
                       '& .MuiTypography-root': {
                         fontFamily: 'Inter, Roboto, sans-serif',
-                        fontSize: theme.typography.fontSize.rem16px,
+                        fontSize: theme.utils.pxToRem(16),
                         fontWeight: theme.typography.fontWeightMedium,
                         color: theme.palette.onPrimaryContainer,
                         lineHeight: theme.typography.lineHeight.lineHeight24px,
@@ -411,16 +412,16 @@ export default function Sidebar() {
                   '& .MuiSelect-icon': {
                     color: theme.palette.white,
                   },
-                  marginTop: theme.typography.pxToRem(24),
-                  marginBottom: theme.typography.pxToRem(24),
+                  marginTop: theme.utils.pxToRem(24),
+                  marginBottom: theme.utils.pxToRem(24),
                   '& .MuiOutlinedInput-root': {
-                    fontSize: theme.typography.pxToRem(16),
+                    fontSize: theme.utils.pxToRem(16),
                     '& fieldset': {
                       border: 'none', // Remove the border
                     },
                   },
                   '& .MuiInputBase-input': {
-                    fontWeight: theme.typography.fontWeight.normal,
+                    fontWeight: theme.typography.fontWeightRegular,
                     color: theme.palette.white,
                     opacity: 1,
                     lineHeight: theme.typography.lineHeight.lineHeight24px,

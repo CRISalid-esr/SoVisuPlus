@@ -288,6 +288,6 @@ const muiTypography = {
     },
 }
 
-const typography = { ...muiTypography, ...themeCustomTypography, fontWeight, lineHeight, letterSpacing, pxToRem }
+const typography = { ...muiTypography, ...themeCustomTypography, fontWeight, lineHeight, letterSpacing}
 
 export default typography
