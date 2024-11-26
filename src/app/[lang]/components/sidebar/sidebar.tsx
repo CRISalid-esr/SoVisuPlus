@@ -620,6 +620,7 @@ export default function Sidebar({
             </Box>
           </Box>
           <Box
+            px={2}
             sx={{
               position: 'sticky', // Keep the footer at the bottom of the drawer
               bottom: 20, // Align it at the bottom
@@ -633,12 +634,14 @@ export default function Sidebar({
           >
             {open ? (
               <Box
+                pt={1}
                 sx={{
                   display: 'flex',
                   justifyContent: 'space-around',
                   alignItems: 'center',
                   borderTop: '1px solid',
                   borderColor: theme.palette.white,
+                  width: '100%',
                 }}
               >
                 <Image
