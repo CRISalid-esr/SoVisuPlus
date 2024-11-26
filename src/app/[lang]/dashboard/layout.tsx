@@ -22,14 +22,14 @@ export default function DashboardLayout({
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
     {isMobile && <Appbar handleToggleDrawer={handleToggleDrawer} />}
-    {/* Sidebar will be conditionally rendered based on screen size */}
     <Sidebar handleToggleDrawer={handleToggleDrawer} open={open} />
 
     <Box
       component="main"
       sx={{
-        padding:0,
+        padding: !isMobile ? "24px" : 0, // Adjust main content padding based on screen size
         flexGrow: 1,
+        marginLeft: !isMobile && open ? '240px' : !isMobile ? '72px' : 0, // Account for sidebar width
         marginTop: isMobile ? '56px' : 0, // Adjust main content padding to account for Appbar on mobile
         overflowY: 'auto', // Ensure content scrolls if necessary
       }}
