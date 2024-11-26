@@ -289,6 +289,13 @@ export default function Sidebar({
                     borderRadius: theme.utils.pxToRem(8),
                     color: theme.palette.onPrimaryContainer,
                   },
+                  ...(pathname === `/${lang}/dashboard`
+                    ? {
+                        backgroundColor: theme.palette.primaryContainer,
+                        borderRadius: theme.utils.pxToRem(8),
+                        color: theme.palette.onPrimaryContainer,
+                      }
+                    : {}),
                 }}
               >
                 <ListItemIcon
@@ -324,6 +331,13 @@ export default function Sidebar({
                   justifyContent: 'center',
                   alignItems: 'center',
                   color: theme.palette.primaryContainer,
+                  ...(pathname === `/${lang}/dashboard/publications`
+                    ? {
+                        backgroundColor: theme.palette.primaryContainer,
+                        borderRadius: theme.utils.pxToRem(8),
+                        color: theme.palette.onPrimaryContainer,
+                      }
+                    : {}),
                   '&:hover': {
                     backgroundColor: theme.palette.primaryContainer,
                     borderRadius: theme.utils.pxToRem(8),
@@ -364,11 +378,19 @@ export default function Sidebar({
                   justifyContent: 'center',
                   alignItems: 'center',
                   color: theme.palette.primaryContainer,
+                  ...(pathname === `/${lang}/dashboard/expertise`
+                    ? {
+                        backgroundColor: theme.palette.primaryContainer,
+                        borderRadius: theme.utils.pxToRem(8),
+                        color: theme.palette.onPrimaryContainer,
+                      }
+                    : {}),
                   '&:hover': {
                     backgroundColor: theme.palette.primaryContainer,
                     borderRadius: theme.utils.pxToRem(8),
                     color: theme.palette.onPrimaryContainer,
                   },
+                  
                 }}
               >
                 <ListItemIcon
@@ -413,6 +435,13 @@ export default function Sidebar({
                     justifyContent: 'center',
                     alignItems: 'center',
                     color: theme.palette.primaryContainer,
+                    ...(pathname === `/${lang}/dashboard/my-groups`
+                      ? {
+                          backgroundColor: theme.palette.primaryContainer,
+                          borderRadius: theme.utils.pxToRem(8),
+                          color: theme.palette.onPrimaryContainer,
+                        }
+                      : {}),
                     '&:hover': {
                       backgroundColor: theme.palette.primaryContainer,
                       borderRadius: theme.utils.pxToRem(8),
@@ -454,6 +483,13 @@ export default function Sidebar({
                     justifyContent: 'center',
                     alignItems: 'center',
                     color: theme.palette.primaryContainer,
+                    ...(pathname === `/${lang}/dashboard/institutions`
+                      ? {
+                          backgroundColor: theme.palette.primaryContainer,
+                          borderRadius: theme.utils.pxToRem(8),
+                          color: theme.palette.onPrimaryContainer,
+                        }
+                      : {}),
                     '&:hover': {
                       backgroundColor: theme.palette.primaryContainer,
                       borderRadius: theme.utils.pxToRem(8),
@@ -495,6 +531,13 @@ export default function Sidebar({
                     justifyContent: 'center',
                     alignItems: 'center',
                     color: theme.palette.primaryContainer,
+                    ...(pathname === `/${lang}/dashboard/laboratories`
+                      ? {
+                          backgroundColor: theme.palette.primaryContainer,
+                          borderRadius: theme.utils.pxToRem(8),
+                          color: theme.palette.onPrimaryContainer,
+                        }
+                      : {}),
                     '&:hover': {
                       backgroundColor: theme.palette.primaryContainer,
                       borderRadius: theme.utils.pxToRem(8),
