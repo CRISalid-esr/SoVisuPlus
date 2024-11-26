@@ -12,6 +12,7 @@ export default function DashboardLayout({
 }) {
   const [open, setOpen] = useState(true) // Determines if the drawer is expanded or collapsed
   const handleToggleDrawer = () => {
+    console.log('handleToggleDrawer',open)
     setOpen((prev) => !prev)
   }
 

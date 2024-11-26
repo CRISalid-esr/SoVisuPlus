@@ -1,7 +1,6 @@
 'use client'
 
 import { Trans } from '@lingui/macro'
-import CloseIcon from '@mui/icons-material/Close'
 import {
   Backdrop,
   Drawer,
@@ -33,6 +32,7 @@ import {
   SearchSm,
   Settings01 as Settings,
   User01 as Users,
+  XClose as Close,
 } from '@untitled-ui/icons-react'
 
 export default function Sidebar({
@@ -56,38 +56,42 @@ export default function Sidebar({
 
   return (
     <>
-      <Backdrop
-        open={open && isMobile}
-        style={{
-          backgroundColor:theme.palette.gray950,
-          opacity: 1,
-          transition: 'none',
-          transitionDuration: '0s',
-          zIndex: theme.zIndex.drawer - 1, // Ensure it's below the drawer
-        }}
-      />
-      <IconButton
-          onClick={handleToggleDrawer}
-          style={{
-            zIndex:  theme.zIndex.drawer + 1, // Ensure it's above the drawer
-            opacity: 1,
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            color: theme.palette.white,
-            fontSize: '24px',
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
+      {open && isMobile && (
+        <>
+          <Backdrop
+            open={open && isMobile}
+            style={{
+              backgroundColor: theme.palette.gray950,
+              opacity: 1,
+              transition: 'none',
+              transitionDuration: '0s',
+              zIndex: theme.zIndex.drawer - 1, // Ensure it's below the drawer
+            }}
+          />
+          <IconButton
+            onClick={handleToggleDrawer}
+            style={{
+              zIndex: theme.zIndex.drawer + 3, // Ensure it's above the drawer
+              opacity: 1,
+              position: 'absolute',
+              top: theme.utils.pxToRem(12),
+              right: theme.utils.pxToRem(20),
+              color: theme.palette.white,
+              fontSize: theme.utils.pxToRem(24),
+            }}
+          >
+            <Close />
+          </IconButton>
+        </>
+      )}
       <Drawer
         variant={isMobile ? 'temporary' : 'permanent'}
         open={open}
         sx={{
-          zIndex:  theme.zIndex.drawer + 2, // Ensure it's above the backdrop
+          zIndex: theme.zIndex.drawer + 2, // Ensure it's above the backdrop
           '& .MuiDrawer-paper': {
-            width: open ? 280 : 60, // Drawer width depending on whether it's open or collapsed
-            transition: 'width 0.3s ease',
+            width: open ? 280 : 80, // Drawer width depending on whether it's open or collapsed
+            transition: 'width 0.1s ease',
             boxSizing: 'border-box',
             backgroundColor: theme.palette.primary.main,
           },
@@ -98,14 +102,13 @@ export default function Sidebar({
       >
         <Box
           sx={{
-            marginTop: '32px',
-            marginLeft: open ? '20px' : '0px',
-            marginRight: open ? '20px' : '0px',
-            zIndex: 1201, // to ensure the drawer appears above the backdrop
+            marginLeft: open ? theme.spacing(2) : theme.spacing(2),
+            marginRight: open ? theme.spacing(2) : theme.spacing(2),
           }}
         >
           <Box
             sx={{
+              marginTop: isMobile ? theme.spacing(2) : theme.spacing(4),
               display: 'flex',
               alignItems: 'center',
               width: '100%',
@@ -145,7 +148,10 @@ export default function Sidebar({
                     <Avatar
                       src='/hideSidePanel.svg'
                       alt='sidepanel'
-                      sx={{ width: 24, height: 24 }}
+                      sx={{
+                        width: theme.utils.pxToRem(24),
+                        height: theme.utils.pxToRem(24),
+                      }}
                     />
                   </IconButton>
                 )}
@@ -188,10 +194,10 @@ export default function Sidebar({
             {open ? (
               <TextField
                 sx={{
-                  height: '46px',
+                  height: theme.utils.pxToRem(46),
                   backgroundColor: theme.palette.white,
-                  borderRadius: '8px',
-                  marginTop: '24px',
+                  borderRadius: theme.utils.pxToRem(8),
+                  marginTop: theme.spacing(3),
                   '& .MuiOutlinedInput-root': {
                     '& fieldset': {
                       border: 'none', // Remove the border
@@ -226,17 +232,28 @@ export default function Sidebar({
               />
             ) : (
               <List>
-                <ListItem component={Link} href={`/${lang}/dashboard`}>
+                <ListItem sx={{
+                    color: theme.palette.primaryContainer,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    '&:hover': {
+                      backgroundColor: theme.palette.primaryContainer,
+                      borderRadius: theme.utils.pxToRem(8),
+                      color: theme.palette.onPrimaryContainer,
+                    },
+                  }}>
                   <ListItemIcon
                     sx={{
-                      height: 24,
-                      width: 24,
+                      height: theme.utils.pxToRem(24),
+                      width: theme.utils.pxToRem(24),
+                      color:"inherit",
                       minWidth: 'unset',
                       cursor: 'pointer',
                     }}
                     onClick={handleToggleDrawer}
                   >
-                    <SearchSm color={theme.palette.onPrimaryContainer} />
+                    <SearchSm />
                   </ListItemIcon>
                 </ListItem>
                 <ListItem />
@@ -253,21 +270,35 @@ export default function Sidebar({
           >
             <Box>
               <List>
-                <ListItem component={Link} href={`/${lang}/dashboard`}>
+                <ListItem
+                  component={Link}
+                  href={`/${lang}/dashboard`}
+                  sx={{
+                    color: theme.palette.primaryContainer,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    '&:hover': {
+                      backgroundColor: theme.palette.primaryContainer,
+                      borderRadius: theme.utils.pxToRem(8),
+                      color: theme.palette.onPrimaryContainer,
+                    },
+                  }}
+                >
                   <ListItemIcon
                     sx={{
-                      height: 24,
-                      width: 24,
+                      height: theme.utils.pxToRem(24),
+                      width: theme.utils.pxToRem(24),
                       minWidth: 'unset',
-                      marginRight: '12px',
+                      marginRight: open ? theme.utils.pxToRem(12) : 0,
+                      color: 'inherit',
                     }}
                   >
-                    <BarChartSquare color={theme.palette.onPrimaryContainer} />
+                    <BarChartSquare />
                   </ListItemIcon>
                   {open && (
                     <ListItemText
                       sx={{
-                        color: theme.palette.onPrimaryContainer,
                         '& .MuiTypography-root': {
                           fontFamily: 'Inter, Roboto, sans-serif',
                           fontSize: theme.utils.pxToRem(16),
@@ -283,26 +314,36 @@ export default function Sidebar({
                 <ListItem
                   component={Link}
                   href={`/${lang}/dashboard/publications`}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    color: theme.palette.primaryContainer,
+                    '&:hover': {
+                      backgroundColor: theme.palette.primaryContainer,
+                      borderRadius: theme.utils.pxToRem(8),
+                      color: theme.palette.onPrimaryContainer,
+                    },
+                  }}
                 >
                   <ListItemIcon
                     sx={{
-                      height: 24,
-                      width: 24,
+                      height: theme.utils.pxToRem(24),
+                      width: theme.utils.pxToRem(24),
                       minWidth: 'unset',
-                      marginRight: '12px',
+                      marginRight: open ? theme.utils.pxToRem(12) : 0,
+                      color: 'inherit',
                     }}
                   >
-                    <LayerThere color={theme.palette.onPrimaryContainer} />
+                    <LayerThere />
                   </ListItemIcon>
                   {open && (
                     <ListItemText
                       sx={{
-                        color: theme.palette.onPrimaryContainer,
                         '& .MuiTypography-root': {
                           fontFamily: 'Inter, Roboto, sans-serif',
                           fontSize: theme.utils.pxToRem(16),
                           fontWeight: theme.typography.fontWeightMedium,
-                          color: theme.palette.onPrimaryContainer,
                           lineHeight:
                             theme.typography.lineHeight.lineHeight24px,
                         },
@@ -314,26 +355,36 @@ export default function Sidebar({
                 <ListItem
                   component={Link}
                   href={`/${lang}/dashboard/expertise`}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    color: theme.palette.primaryContainer,
+                    '&:hover': {
+                      backgroundColor: theme.palette.primaryContainer,
+                      borderRadius: theme.utils.pxToRem(8),
+                      color: theme.palette.onPrimaryContainer,
+                    },
+                  }}
                 >
                   <ListItemIcon
                     sx={{
-                      height: 24,
-                      width: 24,
+                      height: theme.utils.pxToRem(24),
+                      width: theme.utils.pxToRem(24),
                       minWidth: 'unset',
-                      marginRight: '12px',
+                      marginRight: open ? theme.utils.pxToRem(12) : 0,
+                      color: 'inherit',
                     }}
                   >
-                    <CheckDone color={theme.palette.onPrimaryContainer} />
+                    <CheckDone />
                   </ListItemIcon>
                   {open && (
                     <ListItemText
                       sx={{
-                        color: theme.palette.onPrimaryContainer,
                         '& .MuiTypography-root': {
                           fontFamily: 'Inter, Roboto, sans-serif',
                           fontSize: theme.utils.pxToRem(16),
                           fontWeight: theme.typography.fontWeightMedium,
-                          color: theme.palette.onPrimaryContainer,
                           lineHeight:
                             theme.typography.lineHeight.lineHeight24px,
                         },
@@ -345,26 +396,39 @@ export default function Sidebar({
               </List>
             </Box>
             <Box>
-              <ListItem component={Link} href={`/${lang}/dashboard/my-groups`}>
+              <ListItem
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  color: theme.palette.primaryContainer,
+                  '&:hover': {
+                    backgroundColor: theme.palette.primaryContainer,
+                    borderRadius: theme.utils.pxToRem(8),
+                    color: theme.palette.onPrimaryContainer,
+                  },
+                }}
+                component={Link}
+                href={`/${lang}/dashboard/my-groups`}
+              >
                 <ListItemIcon
                   sx={{
-                    height: 24,
-                    width: 24,
+                    height: theme.utils.pxToRem(24),
+                    width: theme.utils.pxToRem(24),
                     minWidth: 'unset',
-                    marginRight: '12px',
+                    marginRight: open ? theme.utils.pxToRem(12) : 0,
+                    color: 'inherit',
                   }}
                 >
-                  <Users color={theme.palette.onPrimaryContainer} />
+                  <Users />
                 </ListItemIcon>
                 {open && (
                   <ListItemText
                     sx={{
-                      color: theme.palette.onPrimaryContainer,
                       '& .MuiTypography-root': {
                         fontFamily: 'Inter, Roboto, sans-serif',
                         fontSize: theme.utils.pxToRem(16),
                         fontWeight: theme.typography.fontWeightMedium,
-                        color: theme.palette.onPrimaryContainer,
                         lineHeight: theme.typography.lineHeight.lineHeight24px,
                       },
                     }}
@@ -373,28 +437,38 @@ export default function Sidebar({
                 )}
               </ListItem>
               <ListItem
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  color: theme.palette.primaryContainer,
+                  '&:hover': {
+                    backgroundColor: theme.palette.primaryContainer,
+                    borderRadius: theme.utils.pxToRem(8),
+                    color: theme.palette.onPrimaryContainer,
+                  },
+                }}
                 component={Link}
                 href={`/${lang}/dashboard/institutions`}
               >
                 <ListItemIcon
                   sx={{
-                    height: 24,
-                    width: 24,
+                    height: theme.utils.pxToRem(24),
+                    width: theme.utils.pxToRem(24),
                     minWidth: 'unset',
-                    marginRight: '12px',
+                    marginRight: open ? theme.utils.pxToRem(12) : 0,
+                    color: 'inherit',
                   }}
                 >
-                  <LifeBuoy color={theme.palette.onPrimaryContainer} />
+                  <LifeBuoy />
                 </ListItemIcon>
                 {open && (
                   <ListItemText
                     sx={{
-                      color: theme.palette.onPrimaryContainer,
                       '& .MuiTypography-root': {
                         fontFamily: 'Inter, Roboto, sans-serif',
                         fontSize: theme.utils.pxToRem(16),
                         fontWeight: theme.typography.fontWeightMedium,
-                        color: theme.palette.onPrimaryContainer,
                         lineHeight: theme.typography.lineHeight.lineHeight24px,
                       },
                     }}
@@ -403,28 +477,38 @@ export default function Sidebar({
                 )}
               </ListItem>
               <ListItem
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  color: theme.palette.primaryContainer,
+                  '&:hover': {
+                    backgroundColor: theme.palette.primaryContainer,
+                    borderRadius: theme.utils.pxToRem(8),
+                    color: theme.palette.onPrimaryContainer,
+                  },
+                }}
                 component={Link}
                 href={`/${lang}/dashboard/laboratories`}
               >
                 <ListItemIcon
                   sx={{
-                    height: 24,
-                    width: 24,
+                    height: theme.utils.pxToRem(24),
+                    width: theme.utils.pxToRem(24),
                     minWidth: 'unset',
-                    marginRight: '12px',
+                    marginRight: open ? theme.utils.pxToRem(12) : 0,
+                    color: 'inherit',
                   }}
                 >
-                  <Settings color={theme.palette.onPrimaryContainer} />
+                  <Settings />
                 </ListItemIcon>
                 {open && (
                   <ListItemText
                     sx={{
-                      color: theme.palette.onPrimaryContainer,
                       '& .MuiTypography-root': {
                         fontFamily: 'Inter, Roboto, sans-serif',
                         fontSize: theme.utils.pxToRem(16),
                         fontWeight: theme.typography.fontWeightMedium,
-                        color: theme.palette.onPrimaryContainer,
                         lineHeight: theme.typography.lineHeight.lineHeight24px,
                       },
                     }}
@@ -434,7 +518,7 @@ export default function Sidebar({
               </ListItem>
             </Box>
           </Box>
-          <Box sx={{ minWidth: 200 }}>
+          <Box >
             {open ? (
               <TextField
                 sx={{
@@ -482,20 +566,31 @@ export default function Sidebar({
                 </MenuItem>
               </TextField>
             ) : (
-              <ListItem>
+              <ListItem sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                color: theme.palette.primaryContainer,
+                '&:hover': {
+                  backgroundColor: theme.palette.primaryContainer,
+                  borderRadius: theme.utils.pxToRem(8),
+                  color: theme.palette.onPrimaryContainer,
+                },
+              }}>
                 <ListItemIcon
                   onClick={handleToggleDrawer}
                   sx={{
-                    height: 24,
-                    width: 24,
+                    height: theme.utils.pxToRem(24),
+                    width: theme.utils.pxToRem(24),
                     minWidth: 'unset',
-                    marginRight: '12px',
-                    cursor: 'pointer',
+                    marginRight: open ? theme.utils.pxToRem(12) : 0,
+                    color: 'inherit',
                   }}
                 >
                   <Image
                     src='/icons/language.svg'
-                    alt='Crisalid logo'
+                    alt='language'
+                   style={{fill:'red'}}
                     width={24}
                     height={24}
                     priority
@@ -560,9 +655,9 @@ export default function Sidebar({
                 </Box>
                 <Typography
                   sx={{
-                    fontSize: '12px',
-                    fontWeight: 400,
-                    lineHeight: '20px',
+                    fontSize: theme.utils.pxToRem(12),
+                    fontWeight: theme.typography.fontWeightRegular,
+                    lineHeight: theme.typography.lineHeight.lineHeight16px,
                   }}
                   color={theme.palette.white}
                 >
@@ -575,13 +670,13 @@ export default function Sidebar({
               <ListItemIcon
                 onClick={handleToggleDrawer}
                 sx={{
-                  height: 24,
-                  width: 24,
+                  height: theme.utils.pxToRem(24),
+                  width: theme.utils.pxToRem(24),
                   minWidth: 'unset',
-                  marginRight: '12px',
+                  marginRight: theme.utils.pxToRem(12),
                   borderTop: '1px solid',
                   borderColor: theme.palette.white,
-                  paddingTop: '24px',
+                  paddingTop: theme.spacing(3),
                   cursor: 'pointer',
                 }}
               >

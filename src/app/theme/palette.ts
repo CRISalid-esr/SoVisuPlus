@@ -10,7 +10,7 @@ const colors: ColorPalette  = {
     primary60: "#4C9E94",
     primary70: "#68B9AE",
     primary80: "#84D5CA",
-    primary90: "#A0F1E6",
+    primary90: "#9EF2E6",
     primary95: "#B3FFF3",
     primary99: "#F2FFFC",
     primary100: "#FFF",
@@ -107,7 +107,7 @@ interface Theme {
 const light: Theme = {
     onPrimary: colors.secondary100,
     primaryContainer: colors.primary90,
-    onPrimaryContainer: colors.primary90,
+    onPrimaryContainer: colors.primary10,
     primaryFixed: colors.primary90,
     primaryFixedDim: colors.primary80,
     onPrimaryFixed: colors.primary10,

@@ -25,6 +25,7 @@
     "@mui/icons-material": "^6.1.6",
     "@mui/material": "^6.1.6",
     "@mui/material-nextjs": "^6.1.6",
+    "@mui/styles": "^6.1.8",
     "@mui/system": "^6.1.7",
     "@prisma/client": "^5.22.0",
     "@types/node": "^20",

@@ -1,5 +1,5 @@
 'use client';
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from "@mui/material/styles";
 import componentsOverride from "./overrides"
 import { dark, light, colors } from './palette'
 import breakpoints from './breakpoints'
