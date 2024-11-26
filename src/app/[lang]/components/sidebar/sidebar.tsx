@@ -56,11 +56,35 @@ export default function Sidebar({
 
   return (
     <>
+      <Backdrop
+        open={open && isMobile}
+        style={{
+          backgroundColor:theme.palette.gray950,
+          opacity: 1,
+          transition: 'none',
+          transitionDuration: '0s',
+          zIndex: theme.zIndex.drawer - 1, // Ensure it's below the drawer
+        }}
+      />
+      <IconButton
+          onClick={handleToggleDrawer}
+          style={{
+            zIndex:  theme.zIndex.drawer + 1, // Ensure it's above the drawer
+            opacity: 1,
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            color: theme.palette.white,
+            fontSize: '24px',
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
       <Drawer
         variant={isMobile ? 'temporary' : 'permanent'}
         open={open}
         sx={{
-          zIndex: 1200, // Ensure it's above other elements
+          zIndex:  theme.zIndex.drawer + 2, // Ensure it's above the backdrop
           '& .MuiDrawer-paper': {
             width: open ? 280 : 60, // Drawer width depending on whether it's open or collapsed
             transition: 'width 0.3s ease',
@@ -72,28 +96,6 @@ export default function Sidebar({
           keepMounted: true, // Improve performance on mobile
         }}
       >
-        <Backdrop
-          open={open && isMobile}
-          style={{
-            opacity: 1,
-            transition: 'none',
-            transitionDuration: '0s',
-            zIndex: 2, // Ensure it's above other elements
-          }}
-        >
-          <IconButton
-            onClick={handleToggleDrawer}
-            style={{
-              opacity: 1,
-              position: 'absolute',
-              top: '20px',
-              right: '20px',
-              color: 'white',
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Backdrop>
         <Box
           sx={{
             marginTop: '32px',

@@ -1,7 +1,7 @@
 'use client';
 import { createTheme } from '@mui/material/styles';
 import componentsOverride from "./overrides"
-import { dark, light, colors } from './palatte'
+import { dark, light, colors } from './palette'
 import breakpoints from './breakpoints'
 import typography from "./typography" // Custom and MUI default
 import {

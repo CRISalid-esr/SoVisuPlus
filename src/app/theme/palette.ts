@@ -91,7 +91,7 @@ const colors: ColorPalette  = {
     neutralVariant99: "#F2FFFC",
     neutralVariant100: "#FFF",
     white: "#FFF",
-    gray950 : "#0C111D",
+    gray950 : "#555961",
 }
 
 
