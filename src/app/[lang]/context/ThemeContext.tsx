@@ -33,7 +33,6 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
 
 
   const theme = currentTheme === 'light' ? lightTheme : darkTheme
-    console.info(theme)
   return (
     <ThemeContext.Provider value={{ toggleTheme, currentTheme }}>
       <MuiThemeProvider theme={theme}>{children}</MuiThemeProvider>

@@ -18,6 +18,7 @@ describe('LanguageProvider', () => {
         <TestComponent />
       </LanguageProvider>,
     )
+    expect(screen.getByText('Hello')).toBeInTheDocument();
   })
 
   it('renders children with correct language translations for fr', () => {

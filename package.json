@@ -28,6 +28,7 @@
     "@mui/styles": "^6.1.8",
     "@mui/system": "^6.1.7",
     "@prisma/client": "^5.22.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
