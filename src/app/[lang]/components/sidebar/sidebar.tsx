@@ -204,7 +204,7 @@ export default function Sidebar({
               overflowY: 'auto', // Allows scrolling if the content exceeds the available space
             }}
           >
-            <Box py={3}>
+            <Box component='div' sx={{}} pt={3} pb={open ? 3 : 0}>
               {open ? (
                 <TextField
                   sx={{
@@ -244,7 +244,11 @@ export default function Sidebar({
                   }}
                 />
               ) : (
-                <List>
+                <List
+                  sx={{
+                    paddingBottom: 0,
+                  }}
+                >
                   <ListItem
                     sx={{
                       color: theme.palette.primaryContainer,
@@ -271,7 +275,6 @@ export default function Sidebar({
                       <SearchSm />
                     </ListItemIcon>
                   </ListItem>
-                  <ListItem />
                 </List>
               )}
             </Box>
@@ -279,7 +282,7 @@ export default function Sidebar({
               <ListItem
                 component={Link}
                 href={`/${lang}/dashboard`}
-                onClick={()=>isMobile && handleToggleDrawer()}
+                onClick={() => isMobile && handleToggleDrawer()}
                 sx={{
                   color: theme.palette.primaryContainer,
                   display: 'flex',
@@ -327,7 +330,7 @@ export default function Sidebar({
               <ListItem
                 component={Link}
                 href={`/${lang}/dashboard/publications`}
-                onClick={()=>isMobile && handleToggleDrawer()}
+                onClick={() => isMobile && handleToggleDrawer()}
                 sx={{
                   display: 'flex',
                   justifyContent: 'center',
@@ -375,7 +378,7 @@ export default function Sidebar({
               <ListItem
                 component={Link}
                 href={`/${lang}/dashboard/expertise`}
-                onClick={()=>isMobile && handleToggleDrawer()}
+                onClick={() => isMobile && handleToggleDrawer()}
                 sx={{
                   display: 'flex',
                   justifyContent: 'center',
@@ -393,7 +396,6 @@ export default function Sidebar({
                     borderRadius: theme.utils.pxToRem(8),
                     color: theme.palette.onPrimaryContainer,
                   },
-                  
                 }}
               >
                 <ListItemIcon
@@ -453,8 +455,7 @@ export default function Sidebar({
                   }}
                   component={Link}
                   href={`/${lang}/dashboard/my-groups`}
-                  onClick={()=>isMobile && handleToggleDrawer()}
-
+                  onClick={() => isMobile && handleToggleDrawer()}
                 >
                   <ListItemIcon
                     sx={{
@@ -503,8 +504,7 @@ export default function Sidebar({
                   }}
                   component={Link}
                   href={`/${lang}/dashboard/institutions`}
-                  onClick={()=>isMobile && handleToggleDrawer()}
-
+                  onClick={() => isMobile && handleToggleDrawer()}
                 >
                   <ListItemIcon
                     sx={{
@@ -553,8 +553,7 @@ export default function Sidebar({
                   }}
                   component={Link}
                   href={`/${lang}/dashboard/laboratories`}
-                  onClick={()=>isMobile && handleToggleDrawer()}
-
+                  onClick={() => isMobile && handleToggleDrawer()}
                 >
                   <ListItemIcon
                     sx={{
