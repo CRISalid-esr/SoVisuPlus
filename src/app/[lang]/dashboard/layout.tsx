@@ -15,7 +15,6 @@ export default function DashboardLayout({
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
   const handleToggleDrawer = () => {
     setOpen((prev) => !prev);
   };
