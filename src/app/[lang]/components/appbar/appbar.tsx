@@ -42,7 +42,7 @@ export default function Appbar({
             />
             <Image
               src='/soVisuPlus.svg'
-              alt='Crisalid logo'
+              alt='Crisalid logo plus'
               width={123.966}
               height={24.795}
               priority
