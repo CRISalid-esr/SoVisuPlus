@@ -18,7 +18,6 @@ export default function Appbar({
         flexGrow: 1,
         height: theme.utils.pxToRem(64),
       })}
-      position='static'
     >
       <Toolbar>
         <Box

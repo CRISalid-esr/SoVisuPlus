@@ -279,6 +279,7 @@ export default function Sidebar({
               <ListItem
                 component={Link}
                 href={`/${lang}/dashboard`}
+                onClick={()=>isMobile && handleToggleDrawer()}
                 sx={{
                   color: theme.palette.primaryContainer,
                   display: 'flex',
@@ -326,6 +327,7 @@ export default function Sidebar({
               <ListItem
                 component={Link}
                 href={`/${lang}/dashboard/publications`}
+                onClick={()=>isMobile && handleToggleDrawer()}
                 sx={{
                   display: 'flex',
                   justifyContent: 'center',
@@ -373,6 +375,7 @@ export default function Sidebar({
               <ListItem
                 component={Link}
                 href={`/${lang}/dashboard/expertise`}
+                onClick={()=>isMobile && handleToggleDrawer()}
                 sx={{
                   display: 'flex',
                   justifyContent: 'center',
@@ -450,6 +453,8 @@ export default function Sidebar({
                   }}
                   component={Link}
                   href={`/${lang}/dashboard/my-groups`}
+                  onClick={()=>isMobile && handleToggleDrawer()}
+
                 >
                   <ListItemIcon
                     sx={{
@@ -498,6 +503,8 @@ export default function Sidebar({
                   }}
                   component={Link}
                   href={`/${lang}/dashboard/institutions`}
+                  onClick={()=>isMobile && handleToggleDrawer()}
+
                 >
                   <ListItemIcon
                     sx={{
@@ -546,6 +553,8 @@ export default function Sidebar({
                   }}
                   component={Link}
                   href={`/${lang}/dashboard/laboratories`}
+                  onClick={()=>isMobile && handleToggleDrawer()}
+
                 >
                   <ListItemIcon
                     sx={{
