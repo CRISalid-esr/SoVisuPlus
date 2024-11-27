@@ -22,8 +22,6 @@ describe('ThemeProvider', () => {
         <TestComponent />
       </ThemeProvider>,
     )
-    screen.debug(screen.getByText(/Current Theme: light/i))
-    expect(2).toBe(2)
     // Verify default theme
     expect(screen.getByText(/Current Theme:/i)).toHaveTextContent(
       'Current Theme: light',
