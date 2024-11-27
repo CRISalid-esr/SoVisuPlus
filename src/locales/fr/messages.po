@@ -35,22 +35,26 @@ msgstr "SoVisu+"
 msgid "home_page_subtitle"
 msgstr "Science ouverte visualisation. Gestion de la production scientifique et des identifiants numériques des chercheurs."
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:147
+#: src/app/[lang]/auth/login/page.tsx:10
+msgid "Login Page work"
+msgstr ""
+
+#: src/app/[lang]/components/sidebar/sidebar.tsx:323
 #: src/app/[lang]/dashboard/page.tsx:10
 msgid "side_bar_dashboard"
 msgstr "Tableau de bord"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:168
+#: src/app/[lang]/components/sidebar/sidebar.tsx:420
 #: src/app/[lang]/dashboard/expertise/page.tsx:10
 msgid "side_bar_expertise"
 msgstr "Mes expertises"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:187
+#: src/app/[lang]/components/sidebar/sidebar.tsx:531
 #: src/app/[lang]/dashboard/institutions/page.tsx:10
 msgid "side_bar_institutions"
 msgstr "Institutions"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:195
+#: src/app/[lang]/components/sidebar/sidebar.tsx:581
 #: src/app/[lang]/dashboard/laboratories/page.tsx:10
 msgid "side_bar_laboratories"
 msgstr "Laboratoires"
@@ -59,8 +63,8 @@ msgstr "Laboratoires"
 msgid "side_bar_my_account"
 msgstr ""
 
+#: src/app/[lang]/components/sidebar/sidebar.tsx:481
 #: src/app/[lang]/dashboard/my-groups/page.tsx:10
-#: src/app/[lang]/dashboard/publications/page.tsx:10
 msgid "side_bar_my_groups"
 msgstr "Mes groupes"
 
@@ -69,9 +73,14 @@ msgid "side_bar_my_research_activities"
 msgstr ""
 
 #: src/app/[lang]/components/sidebar/sidebar.tsx:179
-msgid "side_bar_my-groups"
-msgstr ""
+#~ msgid "side_bar_my-groups"
+#~ msgstr ""
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:159
+#: src/app/[lang]/components/sidebar/sidebar.tsx:371
+#: src/app/[lang]/dashboard/publications/page.tsx:10
 msgid "side_bar_publications"
 msgstr "Mes publication"
+
+#: src/app/[lang]/components/sidebar/sidebar.tsx:232
+msgid "sidebar_search_placeholder"
+msgstr "Chercher"

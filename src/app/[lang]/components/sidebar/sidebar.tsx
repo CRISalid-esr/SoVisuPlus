@@ -1,6 +1,6 @@
 'use client'
 
-import { Trans } from '@lingui/macro'
+import { t, Trans } from '@lingui/macro'
 import {
   Backdrop,
   Drawer,
@@ -229,7 +229,7 @@ export default function Sidebar({
                       lineHeight: theme.typography.lineHeight.lineHeight24px,
                     },
                   }}
-                  placeholder='Chercher'
+                  placeholder={t`sidebar_search_placeholder`}
                   fullWidth
                   InputProps={{
                     startAdornment: (

@@ -7,7 +7,7 @@ export default function PublicationsPage() {
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant='h4' gutterBottom>
-        <Trans>side_bar_my_groups</Trans>
+        <Trans>side_bar_publications</Trans>
       </Typography>
     </Box>
   )
