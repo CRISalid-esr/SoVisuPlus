@@ -582,12 +582,10 @@ export default function Sidebar({
                       '& .MuiSelect-icon': {
                         color: theme.palette.white,
                       },
-                      //marginTop: theme.utils.pxToRem(24),
-                      // marginBottom: theme.utils.pxToRem(24),
                       '& .MuiOutlinedInput-root': {
                         fontSize: theme.utils.pxToRem(16),
                         '& fieldset': {
-                          border: 'none', // Remove the border
+                          border: 'none',
                         },
                       },
                       '& .MuiInputBase-input': {

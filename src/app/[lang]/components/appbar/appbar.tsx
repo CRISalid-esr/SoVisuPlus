@@ -14,10 +14,10 @@ export default function Appbar({
   const toggleDrawer = () => handleToggleDrawer()
   return (
     <AppBar
-      sx={{
+      sx={(theme)=> ({
         flexGrow: 1,
-        height: '64px',
-      }}
+        height: theme.utils.pxToRem(64),
+      })}
       position='static'
     >
       <Toolbar>
