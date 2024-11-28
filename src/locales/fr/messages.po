@@ -13,18 +13,74 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/app/[lang]/page.tsx:63
-msgid "home_page_instance_name"
-msgstr "Instance de développement"
+#. js-lingui-explicit-id
+#: src/app/[lang]/LanguageProvider.test.tsx:13
+#: src/app/[lang]/LanguageProvider.test.tsx:28
+msgid "hello"
+msgstr ""
 
-#: src/app/[lang]/page.tsx:57
-msgid "home_page_main_title"
-msgstr "SoVisu+"
-
-#: src/app/[lang]/page.tsx:68
+#: src/app/[lang]/page.tsx:79
 msgid "home_page_checkup_link_label"
 msgstr "Contrôle du bon fonctionnement de l'application"
 
-#: src/app/[lang]/page.tsx:60
+#: src/app/[lang]/page.tsx:74
+msgid "home_page_instance_name"
+msgstr "Instance de développement"
+
+#: src/app/[lang]/page.tsx:68
+msgid "home_page_main_title"
+msgstr "SoVisu+"
+
+#: src/app/[lang]/page.tsx:71
 msgid "home_page_subtitle"
 msgstr "Science ouverte visualisation. Gestion de la production scientifique et des identifiants numériques des chercheurs."
+
+#: src/app/[lang]/auth/login/page.tsx:10
+msgid "Login Page work"
+msgstr ""
+
+#: src/app/[lang]/components/sidebar/sidebar.tsx:323
+#: src/app/[lang]/dashboard/page.tsx:10
+msgid "side_bar_dashboard"
+msgstr "Tableau de bord"
+
+#: src/app/[lang]/components/sidebar/sidebar.tsx:420
+#: src/app/[lang]/dashboard/expertise/page.tsx:10
+msgid "side_bar_expertise"
+msgstr "Mes expertises"
+
+#: src/app/[lang]/components/sidebar/sidebar.tsx:531
+#: src/app/[lang]/dashboard/institutions/page.tsx:10
+msgid "side_bar_institutions"
+msgstr "Institutions"
+
+#: src/app/[lang]/components/sidebar/sidebar.tsx:581
+#: src/app/[lang]/dashboard/laboratories/page.tsx:10
+msgid "side_bar_laboratories"
+msgstr "Laboratoires"
+
+#: src/app/[lang]/dashboard/my-account/page.tsx:10
+msgid "side_bar_my_account"
+msgstr ""
+
+#: src/app/[lang]/components/sidebar/sidebar.tsx:481
+#: src/app/[lang]/dashboard/my-groups/page.tsx:10
+msgid "side_bar_my_groups"
+msgstr "Mes groupes"
+
+#: src/app/[lang]/dashboard/research-activities/page.tsx:10
+msgid "side_bar_my_research_activities"
+msgstr ""
+
+#: src/app/[lang]/components/sidebar/sidebar.tsx:179
+#~ msgid "side_bar_my-groups"
+#~ msgstr ""
+
+#: src/app/[lang]/components/sidebar/sidebar.tsx:371
+#: src/app/[lang]/dashboard/publications/page.tsx:10
+msgid "side_bar_publications"
+msgstr "Mes publication"
+
+#: src/app/[lang]/components/sidebar/sidebar.tsx:232
+msgid "sidebar_search_placeholder"
+msgstr "Chercher"
