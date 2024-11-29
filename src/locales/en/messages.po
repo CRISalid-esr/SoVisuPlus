@@ -15,7 +15,7 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/LanguageProvider.test.tsx:13
-#: src/app/[lang]/LanguageProvider.test.tsx:28
+#: src/app/[lang]/LanguageProvider.test.tsx:29
 msgid "hello"
 msgstr ""
 
@@ -44,17 +44,17 @@ msgstr ""
 msgid "side_bar_dashboard"
 msgstr "Dashboard"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:420
+#: src/app/[lang]/components/sidebar/sidebar.tsx:509
 #: src/app/[lang]/dashboard/expertise/page.tsx:10
 msgid "side_bar_expertise"
 msgstr "Expertise"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:531
+#: src/app/[lang]/components/sidebar/sidebar.tsx:618
 #: src/app/[lang]/dashboard/institutions/page.tsx:10
 msgid "side_bar_institutions"
 msgstr "Institutions"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:581
+#: src/app/[lang]/components/sidebar/sidebar.tsx:667
 #: src/app/[lang]/dashboard/laboratories/page.tsx:10
 msgid "side_bar_laboratories"
 msgstr "Laboratories"
@@ -63,7 +63,7 @@ msgstr "Laboratories"
 msgid "side_bar_my_account"
 msgstr ""
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:481
+#: src/app/[lang]/components/sidebar/sidebar.tsx:569
 #: src/app/[lang]/dashboard/my-groups/page.tsx:10
 msgid "side_bar_my_groups"
 msgstr "My groups"
@@ -76,11 +76,26 @@ msgstr "Research activities"
 #~ msgid "side_bar_my-groups"
 #~ msgstr "My groups"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:371
+#: src/app/[lang]/components/sidebar/sidebar.tsx:461
 #: src/app/[lang]/dashboard/publications/page.tsx:10
 msgid "side_bar_publications"
 msgstr "Publications"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:232
+#: src/app/[lang]/components/sidebar/sidebar.tsx:319
 msgid "sidebar_search_placeholder"
 msgstr "Search"
+
+#: src/app/[lang]/components/sidebar/sidebar.tsx:89
+#: src/app/[lang]/components/sidebar/sidebar.tsx:112
+#: src/app/[lang]/components/sidebar/sidebar.tsx:135
+#: src/app/[lang]/components/sidebar/sidebar.tsx:735
+msgid "sidebar_theme_dark"
+msgstr "Dark theme"
+
+#: src/app/[lang]/components/sidebar/sidebar.tsx:716
+msgid "sidebar_theme_light"
+msgstr "Light theme"
+
+#: src/app/[lang]/components/sidebar/sidebar.tsx:754
+msgid "sidebar_theme_system"
+msgstr "Auto Theme"

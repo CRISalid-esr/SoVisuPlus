@@ -10,12 +10,18 @@ const nextConfig: NextConfig = {
     middlewarePrefetch: 'flexible',
   },
   webpack: (config) => {
-    config.module.rules.push({
-      test: /\.po$/,
-      use: {
-        loader: '@lingui/loader',
+    config.module.rules.push(
+      {
+        test: /\.svg$/,
+        use: ['@svgr/webpack'],
       },
-    }),
+      {
+        test: /\.po$/,
+        use: {
+          loader: '@lingui/loader',
+        },
+      },
+    ),
       (config.resolve.alias['@'] = path.join(__dirname, 'src', 'app'))
     return config
   },
