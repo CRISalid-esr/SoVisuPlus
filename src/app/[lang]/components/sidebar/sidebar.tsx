@@ -86,7 +86,7 @@ export default function Sidebar({
               }}
               ml={1}
             >
-              <Trans>side_bar_light</Trans>
+              <Trans>sidebar_theme_light</Trans>
             </Typography>
           </Box>
         )
@@ -109,7 +109,7 @@ export default function Sidebar({
               }}
               ml={1}
             >
-              <Trans>side_bar_dark</Trans>
+              <Trans>sidebar_theme_dark</Trans>
             </Typography>
           </Box>
         )
@@ -132,7 +132,7 @@ export default function Sidebar({
               }}
               ml={1}
             >
-              <Trans>side_bar_dark</Trans>
+              <Trans>sidebar_theme_dark</Trans>
             </Typography>
           </Box>
         )
