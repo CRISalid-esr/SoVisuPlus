@@ -24,7 +24,6 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
       "@/components/*": [
         "src/app/[lang]/components/*"
       ],
@@ -45,7 +44,8 @@
       ],
       "@/public/*": [
         "public/*"
-      ]
+      ],
+      "@/*": ["src/*"],
     }
   },
   "include": [
