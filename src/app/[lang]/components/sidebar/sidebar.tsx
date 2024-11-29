@@ -1,9 +1,9 @@
 'use client'
 
-import Check from '../../../../../public/icons/check.svg'
-import DarkMode from '../../../../../public/icons/dark_mode.svg'
-import LightMode from '../../../../../public/icons/light_mode.svg'
-import SystemMode from '../../../../..//public/icons/system_mode.svg'
+import Check from '@/public/icons/check.svg'
+import DarkMode from '@/public/icons/dark_mode.svg'
+import LightMode from '@/public/icons/light_mode.svg'
+import SystemMode from '@/public/icons/system_mode.svg'
 
 import { t, Trans } from '@lingui/macro'
 import {

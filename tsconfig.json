@@ -55,7 +55,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "**/*.d.ts",
-    "src/theme/theme.d.ts"
+    "src/theme/theme.d.ts",
+    "additional.d.ts"
   ],
   "exclude": [
     "node_modules"
