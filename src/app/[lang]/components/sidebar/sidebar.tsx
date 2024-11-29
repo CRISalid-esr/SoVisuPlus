@@ -40,6 +40,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
 
+
 export default function Sidebar({
   open,
   handleToggleDrawer,
@@ -51,7 +52,7 @@ export default function Sidebar({
   const lang = pathname.split('/')[1] // Extract the `lang` dynamic segment
 
   const theme = useTheme()
-  const { setTheme, currentTheme,  } = useThemeContext()
+  const { setTheme, currentTheme } = useThemeContext()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const router = useRouter()
 
@@ -63,7 +64,6 @@ export default function Sidebar({
   const handleChangeTheme = (event: SelectChangeEvent) => {
     setTheme(event.target.value as 'light' | 'dark' | 'system')
   }
-
 
   const renderThemeValue = (value: string) => {
     switch (value) {
@@ -135,6 +135,38 @@ export default function Sidebar({
               <Trans>sidebar_theme_dark</Trans>
             </Typography>
           </Box>
+        )
+      default:
+        return null
+    }
+  }
+
+  const renderThemeIcon = (value: string) => {
+    switch (value) {
+      case 'light':
+        return (
+          <LightMode
+            style={{
+              fill: theme.palette.primaryContainer,
+            }}
+          
+          />
+        )
+      case 'dark':
+        return (
+          <DarkMode
+            style={{
+              fill: theme.palette.primaryContainer,
+            }}
+          />
+        )
+      case 'system':
+        return (
+          <SystemMode
+            style={{
+              fill: theme.palette.primaryContainer,
+            }}
+          />
         )
       default:
         return null
@@ -702,7 +734,6 @@ export default function Sidebar({
                         lineHeight: theme.typography.lineHeight.lineHeight24px,
                       },
                     }}
-                    
                   >
                     <MenuItem value='light'>
                       <ListItemIcon>
@@ -786,14 +817,7 @@ export default function Sidebar({
                         color: 'inherit',
                       }}
                     >
-                      <Image
-                        src='/icons/language.svg'
-                        alt='language'
-                        style={{ fill: 'red' }}
-                        width={24}
-                        height={24}
-                        priority
-                      />
+                      {renderThemeIcon(currentTheme)}
                     </ListItemIcon>
                   </ListItem>
                 )}

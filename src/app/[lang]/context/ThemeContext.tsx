@@ -20,7 +20,6 @@ export enum ThemeMode {
 export type ThemeModeType = 'light' | 'dark' | 'system'
 
 interface ThemeContextType {
-  toggleTheme: () => void
   setTheme: (theme: ThemeModeType) => void
   currentTheme: ThemeModeType
   resolvedTheme: 'light' | 'dark'
@@ -49,7 +48,6 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     const handleSystemThemeChange = () => {
       if (currentTheme === 'system') {
         const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-        console.log('isDark',isDark)
         setResolvedTheme(isDark ? 'dark' : 'light')
       }
     }
@@ -78,9 +76,6 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     }
   }, [currentTheme])
 
-  const toggleTheme = () => {
-    setCurrentTheme((prev) => (prev === ThemeMode.light ? 'dark' : 'light'))
-  }
 
   const setTheme = (theme: ThemeModeType) => {
     setCurrentTheme(theme)
@@ -91,7 +86,6 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   return (
     <ThemeContext.Provider
       value={{
-        toggleTheme,
         setTheme,
         currentTheme,
         resolvedTheme,
