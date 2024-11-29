@@ -1,5 +1,9 @@
 'use client'
 
+import Check from '@/public/icons/check.svg'
+import DarkMode from '@/public/icons/dark_mode.svg'
+import LightMode from '@/public/icons/light_mode.svg'
+import SystemMode from '@/public/icons/system_mode.svg'
 import { t, Trans } from '@lingui/macro'
 import {
   Backdrop,
@@ -11,6 +15,7 @@ import {
   ListItemIcon,
   ListItemText,
   MenuItem,
+  Select,
   SelectChangeEvent,
   TextField,
   Typography,
@@ -18,13 +23,10 @@ import {
 import Avatar from '@mui/material/Avatar'
 import { useTheme } from '@mui/material/styles'
 import { Box, useMediaQuery } from '@mui/system'
-import Image from 'next/image'
-import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-
 import {
   BarChartSquare02 as BarChartSquare,
   CheckDone01 as CheckDone,
+  XClose as Close,
   LayersThree01 as LayerThere,
   LifeBuoy01 as LifeBuoy,
   LogOut01 as Logout,
@@ -32,8 +34,11 @@ import {
   SearchSm,
   Settings01 as Settings,
   User01 as Users,
-  XClose as Close,
 } from '@untitled-ui/icons-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
 
 export default function Sidebar({
   open,
@@ -46,12 +51,94 @@ export default function Sidebar({
   const lang = pathname.split('/')[1] // Extract the `lang` dynamic segment
 
   const theme = useTheme()
+  const { setTheme, currentTheme,  } = useThemeContext()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const router = useRouter()
 
   const handleChange = (event: SelectChangeEvent) => {
     const pathWithoutLang = pathname.split('/').slice(2).join('/') // Remove the current lang segment
     router.push(`/${event.target.value}/${pathWithoutLang}`)
+  }
+
+  const handleChangeTheme = (event: SelectChangeEvent) => {
+    setTheme(event.target.value as 'light' | 'dark' | 'system')
+  }
+
+
+  const renderThemeValue = (value: string) => {
+    switch (value) {
+      case 'light':
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+            }}
+          >
+            <LightMode
+              style={{
+                fill: theme.palette.primaryContainer,
+              }}
+            />
+            <Typography
+              variant='bodyLarge'
+              sx={{
+                color: theme.palette.primaryContainer,
+              }}
+              ml={1}
+            >
+              <Trans>side_bar_light</Trans>
+            </Typography>
+          </Box>
+        )
+      case 'dark':
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+            }}
+          >
+            <DarkMode
+              style={{
+                fill: theme.palette.primaryContainer,
+              }}
+            />
+            <Typography
+              variant='bodyLarge'
+              sx={{
+                color: theme.palette.primaryContainer,
+              }}
+              ml={1}
+            >
+              <Trans>side_bar_dark</Trans>
+            </Typography>
+          </Box>
+        )
+      case 'system':
+        return (
+          <Box
+            sx={{
+              display: 'flex',
+            }}
+          >
+            <SystemMode
+              style={{
+                fill: theme.palette.primaryContainer,
+              }}
+            />
+            <Typography
+              variant='bodyLarge'
+              sx={{
+                color: theme.palette.primaryContainer,
+              }}
+              ml={1}
+            >
+              <Trans>side_bar_dark</Trans>
+            </Typography>
+          </Box>
+        )
+      default:
+        return null
+    }
   }
 
   return (
@@ -583,6 +670,134 @@ export default function Sidebar({
                 </ListItem>
               </Box>
               {/* Third Box */}
+              <Box>
+                {open ? (
+                  <Select
+                    label='Theme'
+                    value={currentTheme}
+                    onChange={handleChangeTheme}
+                    variant='outlined'
+                    fullWidth
+                    disableUnderline
+                    renderValue={renderThemeValue}
+                    sx={{
+                      boxShadow: 'none',
+                      '.MuiOutlinedInput-notchedOutline': { border: 0 },
+                      '&.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline':
+                        {
+                          border: 0,
+                        },
+                      '&.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
+                        {
+                          border: 0,
+                        },
+                      '& .MuiSelect-select': {
+                        display: 'flex',
+                        alignItems: 'center',
+                      },
+                      '& .MuiSvgIcon-fontSizeMedium': {
+                        fontWeight: theme.typography.fontWeightRegular,
+                        color: theme.palette.white,
+                        opacity: 1,
+                        lineHeight: theme.typography.lineHeight.lineHeight24px,
+                      },
+                    }}
+                    
+                  >
+                    <MenuItem value='light'>
+                      <ListItemIcon>
+                        <LightMode
+                          style={{
+                            fill: theme.palette.onSurface,
+                          }}
+                        />
+                      </ListItemIcon>
+                      <ListItemText>
+                        <Trans>sidebar_theme_light</Trans>
+                      </ListItemText>
+                      {currentTheme === ThemeMode.light && (
+                        <Check
+                          style={{
+                            fill: theme.palette.onSurface,
+                          }}
+                        />
+                      )}
+                    </MenuItem>
+                    <MenuItem value='dark'>
+                      <ListItemIcon>
+                        <DarkMode
+                          style={{
+                            fill: theme.palette.onSurface,
+                          }}
+                        />
+                      </ListItemIcon>
+                      <ListItemText>
+                        <Trans>sidebar_theme_dark</Trans>
+                      </ListItemText>
+                      {currentTheme === ThemeMode.dark && (
+                        <Check
+                          style={{
+                            fill: theme.palette.onSurface,
+                          }}
+                        />
+                      )}
+                    </MenuItem>
+                    <MenuItem value='system'>
+                      <ListItemIcon>
+                        <SystemMode
+                          style={{
+                            fill: theme.palette.onSurface,
+                          }}
+                        />
+                      </ListItemIcon>
+                      <ListItemText>
+                        <Trans>sidebar_theme_system</Trans>
+                      </ListItemText>
+                      {currentTheme === ThemeMode.system && (
+                        <Check
+                          style={{
+                            fill: theme.palette.onSurface,
+                          }}
+                        />
+                      )}
+                    </MenuItem>
+                  </Select>
+                ) : (
+                  <ListItem
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      color: theme.palette.primaryContainer,
+                      '&:hover': {
+                        backgroundColor: theme.palette.primaryContainer,
+                        borderRadius: theme.utils.pxToRem(8),
+                        color: theme.palette.onPrimaryContainer,
+                      },
+                    }}
+                  >
+                    <ListItemIcon
+                      onClick={handleToggleDrawer}
+                      sx={{
+                        height: theme.utils.pxToRem(24),
+                        width: theme.utils.pxToRem(24),
+                        minWidth: 'unset',
+                        marginRight: open ? theme.utils.pxToRem(12) : 0,
+                        color: 'inherit',
+                      }}
+                    >
+                      <Image
+                        src='/icons/language.svg'
+                        alt='language'
+                        style={{ fill: 'red' }}
+                        width={24}
+                        height={24}
+                        priority
+                      />
+                    </ListItemIcon>
+                  </ListItem>
+                )}
+              </Box>
               <Box>
                 {open ? (
                   <TextField

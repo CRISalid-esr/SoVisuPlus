@@ -43,6 +43,9 @@
       "@/theme/*": [
         "src/theme/*"
       ],
+      "@/public/*": [
+        "public/*"
+      ]
     }
   },
   "include": [
