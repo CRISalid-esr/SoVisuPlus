@@ -13,8 +13,7 @@ jest.mock('./splash', () => ({
 
 describe('Home Component', () => {
   it('renders without crashing', async () => {
-    const props = { params: { lang: 'en' } };
-    const { container } = render(await Home(props));
+    const { container } = render(await Home());
     expect(container).toBeInTheDocument();
   });
 });
