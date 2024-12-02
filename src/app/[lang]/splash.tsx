@@ -19,7 +19,6 @@ type ClientHomeProps = {
 export default function splash({ session, lang }: ClientHomeProps) {
   const theme = useTheme();
 
-  console.log('lang', lang);  
 
   return (
     <>
