@@ -1,7 +1,6 @@
 'use client';
 
 import { Box, Button, Typography } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import { t } from '@lingui/macro';
 import Logo from '@/public/logo_splash_screen.svg';
 import Oval from '@/public/Oval.svg';
@@ -12,21 +11,19 @@ import Avatars from '@/public/avatars.svg';
 import { signIn,signOut } from 'next-auth/react'
 
 type ClientHomeProps = {
-  session: any; // Replace with proper session type if available
-  lang:string
+  session: { user: { email: string } } | null,
 };
 
-export default function splash({ session, lang }: ClientHomeProps) {
-  const theme = useTheme();
+export default function splash({ session }: ClientHomeProps) {
 
 
   return (
     <>
       <Box flex={{ xs: 1, md: 1 }}>
         <Box
-          sx={{
+          sx={(theme)=>({
             padding: theme.spacing(6),
-          }}
+          })}
         >
           <Logo />
         </Box>
@@ -128,10 +125,10 @@ export default function splash({ session, lang }: ClientHomeProps) {
         />
         <Typography
           variant="displayLarge"
-          sx={{
+          sx={(theme)=>({
             mb: theme.spacing(18),
             zIndex: 1,
-          }}
+          })}
         >
           Lorem Ipsum
         </Typography>
@@ -144,10 +141,10 @@ export default function splash({ session, lang }: ClientHomeProps) {
           <Typography
             component={'p'}
             variant="headingSmall"
-            sx={{
+            sx={(theme)=>({
               mb: theme.spacing(18),
               zIndex: 1,
-            }}
+            })}
           >
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
             eiusmod tempor incididunt ut labore et dolore magna aliqua.

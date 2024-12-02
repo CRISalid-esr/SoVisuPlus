@@ -20,6 +20,8 @@ declare module '@mui/material/styles' {
       fontWeightMedium: number;
       fontWeightBold: number;
       bodyLarge?: React.CSSProperties; // Allow customization for `bodyLarge`
+      displayLarge: React.CSSProperties; // Allow customization for `displayLarge`
+      headingSmall: React.CSSProperties; // Allow customization for `headingSmall`
       lineHeight: {
         lineHeight64px: number; // "4rem", 64px
         lineHeight52px: number; // "3rem", 52px
@@ -52,7 +54,9 @@ declare module '@mui/material/styles' {
       }) => Record<string, any>;
     };
     typography?: {
-      bodyLarge?: React.CSSProperties; // Add this
+      bodyLarge?: React.CSSProperties; 
+      displayLarge: React.CSSProperties;
+      headingSmall?: React.CSSProperties; 
       fontWeightLight?: number;
       fontWeightRegular?: number;
       fontWeightMedium?: number;
@@ -174,5 +178,7 @@ declare module '@mui/material/styles' {
 declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
     bodyLarge: true; // Enable `bodyLarge` as a valid variant
+    displayLarge: true; // Enable `displayLarge` as a valid variant
+    headingSmall : true
   }
 }
