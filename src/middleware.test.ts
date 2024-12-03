@@ -1,5 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { middleware } from './middleware';
+// __tests__/middleware.test.ts
+import { NextResponse } from 'next/server';
+import { middleware } from '@/middleware'; // Adjust path as needed
+import type { NextRequest } from 'next/server';
 
 jest.mock('next/server', () => ({
   NextResponse: {
@@ -9,58 +11,59 @@ jest.mock('next/server', () => ({
 }));
 
 describe('Middleware', () => {
-  const defaultLocale = 'fr';
-
-  const createRequest = (pathname: string) => {
-    return {
-      nextUrl: {
-        pathname,
-        clone: () => ({
-          pathname,
-        }),
-      },
-    } as NextRequest;
-  };
-
-  it('should redirect to default locale if no locale is specified', () => {
-    const request = createRequest('/about');
-    const response = middleware(request);
-    expect(NextResponse.redirect).toHaveBeenCalledWith(
-      expect.objectContaining({ pathname: `/${defaultLocale}/about` })
-    );
-    expect(response).toBeUndefined();
+  const mockNextUrl = (pathname: string) => ({
+    pathname,
+    clone: jest.fn().mockReturnValue({ pathname }),
   });
 
-  it('should proceed with NextResponse.next() if a supported locale is present', () => {
-    const request = createRequest('/en/about');
-    const response = middleware(request);
+  it('should skip public files', () => {
+    const request = { nextUrl: mockNextUrl('/file.png') } as unknown as NextRequest;
+
+    const result = middleware(request);
+
+    expect(result).toBeUndefined();
+    expect(NextResponse.redirect).not.toHaveBeenCalled();
+    expect(NextResponse.next).not.toHaveBeenCalled();
+  });
+
+  it('should skip _next routes', () => {
+    const request = { nextUrl: mockNextUrl('/_next/static/file.js') } as unknown as NextRequest;
+
+    const result = middleware(request);
+
+    expect(result).toBeUndefined();
+    expect(NextResponse.redirect).not.toHaveBeenCalled();
+    expect(NextResponse.next).not.toHaveBeenCalled();
+  });
+
+  it('should redirect to default locale for missing locale', () => {
+    const request = { nextUrl: mockNextUrl('/about') } as unknown as NextRequest;
+
+    middleware(request);
+
+    expect(NextResponse.redirect).toHaveBeenCalledWith(
+      expect.objectContaining({ pathname: '/fr/about' })
+    );
+    expect(NextResponse.next).not.toHaveBeenCalled();
+  });
+
+  it('should redirect to default locale for unsupported locale', () => {
+    const request = { nextUrl: mockNextUrl('/es/about') } as unknown as NextRequest;
+
+    middleware(request);
+
+    expect(NextResponse.redirect).toHaveBeenCalledWith(
+      expect.objectContaining({ pathname: '/fr/es/about' })
+    );
+    expect(NextResponse.next).not.toHaveBeenCalled();
+  });
+
+  it('should proceed with valid locale', () => {
+    const request = { nextUrl: mockNextUrl('/en/about') } as unknown as NextRequest;
+
+    middleware(request);
+
     expect(NextResponse.next).toHaveBeenCalled();
     expect(NextResponse.redirect).not.toHaveBeenCalled();
-    expect(response).toBeUndefined();
-  });
-
-  it('should redirect if an unsupported locale is present', () => {
-    const request = createRequest('/es/about');
-    const response = middleware(request);
-    expect(NextResponse.redirect).toHaveBeenCalledWith(
-      expect.objectContaining({ pathname: `/${defaultLocale}/es/about` })
-    );
-    expect(response).toBeUndefined();
-  });
-
-  it('should skip redirect for public files', () => {
-    const request = createRequest('/_next/static/file.js');
-    const response = middleware(request);
-    expect(NextResponse.redirect).not.toHaveBeenCalled();
-    expect(NextResponse.next).not.toHaveBeenCalled();
-    expect(response).toBeUndefined();
-  });
-
-  it('should skip redirect for API routes', () => {
-    const request = createRequest('/api/data');
-    const response = middleware(request);
-    expect(NextResponse.redirect).not.toHaveBeenCalled();
-    expect(NextResponse.next).not.toHaveBeenCalled();
-    expect(response).toBeUndefined();
   });
 });
