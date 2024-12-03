@@ -4,9 +4,9 @@ import { messages as frMessages } from '@/locales/fr/messages'
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter'
 import React from 'react'
 import { resolveLanguage } from '@/utils/language'
-import { CssBaseline} from '@mui/material'
+import { CssBaseline } from '@mui/material'
 import { ThemeProvider } from '@/app/[lang]/context/ThemeContext'
-
+import SessionProviderWrapper from '@/components/SessionProviderWrapper'
 
 type Props = {
   children: React.ReactNode
@@ -26,9 +26,9 @@ export default async function RootLayout({ params, children }: Props) {
           <CssBaseline />
           <LanguageProvider locale={lang} messages={selectedMessages}>
             <AppRouterCacheProvider>
-              <body>
-                {children}
-              </body>
+              <SessionProviderWrapper>
+                <body>{children}</body>
+              </SessionProviderWrapper>
             </AppRouterCacheProvider>
           </LanguageProvider>
         </ThemeProvider>
