@@ -1,35 +1,47 @@
 'use client'
 
-import { Appbar } from '@/components/appbar';
-import { Sidebar } from '@/components/sidebar';
-import { useTheme } from '@mui/material/styles';
-import { Box, useMediaQuery } from '@mui/system';
-import { useState } from 'react';
+import { Appbar } from '@/components/appbar'
+import { Sidebar } from '@/components/sidebar'
+import { useTheme } from '@mui/material/styles'
+import { Box, useMediaQuery } from '@mui/system'
+import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  const [open, setOpen] = useState(true); // Determines if the drawer is expanded or collapsed
+  const [open, setOpen] = useState(true) // Determines if the drawer is expanded or collapsed
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const handleToggleDrawer = () => {
-    setOpen((prev) => !prev);
-  };
+    setOpen((prev) => !prev)
+  }
+
+  const { data: session, status } = useSession()
+
+  if (status === 'loading') {
+    return <p>Loading...</p>
+  }
+  if (status !== 'authenticated') {
+    return <p>Unauthenticated</p>
+  }
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
       {/* AppBar for mobile */}
-      {isMobile && (
-        <Appbar handleToggleDrawer={handleToggleDrawer} />
-      )}
+      {isMobile && <Appbar handleToggleDrawer={handleToggleDrawer} />}
       {/* Sidebar */}
-      <Sidebar handleToggleDrawer={handleToggleDrawer} open={open} />
+      <Sidebar
+        handleToggleDrawerAction={handleToggleDrawer}
+        open={open}
+        user={session?.user}
+      />
       {/* Main Content */}
       <Box
-        component="main"
+        component='main'
         sx={{
           flexGrow: 1,
           padding: !isMobile ? '24px' : '16px', // Add some padding on mobile
@@ -43,5 +55,5 @@ export default function DashboardLayout({
         {children}
       </Box>
     </Box>
-  );
+  )
 }

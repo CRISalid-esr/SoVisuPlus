@@ -27,7 +27,6 @@ import { Box, useMediaQuery } from '@mui/system'
 import {
   BarChartSquare02 as BarChartSquare,
   CheckDone01 as CheckDone,
-  XClose as Close,
   LayersThree01 as LayerThere,
   LifeBuoy01 as LifeBuoy,
   LogOut01 as Logout,
@@ -35,20 +34,30 @@ import {
   SearchSm,
   Settings01 as Settings,
   User01 as Users,
+  XClose as Close,
 } from '@untitled-ui/icons-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
 
+interface SidebarProps {
+  handleToggleDrawerAction: () => void
+  open: boolean
+  user?:
+    | {
+        name?: string | null | undefined
+        email?: string | null | undefined
+        image?: string | null | undefined
+      }
+    | undefined
+}
 
 export default function Sidebar({
   open,
-  handleToggleDrawer,
-}: {
-  open: boolean
-  handleToggleDrawer: () => void
-}) {
+  handleToggleDrawerAction,
+  user,
+}: SidebarProps) {
   const pathname = usePathname() // Get the current path
   const lang = pathname.split('/')[1] // Extract the `lang` dynamic segment
 
@@ -150,7 +159,6 @@ export default function Sidebar({
             style={{
               fill: theme.palette.primaryContainer,
             }}
-          
           />
         )
       case 'dark':
@@ -189,7 +197,7 @@ export default function Sidebar({
             }}
           />
           <IconButton
-            onClick={handleToggleDrawer}
+            onClick={handleToggleDrawerAction}
             style={{
               zIndex: theme.zIndex.drawer + 3, // Ensure it's above the drawer
               opacity: 1,
@@ -264,7 +272,7 @@ export default function Sidebar({
                 </Box>
                 {!isMobile && (
                   <IconButton
-                    onClick={handleToggleDrawer}
+                    onClick={handleToggleDrawerAction}
                     sx={{
                       marginLeft: 'auto',
                       zIndex: 1201, // to ensure the button appears above the drawer
@@ -293,7 +301,7 @@ export default function Sidebar({
               >
                 {
                   <IconButton
-                    onClick={handleToggleDrawer}
+                    onClick={handleToggleDrawerAction}
                     sx={{
                       zIndex: 1201,
                     }}
@@ -390,7 +398,7 @@ export default function Sidebar({
                         minWidth: 'unset',
                         cursor: 'pointer',
                       }}
-                      onClick={handleToggleDrawer}
+                      onClick={handleToggleDrawerAction}
                     >
                       <SearchSm />
                     </ListItemIcon>
@@ -402,7 +410,7 @@ export default function Sidebar({
               <ListItem
                 component={Link}
                 href={`/${lang}/dashboard`}
-                onClick={() => isMobile && handleToggleDrawer()}
+                onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   color: theme.palette.primaryContainer,
                   display: 'flex',
@@ -450,7 +458,7 @@ export default function Sidebar({
               <ListItem
                 component={Link}
                 href={`/${lang}/dashboard/publications`}
-                onClick={() => isMobile && handleToggleDrawer()}
+                onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   display: 'flex',
                   justifyContent: 'center',
@@ -498,7 +506,7 @@ export default function Sidebar({
               <ListItem
                 component={Link}
                 href={`/${lang}/dashboard/expertise`}
-                onClick={() => isMobile && handleToggleDrawer()}
+                onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   display: 'flex',
                   justifyContent: 'center',
@@ -575,7 +583,7 @@ export default function Sidebar({
                   }}
                   component={Link}
                   href={`/${lang}/dashboard/my-groups`}
-                  onClick={() => isMobile && handleToggleDrawer()}
+                  onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
                     sx={{
@@ -624,7 +632,7 @@ export default function Sidebar({
                   }}
                   component={Link}
                   href={`/${lang}/dashboard/institutions`}
-                  onClick={() => isMobile && handleToggleDrawer()}
+                  onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
                     sx={{
@@ -673,7 +681,7 @@ export default function Sidebar({
                   }}
                   component={Link}
                   href={`/${lang}/dashboard/laboratories`}
-                  onClick={() => isMobile && handleToggleDrawer()}
+                  onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
                     sx={{
@@ -808,7 +816,7 @@ export default function Sidebar({
                     }}
                   >
                     <ListItemIcon
-                      onClick={handleToggleDrawer}
+                      onClick={handleToggleDrawerAction}
                       sx={{
                         height: theme.utils.pxToRem(24),
                         width: theme.utils.pxToRem(24),
@@ -884,7 +892,7 @@ export default function Sidebar({
                     }}
                   >
                     <ListItemIcon
-                      onClick={handleToggleDrawer}
+                      onClick={handleToggleDrawerAction}
                       sx={{
                         height: theme.utils.pxToRem(24),
                         width: theme.utils.pxToRem(24),
@@ -961,7 +969,7 @@ export default function Sidebar({
                         lineHeight: theme.typography.lineHeight.lineHeight20px,
                       }}
                     >
-                      Antoine Dupont
+                      {user?.name}
                     </Typography>
                     <IconButton
                       sx={{
@@ -984,14 +992,14 @@ export default function Sidebar({
                     }}
                     color={theme.palette.white}
                   >
-                    antoine.dupont@univ-nantes.fr
+                    {user?.email}
                   </Typography>
                 </Box>
               </Box>
             ) : (
               <ListItem>
                 <ListItemIcon
-                  onClick={handleToggleDrawer}
+                  onClick={handleToggleDrawerAction}
                   sx={{
                     height: theme.utils.pxToRem(24),
                     width: theme.utils.pxToRem(24),
