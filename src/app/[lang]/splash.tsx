@@ -3,12 +3,9 @@
 import { Box, Button, Typography } from '@mui/material';
 import { t } from '@lingui/macro';
 import Logo from '@/public/logo_splash_screen.svg';
-import Oval from '@/public/Oval.svg';
-import Oval1 from '@/public/Oval_1.svg';
-import Oval2 from '@/public/Oval_2.svg';
-import Oval3 from '@/public/Oval_3.svg';
 import Avatars from '@/public/avatars.svg';
 import { signIn,signOut } from 'next-auth/react'
+import Background from '@/public/background.svg';
 
 type ClientHomeProps = {
   session: { user: { email: string } } | null,
@@ -77,52 +74,18 @@ export default function splash({ session }: ClientHomeProps) {
         bgcolor="teal"
         color="white"
         position={'relative'}
+        sx={{
+         
+          zIndex: 0,
+          overflow: 'hidden',
+        }}
       >
-        <Box
-          sx={{
+        <Background  style={
+          {
             position: 'absolute',
-            top: 0,
-            left: 0,
-          }}
-        >
-          <Oval3
-            style={{
-              width: '327px',
-              height: '576px',
-            }}
-          />
-        </Box>
-
-        <Oval1
-          style={{
-            fill: 'red',
-            position: 'absolute',
-            top: 0,
-            right: 0,
-          }}
-        />
-        <Box
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-          }}
-        >
-          <Oval
-            style={{
-              width: '270px',
-              height: '577px',
-            }}
-          />
-        </Box>
-
-        <Oval2
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-          }}
-        />
+            zIndex: -1,
+           }
+        }/>
         <Typography
           variant="displayLarge"
           sx={(theme)=>({
