@@ -1,40 +1,17 @@
-'use client'
-import { Trans } from '@lingui/macro'
-import {
-  Box,
-  Button,
-  Container,
-  FormControl,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Typography,
-} from '@mui/material'
+import { Box, Container, Typography } from '@mui/material'
 import Image from 'next/image'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import LoginButton from '@/components/auth/LoginButton'
+import { getServerSession } from 'next-auth'
+import authOptions from '@/app/auth/auth_options'
+import LogoutButton from '@/components/auth/LogoutButton'
+import { t } from '@lingui/macro'
 
 type Props = {
   params: Promise<{ lang: string }>
 }
 
-export default function Home({ params }: Props) {
-  const [lang, setLang] = useState<string>('')
-
-    params
-      .then((params) => {
-        setLang(params.lang)
-      })
-      .catch((error) => {
-        console.error(error)
-      })
-
-  const router = useRouter()
-
-  const handleChange = (event: SelectChangeEvent) => {
-    router.push(`/${event.target.value}`)
-  }
+export default async function Home({ params }: Props) {
+  const session = await getServerSession(authOptions)
 
   return (
     <Container maxWidth='sm' sx={{ textAlign: 'center', mt: 8 }}>
@@ -48,38 +25,25 @@ export default function Home({ params }: Props) {
         />
       </Box>
       <Typography variant='h4' component='h1' gutterBottom>
-        SoVisu+
-      </Typography>
-      <FormControl variant='filled' sx={{ m: 1, minWidth: 120 }}>
-        <Select
-          data-testid="language-select"
-          role='combobox'
-          variant='outlined'
-          labelId='language-select'
-          id='language-select'
-          value={lang}
-          onChange={handleChange}
-        >
-          <MenuItem id="en"value='en'>English</MenuItem>
-          <MenuItem id="fr" value='fr'>Français</MenuItem>
-        </Select>
-      </FormControl>
-      <Typography variant='h4' component='h1' gutterBottom>
-        <Trans>home_page_main_title</Trans>
+        {t`home_page_main_title`}
       </Typography>
       <Typography variant='subtitle1' gutterBottom>
-        <Trans>home_page_subtitle</Trans>
+        {t`home_page_subtitle`}
       </Typography>
       <Typography variant='body2' color='textSecondary' sx={{ mb: 4 }}>
-        <Trans>home_page_instance_name</Trans>
+        {t`home_page_description`}
       </Typography>
-      <Box sx={{ mt: 4 }}>
-        <Link href={`/${lang}/setup`} passHref>
-          <Button variant='contained' color='primary'>
-            <Trans>home_page_checkup_link_label</Trans>
-          </Button>
-        </Link>
-      </Box>
+      {session?.user ? (
+        <>
+          <Box>You are logged in as {session?.user?.email}</Box>
+          <LogoutButton />
+        </>
+      ) : (
+        <>
+          <Box>You are no logged in</Box>
+          <LoginButton />
+        </>
+      )}
     </Container>
   )
 }
