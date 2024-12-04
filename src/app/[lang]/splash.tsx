@@ -1,54 +1,29 @@
-'use client';
+'use client'
 
-import { Box, Button, Typography } from '@mui/material';
-import { t } from '@lingui/macro';
-import Logo from '@/public/logo_splash_screen.svg';
-import Avatars from '@/public/avatars.svg';
-import { signIn,signOut } from 'next-auth/react'
-import Background from '@/public/background.svg';
+import { Box, Button, Typography } from '@mui/material'
+import { t } from '@lingui/macro'
+import Logo from '@/public/logo_splash_screen.svg'
+import Avatars from '@/public/avatars.svg'
+import { signIn,  } from 'next-auth/react'
+import Background from '@/public/background.svg'
 
-type ClientHomeProps = {
-  session: { user: { email: string } } | null,
-};
-
-export default function splash({ session }: ClientHomeProps) {
-
-
+export default function splash() {
   return (
     <>
       <Box flex={{ xs: 1, md: 1 }}>
         <Box
-          sx={(theme)=>({
+          sx={(theme) => ({
             padding: theme.spacing(6),
           })}
         >
           <Logo />
         </Box>
-        <Box display="flex" justifyContent="center" alignItems="center">
-          <Box width="100%" maxWidth="400px">
-          {session?.user ? (
-        <>
-          <Box>You are logged in as {session?.user?.email}</Box>
-          <Button
-             onClick={() => signOut()}
+        <Box display='flex' justifyContent='center' alignItems='center'>
+          <Box width='100%' maxWidth='400px'>
+            <Button
+              onClick={() => signIn('keycloak')}
               fullWidth
-              variant="contained"
-              sx={{
-                backgroundColor: 'teal',
-                mb: 2,
-                '&:hover': { backgroundColor: 'darkcyan' },
-              }}
-            >
-              {t`splash.logout`}
-            </Button>
-        </>
-      ) : (
-        <>
-          <Box>You are no logged in</Box>
-          <Button
-             onClick={() => signIn('keycloak')}
-              fullWidth
-              variant="contained"
+              variant='contained'
               sx={{
                 backgroundColor: 'teal',
                 mb: 2,
@@ -57,38 +32,33 @@ export default function splash({ session }: ClientHomeProps) {
             >
               {t`splash.login`}
             </Button>
-        </>
-      )}
-
-           
           </Box>
         </Box>
       </Box>
       <Box
         flex={1}
         display={{ xs: 'none', md: 'flex' }} // Hide on small screens
-        justifyContent="center"
-        alignItems="center"
-        flexDirection="column"
+        justifyContent='center'
+        alignItems='center'
+        flexDirection='column'
         p={4}
-        bgcolor="teal"
-        color="white"
+        bgcolor='teal'
+        color='white'
         position={'relative'}
         sx={{
-         
           zIndex: 0,
           overflow: 'hidden',
         }}
       >
-        <Background  style={
-          {
+        <Background
+          style={{
             position: 'absolute',
             zIndex: -1,
-           }
-        }/>
+          }}
+        />
         <Typography
-          variant="displayLarge"
-          sx={(theme)=>({
+          variant='displayLarge'
+          sx={(theme) => ({
             mb: theme.spacing(18),
             zIndex: 1,
           })}
@@ -103,8 +73,8 @@ export default function splash({ session }: ClientHomeProps) {
         >
           <Typography
             component={'p'}
-            variant="headingSmall"
-            sx={(theme)=>({
+            variant='headingSmall'
+            sx={(theme) => ({
               mb: theme.spacing(18),
               zIndex: 1,
             })}
@@ -124,7 +94,7 @@ export default function splash({ session }: ClientHomeProps) {
         >
           <Avatars />
           <Typography
-            variant="bodyLarge"
+            variant='bodyLarge'
             component={'p'}
             sx={{
               lineHeight: 'normal',
@@ -135,5 +105,5 @@ export default function splash({ session }: ClientHomeProps) {
         </Box>
       </Box>
     </>
-  );
+  )
 }
