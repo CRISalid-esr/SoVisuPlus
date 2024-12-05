@@ -23,8 +23,9 @@ export default function DashboardLayout({
 
   const { data: session, status } = useSession()
 
+  console.log('session', session)
+
   return (
-    <ProtectedRoute>
       <Box sx={{ display: 'flex', height: '100vh' }}>
         {/* AppBar for mobile */}
         {isMobile && <Appbar handleToggleDrawer={handleToggleDrawer} />}
@@ -50,6 +51,5 @@ export default function DashboardLayout({
           {children}
         </Box>
       </Box>
-    </ProtectedRoute>
   )
 }
