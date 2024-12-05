@@ -39,22 +39,22 @@ msgstr ""
 msgid "Login Page work"
 msgstr ""
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:446
+#: src/app/[lang]/components/sidebar/sidebar.tsx:454
 #: src/app/[lang]/dashboard/page.tsx:10
 msgid "side_bar_dashboard"
 msgstr "Tableau de bord"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:542
+#: src/app/[lang]/components/sidebar/sidebar.tsx:550
 #: src/app/[lang]/dashboard/expertise/page.tsx:10
 msgid "side_bar_expertise"
 msgstr "Mes expertises"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:651
+#: src/app/[lang]/components/sidebar/sidebar.tsx:659
 #: src/app/[lang]/dashboard/institutions/page.tsx:10
 msgid "side_bar_institutions"
 msgstr "Institutions"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:700
+#: src/app/[lang]/components/sidebar/sidebar.tsx:708
 #: src/app/[lang]/dashboard/laboratories/page.tsx:10
 msgid "side_bar_laboratories"
 msgstr "Laboratoires"
@@ -67,7 +67,7 @@ msgstr "Laboratoires"
 msgid "side_bar_my_account"
 msgstr ""
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:602
+#: src/app/[lang]/components/sidebar/sidebar.tsx:610
 #: src/app/[lang]/dashboard/my-groups/page.tsx:10
 msgid "side_bar_my_groups"
 msgstr "Mes groupes"
@@ -80,34 +80,34 @@ msgstr ""
 #~ msgid "side_bar_my-groups"
 #~ msgstr ""
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:494
+#: src/app/[lang]/components/sidebar/sidebar.tsx:502
 #: src/app/[lang]/dashboard/publications/page.tsx:10
 msgid "side_bar_publications"
 msgstr "Mes publication"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:352
+#: src/app/[lang]/components/sidebar/sidebar.tsx:360
 msgid "sidebar_search_placeholder"
 msgstr "Chercher"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:113
-#: src/app/[lang]/components/sidebar/sidebar.tsx:136
-#: src/app/[lang]/components/sidebar/sidebar.tsx:766
+#: src/app/[lang]/components/sidebar/sidebar.tsx:122
+#: src/app/[lang]/components/sidebar/sidebar.tsx:145
+#: src/app/[lang]/components/sidebar/sidebar.tsx:774
 msgid "sidebar_theme_dark"
 msgstr "Thème sombre"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:90
-#: src/app/[lang]/components/sidebar/sidebar.tsx:747
+#: src/app/[lang]/components/sidebar/sidebar.tsx:99
+#: src/app/[lang]/components/sidebar/sidebar.tsx:755
 msgid "sidebar_theme_light"
 msgstr "Thème clair"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:785
+#: src/app/[lang]/components/sidebar/sidebar.tsx:793
 msgid "sidebar_theme_system"
 msgstr "Thème automatique"
 
-#: src/app/[lang]/splash.tsx:65
+#: src/app/[lang]/splash.tsx:58
 msgid "splash.login"
 msgstr "Se connecter"
 
-#: src/app/[lang]/splash.tsx:49
+#: src/app/[lang]/splash.tsx:42
 msgid "splash.logout"
 msgstr "Déconnexion"
