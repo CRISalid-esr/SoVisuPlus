@@ -26,10 +26,14 @@ const authOptions: AuthOptions = {
         session.accessToken = token.accessToken
       }
       return session
-    }
+    },
+    async redirect({ url, baseUrl }) {
+      // add /redirect to the url and keep path params
+      return url.startsWith(baseUrl) ? url : `${baseUrl}/redirect${url}`
+    },
   },
   pages: {
-    signIn: '/[locale]/api/auth/providers', // dynamic locale in URL
+    signIn: '/[locale]/api/auth/providers',
   },
 }
 export default authOptions

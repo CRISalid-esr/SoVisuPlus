@@ -5,8 +5,9 @@ import { CustomMiddleware } from '@/middlewares/chain'
 export function callbackMiddleware(middleware: CustomMiddleware) {
   return async (request: NextRequest, event: NextFetchEvent) => {
     const callbackUrl = request.nextUrl.searchParams.get('callbackUrl')
-
-    if (callbackUrl) {
+    const { pathname } = request.nextUrl
+    // if pathname match regex /[locale]/redirect
+    if (callbackUrl && pathname.match(/\/[a-z]{2}\/redirect/)) {
       const decodedUrl = decodeURIComponent(callbackUrl)
       const url = request.nextUrl.clone()
       url.pathname = decodedUrl
