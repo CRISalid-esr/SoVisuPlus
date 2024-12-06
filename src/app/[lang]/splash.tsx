@@ -2,16 +2,12 @@
 
 import { Box, Button, Typography } from '@mui/material'
 import { t } from '@lingui/macro'
-import Logo from '@/public/logo_splash_screen.svg'
-import Avatars from '@/public/avatars.svg'
-import { signIn, useSession,  } from 'next-auth/react'
-import Background from '@/public/background.svg'
+import Logo from '@/public/icons/logo_splash_screen.svg'
+import Avatars from '@/public/icons/avatars.svg'
+import { signIn, useSession } from 'next-auth/react'
+import Background from '@/public/icons/background.svg'
 
 export default function splash() {
-  
-  const { data: session, status } = useSession()
-
-  console.log('session', session)
   return (
     <>
       <Box flex={{ xs: 1, md: 1 }}>

@@ -3,9 +3,7 @@ import IconButton from '@mui/material/IconButton'
 import Toolbar from '@mui/material/Toolbar'
 import { Box } from '@mui/system'
 import Image from 'next/image'
-import {
-  Menu02 as Menu
-} from '@untitled-ui/icons-react'
+import { Menu02 as Menu } from '@untitled-ui/icons-react'
 export default function Appbar({
   handleToggleDrawer,
 }: {
@@ -14,7 +12,7 @@ export default function Appbar({
   const toggleDrawer = () => handleToggleDrawer()
   return (
     <AppBar
-      sx={(theme)=> ({
+      sx={(theme) => ({
         flexGrow: 1,
         height: theme.utils.pxToRem(64),
       })}
@@ -34,7 +32,7 @@ export default function Appbar({
             }}
           >
             <Image
-              src='/logo.svg'
+              src='/icons/logo.svg'
               alt='Crisalid logo'
               width={32}
               height={32}
