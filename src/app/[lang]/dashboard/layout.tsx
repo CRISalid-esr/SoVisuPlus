@@ -21,9 +21,7 @@ export default function DashboardLayout({
     setOpen((prev) => !prev)
   }
 
-  const { data: session, status } = useSession()
-
-  console.log('session', session)
+  const { data: session } = useSession()
 
   return (
     <AuthenticatedRoute>

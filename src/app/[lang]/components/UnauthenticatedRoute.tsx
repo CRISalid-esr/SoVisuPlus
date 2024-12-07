@@ -21,7 +21,7 @@ const UnauthenticatedRoute = ({ children }: { children: React.ReactNode }) => {
     if (status === 'authenticated') {
       router.push(callBackUrlAsString(searchParams.get('callbackUrl')))
     }
-  }, [status, router])
+  }, [status, router, searchParams])
 
   if (status === 'loading') {
     return <div>Loading...</div>
