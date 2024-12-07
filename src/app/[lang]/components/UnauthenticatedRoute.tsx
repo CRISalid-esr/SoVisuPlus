@@ -19,8 +19,7 @@ const UnauthenticatedRoute = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      const callbackUrl = searchParams.get('callbackUrl')
-      router.push(callBackUrlAsString(callbackUrl))
+      router.push(callBackUrlAsString(searchParams.get('callbackUrl')))
     }
   }, [status, router])
 
