@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const AuthenticatedRoute = ({ children }: { children: React.ReactNode }) => {
   const { status } = useSession()
   const router = useRouter()
 
@@ -21,4 +21,4 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>
 }
 
-export default ProtectedRoute
+export default AuthenticatedRoute

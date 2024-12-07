@@ -6,7 +6,7 @@ import { useTheme } from '@mui/material/styles'
 import { Box, useMediaQuery } from '@mui/system'
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
-import ProtectedRoute from '@/components/protectedRoute'
+import AuthenticatedRoute from '@/components/AuthenticatedRoute'
 
 export default function DashboardLayout({
   children,
@@ -26,7 +26,7 @@ export default function DashboardLayout({
   console.log('session', session)
 
   return (
-    <ProtectedRoute>
+    <AuthenticatedRoute>
       <Box sx={{ display: 'flex', height: '100vh' }}>
         {/* AppBar for mobile */}
         {isMobile && <Appbar handleToggleDrawer={handleToggleDrawer} />}
@@ -52,6 +52,6 @@ export default function DashboardLayout({
           {children}
         </Box>
       </Box>
-    </ProtectedRoute>
+    </AuthenticatedRoute>
   )
 }
