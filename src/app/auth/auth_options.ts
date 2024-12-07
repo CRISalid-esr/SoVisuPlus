@@ -27,10 +27,6 @@ const authOptions: AuthOptions = {
       }
       return session
     },
-    async redirect({ url, baseUrl }) {
-      // add /redirect to the url and keep path params
-      return url.startsWith(baseUrl) ? url : `${baseUrl}/redirect${url}`
-    },
   },
   pages: {
     signIn: '/[locale]/api/auth/providers',

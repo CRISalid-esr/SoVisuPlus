@@ -11,7 +11,6 @@ export function authMiddleware(middleware: CustomMiddleware) {
       },
     })
 
-    // Execute authMiddleware first, then pass its result to withAuth
     const customResponse = await withAuthMiddleware(
       request as NextRequestWithAuth,
       event,

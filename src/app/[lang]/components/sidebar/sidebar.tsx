@@ -40,6 +40,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
+import { signOut } from 'next-auth/react'
 
 interface SidebarProps {
   handleToggleDrawerAction: () => void
@@ -976,6 +977,7 @@ export default function Sidebar({
                         marginLeft: 'auto',
                         paddingRight: '0px',
                       }}
+                      onClick={() => signOut({ callbackUrl: '/' })}
                     >
                       <Logout
                         width={20}
