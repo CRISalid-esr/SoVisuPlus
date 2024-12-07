@@ -977,7 +977,11 @@ export default function Sidebar({
                         marginLeft: 'auto',
                         paddingRight: '0px',
                       }}
-                      onClick={() => signOut({ callbackUrl: '/' })}
+                      onClick={async () =>
+                        await signOut({
+                          callbackUrl: '/api/logout',
+                        })
+                      }
                     >
                       <Logout
                         width={20}
