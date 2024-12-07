@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
+import Loading from '@/components/Loading'
 
 const DEFAULT_AUTHENTICATED_REDIRECT_URL = '/dashboard'
 const callBackUrlAsString = (callbackUrl: string | null) => {
@@ -24,9 +25,11 @@ const UnauthenticatedRoute = ({ children }: { children: React.ReactNode }) => {
   }, [status, router, searchParams])
 
   if (status === 'loading') {
-    return <div>Loading...</div>
+    return <Loading />
   }
-
+  if (status === 'authenticated') {
+    return <div>Redirecting...</div>
+  }
   return <>{children}</>
 }
 

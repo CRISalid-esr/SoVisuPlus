@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import Loading from '@/components/Loading'
 
 const AuthenticatedRoute = ({ children }: { children: React.ReactNode }) => {
   const { status } = useSession()
@@ -15,7 +16,7 @@ const AuthenticatedRoute = ({ children }: { children: React.ReactNode }) => {
   }, [status, router])
 
   if (status === 'loading') {
-    return <div>Loading...</div> // Show a loading state while verifying
+    return <Loading /> // Show a loading state while verifying
   }
 
   return <>{children}</>
