@@ -32,5 +32,6 @@ const UnauthenticatedRoute = ({ children }: { children: React.ReactNode }) => {
   }
   return <>{children}</>
 }
+UnauthenticatedRoute.displayName = 'UnauthenticatedRoute';
 
 export default UnauthenticatedRoute

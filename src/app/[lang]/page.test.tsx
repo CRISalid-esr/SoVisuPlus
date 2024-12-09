@@ -1,11 +1,16 @@
-import { render, screen } from '@testing-library/react';
+import { render,  } from '@testing-library/react';
 import Home from './page'; // Import the server component
 
 // Mock external dependencies
-jest.mock('./components/UnauthenticatedRoute', () => ({ children }) => (
+//TODO:fix linting
+// eslint-disable-next-line react/display-name
+jest.mock('./components/UnauthenticatedRoute', () => ({ children }: { children: React.ReactNode }) => (
   <div className="unauthenticated-route">{children}</div>
 ));
 
+
+//TODO:fix linting
+// eslint-disable-next-line react/display-name
 jest.mock('./splash', () => () => <div className="splash">Splash Component</div>);
 
 describe('Home Server Component', () => {

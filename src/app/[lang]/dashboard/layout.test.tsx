@@ -33,7 +33,7 @@ describe('DashboardLayout', () => {
     jest.clearAllMocks()
 
     // Set the default mock implementation for useSession here
-    require('next-auth/react').useSession.mockImplementation(() => ({
+    useSession.mockImplementation(() => ({
       data: { user: { name: 'Test User' } },
       status: 'authenticated',
     }))

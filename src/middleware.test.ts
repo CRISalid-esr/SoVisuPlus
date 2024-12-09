@@ -1,5 +1,4 @@
 import { chain } from '@/middlewares/chain';
-import { NextResponse } from 'next/server'; // Import NextResponse directly for mocking
 
 // Mocking the individual middlewares
 jest.mock('./middlewares/localeMiddleware', () => ({

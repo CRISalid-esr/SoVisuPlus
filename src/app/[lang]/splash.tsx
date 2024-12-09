@@ -4,7 +4,7 @@ import { Box, Button, Typography } from '@mui/material'
 import { t } from '@lingui/macro'
 import Logo from '@/public/icons/logo_splash_screen.svg'
 import Avatars from '@/public/icons/avatars.svg'
-import { signIn, useSession } from 'next-auth/react'
+import { signIn,  } from 'next-auth/react'
 import Background from '@/public/icons/background.svg'
 
 export default function splash() {
