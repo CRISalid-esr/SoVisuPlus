@@ -1,69 +1,50 @@
-// __tests__/middleware.test.ts
-import { NextResponse } from 'next/server';
-import { middleware } from '@/middleware'; // Adjust path as needed
-import type { NextRequest } from 'next/server';
+import { chain } from '@/middlewares/chain';
+import type { NextFetchEvent, NextRequest,NextResponse } from 'next/server'
+// Mocking the individual middlewares
+jest.mock('./middlewares/localeMiddleware', () => ({
+  localeMiddleware: jest.fn(),
+}));
+
+jest.mock('./middlewares/authMiddleware', () => ({
+  authMiddleware: jest.fn(),
+}));
 
 jest.mock('next/server', () => ({
   NextResponse: {
-    redirect: jest.fn(),
-    next: jest.fn(),
+    next: jest.fn(() => "next-response"), // Ensure this returns the expected value
+    redirect: jest.fn(() => "redirect-response"),
   },
 }));
 
-describe('Middleware', () => {
-  const mockNextUrl = (pathname: string) => ({
-    pathname,
-    clone: jest.fn().mockReturnValue({ pathname }),
+
+describe('Middleware Chain Effects', () => {
+  let req: NextRequest, res: NextResponse, event: NextFetchEvent;
+
+  beforeEach(() => {
+    req = {} as unknown as NextRequest; // Mocked request
+    res = { headers: new Headers() } as unknown as NextResponse; // Mocked response with headers
+    event = {}  as unknown as NextFetchEvent; // Mocked fetch event
   });
 
-  it('should skip public files', () => {
-    const request = { nextUrl: mockNextUrl('/file.png') } as unknown as NextRequest;
+  it('modifies response headers correctly in sequence', async () => {
+    const mockMiddleware1 = jest.fn((next) => async (req: NextRequest, event: NextFetchEvent, res: NextResponse) => {
+      res.headers.set('X-Middleware-1', 'Executed');
+      return next(req, event, res); // Call next middleware
+    });
 
-    const result = middleware(request);
+    const mockMiddleware2 = jest.fn((next) => async (req: NextRequest, event: NextFetchEvent, res: NextResponse) => {
+      res.headers.set('X-Middleware-2', 'Executed');
+      return next(req, event, res); // Call next middleware
+    });
 
-    expect(result).toBeUndefined();
-    expect(NextResponse.redirect).not.toHaveBeenCalled();
-    expect(NextResponse.next).not.toHaveBeenCalled();
-  });
+    // Chain the middlewares
+    const middlewareChain = chain([mockMiddleware1, mockMiddleware2]);
 
-  it('should skip _next routes', () => {
-    const request = { nextUrl: mockNextUrl('/_next/static/file.js') } as unknown as NextRequest;
+    // Execute the middleware chain
+    await middlewareChain(req, event, res);
 
-    const result = middleware(request);
-
-    expect(result).toBeUndefined();
-    expect(NextResponse.redirect).not.toHaveBeenCalled();
-    expect(NextResponse.next).not.toHaveBeenCalled();
-  });
-
-  it('should redirect to default locale for missing locale', () => {
-    const request = { nextUrl: mockNextUrl('/about') } as unknown as NextRequest;
-
-    middleware(request);
-
-    expect(NextResponse.redirect).toHaveBeenCalledWith(
-      expect.objectContaining({ pathname: '/fr/about' })
-    );
-    expect(NextResponse.next).not.toHaveBeenCalled();
-  });
-
-  it('should redirect to default locale for unsupported locale', () => {
-    const request = { nextUrl: mockNextUrl('/es/about') } as unknown as NextRequest;
-
-    middleware(request);
-
-    expect(NextResponse.redirect).toHaveBeenCalledWith(
-      expect.objectContaining({ pathname: '/fr/es/about' })
-    );
-    expect(NextResponse.next).not.toHaveBeenCalled();
-  });
-
-  it('should proceed with valid locale', () => {
-    const request = { nextUrl: mockNextUrl('/en/about') } as unknown as NextRequest;
-
-    middleware(request);
-
-    expect(NextResponse.next).toHaveBeenCalled();
-    expect(NextResponse.redirect).not.toHaveBeenCalled();
+    // Check the headers were modified correctly
+    expect(res.headers.get('X-Middleware-1')).toBe('Executed');
+    expect(res.headers.get('X-Middleware-2')).toBe('Executed');
   });
 });

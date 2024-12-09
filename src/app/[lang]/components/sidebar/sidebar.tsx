@@ -40,6 +40,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
+import { signOut } from 'next-auth/react'
 
 interface SidebarProps {
   handleToggleDrawerAction: () => void
@@ -256,14 +257,14 @@ export default function Sidebar({
                   }}
                 >
                   <Image
-                    src='/logo.svg'
+                    src='/icons/logo.svg'
                     alt='Crisalid logo'
                     width={32}
                     height={32}
                     priority
                   />
                   <Image
-                    src='/soVisuPlus.svg'
+                    src='/icons/soVisuPlus.svg'
                     alt='Crisalid logo'
                     width={123.966}
                     height={24.795}
@@ -279,7 +280,7 @@ export default function Sidebar({
                     }}
                   >
                     <Avatar
-                      src='/hideSidePanel.svg'
+                      src='/icons/hideSidePanel.svg'
                       alt='sidepanel'
                       sx={{
                         width: theme.utils.pxToRem(24),
@@ -307,14 +308,14 @@ export default function Sidebar({
                     }}
                   >
                     <Avatar
-                      src='/showSidePanel.svg'
+                      src='/icons/showSidePanel.svg'
                       alt='sidepanel'
                       sx={{ width: 24, height: 24 }}
                     />
                   </IconButton>
                 }
                 <Image
-                  src='/logo.svg'
+                  src='/icons/logo.svg'
                   alt='Crisalid logo'
                   width={32}
                   height={32}
@@ -976,6 +977,11 @@ export default function Sidebar({
                         marginLeft: 'auto',
                         paddingRight: '0px',
                       }}
+                      onClick={async () =>
+                        await signOut({
+                          callbackUrl: '/api/logout',
+                        })
+                      }
                     >
                       <Logout
                         width={20}

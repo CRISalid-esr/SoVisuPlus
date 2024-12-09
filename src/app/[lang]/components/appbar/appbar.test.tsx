@@ -26,7 +26,7 @@ describe('Appbar Component', () => {
 
     // Check if the logos are rendered
     expect(screen.getByAltText('Crisalid logo')).toBeInTheDocument()
-    expect(screen.getByAltText('Crisalid logo').getAttribute('src')).toBe('/logo.svg')
+    expect(screen.getByAltText('Crisalid logo').getAttribute('src')).toBe('/icons/logo.svg')
 
     expect(screen.getByAltText('Crisalid logo plus')).toBeInTheDocument()
     expect(screen.getByAltText('Crisalid logo plus').getAttribute('src')).toBe('/soVisuPlus.svg')

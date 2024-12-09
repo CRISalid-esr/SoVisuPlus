@@ -1,19 +1,28 @@
-import { render } from '@testing-library/react';
-import Home from './page';
-jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(() => Promise.resolve({ user: { name: 'Test User' } })),
-}));
+import { render,  } from '@testing-library/react';
+import Home from './page'; // Import the server component
 
-jest.mock('../auth/auth_options', () => ({}));
+// Mock external dependencies
+//TODO:fix linting
+// eslint-disable-next-line react/display-name
+jest.mock('./components/UnauthenticatedRoute', () => ({ children }: { children: React.ReactNode }) => (
+  <div className="unauthenticated-route">{children}</div>
+));
 
-jest.mock('./splash', () => ({
-  __esModule: true,
-  default: jest.fn(() => <div>Mock Splash Component</div>),
-}));
 
-describe('Home Component', () => {
-  it('renders without crashing', async () => {
+//TODO:fix linting
+// eslint-disable-next-line react/display-name
+jest.mock('./splash', () => () => <div className="splash">Splash Component</div>);
+
+describe('Home Server Component', () => {
+  it('renders the Splash component inside UnauthenticatedRoute', async () => {
+    // Render the component
     const { container } = render(await Home());
-    expect(container).toBeInTheDocument();
+
+    // Assertions using DOM structure
+    const unauthenticatedRoute = container.querySelector('.unauthenticated-route');
+    const splash = container.querySelector('.splash');
+
+    expect(unauthenticatedRoute).toBeInTheDocument();
+    expect(splash).toBeInTheDocument();
   });
 });

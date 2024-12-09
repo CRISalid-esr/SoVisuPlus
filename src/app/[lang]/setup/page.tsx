@@ -54,7 +54,7 @@ export default async function SetupChecks() {
               <Typography variant='h5' component='div'>
                 Deployment |{' '}
                 <Image
-                  src='/docker.svg'
+                  src='/icons/docker.svg'
                   alt='Docker logo'
                   style={{ marginLeft: 10, verticalAlign: 'middle' }}
                   width={40}
@@ -100,7 +100,7 @@ export default async function SetupChecks() {
               <Typography variant='h5' component='div'>
                 Database Checkup |{' '}
                 <Image
-                  src='/prisma.svg'
+                  src='/icons/prisma.svg'
                   alt='Database logo'
                   style={{ marginLeft: 10, verticalAlign: 'middle' }}
                   width={100}

@@ -45,7 +45,12 @@
       "@/public/*": [
         "public/*"
       ],
-      "@/*": ["src/*"],
+      "@/middlewares/*": [
+        "src/middlewares/*"
+      ],
+      "@/*": [
+        "src/*"
+      ]
     }
   },
   "include": [
