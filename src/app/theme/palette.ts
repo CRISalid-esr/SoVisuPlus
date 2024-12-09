@@ -92,6 +92,7 @@ const colors: ColorPalette  = {
     neutralVariant100: "#FFF",
     white: "#FFF",
     gray950 : "#555961",
+    sidebarItemHover: "#197971",
 }
 
 

@@ -379,14 +379,14 @@ export default function Sidebar({
                 >
                   <ListItem
                     sx={{
+                      marginBottom:theme.utils.pxToRem(4),
                       color: theme.palette.primaryContainer,
                       display: 'flex',
                       justifyContent: 'center',
                       alignItems: 'center',
                       '&:hover': {
-                        backgroundColor: theme.palette.primaryContainer,
+                        backgroundColor: theme.palette.sidebarItemHover,
                         borderRadius: theme.utils.pxToRem(8),
-                        color: theme.palette.onPrimaryContainer,
                       },
                     }}
                   >
@@ -412,14 +412,15 @@ export default function Sidebar({
                 href={`/${lang}/dashboard`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
+                  marginBottom:theme.utils.pxToRem(4),
                   color: theme.palette.primaryContainer,
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
                   '&:hover': {
-                    backgroundColor: theme.palette.primaryContainer,
+                    backgroundColor: theme.palette.sidebarItemHover,
                     borderRadius: theme.utils.pxToRem(8),
-                    color: theme.palette.onPrimaryContainer,
+                    color: theme.palette.primaryContainer,
                   },
                   ...(pathname === `/${lang}/dashboard`
                     ? {
@@ -460,6 +461,8 @@ export default function Sidebar({
                 href={`/${lang}/dashboard/publications`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
+                  marginBottom:theme.utils.pxToRem(4),
+
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -472,9 +475,9 @@ export default function Sidebar({
                       }
                     : {}),
                   '&:hover': {
-                    backgroundColor: theme.palette.primaryContainer,
+                    backgroundColor: theme.palette.sidebarItemHover,
                     borderRadius: theme.utils.pxToRem(8),
-                    color: theme.palette.onPrimaryContainer,
+                    color: theme.palette.primaryContainer,
                   },
                 }}
               >
@@ -508,6 +511,7 @@ export default function Sidebar({
                 href={`/${lang}/dashboard/expertise`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
+                  marginBottom:theme.utils.pxToRem(4),
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -520,9 +524,9 @@ export default function Sidebar({
                       }
                     : {}),
                   '&:hover': {
-                    backgroundColor: theme.palette.primaryContainer,
+                    backgroundColor: theme.palette.sidebarItemHover,
                     borderRadius: theme.utils.pxToRem(8),
-                    color: theme.palette.onPrimaryContainer,
+                    color: theme.palette.primaryContainer,
                   },
                 }}
               >
@@ -564,6 +568,7 @@ export default function Sidebar({
               <Box pb={3}>
                 <ListItem
                   sx={{
+                    marginBottom:theme.utils.pxToRem(4),
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -576,9 +581,9 @@ export default function Sidebar({
                         }
                       : {}),
                     '&:hover': {
-                      backgroundColor: theme.palette.primaryContainer,
+                      backgroundColor: theme.palette.sidebarItemHover,
                       borderRadius: theme.utils.pxToRem(8),
-                      color: theme.palette.onPrimaryContainer,
+                      color: theme.palette.primaryContainer,
                     },
                   }}
                   component={Link}
@@ -613,6 +618,7 @@ export default function Sidebar({
                 </ListItem>
                 <ListItem
                   sx={{
+                    marginBottom:theme.utils.pxToRem(4),
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -625,9 +631,9 @@ export default function Sidebar({
                         }
                       : {}),
                     '&:hover': {
-                      backgroundColor: theme.palette.primaryContainer,
+                      backgroundColor: theme.palette.sidebarItemHover,
                       borderRadius: theme.utils.pxToRem(8),
-                      color: theme.palette.onPrimaryContainer,
+                      color: theme.palette.primaryContainer,
                     },
                   }}
                   component={Link}
@@ -662,6 +668,7 @@ export default function Sidebar({
                 </ListItem>
                 <ListItem
                   sx={{
+                    marginBottom:theme.utils.pxToRem(4),
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -674,9 +681,9 @@ export default function Sidebar({
                         }
                       : {}),
                     '&:hover': {
-                      backgroundColor: theme.palette.primaryContainer,
+                      backgroundColor: theme.palette.sidebarItemHover,
                       borderRadius: theme.utils.pxToRem(8),
-                      color: theme.palette.onPrimaryContainer,
+                      color: theme.palette.primaryContainer,
                     },
                   }}
                   component={Link}
@@ -804,14 +811,15 @@ export default function Sidebar({
                 ) : (
                   <ListItem
                     sx={{
+                      marginBottom:theme.utils.pxToRem(4),
                       display: 'flex',
                       justifyContent: 'center',
                       alignItems: 'center',
                       color: theme.palette.primaryContainer,
                       '&:hover': {
-                        backgroundColor: theme.palette.primaryContainer,
+                        backgroundColor: theme.palette.sidebarItemHover,
                         borderRadius: theme.utils.pxToRem(8),
-                        color: theme.palette.onPrimaryContainer,
+                        color: theme.palette.primaryContainer,
                       },
                     }}
                   >
@@ -880,14 +888,15 @@ export default function Sidebar({
                 ) : (
                   <ListItem
                     sx={{
+                      marginBottom:theme.utils.pxToRem(4),
                       display: 'flex',
                       justifyContent: 'center',
                       alignItems: 'center',
                       color: theme.palette.primaryContainer,
                       '&:hover': {
-                        backgroundColor: theme.palette.primaryContainer,
+                        backgroundColor: theme.palette.sidebarItemHover,
                         borderRadius: theme.utils.pxToRem(8),
-                        color: theme.palette.onPrimaryContainer,
+                        color: theme.palette.primaryContainer,
                       },
                     }}
                   >

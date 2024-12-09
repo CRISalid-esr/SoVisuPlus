@@ -47,7 +47,7 @@ msgstr "Tableau de bord"
 #: src/app/[lang]/components/sidebar/sidebar.tsx:551
 #: src/app/[lang]/dashboard/expertise/page.tsx:10
 msgid "side_bar_expertise"
-msgstr "Mes expertises"
+msgstr "Expertises"
 
 #: src/app/[lang]/components/sidebar/sidebar.tsx:660
 #: src/app/[lang]/dashboard/institutions/page.tsx:10
@@ -83,7 +83,7 @@ msgstr ""
 #: src/app/[lang]/components/sidebar/sidebar.tsx:503
 #: src/app/[lang]/dashboard/publications/page.tsx:10
 msgid "side_bar_publications"
-msgstr "Mes publication"
+msgstr "Publications
 
 #: src/app/[lang]/components/sidebar/sidebar.tsx:361
 msgid "sidebar_search_placeholder"
