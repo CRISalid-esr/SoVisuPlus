@@ -337,7 +337,6 @@ export default function Sidebar({
               {open ? (
                 <TextField
                   sx={{
-                    height: theme.utils.pxToRem(46),
                     backgroundColor: theme.palette.white,
                     borderRadius: theme.utils.pxToRem(8),
                     '& .MuiOutlinedInput-root': {
