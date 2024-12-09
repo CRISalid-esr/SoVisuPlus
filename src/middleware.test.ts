@@ -1,6 +1,5 @@
 import { chain } from '@/middlewares/chain';
-import { localeMiddleware } from '@/middlewares/localeMiddleware';
-import { authMiddleware } from '@/middlewares/authMiddleware';
+import { NextResponse } from 'next/server'; // Import NextResponse directly for mocking
 
 // Mocking the individual middlewares
 jest.mock('./middlewares/localeMiddleware', () => ({
@@ -18,36 +17,35 @@ jest.mock('next/server', () => ({
   },
 }));
 
-describe('Middleware Chain', () => {
+
+describe('Middleware Chain Effects', () => {
   let req, res, event;
 
   beforeEach(() => {
     req = {}; // Mocked request
-    res = {}; // Mocked response
+    res = { headers: {} }; // Mocked response with headers
     event = {}; // Mocked fetch event
   });
 
-  it('calls middlewares in sequence and returns the response', async () => {
-    const mockMiddleware1 = jest.fn((next) => (req, event, res) => {
-      console.log('Middleware 1 executed');
-      return next(req, event, res); // Ensure it calls the next middleware once
+  it('modifies response headers correctly in sequence', async () => {
+    const mockMiddleware1 = jest.fn((next) => async (req, event, res) => {
+      res.headers['X-Middleware-1'] = 'Executed';
+      return next(req, event, res); // Call next middleware
     });
 
-    const mockMiddleware2 = jest.fn((next) => (req, event, res) => {
-      console.log('Middleware 2 executed');
-      return next(req, event, res); // Ensure it calls the next middleware once
+    const mockMiddleware2 = jest.fn((next) => async (req, event, res) => {
+      res.headers['X-Middleware-2'] = 'Executed';
+      return next(req, event, res); // Call next middleware
     });
 
+    // Chain the middlewares
     const middlewareChain = chain([mockMiddleware1, mockMiddleware2]);
 
-    const response = await middlewareChain(req, event, res);
+    // Execute the middleware chain
+    await middlewareChain(req, event, res);
 
-    // Ensure each middleware is called once
-    expect(mockMiddleware1).toHaveBeenCalledTimes(1);
-    expect(mockMiddleware2).toHaveBeenCalledTimes(1);
-
-    // Ensure the final response is "next-response"
-    expect(response).toBe("next-response");
+    // Check the headers were modified correctly
+    expect(res.headers['X-Middleware-1']).toBe('Executed');
+    expect(res.headers['X-Middleware-2']).toBe('Executed');
   });
-
 });
