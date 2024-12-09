@@ -20,7 +20,7 @@ jest.mock('../components/sidebar', () => ({
 
 jest.mock('../components/AuthenticatedRoute', () => ({
   __esModule: true,
-  default: ({ children }) => <div>{children}</div>, // Mock AuthenticatedRoute to return children
+  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>, // Mock AuthenticatedRoute to return children
 }))
 
 jest.mock('next-auth/react', () => ({
@@ -30,13 +30,11 @@ jest.mock('next-auth/react', () => ({
 
 describe('DashboardLayout', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-
-    // Set the default mock implementation for useSession here
-    useSession.mockImplementation(() => ({
+    const session =  useSession as jest.Mock
+    session.mockImplementation(() => ({
       data: { user: { name: 'Test User' } },
       status: 'authenticated',
-    }))
+    }));
   })
 
   // Helper function to render with SessionProvider
@@ -63,7 +61,7 @@ describe('DashboardLayout', () => {
 
   it('renders Appbar on mobile view', () => {
     // Mock useMediaQuery to return true (mobile view)
-    useMediaQuery.mockImplementation(() => true)
+    (useMediaQuery as jest.Mock).mockImplementation(() => true)
 
     renderWithSessionProvider(
       <DashboardLayout>
@@ -77,7 +75,7 @@ describe('DashboardLayout', () => {
 
   it('does not render Appbar on desktop view', () => {
     // Mock useMediaQuery to return false (desktop view)
-    useMediaQuery.mockImplementation(() => false)
+    (useMediaQuery as jest.Mock).mockImplementation(() => false)
 
     renderWithSessionProvider(
       <DashboardLayout>
@@ -91,7 +89,7 @@ describe('DashboardLayout', () => {
 
   it('renders Sidebar', () => {
     // Mock useMediaQuery to return false (desktop view) or true (mobile view)
-    useMediaQuery.mockImplementation(() => false)
+    (useMediaQuery as jest.Mock).mockImplementation(() => false)
 
     renderWithSessionProvider(
       <DashboardLayout>
@@ -104,8 +102,9 @@ describe('DashboardLayout', () => {
   })
 
   it('renders the layout with a mock session', () => {
-    // Mock useSession to return a session object
-    useSession.mockImplementation(() => ({
+    const session =  useSession as jest.Mock
+
+    session.mockImplementation(() => ({
       data: { user: { name: 'Test User' } },
       status: 'authenticated',
     }))
