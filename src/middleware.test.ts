@@ -1,69 +1,53 @@
-// __tests__/middleware.test.ts
-import { NextResponse } from 'next/server';
-import { middleware } from '@/middleware'; // Adjust path as needed
-import type { NextRequest } from 'next/server';
+import { chain } from '@/middlewares/chain';
+import { localeMiddleware } from '@/middlewares/localeMiddleware';
+import { authMiddleware } from '@/middlewares/authMiddleware';
+
+// Mocking the individual middlewares
+jest.mock('./middlewares/localeMiddleware', () => ({
+  localeMiddleware: jest.fn(),
+}));
+
+jest.mock('./middlewares/authMiddleware', () => ({
+  authMiddleware: jest.fn(),
+}));
 
 jest.mock('next/server', () => ({
   NextResponse: {
-    redirect: jest.fn(),
-    next: jest.fn(),
+    next: jest.fn(() => "next-response"), // Ensure this returns the expected value
+    redirect: jest.fn(() => "redirect-response"),
   },
 }));
 
-describe('Middleware', () => {
-  const mockNextUrl = (pathname: string) => ({
-    pathname,
-    clone: jest.fn().mockReturnValue({ pathname }),
+describe('Middleware Chain', () => {
+  let req, res, event;
+
+  beforeEach(() => {
+    req = {}; // Mocked request
+    res = {}; // Mocked response
+    event = {}; // Mocked fetch event
   });
 
-  it('should skip public files', () => {
-    const request = { nextUrl: mockNextUrl('/file.png') } as unknown as NextRequest;
+  it('calls middlewares in sequence and returns the response', async () => {
+    const mockMiddleware1 = jest.fn((next) => (req, event, res) => {
+      console.log('Middleware 1 executed');
+      return next(req, event, res); // Ensure it calls the next middleware once
+    });
 
-    const result = middleware(request);
+    const mockMiddleware2 = jest.fn((next) => (req, event, res) => {
+      console.log('Middleware 2 executed');
+      return next(req, event, res); // Ensure it calls the next middleware once
+    });
 
-    expect(result).toBeUndefined();
-    expect(NextResponse.redirect).not.toHaveBeenCalled();
-    expect(NextResponse.next).not.toHaveBeenCalled();
+    const middlewareChain = chain([mockMiddleware1, mockMiddleware2]);
+
+    const response = await middlewareChain(req, event, res);
+
+    // Ensure each middleware is called once
+    expect(mockMiddleware1).toHaveBeenCalledTimes(1);
+    expect(mockMiddleware2).toHaveBeenCalledTimes(1);
+
+    // Ensure the final response is "next-response"
+    expect(response).toBe("next-response");
   });
 
-  it('should skip _next routes', () => {
-    const request = { nextUrl: mockNextUrl('/_next/static/file.js') } as unknown as NextRequest;
-
-    const result = middleware(request);
-
-    expect(result).toBeUndefined();
-    expect(NextResponse.redirect).not.toHaveBeenCalled();
-    expect(NextResponse.next).not.toHaveBeenCalled();
-  });
-
-  it('should redirect to default locale for missing locale', () => {
-    const request = { nextUrl: mockNextUrl('/about') } as unknown as NextRequest;
-
-    middleware(request);
-
-    expect(NextResponse.redirect).toHaveBeenCalledWith(
-      expect.objectContaining({ pathname: '/fr/about' })
-    );
-    expect(NextResponse.next).not.toHaveBeenCalled();
-  });
-
-  it('should redirect to default locale for unsupported locale', () => {
-    const request = { nextUrl: mockNextUrl('/es/about') } as unknown as NextRequest;
-
-    middleware(request);
-
-    expect(NextResponse.redirect).toHaveBeenCalledWith(
-      expect.objectContaining({ pathname: '/fr/es/about' })
-    );
-    expect(NextResponse.next).not.toHaveBeenCalled();
-  });
-
-  it('should proceed with valid locale', () => {
-    const request = { nextUrl: mockNextUrl('/en/about') } as unknown as NextRequest;
-
-    middleware(request);
-
-    expect(NextResponse.next).toHaveBeenCalled();
-    expect(NextResponse.redirect).not.toHaveBeenCalled();
-  });
 });

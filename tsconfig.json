@@ -46,7 +46,7 @@
         "public/*"
       ],
       "@/middlewares/*": [
-        "middlewares/*"
+        "src/middlewares/*"
       ],
       "@/*": [
         "src/*"
