@@ -23,7 +23,7 @@ the [CeCILL v2.1 license](http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr
    Prisma initial migration requires the CREATE DATABASE privilege.
 
 ```sql
-CREATE USER sovisuplus WITH PASSWORD '**************'; 
+CREATE USER sovisuplus WITH PASSWORD '**************';
 ALTER USER sovisuplus CREATEDB;
 [DROP DATABASE sovisuplus;]
 CREATE DATABASE sovisuplus;
@@ -33,7 +33,7 @@ GRANT ALL PRIVILEGES ON DATABASE sovisuplus to sovisuplus;
 In case you are using PostgreSQL v15 the `CREATE` privilege do not grant to everyone on the public schema by default. To
 resolve this problem you need to change the database owner using the following command
 
-```sql 
+```sql
 ALTER DATABASE sovisuplus OWNER TO sovisuplus ;
 ```
 
@@ -52,19 +52,18 @@ cp .env.sample .env
 docker-compose up -d
 ```
 
-The first method will force you to do the configuration manually for each launch, while the second method will 
+The first method will force you to do the configuration manually for each launch, while the second method will
 preserve your configuration.
 
 Access Keycloak at `http://localhost:8080` and create :
 
 - a realm named from the organisation using SoVisu+ (e.g. `myuniversity`)
 - a sovisuplus client of type `openid-connect` with the following settings:
-    - Client ID: `sovisuplus`
-    - Valid Redirect URIs: `http://localhost:3000/*`
-    - Valid post logout redirect URIs: `http://localhost:3000/api/auth/signout`
-    - Web Origins: `http://localhost:3000`
-    - Client authentication: `On`
-
+  - Client ID: `sovisuplus`
+  - Valid Redirect URIs: `http://localhost:3000/*`
+  - Valid post logout redirect URIs: `http://localhost:3000/api/auth/signout`
+  - Web Origins: `http://localhost:3000`
+  - Client authentication: `On`
 
 5. Create a `.env` file in the root directory of the project and fill it with the following content:
 
@@ -75,7 +74,7 @@ KEYCLOAK_CLIENT_ID="sovisuplus"
 KEYCLOAK_CLIENT_SECRET="credentials_from_keycloak_here"
 KEYCLOAK_ISSUER="http://localhost:8080/realms/my-keycloak-realm-here" # e.g. myuniversity
 
-NEXTAUTH_URL="http://localhost:3000/fr/api/auth"
+NEXTAUTH_URL="http://localhost:3000/api/auth"
 NEXTAUTH_SECRET="[generate a secret with : openssl rand -base64 32]"
 ```
 
@@ -86,9 +85,8 @@ NEXTAUTH_SECRET="[generate a secret with : openssl rand -base64 32]"
 
 #### For staging environment
 
-[//]: # (TODO update the docker procedure and Dockerfile with Keycloack integration)
+[//]: # 'TODO update the docker procedure and Dockerfile with Keycloack integration'
 
 1. Build the Docker image with `docker build -t sovisuplus:v0.1 -f ./docker/staging/Dockerfile .`
 2. Run the Docker container with `docker compose -f ./docker/staging/docker-compose.yml up -d`.
 3. The application is now available at `http://localhost:3002`.
-
