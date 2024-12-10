@@ -462,7 +462,6 @@ export default function Sidebar({
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   marginBottom:theme.utils.pxToRem(4),
-
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -729,6 +728,10 @@ export default function Sidebar({
                     renderValue={renderThemeValue}
                     sx={{
                       boxShadow: 'none',
+                      '& :focus-visible': {
+                        outline: '2px solid #fff',
+                        border: '2px solid #000',
+                      },
                       '.MuiOutlinedInput-notchedOutline': { border: 0 },
                       '&.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline':
                         {
@@ -840,15 +843,24 @@ export default function Sidebar({
               </Box>
               <Box>
                 {open ? (
-                  <TextField
+                  <Select
+                    variant='outlined'
+                    fullWidth
                     sx={{
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        border: '1px solid transparent',
+                      },
+                      '& :focus-visible': {
+                        outline: '2px solid #fff',
+                        border: '2px solid #000',
+                      },
                       '& .MuiSelect-icon': {
                         color: theme.palette.white,
                       },
                       '& .MuiOutlinedInput-root': {
                         fontSize: theme.utils.pxToRem(16),
                         '& fieldset': {
-                          border: 'none',
+                          border: 0,
                         },
                       },
                       '& .MuiInputBase-input': {
@@ -858,25 +870,34 @@ export default function Sidebar({
                         lineHeight: theme.typography.lineHeight.lineHeight24px,
                       },
                     }}
-                    fullWidth
-                    select
                     value={lang}
                     onChange={(event) =>
                       handleChange(event as SelectChangeEvent)
                     }
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position='start'>
-                          <Image
-                            src='/icons/language.svg'
-                            alt='Crisalid logo'
-                            width={24}
-                            height={24}
-                            priority
-                          />
-                        </InputAdornment>
-                      ),
-                    }}
+                    renderValue={(value) => (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                        }}
+                      >
+                        <Image
+                          src='/icons/language.svg'
+                          alt='Crisalid logo'
+                          width={24}
+                          height={24}
+                          priority
+                        />
+                        <Typography
+                          variant='bodyLarge'
+                          sx={{
+                            color: theme.palette.primaryContainer,
+                          }}
+                          ml={1}
+                        >
+                          {value === 'en' ? 'English' : 'Français'}
+                        </Typography>
+                      </Box>
+                    )}
                   >
                     <MenuItem id='en' value='en'>
                       English
@@ -884,7 +905,7 @@ export default function Sidebar({
                     <MenuItem id='fr' value='fr'>
                       Français
                     </MenuItem>
-                  </TextField>
+                  </Select>
                 ) : (
                   <ListItem
                     sx={{
