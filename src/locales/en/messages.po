@@ -44,17 +44,17 @@ msgstr ""
 msgid "side_bar_dashboard"
 msgstr "Dashboard"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:554
+#: src/app/[lang]/components/sidebar/sidebar.tsx:553
 #: src/app/[lang]/dashboard/expertise/page.tsx:10
 msgid "side_bar_expertise"
 msgstr "Expertise"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:665
+#: src/app/[lang]/components/sidebar/sidebar.tsx:664
 #: src/app/[lang]/dashboard/institutions/page.tsx:10
 msgid "side_bar_institutions"
 msgstr "Institutions"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:715
+#: src/app/[lang]/components/sidebar/sidebar.tsx:714
 #: src/app/[lang]/dashboard/laboratories/page.tsx:10
 msgid "side_bar_laboratories"
 msgstr "Laboratories"
@@ -63,7 +63,7 @@ msgstr "Laboratories"
 msgid "side_bar_my_account"
 msgstr ""
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:615
+#: src/app/[lang]/components/sidebar/sidebar.tsx:614
 #: src/app/[lang]/dashboard/my-groups/page.tsx:10
 msgid "side_bar_my_groups"
 msgstr "My groups"
@@ -76,7 +76,7 @@ msgstr "Research activities"
 #~ msgid "side_bar_my-groups"
 #~ msgstr "My groups"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:505
+#: src/app/[lang]/components/sidebar/sidebar.tsx:504
 #: src/app/[lang]/dashboard/publications/page.tsx:10
 msgid "side_bar_publications"
 msgstr "Publications"
@@ -87,16 +87,16 @@ msgstr "Search"
 
 #: src/app/[lang]/components/sidebar/sidebar.tsx:123
 #: src/app/[lang]/components/sidebar/sidebar.tsx:146
-#: src/app/[lang]/components/sidebar/sidebar.tsx:781
+#: src/app/[lang]/components/sidebar/sidebar.tsx:784
 msgid "sidebar_theme_dark"
 msgstr "Dark theme"
 
 #: src/app/[lang]/components/sidebar/sidebar.tsx:100
-#: src/app/[lang]/components/sidebar/sidebar.tsx:762
+#: src/app/[lang]/components/sidebar/sidebar.tsx:765
 msgid "sidebar_theme_light"
 msgstr "Light theme"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:800
+#: src/app/[lang]/components/sidebar/sidebar.tsx:803
 msgid "sidebar_theme_system"
 msgstr "Auto Theme"
 
