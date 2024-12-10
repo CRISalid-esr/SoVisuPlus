@@ -31,7 +31,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "action@github.com"
           git add src/locales/*
-          git commit -m "Update translations"
+          git commit -m "Update translations" --no-verify
 
       - name: Delete branch poeditor-translations
         uses: dawidd6/action-delete-branch@v3
