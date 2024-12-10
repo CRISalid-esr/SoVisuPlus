@@ -1,7 +1,7 @@
 {
   "ci": {
     "collect": {
-      "url": ["http://localhost:3000/", "http://localhost:3000/en/dashboard"],
+      "url": ["http://localhost:3000/fr", "http://localhost:3000/en/dashboard"],
       "settings": {
         "onlyCategories": ["accessibility"]
       }
