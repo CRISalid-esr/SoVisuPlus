@@ -2,6 +2,7 @@
 
 import { Trans } from '@lingui/macro'
 import { Box, Typography } from '@mui/material'
+import Head from 'next/head'
 
 export default function InstitutionsPage() {
   return (
