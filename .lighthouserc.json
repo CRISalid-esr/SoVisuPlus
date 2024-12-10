@@ -1,0 +1,10 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["https://localhost:3000/", "https://localhost:3000/en/dashboard"],
+      "settings": {
+        "onlyCategories": ["accessibility"]
+      }
+    }
+  }
+}

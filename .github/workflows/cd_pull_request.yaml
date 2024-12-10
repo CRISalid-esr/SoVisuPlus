@@ -2,12 +2,48 @@ name: Pull Request CI/CD
 
 on:
   pull_request:
-    branches: [ "dev-main" ]
+    branches: ['dev-main']
 
 env:
   NODE_VERSION: '22.9.0'
 
 jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+      - name: Start local server
+        run: npm start &
+        env:
+          PORT: 3000
+      - name: Wait for server to be ready
+        run: |
+          for i in {1..10}; do
+            if nc -z localhost 3000; then
+              echo "Server is up!"
+              break
+            fi
+            echo "Waiting for server..."
+            sleep 3
+          done
+      - uses: actions/checkout@v4
+      - name: Audit URLs using Lighthouse
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            https://localhost:3000
+          uploadArtifacts: true # save results as an action artifacts
+          temporaryPublicStorage: true # upload lighthouse report to the temporary storage
   test:
     runs-on: ubuntu-latest
 
