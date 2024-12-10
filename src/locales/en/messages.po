@@ -87,16 +87,16 @@ msgstr "Search"
 
 #: src/app/[lang]/components/sidebar/sidebar.tsx:123
 #: src/app/[lang]/components/sidebar/sidebar.tsx:146
-#: src/app/[lang]/components/sidebar/sidebar.tsx:784
+#: src/app/[lang]/components/sidebar/sidebar.tsx:791
 msgid "sidebar_theme_dark"
 msgstr "Dark theme"
 
 #: src/app/[lang]/components/sidebar/sidebar.tsx:100
-#: src/app/[lang]/components/sidebar/sidebar.tsx:765
+#: src/app/[lang]/components/sidebar/sidebar.tsx:772
 msgid "sidebar_theme_light"
 msgstr "Light theme"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:803
+#: src/app/[lang]/components/sidebar/sidebar.tsx:810
 msgid "sidebar_theme_system"
 msgstr "Auto Theme"
 
