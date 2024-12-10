@@ -13,7 +13,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 
-RUN npm ci  --legacy-peer-deps --omit=dev
+RUN npm ci  --legacy-peer-deps --ignore-scripts --omit=dev
 
 FROM base AS builder
 WORKDIR /app
