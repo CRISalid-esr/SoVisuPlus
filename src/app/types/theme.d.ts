@@ -124,6 +124,7 @@ declare module '@mui/material/styles' {
     shadows: string;
     white: string;
     gray950: string;
+    sidebarItemHover: string;
   }
 
   interface PaletteOptions {
@@ -169,6 +170,7 @@ declare module '@mui/material/styles' {
     scrim?: string;
     shadows?: string;
     gray950?: string;
+    sidebarItemHover?: string;
   }
 
   
