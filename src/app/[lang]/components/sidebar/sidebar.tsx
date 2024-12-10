@@ -379,7 +379,7 @@ export default function Sidebar({
                 >
                   <ListItem
                     sx={{
-                      marginBottom:theme.utils.pxToRem(4),
+                      marginBottom: theme.utils.pxToRem(4),
                       color: theme.palette.primaryContainer,
                       display: 'flex',
                       justifyContent: 'center',
@@ -412,7 +412,7 @@ export default function Sidebar({
                 href={`/${lang}/dashboard`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
-                  marginBottom:theme.utils.pxToRem(4),
+                  marginBottom: theme.utils.pxToRem(4),
                   color: theme.palette.primaryContainer,
                   display: 'flex',
                   justifyContent: 'center',
@@ -461,7 +461,7 @@ export default function Sidebar({
                 href={`/${lang}/dashboard/publications`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
-                  marginBottom:theme.utils.pxToRem(4),
+                  marginBottom: theme.utils.pxToRem(4),
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -510,7 +510,7 @@ export default function Sidebar({
                 href={`/${lang}/dashboard/expertise`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
-                  marginBottom:theme.utils.pxToRem(4),
+                  marginBottom: theme.utils.pxToRem(4),
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -567,7 +567,7 @@ export default function Sidebar({
               <Box pb={3}>
                 <ListItem
                   sx={{
-                    marginBottom:theme.utils.pxToRem(4),
+                    marginBottom: theme.utils.pxToRem(4),
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -617,7 +617,7 @@ export default function Sidebar({
                 </ListItem>
                 <ListItem
                   sx={{
-                    marginBottom:theme.utils.pxToRem(4),
+                    marginBottom: theme.utils.pxToRem(4),
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -667,7 +667,7 @@ export default function Sidebar({
                 </ListItem>
                 <ListItem
                   sx={{
-                    marginBottom:theme.utils.pxToRem(4),
+                    marginBottom: theme.utils.pxToRem(4),
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -720,12 +720,19 @@ export default function Sidebar({
               <Box>
                 {open ? (
                   <Select
+                    aria-label='Theme switcher'
+                    name='theme switcher'
+                    labelId='Theme'
+                    id='Theme'
                     label='Theme'
                     value={currentTheme}
                     onChange={handleChangeTheme}
                     variant='outlined'
                     fullWidth
                     renderValue={renderThemeValue}
+                    inputProps={{
+                      'aria-label': 'theme switcher',
+                    }}
                     sx={{
                       boxShadow: 'none',
                       '& :focus-visible': {
@@ -814,7 +821,7 @@ export default function Sidebar({
                 ) : (
                   <ListItem
                     sx={{
-                      marginBottom:theme.utils.pxToRem(4),
+                      marginBottom: theme.utils.pxToRem(4),
                       display: 'flex',
                       justifyContent: 'center',
                       alignItems: 'center',
@@ -844,8 +851,13 @@ export default function Sidebar({
               <Box>
                 {open ? (
                   <Select
+                    aria-label='Language switcher'
+                    name='language switcher'
                     variant='outlined'
                     fullWidth
+                    inputProps={{
+                      'aria-label': 'Language switcher',
+                    }}
                     sx={{
                       '& .MuiOutlinedInput-notchedOutline': {
                         border: '1px solid transparent',
@@ -909,7 +921,7 @@ export default function Sidebar({
                 ) : (
                   <ListItem
                     sx={{
-                      marginBottom:theme.utils.pxToRem(4),
+                      marginBottom: theme.utils.pxToRem(4),
                       display: 'flex',
                       justifyContent: 'center',
                       alignItems: 'center',
@@ -1002,6 +1014,7 @@ export default function Sidebar({
                       {user?.name}
                     </Typography>
                     <IconButton
+                      title='Logout'
                       sx={{
                         marginLeft: 'auto',
                         paddingRight: '0px',
@@ -1048,7 +1061,7 @@ export default function Sidebar({
                 >
                   <Image
                     src='/avatar.png'
-                    alt='Crisalid logo'
+                    alt='avatar'
                     width={24}
                     height={24}
                     priority
