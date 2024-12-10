@@ -258,14 +258,14 @@ export default function Sidebar({
                 >
                   <Image
                     src='/icons/logo.svg'
-                    alt='Crisalid logo'
+                    alt='soVisuPlus logo'
                     width={32}
                     height={32}
                     priority
                   />
                   <Image
                     src='/icons/soVisuPlus.svg'
-                    alt='Crisalid logo'
+                    alt='soVisuPlus logo'
                     width={123.966}
                     height={24.795}
                     priority
@@ -894,7 +894,7 @@ export default function Sidebar({
                       >
                         <Image
                           src='/icons/language.svg'
-                          alt='Crisalid logo'
+                          alt='language'
                           width={24}
                           height={24}
                           priority
@@ -982,13 +982,19 @@ export default function Sidebar({
                   width: '100%',
                 }}
               >
-                <Image
-                  src='/avatar.png'
-                  alt='Crisalid logo'
-                  width={40}
-                  height={40}
-                  priority
-                />
+                <IconButton
+                  title='account'
+                  onClick={() => router.push(`/${lang}/dashboard/my-account`)}
+                >
+                  <Image
+                    src='/avatar.png'
+                    alt='avatar'
+                    width={40}
+                    height={40}
+                    priority
+                  />
+                </IconButton>
+
                 <Box
                   sx={{
                     display: 'flex',
@@ -1047,7 +1053,10 @@ export default function Sidebar({
             ) : (
               <ListItem>
                 <ListItemIcon
-                  onClick={handleToggleDrawerAction}
+                  onClick={() => {
+                    router.push(`/${lang}/dashboard/my-account`)
+                    handleToggleDrawerAction()
+                  }}
                   sx={{
                     height: theme.utils.pxToRem(24),
                     width: theme.utils.pxToRem(24),
