@@ -25,6 +25,7 @@ const authOptions: AuthOptions = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async session(params) {
       console.info('session callback', params)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { session, token } = params as any
 
       if (token) {
