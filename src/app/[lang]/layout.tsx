@@ -28,7 +28,9 @@ export default async function RootLayout({ params, children }: Props) {
           <LanguageProvider locale={lang} messages={selectedMessages}>
             <AppRouterCacheProvider>
               <SessionProviderWrapper>
-                <body>{children}</body>
+                <body>
+                {children}
+                </body>
               </SessionProviderWrapper>
             </AppRouterCacheProvider>
           </LanguageProvider>
