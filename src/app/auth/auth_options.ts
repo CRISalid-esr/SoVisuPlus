@@ -13,7 +13,9 @@ const authOptions: AuthOptions = {
     strategy: 'jwt', // Ensure you're using JWT sessions
   },
   callbacks: {
-    async jwt({ token, account, user }) {
+    async jwt(params) {
+      console.info('jwt callback', params)
+      const { token, account, user } = params
       if (account && user) {
         token.accessToken = account.access_token
         token.id = user.id
@@ -21,7 +23,10 @@ const authOptions: AuthOptions = {
       return token
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async session({ session, token }: { session: any; token: any }) {
+    async session(params) {
+      console.info('session callback', params)
+      const { session, token } = params as any
+
       if (token) {
         session.user.id = token.id
         session.accessToken = token.accessToken
