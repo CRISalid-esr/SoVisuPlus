@@ -24,10 +24,12 @@ model Publication {
 }
 
 enum AgentIdentifierType {
-  ORCID
-  ID_REF
-  ID_HAL
-  SCOPUSEID
+  ORCID      @map("orcid")
+  IDREF      @map("idref")
+  ID_HAL_S   @map("id_hal_s")
+  ID_HAL_I   @map("id_hal_i")
+  SCOPUS_EID @map("scopus_eid")
+  LOCAL      @map("local")
 }
 
 model AgentIdentifier {
