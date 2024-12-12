@@ -3,21 +3,38 @@
 
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["linux-musl-openssl-3.0.x", "debian-openssl-1.1.x"]
+  binaryTargets = ["debian-openssl-1.1.x", "native"]
 }
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id    Int    @id @default(autoincrement())
-  email String @unique
+  id              Int               @id @default(autoincrement())
+  email           String            @unique
+  AgentIdentifier AgentIdentifier[]
 }
 
 model Publication {
   id     Int      @id @default(autoincrement())
   uid    String   @unique
   titles String[]
+}
+
+enum AgentIdentifierType {
+  ORCID      @map("orcid")
+  IDREF      @map("idref")
+  ID_HAL_S   @map("id_hal_s")
+  ID_HAL_I   @map("id_hal_i")
+  SCOPUS_EID @map("scopus_eid")
+  LOCAL      @map("local")
+}
+
+model AgentIdentifier {
+  id     Int                 @id @default(autoincrement())
+  type   AgentIdentifierType
+  value  String   @unique
+  userId Int
+  user   User                @relation(fields: [userId], references: [id])
 }
