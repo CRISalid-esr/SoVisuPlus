@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { useMediaQuery } from '@mui/system'
 import { SessionProvider } from 'next-auth/react' // Import SessionProvider
 import { useSession } from 'next-auth/react'
-import DashboardLayout from './layout' // Adjust path as needed
+import MainLayout from './MainLayout' // Adjust path as needed
 
 // Mock the necessary dependencies
 jest.mock('@mui/system', () => ({
@@ -50,9 +50,9 @@ describe('DashboardLayout', () => {
 
   it('renders the layout with children', () => {
     renderWithSessionProvider(
-      <DashboardLayout>
+      <MainLayout>
         <div>Child Content</div>
-      </DashboardLayout>,
+      </MainLayout>,
     )
 
     // Check that child content is rendered
@@ -64,9 +64,9 @@ describe('DashboardLayout', () => {
     (useMediaQuery as jest.Mock).mockImplementation(() => true)
 
     renderWithSessionProvider(
-      <DashboardLayout>
+      <MainLayout>
         <div>Child Content</div>
-      </DashboardLayout>,
+      </MainLayout>,
     )
 
     // Assert that Appbar is rendered on mobile view
@@ -78,9 +78,9 @@ describe('DashboardLayout', () => {
     (useMediaQuery as jest.Mock).mockImplementation(() => false)
 
     renderWithSessionProvider(
-      <DashboardLayout>
+      <MainLayout>
         <div>Child Content</div>
-      </DashboardLayout>,
+      </MainLayout>,
     )
 
     // Assert that Appbar is not rendered on desktop view
@@ -92,9 +92,9 @@ describe('DashboardLayout', () => {
     (useMediaQuery as jest.Mock).mockImplementation(() => false)
 
     renderWithSessionProvider(
-      <DashboardLayout>
+      <MainLayout>
         <div>Child Content</div>
-      </DashboardLayout>,
+      </MainLayout>,
     )
 
     // Assert that Sidebar is rendered
@@ -110,9 +110,9 @@ describe('DashboardLayout', () => {
     }))
 
     renderWithSessionProvider(
-      <DashboardLayout>
+      <MainLayout>
         <div>Child Content</div>
-      </DashboardLayout>,
+      </MainLayout>,
     )
 
     // Check that session-related content is rendered (e.g., user information)

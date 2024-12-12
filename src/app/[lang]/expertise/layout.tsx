@@ -1,5 +1,6 @@
 import DefaultLayout from '../layouts/MainLayout';
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+
+export default function ExpertiseLayout({ children }: { children: React.ReactNode }) {
   return <DefaultLayout>{children}</DefaultLayout>;
-}
+  }

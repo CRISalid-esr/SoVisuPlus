@@ -458,7 +458,7 @@ export default function Sidebar({
               </ListItem>
               <ListItem
                 component={Link}
-                href={`/${lang}/dashboard/publications`}
+                href={`/${lang}/publications`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   marginBottom: theme.utils.pxToRem(4),
@@ -466,7 +466,7 @@ export default function Sidebar({
                   justifyContent: 'center',
                   alignItems: 'center',
                   color: theme.palette.primaryContainer,
-                  ...(pathname === `/${lang}/dashboard/publications`
+                  ...(pathname === `/${lang}/publications`
                     ? {
                         backgroundColor: theme.palette.primaryContainer,
                         borderRadius: theme.utils.pxToRem(8),
@@ -507,7 +507,7 @@ export default function Sidebar({
               </ListItem>
               <ListItem
                 component={Link}
-                href={`/${lang}/dashboard/expertise`}
+                href={`/${lang}/expertise`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   marginBottom: theme.utils.pxToRem(4),
@@ -515,7 +515,7 @@ export default function Sidebar({
                   justifyContent: 'center',
                   alignItems: 'center',
                   color: theme.palette.primaryContainer,
-                  ...(pathname === `/${lang}/dashboard/expertise`
+                  ...(pathname === `/${lang}/expertise`
                     ? {
                         backgroundColor: theme.palette.primaryContainer,
                         borderRadius: theme.utils.pxToRem(8),
@@ -572,7 +572,7 @@ export default function Sidebar({
                     justifyContent: 'center',
                     alignItems: 'center',
                     color: theme.palette.primaryContainer,
-                    ...(pathname === `/${lang}/dashboard/my-groups`
+                    ...(pathname === `/${lang}/my-groups`
                       ? {
                           backgroundColor: theme.palette.primaryContainer,
                           borderRadius: theme.utils.pxToRem(8),
@@ -586,7 +586,7 @@ export default function Sidebar({
                     },
                   }}
                   component={Link}
-                  href={`/${lang}/dashboard/my-groups`}
+                  href={`/${lang}/my-groups`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
@@ -622,7 +622,7 @@ export default function Sidebar({
                     justifyContent: 'center',
                     alignItems: 'center',
                     color: theme.palette.primaryContainer,
-                    ...(pathname === `/${lang}/dashboard/institutions`
+                    ...(pathname === `/${lang}/institutions`
                       ? {
                           backgroundColor: theme.palette.primaryContainer,
                           borderRadius: theme.utils.pxToRem(8),
@@ -636,7 +636,7 @@ export default function Sidebar({
                     },
                   }}
                   component={Link}
-                  href={`/${lang}/dashboard/institutions`}
+                  href={`/${lang}/institutions`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
@@ -672,7 +672,7 @@ export default function Sidebar({
                     justifyContent: 'center',
                     alignItems: 'center',
                     color: theme.palette.primaryContainer,
-                    ...(pathname === `/${lang}/dashboard/laboratories`
+                    ...(pathname === `/${lang}/laboratories`
                       ? {
                           backgroundColor: theme.palette.primaryContainer,
                           borderRadius: theme.utils.pxToRem(8),
@@ -686,7 +686,7 @@ export default function Sidebar({
                     },
                   }}
                   component={Link}
-                  href={`/${lang}/dashboard/laboratories`}
+                  href={`/${lang}/laboratories`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
@@ -984,7 +984,7 @@ export default function Sidebar({
               >
                 <IconButton
                   title='account'
-                  onClick={() => router.push(`/${lang}/dashboard/my-account`)}
+                  onClick={() => router.push(`/${lang}/my-account`)}
                 >
                   <Image
                     src='/avatar.png'
@@ -1054,7 +1054,7 @@ export default function Sidebar({
               <ListItem>
                 <ListItemIcon
                   onClick={() => {
-                    router.push(`/${lang}/dashboard/my-account`)
+                    router.push(`/${lang}/my-account`)
                     handleToggleDrawerAction()
                   }}
                   sx={{
