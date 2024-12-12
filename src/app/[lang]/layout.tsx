@@ -21,7 +21,7 @@ export default async function RootLayout({ params, children }: Props) {
   const { lang, selectedMessages } = await resolveLanguage(params, messages)
   return (
     <>
-      <html lang={lang} title='sovisuplus'>
+      <html lang={lang}>
         <title>sovisuplus</title>
         <ThemeProvider>
           <CssBaseline />

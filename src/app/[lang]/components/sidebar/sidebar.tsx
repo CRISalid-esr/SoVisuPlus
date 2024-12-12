@@ -987,7 +987,7 @@ export default function Sidebar({
                   onClick={() => router.push(`/${lang}/my-account`)}
                 >
                   <Image
-                    src='/avatar.png'
+                    src='/icons/avatar.png'
                     alt='avatar'
                     width={40}
                     height={40}
