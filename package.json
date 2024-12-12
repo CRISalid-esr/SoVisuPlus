@@ -8,6 +8,8 @@
     "start": "npx prisma migrate deploy && next start",
     "lint": "next lint",
     "test": "jest",
+    "test:integration": "jest --config jest.integration.config.ts",
+    "test:all": "npm run test && npm run test:integration",
     "type-check": "tsc --noEmit",
     "lingui:extract": "lingui extract",
     "lingui:compile": "lingui compile",
