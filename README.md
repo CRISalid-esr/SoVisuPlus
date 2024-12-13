@@ -81,6 +81,9 @@ NEXTAUTH_SECRET="[generate a secret with : openssl rand -base64 32]"
 6. Run the Prisma migration with `npx prisma migrate dev --name init`.
 7. Run the development server with `npm run dev`.
 
+To enable the AMQP listener, start a Rabbitmq instance on your local machine, fill in the .env file
+with Rabbitmq parameters and run the listener : `npm run dev:listener`
+
 ### Docker Installation
 
 #### For staging environment
