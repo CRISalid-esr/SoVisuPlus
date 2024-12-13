@@ -3,39 +3,68 @@
 import { Trans } from '@lingui/macro'
 import { Box, Typography } from '@mui/material'
 import DataTable from '@/components/datatable/datatable'
+import { useState } from 'react'
 export default function PublicationsPage() {
-  const columns = [
-    { id: 'id', label: 'ID' },
-    { id: 'name', label: 'Name' },
-    { id: 'email', label: 'Email' },
-  ]
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [columns, setColumns] = useState([
+    {
+      id: 'title',
+      label: 'Title',
+    },
+    {
+      id: 'author',
+      label: 'Author',
+    },
+    {
+      id: 'date',
+      label: 'Date',
+    },
+    {
+      id: 'status',
+      label: 'Status',
+    },
+    {
+      id: 'version',
+      label: 'Version',
+    },
+  ])
 
-  const data = [
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [data, setData] = useState([
     {
-      id: 1,
-      name: 'John Doe',
-      email: 'john@example.com',
-      nestedData: { address: '123 Main St' },
+      title: 'Lorem ipsum',
+      author: 'John Doe',
+      date: '2021-10-01',
+      status: <>jsx elemnt</>,
+      version: '1.0',
+      children: [
+        {
+          title: 'Dolor sit amet',
+          author: 'Jane Doe',
+          date: '2021-10-02',
+          status: 'Draft',
+          version: '1.1',
+          children: [
+            {
+              title: 'Dolor sit amet 2',
+              author: 'Jane Doe',
+              date: '2021-10-02',
+              status: 'Draft',
+              version: '1.1',
+            },
+          ],
+        },
+      ],
     },
     {
-      id: 2,
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      nestedData: { address: '456 Elm St' },
+      title: 'Dolor sit amet',
+      author: 'Jane Doe',
+      date: '2021-10-02',
+      status: 'Draft',
+      version: '1.1',
+      children: <>JSX elment</>,
     },
-    {
-      id: 3,
-      name: 'Alice Johnson',
-      email: 'alice@example.com',
-      nestedData: { address: '789 Pine St' },
-    },
-    {
-      id: 4,
-      name: 'Bob Brown',
-      email: 'bob@example.com',
-      nestedData: { address: '101 Maple St' },
-    },
-  ]
+  ])
 
   return (
     <Box sx={{ padding: 4 }}>

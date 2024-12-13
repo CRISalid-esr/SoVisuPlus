@@ -123,6 +123,69 @@ const DataTable: React.FC<DataTableProps> = ({
     page * rowsPerPage + rowsPerPage,
   )
 
+  // Recursive Row Rendering Function
+  const RenderRow = ({
+    row,
+  }: {
+    row: any // eslint-disable-line @typescript-eslint/no-explicit-any
+  }) => {
+    // Handle collapse for this row
+    const hasChildren =
+      row.children &&
+      (Array.isArray(row.children) || React.isValidElement(row.children))
+    const handleExpand = () => {
+      if (hasChildren) {
+        handleExpandClick(row.id)
+      }
+    }
+
+    return (
+      <React.Fragment key={row.id}>
+        <TableRow>
+          <TableCell padding='checkbox'>
+            <Checkbox
+              onChange={(event) => handleSelectClick(event, row.id)}
+              checked={selected.includes(row.id)}
+            />
+          </TableCell>
+          {columns.map((column) => (
+            <TableCell key={column.id}>{row[column.id]}</TableCell>
+          ))}
+          {hasChildren && (
+            <TableCell padding='checkbox'>
+              <IconButton onClick={handleExpand}>
+                {expanded[row.id] ? <ArrowDropDown /> : <ArrowRight />}
+              </IconButton>
+            </TableCell>
+          )}
+        </TableRow>
+        {hasChildren && (
+          <TableRow>
+            <TableCell colSpan={columns.length + 1} padding='none'>
+              <Collapse in={expanded[row.id]} timeout='auto' unmountOnExit>
+                {Array.isArray(row.children) ? (
+                  <Table>
+                    <TableBody>
+                      {row.children.map(
+                        (
+                          childRow: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+                        ) => (
+                          <RenderRow key={childRow.id} row={childRow} />
+                        ),
+                      )}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  row.children // Render JSX if `children` is not an array
+                )}
+              </Collapse>
+            </TableCell>
+          </TableRow>
+        )}
+      </React.Fragment>
+    )
+  }
+
   return (
     <Paper>
       <TableContainer>
@@ -154,37 +217,7 @@ const DataTable: React.FC<DataTableProps> = ({
           </TableHead>
           <TableBody>
             {visibleData.map((row) => (
-              <React.Fragment key={row.id}>
-                <TableRow>
-                  <TableCell padding='checkbox'>
-                    <Checkbox
-                      onChange={(event) => handleSelectClick(event, row.id)}
-                      checked={selected.includes(row.id)}
-                    />
-                  </TableCell>
-                  {columns.map((column) => (
-                    <TableCell key={column.id}>{row[column.id]}</TableCell>
-                  ))}
-                  <TableCell padding='checkbox'>
-                    <IconButton onClick={() => handleExpandClick(row.id)}>
-                      {expanded[row.id] ? <ArrowDropDown /> : <ArrowRight />}
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell colSpan={columns.length + 1} padding='none'>
-                    <Collapse
-                      in={expanded[row.id]}
-                      timeout='auto'
-                      unmountOnExit
-                    >
-                      <Paper style={{ padding: 16 }}>
-                        <pre>{JSON.stringify(row.nestedData, null, 2)}</pre>
-                      </Paper>
-                    </Collapse>
-                  </TableCell>
-                </TableRow>
-              </React.Fragment>
+              <RenderRow key={row.id} row={row} />
             ))}
           </TableBody>
         </Table>
