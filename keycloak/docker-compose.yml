@@ -16,11 +16,12 @@ services:
     image: quay.io/keycloak/keycloak:26.0
     command: start
     environment:
-      KC_HOSTNAME: localhost
+      KC_HOSTNAME: keycloak.local
       KC_HOSTNAME_PORT: 8080
       KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HOSTNAME_STRICT: "false"
       KC_HEALTH_ENABLED: "true"
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
@@ -28,8 +29,9 @@ services:
       KC_DB_URL: jdbc:postgresql://postgres/${POSTGRES_DB}
       KC_DB_USERNAME: ${POSTGRES_USER}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_HOSTNAME_ADMIN_URL: http://keycloak.local:80
     ports:
-      - 8080:8080
+      - 80:8080
     restart: always
     depends_on:
       - postgres
