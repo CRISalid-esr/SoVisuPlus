@@ -22,6 +22,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@apollo/client": "^3.12.3",
     "@chromatic-com/storybook": "^3.2.2",
     "@emotion/cache": "^11.13.1",
     "@emotion/react": "^11.14.0",
