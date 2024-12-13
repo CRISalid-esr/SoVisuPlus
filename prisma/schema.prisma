@@ -3,8 +3,9 @@
 
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["debian-openssl-1.1.x", "native"]
+  binaryTargets = ["debian-openssl-1.1.x", "native", "debian-openssl-3.0.x"]
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -34,7 +35,7 @@ enum AgentIdentifierType {
 model AgentIdentifier {
   id     Int                 @id @default(autoincrement())
   type   AgentIdentifierType
-  value  String   @unique
+  value  String              @unique
   userId Int
   user   User                @relation(fields: [userId], references: [id])
 }
