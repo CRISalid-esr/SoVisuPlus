@@ -1,4 +1,3 @@
-// components/DataTable.tsx
 import React, { useState } from 'react'
 import {
   Table,
@@ -24,46 +23,67 @@ interface Column {
 
 interface DataTableProps {
   columns: Column[]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any[]
+  data: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
+  page?: number
+  rowsPerPage?: number
+  order?: 'asc' | 'desc'
+  orderBy?: string
+  selected?: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
+  onPageChange?: (newPage: number) => void
+  onRowsPerPageChange?: (newRowsPerPage: number) => void
+  onOrderChange?: (order: 'asc' | 'desc', orderBy: string) => void
+  onSelectionChange?: (selected: any[]) => void // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-interface RowData {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any
-}
-
-const DataTable: React.FC<DataTableProps> = ({ columns, data }) => {
-  const [order, setOrder] = useState<'asc' | 'desc'>('asc')
-  const [orderBy, setOrderBy] = useState<string>('')
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(5)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selected, setSelected] = useState<any[]>([])
+const DataTable: React.FC<DataTableProps> = ({
+  columns,
+  data,
+  page: externalPage,
+  rowsPerPage: externalRowsPerPage,
+  order: externalOrder,
+  orderBy: externalOrderBy,
+  selected: externalSelected,
+  onPageChange,
+  onRowsPerPageChange,
+  onOrderChange,
+  onSelectionChange,
+}) => {
+  const [internalOrder, setInternalOrder] = useState<'asc' | 'desc'>('asc')
+  const [internalOrderBy, setInternalOrderBy] = useState<string>('')
+  const [internalPage, setInternalPage] = useState(0)
+  const [internalRowsPerPage, setInternalRowsPerPage] = useState(5)
+  const [internalSelected, setInternalSelected] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any
   const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({})
+
+  const order = externalOrder ?? internalOrder
+  const orderBy = externalOrderBy ?? internalOrderBy
+  const page = externalPage ?? internalPage
+  const rowsPerPage = externalRowsPerPage ?? internalRowsPerPage
+  const selected = externalSelected ?? internalSelected
 
   const handleRequestSort = (property: string) => {
     const isAsc = orderBy === property && order === 'asc'
-    setOrder(isAsc ? 'desc' : 'asc')
-    setOrderBy(property)
+    const newOrder = isAsc ? 'desc' : 'asc'
+    setInternalOrder(newOrder)
+    setInternalOrderBy(property)
+    onOrderChange?.(newOrder, property)
   }
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
-      setSelected(data.map((n) => n.id))
-    } else {
-      setSelected([])
-    }
+    const newSelected = event.target.checked ? data.map((n) => n.id) : []
+    setInternalSelected(newSelected)
+    onSelectionChange?.(newSelected)
   }
 
   const handleSelectClick = (
     event: React.ChangeEvent<HTMLInputElement>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    id: any,
+    id: any, // eslint-disable-line @typescript-eslint/no-explicit-any
   ) => {
-    setSelected((prev) =>
-      event.target.checked ? [...prev, id] : prev.filter((item) => item !== id),
-    )
+    const newSelected = event.target.checked
+      ? [...selected, id]
+      : selected.filter((item) => item !== id)
+    setInternalSelected(newSelected)
+    onSelectionChange?.(newSelected)
   }
 
   const handleExpandClick = (id: string) => {
@@ -71,36 +91,36 @@ const DataTable: React.FC<DataTableProps> = ({ columns, data }) => {
   }
 
   const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage)
+    setInternalPage(newPage)
+    onPageChange?.(newPage)
   }
 
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
-    setPage(0)
+    const newRowsPerPage = parseInt(event.target.value, 10)
+    setInternalRowsPerPage(newRowsPerPage)
+    setInternalPage(0)
+    onRowsPerPageChange?.(newRowsPerPage)
   }
 
   const createSortHandler = (property: string) => () => {
     handleRequestSort(property)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sortedData = (array: any[]) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return array.sort((a: any, b: any) => {
-      if (orderBy && a[orderBy] < b[orderBy]) {
-        return order === 'asc' ? -1 : 1
-      }
-      if (orderBy && a[orderBy] > b[orderBy]) {
-        return order === 'asc' ? 1 : -1
-      }
-      return 0
-    })
-  }
+  const sortedData = data.sort((a, b) => {
+    if (orderBy && a[orderBy] < b[orderBy]) {
+      return order === 'asc' ? -1 : 1
+    }
+    if (orderBy && a[orderBy] > b[orderBy]) {
+      return order === 'asc' ? 1 : -1
+    }
+    return 0
+  })
 
-  const visibleData = sortedData(
-    data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+  const visibleData = sortedData.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage,
   )
 
   return (
@@ -133,13 +153,13 @@ const DataTable: React.FC<DataTableProps> = ({ columns, data }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {visibleData.map((row: RowData) => (
+            {visibleData.map((row) => (
               <React.Fragment key={row.id}>
                 <TableRow>
                   <TableCell padding='checkbox'>
                     <Checkbox
                       onChange={(event) => handleSelectClick(event, row.id)}
-                      checked={selected.indexOf(row.id) !== -1}
+                      checked={selected.includes(row.id)}
                     />
                   </TableCell>
                   {columns.map((column) => (
@@ -159,7 +179,6 @@ const DataTable: React.FC<DataTableProps> = ({ columns, data }) => {
                       unmountOnExit
                     >
                       <Paper style={{ padding: 16 }}>
-                        {/* Example of nested data */}
                         <pre>{JSON.stringify(row.nestedData, null, 2)}</pre>
                       </Paper>
                     </Collapse>
