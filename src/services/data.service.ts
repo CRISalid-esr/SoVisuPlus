@@ -12,7 +12,6 @@ export class DataService {
     this.client = new ApolloClient({
       uri,
       cache: new InMemoryCache(),
-      // headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     })
   }
 
