@@ -19,6 +19,7 @@ interface Column {
   id: string
   label: string
   numeric?: boolean
+  sortable?: boolean
 }
 
 interface DataTableProps {
@@ -139,6 +140,8 @@ const DataTable: React.FC<DataTableProps> = ({
       }
     }
 
+    //campute the depth of the row
+
     return (
       <React.Fragment key={row.id}>
         <TableRow>
@@ -148,16 +151,21 @@ const DataTable: React.FC<DataTableProps> = ({
               checked={selected.includes(row.id)}
             />
           </TableCell>
-          {columns.map((column) => (
-            <TableCell key={column.id}>{row[column.id]}</TableCell>
-          ))}
           {hasChildren && (
-            <TableCell padding='checkbox'>
+            <TableCell
+              padding='checkbox'
+              sx={{
+                paddingLeft: `16px`,
+              }}
+            >
               <IconButton onClick={handleExpand}>
                 {expanded[row.id] ? <ArrowDropDown /> : <ArrowRight />}
               </IconButton>
             </TableCell>
           )}
+          {columns.map((column) => (
+            <TableCell key={column.id}>{row[column.id]}</TableCell>
+          ))}
         </TableRow>
         {hasChildren && (
           <TableRow>
@@ -203,13 +211,17 @@ const DataTable: React.FC<DataTableProps> = ({
               </TableCell>
               {columns.map((column) => (
                 <TableCell key={column.id}>
-                  <TableSortLabel
-                    active={orderBy === column.id}
-                    direction={orderBy === column.id ? order : 'asc'}
-                    onClick={createSortHandler(column.id)}
-                  >
-                    {column.label}
-                  </TableSortLabel>
+                  {column.sortable ? (
+                    <TableSortLabel
+                      active={orderBy === column.id}
+                      direction={orderBy === column.id ? order : 'asc'}
+                      onClick={createSortHandler(column.id)}
+                    >
+                      {column.label}
+                    </TableSortLabel>
+                  ) : (
+                    column.label
+                  )}
                 </TableCell>
               ))}
               <TableCell />
