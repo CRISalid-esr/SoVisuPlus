@@ -1,15 +1,10 @@
-import { DataService } from './data.service' // Assuming the base service is in a separate file.
-type Person = {
-  id: string
-  email: string
-}
+import { DataService } from './Data.service'
+import { AgentIdentifier } from '../app/types/agentIdentifier'
+import { Person } from '../app/types/person'
 
-type AgentIdentifier = {
-  type: string
-  value: string
-}
+// Assuming the base service is in a separate file.
 
-export class PersonDataService extends DataService {
+export class PersonApiService extends DataService {
   constructor() {
     super(process.env.APOLLO_SERVER_URL || 'http://localhost:4000/graphql')
   }
