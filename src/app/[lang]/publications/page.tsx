@@ -4,6 +4,7 @@ import { Trans } from '@lingui/macro'
 import { Box, Typography } from '@mui/material'
 import DataTable from '@/components/datatable/datatable'
 import { useState } from 'react'
+
 export default function PublicationsPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [columns, setColumns] = useState([
@@ -52,13 +53,28 @@ export default function PublicationsPage() {
       children: <>JSX elment</>,
     },
   ])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const renderExpandableRow = (row: any) => {
+    return (
+      <Box
+        style={{ padding: '16px', backgroundColor: '#f5f5f5', width: '100%' }}
+      >
+        <Typography variant='body2'>Custom content for row {row.id}</Typography>
+      </Box>
+    )
+  }
 
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant='h4' gutterBottom>
         <Trans>side_bar_publications</Trans>
       </Typography>
-      <DataTable columns={columns} data={data} />
+      <DataTable
+        columns={columns}
+        data={data}
+        expandable={true}
+        renderExpandableRow={renderExpandableRow}
+      />
     </Box>
   )
 }

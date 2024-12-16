@@ -12,6 +12,7 @@ import {
   TableSortLabel,
   IconButton,
   Collapse,
+  Typography,
 } from '@mui/material'
 import { ArrowDropDown, ArrowRight } from '@mui/icons-material'
 
@@ -20,6 +21,9 @@ interface Column {
   label: string
   numeric?: boolean
   sortable?: boolean
+  renderCell?: (row: any, column: Column, depth?: number) => React.ReactNode // eslint-disable-line @typescript-eslint/no-explicit-any
+  expandable?: boolean
+  renderExpandableRow?: (row: any) => React.ReactNode // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 interface DataTableProps {
@@ -30,10 +34,13 @@ interface DataTableProps {
   order?: 'asc' | 'desc'
   orderBy?: string
   selected?: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
+  expandable?: boolean
   onPageChange?: (newPage: number) => void
   onRowsPerPageChange?: (newRowsPerPage: number) => void
   onOrderChange?: (order: 'asc' | 'desc', orderBy: string) => void
   onSelectionChange?: (selected: any[]) => void // eslint-disable-line @typescript-eslint/no-explicit-any
+  renderExpandableRow?: (row: any) => React.ReactNode // eslint-disable-line @typescript-eslint/no-explicit-any
+  onExpandChange?: (expanded: { [key: string]: boolean }) => void
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -44,10 +51,12 @@ const DataTable: React.FC<DataTableProps> = ({
   order: externalOrder,
   orderBy: externalOrderBy,
   selected: externalSelected,
+  expandable,
   onPageChange,
   onRowsPerPageChange,
   onOrderChange,
   onSelectionChange,
+  renderExpandableRow,
 }) => {
   const [internalOrder, setInternalOrder] = useState<'asc' | 'desc'>('asc')
   const [internalOrderBy, setInternalOrderBy] = useState<string>('')
@@ -140,7 +149,16 @@ const DataTable: React.FC<DataTableProps> = ({
       }
     }
 
-    //campute the depth of the row
+    const computeColSpan = (): number => {
+      let colSpan = columns.length
+      if (expandable) {
+        colSpan += 1
+      }
+      if (hasChildren) {
+        colSpan += 1
+      }
+      return colSpan
+    }
 
     return (
       <React.Fragment key={row.id}>
@@ -151,7 +169,7 @@ const DataTable: React.FC<DataTableProps> = ({
               checked={selected.includes(row.id)}
             />
           </TableCell>
-          {hasChildren && (
+          {hasChildren && expandable && (
             <TableCell
               padding='checkbox'
               sx={{
@@ -167,25 +185,28 @@ const DataTable: React.FC<DataTableProps> = ({
             <TableCell key={column.id}>{row[column.id]}</TableCell>
           ))}
         </TableRow>
-        {hasChildren && (
+        {hasChildren && expandable && (
           <TableRow>
-            <TableCell colSpan={columns.length + 1} padding='none'>
+            <TableCell colSpan={computeColSpan()} padding='none'>
               <Collapse in={expanded[row.id]} timeout='auto' unmountOnExit>
-                {Array.isArray(row.children) ? (
-                  <Table>
-                    <TableBody>
-                      {row.children.map(
-                        (
-                          childRow: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-                        ) => (
-                          <RenderRow key={childRow.id} row={childRow} />
-                        ),
-                      )}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  row.children // Render JSX if `children` is not an array
-                )}
+                {
+                  renderExpandableRow
+                    ? renderExpandableRow(row) // Use the custom renderer if provided
+                    : // Default expandable row rendering (nested table or children)
+                      Array.isArray(row.children) && (
+                        <Table>
+                          <TableBody>
+                            {row.children.map(
+                              (
+                                childRow: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+                              ) => (
+                                <RenderRow key={childRow.id} row={childRow} />
+                              ),
+                            )}
+                          </TableBody>
+                        </Table>
+                      ) // eslint-disable-line @typescript-eslint/no-explicit-any
+                }
               </Collapse>
             </TableCell>
           </TableRow>
@@ -195,10 +216,24 @@ const DataTable: React.FC<DataTableProps> = ({
   }
 
   return (
-    <Paper>
+    <Paper
+      elevation={1}
+      sx={{
+        borderRadius: '8px',
+        boxShadow: 'none',
+        border: '1px solid rgba(0, 0, 0, 0.05)',
+      }}
+    >
       <TableContainer>
         <Table>
-          <TableHead>
+          <TableHead
+            sx={(theme) => {
+              return {
+                backgroundColor: 'rgba(247, 249, 252, 0.80)',
+                height: theme.utils.pxToRem(34),
+              }
+            }}
+          >
             <TableRow>
               <TableCell padding='checkbox'>
                 <Checkbox
@@ -209,6 +244,7 @@ const DataTable: React.FC<DataTableProps> = ({
                   }
                 />
               </TableCell>
+              {expandable && <TableCell />}
               {columns.map((column) => (
                 <TableCell key={column.id}>
                   {column.sortable ? (
@@ -217,10 +253,28 @@ const DataTable: React.FC<DataTableProps> = ({
                       direction={orderBy === column.id ? order : 'asc'}
                       onClick={createSortHandler(column.id)}
                     >
-                      {column.label}
+                      <Typography
+                        variant='bodySmall'
+                        sx={{
+                          fontWeight: 500,
+                          fontFamily: 'Inter',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        {column.label}
+                      </Typography>
                     </TableSortLabel>
                   ) : (
-                    column.label
+                    <Typography
+                      variant='bodySmall'
+                      sx={{
+                        fontWeight: 500,
+                        fontFamily: 'Inter',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {column.label}
+                    </Typography>
                   )}
                 </TableCell>
               ))}
