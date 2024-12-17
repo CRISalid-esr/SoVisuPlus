@@ -135,7 +135,6 @@ const DataTable: React.FC<DataTableProps> = ({
     page * rowsPerPage + rowsPerPage,
   )
 
-  // Recursive Row Rendering Function
   const RenderRow = ({
     row,
     depth = 0, // Depth to track nesting
@@ -161,35 +160,35 @@ const DataTable: React.FC<DataTableProps> = ({
 
     return (
       <React.Fragment key={row.id}>
-        {/* Primary row */}
+        {/* Primary Row */}
         <TableRow>
-          <TableCell padding='checkbox'>
-            {selectableRows && (
+          {/* Checkbox column */}
+          {selectableRows && (
+            <TableCell padding={depth > 0 ? 'none' : 'checkbox'}>
               <Checkbox
                 onChange={(event) => handleSelectClick(event, row.id)}
                 checked={selected.includes(row.id)}
               />
-            )}
-          </TableCell>
-
-          {expandableRows && (
-            <TableCell padding='checkbox'>
-              {hasChildren && (
-                <IconButton onClick={handleExpand}>
-                  {expanded[row.id] ? <ArrowDropDown /> : <ArrowRight />}
-                </IconButton>
-              )}
-              {!hasChildren && depth === 0 && renderExpandableRow && (
-                <IconButton onClick={handleExpand}>
-                  {expanded[row.id] ? <ArrowDropDown /> : <ArrowRight />}
-                </IconButton>
-              )}
             </TableCell>
           )}
 
-          {/* Render row data */}
+          {/* Expandable column */}
+          {expandableRows && (
+            <TableCell padding={depth > 0 ? 'none' : 'checkbox'}>
+              {hasChildren || (depth === 0 && renderExpandableRow) ? (
+                <IconButton onClick={handleExpand} size='small'>
+                  {expanded[row.id] ? <ArrowDropDown /> : <ArrowRight />}
+                </IconButton>
+              ) : null}
+            </TableCell>
+          )}
+
+          {/* Row Data */}
           {columns.map((column) => (
-            <TableCell key={column.id}>
+            <TableCell
+              key={column.id}
+              padding={depth > 0 ? 'none' : 'normal'} // No padding for children
+            >
               {column.renderCell
                 ? column.renderCell(row, column, depth)
                 : row[column.id]}
@@ -204,7 +203,8 @@ const DataTable: React.FC<DataTableProps> = ({
               <Collapse in={expanded[row.id]} timeout='auto' unmountOnExit>
                 <Table size='small'>
                   <TableBody>
-                    {/*eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
+                    {/* Recursively render children */}
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {row.children.map((child: any) => (
                       <RenderRow key={child.id} row={child} depth={depth + 1} />
                     ))}
@@ -215,7 +215,7 @@ const DataTable: React.FC<DataTableProps> = ({
           </TableRow>
         )}
 
-        {/* renderExpandableRow (only at top level and no children) */}
+        {/* Expandable content */}
         {!hasChildren && depth === 0 && renderExpandableRow && (
           <TableRow>
             <TableCell colSpan={computeColSpan()} padding='none'>
@@ -228,26 +228,11 @@ const DataTable: React.FC<DataTableProps> = ({
       </React.Fragment>
     )
   }
-
   return (
-    <Paper
-      elevation={1}
-      sx={{
-        borderRadius: '8px',
-        boxShadow: 'none',
-        border: '1px solid rgba(0, 0, 0, 0.05)',
-      }}
-    >
+    <Paper elevation={1}>
       <TableContainer>
         <Table>
-          <TableHead
-            sx={(theme) => {
-              return {
-                backgroundColor: 'rgba(247, 249, 252, 0.80)',
-                height: theme.utils.pxToRem(34),
-              }
-            }}
-          >
+          <TableHead>
             <TableRow>
               <TableCell padding='checkbox'>
                 <Checkbox
@@ -258,6 +243,7 @@ const DataTable: React.FC<DataTableProps> = ({
                   }
                 />
               </TableCell>
+              <TableCell padding='checkbox' />
               {columns.map((column) => (
                 <TableCell key={column.id}>
                   {column.sortable ? (
@@ -291,7 +277,6 @@ const DataTable: React.FC<DataTableProps> = ({
                   )}
                 </TableCell>
               ))}
-              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>

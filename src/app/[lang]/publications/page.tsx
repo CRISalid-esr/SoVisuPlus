@@ -49,16 +49,6 @@ export default function PublicationsPage() {
       date: '2021-10-02',
       status: 'Draft',
       version: '1.1',
-      children: [
-        {
-          id: 5,
-          title: 'Dolor sit amet test3',
-          author: 'Jane Doe',
-          date: '2021-10-02',
-          status: 'Draft',
-          version: '1.1',
-        },
-      ],
     },
   ])
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
