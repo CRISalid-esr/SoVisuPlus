@@ -19,10 +19,8 @@ import { ArrowDropDown, ArrowRight } from '@mui/icons-material'
 interface Column {
   id: string
   label: string
-  numeric?: boolean
   sortable?: boolean
   renderCell?: (row: any, column: Column, depth?: number) => React.ReactNode // eslint-disable-line @typescript-eslint/no-explicit-any
-  expandable?: boolean
   visible?: boolean
 }
 
@@ -36,6 +34,8 @@ interface DataTableProps {
   selected?: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
   expandableRows?: boolean
   selectableRows?: boolean
+  enablePagination?: boolean
+  rowsPerPageOptions?: number[]
   onPageChange?: (newPage: number) => void
   onRowsPerPageChange?: (newRowsPerPage: number) => void
   onOrderChange?: (order: 'asc' | 'desc', orderBy: string) => void
@@ -59,6 +59,8 @@ const DataTable: React.FC<DataTableProps> = ({
   onOrderChange,
   onSelectionChange,
   renderExpandableRow,
+  enablePagination,
+  rowsPerPageOptions = [5, 10, 25],
 }) => {
   const [internalOrder, setInternalOrder] = useState<'asc' | 'desc'>('asc')
   const [internalOrderBy, setInternalOrderBy] = useState<string>('')
@@ -268,14 +270,16 @@ const DataTable: React.FC<DataTableProps> = ({
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        count={data.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+      {enablePagination && (
+        <TablePagination
+          rowsPerPageOptions={rowsPerPageOptions}
+          count={data.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      )}
     </Paper>
   )
 }
