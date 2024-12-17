@@ -24,8 +24,6 @@ RUN npx prisma generate
 RUN npm run build
 
 FROM base AS runner
-# install openssl
-RUN apk add --no-cache openssl
 
 WORKDIR /app
 
