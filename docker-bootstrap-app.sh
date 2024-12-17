@@ -16,7 +16,7 @@ NEXTAUTH_SECRET="$NEXTAUTH_SECRET"
 EOF
 
 npx prisma migrate deploy
-
+npx prisma generate
 # npm warn exec The following package was not found and will be installed: prisma@5.22.0
 rm -rf node_modules/prisma
 
