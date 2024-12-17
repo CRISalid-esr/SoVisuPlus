@@ -25,6 +25,11 @@ RUN npm run build
 
 FROM base AS runner
 
+RUN set -ex; \
+    apk update; \
+    apk add --no-cache \
+    openssl
+
 WORKDIR /app
 
 ENV NODE_ENV=production
