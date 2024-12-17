@@ -34,7 +34,8 @@ interface DataTableProps {
   order?: 'asc' | 'desc'
   orderBy?: string
   selected?: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
-  expandable?: boolean
+  expandableRows?: boolean
+  selectableRows?: boolean
   onPageChange?: (newPage: number) => void
   onRowsPerPageChange?: (newRowsPerPage: number) => void
   onOrderChange?: (order: 'asc' | 'desc', orderBy: string) => void
@@ -51,7 +52,8 @@ const DataTable: React.FC<DataTableProps> = ({
   order: externalOrder,
   orderBy: externalOrderBy,
   selected: externalSelected,
-  expandable,
+  expandableRows,
+  selectableRows,
   onPageChange,
   onRowsPerPageChange,
   onOrderChange,
@@ -136,77 +138,88 @@ const DataTable: React.FC<DataTableProps> = ({
   // Recursive Row Rendering Function
   const RenderRow = ({
     row,
+    depth = 0, // Depth to track nesting
   }: {
     row: any // eslint-disable-line @typescript-eslint/no-explicit-any
+    depth?: number
   }) => {
-    // Handle collapse for this row
     const hasChildren =
-      row.children &&
-      (Array.isArray(row.children) || React.isValidElement(row.children))
+      row.children && Array.isArray(row.children) && row.children.length > 0
+
     const handleExpand = () => {
-      if (hasChildren) {
+      if (hasChildren || (!hasChildren && depth === 0 && renderExpandableRow)) {
         handleExpandClick(row.id)
       }
     }
 
     const computeColSpan = (): number => {
       let colSpan = columns.length
-      if (expandable) {
-        colSpan += 1
-      }
-      if (hasChildren) {
-        colSpan += 1
-      }
+      if (expandableRows) colSpan += 1
       return colSpan
     }
 
     return (
       <React.Fragment key={row.id}>
+        {/* Primary row */}
         <TableRow>
           <TableCell padding='checkbox'>
-            <Checkbox
-              onChange={(event) => handleSelectClick(event, row.id)}
-              checked={selected.includes(row.id)}
-            />
+            {selectableRows && (
+              <Checkbox
+                onChange={(event) => handleSelectClick(event, row.id)}
+                checked={selected.includes(row.id)}
+              />
+            )}
           </TableCell>
-          {hasChildren && expandable && (
-            <TableCell
-              padding='checkbox'
-              sx={{
-                paddingLeft: `16px`,
-              }}
-            >
-              <IconButton onClick={handleExpand}>
-                {expanded[row.id] ? <ArrowDropDown /> : <ArrowRight />}
-              </IconButton>
+
+          {expandableRows && (
+            <TableCell padding='checkbox'>
+              {hasChildren && (
+                <IconButton onClick={handleExpand}>
+                  {expanded[row.id] ? <ArrowDropDown /> : <ArrowRight />}
+                </IconButton>
+              )}
+              {!hasChildren && depth === 0 && renderExpandableRow && (
+                <IconButton onClick={handleExpand}>
+                  {expanded[row.id] ? <ArrowDropDown /> : <ArrowRight />}
+                </IconButton>
+              )}
             </TableCell>
           )}
+
+          {/* Render row data */}
           {columns.map((column) => (
-            <TableCell key={column.id}>{row[column.id]}</TableCell>
+            <TableCell key={column.id}>
+              {column.renderCell
+                ? column.renderCell(row, column, depth)
+                : row[column.id]}
+            </TableCell>
           ))}
         </TableRow>
-        {hasChildren && expandable && (
+
+        {/* Nested children */}
+        {hasChildren && (
           <TableRow>
             <TableCell colSpan={computeColSpan()} padding='none'>
               <Collapse in={expanded[row.id]} timeout='auto' unmountOnExit>
-                {
-                  renderExpandableRow
-                    ? renderExpandableRow(row) // Use the custom renderer if provided
-                    : // Default expandable row rendering (nested table or children)
-                      Array.isArray(row.children) && (
-                        <Table>
-                          <TableBody>
-                            {row.children.map(
-                              (
-                                childRow: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-                              ) => (
-                                <RenderRow key={childRow.id} row={childRow} />
-                              ),
-                            )}
-                          </TableBody>
-                        </Table>
-                      ) // eslint-disable-line @typescript-eslint/no-explicit-any
-                }
+                <Table size='small'>
+                  <TableBody>
+                    {/*eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
+                    {row.children.map((child: any) => (
+                      <RenderRow key={child.id} row={child} depth={depth + 1} />
+                    ))}
+                  </TableBody>
+                </Table>
+              </Collapse>
+            </TableCell>
+          </TableRow>
+        )}
+
+        {/* renderExpandableRow (only at top level and no children) */}
+        {!hasChildren && depth === 0 && renderExpandableRow && (
+          <TableRow>
+            <TableCell colSpan={computeColSpan()} padding='none'>
+              <Collapse in={expanded[row.id]} timeout='auto' unmountOnExit>
+                {renderExpandableRow(row)}
               </Collapse>
             </TableCell>
           </TableRow>
@@ -244,7 +257,7 @@ const DataTable: React.FC<DataTableProps> = ({
                   }
                 />
               </TableCell>
-              {expandable && <TableCell />}
+              {expandableRows && <TableCell />}
               {columns.map((column) => (
                 <TableCell key={column.id}>
                   {column.sortable ? (

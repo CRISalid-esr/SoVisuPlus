@@ -41,7 +41,6 @@ export default function PublicationsPage() {
       date: '2021-10-01',
       status: <>jsx elemnt</>,
       version: '1.0',
-      children: <>JSX elment</>,
     },
     {
       id: 4,
@@ -50,7 +49,16 @@ export default function PublicationsPage() {
       date: '2021-10-02',
       status: 'Draft',
       version: '1.1',
-      children: <>JSX elment</>,
+      children: [
+        {
+          id: 5,
+          title: 'Dolor sit amet test3',
+          author: 'Jane Doe',
+          date: '2021-10-02',
+          status: 'Draft',
+          version: '1.1',
+        },
+      ],
     },
   ])
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -72,7 +80,7 @@ export default function PublicationsPage() {
       <DataTable
         columns={columns}
         data={data}
-        expandable={true}
+        expandableRows={true}
         renderExpandableRow={renderExpandableRow}
       />
     </Box>
