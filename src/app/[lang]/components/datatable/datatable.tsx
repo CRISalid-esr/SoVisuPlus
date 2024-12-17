@@ -155,6 +155,7 @@ const DataTable: React.FC<DataTableProps> = ({
     const computeColSpan = (): number => {
       let colSpan = columns.length
       if (expandableRows) colSpan += 1
+      if (selectableRows) colSpan += 1
       return colSpan
     }
 
@@ -257,7 +258,6 @@ const DataTable: React.FC<DataTableProps> = ({
                   }
                 />
               </TableCell>
-              {expandableRows && <TableCell />}
               {columns.map((column) => (
                 <TableCell key={column.id}>
                   {column.sortable ? (
