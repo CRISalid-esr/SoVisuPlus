@@ -6,6 +6,12 @@ msgstr ""
 "X-Generator: POEditor.com\n"
 "Project-Id-Version: SoVisu+\n"
 "Language: fr\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/LanguageProvider.test.tsx:13
@@ -19,8 +25,8 @@ msgstr "Bonjour"
 #: src/app/[lang]/page.tsx:68
 #: src/app/[lang]/page.tsx:71
 #: src/app/[lang]/auth/login/page.tsx:10
-msgid "Login Page work"
-msgstr ""
+#~ msgid "Login Page work"
+#~ msgstr ""
 
 #: src/app/[lang]/components/sidebar/sidebar.tsx:455
 #: src/app/[lang]/dashboard/page.tsx:10
@@ -28,37 +34,35 @@ msgid "side_bar_dashboard"
 msgstr "Tableau de bord"
 
 #: src/app/[lang]/components/sidebar/sidebar.tsx:553
-#: src/app/[lang]/dashboard/expertise/page.tsx:10
+#: src/app/[lang]/expertise/page.tsx:10
 msgid "side_bar_expertise"
 msgstr "Expertises"
 
 #: src/app/[lang]/components/sidebar/sidebar.tsx:664
-#: src/app/[lang]/dashboard/institutions/page.tsx:10
+#: src/app/[lang]/institutions/page.tsx:10
 msgid "side_bar_institutions"
 msgstr "Institutions"
 
 #: src/app/[lang]/components/sidebar/sidebar.tsx:714
-#: src/app/[lang]/dashboard/laboratories/page.tsx:10
+#: src/app/[lang]/laboratories/page.tsx:10
 msgid "side_bar_laboratories"
 msgstr "Laboratoires"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:89
-#: src/app/[lang]/dashboard/my-account/page.tsx:10
+#: src/app/[lang]/my-account/page.tsx:10
 msgid "side_bar_my_account"
 msgstr "Mon compte"
 
 #: src/app/[lang]/components/sidebar/sidebar.tsx:614
-#: src/app/[lang]/dashboard/my-groups/page.tsx:10
+#: src/app/[lang]/my-groups/page.tsx:10
 msgid "side_bar_my_groups"
 msgstr "Groupes"
 
-#: src/app/[lang]/dashboard/research-activities/page.tsx:10
+#: src/app/[lang]/research-activities/page.tsx:10
 msgid "side_bar_my_research_activities"
 msgstr "Activités de recherche"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:179
 #: src/app/[lang]/components/sidebar/sidebar.tsx:504
-#: src/app/[lang]/dashboard/publications/page.tsx:10
+#: src/app/[lang]/publications/page.tsx:92
 msgid "side_bar_publications"
 msgstr "Publications"
 
@@ -86,6 +90,5 @@ msgid "splash.login"
 msgstr "Se connecter"
 
 #: src/app/[lang]/splash.tsx:42
-msgid "splash.logout"
-msgstr "Déconnexion"
-
+#~ msgid "splash.logout"
+#~ msgstr "Déconnexion"
