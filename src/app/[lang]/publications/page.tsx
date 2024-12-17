@@ -82,6 +82,7 @@ export default function PublicationsPage() {
         data={data}
         expandableRows={true}
         renderExpandableRow={renderExpandableRow}
+        selectableRows={true}
       />
     </Box>
   )
