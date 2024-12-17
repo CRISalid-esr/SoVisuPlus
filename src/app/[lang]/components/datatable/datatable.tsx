@@ -23,7 +23,7 @@ interface Column {
   sortable?: boolean
   renderCell?: (row: any, column: Column, depth?: number) => React.ReactNode // eslint-disable-line @typescript-eslint/no-explicit-any
   expandable?: boolean
-  renderExpandableRow?: (row: any) => React.ReactNode // eslint-disable-line @typescript-eslint/no-explicit-any
+  visible?: boolean
 }
 
 interface DataTableProps {
@@ -189,7 +189,7 @@ const DataTable: React.FC<DataTableProps> = ({
               key={column.id}
               padding={depth > 0 ? 'none' : 'normal'} // No padding for children
             >
-              {column.renderCell
+              {column.visible && column.renderCell
                 ? column.renderCell(row, column, depth)
                 : row[column.id]}
             </TableCell>
@@ -252,28 +252,10 @@ const DataTable: React.FC<DataTableProps> = ({
                       direction={orderBy === column.id ? order : 'asc'}
                       onClick={createSortHandler(column.id)}
                     >
-                      <Typography
-                        variant='bodySmall'
-                        sx={{
-                          fontWeight: 500,
-                          fontFamily: 'Inter',
-                          textTransform: 'uppercase',
-                        }}
-                      >
-                        {column.label}
-                      </Typography>
+                      <Typography>{column.label}</Typography>
                     </TableSortLabel>
                   ) : (
-                    <Typography
-                      variant='bodySmall'
-                      sx={{
-                        fontWeight: 500,
-                        fontFamily: 'Inter',
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      {column.label}
-                    </Typography>
+                    <Typography>{column.label}</Typography>
                   )}
                 </TableCell>
               ))}
