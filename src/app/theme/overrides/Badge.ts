@@ -1,12 +1,7 @@
-import { Theme } from '@mui/material/styles'
-
-export default function Badge(theme: Theme) {
+export default function Badge() {
   return {
     MuiBadge: {
-      defaultProps: {
-        showZero: false,
-        variant: 'standard',
-      },
+      defaultProps: {},
       styleOverrides: {
         root: {},
         badge: {},

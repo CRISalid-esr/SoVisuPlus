@@ -1,12 +1,11 @@
-import { Tabs, Tab, Box, Typography, Badge } from '@mui/material'
-import { Palette, PaletteColor } from '@mui/material/styles'
-import { color, useTheme } from '@mui/system'
+import { Badge, Box, Tab, Tabs, Typography } from '@mui/material'
+import { useTheme } from '@mui/system'
 
 type TabData = {
   label: string
   value: string
   numberOfItems?: number
-  color: keyof Palette
+  color: string
 }
 
 type TabFilterProps = {
@@ -57,7 +56,10 @@ const TabFilter = ({
                 {tab.numberOfItems && (
                   <Badge
                     sx={{
-                      backgroundColor: theme.palette[tab.color].main,
+                      ' .MuiBadge-badge': {
+                        color: theme.palette.white,
+                        backgroundColor: tab.color,
+                      },
                     }}
                     badgeContent={tab.numberOfItems}
                   />

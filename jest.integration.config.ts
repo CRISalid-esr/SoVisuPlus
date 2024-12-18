@@ -13,7 +13,7 @@ const createJestConfig = nextJest({
 
 const config: Config = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-  testMatch: ['<rootDir>/src/__tests__/integration/**/*.test.(ts|tsx)'],
+  testMatch: ['<rootDir>/integration/**/*.test.(ts|tsx)'],
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 

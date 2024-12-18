@@ -1,17 +1,13 @@
 'use client'
 
-import { Trans } from '@lingui/macro'
+import { t, Trans } from '@lingui/macro'
 import { Box, Typography } from '@mui/material'
 import { MaterialReactTable } from 'material-react-table'
 import { useMemo, useState } from 'react'
 
 import { TabFilter } from '@/components/TabFilter'
+import { useTheme } from '@mui/system'
 
-const tabs = [
-  { label: 'All', value: 'all' },
-  { label: 'Active', value: 'active' },
-  { label: 'Completed', value: 'completed' },
-]
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const data: any[] = [
   {
@@ -90,6 +86,28 @@ const columns = [
 ]
 
 export default function PublicationsPage() {
+  const theme = useTheme()
+
+  const tabs = [
+    {
+      label: t`publications_page_all_publications_filter`,
+      value: 'all_publications',
+      color: theme.palette.primary.main,
+    },
+    {
+      label: t`publications_page_incomplete_hal_repository_filter`,
+      value: 'incomplete_hal_repository',
+      numberOfItems: 2,
+      color: theme.palette.primary.main,
+    },
+    {
+      label: t`publications_page_keywords_to_validate`,
+      value: 'keywords_to_validate',
+      numberOfItems: 1,
+      color: theme.palette.primary.main,
+    },
+  ]
+
   const [selectedTab, setSelectedTab] = useState(tabs[0].value)
 
   const memoizedColumns = useMemo(() => columns, [columns])
