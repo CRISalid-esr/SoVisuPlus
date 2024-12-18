@@ -12,7 +12,7 @@ const tabs = [
   { label: 'Active', value: 'active' },
   { label: 'Completed', value: 'completed' },
 ]
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const data: any[] = [
   {
     name: {
@@ -91,7 +91,6 @@ const columns = [
 
 export default function PublicationsPage() {
   const [selectedTab, setSelectedTab] = useState(tabs[0].value)
-
 
   const memoizedColumns = useMemo(() => columns, [columns])
   const memoizedData = useMemo(() => data, [data])

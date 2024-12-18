@@ -21,8 +21,19 @@ const TabFilter = ({
   }
 
   return (
-    <Box>
-      <Tabs value={selectedValue} onChange={handleTabChange}>
+    <Box sx={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
+      <Tabs
+        value={selectedValue}
+        onChange={handleTabChange}
+        variant='scrollable'
+        scrollButtons='auto'
+        allowScrollButtonsMobile
+        sx={{
+          '.MuiTabs-scrollButtons': {
+            display: 'inline-flex',
+          },
+        }}
+      >
         {tabsData.map((tab, index) => (
           <Tab key={index} label={tab.label} value={tab.value} />
         ))}
