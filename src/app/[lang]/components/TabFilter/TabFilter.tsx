@@ -1,8 +1,12 @@
-import { Tabs, Tab, Box } from '@mui/material'
+import { Tabs, Tab, Box, Typography, Badge } from '@mui/material'
+import { Palette, PaletteColor } from '@mui/material/styles'
+import { color, useTheme } from '@mui/system'
 
 type TabData = {
   label: string
   value: string
+  numberOfItems?: number
+  color: keyof Palette
 }
 
 type TabFilterProps = {
@@ -16,6 +20,8 @@ const TabFilter = ({
   selectedValue,
   onTabChange,
 }: TabFilterProps) => {
+  const theme = useTheme()
+
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
     onTabChange(newValue) // Call the parent's handler
   }
@@ -35,7 +41,31 @@ const TabFilter = ({
         }}
       >
         {tabsData.map((tab, index) => (
-          <Tab key={index} label={tab.label} value={tab.value} />
+          <Tab
+            sx={{
+              textTransform: 'none',
+            }}
+            key={index}
+            label={
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <Typography mr={2}>{tab.label}</Typography>
+                {tab.numberOfItems && (
+                  <Badge
+                    sx={{
+                      backgroundColor: theme.palette[tab.color].main,
+                    }}
+                    badgeContent={tab.numberOfItems}
+                  />
+                )}
+              </Box>
+            }
+            value={tab.value}
+          />
         ))}
       </Tabs>
     </Box>

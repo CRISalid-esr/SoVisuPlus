@@ -27,6 +27,26 @@ msgstr "Hello"
 #~ msgid "Login Page work"
 #~ msgstr ""
 
+#: src/app/[lang]/publications/page.tsx:89
+msgid "publications_page_all_publications_filter"
+msgstr ""
+
+#: src/app/[lang]/publications/page.tsx:91
+msgid "publications_page_incomplete_hal_repository_filter"
+msgstr ""
+
+#: src/app/[lang]/publications/page.tsx:95
+msgid "publications_page_keywords_to_validate"
+msgstr ""
+
+#: src/app/[lang]/publications/page.tsx:125
+msgid "publications_page_main_title"
+msgstr ""
+
+#: src/app/[lang]/publications/page.tsx:130
+msgid "publications_page_synchronize_button"
+msgstr ""
+
 #: src/app/[lang]/components/sidebar/Sidebar.tsx:455
 #: src/app/[lang]/dashboard/page.tsx:10
 msgid "side_bar_dashboard"
