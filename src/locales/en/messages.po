@@ -27,22 +27,22 @@ msgstr "Hello"
 #~ msgid "Login Page work"
 #~ msgstr ""
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:455
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:455
 #: src/app/[lang]/dashboard/page.tsx:10
 msgid "side_bar_dashboard"
 msgstr "Dashboard"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:553
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:553
 #: src/app/[lang]/expertise/page.tsx:10
 msgid "side_bar_expertise"
 msgstr "Expertise"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:664
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:664
 #: src/app/[lang]/institutions/page.tsx:10
 msgid "side_bar_institutions"
 msgstr "Institutions"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:714
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:714
 #: src/app/[lang]/laboratories/page.tsx:10
 msgid "side_bar_laboratories"
 msgstr "Laboratories"
@@ -51,7 +51,7 @@ msgstr "Laboratories"
 msgid "side_bar_my_account"
 msgstr "Account manager"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:614
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:614
 #: src/app/[lang]/my-groups/page.tsx:10
 msgid "side_bar_my_groups"
 msgstr "Groups"
@@ -60,27 +60,27 @@ msgstr "Groups"
 msgid "side_bar_my_research_activities"
 msgstr "Research activities"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:504
-#: src/app/[lang]/publications/page.tsx:92
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:504
+#: src/app/[lang]/publications/page.tsx:91
 msgid "side_bar_publications"
 msgstr "Publications"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:360
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:360
 msgid "sidebar_search_placeholder"
 msgstr "Search"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:123
-#: src/app/[lang]/components/sidebar/sidebar.tsx:146
-#: src/app/[lang]/components/sidebar/sidebar.tsx:791
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:123
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:146
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:791
 msgid "sidebar_theme_dark"
 msgstr "Dark theme"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:100
-#: src/app/[lang]/components/sidebar/sidebar.tsx:772
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:100
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:772
 msgid "sidebar_theme_light"
 msgstr "Light theme"
 
-#: src/app/[lang]/components/sidebar/sidebar.tsx:810
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:810
 msgid "sidebar_theme_system"
 msgstr "Auto Theme"
 
