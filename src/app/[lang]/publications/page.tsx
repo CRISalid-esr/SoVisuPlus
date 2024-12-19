@@ -2,12 +2,8 @@
 
 import { Trans } from '@lingui/macro'
 import { Box, Typography } from '@mui/material'
+import { MaterialReactTable } from 'material-react-table'
 import { useMemo } from 'react'
-import {
-  MaterialReactTable,
-  useMaterialReactTable,
-  type MRT_ColumnDef,
-} from 'material-react-table'
 
 export default function PublicationsPage() {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -59,48 +55,46 @@ export default function PublicationsPage() {
     },
   ]
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  const columns = useMemo<MRT_ColumnDef<any>[]>(
-    () => [
-      {
-        accessorKey: 'name.firstName', //access nested data with dot notation
-        header: 'First Name',
-        size: 150,
-      },
-      {
-        accessorKey: 'name.lastName',
-        header: 'Last Name',
-        size: 150,
-      },
-      {
-        accessorKey: 'address', //normal accessorKey
-        header: 'Address',
-        size: 200,
-      },
-      {
-        accessorKey: 'city',
-        header: 'City',
-        size: 150,
-      },
-      {
-        accessorKey: 'state',
-        header: 'State',
-        size: 150,
-      },
-    ],
-    [],
-  )
-
-  const table = useMaterialReactTable({
-    columns,
-    data,
-  })
+  const columns = [
+    {
+      accessorKey: 'name.firstName', //access nested data with dot notation
+      header: 'First Name',
+      size: 150,
+    },
+    {
+      accessorKey: 'name.lastName',
+      header: 'Last Name',
+      size: 150,
+    },
+    {
+      accessorKey: 'address', //normal accessorKey
+      header: 'Address',
+      size: 200,
+    },
+    {
+      accessorKey: 'city',
+      header: 'City',
+      size: 150,
+    },
+    {
+      accessorKey: 'state',
+      header: 'State',
+      size: 150,
+    },
+  ]
+  const memoizedColumns = useMemo(() => columns, [columns])
+  const memoizedData = useMemo(() => data, [data])
 
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant='h4' gutterBottom>
         <Trans>side_bar_publications</Trans>
       </Typography>
-      <MaterialReactTable table={table} />
+      <MaterialReactTable
+        columns={memoizedColumns}
+        data={memoizedData}
+        enablePagination
+      />
     </Box>
   )
 }
