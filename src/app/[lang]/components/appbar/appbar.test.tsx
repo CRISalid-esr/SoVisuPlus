@@ -21,15 +21,19 @@ describe('Appbar Component', () => {
     render(
       <ThemeProvider theme={theme}>
         <Appbar handleToggleDrawer={mockHandleToggleDrawer} />
-      </ThemeProvider>
+      </ThemeProvider>,
     )
 
     // Check if the logos are rendered
     expect(screen.getByAltText('Crisalid logo')).toBeInTheDocument()
-    expect(screen.getByAltText('Crisalid logo').getAttribute('src')).toBe('/icons/logo.svg')
+    expect(screen.getByAltText('Crisalid logo').getAttribute('src')).toBe(
+      '/icons/logo.svg',
+    )
 
     expect(screen.getByAltText('Crisalid logo plus')).toBeInTheDocument()
-    expect(screen.getByAltText('Crisalid logo plus').getAttribute('src')).toBe('/soVisuPlus.svg')
+    expect(screen.getByAltText('Crisalid logo plus').getAttribute('src')).toBe(
+      '/icons/soVisuPlus.svg',
+    )
 
     // Check if the IconButton with Menu icon is rendered
     const menuButton = screen.getByLabelText('menu')

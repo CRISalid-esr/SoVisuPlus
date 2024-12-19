@@ -19,14 +19,7 @@ msgstr ""
 msgid "hello"
 msgstr "Bonjour"
 
-#. différence avec splash login ?
-#: src/app/[lang]/page.tsx:79
-#: src/app/[lang]/page.tsx:74
-#: src/app/[lang]/page.tsx:68
-#: src/app/[lang]/page.tsx:71
-#: src/app/[lang]/auth/login/page.tsx:10
-#~ msgid "Login Page work"
-#~ msgstr ""
+
 
 #: src/app/[lang]/publications/page.tsx:89
 msgid "publications_page_all_publications_filter"

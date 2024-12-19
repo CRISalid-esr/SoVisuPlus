@@ -1,13 +1,13 @@
 'use client'
 
 import { t, Trans } from '@lingui/macro'
-import { Box, Typography } from '@mui/material'
+import { Box, Button, Typography } from '@mui/material'
 import { MaterialReactTable } from 'material-react-table'
 import { useMemo, useState } from 'react'
 
 import { TabFilter } from '@/components/TabFilter'
 import { useTheme } from '@mui/system'
-
+import SyncIcon from '@mui/icons-material/Sync'
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const data: any[] = [
   {
@@ -119,10 +119,22 @@ export default function PublicationsPage() {
 
   return (
     <Box sx={{ padding: 4 }}>
-      <Typography variant='h4' gutterBottom>
-        <Trans>side_bar_publications</Trans>
-      </Typography>
-
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Box>
+          <Typography variant='h4' gutterBottom>
+            <Trans>publications_page_main_title</Trans>
+          </Typography>
+        </Box>
+        <Button startIcon={<SyncIcon />} variant='outlined'>
+          <Trans>publications_page_synchronize_button</Trans>
+        </Button>
+      </Box>
       <TabFilter
         tabsData={tabs}
         selectedValue={selectedTab}
