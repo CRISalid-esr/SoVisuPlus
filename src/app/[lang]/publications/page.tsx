@@ -118,7 +118,7 @@ export default function PublicationsPage() {
   }
 
   return (
-    <Box sx={{ padding: 4 }}>
+    <Box>
       <Box
         sx={{
           display: 'flex',
