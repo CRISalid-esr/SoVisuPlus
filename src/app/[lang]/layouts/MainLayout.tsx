@@ -39,7 +39,6 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               marginLeft: !isMobile && open ? '240px' : !isMobile ? '72px' : 0, // Adjust for Sidebar width
               marginTop: isMobile ? '64px' : 0, // Adjust for AppBar height (typically 64px on mobile)
               overflowY: 'auto', // Allow scrolling if content overflows
-              zIndex: 1, // Keep content below AppBar and Sidebar
               position: 'relative', // Ensure main is properly positioned
             }}
           >

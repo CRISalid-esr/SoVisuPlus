@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import Appbar from './appbar'
+import Appbar from './Appbar'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import '@testing-library/jest-dom'
 
