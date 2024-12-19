@@ -26,7 +26,14 @@ const TabFilter = ({
   }
 
   return (
-    <Box sx={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
+    <Box
+      sx={(theme) => ({
+        overflowX: 'auto',
+        whiteSpace: 'nowrap',
+        borderBottom: '1px solid #DDE4E1',
+        marginBottom: theme.spacing(8),
+      })}
+    >
       <Tabs
         value={selectedValue}
         onChange={handleTabChange}
