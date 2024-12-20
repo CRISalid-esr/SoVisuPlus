@@ -7,6 +7,7 @@ import { resolveLanguage } from '@/utils/language'
 import { CssBaseline } from '@mui/material'
 import { ThemeProvider } from '@/app/[lang]/context/ThemeContext'
 import SessionProviderWrapper from '@/components/SessionProviderWrapper'
+import ErrorBoundary from '../[lang]/components/ErrorBoundary'
 
 type Props = {
   children: React.ReactNode
@@ -23,16 +24,18 @@ export default async function RootLayout({ params, children }: Props) {
     <>
       <html lang={lang}>
         <title>sovisuplus</title>
-        <ThemeProvider>
-          <CssBaseline />
-          <LanguageProvider locale={lang} messages={selectedMessages}>
-            <AppRouterCacheProvider>
-              <SessionProviderWrapper>
-                <body>{children}</body>
-              </SessionProviderWrapper>
-            </AppRouterCacheProvider>
-          </LanguageProvider>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider>
+            <CssBaseline />
+            <LanguageProvider locale={lang} messages={selectedMessages}>
+              <AppRouterCacheProvider>
+                <SessionProviderWrapper>
+                  <body>{children}</body>
+                </SessionProviderWrapper>
+              </AppRouterCacheProvider>
+            </LanguageProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
       </html>
     </>
   )
