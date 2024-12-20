@@ -39,11 +39,11 @@ const TabFilter = ({
         onChange={handleTabChange}
         variant='scrollable'
         scrollButtons='auto'
-        allowScrollButtonsMobile
+        aria-label='scrollable tabs'
         sx={{
-          '.MuiTabs-scrollButtons': {
-            display: 'inline-flex',
-          },
+          display: 'flex',
+          justifyContent: 'center',
+          width: '100%',
         }}
       >
         {tabsData.map((tab, index) => (

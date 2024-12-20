@@ -120,10 +120,18 @@ export default function PublicationsPage() {
   return (
     <Box>
       <Box
+        mb={3}
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center',
+          alignItems: {
+            xs: 'flex-start',
+            md: 'center',
+          },
+          flexDirection: {
+            xs: 'column',
+            sm: 'row',
+          },
         }}
       >
         <Box>

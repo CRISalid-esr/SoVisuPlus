@@ -40,7 +40,7 @@ export default function MainLayout({
           component='main'
           sx={{
             flexGrow: 1,
-            padding: !isMobile ? '32px' : '16px', // Add some padding on mobile
+            padding: !isMobile ? '32px' : '24px 16px', // Add some padding on mobile
             marginLeft: !isMobile && open ? '280px' : !isMobile ? '72px' : 0, // Adjust for Sidebar width
             marginTop: isMobile ? '64px' : 0, // Adjust for AppBar height (typically 64px on mobile)
             overflowY: 'auto', // Allow scrolling if content overflows
