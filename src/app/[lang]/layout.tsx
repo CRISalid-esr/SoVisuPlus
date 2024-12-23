@@ -8,6 +8,7 @@ import { CssBaseline } from '@mui/material'
 import { ThemeProvider } from '@/app/[lang]/context/ThemeContext'
 import SessionProviderWrapper from '@/components/SessionProviderWrapper'
 import ErrorBoundary from '../[lang]/components/ErrorBoundary'
+import ErrorFallback from './components/ErrorFallback'
 
 type Props = {
   children: React.ReactNode
@@ -24,7 +25,7 @@ export default async function RootLayout({ params, children }: Props) {
     <>
       <html lang={lang}>
         <title>sovisuplus</title>
-        <ErrorBoundary>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
           <ThemeProvider>
             <CssBaseline />
             <LanguageProvider locale={lang} messages={selectedMessages}>

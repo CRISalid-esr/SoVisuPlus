@@ -1,27 +1,39 @@
 'use client'
 import React, { Component, ErrorInfo } from 'react'
 
-interface ErrorBoundaryProps {
+interface Props {
   children: React.ReactNode
+  FallbackComponent: React.ComponentType<{ error: Error }>
 }
 
-class ErrorBoundary extends Component<ErrorBoundaryProps> {
-  state = { hasError: false }
+interface State {
+  hasError: boolean
+  error: Error | null
+}
 
-  static getDerivedStateFromError() {
-    return { hasError: true }
+class ErrorBoundary extends Component<Props, State> {
+  state: State = {
+    hasError: false,
+    error: null,
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('Error caught in Error Boundary:', error, info)
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Error caught by ErrorBoundary:', error, errorInfo)
   }
 
   render() {
-    if (this.state.hasError) {
-      return <div>Something went wrong. Please try again later.</div>
+    const { hasError, error } = this.state
+    const { FallbackComponent, children } = this.props
+
+    if (hasError) {
+      return <FallbackComponent error={error!} />
     }
 
-    return this.props.children
+    return children
   }
 }
 
