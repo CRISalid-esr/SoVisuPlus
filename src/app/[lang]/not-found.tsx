@@ -5,11 +5,16 @@ import ErrorFallback from '@/components/ErrorFallback'
 import Background from '@/public/icons/background.svg'
 import Error404 from '@/public/icons/error404.svg'
 import Logo from '@/public/icons/logo_splash_screen.svg'
-import { Trans } from '@lingui/macro'
 import { Box, Button, Typography } from '@mui/material'
 import { signIn } from 'next-auth/react'
+import Link from 'next/link'
+import { Trans } from '@lingui/react'
+import { usePathname } from 'next/navigation'
 
 const NotFound = () => {
+  const pathname = usePathname() // Get the current path
+  const lang = pathname.split('/')[1] // Extract the `lang` dynamic segment
+
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Box display='flex' flexDirection='row' height='100vh' width='100vw'>
@@ -33,7 +38,7 @@ const NotFound = () => {
                   '&:hover': { backgroundColor: 'darkcyan' },
                 }}
               >
-                <Trans>notfound_page_back_home</Trans>
+                <Trans id='notfound_page_back_home' />
               </Button>
             </Box>
           </Box>
@@ -99,7 +104,13 @@ const NotFound = () => {
                   zIndex: 1,
                 })}
               >
-                <Trans>notfound_page_description</Trans>
+                <Trans
+                  id='notfound_page_description'
+                  components={{
+                    0: <Link href={`/${lang}/faq`} passHref />,
+                    1: <Link href={`/${lang}/community`} passHref />,
+                  }}
+                />
               </Typography>
             </Box>
             <Box

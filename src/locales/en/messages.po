@@ -14,10 +14,33 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:41
+msgid "notfound_page_back_home"
+msgstr "Retour à la page d'accueil"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:107
+msgid "notfound_page_description"
+msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1>community</1> might be able to help."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:37
+#~ msgid "pageNotFound"
+#~ msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/LanguageProvider.test.tsx:13
 #: src/app/[lang]/LanguageProvider.test.tsx:29
 msgid "hello"
 msgstr "Hello"
+
+#: src/app/[lang]/not-found.tsx:37
+#~ msgid "notfound_page_back_home"
+#~ msgstr ""
+
+#: src/app/[lang]/not-found.tsx:118
+#~ msgid "notfound_page_description"
+#~ msgstr ""
 
 #: src/app/[lang]/publications/page.tsx:93
 msgid "publications_page_all_publications_filter"
