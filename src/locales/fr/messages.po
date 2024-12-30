@@ -13,21 +13,19 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:41
-msgid "notfound_page_back_home"
-msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/not-found.tsx:107
 msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
+#: src/app/[lang]/not-found.tsx:44
+msgid "notfound_page_back_home"
+msgstr "Retour à la page d'accueil"
 
 #. js-lingui-explicit-id
-#. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:37
-#~ msgid "pageNotFound"
-#~ msgstr ""
+#: src/app/[lang]/not-found.tsx:110
+msgid "notfound_page_description"
+msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/LanguageProvider.test.tsx:13

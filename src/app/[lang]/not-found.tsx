@@ -6,14 +6,15 @@ import Background from '@/public/icons/background.svg'
 import Error404 from '@/public/icons/error404.svg'
 import Logo from '@/public/icons/logo_splash_screen.svg'
 import { Box, Button, Typography } from '@mui/material'
-import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { Trans } from '@lingui/react'
 import { usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 const NotFound = () => {
   const pathname = usePathname() // Get the current path
   const lang = pathname.split('/')[1] // Extract the `lang` dynamic segment
+  const router = useRouter()
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -29,12 +30,13 @@ const NotFound = () => {
           <Box display='flex' justifyContent='center' alignItems='center'>
             <Box width='100%' maxWidth='400px'>
               <Button
-                onClick={() => signIn('keycloak')}
+                onClick={() => router.push(`/${lang}/dashboard`)}
                 fullWidth
                 variant='contained'
                 sx={{
+                  textTransform: 'none',
                   backgroundColor: 'teal',
-                  mb: 2,
+                  mb: 10,
                   '&:hover': { backgroundColor: 'darkcyan' },
                 }}
               >
@@ -83,7 +85,7 @@ const NotFound = () => {
             <Typography
               variant='displayLarge'
               sx={(theme) => ({
-                mb: theme.spacing(18),
+                mb: theme.spacing(4),
                 zIndex: 1,
                 textAlign: 'start',
               })}
@@ -99,8 +101,7 @@ const NotFound = () => {
               <Typography
                 component={'p'}
                 variant='headingSmall'
-                sx={(theme) => ({
-                  mb: theme.spacing(18),
+                sx={() => ({
                   zIndex: 1,
                 })}
               >
