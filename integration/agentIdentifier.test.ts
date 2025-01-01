@@ -15,6 +15,7 @@ describe('AgentIdentifier Model Tests', () => {
   test('should create an AgentIdentifier for a user', async () => {
     const user = await prisma.user.create({
       data: {
+        person_uid: 'local-test1234',
         email: 'user1@example.com',
       },
     })
@@ -35,6 +36,7 @@ describe('AgentIdentifier Model Tests', () => {
   test('should fetch an AgentIdentifier for a user', async () => {
     const user = await prisma.user.create({
       data: {
+        person_uid: 'local-test1234',
         email: 'user2@example.com',
       },
     })
@@ -49,7 +51,8 @@ describe('AgentIdentifier Model Tests', () => {
 
     const fetchedAgent = await prisma.agentIdentifier.findUnique({
       where: {
-        id: agentIdentifier.id,
+        type: agentIdentifier.type,
+        value: agentIdentifier.value,
       },
     })
 

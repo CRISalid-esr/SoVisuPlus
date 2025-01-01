@@ -1,14 +1,25 @@
 import {
   ApolloClient,
-  InMemoryCache,
   gql,
+  InMemoryCache,
   NormalizedCacheObject,
 } from '@apollo/client'
 
-export class DataService {
-  private client: ApolloClient<NormalizedCacheObject>
+export class AbstractGraphQLClient {
+  private readonly client: ApolloClient<NormalizedCacheObject>
+  private readonly enabled: boolean
 
-  constructor(uri: string) {
+  constructor() {
+    this.enabled = process.env.GRAPHQL_ENDPOINT_ENABLED
+    const uri: string | undefined = process.env.GRAPHQL_ENDPOINT_URL
+    if (!this.enabled) {
+      console.warn('GraphQL endpoint is disabled')
+    }
+    if (!uri) {
+      console.error(
+        'GraphQL endpoint URL should be defined as GRAPHQL_ENDPOINT_URL',
+      )
+    }
     this.client = new ApolloClient({
       uri,
       cache: new InMemoryCache(),
@@ -25,6 +36,7 @@ export class DataService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     variables?: Record<string, any>,
   ): Promise<T> {
+    this.assertEnabled()
     try {
       const result = await this.client.query<T>({
         query: gql`
@@ -50,6 +62,7 @@ export class DataService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     variables?: Record<string, any>,
   ): Promise<T> {
+    this.assertEnabled()
     try {
       const result = await this.client.mutate<T>({
         mutation: gql`
@@ -79,6 +92,7 @@ export class DataService {
     variables: Record<string, any>,
     callback: (data: T) => void,
   ) {
+    this.assertEnabled()
     const observable = this.client.subscribe({
       query: gql`
         ${subscription}
@@ -92,5 +106,25 @@ export class DataService {
       },
       error: (error) => console.error('Subscription error:', error),
     })
+  }
+
+  /**
+   * Check if the GraphQL client is enabled.
+   * @returns `true` if enabled, otherwise `false`.
+   */
+  public isEnabled(): boolean {
+    return this.enabled
+  }
+
+  /**
+   * Asserts that the GraphQL client is enabled and valid.
+   */
+  private assertEnabled(): void {
+    if (!this.enabled) {
+      throw new Error('GraphQL client is disabled.')
+    }
+    if (!this.client) {
+      throw new Error('GraphQL client is not initialized.')
+    }
   }
 }

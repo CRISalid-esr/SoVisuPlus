@@ -1,5 +1,8 @@
-import { AuthOptions } from 'next-auth'
-import KeycloakProvider from 'next-auth/providers/keycloak'
+import { Account, AuthOptions, Profile, User } from 'next-auth'
+import KeycloakProvider, { KeycloakProfile } from 'next-auth/providers/keycloak'
+import { PersonService } from '@/lib/services/PersonService'
+import { AuthenticationProfile } from '@/types/AuthenticationProfile'
+import { CredentialInput } from 'next-auth/providers/credentials'
 
 const authOptions: AuthOptions = {
   providers: [
@@ -10,9 +13,32 @@ const authOptions: AuthOptions = {
     }),
   ],
   session: {
-    strategy: 'jwt', // Ensure you're using JWT sessions
+    strategy: 'jwt',
   },
   callbacks: {
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    async signIn({
+      user,
+      account,
+      profile,
+      email,
+      credentials,
+    }: {
+      user: User
+      account: Account | null
+      profile?: Profile
+      email?: { verificationRequest?: boolean }
+      credentials?: Record<string, CredentialInput>
+    }) {
+      console.info('signIn callback', user, account, profile)
+      const personService = new PersonService()
+      const authenticationProfile: AuthenticationProfile = {
+        username: (profile as KeycloakProfile)?.preferred_username,
+        email: profile?.email,
+        orcid: (profile as KeycloakProfile)?.orcid,
+      }
+      return await personService.submitProfile(authenticationProfile)
+    },
     async jwt(params) {
       console.info('jwt callback', params)
       const { token, account, user } = params

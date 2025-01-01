@@ -8,5 +8,7 @@ declare namespace NodeJS {
     AMQP_HOST: string
     AMQP_PORT: string
     AMQP_QUEUE_NAME: string
+    GRAPHQL_ENDPOINT_ENABLED: boolean
+    GRAPHQL_ENDPOINT_URL: string
   }
 }

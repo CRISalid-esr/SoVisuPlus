@@ -1,0 +1,29 @@
+query PeopleQuery($where: PersonWhere) {
+  people(where: $where) {
+    uid
+    display_name
+    identifiers {
+      type
+      value
+    }
+    names {
+      first_names {
+        language
+        value
+      }
+      last_names {
+        language
+        value
+      }
+    }
+    memberships {
+      uid
+      acronym
+      names {
+        language
+        value
+      }
+      type
+    }
+  }
+}
