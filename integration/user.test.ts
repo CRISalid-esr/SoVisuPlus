@@ -15,6 +15,7 @@ describe('User Model Tests', () => {
   test('should create a new user', async () => {
     const user = await prisma.user.create({
       data: {
+        person_uid: 'local-test1234',
         email: 'test@example.com',
       },
     })
@@ -26,6 +27,7 @@ describe('User Model Tests', () => {
   test('should find a user by email', async () => {
     await prisma.user.create({
       data: {
+        person_uid: 'local-test1234',
         email: 'findme@example.com',
       },
     })
