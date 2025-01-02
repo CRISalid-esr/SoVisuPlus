@@ -1,36 +1,39 @@
-'use client';
-import { createTheme } from "@mui/material/styles";
-import componentsOverride from "./overrides"
+'use client'
+import { createTheme } from '@mui/material/styles'
+import componentsOverride from './overrides'
 import { dark, light, colors } from './palette'
 import breakpoints from './breakpoints'
-import typography from "./typography" // Custom and MUI default
+import typography from './typography' // Custom and MUI default
 import {
-  pxToLineHeight, pxToRem, pxToThemeSpacing, responsiveFontSizes
+  pxToLineHeight,
+  pxToRem,
+  pxToThemeSpacing,
+  responsiveFontSizes,
 } from './utils'
-
 
 const lightTheme = createTheme({
   palette: {
     mode: 'light',
     ...light,
-    ...colors
+    ...colors,
   },
   breakpoints,
   typography,
   utils: { pxToLineHeight, pxToRem, pxToThemeSpacing, responsiveFontSizes },
-});
+})
 
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     ...dark,
-    ...colors
+    ...colors,
   },
   breakpoints,
   typography,
   utils: { pxToLineHeight, pxToRem, pxToThemeSpacing, responsiveFontSizes },
-});
+})
 
 darkTheme.components = componentsOverride(darkTheme)
 lightTheme.components = componentsOverride(lightTheme)
-export { lightTheme, darkTheme };
+
+export { lightTheme, darkTheme }

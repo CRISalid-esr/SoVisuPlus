@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   experimental: {
+    authInterrupts: true,
     swcPlugins: [['@lingui/swc-plugin', {}]],
     middlewarePrefetch: 'flexible',
   },
