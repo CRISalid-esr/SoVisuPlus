@@ -13,11 +13,44 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:107
+msgid "notfound_page_description"
+msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
+#: src/app/[lang]/not-found.tsx:44
+#: src/app/[lang]/forbidden.tsx:43
+msgid "forbidden_page_back_home"
+msgstr "Retour à la page d'accueil"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:108
+msgid "forbidden_page_description"
+msgstr "Vous n'êtes pas autorisé à accéder à cette ressource. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/ErrorFallback.tsx:38
+msgid "internal_server_page_back_home"
+msgstr "Retour à la page d'accueil"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/ErrorFallback.tsx:103
+msgid "internal_server_page_description"
+msgstr "Le serveur a détecté une erreur interne et n'a  pas pu traiter votre demande. Réessayez un peu plus tard !"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:43
+msgid "notfound_page_back_home"
+msgstr "Retour à la page d'accueil"
+
+
+
 #. js-lingui-explicit-id
 #: src/app/[lang]/LanguageProvider.test.tsx:13
 #: src/app/[lang]/LanguageProvider.test.tsx:29
 msgid "hello"
 msgstr "Bonjour"
+
 
 #: src/app/[lang]/publications/page.tsx:93
 msgid "publications_page_all_publications_filter"
@@ -73,6 +106,7 @@ msgid "side_bar_my_research_activities"
 msgstr "Activités de recherche"
 
 #: src/app/[lang]/components/sidebar/Sidebar.tsx:504
+#: src/app/[lang]/publications/page.tsx:98
 msgid "side_bar_publications"
 msgstr "Publications"
 

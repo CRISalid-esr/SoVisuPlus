@@ -13,11 +13,50 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:107
+#: src/app/[lang]/not-found.tsx:44
+#: src/app/[lang]/forbidden.tsx:43
+msgid "forbidden_page_back_home"
+msgstr "Back to home page"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:108
+msgid "forbidden_page_description"
+msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/ErrorFallback.tsx:38
+msgid "internal_server_page_back_home"
+msgstr "Back to home page"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/ErrorFallback.tsx:103
+msgid "internal_server_page_description"
+msgstr "The server detected an internal error and was unable to process your request. Please try again later!"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:43
+msgid "notfound_page_back_home"
+msgstr "Back to home page"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:108
+msgid "notfound_page_description"
+msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1>community</1> might be able to help."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:37
+#~ msgid "pageNotFound"
+#~ msgstr ""
+
 #. js-lingui-explicit-id
 #: src/app/[lang]/LanguageProvider.test.tsx:13
 #: src/app/[lang]/LanguageProvider.test.tsx:29
 msgid "hello"
 msgstr "Hello"
+
 
 #: src/app/[lang]/publications/page.tsx:93
 msgid "publications_page_all_publications_filter"
@@ -73,6 +112,10 @@ msgid "side_bar_my_research_activities"
 msgstr "Research activities"
 
 #: src/app/[lang]/components/sidebar/Sidebar.tsx:504
+<<<<<<< HEAD
+=======
+#: src/app/[lang]/publications/page.tsx:98
+>>>>>>> dee6da8 (fix forbidden)
 msgid "side_bar_publications"
 msgstr "Publications"
 
