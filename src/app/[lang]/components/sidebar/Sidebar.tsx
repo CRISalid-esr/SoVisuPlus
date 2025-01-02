@@ -174,6 +174,7 @@ export default function Sidebar({
         return null
     }
   }
+  console.log('theme.palette.primary.main', theme.palette.primary.main)
 
   return (
     <>
