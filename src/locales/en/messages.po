@@ -19,23 +19,23 @@ msgstr ""
 msgid "hello"
 msgstr "Hello"
 
-#: src/app/[lang]/publications/page.tsx:89
+#: src/app/[lang]/publications/page.tsx:93
 msgid "publications_page_all_publications_filter"
 msgstr ""
 
-#: src/app/[lang]/publications/page.tsx:91
+#: src/app/[lang]/publications/page.tsx:98
 msgid "publications_page_incomplete_hal_repository_filter"
 msgstr ""
 
-#: src/app/[lang]/publications/page.tsx:95
+#: src/app/[lang]/publications/page.tsx:104
 msgid "publications_page_keywords_to_validate"
 msgstr ""
 
-#: src/app/[lang]/publications/page.tsx:125
+#: src/app/[lang]/publications/page.tsx:139
 msgid "publications_page_main_title"
 msgstr ""
 
-#: src/app/[lang]/publications/page.tsx:130
+#: src/app/[lang]/publications/page.tsx:143
 msgid "publications_page_synchronize_button"
 msgstr ""
 
@@ -73,7 +73,6 @@ msgid "side_bar_my_research_activities"
 msgstr "Research activities"
 
 #: src/app/[lang]/components/sidebar/Sidebar.tsx:504
-#: src/app/[lang]/publications/page.tsx:91
 msgid "side_bar_publications"
 msgstr "Publications"
 
