@@ -25,18 +25,18 @@ export default async function RootLayout({ params, children }: Props) {
     <>
       <html lang={lang}>
         <title>sovisuplus</title>
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
-          <ThemeProvider>
-            <CssBaseline />
-            <LanguageProvider locale={lang} messages={selectedMessages}>
-              <AppRouterCacheProvider>
+        <ThemeProvider>
+          <CssBaseline />
+          <LanguageProvider locale={lang} messages={selectedMessages}>
+            <AppRouterCacheProvider>
+              <ErrorBoundary FallbackComponent={ErrorFallback}>
                 <SessionProviderWrapper>
                   <body>{children}</body>
                 </SessionProviderWrapper>
-              </AppRouterCacheProvider>
-            </LanguageProvider>
-          </ThemeProvider>
-        </ErrorBoundary>
+              </ErrorBoundary>
+            </AppRouterCacheProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </html>
     </>
   )

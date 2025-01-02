@@ -17,11 +17,22 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/not-found.tsx:107
 #: src/app/[lang]/not-found.tsx:44
+#: src/app/[lang]/components/ErrorFallback.tsx:38
+msgid "internal_server_page_back_home"
+msgstr "Back to home page"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/ErrorFallback.tsx:103
+msgid "internal_server_page_description"
+msgstr "The server detected an internal error and was unable to process your request. Please try again later!"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:43
 msgid "notfound_page_back_home"
 msgstr "Back to home page"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:110
+#: src/app/[lang]/not-found.tsx:108
 msgid "notfound_page_description"
 msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1>community</1> might be able to help."
 
