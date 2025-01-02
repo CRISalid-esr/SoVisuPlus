@@ -8,6 +8,13 @@ jest.mock('@prisma/client', () => {
       upsert: jest.fn(),
       findFirst: jest.fn(),
     },
+    person: {
+      upsert: jest.fn(),
+    },
+    agentIdentifier: {
+      deleteMany: jest.fn(),
+      createMany: jest.fn(),
+    },
   }
   return { PrismaClient: jest.fn(() => mockPrismaClient) }
 })
@@ -37,6 +44,7 @@ describe('UserDAO', () => {
     }
 
     ;(mockPrisma.user.upsert as jest.Mock).mockResolvedValue(expectedUser)
+    ;(mockPrisma.person.upsert as jest.Mock).mockResolvedValue(person)
     const userDAO = new UserDAO()
     const user: User = await userDAO.createOrUpdateUserFor(person)
     expect(user).toEqual(expectedUser)
