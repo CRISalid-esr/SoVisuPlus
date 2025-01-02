@@ -5,12 +5,15 @@ import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 
+/**
+ * Service for handling person-related operations
+ */
 export class PersonService {
-  private personApiService: PersonGraphQLClient
+  private personGraphQLClient: PersonGraphQLClient
   private personDAO: UserDAO
 
   constructor() {
-    this.personApiService = new PersonGraphQLClient()
+    this.personGraphQLClient = new PersonGraphQLClient()
     this.personDAO = new UserDAO()
   }
 
@@ -32,15 +35,15 @@ export class PersonService {
       return false
     }
     // refresh the user data from the graph API if enabled
-    if (this.personApiService.isEnabled()) {
+    if (this.personGraphQLClient.isEnabled()) {
       const person: Person | null =
-        await this.personApiService.getPerson(electedIdentifier)
+        await this.personGraphQLClient.getPerson(electedIdentifier)
       if (person) {
-        await this.personDAO.upsertUser(person)
+        await this.personDAO.createOrUpdateUserFor(person)
         return true
       }
     }
-    // Anyways, look up the user in the database
+    // Anyway, look up the user in the database
     const user: User | null =
       await this.personDAO.getUserByIdentifier(electedIdentifier)
     return !!user

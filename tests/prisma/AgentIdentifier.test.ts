@@ -3,13 +3,14 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 describe('AgentIdentifier Model Tests', () => {
-  beforeAll(async () => {
-    // Reset the AgentIdentifier table
-    await prisma.$executeRaw`TRUNCATE TABLE "AgentIdentifier" CASCADE`
-  })
-
   afterAll(async () => {
     await prisma.$disconnect()
+  })
+
+  beforeEach(async () => {
+    await prisma.$executeRawUnsafe(`
+    TRUNCATE TABLE "AgentIdentifier", "User" RESTART IDENTITY CASCADE;
+  `)
   })
 
   test('should create an AgentIdentifier for a user', async () => {

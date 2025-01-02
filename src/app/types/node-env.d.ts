@@ -1,5 +1,7 @@
 declare namespace NodeJS {
   export interface ProcessEnv {
+    DATABASE_URL
+    DATABASE_URL_TEST
     KEYCLOAK_CLIENT_ID: string
     KEYCLOAK_CLIENT_SECRET: string
     KEYCLOAK_ISSUER: string

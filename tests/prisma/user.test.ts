@@ -3,11 +3,6 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 describe('User Model Tests', () => {
-  beforeAll(async () => {
-    // Reset the User table
-    await prisma.$executeRaw`TRUNCATE TABLE "User" CASCADE`
-  })
-
   afterAll(async () => {
     await prisma.$disconnect()
   })

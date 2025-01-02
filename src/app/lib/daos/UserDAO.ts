@@ -3,10 +3,10 @@ import { Person } from '@/types/Person'
 import { AgentIdentifier } from '@/types/AgentIdentifier'
 
 export class UserDAO {
-  private db: PrismaClient
+  private prismaClient: PrismaClient
 
   constructor() {
-    this.db = new PrismaClient()
+    this.prismaClient = new PrismaClient()
   }
 
   /**
@@ -14,9 +14,9 @@ export class UserDAO {
    * @param person - The Person object to upsert
    * @returns The created or updated User record
    */
-  public async upsertUser(person: Person): Promise<User> {
+  public async createOrUpdateUserFor(person: Person): Promise<User> {
     try {
-      return await this.db.user.upsert({
+      return await this.prismaClient.user.upsert({
         where: {
           person_uid: person.uid,
         },
@@ -60,7 +60,7 @@ export class UserDAO {
     identifier: AgentIdentifier,
   ): Promise<User | null> {
     try {
-      return await this.db.user.findFirst({
+      return await this.prismaClient.user.findFirst({
         where: {
           AgentIdentifier: {
             some: {

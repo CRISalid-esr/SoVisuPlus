@@ -12,8 +12,8 @@ const createJestConfig = nextJest({
 })
 
 const config: Config = {
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-  testMatch: ['<rootDir>/src/__tests__/integration/**/*.test.(ts|tsx)'],
+  setupFilesAfterEnv: ['<rootDir>/jest.integration.setup.ts'],
+  testMatch: ['<rootDir>/tests/**/*.test.(ts|tsx)'],
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
@@ -167,7 +167,7 @@ const config: Config = {
 
   // The glob patterns Jest uses to detect test files
   // testMatch: [
-  //   "**/__tests__/**/*.[jt]s?(x)",
+  //   "**/tests/**/*.[jt]s?(x)",
   //   "**/?(*.)+(spec|test).[tj]s?(x)"
   // ],
 
