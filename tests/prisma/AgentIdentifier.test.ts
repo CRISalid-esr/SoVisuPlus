@@ -9,15 +9,17 @@ describe('AgentIdentifier Model Tests', () => {
 
   beforeEach(async () => {
     await prisma.$executeRawUnsafe(`
-    TRUNCATE TABLE "AgentIdentifier", "User" RESTART IDENTITY CASCADE;
+    TRUNCATE TABLE "Person", "AgentIdentifier", "User" RESTART IDENTITY CASCADE;
   `)
   })
 
   test('should create an AgentIdentifier for a user', async () => {
-    const user = await prisma.user.create({
+    const person = await prisma.person.create({
       data: {
-        person_uid: 'local-test1234',
+        uid: 'local-test1234',
         email: 'user1@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
       },
     })
 
@@ -25,20 +27,26 @@ describe('AgentIdentifier Model Tests', () => {
       data: {
         type: 'ORCID',
         value: '12345',
-        userId: user.id, // Linking to the User
+        person: {
+          connect: {
+            id: person.id,
+          },
+        },
       },
     })
 
     expect(agentIdentifier).toHaveProperty('id')
     expect(agentIdentifier.value).toBe('12345')
-    expect(agentIdentifier.userId).toBe(user.id)
+    expect(agentIdentifier.personId).toBe(person.id)
   })
 
   test('should fetch an AgentIdentifier for a user', async () => {
-    const user = await prisma.user.create({
+    const person = await prisma.person.create({
       data: {
-        person_uid: 'local-test1234',
+        uid: 'local-test1234',
         email: 'user2@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
       },
     })
 
@@ -46,7 +54,11 @@ describe('AgentIdentifier Model Tests', () => {
       data: {
         type: 'SCOPUS_EID',
         value: '67890',
-        userId: user.id,
+        person: {
+          connect: {
+            id: person.id,
+          },
+        },
       },
     })
 

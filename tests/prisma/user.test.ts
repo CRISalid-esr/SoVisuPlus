@@ -7,31 +7,53 @@ describe('User Model Tests', () => {
     await prisma.$disconnect()
   })
 
+  beforeEach(async () => {
+    await prisma.$executeRawUnsafe(`
+    TRUNCATE TABLE "Person", "User" RESTART IDENTITY CASCADE;
+  `)
+  })
+
   test('should create a new user', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'local-test1234',
+        email: 'user1@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+      },
+    })
+
     const user = await prisma.user.create({
       data: {
-        person_uid: 'local-test1234',
-        email: 'test@example.com',
+        personId: person.id,
       },
     })
 
     expect(user).toHaveProperty('id')
-    expect(user.email).toBe('test@example.com')
+    expect(user.personId).toBe(person.id)
   })
 
   test('should find a user by email', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'local-test1234',
+        email: 'user1@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+      },
+    })
+
     await prisma.user.create({
       data: {
-        person_uid: 'local-test1234',
-        email: 'findme@example.com',
+        personId: person.id,
       },
     })
 
     const foundUser = await prisma.user.findUnique({
-      where: { email: 'findme@example.com' },
+      where: { personId: person.id },
     })
 
     expect(foundUser).not.toBeNull()
-    expect(foundUser?.email).toBe('findme@example.com')
+    expect(foundUser?.personId).toBe(person.id)
   })
 })

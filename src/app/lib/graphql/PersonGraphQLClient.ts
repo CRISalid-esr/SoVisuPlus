@@ -63,15 +63,15 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
   }) {
     return {
       uid: personData.uid,
-      display_name: personData.display_name,
+      displayName: personData.display_name,
       identifiers: personData.identifiers.map(
         (identifier: AgentIdentifier) => ({
           type: identifier.type,
           value: identifier.value,
         }),
       ),
-      first_name: personData.names[0]?.first_names[0]?.value,
-      last_name: personData.names[0]?.last_names[0]?.value,
+      firstName: personData.names[0]?.first_names[0]?.value,
+      lastName: personData.names[0]?.last_names[0]?.value,
       email: '',
     }
   }

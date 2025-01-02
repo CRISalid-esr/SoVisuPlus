@@ -1,6 +1,6 @@
 import { Account, AuthOptions, Profile, User } from 'next-auth'
 import KeycloakProvider, { KeycloakProfile } from 'next-auth/providers/keycloak'
-import { PersonService } from '@/lib/services/PersonService'
+import { UserService } from '@/lib/services/UserService'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 import { CredentialInput } from 'next-auth/providers/credentials'
 
@@ -31,7 +31,7 @@ const authOptions: AuthOptions = {
       credentials?: Record<string, CredentialInput>
     }) {
       console.info('signIn callback', user, account, profile)
-      const personService = new PersonService()
+      const personService = new UserService()
       const authenticationProfile: AuthenticationProfile = {
         username: (profile as KeycloakProfile)?.preferred_username,
         email: profile?.email,

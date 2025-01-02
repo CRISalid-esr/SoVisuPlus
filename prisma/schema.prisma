@@ -12,12 +12,21 @@ datasource db {
 }
 
 model User {
-  id              Int               @id @default(autoincrement())
-  person_uid      String            @unique // link with graph unique identifier
-  email           String            @unique
-  AgentIdentifier AgentIdentifier[]
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  id       Int    @id @default(autoincrement())
+  personId Int    @unique
+  person   Person @relation(fields: [personId], references: [id])
+}
+
+model Person {
+  id          Int               @id @default(autoincrement())
+  uid         String            @unique
+  email       String            @unique
+  firstName   String
+  lastName    String
+  identifiers AgentIdentifier[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  user        User?
 }
 
 model Publication {
@@ -36,9 +45,9 @@ enum AgentIdentifierType {
 }
 
 model AgentIdentifier {
-  id     Int                 @id @default(autoincrement())
-  type   AgentIdentifierType
-  value  String              @unique
-  userId Int
-  user   User                @relation(fields: [userId], references: [id])
+  id       Int                 @id @default(autoincrement())
+  type     AgentIdentifierType
+  value    String              @unique
+  person   Person              @relation(fields: [personId], references: [id])
+  personId Int
 }

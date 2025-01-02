@@ -21,9 +21,9 @@ describe('UserDAO', () => {
     const person: Person = {
       uid: 'local-johndoe',
       email: 'johndoe@myuniversity.com',
-      display_name: 'John Doe',
-      first_name: 'John',
-      last_name: 'Doe',
+      displayName: 'John Doe',
+      firstName: 'John',
+      lastName: 'Doe',
       identifiers: [
         {
           type: 'ORCID',
