@@ -55,7 +55,7 @@ jobs:
         run: cp .env.sample .env
 
       - name: Run Jest integration tests
-        run: npm test:integration
+        run: npm run test:integration
   lint:
     runs-on: ubuntu-latest
 
