@@ -2,13 +2,13 @@ name: Pull Request CI/CD
 
 on:
   pull_request:
-    branches: [ "dev-main" ]
+    branches: ['dev-main']
 
 env:
   NODE_VERSION: '22.9.0'
 
 jobs:
-  test:
+  unit-tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,6 +25,37 @@ jobs:
 
       - name: Run Jest tests
         run: npm test
+  integration-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: sovisuplus_test
+          POSTGRES_PASSWORD: sovisuplus_test
+          POSTGRES_DB: sovisuplus_test
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Copy .env.sample to .env
+        run: cp .env.sample .env
+
+      - name: Run Jest integration tests
+        run: npm test:integration
   lint:
     runs-on: ubuntu-latest
 
