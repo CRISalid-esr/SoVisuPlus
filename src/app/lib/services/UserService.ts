@@ -8,19 +8,19 @@ import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 /**
  * Service for handling person-related operations
  */
-export class PersonService {
-  private personGraphQLClient: PersonGraphQLClient
-  private personDAO: UserDAO
+export class UserService {
+  private personGraphQLClient: PersonGraphQLClient | null
+  private userDAO: UserDAO
 
   constructor() {
-    this.personGraphQLClient = new PersonGraphQLClient()
-    this.personDAO = new UserDAO()
+    this.personGraphQLClient = null
+    this.userDAO = new UserDAO()
   }
 
   /**
    * Check if an authentication profile matches an existing person
    * @param profile Profile with identifiers acknowledged by identity providers
-   * @returns True if the profile matches an existing person, false otherwise
+   * @returns True if the profile matches an existing user, false otherwise
    */
   public async submitProfile(profile: AuthenticationProfile): Promise<boolean> {
     let electedIdentifier: AgentIdentifier | null = null
@@ -35,17 +35,24 @@ export class PersonService {
       return false
     }
     // refresh the user data from the graph API if enabled
-    if (this.personGraphQLClient.isEnabled()) {
+    if (this.getPersonGraphQLClient().isEnabled()) {
       const person: Person | null =
-        await this.personGraphQLClient.getPerson(electedIdentifier)
+        await this.getPersonGraphQLClient().getPerson(electedIdentifier)
       if (person) {
-        await this.personDAO.createOrUpdateUserFor(person)
+        await this.userDAO.createOrUpdateUserFor(person)
         return true
       }
     }
     // Anyway, look up the user in the database
     const user: User | null =
-      await this.personDAO.getUserByIdentifier(electedIdentifier)
+      await this.userDAO.getUserByIdentifier(electedIdentifier)
     return !!user
+  }
+
+  private getPersonGraphQLClient() {
+    if (!this.personGraphQLClient) {
+      this.personGraphQLClient = new PersonGraphQLClient()
+    }
+    return this.personGraphQLClient
   }
 }
