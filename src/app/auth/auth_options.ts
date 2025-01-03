@@ -1,5 +1,10 @@
-import { AuthOptions } from 'next-auth'
-import KeycloakProvider from 'next-auth/providers/keycloak'
+import { Account, AuthOptions, Profile, User as NextAuthUser } from 'next-auth'
+import KeycloakProvider, { KeycloakProfile } from 'next-auth/providers/keycloak'
+import { UserService } from '@/lib/services/UserService'
+import { AuthenticationProfile } from '@/types/AuthenticationProfile'
+import { CredentialInput } from 'next-auth/providers/credentials'
+import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
+import { UserDAO } from '@/lib/daos/UserDAO'
 
 const authOptions: AuthOptions = {
   providers: [
@@ -10,9 +15,35 @@ const authOptions: AuthOptions = {
     }),
   ],
   session: {
-    strategy: 'jwt', // Ensure you're using JWT sessions
+    strategy: 'jwt',
   },
   callbacks: {
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    async signIn({
+      user,
+      account,
+      profile,
+      email,
+      credentials,
+    }: {
+      user: NextAuthUser
+      account: Account | null
+      profile?: Profile
+      email?: { verificationRequest?: boolean }
+      credentials?: Record<string, CredentialInput>
+    }) {
+      console.info('signIn callback', user, account, profile)
+      const userService = new UserService(
+        new PersonGraphQLClient(),
+        new UserDAO(),
+      )
+      const authenticationProfile: AuthenticationProfile = {
+        username: (profile as KeycloakProfile)?.preferred_username,
+        email: profile?.email,
+        orcid: (profile as KeycloakProfile)?.orcid,
+      }
+      return await userService.submitProfile(authenticationProfile)
+    },
     async jwt(params) {
       console.info('jwt callback', params)
       const { token, account, user } = params

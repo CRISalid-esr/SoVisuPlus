@@ -3,19 +3,17 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 describe('AgentIdentifier Model Tests', () => {
-  beforeAll(async () => {
-    // Reset the AgentIdentifier table
-    await prisma.$executeRaw`TRUNCATE TABLE "AgentIdentifier" CASCADE`
-  })
-
   afterAll(async () => {
     await prisma.$disconnect()
   })
 
   test('should create an AgentIdentifier for a user', async () => {
-    const user = await prisma.user.create({
+    const person = await prisma.person.create({
       data: {
+        uid: 'local-test1234',
         email: 'user1@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
       },
     })
 
@@ -23,19 +21,26 @@ describe('AgentIdentifier Model Tests', () => {
       data: {
         type: 'ORCID',
         value: '12345',
-        userId: user.id, // Linking to the User
+        person: {
+          connect: {
+            id: person.id,
+          },
+        },
       },
     })
 
     expect(agentIdentifier).toHaveProperty('id')
     expect(agentIdentifier.value).toBe('12345')
-    expect(agentIdentifier.userId).toBe(user.id)
+    expect(agentIdentifier.personId).toBe(person.id)
   })
 
   test('should fetch an AgentIdentifier for a user', async () => {
-    const user = await prisma.user.create({
+    const person = await prisma.person.create({
       data: {
+        uid: 'local-test2345',
         email: 'user2@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
       },
     })
 
@@ -43,13 +48,18 @@ describe('AgentIdentifier Model Tests', () => {
       data: {
         type: 'SCOPUS_EID',
         value: '67890',
-        userId: user.id,
+        person: {
+          connect: {
+            id: person.id,
+          },
+        },
       },
     })
 
     const fetchedAgent = await prisma.agentIdentifier.findUnique({
       where: {
-        id: agentIdentifier.id,
+        type: agentIdentifier.type,
+        value: agentIdentifier.value,
       },
     })
 

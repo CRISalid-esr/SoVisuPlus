@@ -1,12 +1,12 @@
 import * as amqplib from 'amqplib'
-import AMQPConnection from '@/lib/amqp/amqpConnection'
+import AmqpConnection from '@/lib/amqp/AmqpConnection'
 
 jest.mock('amqplib')
 
 describe('AMQPConnection', () => {
   let mockChannel: Partial<amqplib.Channel>
   let mockConnection: Partial<amqplib.Connection>
-  let amqpConnection: AMQPConnection
+  let amqpConnection: AmqpConnection
   let mockAmqpLibConnect: jest.Mock
   let mockChannelConsume: jest.Mock
 
@@ -28,7 +28,7 @@ describe('AMQPConnection', () => {
 
     mockAmqpLibConnect.mockResolvedValue(mockConnection)
 
-    amqpConnection = new AMQPConnection()
+    amqpConnection = new AmqpConnection()
   })
 
   it('should connect to RabbitMQ successfully', async () => {

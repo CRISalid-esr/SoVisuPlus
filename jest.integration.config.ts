@@ -12,8 +12,8 @@ const createJestConfig = nextJest({
 })
 
 const config: Config = {
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
-  testMatch: ['<rootDir>/integration/**/*.test.(ts|tsx)'],
+  setupFilesAfterEnv: ['<rootDir>/jest.integration.setup.ts'],
+  testMatch: ['<rootDir>/tests/**/*.test.(ts|tsx)'],
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
@@ -100,6 +100,7 @@ const config: Config = {
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   preset: 'ts-jest',
   moduleNameMapper: {
+    '\\.graphql$': '<rootDir>/__mocks__/graphqlMock.js',
     '^@/(.*)$': '<rootDir>/src/app/$1',
   },
 
@@ -167,7 +168,7 @@ const config: Config = {
 
   // The glob patterns Jest uses to detect test files
   // testMatch: [
-  //   "**/__tests__/**/*.[jt]s?(x)",
+  //   "**/tests/**/*.[jt]s?(x)",
   //   "**/?(*.)+(spec|test).[tj]s?(x)"
   // ],
 

@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   experimental: {
-    authInterrupts: true,
     swcPlugins: [['@lingui/swc-plugin', {}]],
     middlewarePrefetch: 'flexible',
   },
@@ -21,6 +20,11 @@ const nextConfig: NextConfig = {
         use: {
           loader: '@lingui/loader',
         },
+      },
+      {
+        test: /\.(graphql|gql)$/,
+        exclude: /node_modules/,
+        loader: 'graphql-tag/loader',
       },
     ),
       (config.resolve.alias['@'] = path.join(__dirname, 'src', 'app'))

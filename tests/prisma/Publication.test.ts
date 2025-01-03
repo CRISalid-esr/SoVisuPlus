@@ -3,13 +3,8 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 describe('Publication Model Tests', () => {
-  beforeAll(async () => {
-    // Reset the Publication table
-    await prisma.$executeRaw`TRUNCATE TABLE "Publication" CASCADE`
-  })
-
-  afterAll(async () => {
-    await prisma.$disconnect()
+  afterEach(async () => {
+    await prisma.publication.deleteMany()
   })
 
   test('should create a new publication', async () => {
