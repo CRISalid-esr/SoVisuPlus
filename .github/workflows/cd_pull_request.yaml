@@ -40,6 +40,9 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
+      - name: Copy .env.sample to .env
+        run: cp .env.sample .env
+
       - name: Start PostgreSQL in Docker
         run: |
           docker run -dit --rm --name postgres_test_service \
@@ -57,8 +60,6 @@ jobs:
         shell: bash
 
       - name: Run Tests
-        env:
-          DATABASE_URL: postgres://sovisuplus_test:sovisuplus_test@localhost:5433/sovisuplus_test
         run: |
           npx prisma generate
           npx prisma db push
