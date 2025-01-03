@@ -48,6 +48,6 @@ model AgentIdentifier {
   id       Int                 @id @default(autoincrement())
   type     AgentIdentifierType
   value    String              @unique
-  person   Person              @relation(fields: [personId], references: [id])
+  person   Person              @relation(fields: [personId], references: [id], onDelete: Cascade)
   personId Int
 }

@@ -106,7 +106,7 @@ It requires a separate PostgreSQL database to run the tests. You can use the fol
 instance with Docker:
 
 ```bash
-docker run   --rm --name postgres_test_service   -e POSTGRES_USER=sovisuplus_test   -e POSTGRES_PASSWORD=sovisuplus_test   -e POSTGRES_DB=sovisuplus_test   -p 5433:5432  postgres:latest
+docker run -it  --rm --name postgres_test_service   -e POSTGRES_USER=sovisuplus_test   -e POSTGRES_PASSWORD=sovisuplus_test   -e POSTGRES_DB=sovisuplus_test   -p 5433:5432  postgres:latest
 ```
 
 ### Docker Installation
