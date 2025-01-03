@@ -7,17 +7,11 @@ describe('User Model Tests', () => {
     await prisma.$disconnect()
   })
 
-  beforeEach(async () => {
-    await prisma.$executeRawUnsafe(`
-    TRUNCATE TABLE "Person", "User" RESTART IDENTITY CASCADE;
-  `)
-  })
-
   test('should create a new user', async () => {
     const person = await prisma.person.create({
       data: {
-        uid: 'local-test1234',
-        email: 'user1@example.com',
+        uid: 'local-test4567',
+        email: 'user4@example.com',
         firstName: 'John',
         lastName: 'Doe',
       },

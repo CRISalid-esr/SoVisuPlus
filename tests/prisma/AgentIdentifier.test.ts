@@ -7,12 +7,6 @@ describe('AgentIdentifier Model Tests', () => {
     await prisma.$disconnect()
   })
 
-  beforeEach(async () => {
-    await prisma.$executeRawUnsafe(`
-    TRUNCATE TABLE "Person", "AgentIdentifier", "User" RESTART IDENTITY CASCADE;
-  `)
-  })
-
   test('should create an AgentIdentifier for a user', async () => {
     const person = await prisma.person.create({
       data: {
