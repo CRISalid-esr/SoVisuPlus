@@ -2,7 +2,7 @@ name: Pull Request CI/CD
 
 on:
   pull_request:
-    branches: ['dev-main']
+    branches: [ 'dev-main' ]
 
 env:
   NODE_VERSION: '22.9.0'
@@ -51,11 +51,29 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Copy .env.sample to .env
-        run: cp .env.sample .env
+      - name: Start PostgreSQL in Docker
+        run: |
+          docker run -it --rm --name postgres_test_service \
+            -e POSTGRES_USER=sovisuplus_test \
+            -e POSTGRES_PASSWORD=sovisuplus_test \
+            -e POSTGRES_DB=sovisuplus_test \
+            -p 5433:5432 \
+            postgres:latest &
+          
+          # Wait for PostgreSQL to be ready
+          until docker exec postgres_test_service pg_isready -U sovisuplus_test; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 5
+          done
+        shell: bash
 
-      - name: Run Jest integration tests
-        run: npm run test:integration
+      - name: Run Tests
+        env:
+          DATABASE_URL: postgres://sovisuplus_test:sovisuplus_test@localhost:5433/sovisuplus_test
+        run: |
+          npx prisma generate
+          npx prisma db push
+          npm run test:integration
   lint:
     runs-on: ubuntu-latest
 
