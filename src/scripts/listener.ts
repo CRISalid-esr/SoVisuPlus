@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv'
-import AmqpConnection from '../app/lib/amqp/amqpConnection'
+import AmqpConnection from '@/lib/amqp/AmqpConnection'
 
 dotenv.config()
 ;(async () => {

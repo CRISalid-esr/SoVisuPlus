@@ -3,7 +3,7 @@ import { Channel, Connection } from 'amqplib'
 
 type AMQPMessageHandler = (message: string) => void
 
-class AMQPConnection {
+class AmqpConnection {
   connection!: Connection
   channel!: Channel
   private connected!: boolean
@@ -54,4 +54,4 @@ class AMQPConnection {
   }
 }
 
-export default AMQPConnection
+export default AmqpConnection
