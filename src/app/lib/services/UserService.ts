@@ -9,12 +9,12 @@ import { AuthenticationProfile } from '@/types/AuthenticationProfile'
  * Service for handling person-related operations
  */
 export class UserService {
-  private personGraphQLClient: PersonGraphQLClient | null
+  private personGraphQLClient: PersonGraphQLClient
   private userDAO: UserDAO
 
-  constructor() {
-    this.personGraphQLClient = null
-    this.userDAO = new UserDAO()
+  constructor(personGraphQLClient: PersonGraphQLClient, userDAO: UserDAO) {
+    this.personGraphQLClient = personGraphQLClient
+    this.userDAO = userDAO
   }
 
   /**
@@ -29,15 +29,20 @@ export class UserService {
         type: 'local',
         value: profile.username,
       }
+    } else if (profile.orcid) {
+      electedIdentifier = {
+        type: 'orcid',
+        value: profile.orcid,
+      }
     }
     if (!electedIdentifier) {
       // None of the data provided by the profile allows to identify the user
       return false
     }
     // refresh the user data from the graph API if enabled
-    if (this.getPersonGraphQLClient().isEnabled()) {
+    if (this.personGraphQLClient.isEnabled()) {
       const person: Person | null =
-        await this.getPersonGraphQLClient().getPerson(electedIdentifier)
+        await this.personGraphQLClient.getPerson(electedIdentifier)
       if (person) {
         await this.userDAO.createOrUpdateUserFor(person)
         return true
@@ -47,12 +52,5 @@ export class UserService {
     const user: User | null =
       await this.userDAO.getUserByIdentifier(electedIdentifier)
     return !!user
-  }
-
-  private getPersonGraphQLClient() {
-    if (!this.personGraphQLClient) {
-      this.personGraphQLClient = new PersonGraphQLClient()
-    }
-    return this.personGraphQLClient
   }
 }
