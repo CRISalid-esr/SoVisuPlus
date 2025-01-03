@@ -43,7 +43,7 @@ describe('AgentIdentifier Model Tests', () => {
   test('should fetch an AgentIdentifier for a user', async () => {
     const person = await prisma.person.create({
       data: {
-        uid: 'local-test1234',
+        uid: 'local-test2345',
         email: 'user2@example.com',
         firstName: 'John',
         lastName: 'Doe',
