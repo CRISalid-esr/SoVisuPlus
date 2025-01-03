@@ -100,6 +100,7 @@ const config: Config = {
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   preset: 'ts-jest',
   moduleNameMapper: {
+    '\\.graphql$': '<rootDir>/__mocks__/graphqlMock.js',
     '^@/(.*)$': '<rootDir>/src/app/$1',
   },
 

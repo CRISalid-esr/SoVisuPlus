@@ -120,7 +120,7 @@ export class AbstractGraphQLClient {
    * Asserts that the GraphQL client is enabled and valid.
    */
   private assertEnabled(): void {
-    if (!this.enabled) {
+    if (!this.isEnabled()) {
       throw new Error('GraphQL client is disabled.')
     }
     if (!this.client) {

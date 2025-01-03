@@ -47,7 +47,7 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
       PeopleQuery,
       variables,
     )
-    const [personData] = response.people // Assuming the query returns an array and we need the first match
+    const [personData] = response.people
 
     if (!personData) {
       return null
