@@ -60,6 +60,8 @@ jobs:
         shell: bash
 
       - name: Run Tests
+        env:
+          DATABASE_URL: postgres://sovisuplus_test:sovisuplus_test@localhost:5433/sovisuplus_test
         run: |
           npx prisma generate
           npx prisma db push
