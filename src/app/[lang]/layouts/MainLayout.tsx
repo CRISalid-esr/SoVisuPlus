@@ -22,6 +22,8 @@ export default function MainLayout({
     setOpen((prev) => !prev)
   }
 
+  console.log('MainLayout')
+
   const { data: session } = useSession()
 
   return (

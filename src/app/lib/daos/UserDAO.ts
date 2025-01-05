@@ -33,6 +33,7 @@ export class UserDAO extends AbstractDAO {
   public async getUserByIdentifier(
     identifier: AgentIdentifier,
   ): Promise<DbUser | null> {
+    console.log('identifier', identifier)
     try {
       return await this.prismaClient.user.findFirst({
         where: {
