@@ -13,11 +13,12 @@ CREATE TABLE "User" (
 CREATE TABLE "Person" (
     "id" SERIAL NOT NULL,
     "uid" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
+    "email" TEXT,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "external" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Person_pkey" PRIMARY KEY ("id")
 );
@@ -54,7 +55,7 @@ CREATE UNIQUE INDEX "Person_email_key" ON "Person"("email");
 CREATE UNIQUE INDEX "Publication_uid_key" ON "Publication"("uid");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "AgentIdentifier_value_key" ON "AgentIdentifier"("value");
+CREATE UNIQUE INDEX "AgentIdentifier_type_value_key" ON "AgentIdentifier"("type", "value");
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_personId_fkey" FOREIGN KEY ("personId") REFERENCES "Person"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

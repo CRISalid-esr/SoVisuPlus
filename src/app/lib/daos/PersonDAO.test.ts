@@ -1,17 +1,14 @@
-import { PrismaClient, User } from '@prisma/client'
+import { Person as DbPerson, PrismaClient } from '@prisma/client'
 import { Person } from '@/types/Person'
-import { UserDAO } from '@/lib/daos/UserDAO'
+import { PersonDAO } from '@/lib/daos/PersonDAO'
 
 jest.mock('@prisma/client', () => {
   const mockPrismaClient = {
-    user: {
-      upsert: jest.fn(),
-      findFirst: jest.fn(),
-    },
     person: {
       upsert: jest.fn(),
     },
     agentIdentifier: {
+      findMany: jest.fn(),
       deleteMany: jest.fn(),
       createMany: jest.fn(),
     },
@@ -19,14 +16,15 @@ jest.mock('@prisma/client', () => {
   return { PrismaClient: jest.fn(() => mockPrismaClient) }
 })
 const mockPrisma = new PrismaClient()
-describe('UserDAO', () => {
+describe('PersonDAO', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  it('should upsert a user', async () => {
+  it('should upsert a person', async () => {
     const person: Person = {
       uid: 'local-johndoe',
+      external: false,
       email: 'johndoe@myuniversity.com',
       displayName: 'John Doe',
       firstName: 'John',
@@ -38,15 +36,12 @@ describe('UserDAO', () => {
         },
       ],
     }
-    const expectedUser = {
-      person_uid: 'local-johndoe',
-      email: 'johndoe@myuniversity.com',
-    }
 
-    ;(mockPrisma.user.upsert as jest.Mock).mockResolvedValue(expectedUser)
     ;(mockPrisma.person.upsert as jest.Mock).mockResolvedValue(person)
-    const userDAO = new UserDAO()
-    const user: User = await userDAO.createOrUpdateUserFor(person)
-    expect(user).toEqual(expectedUser)
+    ;(mockPrisma.agentIdentifier.findMany as jest.Mock).mockResolvedValue([])
+    const personDAO = new PersonDAO()
+    const dbPerson: DbPerson = await personDAO.createOrUpdatePerson(person)
+    expect(dbPerson.uid).toEqual('local-johndoe')
+    expect(dbPerson.email).toEqual('johndoe@myuniversity.com')
   })
 })
