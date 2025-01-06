@@ -1,4 +1,4 @@
-import { Account, AuthOptions, Profile, User as NextAuthUser } from 'next-auth'
+import { Account, AuthOptions, Profile, User as NextAuthUser, Session } from 'next-auth'
 import KeycloakProvider, { KeycloakProfile } from 'next-auth/providers/keycloak'
 import { UserService } from '@/lib/services/UserService'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
@@ -6,7 +6,22 @@ import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { JWT } from 'next-auth/jwt'
-import { Session } from '@auth/core/types'
+import { Session as AuthUser  } from '@auth/core/types'
+
+
+declare module '@auth/core/types' {
+  interface User extends AuthUser {
+    username?: string;
+    orcid?: string;
+  }
+
+  interface Session {
+    user: {
+      id: string;
+      username: string;
+    };
+  }
+}
 
 const authOptions: AuthOptions = {
   providers: [
@@ -40,18 +55,25 @@ const authOptions: AuthOptions = {
         email: profile?.email,
         orcid: (profile as KeycloakProfile)?.orcid,
       }
-      return await userService.submitProfile(authenticationProfile)
+      await userService.submitProfile(authenticationProfile)
+      return true
     },
     async jwt({
       token,
       account,
       user,
+      profile,
     }: {
       token: JWT
       account?: Account | null
-      user?: NextAuthUser
+      user?: NextAuthUser ,
+      profile?: Profile
     }) {
-      console.info('jwt callback', { token, account, user })
+      if (profile) {
+        token.username = (profile as KeycloakProfile)?.preferred_username
+        token.email = profile?.email
+        token.orcid = (profile as KeycloakProfile)?.orcid
+      }
       if (account && user) {
         token.accessToken = account.access_token
         token.id = user.id
@@ -59,9 +81,10 @@ const authOptions: AuthOptions = {
       return token
     },
     async session({ session, token }: { session: Session; token: JWT }) {
-      console.info('session callback', { session, token })
       if (token && session.user) {
         session.user.id = token.id as string
+        session.user.username = token.username as string
+        session.user.orcid = token.orcid as string
       }
       return session
     },

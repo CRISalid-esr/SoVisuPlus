@@ -1,13 +1,21 @@
-import { create } from 'zustand'
-import { addPublicationSlice, PublicationSlice } from './publication_slice'
+'use client' // Ensure this file works in a client environment
 
-import { addUserSlice, UserSlice } from './userSlice' // Import the user slice
+import { create } from 'zustand'
+import { devtools } from 'zustand/middleware'
+
+import { addPublicationSlice, PublicationSlice } from './publication_slice'
+import { addUserSlice, UserSlice } from './userSlice'
 
 export type GlobalStore = PublicationSlice & UserSlice
 
-const useStore = create<GlobalStore>()((...a) => ({
-  ...addPublicationSlice(...a),
-  ...addUserSlice(...a), // Add the user slice to the store
-}))
+const useStore = create<GlobalStore>()(
+  devtools(
+    (...a) => ({
+      ...addPublicationSlice(...a),
+      ...addUserSlice(...a),
+    }),
+    { name: 'GlobalStore' }, // Optional: Name for debugging in devtools
+  ),
+)
 
 export default useStore

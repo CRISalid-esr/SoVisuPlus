@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { getServerSession } from 'next-auth' // Assuming you are using NextAuth
+import { getServerSession, Session } from 'next-auth' // Assuming you are using NextAuth
 import authOptions from '@/app/auth/auth_options'
 import { AgentIdentifierType as DbAgentIdentifierType } from '@prisma/client'
 import { AgentIdentifier } from '@/types/AgentIdentifier'
@@ -8,13 +8,13 @@ import { AgentIdentifier } from '@/types/AgentIdentifier'
 export const GET = async () => {
   try {
     // Get the session to identify the connected user
-    const session = await getServerSession(authOptions)
+    const session = (await getServerSession(authOptions)) as Session & {
+      user: { username?: string; orcid?: string }
+    }
     //const
     let electedIdentifier: AgentIdentifier | null = null
 
-    const profile = {
-      username: 'adominguez',
-    }
+    console.log('session', session)
 
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -23,15 +23,15 @@ export const GET = async () => {
       )
     }
 
-    if (profile.username) {
+    if (session?.user.username) {
       electedIdentifier = {
         type: 'local',
-        value: profile.username,
+        value: session?.user.username,
       }
-    } else if (profile.orcid) {
+    } else if (session?.user.orcid) {
       electedIdentifier = {
         type: 'orcid',
-        value: profile.orcid,
+        value: session?.user.orcid,
       }
     }
 

@@ -26,14 +26,12 @@ export default function MainLayout({
   const { data: session, status } = useSession()
   const fetchConnectedUser = useStore((state) => state.fetchConnectedUser)
   const connectedUser = useStore((state) => state.connectedUser)
-  console.log('session', session)
   // Fetch connected user on session change
   useEffect(() => {
-    if (status === 'authenticated' && session?.user) {
-      console.log('fetchConnectedUser')
+    if (status === 'authenticated' && session?.user && !connectedUser) {
       fetchConnectedUser()
     }
-  }, [status, session, fetchConnectedUser])
+  }, [status, session])
 
   // Show a loading state if user data is still being fetched
   if (status === 'loading' && !connectedUser) {
