@@ -18,7 +18,7 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
   fetchConnectedUser: async () => {
     set({ loading: true })
     try {
-      const response = await fetch('/api/me') // Replace with your API endpoint for the connected user
+      const response = await fetch('/api/users/me') // Replace with your API endpoint for the connected user
       const jsonData: User = await response.json()
       set({ connectedUser: jsonData })
     } catch (error) {

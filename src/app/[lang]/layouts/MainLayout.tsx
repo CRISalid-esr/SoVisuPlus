@@ -4,9 +4,10 @@ import { Appbar } from '@/components/appbar'
 import { Sidebar } from '@/components/sidebar'
 import { useTheme } from '@mui/material/styles'
 import { Box, useMediaQuery } from '@mui/system'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import AuthenticatedRoute from '@/components/AuthenticatedRoute'
+import useStore from '@/stores/global_store'
 
 export default function MainLayout({
   children,
@@ -22,9 +23,22 @@ export default function MainLayout({
     setOpen((prev) => !prev)
   }
 
-  console.log('MainLayout')
+  const { data: session, status } = useSession()
+  const fetchConnectedUser = useStore((state) => state.fetchConnectedUser)
+  const connectedUser = useStore((state) => state.connectedUser)
+  console.log('session', session)
+  // Fetch connected user on session change
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      console.log('fetchConnectedUser')
+      fetchConnectedUser()
+    }
+  }, [status, session, fetchConnectedUser])
 
-  const { data: session } = useSession()
+  // Show a loading state if user data is still being fetched
+  if (status === 'loading' && !connectedUser) {
+    return <p>Loading...</p>
+  }
 
   return (
     <AuthenticatedRoute>
