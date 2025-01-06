@@ -14,6 +14,7 @@ describe('AMQPConnection', () => {
     jest.resetAllMocks()
 
     mockChannel = {
+      prefetch: jest.fn(),
       assertQueue: jest.fn(),
       consume: jest.fn(),
       ack: jest.fn(),

@@ -21,11 +21,6 @@ const nextConfig: NextConfig = {
           loader: '@lingui/loader',
         },
       },
-      {
-        test: /\.(graphql|gql)$/,
-        exclude: /node_modules/,
-        loader: 'graphql-tag/loader',
-      },
     ),
       (config.resolve.alias['@'] = path.join(__dirname, 'src', 'app'))
     return config

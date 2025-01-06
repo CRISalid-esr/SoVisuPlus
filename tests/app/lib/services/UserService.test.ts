@@ -3,6 +3,7 @@ import { UserService } from '@/lib/services/UserService'
 import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
+import { PersonDAO } from '@/lib/daos/PersonDAO'
 
 const prisma = new PrismaClient()
 
@@ -14,11 +15,12 @@ describe('UserService Integration Tests', () => {
     // Initialize the UserService with mocks and real database DAO
     personGraphQLClientMock = {
       isEnabled: jest.fn().mockReturnValue(true),
-      getPerson: jest.fn(),
+      getPersonByIdentifier: jest.fn(),
     } as unknown as jest.Mocked<PersonGraphQLClient>
 
     const userDAO = new UserDAO()
-    userService = new UserService(personGraphQLClientMock, userDAO)
+    const personDAO = new PersonDAO()
+    userService = new UserService(personGraphQLClientMock, userDAO, personDAO)
   })
 
   afterEach(async () => {
@@ -34,6 +36,7 @@ describe('UserService Integration Tests', () => {
   test('should create or update a user with username using GraphQL data', async () => {
     const personData = {
       uid: 'local-test123',
+      external: false,
       email: 'rgarcia@example.com',
       firstName: 'Robert',
       lastName: 'Garcia',
@@ -41,7 +44,7 @@ describe('UserService Integration Tests', () => {
       identifiers: [{ type: 'ORCID', value: '0000-0002-1234-5678' }],
     }
 
-    personGraphQLClientMock.getPerson.mockResolvedValue(personData)
+    personGraphQLClientMock.getPersonByIdentifier.mockResolvedValue(personData)
 
     const profile: AuthenticationProfile = { username: 'graphql-test123' }
     const result = await userService.submitProfile(profile)

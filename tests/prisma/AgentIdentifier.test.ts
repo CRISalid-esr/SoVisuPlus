@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/daos/prisma'
 
 describe('AgentIdentifier Model Tests', () => {
   afterAll(async () => {
@@ -58,8 +56,10 @@ describe('AgentIdentifier Model Tests', () => {
 
     const fetchedAgent = await prisma.agentIdentifier.findUnique({
       where: {
-        type: agentIdentifier.type,
-        value: agentIdentifier.value,
+        type_value: {
+          type: agentIdentifier.type,
+          value: agentIdentifier.value,
+        },
       },
     })
 

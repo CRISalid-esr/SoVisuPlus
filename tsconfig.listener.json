@@ -4,12 +4,35 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "dist/scripts",
+    "skipLibCheck": true,
     "strict": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "typeRoots": ["node_modules/@types", "src/app/types"],
+    "paths": {
+      "@/components/*": ["src/app/[lang]/components/*"],
+      "@/utils/*": ["src/app/utils/*"],
+      "@/lib/*": ["src/app/lib/*"],
+      "@/types/*": ["src/app/types/*"],
+      "@/stores/*": ["src/app/stores/*"],
+      "@/locales/*": ["src/locales/*"],
+      "@/theme/*": ["src/theme/*"],
+      "@/public/*": ["public/*"],
+      "@/middlewares/*": ["src/middlewares/*"],
+      "@/*": ["src/*"]
+    }
   },
-  "include": ["src/scripts/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "**/*.jsx",
+    "**/*.tsx",
+    "**/*.stories.ts",
+    "src/app/[lang]",
+    "src/app/theme",
+    "src/app/auth",
+    "src/app/types/theme.d.ts"
+  ]
 }

@@ -1,9 +1,10 @@
 import { AgentIdentifier } from '@/app/types/AgentIdentifier'
-import { User } from '@prisma/client'
+import { Person as DbPerson, User } from '@prisma/client'
 import { Person } from '@/app/types/Person'
 import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
+import { PersonDAO } from '@/lib/daos/PersonDAO'
 
 /**
  * Service for handling person-related operations
@@ -11,10 +12,16 @@ import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 export class UserService {
   private personGraphQLClient: PersonGraphQLClient
   private userDAO: UserDAO
+  private personDAO: PersonDAO
 
-  constructor(personGraphQLClient: PersonGraphQLClient, userDAO: UserDAO) {
+  constructor(
+    personGraphQLClient: PersonGraphQLClient,
+    userDAO: UserDAO,
+    personDAO: PersonDAO,
+  ) {
     this.personGraphQLClient = personGraphQLClient
     this.userDAO = userDAO
+    this.personDAO = personDAO
   }
 
   /**
@@ -42,10 +49,27 @@ export class UserService {
     // refresh the user data from the graph API if enabled
     if (this.personGraphQLClient.isEnabled()) {
       const person: Person | null =
-        await this.personGraphQLClient.getPerson(electedIdentifier)
-      if (person) {
-        await this.userDAO.createOrUpdateUserFor(person)
+        await this.personGraphQLClient.getPersonByIdentifier(electedIdentifier)
+      if (!person) {
+        return false
+      }
+      if (person.external) {
+        console.log(
+          `Person {${person.uid}} is external, skipping user creation`,
+        )
+        return false
+      }
+      try {
+        const dbPerson: DbPerson =
+          await this.personDAO.createOrUpdatePerson(person)
+        await this.userDAO.createOrUpdateUser(dbPerson.id)
         return true
+      } catch (error) {
+        console.error(
+          `Failed to process person message for UID: ${person.uid}`,
+          error,
+        )
+        return false
       }
     }
     // Anyway, look up the user in the database

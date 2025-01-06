@@ -19,6 +19,7 @@ class AmqpConnection {
         `amqp://${process.env.AMQP_USER}:${process.env.AMQP_PASSWORD}@${process.env.AMQP_HOST}:${process.env.AMQP_PORT}`,
       )
       this.channel = await this.connection.createChannel()
+      await this.channel.prefetch(1)
       this.connected = true
     } catch (error) {
       console.error(error)

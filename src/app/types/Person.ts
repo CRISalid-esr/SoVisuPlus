@@ -2,7 +2,8 @@ import { AgentIdentifier } from '@/types/AgentIdentifier'
 
 class Person {
   uid: string
-  email: string
+  external: boolean
+  email: string | null
   displayName: string
   firstName: string
   lastName: string
@@ -10,6 +11,7 @@ class Person {
 
   constructor(
     uid: string,
+    external: boolean,
     email: string,
     displayName: string,
     firstName: string,
@@ -17,6 +19,7 @@ class Person {
     identifiers: AgentIdentifier[] = [],
   ) {
     this.uid = uid
+    this.external = external
     this.email = email
     this.displayName = displayName
     this.firstName = firstName

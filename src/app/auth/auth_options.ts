@@ -5,6 +5,7 @@ import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 import { CredentialInput } from 'next-auth/providers/credentials'
 import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 import { UserDAO } from '@/lib/daos/UserDAO'
+import { PersonDAO } from '@/lib/daos/PersonDAO'
 
 const authOptions: AuthOptions = {
   providers: [
@@ -36,6 +37,7 @@ const authOptions: AuthOptions = {
       const userService = new UserService(
         new PersonGraphQLClient(),
         new UserDAO(),
+        new PersonDAO(),
       )
       const authenticationProfile: AuthenticationProfile = {
         username: (profile as KeycloakProfile)?.preferred_username,

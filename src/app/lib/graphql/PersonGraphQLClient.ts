@@ -1,7 +1,7 @@
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
 import { AgentIdentifier } from '@/types/AgentIdentifier'
 import { Person } from '@/types/Person'
-import PeopleQuery from './queries/people.graphql'
+import { loadQuery } from '@/lib/graphql/queries/loadQuery'
 
 interface GraphAgentIdentifier {
   type: string
@@ -17,17 +17,25 @@ interface GraphPersonName {
   }[]
 }
 
+interface GraphPersonResponse {
+  uid: string
+  display_name: string
+  external: boolean
+  identifiers: Array<GraphAgentIdentifier>
+  names: Array<GraphPersonName>
+}
+
 export interface GraphPeopleResponse {
-  people: Array<{
-    uid: string
-    display_name: string
-    identifiers: Array<GraphAgentIdentifier>
-    names: Array<GraphPersonName>
-  }>
+  people: Array<GraphPersonResponse>
 }
 
 export class PersonGraphQLClient extends AbstractGraphQLClient {
-  public async getPerson(
+  /**
+   * Get a person by one of their identifiers
+   * @param agentIdentifier
+   * @returns The person if found, null otherwise
+   */
+  public async getPersonByIdentifier(
     agentIdentifier: AgentIdentifier,
   ): Promise<Person | null> {
     const variables = {
@@ -42,9 +50,10 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
         ],
       },
     }
+    const personQuery = loadQuery('person.graphql')
 
     const response: GraphPeopleResponse = await this.query<GraphPeopleResponse>(
-      PeopleQuery,
+      personQuery,
       variables,
     )
     const [personData] = response.people
@@ -55,15 +64,36 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
     return this.hydrate(personData)
   }
 
-  private hydrate(personData: {
-    uid: string
-    display_name: string
-    identifiers: AgentIdentifier[]
-    names: Array<GraphPersonName>
-  }) {
+  /**
+   * Get a person by their UID
+   * @param uid
+   * @returns The person if found, null otherwise
+   */
+  public async getPersonByUid(uid: string): Promise<Person | null> {
+    const variables = {
+      where: {
+        uid_EQ: uid,
+      },
+    }
+    const personQuery = loadQuery('person.graphql')
+
+    const response: GraphPeopleResponse = await this.query<GraphPeopleResponse>(
+      personQuery,
+      variables,
+    )
+    const [personData] = response.people
+
+    if (!personData) {
+      return null
+    }
+    return this.hydrate(personData)
+  }
+
+  private hydrate(personData: GraphPersonResponse): Person {
     return {
       uid: personData.uid,
       displayName: personData.display_name,
+      external: personData.external,
       identifiers: personData.identifiers.map(
         (identifier: AgentIdentifier) => ({
           type: identifier.type,
@@ -72,7 +102,7 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
       ),
       firstName: personData.names[0]?.first_names[0]?.value,
       lastName: personData.names[0]?.last_names[0]?.value,
-      email: '',
+      email: null,
     }
   }
 }
