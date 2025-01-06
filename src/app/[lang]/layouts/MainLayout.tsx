@@ -5,7 +5,6 @@ import { Sidebar } from '@/components/sidebar'
 import { useTheme } from '@mui/material/styles'
 import { Box, useMediaQuery } from '@mui/system'
 import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
 import AuthenticatedRoute from '@/components/AuthenticatedRoute'
 import useStore from '@/stores/global_store'
 
@@ -23,18 +22,19 @@ export default function MainLayout({
     setOpen((prev) => !prev)
   }
 
-  const { data: session, status } = useSession()
-  const fetchConnectedUser = useStore((state) => state.fetchConnectedUser)
-  const connectedUser = useStore((state) => state.connectedUser)
+  const { connectedUser, loading, fetchConnectedUser } = useStore(
+    (state) => state,
+  )
+
   // Fetch connected user on session change
   useEffect(() => {
-    if (status === 'authenticated' && session?.user && !connectedUser) {
+    if (!connectedUser) {
       fetchConnectedUser()
     }
-  }, [status, session])
+  }, [])
 
   // Show a loading state if user data is still being fetched
-  if (status === 'loading' && !connectedUser) {
+  if (loading && !connectedUser) {
     return <p>Loading...</p>
   }
 
@@ -47,7 +47,7 @@ export default function MainLayout({
         <Sidebar
           handleToggleDrawerAction={handleToggleDrawer}
           open={open}
-          user={session?.user}
+          user={connectedUser}
         />
         {/* Main Content */}
         <Box

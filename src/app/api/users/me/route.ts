@@ -4,7 +4,7 @@ import { getServerSession, Session } from 'next-auth' // Assuming you are using 
 import authOptions from '@/app/auth/auth_options'
 import { AgentIdentifierType as DbAgentIdentifierType } from '@prisma/client'
 import { AgentIdentifier } from '@/types/AgentIdentifier'
-
+import { User } from '@/types/User'
 export const GET = async () => {
   try {
     // Get the session to identify the connected user
@@ -42,7 +42,7 @@ export const GET = async () => {
       )
     }
 
-    const user = await prisma.user.findFirst({
+    const user = (await prisma.user.findFirst({
       where: {
         person: {
           identifiers: {
@@ -54,7 +54,7 @@ export const GET = async () => {
         },
       },
       include: { person: true }, // Include associated Person if needed
-    })
+    })) as User | null
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
