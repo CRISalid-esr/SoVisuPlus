@@ -3,6 +3,7 @@ import {
   gql,
   InMemoryCache,
   NormalizedCacheObject,
+  OperationVariables,
 } from '@apollo/client'
 
 export class AbstractGraphQLClient {
@@ -33,8 +34,7 @@ export class AbstractGraphQLClient {
    */
   public async query<T>(
     query: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    variables?: Record<string, any>,
+    variables?: OperationVariables,
   ): Promise<T> {
     this.assertEnabled()
     try {
@@ -59,8 +59,7 @@ export class AbstractGraphQLClient {
    */
   public async mutate<T>(
     mutation: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    variables?: Record<string, any>,
+    variables?: OperationVariables,
   ): Promise<T> {
     this.assertEnabled()
     try {

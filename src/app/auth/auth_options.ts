@@ -2,7 +2,6 @@ import { Account, AuthOptions, Profile, User as NextAuthUser } from 'next-auth'
 import KeycloakProvider, { KeycloakProfile } from 'next-auth/providers/keycloak'
 import { UserService } from '@/lib/services/UserService'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
-import { CredentialInput } from 'next-auth/providers/credentials'
 import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
@@ -19,19 +18,14 @@ const authOptions: AuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    /* eslint-disable @typescript-eslint/no-unused-vars */
     async signIn({
       user,
       account,
       profile,
-      email,
-      credentials,
     }: {
       user: NextAuthUser
       account: Account | null
       profile?: Profile
-      email?: { verificationRequest?: boolean }
-      credentials?: Record<string, CredentialInput>
     }) {
       console.info('signIn callback', user, account, profile)
       const userService = new UserService(
@@ -55,7 +49,6 @@ const authOptions: AuthOptions = {
       }
       return token
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async session(params) {
       console.info('session callback', params)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
