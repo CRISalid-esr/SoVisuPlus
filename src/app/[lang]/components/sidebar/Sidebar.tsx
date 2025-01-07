@@ -34,12 +34,13 @@ import {
   User01 as Users,
   XClose as Close,
 } from '@untitled-ui/icons-react'
-import { signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
 import { SearchInput } from '../SearchInput'
+import { signOut } from 'next-auth/react'
+import { universityLogos } from '../../../../../configs'
 
 interface SidebarProps {
   handleToggleDrawerAction: () => void
@@ -176,6 +177,14 @@ export default function Sidebar({
   }
   console.log('theme.palette.primary.main', theme.palette.primary.main)
 
+  const renderUnversityLogo = () => {
+    if(currentTheme === ThemeMode.light){
+      return universityLogos.lightSideBarLogo
+    }
+    return universityLogos.darkSideBarLogo
+  }
+    
+
   return (
     <>
       {open && isMobile && (
@@ -250,17 +259,12 @@ export default function Sidebar({
                   }}
                 >
                   <Image
-                    src='/icons/logo.svg'
+                    src={renderUnversityLogo()}
                     alt='soVisuPlus logo'
-                    width={32}
-                    height={32}
-                    priority
-                  />
-                  <Image
-                    src='/icons/soVisuPlus.svg'
-                    alt='soVisuPlus logo'
-                    width={123.966}
-                    height={24.795}
+                    width={0}
+                    height={0}
+                    sizes='100vw'
+                    style={{ width: '100%', height: 'auto' }} // optional
                     priority
                   />
                 </Box>
