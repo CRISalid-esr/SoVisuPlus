@@ -12,20 +12,21 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  personId Int    @unique
-  person   Person @relation(fields: [personId], references: [id])
+  id       Int     @id @default(autoincrement())
+  personId Int?    @unique
+  person   Person? @relation(fields: [personId], references: [id], onDelete: SetNull)
 }
 
 model Person {
   id          Int               @id @default(autoincrement())
   uid         String            @unique
-  email       String            @unique
+  email       String?           @unique
   firstName   String
   lastName    String
   identifiers AgentIdentifier[]
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
+  external    Boolean           @default(false)
   user        User?
 }
 
@@ -47,7 +48,9 @@ enum AgentIdentifierType {
 model AgentIdentifier {
   id       Int                 @id @default(autoincrement())
   type     AgentIdentifierType
-  value    String              @unique
+  value    String
   person   Person              @relation(fields: [personId], references: [id], onDelete: Cascade)
   personId Int
+
+  @@unique([type, value])
 }

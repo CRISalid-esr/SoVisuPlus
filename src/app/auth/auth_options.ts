@@ -2,9 +2,11 @@ import { Account, AuthOptions, Profile, User as NextAuthUser } from 'next-auth'
 import KeycloakProvider, { KeycloakProfile } from 'next-auth/providers/keycloak'
 import { UserService } from '@/lib/services/UserService'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
-import { CredentialInput } from 'next-auth/providers/credentials'
 import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 import { UserDAO } from '@/lib/daos/UserDAO'
+import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { JWT } from 'next-auth/jwt'
+import { Session } from '@auth/core/types'
 
 const authOptions: AuthOptions = {
   providers: [
@@ -18,24 +20,20 @@ const authOptions: AuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    /* eslint-disable @typescript-eslint/no-unused-vars */
     async signIn({
       user,
       account,
       profile,
-      email,
-      credentials,
     }: {
       user: NextAuthUser
       account: Account | null
       profile?: Profile
-      email?: { verificationRequest?: boolean }
-      credentials?: Record<string, CredentialInput>
     }) {
       console.info('signIn callback', user, account, profile)
       const userService = new UserService(
         new PersonGraphQLClient(),
         new UserDAO(),
+        new PersonDAO(),
       )
       const authenticationProfile: AuthenticationProfile = {
         username: (profile as KeycloakProfile)?.preferred_username,
@@ -44,24 +42,26 @@ const authOptions: AuthOptions = {
       }
       return await userService.submitProfile(authenticationProfile)
     },
-    async jwt(params) {
-      console.info('jwt callback', params)
-      const { token, account, user } = params
+    async jwt({
+      token,
+      account,
+      user,
+    }: {
+      token: JWT
+      account?: Account | null
+      user?: NextAuthUser
+    }) {
+      console.info('jwt callback', { token, account, user })
       if (account && user) {
         token.accessToken = account.access_token
         token.id = user.id
       }
       return token
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async session(params) {
-      console.info('session callback', params)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { session, token } = params as any
-
-      if (token) {
-        session.user.id = token.id
-        session.accessToken = token.accessToken
+    async session({ session, token }: { session: Session; token: JWT }) {
+      console.info('session callback', { session, token })
+      if (token && session.user) {
+        session.user.id = token.id as string
       }
       return session
     },

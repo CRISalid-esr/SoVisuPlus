@@ -1,53 +1,23 @@
 import {
   AgentIdentifierType as DbAgentIdentifierType,
-  Person as DbPerson,
   User as DbUser,
 } from '@prisma/client'
-import { Person } from '@/types/Person'
 import { AgentIdentifier } from '@/types/AgentIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 
+/** UserDAO: Handles operations related to User records */
 export class UserDAO extends AbstractDAO {
   /**
    * Create or update a User record in the database
-   * @param person - The Person object to upsert
+   * @param personId - The ID of the associated Person
    * @returns The created or updated User record
    */
-  public async createOrUpdateUserFor(person: Person): Promise<DbUser> {
+  public async createOrUpdateUser(personId: number): Promise<DbUser> {
     try {
-      console.log('Prisma Client Models:', Object.keys(this.prismaClient))
-      const dbPerson: DbPerson = await this.prismaClient.person.upsert({
-        where: { uid: person.uid },
-        update: {
-          email: person.email || undefined,
-          firstName: person.firstName,
-          lastName: person.lastName,
-        },
-        create: {
-          uid: person.uid,
-          email: person.email || '',
-          firstName: person.firstName,
-          lastName: person.lastName,
-        },
-      })
-
-      // Handle AgentIdentifier separately
-      await this.prismaClient.agentIdentifier.deleteMany({
-        where: { personId: dbPerson.id },
-      })
-
-      await this.prismaClient.agentIdentifier.createMany({
-        data: person.identifiers.map((identifier) => ({
-          personId: dbPerson.id,
-          type: identifier.type.toUpperCase() as DbAgentIdentifierType,
-          value: identifier.value,
-        })),
-      })
-
       return await this.prismaClient.user.upsert({
-        where: { personId: dbPerson.id },
+        where: { personId },
         update: {},
-        create: { personId: dbPerson.id },
+        create: { personId },
       })
     } catch (error) {
       console.error('Error during user upsert:', error as Error)

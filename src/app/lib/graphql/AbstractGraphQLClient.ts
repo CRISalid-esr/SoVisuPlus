@@ -3,6 +3,7 @@ import {
   gql,
   InMemoryCache,
   NormalizedCacheObject,
+  OperationVariables,
 } from '@apollo/client'
 
 export class AbstractGraphQLClient {
@@ -10,18 +11,18 @@ export class AbstractGraphQLClient {
   private readonly enabled: boolean
 
   constructor() {
-    this.enabled = process.env.GRAPHQL_ENDPOINT_ENABLED
-    const uri: string | undefined = process.env.GRAPHQL_ENDPOINT_URL
+    this.enabled = process.env.GRAPHQL_ENDPOINT_ENABLED as unknown as boolean
+    const uri = process.env.GRAPHQL_ENDPOINT_URL
+
     if (!this.enabled) {
-      console.warn('GraphQL endpoint is disabled')
+      console.warn('GraphQL endpoint is disabled.')
     }
     if (!uri) {
-      console.error(
-        'GraphQL endpoint URL should be defined as GRAPHQL_ENDPOINT_URL',
-      )
+      console.error('GRAPHQL_ENDPOINT_URL must be defined.')
     }
+
     this.client = new ApolloClient({
-      uri,
+      uri: uri || '', // Default to an empty string if URI is undefined
       cache: new InMemoryCache(),
     })
   }
@@ -33,8 +34,7 @@ export class AbstractGraphQLClient {
    */
   public async query<T>(
     query: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    variables?: Record<string, any>,
+    variables?: OperationVariables,
   ): Promise<T> {
     this.assertEnabled()
     try {
@@ -54,13 +54,12 @@ export class AbstractGraphQLClient {
 
   /**
    * Performs a GraphQL mutation.
-   * @param mutation - The GraphQL mutation as a string.
+   * @param mutation - The GraphQL mutation as a document node (AST).
    * @param variables - Optional variables for the mutation.
    */
   public async mutate<T>(
     mutation: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    variables?: Record<string, any>,
+    variables?: OperationVariables,
   ): Promise<T> {
     this.assertEnabled()
     try {
@@ -81,34 +80,6 @@ export class AbstractGraphQLClient {
   }
 
   /**
-   * Subscribes to a GraphQL subscription.
-   * @param subscription - The GraphQL subscription as a string.
-   * @param variables - Optional variables for the subscription.
-   * @param callback - Callback to handle data updates.
-   */
-  public subscribe<T>(
-    subscription: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    variables: Record<string, any>,
-    callback: (data: T) => void,
-  ) {
-    this.assertEnabled()
-    const observable = this.client.subscribe({
-      query: gql`
-        ${subscription}
-      `,
-      variables,
-    })
-
-    return observable.subscribe({
-      next: ({ data }) => {
-        callback(data as T)
-      },
-      error: (error) => console.error('Subscription error:', error),
-    })
-  }
-
-  /**
    * Check if the GraphQL client is enabled.
    * @returns `true` if enabled, otherwise `false`.
    */
@@ -120,7 +91,7 @@ export class AbstractGraphQLClient {
    * Asserts that the GraphQL client is enabled and valid.
    */
   private assertEnabled(): void {
-    if (!this.isEnabled()) {
+    if (!this.enabled) {
       throw new Error('GraphQL client is disabled.')
     }
     if (!this.client) {

@@ -22,7 +22,7 @@ describe('PersonGraphQLClient', () => {
     mockQuery.mockResolvedValue({ people: [] })
 
     const agentIdentifier: AgentIdentifier = { type: 'ORCID', value: '12345' }
-    const person = await client.getPerson(agentIdentifier)
+    const person = await client.getPersonByIdentifier(agentIdentifier)
 
     expect(person).toBeNull()
     expect(mockQuery).toHaveBeenCalledWith(expect.any(String), {
@@ -44,6 +44,7 @@ describe('PersonGraphQLClient', () => {
       people: [
         {
           uid: 'person-123',
+          external: false,
           display_name: 'John Doe',
           identifiers: [
             { type: 'ORCID', value: '12345' },
@@ -62,10 +63,11 @@ describe('PersonGraphQLClient', () => {
     mockQuery.mockResolvedValue(mockResponse)
 
     const agentIdentifier: AgentIdentifier = { type: 'ORCID', value: '12345' }
-    const person = await client.getPerson(agentIdentifier)
+    const person = await client.getPersonByIdentifier(agentIdentifier)
 
     expect(person).toEqual({
       uid: 'person-123',
+      external: false,
       displayName: 'John Doe',
       identifiers: [
         { type: 'ORCID', value: '12345' },
@@ -73,7 +75,7 @@ describe('PersonGraphQLClient', () => {
       ],
       firstName: 'John',
       lastName: 'Doe',
-      email: '',
+      email: null,
     })
     expect(mockQuery).toHaveBeenCalledWith(expect.any(String), {
       where: {
