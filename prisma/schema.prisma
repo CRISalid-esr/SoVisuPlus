@@ -12,9 +12,9 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  personId Int    @unique
-  person   Person @relation(fields: [personId], references: [id])
+  id       Int     @id @default(autoincrement())
+  personId Int?    @unique
+  person   Person? @relation(fields: [personId], references: [id], onDelete: SetNull)
 }
 
 model Person {

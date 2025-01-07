@@ -4,8 +4,7 @@ import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/daos/prisma'
 
 describe('UserService Integration Tests', () => {
   let userService: UserService

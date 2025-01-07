@@ -16,32 +16,93 @@ jest.mock('@prisma/client', () => {
   return { PrismaClient: jest.fn(() => mockPrismaClient) }
 })
 const mockPrisma = new PrismaClient()
+
 describe('PersonDAO', () => {
+  let personDAO: PersonDAO
   beforeEach(() => {
     jest.clearAllMocks()
+    personDAO = new PersonDAO()
   })
 
+  const person: Person = {
+    uid: 'local-johndoe',
+    external: false,
+    email: 'johndoe@myuniversity.com',
+    displayName: 'John Doe',
+    firstName: 'John',
+    lastName: 'Doe',
+    identifiers: [
+      {
+        type: 'ORCID',
+        value: '0000-0001-2345-6789',
+      },
+    ],
+  }
+
   it('should upsert a person', async () => {
-    const person: Person = {
-      uid: 'local-johndoe',
-      external: false,
-      email: 'johndoe@myuniversity.com',
-      displayName: 'John Doe',
-      firstName: 'John',
-      lastName: 'Doe',
-      identifiers: [
+    ;(mockPrisma.person.upsert as jest.Mock).mockResolvedValue({
+      ...person,
+      id: 1,
+    })
+    ;(mockPrisma.agentIdentifier.findMany as jest.Mock).mockResolvedValue([])
+    const dbPerson: DbPerson = await personDAO.createOrUpdatePerson(person)
+    expect(dbPerson.uid).toEqual('local-johndoe')
+    expect(dbPerson.email).toEqual('johndoe@myuniversity.com')
+    expect(mockPrisma.person.upsert).toHaveBeenCalledWith({
+      where: { uid: person.uid },
+      update: {
+        email: person.email,
+        firstName: person.firstName,
+        lastName: person.lastName,
+      },
+      create: {
+        uid: person.uid,
+        email: person.email,
+        firstName: person.firstName,
+        lastName: person.lastName,
+      },
+    })
+
+    expect(mockPrisma.agentIdentifier.findMany).toHaveBeenCalledWith({
+      where: {
+        OR: [
+          {
+            type: 'ORCID',
+            value: '0000-0001-2345-6789',
+            personId: { not: 1 },
+          },
+        ],
+      },
+    })
+  })
+
+  it('should throw an error if conflicting identifiers are found', async () => {
+    ;(mockPrisma.agentIdentifier.findMany as jest.Mock).mockResolvedValue([
+      { type: 'ORCID', value: '0000-0001-2345-6789', personId: 999 },
+    ])
+
+    await expect(personDAO.createOrUpdatePerson(person)).rejects.toThrow(
+      'Conflicting identifiers found: ORCID:0000-0001-2345-6789',
+    )
+  })
+
+  it('should call deleteMany and createMany for upsertIdentifiers', async () => {
+    ;(mockPrisma.agentIdentifier.findMany as jest.Mock).mockResolvedValue([])
+
+    await personDAO.createOrUpdatePerson(person)
+
+    expect(mockPrisma.agentIdentifier.deleteMany).toHaveBeenCalledWith({
+      where: { personId: expect.any(Number) },
+    })
+
+    expect(mockPrisma.agentIdentifier.createMany).toHaveBeenCalledWith({
+      data: [
         {
+          personId: expect.any(Number),
           type: 'ORCID',
           value: '0000-0001-2345-6789',
         },
       ],
-    }
-
-    ;(mockPrisma.person.upsert as jest.Mock).mockResolvedValue(person)
-    ;(mockPrisma.agentIdentifier.findMany as jest.Mock).mockResolvedValue([])
-    const personDAO = new PersonDAO()
-    const dbPerson: DbPerson = await personDAO.createOrUpdatePerson(person)
-    expect(dbPerson.uid).toEqual('local-johndoe')
-    expect(dbPerson.email).toEqual('johndoe@myuniversity.com')
+    })
   })
 })

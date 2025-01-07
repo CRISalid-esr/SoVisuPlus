@@ -1,4 +1,5 @@
 import prisma from '@/lib/daos/prisma'
+import { AgentIdentifierType } from '@prisma/client'
 
 describe('AgentIdentifier Model Tests', () => {
   afterAll(async () => {
@@ -17,7 +18,7 @@ describe('AgentIdentifier Model Tests', () => {
 
     const agentIdentifier = await prisma.agentIdentifier.create({
       data: {
-        type: 'ORCID',
+        type: AgentIdentifierType.ORCID,
         value: '12345',
         person: {
           connect: {

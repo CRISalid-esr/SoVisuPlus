@@ -4,7 +4,7 @@ CREATE TYPE "AgentIdentifierType" AS ENUM ('orcid', 'idref', 'id_hal_s', 'id_hal
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
-    "personId" INTEGER NOT NULL,
+    "personId" INTEGER,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -58,7 +58,7 @@ CREATE UNIQUE INDEX "Publication_uid_key" ON "Publication"("uid");
 CREATE UNIQUE INDEX "AgentIdentifier_type_value_key" ON "AgentIdentifier"("type", "value");
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_personId_fkey" FOREIGN KEY ("personId") REFERENCES "Person"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "User" ADD CONSTRAINT "User_personId_fkey" FOREIGN KEY ("personId") REFERENCES "Person"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AgentIdentifier" ADD CONSTRAINT "AgentIdentifier_personId_fkey" FOREIGN KEY ("personId") REFERENCES "Person"("id") ON DELETE CASCADE ON UPDATE CASCADE;
