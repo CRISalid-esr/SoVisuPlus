@@ -1,6 +1,7 @@
 import { AgentIdentifierType, PrismaClient } from '@prisma/client'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
+import { clearDatabase } from '../../../prisma/clearDatabase'
 
 const prisma = new PrismaClient()
 
@@ -12,8 +13,11 @@ describe('PersonDAO Integration Tests', () => {
   })
 
   afterEach(async () => {
-    await prisma.agentIdentifier.deleteMany()
-    await prisma.person.deleteMany()
+    await clearDatabase(prisma)
+  })
+
+  beforeEach(async () => {
+    await clearDatabase(prisma)
   })
 
   afterAll(async () => {
