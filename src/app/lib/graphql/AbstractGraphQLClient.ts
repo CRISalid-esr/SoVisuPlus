@@ -1,18 +1,23 @@
 import {
   ApolloClient,
   gql,
+  HttpLink,
   InMemoryCache,
   NormalizedCacheObject,
   OperationVariables,
 } from '@apollo/client'
+import { setContext } from '@apollo/client/link/context'
 
 export class AbstractGraphQLClient {
   private readonly client: ApolloClient<NormalizedCacheObject>
   private readonly enabled: boolean
+  private readonly apiKeyEnabled: boolean
 
   constructor() {
-    this.enabled = process.env.GRAPHQL_ENDPOINT_ENABLED as unknown as boolean
+    this.enabled = process.env.GRAPHQL_ENDPOINT_ENABLED === 'true'
+    this.apiKeyEnabled = process.env.GRAPHQL_API_KEY_ENABLED === 'true'
     const uri = process.env.GRAPHQL_ENDPOINT_URL
+    const apiKey = process.env.GRAPHQL_API_KEY
 
     if (!this.enabled) {
       console.warn('GraphQL endpoint is disabled.')
@@ -20,9 +25,32 @@ export class AbstractGraphQLClient {
     if (!uri) {
       console.error('GRAPHQL_ENDPOINT_URL must be defined.')
     }
+    if (this.apiKeyEnabled && !apiKey) {
+      console.error('GRAPHQL_API_KEY must be defined.')
+    }
+
+    const httpLink = new HttpLink({ uri: uri || '' })
+
+    // Set the x-api-key header only if API key is enabled
+    const authLink = setContext((_, { headers }) => {
+      if (this.apiKeyEnabled) {
+        if (!apiKey) {
+          console.error(
+            'GRAPHQL_API_KEY must be defined when API key authentication is enabled.',
+          )
+        }
+        return {
+          headers: {
+            ...headers,
+            'x-api-key': apiKey || '', // Use the API key from the environment
+          },
+        }
+      }
+      return { headers }
+    })
 
     this.client = new ApolloClient({
-      uri: uri || '', // Default to an empty string if URI is undefined
+      link: authLink.concat(httpLink),
       cache: new InMemoryCache(),
     })
   }
