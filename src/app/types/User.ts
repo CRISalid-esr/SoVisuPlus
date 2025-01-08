@@ -21,6 +21,10 @@ class User {
   getDisplayName(): string {
     return this.person?.displayName || this.username
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static fromDbUser(user: any): User {
+    return new User(user.id, user.username, Person.fromDbPerson(user.person))
+  }
 }
 
 export { User }

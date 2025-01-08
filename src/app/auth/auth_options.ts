@@ -1,4 +1,4 @@
-import { Account, AuthOptions, Profile, User as NextAuthUser, Session } from 'next-auth'
+import { Account, AuthOptions, Profile, User as NextAuthUser } from 'next-auth'
 import KeycloakProvider, { KeycloakProfile } from 'next-auth/providers/keycloak'
 import { UserService } from '@/lib/services/UserService'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
@@ -6,20 +6,12 @@ import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { JWT } from 'next-auth/jwt'
-import { Session as AuthUser  } from '@auth/core/types'
-
+import { Session } from '@auth/core/types'
 
 declare module '@auth/core/types' {
-  interface User extends AuthUser {
-    username?: string;
-    orcid?: string;
-  }
-
-  interface Session {
-    user: {
-      id: string;
-      username: string;
-    };
+  interface User {
+    username?: string
+    orcid?: string
   }
 }
 
@@ -55,8 +47,7 @@ const authOptions: AuthOptions = {
         email: profile?.email,
         orcid: (profile as KeycloakProfile)?.orcid,
       }
-      await userService.submitProfile(authenticationProfile)
-      return true
+      return await userService.submitProfile(authenticationProfile)
     },
     async jwt({
       token,
@@ -66,7 +57,7 @@ const authOptions: AuthOptions = {
     }: {
       token: JWT
       account?: Account | null
-      user?: NextAuthUser ,
+      user?: NextAuthUser
       profile?: Profile
     }) {
       if (profile) {

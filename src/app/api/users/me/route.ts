@@ -14,8 +14,6 @@ export const GET = async () => {
     //const
     let electedIdentifier: AgentIdentifier | null = null
 
-    console.log('session', session)
-
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'User not authenticated' },
@@ -42,7 +40,7 @@ export const GET = async () => {
       )
     }
 
-    const user = (await prisma.user.findFirst({
+    const user = await prisma.user.findFirst({
       where: {
         person: {
           identifiers: {
@@ -54,13 +52,15 @@ export const GET = async () => {
         },
       },
       include: { person: true }, // Include associated Person if needed
-    })) as User | null
+    })
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    return NextResponse.json(user)
+    // Create a User object from the database user
+    const connectedUser = User.fromDbUser(user)
+    return NextResponse.json(connectedUser)
   } catch (error) {
     console.error('Error fetching connected user:', error)
     return NextResponse.json({ error: 'An error occurred' }, { status: 500 })

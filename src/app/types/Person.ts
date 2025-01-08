@@ -1,5 +1,4 @@
 import { AgentIdentifier } from '@/types/AgentIdentifier'
-
 class Person {
   uid: string
   external: boolean
@@ -25,6 +24,20 @@ class Person {
     this.firstName = firstName
     this.lastName = lastName
     this.identifiers = identifiers
+  }
+
+  //static method to create a Person object from a JSON object
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static fromDbPerson(person: any): Person {
+    return new Person(
+      person.uid,
+      person.external,
+      person.email,
+      person.displayName,
+      person.firstName,
+      person.lastName,
+      person.identifiers,
+    )
   }
 }
 
