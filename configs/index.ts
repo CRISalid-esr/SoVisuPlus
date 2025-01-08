@@ -2,10 +2,10 @@
 const university = process.env.NEXT_PUBLIC_UNIVERSITY
 
 let universityColors
-let universityLogos;
+let universityLogos
 
 switch (university) {
-  case 'paris1':
+  case 'custom':
     universityColors = require('./paris1/colors').colors
     universityLogos = require('./paris1/logos').logos
     break
@@ -15,4 +15,4 @@ switch (university) {
     break
 }
 
-export { universityColors ,universityLogos }
+export { universityColors, universityLogos }
