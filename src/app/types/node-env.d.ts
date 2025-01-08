@@ -12,5 +12,7 @@ declare namespace NodeJS {
     AMQP_QUEUE_NAME: string
     GRAPHQL_ENDPOINT_ENABLED: string
     GRAPHQL_ENDPOINT_URL: string
+    GRAPHQL_API_KEY_ENABLED: string
+    GRAPHQL_API_KEY: string
   }
 }
