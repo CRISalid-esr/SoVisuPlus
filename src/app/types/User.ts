@@ -1,11 +1,13 @@
 import { Person } from '@/types/Person'
+import { User as DbUser } from '@prisma/client'
+import { Person as DbPerson } from '@prisma/client'
 
 class User {
-  id: string
+  id: string | number
   username: string
   person?: Person // Optional property for the associated Person
 
-  constructor(id: string, username: string, person?: Person) {
+  constructor(id: string | number, username: string, person?: Person) {
     this.id = id
     this.username = username
     if (person) {
@@ -21,9 +23,9 @@ class User {
   getDisplayName(): string {
     return this.person?.displayName || this.username
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static fromDbUser(user: any): User {
-    return new User(user.id, user.username, Person.fromDbPerson(user.person))
+  static fromDbUser(user: DbUser & { person?: DbPerson }): User {
+    const person = user.person ? Person.fromDbPerson(user.person) : undefined
+    return new User(user.id, '', person)
   }
 }
 

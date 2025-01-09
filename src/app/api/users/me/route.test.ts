@@ -48,23 +48,19 @@ jest.mock('next-auth', () => ({
 
 describe('GET /api/route', () => {
   it('should return the connected user', async () => {
-    const mockUser = User.fromDbUser({
-      uid: '123',
-      username: 'Test User',
+    const mockUser: User = User.fromDbUser({
+      id: 123,
       person: {
         uid: '123',
         external: false,
         email: 'test',
-        displayName: 'Test User',
         firstName: 'Test',
         lastName: 'User',
-        identifiers: [
-          {
-            type: 'local',
-            value: 'Test User',
-          },
-        ],
+        id: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
+      personId: null,
     })
 
     // Mock Prisma response

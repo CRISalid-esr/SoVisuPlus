@@ -5,6 +5,8 @@ import authOptions from '@/app/auth/auth_options'
 import { AgentIdentifierType as DbAgentIdentifierType } from '@prisma/client'
 import { AgentIdentifier } from '@/types/AgentIdentifier'
 import { User } from '@/types/User'
+import { User as DbUser } from '@prisma/client'
+
 export const GET = async () => {
   try {
     // Get the session to identify the connected user
@@ -40,7 +42,7 @@ export const GET = async () => {
       )
     }
 
-    const user = await prisma.user.findFirst({
+    const user: DbUser | null = await prisma.user.findFirst({
       where: {
         person: {
           identifiers: {
