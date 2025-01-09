@@ -22,9 +22,7 @@ const useStore = create<GlobalStore>()(
             const item = localStorage.getItem(name)
             return item ? JSON.parse(item) : null
           },
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          setItem: (name: string, value: any) => {
-            console.log('value', value)
+          setItem: <T>(name: string, value: T) => {
             localStorage.setItem(name, JSON.stringify(value))
           },
           removeItem: (name: string) => {

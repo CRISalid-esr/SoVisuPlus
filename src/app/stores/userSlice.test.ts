@@ -40,13 +40,10 @@ describe('addUserSlice Tests', () => {
       json: async () => mockUser,
     })
 
-    // Call the fetchConnectedUser method
     await useStore.getState().fetchConnectedUser()
 
-    // Retrieve the updated state
     const updatedState = useStore.getState()
 
-    // Ensure the state is updated correctly after the async fetch
     expect(updatedState.loading).toBe(false)
     expect(updatedState.error).toBeNull()
     expect(updatedState.connectedUser).toEqual(mockUser)
@@ -54,17 +51,13 @@ describe('addUserSlice Tests', () => {
   })
 
   it('should handle fetch error', async () => {
-    // Mock the global fetch API to throw an error
     const mockError = new Error('Fetch error')
     global.fetch = jest.fn().mockRejectedValue(mockError)
 
-    // Call the fetchConnectedUser method
     await useStore.getState().fetchConnectedUser()
 
-    // Retrieve the updated state
     const updatedState = useStore.getState()
 
-    // Ensure error state is set correctly
     expect(updatedState.loading).toBe(false)
     expect(updatedState.connectedUser).toBeNull()
     expect(updatedState.currentPerspective).toBeNull()
