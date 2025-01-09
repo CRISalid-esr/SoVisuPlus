@@ -55,6 +55,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 RUN touch .env && chown nextjs:nodejs .env
 
+# queries are not bundled in the build, so we need to copy them manually
+COPY --from=builder --chown=nextjs:nodejs /app/src/app/lib/graphql/queries /app/src/app/lib/graphql/queries
+
 COPY ../../docker-bootstrap-app.sh ./
 
 USER nextjs
