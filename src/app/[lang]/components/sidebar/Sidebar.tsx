@@ -41,17 +41,12 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
 import { signOut } from 'next-auth/react'
+import { User } from '@/types/User'
 
 interface SidebarProps {
   handleToggleDrawerAction: () => void
   open: boolean
-  user?:
-    | {
-        name?: string | null | undefined
-        email?: string | null | undefined
-        image?: string | null | undefined
-      }
-    | undefined
+  user: User | null
 }
 
 export default function Sidebar({
@@ -1016,7 +1011,7 @@ export default function Sidebar({
                         lineHeight: theme.typography.lineHeight.lineHeight20px,
                       }}
                     >
-                      {user?.name}
+                      {user?.person?.firstName} {user?.person?.lastName}
                     </Typography>
                     <IconButton
                       title='Logout'
@@ -1045,7 +1040,7 @@ export default function Sidebar({
                     }}
                     color={theme.palette.white}
                   >
-                    {user?.email}
+                    {user?.person?.email}
                   </Typography>
                 </Box>
               </Box>

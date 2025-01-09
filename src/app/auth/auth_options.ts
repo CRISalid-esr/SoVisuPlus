@@ -8,6 +8,13 @@ import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { JWT } from 'next-auth/jwt'
 import { Session } from '@auth/core/types'
 
+declare module '@auth/core/types' {
+  interface User {
+    username?: string
+    orcid?: string
+  }
+}
+
 const authOptions: AuthOptions = {
   providers: [
     KeycloakProvider({
@@ -46,12 +53,18 @@ const authOptions: AuthOptions = {
       token,
       account,
       user,
+      profile,
     }: {
       token: JWT
       account?: Account | null
       user?: NextAuthUser
+      profile?: Profile
     }) {
-      console.info('jwt callback', { token, account, user })
+      if (profile) {
+        token.username = (profile as KeycloakProfile)?.preferred_username
+        token.email = profile?.email
+        token.orcid = (profile as KeycloakProfile)?.orcid
+      }
       if (account && user) {
         token.accessToken = account.access_token
         token.id = user.id
@@ -59,9 +72,10 @@ const authOptions: AuthOptions = {
       return token
     },
     async session({ session, token }: { session: Session; token: JWT }) {
-      console.info('session callback', { session, token })
       if (token && session.user) {
         session.user.id = token.id as string
+        session.user.username = token.username as string
+        session.user.orcid = token.orcid as string
       }
       return session
     },

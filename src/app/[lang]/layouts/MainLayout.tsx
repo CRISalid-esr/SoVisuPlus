@@ -4,9 +4,9 @@ import { Appbar } from '@/components/appbar'
 import { Sidebar } from '@/components/sidebar'
 import { useTheme } from '@mui/material/styles'
 import { Box, useMediaQuery } from '@mui/system'
-import { useState } from 'react'
-import { useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
 import AuthenticatedRoute from '@/components/AuthenticatedRoute'
+import useStore from '@/stores/global_store'
 
 export default function MainLayout({
   children,
@@ -22,7 +22,19 @@ export default function MainLayout({
     setOpen((prev) => !prev)
   }
 
-  const { data: session } = useSession()
+  const { connectedUser, loading, fetchConnectedUser } = useStore(
+    (state) => state,
+  )
+
+  useEffect(() => {
+    if (!connectedUser) {
+      fetchConnectedUser()
+    }
+  }, [])
+
+  if (loading && !connectedUser) {
+    return <p>Loading...</p>
+  }
 
   return (
     <AuthenticatedRoute>
@@ -33,7 +45,7 @@ export default function MainLayout({
         <Sidebar
           handleToggleDrawerAction={handleToggleDrawer}
           open={open}
-          user={session?.user}
+          user={connectedUser}
         />
         {/* Main Content */}
         <Box
