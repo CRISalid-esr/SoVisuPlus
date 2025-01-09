@@ -74,22 +74,22 @@ msgstr "Publications"
 msgid "publications_page_synchronize_button"
 msgstr "Synchroniser"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:454
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:449
 #: src/app/[lang]/dashboard/page.tsx:10
 msgid "side_bar_dashboard"
 msgstr "Tableau de bord"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:552
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:547
 #: src/app/[lang]/expertise/page.tsx:10
 msgid "side_bar_expertise"
 msgstr "Expertises"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:663
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:658
 #: src/app/[lang]/institutions/page.tsx:10
 msgid "side_bar_institutions"
 msgstr "Institutions"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:713
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:708
 #: src/app/[lang]/laboratories/page.tsx:10
 msgid "side_bar_laboratories"
 msgstr "Laboratoires"
@@ -98,7 +98,7 @@ msgstr "Laboratoires"
 msgid "side_bar_my_account"
 msgstr "Mon compte"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:613
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:608
 #: src/app/[lang]/my-groups/page.tsx:10
 msgid "side_bar_my_groups"
 msgstr "Groupes"
@@ -107,26 +107,26 @@ msgstr "Groupes"
 msgid "side_bar_my_research_activities"
 msgstr "Activités de recherche"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:503
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:498
 msgid "side_bar_publications"
 msgstr "Publications"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:359
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:354
 msgid "sidebar_search_placeholder"
 msgstr "Chercher"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:122
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:145
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:790
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:117
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:140
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:785
 msgid "sidebar_theme_dark"
 msgstr "Thème sombre"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:99
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:771
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:94
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:766
 msgid "sidebar_theme_light"
 msgstr "Thème clair"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:809
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:804
 msgid "sidebar_theme_system"
 msgstr "Thème automatique"
 
