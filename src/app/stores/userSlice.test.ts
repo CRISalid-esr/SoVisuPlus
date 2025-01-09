@@ -9,7 +9,6 @@ const mockUser = {
   person: { id: 1, name: 'Agent Test', type: 'Agent' },
 }
 
-// Create a test store with the UserSlice
 const createTestStore = () => {
   return create<UserSlice>((set, get, store) => ({
     ...addUserSlice(set, get, store),

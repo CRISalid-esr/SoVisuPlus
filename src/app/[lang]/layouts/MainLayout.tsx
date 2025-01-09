@@ -26,14 +26,12 @@ export default function MainLayout({
     (state) => state,
   )
 
-  // Fetch connected user on session change
   useEffect(() => {
     if (!connectedUser) {
       fetchConnectedUser()
     }
   }, [])
 
-  // Show a loading state if user data is still being fetched
   if (loading && !connectedUser) {
     return <p>Loading...</p>
   }
