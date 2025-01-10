@@ -24,4 +24,5 @@ npx prisma migrate deploy
 # npm warn exec The following package was not found and will be installed: prisma@5.22.0
 rm -rf node_modules/prisma
 
-npm run start:all
+HOSTNAME="0.0.0.0" npm run start:web & npm run start:listener
+wait
