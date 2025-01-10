@@ -4,12 +4,23 @@ import Toolbar from '@mui/material/Toolbar'
 import { Box } from '@mui/system'
 import Image from 'next/image'
 import { Menu02 as Menu } from '@untitled-ui/icons-react'
+import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
+import { universityLogos } from '../../../../../configs'
+
 export default function Appbar({
   handleToggleDrawer,
 }: {
   handleToggleDrawer: () => void
 }) {
   const toggleDrawer = () => handleToggleDrawer()
+  const { currentTheme } = useThemeContext()
+
+  const renderUnversityLogo = () => {
+    if (currentTheme === ThemeMode.light) {
+      return universityLogos.lightSideBarLogo
+    }
+    return universityLogos.darkSideBarLogo
+  }
   return (
     <AppBar
       sx={(theme) => ({
@@ -32,17 +43,12 @@ export default function Appbar({
             }}
           >
             <Image
-              src='/icons/logo.svg'
+              src={renderUnversityLogo()}
               alt='Crisalid logo'
-              width={32}
-              height={32}
-              priority
-            />
-            <Image
-              src='/icons/soVisuPlus.svg'
-              alt='Crisalid logo plus'
-              width={123.966}
-              height={24.795}
+              width={0}
+              height={0}
+              sizes='100vw'
+              style={{ width: '120px', height: 'auto' }} // optional
               priority
             />
           </Box>

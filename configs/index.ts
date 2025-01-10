@@ -6,12 +6,13 @@ let universityLogos
 
 switch (university) {
   case 'custom':
-    universityColors = require('./paris1/colors').colors
-    universityLogos = require('./paris1/logos').logos
+    universityColors = require('./custom/colors').colors
+    universityLogos = require('./custom/logos').logos
     break
   default:
+    console.log('Using default university')
     universityColors = require('./default/colors').colors
-    universityLogos = require('./paris1/logos').logos
+    universityLogos = require('./default/logos').logos
     break
 }
 
