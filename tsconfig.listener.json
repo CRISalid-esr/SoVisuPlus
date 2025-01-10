@@ -9,8 +9,8 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "baseUrl": ".",
     "typeRoots": ["node_modules/@types", "src/app/types"],
+    "baseUrl": ".",
     "paths": {
       "@/components/*": ["src/app/[lang]/components/*"],
       "@/utils/*": ["src/app/utils/*"],
@@ -23,6 +23,9 @@
       "@/middlewares/*": ["src/middlewares/*"],
       "@/*": ["src/*"]
     }
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
   },
   "include": ["src/**/*.ts"],
   "exclude": [
