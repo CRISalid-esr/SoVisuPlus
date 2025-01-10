@@ -8,10 +8,10 @@
     "build:paris1": "cross-env NEXT_PUBLIC_UNIVERSITY=paris1 next build",
     "dev:paris1": "cross-env NEXT_PUBLIC_UNIVERSITY=paris1 next dev",
     "dev:listener": "ts-node --project tsconfig.listener.json src/scripts/listener.ts",
-    "build:listener": "tsc --project tsconfig.listener.json --outDir dist",
-    "start:listener": "node dist/scripts/listener.js",
-    "start:web": "npx prisma migrate deploy && next start",
-    "start:all": "concurrently \"npm run start:web\" \"npm run start:listener\"",
+    "build:listener": "tsc --project tsconfig.listener.json --outDir dist && tsc-alias --project tsconfig.listener.json --outDir dist ",
+    "start:listener": "node -r tsconfig-paths/register dist/scripts/listener.js",
+    "start:web": "next start",
+    "start:all": "concurrently \"HOSTNAME=\"0.0.0.0\" npm run start:web\" \"npm run start:listener\"",
     "lint": "next lint",
     "test": "jest --config jest.config.ts",
     "test:integration": "jest --config jest.integration.config.ts",
@@ -103,6 +103,7 @@
     "storybook": "^8.4.6",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0"
   }
 }

@@ -42,5 +42,5 @@
     "src/theme/theme.d.ts",
     "additional.d.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "src/scripts"]
 }
