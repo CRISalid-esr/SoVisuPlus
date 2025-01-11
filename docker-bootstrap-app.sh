@@ -24,5 +24,6 @@ npx prisma migrate deploy
 # npm warn exec The following package was not found and will be installed: prisma@5.22.0
 rm -rf node_modules/prisma
 
+export NODE_PATH=/app/node_modules # for the listener to find shared modules
 HOSTNAME="0.0.0.0" npm run start:web & npm run start:listener
 wait

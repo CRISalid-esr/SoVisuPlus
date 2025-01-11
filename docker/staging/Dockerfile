@@ -22,6 +22,7 @@ COPY . .
 
 RUN npx prisma generate
 RUN npm run build
+RUN npm run build:listener
 
 FROM base AS runner
 
@@ -47,11 +48,14 @@ RUN adduser -S nextjs -u 1001
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
+COPY --from=deps /app/node_modules ./node_modules
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+COPY --from=builder --chown=nextjs:nodejs /app/dist-listener ./dist-listener
 
 RUN touch .env && chown nextjs:nodejs .env
 
