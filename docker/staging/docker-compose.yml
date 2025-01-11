@@ -20,8 +20,27 @@ services:
       interval: 1s
       timeout: 5s
       retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: svp-rabbitmq
+    restart: always
+    ports:
+      - 5672:5672 # Default AMQP port
+      - 15672:15672 # Management console
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - svp-network
+    healthcheck:
+      test: ['CMD-SHELL', 'rabbitmq-diagnostics -q ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   sovisuplus:
-    image: crisalidesr/sovisuplus:v0.5-dev
+    image: crisalidesr/sovisuplus:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -36,11 +55,20 @@ services:
       - DB_HOST=svp-db
       - DB_PORT=5432
       - NEXTAUTH_SECRET=include_your_secret_here
+      - AMQP_HOST=svp-rabbitmq
+      - AMQP_PORT=5672
+      - AMQP_USER=guest
+      - AMQP_PASSWORD=guest
+      - AMQP_QUEUE_NAME=sovisuplus
+      - GRAPHQL_ENDPOINT_ENABLED=false
     depends_on:
       svp-db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - svp-network
+
 networks:
   svp-network:
     driver: bridge

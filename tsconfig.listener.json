@@ -30,12 +30,17 @@
   "include": ["src/**/*.ts"],
   "exclude": [
     "node_modules",
+    "**/*.test.ts",
+    "**/*.test.js",
+    "**/*.spec.ts",
+    "**/*.spec.js",
     "**/*.jsx",
     "**/*.tsx",
     "**/*.stories.ts",
     "src/app/[lang]",
     "src/app/theme",
     "src/app/auth",
-    "src/app/types/theme.d.ts"
+    "src/app/types/theme.d.ts",
+    "dist-listener"
   ]
 }

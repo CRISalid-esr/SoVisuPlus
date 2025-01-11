@@ -1,4 +1,3 @@
-import 'tsconfig-paths/register'
 import * as dotenv from 'dotenv'
 import AmqpConnection from '@/lib/amqp/AmqpConnection'
 import MessageProcessingService from '@/lib/amqp/services/MessageProcessingService'
