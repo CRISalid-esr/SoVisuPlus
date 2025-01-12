@@ -54,3 +54,29 @@ model PersonIdentifier {
 
   @@unique([type, value])
 }
+
+model ResearchStructure {
+  id           Int                           @id @default(autoincrement())
+  uid          String                        @unique
+  acronym      String?
+  identifiers  ResearchStructureIdentifier[]
+  names        Json                          @db.JsonB // Store internationalized names
+  descriptions Json                          @db.JsonB // Store internationalized descriptions
+}
+
+model ResearchStructureIdentifier {
+  id                  Int                             @id @default(autoincrement())
+  type                ResearchStructureIdentifierType
+  value               String
+  researchStructure   ResearchStructure               @relation(fields: [researchStructureId], references: [id], onDelete: Cascade)
+  researchStructureId Int
+
+  @@unique([type, value])
+}
+
+enum ResearchStructureIdentifierType {
+  LOCAL @map("local")
+  RNSR  @map("rnsr")
+  IDREF @map("idref")
+  ROR   @map("ror")
+}

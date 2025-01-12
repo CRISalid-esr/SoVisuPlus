@@ -18,11 +18,16 @@ export class PersonWorker extends MessageProcessingWorker<AMQPPersonMessage> {
    * Constructor
    * @param message - The person message to process
    */
-  constructor(message: AMQPPersonMessage) {
+  constructor(
+    message: AMQPPersonMessage,
+    personDAO: PersonDAO,
+    userDAO: UserDAO,
+    personGraphQLClient: PersonGraphQLClient,
+  ) {
     super(message)
-    this.personGraphQLClient = new PersonGraphQLClient()
-    this.personDAO = new PersonDAO()
-    this.userDAO = new UserDAO()
+    this.personDAO = personDAO
+    this.userDAO = userDAO
+    this.personGraphQLClient = personGraphQLClient
   }
 
   /**
