@@ -1,4 +1,4 @@
-import { AgentIdentifierType, PrismaClient } from '@prisma/client'
+import { PersonIdentifierType, PrismaClient } from '@prisma/client'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { clearDatabase } from '../../../prisma/clearDatabase'
 
@@ -56,9 +56,9 @@ describe('UserDAO Integration Tests', () => {
       },
     })
 
-    await prisma.agentIdentifier.create({
+    await prisma.personIdentifier.create({
       data: {
-        type: AgentIdentifierType.ORCID,
+        type: PersonIdentifierType.ORCID,
         value: '0000-0001-2345-6789',
         personId: person.id,
       },

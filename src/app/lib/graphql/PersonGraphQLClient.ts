@@ -1,9 +1,9 @@
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
-import { AgentIdentifier } from '@/types/AgentIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { Person } from '@/types/Person'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
 
-interface GraphAgentIdentifier {
+interface GraphPersonIdentifier {
   type: string
   value: string
 }
@@ -21,7 +21,7 @@ interface GraphPersonResponse {
   uid: string
   display_name: string
   external: boolean
-  identifiers: Array<GraphAgentIdentifier>
+  identifiers: Array<GraphPersonIdentifier>
   names: Array<GraphPersonName>
 }
 
@@ -32,19 +32,19 @@ export interface GraphPeopleResponse {
 export class PersonGraphQLClient extends AbstractGraphQLClient {
   /**
    * Get a person by one of their identifiers
-   * @param agentIdentifier
+   * @param personIdentifier
    * @returns The person if found, null otherwise
    */
   public async getPersonByIdentifier(
-    agentIdentifier: AgentIdentifier,
+    personIdentifier: PersonIdentifier,
   ): Promise<Person | null> {
     const variables = {
       where: {
         AND: [
           {
             identifiers_SOME: {
-              type_EQ: agentIdentifier.type, // Assuming `type` exists in AgentIdentifier
-              value_EQ: agentIdentifier.value, // Assuming `value` exists in AgentIdentifier
+              type_EQ: personIdentifier.type, // Assuming `type` exists in PersonIdentifier
+              value_EQ: personIdentifier.value, // Assuming `value` exists in PersonIdentifier
             },
           },
         ],
@@ -95,7 +95,7 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
       displayName: personData.display_name,
       external: personData.external,
       identifiers: personData.identifiers.map(
-        (identifier: AgentIdentifier) => ({
+        (identifier: PersonIdentifier) => ({
           type: identifier.type,
           value: identifier.value,
         }),

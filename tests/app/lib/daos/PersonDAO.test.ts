@@ -1,4 +1,4 @@
-import { AgentIdentifierType, PrismaClient } from '@prisma/client'
+import { PersonIdentifierType, PrismaClient } from '@prisma/client'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 import { clearDatabase } from '../../../prisma/clearDatabase'
@@ -46,13 +46,13 @@ describe('PersonDAO Integration Tests', () => {
     expect(dbPerson.uid).toBe(personData.uid)
     expect(dbPerson.email).toBe(personData.email)
 
-    const savedIdentifiers = await prisma.agentIdentifier.findMany({
+    const savedIdentifiers = await prisma.personIdentifier.findMany({
       where: { personId: dbPerson.id },
     })
 
     expect(savedIdentifiers).toHaveLength(1)
     expect(savedIdentifiers[0]).toMatchObject({
-      type: AgentIdentifierType.ORCID,
+      type: PersonIdentifierType.ORCID,
       value: '0000-0001-2345-6789',
       personId: dbPerson.id,
     })
@@ -68,10 +68,10 @@ describe('PersonDAO Integration Tests', () => {
       },
     })
 
-    await prisma.agentIdentifier.createMany({
+    await prisma.personIdentifier.createMany({
       data: [
         {
-          type: AgentIdentifierType.ORCID,
+          type: PersonIdentifierType.ORCID,
           value: '0000-0001-1111-1111',
           personId: initialPerson.id,
         },
@@ -84,13 +84,13 @@ describe('PersonDAO Integration Tests', () => {
     expect(updatedPerson.firstName).toBe(personData.firstName)
     expect(updatedPerson.lastName).toBe(personData.lastName)
 
-    const updatedIdentifiers = await prisma.agentIdentifier.findMany({
+    const updatedIdentifiers = await prisma.personIdentifier.findMany({
       where: { personId: updatedPerson.id },
     })
 
     expect(updatedIdentifiers).toHaveLength(1)
     expect(updatedIdentifiers[0]).toMatchObject({
-      type: AgentIdentifierType.ORCID,
+      type: PersonIdentifierType.ORCID,
       value: '0000-0001-2345-6789',
     })
   })
@@ -105,9 +105,9 @@ describe('PersonDAO Integration Tests', () => {
       },
     })
 
-    await prisma.agentIdentifier.create({
+    await prisma.personIdentifier.create({
       data: {
-        type: AgentIdentifierType.ORCID,
+        type: PersonIdentifierType.ORCID,
         value: '0000-0001-2345-6789',
         personId: conflictingPerson.id,
       },
@@ -128,10 +128,10 @@ describe('PersonDAO Integration Tests', () => {
       },
     })
 
-    await prisma.agentIdentifier.createMany({
+    await prisma.personIdentifier.createMany({
       data: [
         {
-          type: AgentIdentifierType.ORCID,
+          type: PersonIdentifierType.ORCID,
           value: '0000-0001-1111-1111',
           personId: initialPerson.id,
         },
@@ -148,7 +148,7 @@ describe('PersonDAO Integration Tests', () => {
 
     const updatedPerson = await personDAO.createOrUpdatePerson(newPersonData)
 
-    const updatedIdentifiers = await prisma.agentIdentifier.findMany({
+    const updatedIdentifiers = await prisma.personIdentifier.findMany({
       where: { personId: updatedPerson.id },
     })
 
@@ -156,11 +156,11 @@ describe('PersonDAO Integration Tests', () => {
     expect(updatedIdentifiers).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          type: AgentIdentifierType.SCOPUS_EID,
+          type: PersonIdentifierType.SCOPUS_EID,
           value: '1234-5678-9012',
         }),
         expect.objectContaining({
-          type: AgentIdentifierType.IDREF,
+          type: PersonIdentifierType.IDREF,
           value: 'AB-1234-5678',
         }),
       ]),

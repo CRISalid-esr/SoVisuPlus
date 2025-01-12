@@ -7,7 +7,7 @@ jest.mock('@prisma/client', () => {
     person: {
       upsert: jest.fn(),
     },
-    agentIdentifier: {
+    personIdentifier: {
       findMany: jest.fn(),
       deleteMany: jest.fn(),
       createMany: jest.fn(),
@@ -44,7 +44,7 @@ describe('PersonDAO', () => {
       ...person,
       id: 1,
     })
-    ;(mockPrisma.agentIdentifier.findMany as jest.Mock).mockResolvedValue([])
+    ;(mockPrisma.personIdentifier.findMany as jest.Mock).mockResolvedValue([])
     const dbPerson: DbPerson = await personDAO.createOrUpdatePerson(person)
     expect(dbPerson.uid).toEqual('local-johndoe')
     expect(dbPerson.email).toEqual('johndoe@myuniversity.com')
@@ -63,7 +63,7 @@ describe('PersonDAO', () => {
       },
     })
 
-    expect(mockPrisma.agentIdentifier.findMany).toHaveBeenCalledWith({
+    expect(mockPrisma.personIdentifier.findMany).toHaveBeenCalledWith({
       where: {
         OR: [
           {
@@ -77,7 +77,7 @@ describe('PersonDAO', () => {
   })
 
   it('should throw an error if conflicting identifiers are found', async () => {
-    ;(mockPrisma.agentIdentifier.findMany as jest.Mock).mockResolvedValue([
+    ;(mockPrisma.personIdentifier.findMany as jest.Mock).mockResolvedValue([
       { type: 'ORCID', value: '0000-0001-2345-6789', personId: 999 },
     ])
 
@@ -87,15 +87,15 @@ describe('PersonDAO', () => {
   })
 
   it('should call deleteMany and createMany for upsertIdentifiers', async () => {
-    ;(mockPrisma.agentIdentifier.findMany as jest.Mock).mockResolvedValue([])
+    ;(mockPrisma.personIdentifier.findMany as jest.Mock).mockResolvedValue([])
 
     await personDAO.createOrUpdatePerson(person)
 
-    expect(mockPrisma.agentIdentifier.deleteMany).toHaveBeenCalledWith({
+    expect(mockPrisma.personIdentifier.deleteMany).toHaveBeenCalledWith({
       where: { personId: expect.any(Number) },
     })
 
-    expect(mockPrisma.agentIdentifier.createMany).toHaveBeenCalledWith({
+    expect(mockPrisma.personIdentifier.createMany).toHaveBeenCalledWith({
       data: [
         {
           personId: expect.any(Number),

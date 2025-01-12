@@ -23,7 +23,7 @@ describe('UserService Integration Tests', () => {
   })
 
   afterEach(async () => {
-    await prisma.agentIdentifier.deleteMany()
+    await prisma.personIdentifier.deleteMany()
     await prisma.user.deleteMany()
     await prisma.person.deleteMany()
   })
@@ -57,12 +57,12 @@ describe('UserService Integration Tests', () => {
     expect(createdPerson).not.toBeNull()
     expect(createdPerson?.email).toBe(personData.email)
 
-    const createdAgentIdentifier = await prisma.agentIdentifier.findFirst({
+    const createdPersonIdentifier = await prisma.personIdentifier.findFirst({
       where: { value: '0000-0002-1234-5678' },
     })
 
-    expect(createdAgentIdentifier).not.toBeNull()
-    expect(createdAgentIdentifier?.personId).toBe(createdPerson?.id)
+    expect(createdPersonIdentifier).not.toBeNull()
+    expect(createdPersonIdentifier?.personId).toBe(createdPerson?.id)
   })
 
   test('should return true for an existing user in the database', async () => {
@@ -75,7 +75,7 @@ describe('UserService Integration Tests', () => {
       },
     })
 
-    await prisma.agentIdentifier.create({
+    await prisma.personIdentifier.create({
       data: {
         type: 'LOCAL',
         value: 'existing-test123',

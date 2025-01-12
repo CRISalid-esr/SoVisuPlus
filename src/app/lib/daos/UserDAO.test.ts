@@ -1,5 +1,5 @@
 import { User as DbUser, PrismaClient } from '@prisma/client'
-import { AgentIdentifier } from '@/types/AgentIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { UserDAO } from '@/lib/daos/UserDAO'
 
 jest.mock('@prisma/client', () => {
@@ -8,7 +8,7 @@ jest.mock('@prisma/client', () => {
       upsert: jest.fn(),
       findFirst: jest.fn(),
     },
-    agentIdentifier: {
+    personIdentifier: {
       findMany: jest.fn(),
     },
   }
@@ -23,7 +23,7 @@ describe('UserDAO', () => {
     userDAO = new UserDAO()
   })
 
-  const identifier: AgentIdentifier = {
+  const identifier: PersonIdentifier = {
     type: 'ORCID',
     value: '0000-0001-2345-6789',
   }

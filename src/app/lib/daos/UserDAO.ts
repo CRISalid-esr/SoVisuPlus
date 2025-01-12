@@ -1,8 +1,8 @@
 import {
-  AgentIdentifierType as DbAgentIdentifierType,
+  PersonIdentifierType as DbPersonIdentifierType,
   User as DbUser,
 } from '@prisma/client'
-import { AgentIdentifier } from '@/types/AgentIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 
 /** UserDAO: Handles operations related to User records */
@@ -26,12 +26,12 @@ export class UserDAO extends AbstractDAO {
   }
 
   /**
-   * Fetch a User by an AgentIdentifier.
-   * @param identifier - The AgentIdentifier to search for.
+   * Fetch a User by an PersonIdentifier.
+   * @param identifier - The PersonIdentifier to search for.
    * @returns The User record if found, null otherwise.
    */
   public async getUserByIdentifier(
-    identifier: AgentIdentifier,
+    identifier: PersonIdentifier,
   ): Promise<DbUser | null> {
     console.log('identifier', identifier)
     try {
@@ -40,7 +40,7 @@ export class UserDAO extends AbstractDAO {
           person: {
             identifiers: {
               some: {
-                type: identifier.type.toUpperCase() as DbAgentIdentifierType,
+                type: identifier.type.toUpperCase() as DbPersonIdentifierType,
                 value: identifier.value,
               },
             },

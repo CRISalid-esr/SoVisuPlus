@@ -1,12 +1,12 @@
 import prisma from '@/lib/daos/prisma'
-import { AgentIdentifierType } from '@prisma/client'
+import { PersonIdentifierType } from '@prisma/client'
 
-describe('AgentIdentifier Model Tests', () => {
+describe('PersonIdentifier Model Tests', () => {
   afterAll(async () => {
     await prisma.$disconnect()
   })
 
-  test('should create an AgentIdentifier for a user', async () => {
+  test('should create a PersonIdentifier for a user', async () => {
     const person = await prisma.person.create({
       data: {
         uid: 'local-test1234',
@@ -16,9 +16,9 @@ describe('AgentIdentifier Model Tests', () => {
       },
     })
 
-    const agentIdentifier = await prisma.agentIdentifier.create({
+    const personIdentifier = await prisma.personIdentifier.create({
       data: {
-        type: AgentIdentifierType.ORCID,
+        type: PersonIdentifierType.ORCID,
         value: '12345',
         person: {
           connect: {
@@ -28,12 +28,12 @@ describe('AgentIdentifier Model Tests', () => {
       },
     })
 
-    expect(agentIdentifier).toHaveProperty('id')
-    expect(agentIdentifier.value).toBe('12345')
-    expect(agentIdentifier.personId).toBe(person.id)
+    expect(personIdentifier).toHaveProperty('id')
+    expect(personIdentifier.value).toBe('12345')
+    expect(personIdentifier.personId).toBe(person.id)
   })
 
-  test('should fetch an AgentIdentifier for a user', async () => {
+  test('should fetch an PersonIdentifier for a user', async () => {
     const person = await prisma.person.create({
       data: {
         uid: 'local-test2345',
@@ -43,7 +43,7 @@ describe('AgentIdentifier Model Tests', () => {
       },
     })
 
-    const agentIdentifier = await prisma.agentIdentifier.create({
+    const personIdentifier = await prisma.personIdentifier.create({
       data: {
         type: 'SCOPUS_EID',
         value: '67890',
@@ -55,11 +55,11 @@ describe('AgentIdentifier Model Tests', () => {
       },
     })
 
-    const fetchedAgent = await prisma.agentIdentifier.findUnique({
+    const fetchedAgent = await prisma.personIdentifier.findUnique({
       where: {
         type_value: {
-          type: agentIdentifier.type,
-          value: agentIdentifier.value,
+          type: personIdentifier.type,
+          value: personIdentifier.value,
         },
       },
     })

@@ -1,6 +1,6 @@
 import { PersonGraphQLClient } from './PersonGraphQLClient'
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
-import { AgentIdentifier } from '@/types/AgentIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 
 jest.mock('./AbstractGraphQLClient')
 
@@ -21,8 +21,8 @@ describe('PersonGraphQLClient', () => {
   test('should return null if no person matches the agent identifier', async () => {
     mockQuery.mockResolvedValue({ people: [] })
 
-    const agentIdentifier: AgentIdentifier = { type: 'ORCID', value: '12345' }
-    const person = await client.getPersonByIdentifier(agentIdentifier)
+    const personIdentifier: PersonIdentifier = { type: 'ORCID', value: '12345' }
+    const person = await client.getPersonByIdentifier(personIdentifier)
 
     expect(person).toBeNull()
     expect(mockQuery).toHaveBeenCalledWith(expect.any(String), {
@@ -62,8 +62,8 @@ describe('PersonGraphQLClient', () => {
 
     mockQuery.mockResolvedValue(mockResponse)
 
-    const agentIdentifier: AgentIdentifier = { type: 'ORCID', value: '12345' }
-    const person = await client.getPersonByIdentifier(agentIdentifier)
+    const personIdentifier: PersonIdentifier = { type: 'ORCID', value: '12345' }
+    const person = await client.getPersonByIdentifier(personIdentifier)
 
     expect(person).toEqual({
       uid: 'person-123',

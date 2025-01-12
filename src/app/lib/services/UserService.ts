@@ -1,4 +1,4 @@
-import { AgentIdentifier } from '@/app/types/AgentIdentifier'
+import { PersonIdentifier } from '@/app/types/PersonIdentifier'
 import { Person as DbPerson, User } from '@prisma/client'
 import { Person } from '@/app/types/Person'
 import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
@@ -30,7 +30,7 @@ export class UserService {
    * @returns True if the profile matches an existing user, false otherwise
    */
   public async submitProfile(profile: AuthenticationProfile): Promise<boolean> {
-    let electedIdentifier: AgentIdentifier | null = null
+    let electedIdentifier: PersonIdentifier | null = null
     if (profile.username) {
       electedIdentifier = {
         type: 'local',
