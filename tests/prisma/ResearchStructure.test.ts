@@ -1,16 +1,6 @@
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/daos/prisma'
 
 describe('ResearchStructure Model Tests', () => {
-  afterAll(async () => {
-    await prisma.$disconnect()
-  })
-
-  afterEach(async () => {
-    await prisma.researchStructure.deleteMany()
-  })
-
   test('should create a new research structure', async () => {
     const researchStructure = await prisma.researchStructure.create({
       data: {

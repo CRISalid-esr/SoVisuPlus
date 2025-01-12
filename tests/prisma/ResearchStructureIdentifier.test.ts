@@ -1,7 +1,4 @@
-// file: tests/prisma/ResearchIdentifier.test.ts
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/daos/prisma'
 
 describe('ResearchIdentifier Model Tests', () => {
   afterAll(async () => {

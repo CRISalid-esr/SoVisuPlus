@@ -1,27 +1,13 @@
-import { PersonIdentifierType, PrismaClient } from '@prisma/client'
+import { PersonIdentifierType } from '@prisma/client'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
-import { clearDatabase } from '../../../prisma/clearDatabase'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/daos/prisma'
 
 describe('PersonDAO Integration Tests', () => {
   let personDAO: PersonDAO
 
   beforeAll(() => {
     personDAO = new PersonDAO()
-  })
-
-  afterEach(async () => {
-    await clearDatabase(prisma)
-  })
-
-  beforeEach(async () => {
-    await clearDatabase(prisma)
-  })
-
-  afterAll(async () => {
-    await prisma.$disconnect()
   })
 
   const personData: Person = {
