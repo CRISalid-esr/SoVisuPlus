@@ -42,6 +42,20 @@ import { usePathname, useRouter } from 'next/navigation'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
 import { signOut } from 'next-auth/react'
 import { User } from '@/types/User'
+import { SearchModal } from '../SearchModal'
+import { useState } from 'react'
+
+const items = [
+  'React',
+  'Angular',
+  'Vue',
+  'Svelte',
+  'Next.js',
+  'Nuxt.js',
+  'Gatsby',
+  'Remix',
+  'Solid.js',
+]
 
 interface SidebarProps {
   handleToggleDrawerAction: () => void
@@ -54,6 +68,8 @@ export default function Sidebar({
   handleToggleDrawerAction,
   user,
 }: SidebarProps) {
+  const [openSearchModal, setOpenSearchModal] = useState(false)
+
   const pathname = usePathname() // Get the current path
   const lang = pathname.split('/')[1] // Extract the `lang` dynamic segment
   const theme = useTheme()
@@ -329,42 +345,51 @@ export default function Sidebar({
           >
             <Box component='div' sx={{}} pt={3} pb={open ? 3 : 0}>
               {open ? (
-                <TextField
-                  sx={{
-                    backgroundColor: theme.palette.white,
-                    borderRadius: theme.utils.pxToRem(8),
-                    '& .MuiOutlinedInput-root': {
-                      '& fieldset': {
-                        border: 'none', // Remove the border
+                <>
+                  <SearchModal
+                    open={openSearchModal}
+                    onClose={() => setOpenSearchModal(false)}
+                    title='Search'
+                    items={[]}
+                  />
+                  <TextField
+                    onClick={() => setOpenSearchModal(true)}
+                    sx={{
+                      backgroundColor: theme.palette.white,
+                      borderRadius: theme.utils.pxToRem(8),
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          border: 'none', // Remove the border
+                        },
                       },
-                    },
-                    '& .MuiInputBase-input': {
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                    },
-                    '& .MuiInputBase-input::placeholder': {
-                      fontSize: theme.utils.pxToRem(16),
-                      fontWeight: theme.typography.fontWeightRegular,
-                      color: theme.palette.primary.main,
-                      opacity: 1,
-                      lineHeight: theme.typography.lineHeight.lineHeight24px,
-                    },
-                  }}
-                  placeholder={t`sidebar_search_placeholder`}
-                  fullWidth
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position='start'>
-                        <SearchLg
-                          width={20}
-                          height={20}
-                          color={theme.palette.primary.main}
-                        />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+                      '& .MuiInputBase-input': {
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                      },
+                      '& .MuiInputBase-input::placeholder': {
+                        fontSize: theme.utils.pxToRem(16),
+                        fontWeight: theme.typography.fontWeightRegular,
+                        color: theme.palette.primary.main,
+                        opacity: 1,
+                        lineHeight: theme.typography.lineHeight.lineHeight24px,
+                      },
+                    }}
+                    placeholder={t`sidebar_search_placeholder`}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position='start'>
+                          <SearchLg
+                            width={20}
+                            height={20}
+                            color={theme.palette.primary.main}
+                          />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </>
               ) : (
                 <List
                   sx={{
