@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getServerSession, Session } from 'next-auth' // Assuming you are using NextAuth
 import authOptions from '@/app/auth/auth_options'
-import { AgentIdentifierType as DbAgentIdentifierType } from '@prisma/client'
-import { AgentIdentifier } from '@/types/AgentIdentifier'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { User } from '@/types/User'
 import { User as DbUser } from '@prisma/client'
 
@@ -14,7 +14,7 @@ export const GET = async () => {
       user: { username?: string; orcid?: string }
     }
     //const
-    let electedIdentifier: AgentIdentifier | null = null
+    let electedIdentifier: PersonIdentifier | null = null
 
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -47,7 +47,7 @@ export const GET = async () => {
         person: {
           identifiers: {
             some: {
-              type: electedIdentifier.type.toUpperCase() as DbAgentIdentifierType,
+              type: electedIdentifier.type.toUpperCase() as DbPersonIdentifierType,
               value: electedIdentifier.value,
             },
           },

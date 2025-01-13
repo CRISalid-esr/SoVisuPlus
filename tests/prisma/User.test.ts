@@ -1,12 +1,6 @@
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/daos/prisma'
 
 describe('User Model Tests', () => {
-  afterAll(async () => {
-    await prisma.$disconnect()
-  })
-
   test('should create a new user', async () => {
     const person = await prisma.person.create({
       data: {

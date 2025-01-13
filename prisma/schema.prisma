@@ -18,15 +18,15 @@ model User {
 }
 
 model Person {
-  id          Int               @id @default(autoincrement())
-  uid         String            @unique
-  email       String?           @unique
+  id          Int                @id @default(autoincrement())
+  uid         String             @unique
+  email       String?            @unique
   firstName   String
   lastName    String
-  identifiers AgentIdentifier[]
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  external    Boolean           @default(false)
+  identifiers PersonIdentifier[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  external    Boolean            @default(false)
   user        User?
 }
 
@@ -36,7 +36,7 @@ model Publication {
   titles String[]
 }
 
-enum AgentIdentifierType {
+enum PersonIdentifierType {
   ORCID      @map("orcid")
   IDREF      @map("idref")
   ID_HAL_S   @map("id_hal_s")
@@ -45,12 +45,38 @@ enum AgentIdentifierType {
   LOCAL      @map("local")
 }
 
-model AgentIdentifier {
-  id       Int                 @id @default(autoincrement())
-  type     AgentIdentifierType
+model PersonIdentifier {
+  id       Int                  @id @default(autoincrement())
+  type     PersonIdentifierType
   value    String
-  person   Person              @relation(fields: [personId], references: [id], onDelete: Cascade)
+  person   Person               @relation(fields: [personId], references: [id], onDelete: Cascade)
   personId Int
 
   @@unique([type, value])
+}
+
+model ResearchStructure {
+  id           Int                           @id @default(autoincrement())
+  uid          String                        @unique
+  acronym      String?
+  identifiers  ResearchStructureIdentifier[]
+  names        Json                          @db.JsonB // Store internationalized names
+  descriptions Json                          @db.JsonB // Store internationalized descriptions
+}
+
+model ResearchStructureIdentifier {
+  id                  Int                             @id @default(autoincrement())
+  type                ResearchStructureIdentifierType
+  value               String
+  researchStructure   ResearchStructure               @relation(fields: [researchStructureId], references: [id], onDelete: Cascade)
+  researchStructureId Int
+
+  @@unique([type, value])
+}
+
+enum ResearchStructureIdentifierType {
+  LOCAL @map("local")
+  RNSR  @map("rnsr")
+  IDREF @map("idref")
+  ROR   @map("ror")
 }

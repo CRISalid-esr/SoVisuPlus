@@ -1,4 +1,4 @@
-import { AgentIdentifier } from '@/types/AgentIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { Person as DbPerson } from '@prisma/client'
 
 class Person {
@@ -8,7 +8,7 @@ class Person {
   displayName: string
   firstName: string
   lastName: string
-  identifiers: AgentIdentifier[]
+  identifiers: PersonIdentifier[]
 
   constructor(
     uid: string,
@@ -17,7 +17,7 @@ class Person {
     displayName: string,
     firstName: string,
     lastName: string,
-    identifiers: AgentIdentifier[] = [],
+    identifiers: PersonIdentifier[] = [],
   ) {
     this.uid = uid
     this.external = external
@@ -38,7 +38,7 @@ class Person {
       '',
       person.firstName,
       person.lastName,
-      'identifiers' in person ? (person.identifiers as AgentIdentifier[]) : [],
+      'identifiers' in person ? (person.identifiers as PersonIdentifier[]) : [],
     )
   }
 }

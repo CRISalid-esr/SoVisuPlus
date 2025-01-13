@@ -1,12 +1,12 @@
 import {
-  AgentIdentifierType as DbAgentIdentifierType,
+  PersonIdentifierType as DbPersonIdentifierType,
   Person as DbPerson,
 } from '@prisma/client'
 import { Person } from '@/types/Person'
-import { AgentIdentifier } from '@/types/AgentIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 
-/** PersonDAO: Handles operations related to Person and AgentIdentifiers */
+/** PersonDAO: Handles operations related to Person and PersonIdentifiers */
 export class PersonDAO extends AbstractDAO {
   /**
    * Create or update a Person record in the database
@@ -41,19 +41,19 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Handle potential conflicts with existing AgentIdentifiers
+   * Handle potential conflicts with existing PersonIdentifiers
    * @param identifiers - The list of identifiers to check
    * @param currentPersonId - The ID of the current person
    */
   private async handleIdentifierConflicts(
-    identifiers: AgentIdentifier[],
+    identifiers: PersonIdentifier[],
     currentPersonId: number,
   ): Promise<void> {
     const conflictingIdentifiers =
-      await this.prismaClient.agentIdentifier.findMany({
+      await this.prismaClient.personIdentifier.findMany({
         where: {
           OR: identifiers.map((identifier) => ({
-            type: identifier.type.toUpperCase() as DbAgentIdentifierType,
+            type: identifier.type.toUpperCase() as DbPersonIdentifierType,
             value: identifier.value,
             personId: { not: currentPersonId },
           })),
@@ -70,24 +70,24 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Upsert AgentIdentifiers for a given person
+   * Upsert PersonIdentifiers for a given person
    * @param identifiers - The list of identifiers to upsert
    * @param personId - The ID of the person
    */
   private async upsertIdentifiers(
-    identifiers: AgentIdentifier[],
+    identifiers: PersonIdentifier[],
     personId: number,
   ): Promise<void> {
     // Remove old identifiers
-    await this.prismaClient.agentIdentifier.deleteMany({
+    await this.prismaClient.personIdentifier.deleteMany({
       where: { personId },
     })
 
     // Insert new identifiers
-    await this.prismaClient.agentIdentifier.createMany({
+    await this.prismaClient.personIdentifier.createMany({
       data: identifiers.map((identifier) => ({
         personId,
-        type: identifier.type.toUpperCase() as DbAgentIdentifierType,
+        type: identifier.type.toUpperCase() as DbPersonIdentifierType,
         value: identifier.value,
       })),
     })

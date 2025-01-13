@@ -1,26 +1,12 @@
-import { AgentIdentifierType, PrismaClient } from '@prisma/client'
+import { PersonIdentifierType } from '@prisma/client'
 import { UserDAO } from '@/lib/daos/UserDAO'
-import { clearDatabase } from '../../../prisma/clearDatabase'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/daos/prisma'
 
 describe('UserDAO Integration Tests', () => {
   let userDAO: UserDAO
 
   beforeAll(() => {
     userDAO = new UserDAO()
-  })
-
-  afterEach(async () => {
-    await clearDatabase(prisma)
-  })
-
-  beforeEach(async () => {
-    await clearDatabase(prisma)
-  })
-
-  afterAll(async () => {
-    await prisma.$disconnect()
   })
 
   test('should create or update a user', async () => {
@@ -56,9 +42,9 @@ describe('UserDAO Integration Tests', () => {
       },
     })
 
-    await prisma.agentIdentifier.create({
+    await prisma.personIdentifier.create({
       data: {
-        type: AgentIdentifierType.ORCID,
+        type: PersonIdentifierType.ORCID,
         value: '0000-0001-2345-6789',
         personId: person.id,
       },
