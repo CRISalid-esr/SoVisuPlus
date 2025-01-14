@@ -19,16 +19,6 @@ interface Tag {
   selected: boolean
 }
 
-const isPerson = (
-  option: (Person | ResearchStructure) & { type: string },
-): option is Person => option.type === 'people'
-
-function isResearchStructure(
-  option: (Person | ResearchStructure) & { type: string },
-): option is ResearchStructure {
-  return option.type === 'researchStructures'
-}
-
 const SearchInput: React.FC = () => {
   const [peoplePage, setPeoplePage] = useState(1)
   const [researchStructuresPage, setResearchStructuresPage] = useState(1)
@@ -161,11 +151,11 @@ const SearchInput: React.FC = () => {
       renderGroup={renderGroup}
       disableCloseOnSelect={true}
       options={mergedOptions}
-      getOptionLabel={(option): string => {
-        if (isPerson(option)) {
+      getOptionLabel={(option: ResearchStructure | Person): string => {
+        if (option.type == 'people') {
           return `${option.firstName} ${option.lastName}`
         }
-        if (isResearchStructure(option)) {
+        if (option.type == 'researchStructures') {
           return (option.names ? option.names[0] : option.acronym) || 'n/c'
         }
         return 'n/c'
