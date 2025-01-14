@@ -54,8 +54,8 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
         AND: [
           {
             identifiers_SOME: {
-              type_EQ: personIdentifier.type, // Assuming `type` exists in PersonIdentifier
-              value_EQ: personIdentifier.value, // Assuming `value` exists in PersonIdentifier
+              type_EQ: personIdentifier.type.toLowerCase(),
+              value_EQ: personIdentifier.value,
             },
           },
         ],
