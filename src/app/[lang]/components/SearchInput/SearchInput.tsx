@@ -10,21 +10,12 @@ import { useTheme } from '@mui/material/styles'
 import { t } from '@lingui/macro'
 import useStore from '@/stores/global_store'
 import CustomPaper from '@/components/CustomPaper'
-import { ResearchStructure } from '@/types/ResearchStructure'
-import { Person } from '@/types/Person'
 
 interface Tag {
   label: string
   value: string
   selected: boolean
 }
-
-const isPerson = (option: Person | ResearchStructure): option is Person =>
-  option.type === 'people'
-
-const isResearchStructure = (
-  option: Person | ResearchStructure,
-): option is ResearchStructure => option.type === 'researchStructures'
 
 const SearchInput: React.FC = () => {
   const [peoplePage, setPeoplePage] = useState(1)
@@ -159,12 +150,10 @@ const SearchInput: React.FC = () => {
       disableCloseOnSelect={true}
       options={mergedOptions}
       getOptionLabel={(option): string => {
-        if (isPerson(option)) {
+        if (option.type == 'people')
           return `${option.firstName} ${option.lastName}`
-        }
-        if (isResearchStructure(option)) {
+        if (option.type == 'researchStructures')
           return (option.names ? option.names[0] : option.acronym) || 'n/c'
-        }
         return 'n/c'
       }}
       groupBy={(option) => {
