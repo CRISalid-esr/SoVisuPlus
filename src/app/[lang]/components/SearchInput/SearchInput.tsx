@@ -26,9 +26,9 @@ const SearchInput: React.FC = () => {
   const theme = useTheme()
   const [searchTerm, setSearchTerm] = useState('')
   const [searchTags, setSearchTags] = useState<Tag[]>([
-    { label: 'Chercheurs', value: 'people', selected: true },
+    { label: t`sidebar_search_people`, value: 'people', selected: true },
     {
-      label: 'Unités de recherche',
+      label: t`sidebar_search_research_structures`,
       value: 'researchStructures',
       selected: true,
     },
