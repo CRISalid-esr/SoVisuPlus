@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand'
-import { Person } from '@prisma/client' // Assuming you have a Prisma model for Person
+import { ResearchStructure } from '@/types/ResearchStructure' // Assuming you have a Prisma model for Person
 
 // Define the queryObject interface correctly
 export interface QueryObject {
@@ -10,7 +10,7 @@ export interface QueryObject {
 // Define the state for the ResearchStructureSlice
 export interface ResearchStructureSlice {
   researchStructure: {
-    researchStructures: Person[] // Assuming you have a Prisma model for Person
+    researchStructures: ResearchStructure[] // Assuming you have a Prisma model for Person
     loading: boolean
     total: number
     error: string | null | unknown
@@ -40,19 +40,19 @@ export const addResearchStructureSlice: StateCreator<
             acc[key] = (value as string).toString()
             return acc
           },
-          {} as Record<string, string>
+          {} as Record<string, string>,
         ),
       ).toString()
 
       // Set loading state to true
       set((state) => ({
-        researchStructure: { ...state.researchStructure, loading: true }
+        researchStructure: { ...state.researchStructure, loading: true },
       }))
 
       try {
         // Fetch data from the API
         const response = await fetch(`/api/researchStructures?${queryString}`)
-        
+
         // Handle unsuccessful fetch
         if (!response.ok) {
           throw new Error(`Failed to fetch: ${response.statusText}`)

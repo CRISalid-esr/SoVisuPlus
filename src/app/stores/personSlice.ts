@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand'
-import { Person } from '@prisma/client' // Assuming you have a Prisma model for Person
+import { Person } from '@/types/Person'
 
 export interface queryObject {
   searchTerm: string

@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import {
   Autocomplete,
+  AutocompleteRenderGroupParams,
   Box,
-  Chip,
-  Paper,
   TextField,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { t } from '@lingui/macro'
 import useStore from '@/stores/global_store'
+import CustomPaper from '@/components/CustomPaper'
+import { Person } from '@/types/Person'
+import { ResearchStructure } from '@/types/ResearchStructure'
 
 interface Tag {
   label: string
@@ -17,9 +19,7 @@ interface Tag {
   selected: boolean
 }
 
-interface SearchInputProps {}
-
-const SearchInput: React.FC<SearchInputProps> = () => {
+const SearchInput: React.FC = () => {
   const [peoplePage, setPeoplePage] = useState(1)
   const [researchStructuresPage, setResearchStructuresPage] = useState(1)
   const theme = useTheme()
@@ -69,8 +69,9 @@ const SearchInput: React.FC<SearchInputProps> = () => {
   }, [fetchResearchStructures, researchStructuresPage, searchTerm, searchTags])
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLDivElement
     const bottom =
-      e.target.scrollHeight === e.target.scrollTop + e.target.clientHeight
+      target.scrollHeight === target.scrollTop + target.clientHeight
     if (bottom) {
       // Trigger fetch for selected tags if more data is available
       if (
@@ -92,57 +93,28 @@ const SearchInput: React.FC<SearchInputProps> = () => {
     }
   }
 
-  const handleClickTag = (tagValue: string) => {
-    setSearchTags((prevTags) =>
+  const handleTagClick = (tagValue: string) => {
+    setSearchTags((prevTags: Tag[]) =>
       prevTags.map((tag) =>
         tag.value === tagValue ? { ...tag, selected: !tag.selected } : tag,
       ),
     )
   }
 
-  const CustomPaper = (props: any) => (
-    <Paper
-      {...props}
-      onMouseDown={(event: { preventDefault: () => any }) =>
-        event.preventDefault()
-      }
-    >
-      <Box
-        sx={{
-          p: 5,
-          display: 'flex',
-          gap: 1,
-          flexWrap: 'wrap',
-        }}
-      >
-        {searchTags.map((tag) => (
-          <Chip
-            key={tag.value}
-            label={tag.label}
-            onClick={() => handleClickTag(tag.value)}
-            color={tag.selected ? 'primary' : 'default'}
-            sx={{ cursor: 'pointer' }}
-          />
-        ))}
-      </Box>
-      <Box>{props.children}</Box>
-    </Paper>
-  )
-
-  const mergedOptions = [
-    ...people.map((person) => ({ ...person, type: 'people' })),
-    ...researchStructures.map((structure) => ({
+  const mergedOptions: (Person | ResearchStructure)[] = [
+    ...(people || []).map((person) => ({ ...person, type: 'people' })),
+    ...(researchStructures || []).map((structure) => ({
       ...structure,
       type: 'researchStructures',
     })),
   ]
   console.log('totalResearchStructures', totalResearchStructures)
 
-  const renderGroup = (params: any) => {
+  const renderGroup = (params: AutocompleteRenderGroupParams) => {
     const count =
       params.group === 'people' ? totalPeople : totalResearchStructures
     return (
-      <li {...params.other}>
+      <li {...params}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 1 }}>
           <Typography variant='body2'>
             {params.group} ({count})
@@ -160,12 +132,18 @@ const SearchInput: React.FC<SearchInputProps> = () => {
       disableCloseOnSelect={true}
       options={mergedOptions}
       getOptionLabel={(option) => {
-        console.log('option', option)
-        return option.type === 'people'
+        return option instanceof Person
           ? `${option.firstName} ${option.lastName}`
           : option.names['fr']
       }}
-      groupBy={(option) => option.type} // Group options by type (Chercheur, Unité de recherche)
+      groupBy={(option) => {
+        if (option instanceof Person) {
+          return 'Chercheur'
+        } else if (option instanceof ResearchStructure) {
+          return 'Unité de recherche'
+        }
+        return 'Autre'
+      }} // Group options by type (Chercheur, Unité de recherche)
       renderInput={(params) => (
         <TextField
           {...params}
@@ -195,7 +173,13 @@ const SearchInput: React.FC<SearchInputProps> = () => {
         />
       )}
       slots={{
-        paper: (props) => <CustomPaper {...props} />,
+        paper: (props) => (
+          <CustomPaper
+            searchTags={searchTags}
+            handleTagClick={(tag: string) => handleTagClick(tag)}
+            {...props}
+          />
+        ),
       }}
       fullWidth
       inputValue={searchTerm}

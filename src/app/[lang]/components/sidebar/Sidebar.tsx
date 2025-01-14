@@ -38,21 +38,8 @@ import { signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
 import { SearchInput } from '../SearchInput'
-
-const items = [
-  'React',
-  'Angular',
-  'Vue',
-  'Svelte',
-  'Next.js',
-  'Nuxt.js',
-  'Gatsby',
-  'Remix',
-  'Solid.js',
-]
 
 interface SidebarProps {
   handleToggleDrawerAction: () => void
@@ -65,8 +52,6 @@ export default function Sidebar({
   handleToggleDrawerAction,
   user,
 }: SidebarProps) {
-  const [openSearchModal, setOpenSearchModal] = useState(false)
-
   const pathname = usePathname() // Get the current path
   const lang = pathname.split('/')[1] // Extract the `lang` dynamic segment
   const theme = useTheme()
