@@ -121,7 +121,7 @@ msgstr "Chercher"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:31
 msgid "sidebar_search_research_structures"
-msgstr "Research structures"
+msgstr "Unités de recherche"
 
 #: src/app/[lang]/components/sidebar/Sidebar.tsx:115
 #: src/app/[lang]/components/sidebar/Sidebar.tsx:138

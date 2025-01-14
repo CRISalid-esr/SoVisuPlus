@@ -91,6 +91,7 @@ const SearchInput: React.FC = () => {
   }, [fetchResearchStructures, researchStructuresPage, searchTerm, searchTags])
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>, group: string) => {
+    console.log('group',group)
     const target = e.target as HTMLDivElement
     const bottom =
       target.scrollHeight === target.scrollTop + target.clientHeight
@@ -143,6 +144,7 @@ const SearchInput: React.FC = () => {
   }, [people, researchStructures, searchTags])
 
   const renderGroup = (params: AutocompleteRenderGroupParams) => {
+    console.log('params',params)
     return (
       <Box
         onScroll={(e) => {
@@ -181,7 +183,12 @@ const SearchInput: React.FC = () => {
         }
         return 'n/c'
       }}
-      groupBy={(option) => option.type} // Group options by type (Chercheur, Unité de recherche)
+      groupBy={(option) => {
+         if(option.type == 'people')  
+          return t`sidebar_search_people` 
+          else if(option.type == 'researchStructures') 
+          return t`sidebar_search_research_structures`
+      }} // Group options by type (Chercheur, Unité de recherche)
       renderInput={(params) => (
         <TextField
           {...params}
