@@ -1,14 +1,13 @@
 import React from 'react'
-import { Modal, Box, Typography, IconButton, Button } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import { Box, Modal } from '@mui/material'
 
 interface AppModalProps {
   open: boolean
   onClose: () => void
-  title?: React.ReactNode // Title now accepts ReactNode for more flexibility
+  title?: React.ReactNode
   children?: React.ReactNode
   width?: number | string
-  actions?: React.ReactNode // Allows passing action buttons
+  actions?: React.ReactNode
 }
 
 const AppModal: React.FC<AppModalProps> = ({

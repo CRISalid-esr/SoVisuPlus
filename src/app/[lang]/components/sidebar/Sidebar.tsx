@@ -18,8 +18,7 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
-  TextField,
-  Typography
+  Typography,
 } from '@mui/material'
 import Avatar from '@mui/material/Avatar'
 import { useTheme } from '@mui/material/styles'
@@ -27,13 +26,13 @@ import { Box, useMediaQuery } from '@mui/system'
 import {
   BarChartSquare02 as BarChartSquare,
   CheckDone01 as CheckDone,
-  XClose as Close,
   LayersThree01 as LayerThere,
   LifeBuoy01 as LifeBuoy,
   LogOut01 as Logout,
   SearchSm,
   Settings01 as Settings,
-  User01 as Users
+  User01 as Users,
+  XClose as Close,
 } from '@untitled-ui/icons-react'
 import { signOut } from 'next-auth/react'
 import Image from 'next/image'
@@ -343,7 +342,7 @@ export default function Sidebar({
           >
             <Box component='div' sx={{}} pt={3} pb={open ? 3 : 0}>
               {open ? (
-                 <SearchInput/>
+                <SearchInput />
               ) : (
                 <List
                   sx={{

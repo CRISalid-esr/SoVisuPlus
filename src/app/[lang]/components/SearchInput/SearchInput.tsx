@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import {
+  Autocomplete,
   Box,
+  Chip,
+  Paper,
   TextField,
   Typography,
-  Autocomplete,
-  Paper,
-  Chip,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { t } from '@lingui/macro'
@@ -20,21 +20,25 @@ interface Tag {
 interface SearchInputProps {}
 
 const SearchInput: React.FC<SearchInputProps> = () => {
-  const [pagePersons, setPagePersons] = useState(1)
-  const [pageResearchStructures, setPageResearchStructures] = useState(1)
+  const [peoplePage, setPeoplePage] = useState(1)
+  const [researchStructuresPage, setResearchStructuresPage] = useState(1)
   const theme = useTheme()
   const [searchTerm, setSearchTerm] = useState('')
   const [searchTags, setSearchTags] = useState<Tag[]>([
-    { label: 'Chercheurs', value: 'persons', selected: true },
-    { label: 'Unités de recherche', value: 'researchStructures', selected: false },
+    { label: 'Chercheurs', value: 'people', selected: true },
+    {
+      label: 'Unités de recherche',
+      value: 'researchStructures',
+      selected: false,
+    },
   ])
 
   const {
-    fetchPersons,
-    loading: personsLoading,
-    persons,
-    hasMore: hasMorePersons,
-    total: totalPersons,
+    fetchPeople,
+    loading: peopleLoading,
+    people,
+    hasMore: hasMorePeople,
+    total: totalPeople,
   } = useStore((state) => state.person)
 
   const {
@@ -46,21 +50,23 @@ const SearchInput: React.FC<SearchInputProps> = () => {
   } = useStore((state) => state.researchStructure)
 
   useEffect(() => {
-    if (searchTags.some((tag) => tag.selected && tag.value === 'persons')) {
-      fetchPersons({ searchTerm, pagePersons: pagePersons.toString() })
+    if (searchTags.some((tag) => tag.selected && tag.value === 'people')) {
+      fetchPeople({ searchTerm, peoplePage: peoplePage.toString() })
     }
-  }, [fetchPersons, pagePersons, searchTerm, searchTags])
+  }, [fetchPeople, peoplePage, searchTerm, searchTags])
 
   useEffect(() => {
     if (
-      searchTags.some((tag) => tag.selected && tag.value === 'researchStructures')
+      searchTags.some(
+        (tag) => tag.selected && tag.value === 'researchStructures',
+      )
     ) {
       fetchResearchStructures({
         searchTerm,
-        pageResearchStructures: pageResearchStructures.toString(),
+        page: researchStructuresPage,
       })
     }
-  }, [fetchResearchStructures, pageResearchStructures, searchTerm, searchTags])
+  }, [fetchResearchStructures, researchStructuresPage, searchTerm, searchTags])
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const bottom =
@@ -68,20 +74,20 @@ const SearchInput: React.FC<SearchInputProps> = () => {
     if (bottom) {
       // Trigger fetch for selected tags if more data is available
       if (
-        searchTags.some((tag) => tag.selected && tag.value === 'persons') &&
-        hasMorePersons &&
-        !personsLoading
+        searchTags.some((tag) => tag.selected && tag.value === 'people') &&
+        hasMorePeople &&
+        !peopleLoading
       ) {
-        setPagePersons((prevPage) => prevPage + 1)
+        setPeoplePage((prevPage) => prevPage + 1)
       }
       if (
         searchTags.some(
-          (tag) => tag.selected && tag.value ===  "researchStructures",
+          (tag) => tag.selected && tag.value === 'researchStructures',
         ) &&
         hasMoreResearchStructures &&
         !researchStructuresLoading
       ) {
-        setPageResearchStructures((prevPage) => prevPage + 1)
+        setResearchStructuresPage((prevPage) => prevPage + 1)
       }
     }
   }
@@ -124,17 +130,17 @@ const SearchInput: React.FC<SearchInputProps> = () => {
   )
 
   const mergedOptions = [
-    ...persons.map((person) => ({ ...person, type: 'persons' })),
+    ...people.map((person) => ({ ...person, type: 'people' })),
     ...researchStructures.map((structure) => ({
       ...structure,
       type: 'researchStructures',
     })),
   ]
-console.log('totalResearchStructures',totalResearchStructures)
+  console.log('totalResearchStructures', totalResearchStructures)
 
   const renderGroup = (params: any) => {
     const count =
-      params.group === 'persons' ? totalPersons : totalResearchStructures
+      params.group === 'people' ? totalPeople : totalResearchStructures
     return (
       <li {...params.other}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 1 }}>
@@ -154,8 +160,8 @@ console.log('totalResearchStructures',totalResearchStructures)
       disableCloseOnSelect={true}
       options={mergedOptions}
       getOptionLabel={(option) => {
-        console.log('option',option)
-        return option.type === 'persons'
+        console.log('option', option)
+        return option.type === 'people'
           ? `${option.firstName} ${option.lastName}`
           : option.names['fr']
       }}

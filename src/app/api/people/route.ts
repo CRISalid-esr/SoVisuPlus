@@ -1,8 +1,7 @@
 import prisma from '@/lib/prisma'
-import { Person } from '@prisma/client'
-import { NextResponse, NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export const GET = async (req: NextRequest, res: NextResponse) => {
+export const GET = async (req: NextRequest) => {
   const urlParams = req.nextUrl.searchParams
   const searchTerm = urlParams.get('search') || ''
   const page = urlParams.get('page') || '1'
@@ -11,20 +10,20 @@ export const GET = async (req: NextRequest, res: NextResponse) => {
   const itemsPerPage = 10
 
   try {
-    // Fetch persons from the database using Prisma
-    const persons = await prisma.person.findMany({
+    // Fetch people from the database using Prisma
+    const people = await prisma.person.findMany({
       where: {
         OR: [
           {
             firstName: {
               contains: searchTerm as string,
-              mode: 'insensitive', // Case-insensitive search
+              mode: 'insensitive',
             },
           },
           {
             lastName: {
               contains: searchTerm as string,
-              mode: 'insensitive', // Case-insensitive search
+              mode: 'insensitive',
             },
           },
         ],
@@ -32,35 +31,35 @@ export const GET = async (req: NextRequest, res: NextResponse) => {
       skip: (pageNumber - 1) * itemsPerPage,
       take: itemsPerPage,
       orderBy: {
-        lastName: 'asc', // Optional: Order by last name
+        lastName: 'asc',
       },
     })
-    // Count the total number of matching persons for pagination info (optional)
-    const totalPersons = await prisma.person.count({
+
+    const peopleCount = await prisma.person.count({
       where: {
         OR: [
           {
             firstName: {
               contains: searchTerm as string,
-              mode: 'insensitive', // Case-insensitive search
+              mode: 'insensitive',
             },
           },
           {
             lastName: {
               contains: searchTerm as string,
-              mode: 'insensitive', // Case-insensitive search
+              mode: 'insensitive',
             },
           },
         ],
       },
     })
     return NextResponse.json({
-        persons,
-        total: totalPersons,
-        hasMore: totalPersons > pageNumber * itemsPerPage,
-      });
+      people: people,
+      total: peopleCount,
+      hasMore: peopleCount > pageNumber * itemsPerPage,
+    })
   } catch (error) {
-    console.error('Error fetching persons:', error)
-    return NextResponse.json({ error: 'An error occurred' }, { status: 500 });
+    console.error('Error fetching people:', error)
+    return NextResponse.json({ error: 'An error occurred' }, { status: 500 })
   }
 }

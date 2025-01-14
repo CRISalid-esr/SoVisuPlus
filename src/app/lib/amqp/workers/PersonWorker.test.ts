@@ -102,7 +102,7 @@ describe('PersonWorker', () => {
     expect(mockUserDAO.createOrUpdateUser).toHaveBeenCalledWith(1)
   })
 
-  it('should skip user creation for external persons', async () => {
+  it('should skip user creation for an external person', async () => {
     const message: AMQPPersonMessage = {
       type: 'person',
       event: 'updated',
