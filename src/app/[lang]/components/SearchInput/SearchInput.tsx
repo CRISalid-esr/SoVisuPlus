@@ -12,6 +12,7 @@ import useStore from '@/stores/global_store'
 import CustomPaper from '@/components/CustomPaper'
 import { Person } from '@/types/Person'
 import { ResearchStructure } from '@/types/ResearchStructure'
+import { usePathname } from 'next/navigation'
 
 interface Tag {
   label: string
@@ -29,9 +30,11 @@ const SearchInput: React.FC = () => {
     {
       label: 'Unités de recherche',
       value: 'researchStructures',
-      selected: false,
+      selected: true,
     },
   ])
+  const pathname = usePathname() // Get the current path
+  const lang = pathname.split('/')[1] // Extract the `lang` dynamic segment
 
   const {
     fetchPeople,
@@ -156,7 +159,7 @@ const SearchInput: React.FC = () => {
           return `${option.firstName} ${option.lastName}`
         }
         if (option.type == 'researchStructures') {
-          return (option.names ? option.names[0] : option.acronym) || 'n/c'
+          return (option.names ? option.names[lang] : option.acronym) || 'n/c'
         }
         return 'n/c'
       }}
