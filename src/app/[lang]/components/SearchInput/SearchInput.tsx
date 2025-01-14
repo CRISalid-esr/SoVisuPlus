@@ -57,7 +57,7 @@ const SearchInput: React.FC = () => {
       if (searchTags.some((tag) => tag.selected && tag.value === 'people')) {
         if (fetchPeople) {
           try {
-            await fetchPeople({ searchTerm, peoplePage: peoplePage.toString() })
+            await fetchPeople({ searchTerm, page: peoplePage.toString() })
           } catch (error) {
             console.error('Error fetching people:', error)
           }
@@ -155,6 +155,8 @@ const SearchInput: React.FC = () => {
       </li>
     )
   }
+
+  console.log('people', people)
 
   return (
     <Autocomplete
