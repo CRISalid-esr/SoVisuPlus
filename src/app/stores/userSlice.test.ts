@@ -27,10 +27,10 @@ describe('addUserSlice Tests', () => {
 
   it('should initialize with default values', () => {
     const state = useStore.getState()
-    expect(state.connectedUser).toBeNull()
-    expect(state.currentPerspective).toBeNull()
-    expect(state.loading).toBe(true)
-    expect(state.error).toBeNull()
+    expect(state.user.connectedUser).toBeNull()
+    expect(state.user.currentPerspective).toBeNull()
+    expect(state.user.loading).toBe(true)
+    expect(state.user.error).toBeNull()
   })
 
   it('should fetch connected user successfully', async () => {
@@ -39,28 +39,28 @@ describe('addUserSlice Tests', () => {
       json: async () => mockUser,
     })
 
-    await useStore.getState().fetchConnectedUser()
+    await useStore.getState().user.fetchConnectedUser()
 
     const updatedState = useStore.getState()
 
-    expect(updatedState.loading).toBe(false)
-    expect(updatedState.error).toBeNull()
-    expect(updatedState.connectedUser).toEqual(mockUser)
-    expect(updatedState.currentPerspective).toEqual(mockUser.person)
+    expect(updatedState.user.loading).toBe(false)
+    expect(updatedState.user.error).toBeNull()
+    expect(updatedState.user.connectedUser).toEqual(mockUser)
+    expect(updatedState.user.currentPerspective).toEqual(mockUser.person)
   })
 
   it('should handle fetch error', async () => {
     const mockError = new Error('Fetch error')
     global.fetch = jest.fn().mockRejectedValue(mockError)
 
-    await useStore.getState().fetchConnectedUser()
+    await useStore.getState().user.fetchConnectedUser()
 
     const updatedState = useStore.getState()
 
-    expect(updatedState.loading).toBe(false)
-    expect(updatedState.connectedUser).toBeNull()
-    expect(updatedState.currentPerspective).toBeNull()
-    expect(updatedState.error).toBeInstanceOf(Error)
-    expect((updatedState.error as Error).message).toBe('Fetch error')
+    expect(updatedState.user.loading).toBe(false)
+    expect(updatedState.user.connectedUser).toBeNull()
+    expect(updatedState.user.currentPerspective).toBeNull()
+    expect(updatedState.user.error).toBeInstanceOf(Error)
+    expect((updatedState.user.error as Error).message).toBe('Fetch error')
   })
 })

@@ -10,20 +10,15 @@ describe('PersonDAO Integration Tests', () => {
     personDAO = new PersonDAO()
   })
 
-  const personData: Person = {
-    uid: 'local-johndoe',
-    external: false,
-    email: 'johndoe@example.com',
-    displayName: 'John Doe',
-    firstName: 'John',
-    lastName: 'Doe',
-    identifiers: [
-      {
-        type: 'orcid', // Use the mapped value here
-        value: '0000-0001-2345-6789',
-      },
-    ],
-  }
+  const personData: Person = new Person(
+    'local-johndoe',
+    false,
+    'johndoe@example.com',
+    'John',
+    'Doe',
+    'John Doe',
+    [{ type: PersonIdentifierType.ORCID, value: '0000-0001-2345-6789' }],
+  )
 
   test('should create a new person with identifiers', async () => {
     const dbPerson = await personDAO.createOrUpdatePerson(personData)
@@ -124,13 +119,11 @@ describe('PersonDAO Integration Tests', () => {
       ],
     })
 
-    const newPersonData = {
-      ...personData,
-      identifiers: [
-        { type: 'scopus_eid', value: '1234-5678-9012' },
-        { type: 'idref', value: 'AB-1234-5678' },
-      ],
-    }
+    const newPersonData = personData
+    newPersonData.setIdentifiers([
+      { type: PersonIdentifierType.SCOPUS_EID, value: '1234-5678-9012' },
+      { type: PersonIdentifierType.IDREF, value: 'AB-1234-5678' },
+    ])
 
     const updatedPerson = await personDAO.createOrUpdatePerson(newPersonData)
 

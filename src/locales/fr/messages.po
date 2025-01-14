@@ -74,22 +74,22 @@ msgstr "Publications"
 msgid "publications_page_synchronize_button"
 msgstr "Synchroniser"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:449
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:412
 #: src/app/[lang]/dashboard/page.tsx:10
 msgid "side_bar_dashboard"
 msgstr "Tableau de bord"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:547
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:510
 #: src/app/[lang]/expertise/page.tsx:10
 msgid "side_bar_expertise"
 msgstr "Expertises"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:658
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:621
 #: src/app/[lang]/institutions/page.tsx:10
 msgid "side_bar_institutions"
 msgstr "Institutions"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:708
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:671
 #: src/app/[lang]/laboratories/page.tsx:10
 msgid "side_bar_laboratories"
 msgstr "Laboratoires"
@@ -98,7 +98,7 @@ msgstr "Laboratoires"
 msgid "side_bar_my_account"
 msgstr "Mon compte"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:608
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:571
 #: src/app/[lang]/my-groups/page.tsx:10
 msgid "side_bar_my_groups"
 msgstr "Groupes"
@@ -107,26 +107,34 @@ msgstr "Groupes"
 msgid "side_bar_my_research_activities"
 msgstr "Activités de recherche"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:498
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:461
 msgid "side_bar_publications"
 msgstr "Publications"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:354
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:29
+msgid "sidebar_search_people"
+msgstr "Chercheurs"
+
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:211
 msgid "sidebar_search_placeholder"
 msgstr "Chercher"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:117
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:140
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:785
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:31
+msgid "sidebar_search_research_structures"
+msgstr "Research structures"
+
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:115
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:138
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:748
 msgid "sidebar_theme_dark"
 msgstr "Thème sombre"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:94
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:766
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:92
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:729
 msgid "sidebar_theme_light"
 msgstr "Thème clair"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:804
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:767
 msgid "sidebar_theme_system"
 msgstr "Thème automatique"
 

@@ -1,6 +1,9 @@
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+
 type PersonIdentifier = {
-  type: string
+  type: DbPersonIdentifierType
   value: string
 }
 
 export type { PersonIdentifier }
+export { DbPersonIdentifierType as PersonIdentifierType }

@@ -33,15 +33,18 @@ describe('UserService', () => {
   let personDAOMock: jest.Mocked<PersonDAO>
 
   beforeEach(() => {
-    personGraphQLClientMock = createMockPersonGraphQLClient(true, {
-      uid: 'local-johndoe',
-      external: false,
-      email: 'johndo@university.edu',
-      displayName: 'John Doe',
-      firstName: 'John',
-      lastName: 'Doe',
-      identifiers: [{ type: 'ORCID', value: '0000-0001-2345-6789' }],
-    })
+    personGraphQLClientMock = createMockPersonGraphQLClient(
+      true,
+      new Person(
+        'local-johndoe',
+        false,
+        'johndo@university.edu',
+        'John',
+        'Doe',
+        'John Doe',
+        [{ type: 'ORCID', value: '0000-0001-2345-6789' }],
+      ),
+    )
 
     userDAOMock = createMockUserDAO({
       id: 1,
@@ -79,7 +82,7 @@ describe('UserService', () => {
 
     expect(personGraphQLClientMock.isEnabled).toHaveBeenCalled()
     expect(personGraphQLClientMock.getPersonByIdentifier).toHaveBeenCalledWith({
-      type: 'local',
+      type: 'LOCAL',
       value: 'local-johndoe',
     })
     expect(userDAOMock.createOrUpdateUser).toHaveBeenCalledWith(1)
@@ -94,7 +97,7 @@ describe('UserService', () => {
     expect(result).toBe(true)
 
     expect(userDAOMock.getUserByIdentifier).toHaveBeenCalledWith({
-      type: 'local',
+      type: 'LOCAL',
       value: 'local-johndoe',
     })
   })

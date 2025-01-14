@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import { Alert } from '@mui/material'
 
 export default function StoreChecker() {
-  const loading = useStore<boolean>((state) => state.loading)
-  const fetchPublications = useStore((state) => state.fetchPublications)
+  const loading = useStore<boolean>((state) => state.publication.loading)
+  const fetchPublications = useStore((state) => state.publication.fetchPublications)
   const [failure, setFailure] = useState<boolean>(false)
   useEffect(() => {
     fetchPublications().then(() => {

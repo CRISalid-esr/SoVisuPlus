@@ -5,24 +5,17 @@ import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
 /**
  * Service for handling person-related operations
  */
 export class UserService {
-  private personGraphQLClient: PersonGraphQLClient
-  private userDAO: UserDAO
-  private personDAO: PersonDAO
-
   constructor(
-    personGraphQLClient: PersonGraphQLClient,
-    userDAO: UserDAO,
-    personDAO: PersonDAO,
-  ) {
-    this.personGraphQLClient = personGraphQLClient
-    this.userDAO = userDAO
-    this.personDAO = personDAO
-  }
+    private personGraphQLClient: PersonGraphQLClient,
+    private userDAO: UserDAO,
+    private personDAO: PersonDAO,
+  ) {}
 
   /**
    * Check if an authentication profile matches an existing person
@@ -33,12 +26,12 @@ export class UserService {
     let electedIdentifier: PersonIdentifier | null = null
     if (profile.username) {
       electedIdentifier = {
-        type: 'local',
+        type: PersonIdentifierType.LOCAL,
         value: profile.username,
       }
     } else if (profile.orcid) {
       electedIdentifier = {
-        type: 'orcid',
+        type: PersonIdentifierType.ORCID,
         value: profile.orcid,
       }
     }

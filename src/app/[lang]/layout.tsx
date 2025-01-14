@@ -14,30 +14,30 @@ type Props = {
   children: React.ReactNode
   params: Promise<{ lang: string }>
 }
-
 export default async function RootLayout({ params, children }: Props) {
   const messages: { [key: string]: Record<string, string> } = {
     en: enMessages,
     fr: frMessages,
   }
   const { lang, selectedMessages } = await resolveLanguage(params, messages)
+
   return (
-    <>
-      <html lang={lang}>
+    <html lang={lang}>
+      <head>
         <title>sovisuplus</title>
+      </head>
+      <body>
         <ThemeProvider>
           <CssBaseline />
           <LanguageProvider locale={lang} messages={selectedMessages}>
             <AppRouterCacheProvider>
               <ErrorBoundary FallbackComponent={ErrorFallback}>
-                <SessionProviderWrapper>
-                  <body>{children}</body>
-                </SessionProviderWrapper>
+                <SessionProviderWrapper>{children}</SessionProviderWrapper>
               </ErrorBoundary>
             </AppRouterCacheProvider>
           </LanguageProvider>
         </ThemeProvider>
-      </html>
-    </>
+      </body>
+    </html>
   )
 }
