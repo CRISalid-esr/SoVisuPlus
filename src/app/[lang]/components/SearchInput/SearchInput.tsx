@@ -227,7 +227,6 @@ const SearchInput: React.FC = () => {
       inputValue={searchTerm}
       onInputChange={(e, newInputValue) => setSearchTerm(newInputValue)}
       sx={{ mb: 2 }}
-      onScroll={handleScroll}
     />
   )
 }

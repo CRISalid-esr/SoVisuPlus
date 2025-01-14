@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const GET = async (req: NextRequest) => {
   const urlParams = req.nextUrl.searchParams
-  const searchTerm = urlParams.get('search') || ''
+  const searchTerm = urlParams.get('searchTerm') || ''
   const page = urlParams.get('page') || '1'
   // Default pagination parameters
   const pageNumber = page ? parseInt(page as string, 10) : 1
