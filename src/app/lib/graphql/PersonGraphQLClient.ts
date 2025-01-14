@@ -108,10 +108,21 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
       personData.display_name,
       personData.names[0]?.first_names[0]?.value,
       personData.names[0]?.last_names[0]?.value,
-      personData.identifiers.map((identifier: GraphPersonIdentifier) => ({
-        type: this.convertGraphIdentifierType(identifier.type),
-        value: identifier.value,
-      })),
+      personData.identifiers
+        .map((identifier: GraphPersonIdentifier) => {
+          try {
+            return {
+              type: this.convertGraphIdentifierType(identifier.type),
+              value: identifier.value,
+            }
+          } catch {
+            console.warn(
+              `Unsupported identifier type for ${identifier.value}: ${identifier.type}`,
+            )
+            return null // Skip unsupported identifiers
+          }
+        })
+        .filter((identifier) => identifier !== null), // Remove null entries
     )
   }
 

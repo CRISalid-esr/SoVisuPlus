@@ -75,4 +75,24 @@ describe('ResearchStructureWorker', () => {
       descriptions: { en: 'A description' },
     })
   })
+
+  it('should throw an error if an invalid identifier type is provided', async () => {
+    const message: AMQPResearchStructureMessage = {
+      type: 'research_structure',
+      event: 'updated',
+      fields: {
+        uid: 'rs-123',
+        identifiers: [{ type: 'INVALID', value: '12345' }],
+        names: [{ value: 'Research Structure', language: 'en' }],
+        acronym: 'RS',
+        descriptions: [{ value: 'A description', language: 'en' }],
+      },
+    }
+
+    worker = new ResearchStructureWorker(message, mockDAO)
+
+    await expect(worker.process()).rejects.toThrow(
+      'Unsupported identifier type: INVALID',
+    )
+  })
 })
