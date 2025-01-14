@@ -1,6 +1,9 @@
 import { PersonGraphQLClient } from './PersonGraphQLClient'
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 
 jest.mock('./AbstractGraphQLClient')
 
@@ -47,8 +50,8 @@ describe('PersonGraphQLClient', () => {
           external: false,
           display_name: 'John Doe',
           identifiers: [
-            { type: 'ORCID', value: '12345' },
-            { type: 'SCOPUS', value: '67890' },
+            { type: 'orcid', value: '12345' },
+            { type: 'scopus_eid', value: '67890' },
           ],
           names: [
             {
@@ -70,8 +73,8 @@ describe('PersonGraphQLClient', () => {
       external: false,
       displayName: 'John Doe',
       identifiers: [
-        { type: 'ORCID', value: '12345' },
-        { type: 'SCOPUS', value: '67890' },
+        { type: PersonIdentifierType.ORCID, value: '12345' },
+        { type: PersonIdentifierType.SCOPUS_EID, value: '67890' },
       ],
       firstName: 'John',
       lastName: 'Doe',

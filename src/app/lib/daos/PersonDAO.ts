@@ -30,8 +30,8 @@ export class PersonDAO extends AbstractDAO {
         },
       })
 
-      await this.handleIdentifierConflicts(person.identifiers, dbPerson.id)
-      await this.upsertIdentifiers(person.identifiers, dbPerson.id)
+      await this.handleIdentifierConflicts(person.getIdentifiers(), dbPerson.id)
+      await this.upsertIdentifiers(person.getIdentifiers(), dbPerson.id)
 
       return dbPerson
     } catch (error) {

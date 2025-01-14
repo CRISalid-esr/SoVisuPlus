@@ -5,6 +5,7 @@ import { UserDAO } from '@/lib/daos/UserDAO'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import prisma from '@/lib/daos/prisma'
+import { Person } from '@/types/Person'
 
 describe('UserService Integration Tests', () => {
   let userService: UserService
@@ -33,16 +34,15 @@ describe('UserService Integration Tests', () => {
   })
 
   test('should create or update a user with username using GraphQL data', async () => {
-    const personData = {
-      uid: 'local-test123',
-      external: false,
-      email: 'rgarcia@example.com',
-      firstName: 'Robert',
-      lastName: 'Garcia',
-      displayName: 'Robert Garcia',
-      identifiers: [{ type: 'ORCID', value: '0000-0002-1234-5678' }],
-    }
-
+    const personData = new Person(
+      'local-test123',
+      false,
+      'rgarcia@example.com',
+      'Robert',
+      'Garcia',
+      'Robert Garcia',
+      [{ type: 'ORCID', value: '0000-0002-1234-5678' }],
+    )
     personGraphQLClientMock.getPersonByIdentifier.mockResolvedValue(personData)
 
     const profile: AuthenticationProfile = { username: 'graphql-test123' }

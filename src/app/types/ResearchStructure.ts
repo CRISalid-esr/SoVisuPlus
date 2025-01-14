@@ -1,28 +1,47 @@
 import { ResearchStructure as DbResearchStructure } from '@prisma/client'
-import { ResearchStructureIdentifier } from '@/types/ResearchStructureIdentifier'
+import {
+  ResearchStructureIdentifier,
+  ResearchStructureIdentifierType,
+} from '@/types/ResearchStructureIdentifier'
 
 class ResearchStructure {
-  uid: string
-  acronym: string | null
-  names: Record<string, string>
-  descriptions: Record<string, string>
-  identifiers: ResearchStructureIdentifier[]
-
   constructor(
-    uid: string,
-    acronym: string | null,
-    names: Record<string, string>,
-    descriptions: Record<string, string>,
-    identifiers: ResearchStructureIdentifier[] = [],
+    public uid: string,
+    public acronym: string | null,
+    public names: Record<string, string>,
+    public descriptions: Record<string, string>,
+    private _identifiers: {
+      type: ResearchStructureIdentifierType
+      value: string
+    }[] = [],
   ) {
-    this.uid = uid
-    this.acronym = acronym
-    this.names = names
-    this.descriptions = descriptions
-    this.identifiers = identifiers
+    this.identifiers = _identifiers
   }
 
-  // Static method to create a ResearchStructure object from a JSON object
+  set identifiers(value: ResearchStructureIdentifier[]) {
+    value.forEach((identifier) => {
+      if (!identifier.type) {
+        throw new Error(`Identifier type is required`)
+      }
+      if (
+        !Object.values(ResearchStructureIdentifierType).includes(
+          identifier.type,
+        )
+      ) {
+        throw new Error(
+          `${identifier.type} is not a valid ResearchStructureIdentifierType`,
+        )
+      }
+      if (!identifier.value) {
+        throw new Error(`Identifier value is required`)
+      }
+    })
+  }
+
+  get identifiers(): ResearchStructureIdentifier[] {
+    return this._identifiers
+  }
+
   static fromDbResearchStructure(
     researchStructure: DbResearchStructure,
   ): ResearchStructure {

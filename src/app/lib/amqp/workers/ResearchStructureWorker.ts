@@ -1,6 +1,11 @@
 import { AMQPResearchStructureMessage } from '@/types/AMQPResearchStructureMessage'
 import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
 import { MessageProcessingWorker } from '@/lib/amqp/workers/MessageProcessingWorker'
+import { ResearchStructure } from '@/types/ResearchStructure'
+import {
+  ResearchStructureIdentifier,
+  ResearchStructureIdentifierType,
+} from '@/types/ResearchStructureIdentifier'
 
 /**
  * Worker for processing research structure-related messages
@@ -37,15 +42,24 @@ export class ResearchStructureWorker extends MessageProcessingWorker<AMQPResearc
         description.value,
       ]),
     )
+    const transformedIdentifiers: ResearchStructureIdentifier[] =
+      identifiers.map((identifier) => {
+        return {
+          type: this.convertGraphIdentifierType(identifier.type),
+          value: identifier.value,
+        }
+      })
 
     try {
-      await this.researchStructureDAO.createOrUpdateResearchStructure({
-        uid,
-        identifiers,
-        names: transformedNames,
-        acronym,
-        descriptions: transformedDescriptions,
-      })
+      await this.researchStructureDAO.createOrUpdateResearchStructure(
+        new ResearchStructure(
+          uid,
+          acronym,
+          transformedNames,
+          transformedDescriptions,
+          transformedIdentifiers,
+        ),
+      )
       console.log(`Successfully processed research structure: ${uid}`)
     } catch (error) {
       console.error(
@@ -53,6 +67,21 @@ export class ResearchStructureWorker extends MessageProcessingWorker<AMQPResearc
         error,
       )
       throw error
+    }
+  }
+
+  private convertGraphIdentifierType(
+    value: string,
+  ): ResearchStructureIdentifierType {
+    switch (value.toLowerCase()) {
+      case 'rnsr':
+        return ResearchStructureIdentifierType.RNSR
+      case 'idref':
+        return ResearchStructureIdentifierType.IDREF
+      case 'local':
+        return ResearchStructureIdentifierType.LOCAL
+      default:
+        throw new Error(`Unsupported identifier type: ${value}`)
     }
   }
 }

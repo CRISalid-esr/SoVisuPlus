@@ -5,6 +5,7 @@ import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
 /**
  * Service for handling person-related operations
@@ -33,12 +34,12 @@ export class UserService {
     let electedIdentifier: PersonIdentifier | null = null
     if (profile.username) {
       electedIdentifier = {
-        type: 'local',
+        type: PersonIdentifierType.LOCAL,
         value: profile.username,
       }
     } else if (profile.orcid) {
       electedIdentifier = {
-        type: 'orcid',
+        type: PersonIdentifierType.ORCID,
         value: profile.orcid,
       }
     }

@@ -1,10 +1,21 @@
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { Person } from '@/types/Person'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
 
+enum GraphPersonIdentifierType {
+  LOCAL = 'local',
+  ORCID = 'orcid',
+  IDREF = 'idref',
+  SCOPUS_EID = 'scopus_eid',
+  ID_HAL = 'id_hal',
+}
+
 interface GraphPersonIdentifier {
-  type: string
+  type: GraphPersonIdentifierType
   value: string
 }
 
@@ -90,19 +101,36 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
   }
 
   private hydrate(personData: GraphPersonResponse): Person {
-    return {
-      uid: personData.uid,
-      displayName: personData.display_name,
-      external: personData.external,
-      identifiers: personData.identifiers.map(
-        (identifier: PersonIdentifier) => ({
-          type: identifier.type,
-          value: identifier.value,
-        }),
-      ),
-      firstName: personData.names[0]?.first_names[0]?.value,
-      lastName: personData.names[0]?.last_names[0]?.value,
-      email: null,
+    return new Person(
+      personData.uid,
+      personData.external,
+      null,
+      personData.display_name,
+      personData.names[0]?.first_names[0]?.value,
+      personData.names[0]?.last_names[0]?.value,
+      personData.identifiers.map((identifier: GraphPersonIdentifier) => ({
+        type: this.convertGraphIdentifierType(identifier.type),
+        value: identifier.value,
+      })),
+    )
+  }
+
+  private convertGraphIdentifierType(
+    type: GraphPersonIdentifierType,
+  ): PersonIdentifierType {
+    switch (type) {
+      case GraphPersonIdentifierType.LOCAL:
+        return PersonIdentifierType.LOCAL
+      case GraphPersonIdentifierType.ORCID:
+        return PersonIdentifierType.ORCID
+      case GraphPersonIdentifierType.IDREF:
+        return PersonIdentifierType.IDREF
+      case GraphPersonIdentifierType.SCOPUS_EID:
+        return PersonIdentifierType.SCOPUS_EID
+      case GraphPersonIdentifierType.ID_HAL:
+        return PersonIdentifierType.ID_HAL_S
+      default:
+        throw new Error(`Unknown identifier type: ${type}`)
     }
   }
 }

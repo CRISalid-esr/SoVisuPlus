@@ -62,15 +62,15 @@ describe('PersonWorker', () => {
       },
     }
 
-    const person: Person = {
-      uid: 'person-123',
-      external: false,
-      email: 'john.doe@example.com',
-      displayName: 'John Doe',
-      firstName: 'John',
-      lastName: 'Doe',
-      identifiers: [],
-    }
+    const person: Person = new Person(
+      'person-123',
+      false,
+      'john.doe@example.com',
+      'John Doe',
+      'John',
+      'Doe',
+      [],
+    )
 
     const dbPerson: DbPerson = {
       id: 1,
@@ -117,15 +117,15 @@ describe('PersonWorker', () => {
       },
     }
 
-    const person: Person = {
-      uid: 'person-123',
-      external: true,
-      email: 'john.doe@example.com',
-      displayName: 'John Doe',
-      firstName: 'John',
-      lastName: 'Doe',
-      identifiers: [],
-    }
+    const person: Person = new Person(
+      'person-123',
+      true,
+      'john.doe@example.com',
+      'John Doe',
+      'John',
+      'Doe',
+      [],
+    )
 
     const dbPerson: DbPerson = {
       id: 1,

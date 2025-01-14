@@ -3,6 +3,9 @@ import { Person } from '@/types/Person'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 
 jest.mock('@prisma/client', () => {
+  // avoid PersonIdentifierType to be mocked
+  const actualPrismaClient: PrismaClient = jest.requireActual('@prisma/client')
+
   const mockPrismaClient = {
     person: {
       upsert: jest.fn(),
@@ -13,7 +16,11 @@ jest.mock('@prisma/client', () => {
       createMany: jest.fn(),
     },
   }
-  return { PrismaClient: jest.fn(() => mockPrismaClient) }
+
+  return {
+    ...actualPrismaClient,
+    PrismaClient: jest.fn(() => mockPrismaClient),
+  }
 })
 const mockPrisma = new PrismaClient()
 
@@ -24,20 +31,15 @@ describe('PersonDAO', () => {
     personDAO = new PersonDAO()
   })
 
-  const person: Person = {
-    uid: 'local-johndoe',
-    external: false,
-    email: 'johndoe@myuniversity.com',
-    displayName: 'John Doe',
-    firstName: 'John',
-    lastName: 'Doe',
-    identifiers: [
-      {
-        type: 'ORCID',
-        value: '0000-0001-2345-6789',
-      },
-    ],
-  }
+  const person: Person = new Person(
+    'local-johndoe',
+    false,
+    'johndoe@myuniversity.com',
+    'John',
+    'Doe',
+    'John Doe',
+    [{ type: 'ORCID', value: '0000-0001-2345-6789' }],
+  )
 
   it('should upsert a person', async () => {
     ;(mockPrisma.person.upsert as jest.Mock).mockResolvedValue({

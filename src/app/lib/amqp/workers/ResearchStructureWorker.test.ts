@@ -40,7 +40,7 @@ describe('ResearchStructureWorker', () => {
 
     expect(mockDAO.createOrUpdateResearchStructure).toHaveBeenCalledWith({
       uid: 'rs-123',
-      identifiers: [{ type: 'RNSR', value: '12345' }],
+      _identifiers: [{ type: 'RNSR', value: '12345' }],
       names: { en: 'Research Structure' },
       acronym: 'RS',
       descriptions: { en: 'A description' },
@@ -69,7 +69,7 @@ describe('ResearchStructureWorker', () => {
 
     expect(mockDAO.createOrUpdateResearchStructure).toHaveBeenCalledWith({
       uid: 'rs-123',
-      identifiers: [{ type: 'RNSR', value: '12345' }],
+      _identifiers: [{ type: 'RNSR', value: '12345' }],
       names: { en: 'Research Structure' },
       acronym: 'RS',
       descriptions: { en: 'A description' },
