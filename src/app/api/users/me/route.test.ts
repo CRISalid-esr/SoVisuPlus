@@ -70,8 +70,6 @@ describe('GET /api/route', () => {
     const response = await GET()
     const data = await response.json()
 
-    console.log('data', data)
-
     expect(response.status).toBe(200)
     expect(data).toEqual(mockUser)
   })

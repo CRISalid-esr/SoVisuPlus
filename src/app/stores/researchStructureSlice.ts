@@ -1,5 +1,6 @@
 import { StateCreator } from 'zustand'
 import { ResearchStructure } from '@/types/ResearchStructure' // Assuming you have a Prisma model for Person
+import { i18n } from '@lingui/core' // Import Lingui
 
 // Define the queryObject interface correctly
 export interface QueryObject {
@@ -51,7 +52,11 @@ export const addResearchStructureSlice: StateCreator<
 
       try {
         // Fetch data from the API
-        const response = await fetch(`/api/researchStructures?${queryString}`)
+        const response = await fetch(`/api/researchStructures?${queryString}`, {
+          headers: {
+            'accept-language': i18n.locale,
+          },
+        })
 
         // Handle unsuccessful fetch
         if (!response.ok) {

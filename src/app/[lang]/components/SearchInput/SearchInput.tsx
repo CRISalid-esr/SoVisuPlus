@@ -166,8 +166,6 @@ const SearchInput: React.FC = () => {
     )
   }
 
-  console.log('people', people)
-
   return (
     <Autocomplete
       onClose={() => {}}
