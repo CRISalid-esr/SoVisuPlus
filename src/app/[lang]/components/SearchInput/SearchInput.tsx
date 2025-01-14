@@ -125,13 +125,22 @@ const SearchInput: React.FC = () => {
 
   const mergedOptions = useMemo(() => {
     return [
-      ...(people || []).map((person) => ({ ...person, type: 'people' })),
-      ...(researchStructures || []).map((structure) => ({
-        ...structure,
-        type: 'researchStructures',
-      })),
+      ...(searchTags.some((tag) => tag.selected && tag.value === 'people')
+        ? people.map((people) => ({
+            ...people,
+            type: 'people',
+          }))
+        : []),
+      ...(searchTags.some(
+        (tag) => tag.selected && tag.value === 'researchStructures',
+      )
+        ? researchStructures.map((researchStructure) => ({
+            ...researchStructure,
+            type: 'researchStructures',
+          }))
+        : []),
     ]
-  }, [people, researchStructures])
+  }, [people, researchStructures, searchTags])
 
   const renderGroup = (params: AutocompleteRenderGroupParams) => {
     const count =
