@@ -26,9 +26,9 @@ describe('addPublicationSlice Tests', () => {
 
   it('should initialize with default values', () => {
     const state = useStore.getState();
-    expect(state.publications).toEqual([]);
-    expect(state.loading).toBe(true);
-    expect(state.error).toBeNull();
+    expect(state.publication.publications).toEqual([]);
+    expect(state.publication.loading).toBe(true);
+    expect(state.publication.error).toBeNull();
   });
 
   it('should fetch publications successfully', async () => {
@@ -38,15 +38,15 @@ describe('addPublicationSlice Tests', () => {
     });
 
     // Call the fetchPublications method
-    await useStore.getState().fetchPublications();
+    await useStore.getState().publication.fetchPublications();
 
     // Retrieve the updated state
     const updatedState = useStore.getState();
 
     // Ensure the state is updated correctly after the async fetch
-    expect(updatedState.loading).toBe(false);
-    expect(updatedState.error).toBeNull();
-    expect(updatedState.publications).toEqual(mockPublications);
+    expect(updatedState.publication.loading).toBe(false);
+    expect(updatedState.publication.error).toBeNull();
+    expect(updatedState.publication.publications).toEqual(mockPublications);
   });
 
   it('should handle fetch error', async () => {
@@ -55,15 +55,15 @@ describe('addPublicationSlice Tests', () => {
     global.fetch = jest.fn().mockRejectedValue(mockError);
 
     // Call the fetchPublications method
-    await useStore.getState().fetchPublications();
+    await useStore.getState().publication.fetchPublications();
 
     // Retrieve the updated state
     const updatedState = useStore.getState();
 
     // Ensure error state is set correctly
-    expect(updatedState.loading).toBe(false);
-    expect(updatedState.publications).toEqual([]);
-    expect(updatedState.error).toBeInstanceOf(Error);
-    expect((updatedState.error as Error).message).toBe('Fetch error');
+    expect(updatedState.publication.loading).toBe(false);
+    expect(updatedState.publication.publications).toEqual([]);
+    expect(updatedState.publication.error).toBeInstanceOf(Error);
+    expect((updatedState.publication.error as Error).message).toBe('Fetch error');
   });
 });

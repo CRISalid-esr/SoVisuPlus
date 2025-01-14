@@ -3,15 +3,19 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 
-import { addPublicationSlice, PublicationSlice } from './publication_slice'
-import { addUserSlice, UserSlice } from './userSlice'
+import { ResearchStructureSlice,addResearchStructureSlice } from './researchStructureSlice'
+import { PersonSlice,addPersonSlice } from './personSlice'
+import { PublicationSlice,addPublicationSlice } from './publication_slice'
+import { UserSlice,addUserSlice } from './userSlice'
 
-export type GlobalStore = PublicationSlice & UserSlice
+export type GlobalStore = ResearchStructureSlice  & PersonSlice & PublicationSlice & UserSlice
 
 const useStore = create<GlobalStore>()(
   devtools(
     persist(
       (...a) => ({
+        ...addResearchStructureSlice(...a),
+        ...addPersonSlice(...a),
         ...addPublicationSlice(...a),
         ...addUserSlice(...a),
       }),

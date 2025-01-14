@@ -5,12 +5,12 @@ import DarkMode from '@/public/icons/dark_mode.svg'
 import LightMode from '@/public/icons/light_mode.svg'
 import SystemMode from '@/public/icons/system_mode.svg'
 
-import { t, Trans } from '@lingui/macro'
+import { User } from '@/types/User'
+import { Trans } from '@lingui/macro'
 import {
   Backdrop,
   Drawer,
   IconButton,
-  InputAdornment,
   List,
   ListItem,
   ListItemIcon,
@@ -19,7 +19,7 @@ import {
   Select,
   SelectChangeEvent,
   TextField,
-  Typography,
+  Typography
 } from '@mui/material'
 import Avatar from '@mui/material/Avatar'
 import { useTheme } from '@mui/material/styles'
@@ -27,23 +27,21 @@ import { Box, useMediaQuery } from '@mui/system'
 import {
   BarChartSquare02 as BarChartSquare,
   CheckDone01 as CheckDone,
+  XClose as Close,
   LayersThree01 as LayerThere,
   LifeBuoy01 as LifeBuoy,
   LogOut01 as Logout,
-  SearchLg,
   SearchSm,
   Settings01 as Settings,
-  User01 as Users,
-  XClose as Close,
+  User01 as Users
 } from '@untitled-ui/icons-react'
+import { signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
-import { signOut } from 'next-auth/react'
-import { User } from '@/types/User'
-import { SearchModal } from '../SearchModal'
 import { useState } from 'react'
+import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
+import { SearchInput } from '../SearchInput'
 
 const items = [
   'React',
@@ -345,51 +343,7 @@ export default function Sidebar({
           >
             <Box component='div' sx={{}} pt={3} pb={open ? 3 : 0}>
               {open ? (
-                <>
-                  <SearchModal
-                    open={openSearchModal}
-                    onClose={() => setOpenSearchModal(false)}
-                    title='Search'
-                    items={[]}
-                  />
-                  <TextField
-                    onClick={() => setOpenSearchModal(true)}
-                    sx={{
-                      backgroundColor: theme.palette.white,
-                      borderRadius: theme.utils.pxToRem(8),
-                      '& .MuiOutlinedInput-root': {
-                        '& fieldset': {
-                          border: 'none', // Remove the border
-                        },
-                      },
-                      '& .MuiInputBase-input': {
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                      },
-                      '& .MuiInputBase-input::placeholder': {
-                        fontSize: theme.utils.pxToRem(16),
-                        fontWeight: theme.typography.fontWeightRegular,
-                        color: theme.palette.primary.main,
-                        opacity: 1,
-                        lineHeight: theme.typography.lineHeight.lineHeight24px,
-                      },
-                    }}
-                    placeholder={t`sidebar_search_placeholder`}
-                    fullWidth
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position='start'>
-                          <SearchLg
-                            width={20}
-                            height={20}
-                            color={theme.palette.primary.main}
-                          />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </>
+                 <SearchInput/>
               ) : (
                 <List
                   sx={{

@@ -23,7 +23,7 @@ export default function MainLayout({
   }
 
   const { connectedUser, loading, fetchConnectedUser } = useStore(
-    (state) => state,
+    (state) => state.user,
   )
 
   useEffect(() => {
