@@ -143,13 +143,12 @@ const SearchInput: React.FC = () => {
   }, [people, researchStructures, searchTags])
 
   const renderGroup = (params: AutocompleteRenderGroupParams) => {
-    const count =
-      params.group === 'people' ? totalPeople : totalResearchStructures
     return (
       <li {...params} key={params.group}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 1 }}>
           <Typography variant='body2'>
-            {params.group} ({count})
+            {params.group} (
+            {params.group === 'people' ? totalPeople : totalResearchStructures})
           </Typography>
         </Box>
         <ul>{params.children}</ul>
