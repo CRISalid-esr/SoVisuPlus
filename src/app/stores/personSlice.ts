@@ -46,7 +46,10 @@ export const addPersonSlice: StateCreator<PersonSlice, [], [], PersonSlice> = (
         set((state) => ({
           person: {
             ...state.person,
-            people: people,
+            people:
+              Number(queryObject.page) === 1
+                ? people
+                : [...state.person.people, ...people],
             hasMore,
             total,
             error: null, // Reset error state

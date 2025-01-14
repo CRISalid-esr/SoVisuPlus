@@ -60,12 +60,17 @@ export const addResearchStructureSlice: StateCreator<
 
         const jsonData = await response.json()
         const { hasMore, researchStructures, total } = jsonData
-
         // Update the state with the fetched data
         set((state) => ({
           researchStructure: {
             ...state.researchStructure,
-            researchStructures,
+            researchStructures:
+              Number(queryObject.page) === 1
+                ? researchStructures
+                : [
+                    ...state.researchStructure.researchStructures,
+                    ...researchStructures,
+                  ],
             hasMore,
             total,
             error: null, // Reset error state
