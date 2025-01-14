@@ -8,11 +8,7 @@ import { AMQPEntityData } from '@/types/AMQPEntityData'
 export abstract class MessageProcessingWorker<
   T extends AMQPMessage<AMQPEntityData>,
 > {
-  protected message: T
-
-  constructor(message: T) {
-    this.message = message
-  }
+  constructor(protected message: T) {}
 
   /**
    * Process the message associated with this worker.

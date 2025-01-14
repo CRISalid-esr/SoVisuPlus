@@ -11,19 +11,11 @@ import { PersonIdentifierType } from '@/types/PersonIdentifier'
  * Service for handling person-related operations
  */
 export class UserService {
-  private personGraphQLClient: PersonGraphQLClient
-  private userDAO: UserDAO
-  private personDAO: PersonDAO
-
   constructor(
-    personGraphQLClient: PersonGraphQLClient,
-    userDAO: UserDAO,
-    personDAO: PersonDAO,
-  ) {
-    this.personGraphQLClient = personGraphQLClient
-    this.userDAO = userDAO
-    this.personDAO = personDAO
-  }
+    private personGraphQLClient: PersonGraphQLClient,
+    private userDAO: UserDAO,
+    private personDAO: PersonDAO,
+  ) {}
 
   /**
    * Check if an authentication profile matches an existing person

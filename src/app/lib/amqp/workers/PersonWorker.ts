@@ -10,24 +10,17 @@ import { PersonDAO } from '@/lib/daos/PersonDAO'
  * Worker for processing person-related messages
  */
 export class PersonWorker extends MessageProcessingWorker<AMQPPersonMessage> {
-  private personGraphQLClient: PersonGraphQLClient
-  private userDAO: UserDAO
-  private personDAO: PersonDAO
-
   /**
    * Constructor
    * @param message - The person message to process
    */
   constructor(
     message: AMQPPersonMessage,
-    personDAO: PersonDAO,
-    userDAO: UserDAO,
-    personGraphQLClient: PersonGraphQLClient,
+    private personDAO: PersonDAO,
+    private userDAO: UserDAO,
+    private personGraphQLClient: PersonGraphQLClient,
   ) {
     super(message)
-    this.personDAO = personDAO
-    this.userDAO = userDAO
-    this.personGraphQLClient = personGraphQLClient
   }
 
   /**

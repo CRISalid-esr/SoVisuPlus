@@ -11,18 +11,15 @@ import {
  * Worker for processing research structure-related messages
  */
 export class ResearchStructureWorker extends MessageProcessingWorker<AMQPResearchStructureMessage> {
-  private researchStructureDAO: ResearchStructureDAO
-
   /**
    * Constructor
    * @param message - The research structure message to process
    */
   constructor(
     message: AMQPResearchStructureMessage,
-    researchStructureDAO: ResearchStructureDAO,
+    private researchStructureDAO: ResearchStructureDAO,
   ) {
     super(message)
-    this.researchStructureDAO = researchStructureDAO
   }
 
   /**
