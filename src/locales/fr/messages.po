@@ -115,7 +115,7 @@ msgstr "Publications"
 msgid "sidebar_search_people"
 msgstr "Chercheurs"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:211
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:209
 msgid "sidebar_search_placeholder"
 msgstr "Chercher"
 
