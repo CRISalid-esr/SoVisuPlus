@@ -90,12 +90,11 @@ const SearchInput: React.FC = () => {
     fetchData()
   }, [fetchResearchStructures, researchStructuresPage, searchTerm, searchTags])
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>, group: string) => {
     const target = e.target as HTMLDivElement
     const bottom =
       target.scrollHeight === target.scrollTop + target.clientHeight
     if (bottom) {
-      // Trigger fetch for selected tags if more data is available
       if (
         searchTags.some((tag) => tag.selected && tag.value === 'people') &&
         hasMorePeople &&
@@ -108,7 +107,8 @@ const SearchInput: React.FC = () => {
           (tag) => tag.selected && tag.value === 'researchStructures',
         ) &&
         hasMoreResearchStructures &&
-        !researchStructuresLoading
+        !researchStructuresLoading &&
+        group === 'researchStructures'
       ) {
         setResearchStructuresPage((prevPage) => prevPage + 1)
       }
@@ -144,7 +144,17 @@ const SearchInput: React.FC = () => {
 
   const renderGroup = (params: AutocompleteRenderGroupParams) => {
     return (
-      <li {...params} key={params.group}>
+      <Box
+        onScroll={(e) => {
+          handleScroll(e, params.group)
+        }}
+        sx={{
+          maxHeight: 150, // Max height for each group
+          overflowY: 'auto', // Enable scrolling
+        }}
+        component={'li'}
+        {...params}
+      >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 1 }}>
           <Typography variant='body2'>
             {params.group} (
@@ -152,7 +162,7 @@ const SearchInput: React.FC = () => {
           </Typography>
         </Box>
         <ul>{params.children}</ul>
-      </li>
+      </Box>
     )
   }
 
