@@ -3,7 +3,10 @@ import prisma from '@/lib/prisma'
 import { getServerSession, Session } from 'next-auth' // Assuming you are using NextAuth
 import authOptions from '@/app/auth/auth_options'
 import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { User } from '@/types/User'
 import { User as DbUser } from '@prisma/client'
 
@@ -25,12 +28,12 @@ export const GET = async () => {
 
     if (session?.user.username) {
       electedIdentifier = {
-        type: 'local',
+        type: PersonIdentifierType.LOCAL,
         value: session?.user.username,
       }
     } else if (session?.user.orcid) {
       electedIdentifier = {
-        type: 'orcid',
+        type: PersonIdentifierType.ORCID,
         value: session?.user.orcid,
       }
     }

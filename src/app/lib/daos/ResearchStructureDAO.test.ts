@@ -1,11 +1,14 @@
 import {
-  ResearchStructure as DbResearchStructure,
   PrismaClient,
+  ResearchStructure as DbResearchStructure,
 } from '@prisma/client'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
+import { ResearchStructureIdentifierType } from '@/types/ResearchStructureIdentifier'
 
 jest.mock('@prisma/client', () => {
+  // avoid PersonIdentifierType to be mocked
+  const actualPrismaClient: PrismaClient = jest.requireActual('@prisma/client')
   const mockPrismaClient = {
     researchStructure: {
       upsert: jest.fn(),
@@ -15,7 +18,10 @@ jest.mock('@prisma/client', () => {
       createMany: jest.fn(),
     },
   }
-  return { PrismaClient: jest.fn(() => mockPrismaClient) }
+  return {
+    ...actualPrismaClient,
+    PrismaClient: jest.fn(() => mockPrismaClient), // Override PrismaClient with the mock
+  }
 })
 const mockPrisma = new PrismaClient()
 
@@ -26,18 +32,13 @@ describe('ResearchStructureDAO', () => {
     researchStructureDAO = new ResearchStructureDAO()
   })
 
-  const researchStructure: ResearchStructure = {
-    uid: 'local-rs001',
-    acronym: 'RS001',
-    names: { en: 'Research Structure 001' },
-    descriptions: { en: 'A description for Research Structure 001' },
-    identifiers: [
-      {
-        type: 'RNSR',
-        value: '001234567Z',
-      },
-    ],
-  }
+  const researchStructure: ResearchStructure = new ResearchStructure(
+    'local-rs001',
+    'RS001',
+    { en: 'Research Structure 001' },
+    { en: 'A description for Research Structure 001' },
+    [{ type: ResearchStructureIdentifierType.RNSR, value: '001234567Z' }],
+  )
 
   it('should upsert a research structure', async () => {
     ;(mockPrisma.researchStructure.upsert as jest.Mock).mockResolvedValue({
