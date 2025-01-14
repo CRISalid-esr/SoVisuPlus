@@ -1,5 +1,6 @@
 import { StateCreator } from 'zustand'
 import { Person } from '@/types/Person'
+import { i18n } from '@lingui/core' // Import Lingui
 
 export interface queryObject {
   searchTerm: string
@@ -38,7 +39,11 @@ export const addPersonSlice: StateCreator<PersonSlice, [], [], PersonSlice> = (
       ).toString()
       set((state) => ({ person: { ...state.person, loading: true } }))
       try {
-        const response = await fetch(`/api/people?${queryString}`) // Replace with your API endpoint
+        const response = await fetch(`/api/people?${queryString}`, {
+          headers: {
+            'accept-language': i18n.locale,
+          },
+        })
         const jsonData = await response.json()
         const hasMore = jsonData.hasMore
         const people = jsonData.people
