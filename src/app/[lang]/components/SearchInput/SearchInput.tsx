@@ -171,14 +171,7 @@ const SearchInput: React.FC = () => {
         }
         return 'n/c'
       }}
-      groupBy={(option) => {
-        if (option.type == 'people') {
-          return 'Chercheur'
-        } else if (option.type == 'researchStructures') {
-          return 'Unité de recherche'
-        }
-        return 'Autre'
-      }} // Group options by type (Chercheur, Unité de recherche)
+      groupBy={(option) => option.type} // Group options by type (Chercheur, Unité de recherche)
       renderInput={(params) => (
         <TextField
           {...params}
