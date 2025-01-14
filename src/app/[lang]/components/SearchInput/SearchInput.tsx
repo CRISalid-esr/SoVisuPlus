@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   Autocomplete,
   AutocompleteRenderGroupParams,
@@ -50,22 +50,41 @@ const SearchInput: React.FC = () => {
   } = useStore((state) => state.researchStructure)
 
   useEffect(() => {
-    if (searchTags.some((tag) => tag.selected && tag.value === 'people')) {
-      fetchPeople({ searchTerm, peoplePage: peoplePage.toString() })
+    const fetchData = async () => {
+      if (searchTags.some((tag) => tag.selected && tag.value === 'people')) {
+        if (fetchPeople) {
+          try {
+            await fetchPeople({ searchTerm, peoplePage: peoplePage.toString() })
+          } catch (error) {
+            console.error('Error fetching people:', error)
+          }
+        }
+      }
     }
+    fetchData()
   }, [fetchPeople, peoplePage, searchTerm, searchTags])
 
   useEffect(() => {
-    if (
-      searchTags.some(
-        (tag) => tag.selected && tag.value === 'researchStructures',
-      )
-    ) {
-      fetchResearchStructures({
-        searchTerm,
-        page: researchStructuresPage,
-      })
+    const fetchData = async () => {
+      if (
+        searchTags.some(
+          (tag) => tag.selected && tag.value === 'researchStructures',
+        )
+      ) {
+        if (fetchResearchStructures) {
+          try {
+            await fetchResearchStructures({
+              searchTerm,
+              page: researchStructuresPage,
+            })
+          } catch (error) {
+            console.error('Error fetching research structures:', error)
+          }
+        }
+      }
     }
+
+    fetchData()
   }, [fetchResearchStructures, researchStructuresPage, searchTerm, searchTags])
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -101,20 +120,21 @@ const SearchInput: React.FC = () => {
     )
   }
 
-  const mergedOptions: (Person | ResearchStructure)[] = [
-    ...(people || []).map((person) => ({ ...person, type: 'people' })),
-    ...(researchStructures || []).map((structure) => ({
-      ...structure,
-      type: 'researchStructures',
-    })),
-  ]
-  console.log('totalResearchStructures', totalResearchStructures)
+  const mergedOptions = useMemo(() => {
+    return [
+      ...(people || []).map((person) => ({ ...person, type: 'people' })),
+      ...(researchStructures || []).map((structure) => ({
+        ...structure,
+        type: 'researchStructures',
+      })),
+    ]
+  }, [people, researchStructures])
 
   const renderGroup = (params: AutocompleteRenderGroupParams) => {
     const count =
       params.group === 'people' ? totalPeople : totalResearchStructures
     return (
-      <li {...params}>
+      <li {...params} key={params.group}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 1 }}>
           <Typography variant='body2'>
             {params.group} ({count})
@@ -131,15 +151,17 @@ const SearchInput: React.FC = () => {
       renderGroup={renderGroup}
       disableCloseOnSelect={true}
       options={mergedOptions}
-      getOptionLabel={(option) => {
-        return option instanceof Person
-          ? `${option.firstName} ${option.lastName}`
-          : option.names['fr']
+      getOptionLabel={(option): string => {
+        if (option instanceof Person)
+          return `${option.firstName} ${option.lastName}`
+        if (option instanceof ResearchStructure)
+          return (option.names ? option.names[0] : option.acronym) || 'n/c'
+        return 'n/c'
       }}
       groupBy={(option) => {
-        if (option instanceof Person) {
+        if (option.type == 'people') {
           return 'Chercheur'
-        } else if (option instanceof ResearchStructure) {
+        } else if (option.type == 'researchStructures') {
           return 'Unité de recherche'
         }
         return 'Autre'
@@ -175,6 +197,8 @@ const SearchInput: React.FC = () => {
       slots={{
         paper: (props) => (
           <CustomPaper
+            // generate unique random kay
+            key={Math.random()}
             searchTags={searchTags}
             handleTagClick={(tag: string) => handleTagClick(tag)}
             {...props}
