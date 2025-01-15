@@ -4,6 +4,7 @@ import {
   AutocompleteRenderGroupParams,
   Box,
   Chip,
+  CircularProgress,
   Paper,
   PaperProps,
   TextField,
@@ -157,7 +158,17 @@ const SearchInput: React.FC = () => {
         component={'li'}
         {...params}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 1 }}>
+        <Box
+          sx={{
+            position: 'sticky',
+            top: 0, // Fixes the title at the top of the group
+            zIndex: 1, // Ensure the title stays on top of other content
+            backgroundColor: theme.palette.background.paper, // Set a background to prevent overlap
+            display: 'flex',
+            justifyContent: 'space-between',
+            p: 1,
+          }}
+        >
           <Typography variant='body2'>
             {params.group} (
             {params.group === 'people' ? totalPeople : totalResearchStructures})
@@ -250,6 +261,8 @@ const SearchInput: React.FC = () => {
       inputValue={searchTerm}
       onInputChange={(e, newInputValue) => setSearchTerm(newInputValue)}
       sx={{ mb: 2 }}
+      loading={peopleLoading || researchStructuresLoading} // Display loading when data is being fetched
+      loadingText={<CircularProgress size={24} />} // Show spinner when loading
     />
   )
 }
