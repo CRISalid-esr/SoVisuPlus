@@ -3,13 +3,15 @@ import {
   Autocomplete,
   AutocompleteRenderGroupParams,
   Box,
+  Chip,
+  Paper,
+  PaperProps,
   TextField,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { t } from '@lingui/macro'
 import useStore from '@/stores/global_store'
-import CustomPaper from '@/components/CustomPaper'
 import { Person } from '@/types/Person'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { usePathname } from 'next/navigation'
@@ -166,6 +168,37 @@ const SearchInput: React.FC = () => {
     )
   }
 
+  const customPaper = useMemo(
+    () => (paperProps) => {
+      return (
+        <Paper onMouseDown={(event) => event.preventDefault()}>
+          <Box
+            sx={{
+              p: 5,
+              display: 'flex',
+              gap: 1,
+              flexWrap: 'wrap',
+            }}
+          >
+            {searchTags.map((tag) => {
+              return (
+                <Chip
+                  key={tag.value}
+                  label={tag.label}
+                  onClick={() => handleTagClick(tag.value)}
+                  color={tag.selected ? 'primary' : 'default'}
+                  sx={{ cursor: 'pointer' }}
+                />
+              )
+            })}
+          </Box>
+          <Box>{paperProps.children}</Box>
+        </Paper>
+      )
+    },
+    [],
+  )
+
   return (
     <Autocomplete
       onClose={() => {}}
@@ -211,15 +244,7 @@ const SearchInput: React.FC = () => {
         />
       )}
       slots={{
-        paper: (props) => (
-          <CustomPaper
-            // generate unique random kay
-            key={Math.random()}
-            searchTags={searchTags}
-            handleTagClick={(tag: string) => handleTagClick(tag)}
-            {...props}
-          />
-        ),
+        paper: customPaper,
       }}
       fullWidth
       inputValue={searchTerm}
