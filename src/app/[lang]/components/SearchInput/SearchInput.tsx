@@ -172,7 +172,10 @@ const SearchInput: React.FC = () => {
         >
           <Typography variant='body2'>
             {params.group} (
-            {params.group === 'people' ? totalPeople : totalResearchStructures})
+            {params.group === t`sidebar_search_people`
+              ? totalPeople
+              : totalResearchStructures}
+            )
           </Typography>
         </Box>
         <ul>{params.children}</ul>
