@@ -212,7 +212,9 @@ const SearchInput: React.FC = () => {
 
   return (
     <Autocomplete
-      onClose={() => {}}
+      onClose={() => {
+        setSearchTerm(searchTerm)
+      }}
       renderGroup={renderGroup}
       disableCloseOnSelect={true}
       options={mergedOptions}
@@ -259,7 +261,13 @@ const SearchInput: React.FC = () => {
       }}
       fullWidth
       inputValue={searchTerm}
-      onInputChange={(e, newInputValue) => setSearchTerm(newInputValue)}
+      onInputChange={(e, newInputValue, reason) => {
+        if (reason === 'reset') {
+          setSearchTerm(searchTerm)
+        } else {
+          setSearchTerm(newInputValue)
+        }
+      }}
       sx={{ mb: 2 }}
       loading={peopleLoading || researchStructuresLoading} // Display loading when data is being fetched
       loadingText={<CircularProgress size={24} />} // Show spinner when loading
