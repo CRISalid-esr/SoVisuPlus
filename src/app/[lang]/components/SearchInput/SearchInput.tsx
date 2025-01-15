@@ -16,6 +16,7 @@ import useStore from '@/stores/global_store'
 import { Person } from '@/types/Person'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { usePathname } from 'next/navigation'
+import Highlighter from 'react-highlight-words'
 
 interface Tag {
   label: string
@@ -275,6 +276,24 @@ const SearchInput: React.FC = () => {
         } else {
           setSearchTerm(newInputValue)
         }
+      }}
+      filterOptions={(x) => x} // Disables filtering
+      renderOption={(props, option, { inputValue }) => {
+        const label =
+          option.type === 'people'
+            ? `${option.firstName} ${option.lastName}`
+            : (option.names ? option.names[lang] : option.acronym) || 'n/c'
+
+        return (
+          <li {...props} key={option.id}>
+            <Highlighter
+              highlightClassName='highlight'
+              searchWords={[inputValue]}
+              autoEscape
+              textToHighlight={label}
+            />
+          </li>
+        )
       }}
       sx={{ mb: 2 }}
       loading={peopleLoading || researchStructuresLoading} // Display loading when data is being fetched
