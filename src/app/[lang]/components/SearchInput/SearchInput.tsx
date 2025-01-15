@@ -169,12 +169,12 @@ const SearchInput: React.FC = () => {
   }
 
   const customPaper = useMemo(
-    () => (paperProps) => {
+    () => (paperProps: PaperProps) => {
       return (
         <Paper onMouseDown={(event) => event.preventDefault()}>
           <Box
             sx={{
-              p: 5,
+              p: 2,
               display: 'flex',
               gap: 1,
               flexWrap: 'wrap',
