@@ -1,8 +1,8 @@
 import { createStore } from 'zustand'
 import { addPersonSlice, PersonSlice } from './personSlice'
 import { i18n } from '@lingui/core'
-
-const mockFetchResponse = (data: any, ok = true) => {
+import { Person } from '@/types/Person'
+const mockFetchResponse = (data: Person[], ok = true) => {
   global.fetch = jest.fn(() =>
     Promise.resolve({
       ok,
@@ -11,7 +11,7 @@ const mockFetchResponse = (data: any, ok = true) => {
   )
 }
 
-const mockFetchError = (error: any) => {
+const mockFetchError = (error: Error) => {
   global.fetch = jest.fn(() => Promise.reject(error))
 }
 
