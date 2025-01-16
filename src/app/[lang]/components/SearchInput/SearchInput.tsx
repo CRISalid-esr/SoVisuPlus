@@ -43,7 +43,7 @@ const SearchInput: React.FC = () => {
   const {
     fetchPeople,
     loading: peopleLoading,
-    people,
+    people = [],
     hasMore: hasMorePeople,
     total: totalPeople,
   } = useStore((state) => state.person)
@@ -51,13 +51,13 @@ const SearchInput: React.FC = () => {
   const {
     fetchResearchStructures,
     loading: researchStructuresLoading,
-    researchStructures,
+    researchStructures = [],
     hasMore: hasMoreResearchStructures,
     total: totalResearchStructures,
   } = useStore((state) => state.researchStructure)
 
   const pathname = usePathname()
-  const lang = pathname.split('/')[1]
+  const lang = pathname ? pathname.split('/')[1] : ''
 
   useEffect(() => {
     const fetchData = async () => {
@@ -133,7 +133,7 @@ const SearchInput: React.FC = () => {
   const mergedOptions = useMemo(() => {
     return [
       ...(searchTags.some((tag) => tag.selected && tag.value === 'people')
-        ? people.map((people) => ({
+        ? people?.map((people) => ({
             ...people,
             type: 'people',
           }))
@@ -141,7 +141,7 @@ const SearchInput: React.FC = () => {
       ...(searchTags.some(
         (tag) => tag.selected && tag.value === 'researchStructures',
       )
-        ? researchStructures.map((researchStructure) => ({
+        ? researchStructures?.map((researchStructure) => ({
             ...researchStructure,
             type: 'researchStructures',
           }))
