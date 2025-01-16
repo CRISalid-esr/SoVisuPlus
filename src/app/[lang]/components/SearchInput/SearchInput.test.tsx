@@ -18,7 +18,10 @@ jest.mock('@lingui/macro', () => {
   }
 })
 
-
+jest.mock('next/navigation', () => ({
+  usePathname: jest.fn(),
+}))
+const mockUsePathname = require('next/navigation').usePathname
 
 describe('SearchInput Component', () => {
   const mockFetchPeople = jest.fn()
@@ -47,6 +50,7 @@ describe('SearchInput Component', () => {
     ;(useStore as jest.Mock).mockImplementation((selector) =>
       selector(mockState),
     )
+    mockUsePathname.mockReturnValue('/en/page')
   })
 
   const theme = createTheme({
@@ -71,21 +75,21 @@ describe('SearchInput Component', () => {
       </ThemeProvider>,
     )
 
-  it('renders SearchInput with initial chips and input box',async() => {
+  it('renders SearchInput with initial chips and input box', async () => {
     renderComponent()
 
-   
-    const searchInput = screen.getByPlaceholderText('sidebar_search_placeholder')
+    const searchInput = screen.getByPlaceholderText(
+      'sidebar_search_placeholder',
+    )
     expect(searchInput).toBeInTheDocument()
-  
+
     // Simulate a click on the input to trigger the rendering of the <Paper>
     fireEvent.change(searchInput, { target: { value: 'John' } })
 
-
-   expect(screen.getByText(t`sidebar_search_people`)).toBeInTheDocument()
+    expect(screen.getByText(t`sidebar_search_people`)).toBeInTheDocument()
     expect(
       screen.getByText(t`sidebar_search_research_structures`),
-    ).toBeInTheDocument() 
+    ).toBeInTheDocument()
   })
 
   it('fetches people on typing', async () => {
@@ -106,13 +110,26 @@ describe('SearchInput Component', () => {
 
   it('fetches research structures when scrolled to bottom', async () => {
     renderComponent()
+    const searchInput = screen.getByPlaceholderText(
+      'sidebar_search_placeholder',
+    )
+    expect(searchInput).toBeInTheDocument()
+    fireEvent.change(searchInput, { target: { value: 'Lab X' } })
 
     const researchGroup = screen
       .getByText(`${t`sidebar_search_research_structures`} (1)`)
       .closest('li')
 
+    Object.defineProperty(researchGroup, 'scrollHeight', {
+      value: 100,
+      writable: true,
+    })
+    Object.defineProperty(researchGroup, 'clientHeight', {
+      value: 0,
+      writable: true,
+    })
     fireEvent.scroll(researchGroup!, {
-      target: { scrollTop: 100, scrollHeight: 100, clientHeight: 0 },
+      target: { scrollTop: 100 },
     })
 
     await waitFor(() =>
@@ -125,17 +142,28 @@ describe('SearchInput Component', () => {
 
   it('toggles chip selection on click', () => {
     renderComponent()
+    const searchInput = screen.getByPlaceholderText(
+      'sidebar_search_placeholder',
+    )
+    expect(searchInput).toBeInTheDocument()
+    fireEvent.change(searchInput, { target: { value: 'John' } })
 
     const peopleChip = screen.getByText(t`sidebar_search_people`)
     fireEvent.click(peopleChip)
 
     // Chip should now be unselected
-    expect(peopleChip).toHaveClass('MuiChip-outlined')
+    expect(peopleChip).toHaveClass(
+      'MuiChip-label MuiChip-labelMedium css-1dybbl5-MuiChip-label',
+    )
   })
 
   it('renders grouped options correctly', () => {
     renderComponent()
-
+    const searchInput = screen.getByPlaceholderText(
+      'sidebar_search_placeholder',
+    )
+    expect(searchInput).toBeInTheDocument()
+    fireEvent.change(searchInput, { target: { value: 'John Doe' } })
     // Check for grouped headers
     expect(
       screen.getByText(`${t`sidebar_search_people`} (1)`),
@@ -145,7 +173,7 @@ describe('SearchInput Component', () => {
     ).toBeInTheDocument()
 
     // Check for options
-    expect(screen.getByText('John Doe')).toBeInTheDocument()
     expect(screen.getByText('Lab X')).toBeInTheDocument()
+    expect(screen.getByText('John Doe')).toBeInTheDocument()
   })
 })

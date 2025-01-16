@@ -216,6 +216,8 @@ const SearchInput: React.FC = () => {
     ),
     [searchTags],
   )
+  console.log('mergedOptions', mergedOptions)
+  console.log('lang', lang)
 
   return (
     <Autocomplete
