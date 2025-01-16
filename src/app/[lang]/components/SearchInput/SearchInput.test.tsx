@@ -12,6 +12,14 @@ jest.mock('@/stores/global_store', () => ({
   default: jest.fn(),
 }))
 
+jest.mock('@lingui/macro', () => {
+  return {
+    t: (key: string) => key, // Return the key directly for testing
+  }
+})
+
+
+
 describe('SearchInput Component', () => {
   const mockFetchPeople = jest.fn()
   const mockFetchResearchStructures = jest.fn()
@@ -63,19 +71,21 @@ describe('SearchInput Component', () => {
       </ThemeProvider>,
     )
 
-  it('renders SearchInput with initial chips and input box', () => {
+  it('renders SearchInput with initial chips and input box',async() => {
     renderComponent()
 
-    // Check the search input
-    expect(
-      screen.getByPlaceholderText(t`sidebar_search_placeholder`),
-    ).toBeInTheDocument()
+   
+    const searchInput = screen.getByPlaceholderText('sidebar_search_placeholder')
+    expect(searchInput).toBeInTheDocument()
+  
+    // Simulate a click on the input to trigger the rendering of the <Paper>
+    fireEvent.change(searchInput, { target: { value: 'John' } })
 
-    // Check the chips
-    expect(screen.getByText(t`sidebar_search_people`)).toBeInTheDocument()
+
+   expect(screen.getByText(t`sidebar_search_people`)).toBeInTheDocument()
     expect(
       screen.getByText(t`sidebar_search_research_structures`),
-    ).toBeInTheDocument()
+    ).toBeInTheDocument() 
   })
 
   it('fetches people on typing', async () => {
