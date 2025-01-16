@@ -271,6 +271,8 @@ const SearchInput: React.FC = () => {
         } else {
           setSearchTerm(newInputValue)
         }
+        setPeoplePage(1)
+        setResearchStructuresPage(1)
       }}
       filterOptions={(x) => x} // Disables filtering
       renderOption={(props, option, { inputValue }) => {
