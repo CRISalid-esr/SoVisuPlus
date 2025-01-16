@@ -1,17 +1,21 @@
 import { createStore } from 'zustand'
-import { addResearchStructureSlice, ResearchStructureSlice } from './researchStructureSlice'
+import {
+  addResearchStructureSlice,
+  ResearchStructureSlice,
+} from './researchStructureSlice'
 import { i18n } from '@lingui/core'
+import { ResearchStructure } from '@/types/ResearchStructure'
 
-const mockFetchResponse = (data: any, ok = true) => {
+const mockFetchResponse = (data: ResearchStructure[], ok = true) => {
   global.fetch = jest.fn(() =>
     Promise.resolve({
       ok,
       json: () => Promise.resolve(data),
-    } as Response)
+    } as Response),
   )
 }
 
-const mockFetchError = (error: any) => {
+const mockFetchError = (error: Error) => {
   global.fetch = jest.fn(() => Promise.reject(error))
 }
 
@@ -31,10 +35,17 @@ describe('addResearchStructureSlice', () => {
       { id: 1, name: 'Research Structure A' },
       { id: 2, name: 'Research Structure B' },
     ]
-    const response = { hasMore: true, researchStructures: researchStructuresData, total: 2 }
+    const response = {
+      hasMore: true,
+      researchStructures: researchStructuresData,
+      total: 2,
+    }
     mockFetchResponse(response)
 
-    await store.getState().researchStructure.fetchResearchStructures({ page: 1, searchTerm: 'test' })
+    await store.getState().researchStructure.fetchResearchStructures({
+      page: 1,
+      searchTerm: 'test',
+    })
 
     const state = store.getState().researchStructure
     expect(state.loading).toBe(false)
@@ -46,7 +57,7 @@ describe('addResearchStructureSlice', () => {
       '/api/researchStructures?page=1&searchTerm=test',
       expect.objectContaining({
         headers: { 'accept-language': i18n.locale },
-      })
+      }),
     )
   })
 
@@ -54,7 +65,10 @@ describe('addResearchStructureSlice', () => {
     const errorMessage = 'Network error'
     mockFetchError(new Error(errorMessage))
 
-    await store.getState().researchStructure.fetchResearchStructures({ page: 1, searchTerm: 'test' })
+    await store.getState().researchStructure.fetchResearchStructures({
+      page: 1,
+      searchTerm: 'test',
+    })
 
     const state = store.getState().researchStructure
     expect(state.loading).toBe(false)
@@ -65,17 +79,32 @@ describe('addResearchStructureSlice', () => {
   it('should append research structures data on subsequent pages', async () => {
     const initialResearchStructures = [{ id: 1, name: 'Research Structure A' }]
     const newResearchStructures = [{ id: 2, name: 'Research Structure B' }]
-    const responsePage1 = { hasMore: true, researchStructures: initialResearchStructures, total: 2 }
-    const responsePage2 = { hasMore: false, researchStructures: newResearchStructures, total: 2 }
+    const responsePage1 = {
+      hasMore: true,
+      researchStructures: initialResearchStructures,
+      total: 2,
+    }
+    const responsePage2 = {
+      hasMore: false,
+      researchStructures: newResearchStructures,
+      total: 2,
+    }
 
     mockFetchResponse(responsePage1)
-    await store.getState().researchStructure.fetchResearchStructures({ page: 1, searchTerm: '' })
+    await store
+      .getState()
+      .researchStructure.fetchResearchStructures({ page: 1, searchTerm: '' })
 
     mockFetchResponse(responsePage2)
-    await store.getState().researchStructure.fetchResearchStructures({ page: 2, searchTerm: '' })
+    await store
+      .getState()
+      .researchStructure.fetchResearchStructures({ page: 2, searchTerm: '' })
 
     const state = store.getState().researchStructure
-    expect(state.researchStructures).toEqual([...initialResearchStructures, ...newResearchStructures])
+    expect(state.researchStructures).toEqual([
+      ...initialResearchStructures,
+      ...newResearchStructures,
+    ])
     expect(state.hasMore).toBe(false)
     expect(state.total).toBe(2)
   })
