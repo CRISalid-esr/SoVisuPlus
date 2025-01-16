@@ -17,7 +17,8 @@ import { Person } from '@/types/Person'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { usePathname } from 'next/navigation'
 import Highlighter from 'react-highlight-words'
-
+import DoneIcon from '@mui/icons-material/Done'
+import DeleteIcon from '@mui/icons-material/Delete'
 interface Tag {
   label: string
   value: string
@@ -27,7 +28,6 @@ interface Tag {
 const SearchInput: React.FC = () => {
   const [peoplePage, setPeoplePage] = useState(1)
   const [researchStructuresPage, setResearchStructuresPage] = useState(1)
-  const theme = useTheme()
   const [searchTerm, setSearchTerm] = useState('')
   const [searchTags, setSearchTags] = useState<Tag[]>([
     { label: t`sidebar_search_people`, value: 'people', selected: true },
@@ -37,8 +37,8 @@ const SearchInput: React.FC = () => {
       selected: true,
     },
   ])
-  const pathname = usePathname() // Get the current path
-  const lang = pathname.split('/')[1] // Extract the `lang` dynamic segment
+
+  const theme = useTheme()
 
   const {
     fetchPeople,
@@ -55,6 +55,9 @@ const SearchInput: React.FC = () => {
     hasMore: hasMoreResearchStructures,
     total: totalResearchStructures,
   } = useStore((state) => state.researchStructure)
+
+  const pathname = usePathname()
+  const lang = pathname.split('/')[1]
 
   useEffect(() => {
     const fetchData = async () => {
@@ -185,34 +188,33 @@ const SearchInput: React.FC = () => {
   }
 
   const customPaper = useMemo(
-    () => (paperProps: PaperProps) => {
-      return (
-        <Paper onMouseDown={(event) => event.preventDefault()}>
-          <Box
-            sx={{
-              p: 2,
-              display: 'flex',
-              gap: 1,
-              flexWrap: 'wrap',
-            }}
-          >
-            {searchTags.map((tag) => {
-              return (
-                <Chip
-                  key={tag.value}
-                  label={tag.label}
-                  onClick={() => handleTagClick(tag.value)}
-                  color={tag.selected ? 'primary' : 'default'}
-                  sx={{ cursor: 'pointer' }}
-                />
-              )
-            })}
-          </Box>
-          <Box>{paperProps.children}</Box>
-        </Paper>
-      )
-    },
-    [],
+    () => (paperProps: PaperProps) => (
+      <Paper onMouseDown={(event) => event.preventDefault()}>
+        <Box
+          sx={{
+            p: 2,
+            display: 'flex',
+            gap: 1,
+            flexWrap: 'wrap',
+          }}
+        >
+          {searchTags.map((tag) => {
+            return (
+              <Chip
+                key={tag.value}
+                label={tag.label}
+                onClick={() => handleTagClick(tag.value)}
+                color={tag.selected ? 'primary' : 'default'}
+                sx={{ cursor: 'pointer' }}
+                icon={tag.selected ? <DeleteIcon /> : <DoneIcon />}
+              />
+            )
+          })}
+        </Box>
+        <Box>{paperProps.children}</Box>
+      </Paper>
+    ),
+    [searchTags],
   )
 
   return (
