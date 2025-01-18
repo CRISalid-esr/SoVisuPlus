@@ -1,13 +1,15 @@
 import { StateCreator } from 'zustand'
-import { Agent } from '@/types/Agent'
 import { User } from '@/types/User'
+import { IAgent } from '@/types/IAgent'
+
 export interface UserSlice {
   user: {
     connectedUser: User | null // The authenticated user
-    currentPerspective: Agent | null
+    currentPerspective: IAgent | null
     loading: boolean
     error: string | null | unknown
     fetchConnectedUser: () => Promise<void>
+    setPerspective: (perspective: IAgent) => void
   }
 }
 
@@ -15,7 +17,6 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
   set,
 ) => ({
   user: {
-    users: [],
     connectedUser: null,
     loading: true,
     error: null,
@@ -25,13 +26,26 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
       try {
         const response = await fetch('/api/users/me')
         const jsonData = await response.json()
-        set((state) => ({ user: { ...state.user, connectedUser: jsonData, currentPerspective: jsonData.person } }))
+        set((state) => ({
+          user: {
+            ...state.user,
+            connectedUser: jsonData,
+            currentPerspective: jsonData.person,
+          },
+        }))
       } catch (error) {
         console.error('Failed to fetch connected user', error)
-        set((state) => ({ user: { ...state.user, error, connectedUser: null } }))
+        set((state) => ({
+          user: { ...state.user, error, connectedUser: null },
+        }))
       } finally {
         set((state) => ({ user: { ...state.user, loading: false } }))
       }
+    },
+    setPerspective: (perspective: IAgent) => {
+      set((state) => ({
+        user: { ...state.user, currentPerspective: perspective },
+      }))
     },
   },
 })

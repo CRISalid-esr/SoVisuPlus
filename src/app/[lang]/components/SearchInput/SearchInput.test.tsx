@@ -1,12 +1,11 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import SearchInput from './SearchInput'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles'
 import useStore from '@/stores/global_store'
 import { t } from '@lingui/macro'
 
-// Mock Zustand store
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -18,10 +17,10 @@ jest.mock('@lingui/macro', () => {
   }
 })
 
+//pathName should return /en/toto
 jest.mock('next/navigation', () => ({
-  usePathname: jest.fn(),
+  usePathname: () => '/en/anypage',
 }))
-const mockUsePathname = require('next/navigation').usePathname
 
 describe('SearchInput Component', () => {
   const mockFetchPeople = jest.fn()
@@ -44,13 +43,15 @@ describe('SearchInput Component', () => {
       hasMore: true,
       total: 1,
     },
+    user: {
+      setPerspective: jest.fn(),
+    },
   }
 
   beforeEach(() => {
-    ;(useStore as jest.Mock).mockImplementation((selector) =>
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
       selector(mockState),
     )
-    mockUsePathname.mockReturnValue('/en/page')
   })
 
   const theme = createTheme({
@@ -66,7 +67,7 @@ describe('SearchInput Component', () => {
     utils: {
       pxToRem: (value: number) => `${value / 16}rem`,
     },
-  })
+  } as ThemeOptions)
 
   const renderComponent = () =>
     render(

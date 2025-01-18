@@ -3,8 +3,9 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { Person as DbPerson } from '@prisma/client'
+import { IAgent } from '@/types/IAgent'
 
-class Person {
+class Person implements IAgent {
   constructor(
     public uid: string,
     public external: boolean,
@@ -13,6 +14,7 @@ class Person {
     public firstName: string,
     public lastName: string,
     private identifiers: PersonIdentifier[] = [],
+    public type: 'person' = 'person',
   ) {
     this.validateIdentifiers(identifiers) // Use the setter to validate on initialization
   }
