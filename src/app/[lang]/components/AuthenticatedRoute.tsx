@@ -16,7 +16,7 @@ const AuthenticatedRoute = ({ children }: { children: React.ReactNode }) => {
   }, [status, router])
 
   if (status === 'loading') {
-    return <Loading /> // Show a loading state while verifying
+    return <Loading />
   }
 
   return <>{children}</>
