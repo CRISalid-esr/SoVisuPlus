@@ -39,7 +39,7 @@ describe('PersonGraphQLClient', () => {
         AND: [
           {
             identifiers_SOME: {
-              type_EQ: 'ORCID',
+              type_EQ: 'orcid',
               value_EQ: '12345',
             },
           },
@@ -91,7 +91,7 @@ describe('PersonGraphQLClient', () => {
         AND: [
           {
             identifiers_SOME: {
-              type_EQ: 'ORCID',
+              type_EQ: 'orcid',
               value_EQ: '12345',
             },
           },
@@ -123,7 +123,7 @@ describe('PersonGraphQLClient', () => {
 
     mockQuery.mockResolvedValue(mockResponse)
 
-    const personIdentifier: PersonIdentifier = { type: 'ORCID', value: '98765' }
+    const personIdentifier: PersonIdentifier = { type: 'orcid', value: '98765' }
     const person = await client.getPersonByIdentifier(personIdentifier)
 
     expect(person).toEqual({
@@ -143,7 +143,7 @@ describe('PersonGraphQLClient', () => {
         AND: [
           {
             identifiers_SOME: {
-              type_EQ: 'ORCID',
+              type_EQ: 'orcid',
               value_EQ: '98765',
             },
           },
