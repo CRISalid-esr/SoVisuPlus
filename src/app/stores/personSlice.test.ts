@@ -1,8 +1,15 @@
-import { createStore } from 'zustand'
+import { createStore, StoreApi } from 'zustand'
 import { addPersonSlice, PersonSlice } from './personSlice'
 import { i18n } from '@lingui/core'
-import { Person } from '@/types/Person'
-const mockFetchResponse = (data: Person[], ok = true) => {
+
+const mockFetchResponse = (
+  data: {
+    hasMore: boolean
+    people: { id: number; name: string }[]
+    total: number
+  },
+  ok = true,
+) => {
   global.fetch = jest.fn(() =>
     Promise.resolve({
       ok,
@@ -16,7 +23,7 @@ const mockFetchError = (error: Error) => {
 }
 
 describe('addPersonSlice', () => {
-  let store: ReturnType<typeof createStore<PersonSlice>>
+  let store: StoreApi<PersonSlice>
 
   beforeEach(() => {
     store = createStore(addPersonSlice)

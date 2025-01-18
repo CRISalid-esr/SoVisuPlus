@@ -28,9 +28,11 @@ export default function MainLayout({
 
   useEffect(() => {
     if (!connectedUser) {
-      fetchConnectedUser()
+      fetchConnectedUser().catch((error) => {
+        console.error('Failed to fetch connected user', error)
+      })
     }
-  }, [])
+  }, [connectedUser, fetchConnectedUser])
 
   if (loading && !connectedUser) {
     return <p>Loading...</p>

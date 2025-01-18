@@ -13,23 +13,32 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { t } from '@lingui/macro'
 import useStore from '@/stores/global_store'
-import { Person } from '@/types/Person'
-import { ResearchStructure } from '@/types/ResearchStructure'
 import { usePathname } from 'next/navigation'
 import Highlighter from 'react-highlight-words'
 import DoneIcon from '@mui/icons-material/Done'
 import DeleteIcon from '@mui/icons-material/Delete'
-interface Tag {
+import { IAgent } from '@/types/IAgent'
+import { Person } from '@/types/Person'
+import { ResearchStructure } from '@/types/ResearchStructure'
+
+interface IAutoCompleteGroupTag {
   label: string
   value: string
   selected: boolean
+}
+
+interface IAutoCompleteOption<T extends IAgent> {
+  type: string
+  id: string
+  label: string
+  agent: T
 }
 
 const SearchInput: React.FC = () => {
   const [peoplePage, setPeoplePage] = useState(1)
   const [researchStructuresPage, setResearchStructuresPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchTags, setSearchTags] = useState<Tag[]>([
+  const [searchTags, setSearchTags] = useState<IAutoCompleteGroupTag[]>([
     { label: t`sidebar_search_people`, value: 'people', selected: true },
     {
       label: t`sidebar_search_research_structures`,
@@ -56,6 +65,8 @@ const SearchInput: React.FC = () => {
     total: totalResearchStructures,
   } = useStore((state) => state.researchStructure)
 
+  const { setPerspective } = useStore((state) => state.user)
+
   const pathname = usePathname()
   const lang = pathname ? pathname.split('/')[1] : ''
 
@@ -71,7 +82,9 @@ const SearchInput: React.FC = () => {
         }
       }
     }
-    fetchData()
+    fetchData().catch((error) => {
+      console.error('Error fetching data:', error)
+    })
   }, [fetchPeople, peoplePage, searchTerm, searchTags])
 
   useEffect(() => {
@@ -93,12 +106,13 @@ const SearchInput: React.FC = () => {
         }
       }
     }
-
-    fetchData()
+    fetchData().catch((error) => {
+      console.error('Error fetching data:', error)
+    })
   }, [fetchResearchStructures, researchStructuresPage, searchTerm, searchTags])
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>, group: string) => {
-    const target = e.target as HTMLDivElement
+  const handleScroll = (e: React.UIEvent<HTMLLIElement>, group: string) => {
+    const target = e.target as HTMLLIElement
     const bottom =
       target.scrollHeight === target.scrollTop + target.clientHeight
     if (bottom) {
@@ -123,35 +137,56 @@ const SearchInput: React.FC = () => {
   }
 
   const handleTagClick = (tagValue: string) => {
-    setSearchTags((prevTags: Tag[]) =>
+    setSearchTags((prevTags: IAutoCompleteGroupTag[]) =>
       prevTags.map((tag) =>
         tag.value === tagValue ? { ...tag, selected: !tag.selected } : tag,
       ),
     )
   }
 
-  const mergedOptions = useMemo(() => {
-    return [
-      ...(searchTags.some((tag) => tag.selected && tag.value === 'people')
-        ? people?.map((people) => ({
-            ...people,
+  const mergedOptions: IAutoCompleteOption<Person | ResearchStructure>[] =
+    useMemo(() => {
+      const mergedOptions: IAutoCompleteOption<Person | ResearchStructure>[] =
+        []
+      if (searchTags.some((tag) => tag.selected && tag.value === 'people')) {
+        const peopleOptions = people.map((person) => {
+          return {
             type: 'people',
-          }))
-        : []),
-      ...(searchTags.some(
-        (tag) => tag.selected && tag.value === 'researchStructures',
-      )
-        ? researchStructures?.map((researchStructure) => ({
-            ...researchStructure,
-            type: 'researchStructures',
-          }))
-        : []),
-    ]
-  }, [people, researchStructures, searchTags])
+            id: person.uid,
+            label: `${person.firstName} ${person.lastName}`,
+            agent: person,
+          }
+        })
+        mergedOptions.push(...peopleOptions)
+      }
+      if (
+        searchTags.some(
+          (tag) => tag.selected && tag.value === 'researchStructures',
+        )
+      ) {
+        const researchStructureOptions = researchStructures.map(
+          (researchStructure) => {
+            return {
+              type: 'researchStructures',
+              id: researchStructure.uid,
+              label:
+                researchStructure.names[lang] ||
+                researchStructure.acronym ||
+                t`sidebar_search_unknown_label`,
+              agent: researchStructure,
+            }
+          },
+        )
+        mergedOptions.push(...researchStructureOptions)
+      }
+      return mergedOptions
+    }, [people, researchStructures, searchTags, lang])
 
   const renderGroup = (params: AutocompleteRenderGroupParams) => {
+    const { key, ...rest } = params
     return (
       <Box
+        key={key}
         onScroll={(e) => {
           handleScroll(e, params.group)
         }}
@@ -160,7 +195,7 @@ const SearchInput: React.FC = () => {
           overflowY: 'auto', // Enable scrolling
         }}
         component={'li'}
-        {...params}
+        {...rest}
       >
         <Box
           sx={{
@@ -186,8 +221,8 @@ const SearchInput: React.FC = () => {
     )
   }
 
-  const customPaper = useMemo(
-    () => (paperProps: PaperProps) => (
+  const customPaper = useMemo(() => {
+    const CustomPaper = (paperProps: PaperProps) => (
       <Paper onMouseDown={(event) => event.preventDefault()}>
         <Box
           sx={{
@@ -197,43 +232,48 @@ const SearchInput: React.FC = () => {
             flexWrap: 'wrap',
           }}
         >
-          {searchTags.map((tag) => {
-            return (
-              <Chip
-                key={tag.value}
-                label={tag.label}
-                onClick={() => handleTagClick(tag.value)}
-                color={tag.selected ? 'primary' : 'default'}
-                sx={{ cursor: 'pointer' }}
-                icon={tag.selected ? <DeleteIcon /> : <DoneIcon />}
-              />
-            )
-          })}
+          {searchTags.map((tag) => (
+            <Chip
+              key={tag.value}
+              label={tag.label}
+              onClick={() => handleTagClick(tag.value)}
+              color={tag.selected ? 'primary' : 'default'}
+              sx={{ cursor: 'pointer' }}
+              icon={tag.selected ? <DeleteIcon /> : <DoneIcon />}
+            />
+          ))}
         </Box>
         <Box>{paperProps.children}</Box>
       </Paper>
-    ),
-    [searchTags],
-  )
-  console.log('mergedOptions', mergedOptions)
-  console.log('lang', lang)
+    )
+
+    CustomPaper.displayName = 'CustomPaper'
+
+    return CustomPaper
+  }, [searchTags])
+
+  const handlePerspectiveSelections = (
+    event: React.SyntheticEvent,
+    value: IAutoCompleteOption<Person | ResearchStructure> | null,
+  ) => {
+    if (value) {
+      setPerspective(value.agent)
+    }
+  }
 
   return (
     <Autocomplete
       onClose={() => {
         setSearchTerm(searchTerm)
       }}
+      onChange={handlePerspectiveSelections}
       renderGroup={renderGroup}
       disableCloseOnSelect={true}
       options={mergedOptions}
-      getOptionLabel={(option: ResearchStructure | Person): string => {
-        if (option.type == 'people') {
-          return `${option.firstName} ${option.lastName}`
-        }
-        if (option.type == 'researchStructures') {
-          return (option.names ? option.names[lang] : option.acronym) || 'n/c'
-        }
-        return 'n/c'
+      getOptionLabel={(
+        option: IAutoCompleteOption<Person | ResearchStructure>,
+      ) => {
+        return option.label
       }}
       groupBy={(option) => option.type} // Group options by type (Chercheur, Unité de recherche)
       renderInput={(params) => (
@@ -269,7 +309,7 @@ const SearchInput: React.FC = () => {
       }}
       fullWidth
       inputValue={searchTerm}
-      onInputChange={(e, newInputValue, reason) => {
+      onInputChange={(_, newInputValue, reason) => {
         if (reason === 'reset') {
           setSearchTerm(searchTerm)
         } else {
@@ -280,18 +320,13 @@ const SearchInput: React.FC = () => {
       }}
       filterOptions={(x) => x} // Disables filtering
       renderOption={(props, option, { inputValue }) => {
-        const label =
-          option.type === 'people'
-            ? `${option.firstName} ${option.lastName}`
-            : (option.names ? option.names[lang] : option.acronym) || 'n/c'
-
         return (
           <li {...props} key={option.id}>
             <Highlighter
               highlightClassName='highlight'
               searchWords={[inputValue]}
               autoEscape
-              textToHighlight={label}
+              textToHighlight={option.label}
             />
           </li>
         )

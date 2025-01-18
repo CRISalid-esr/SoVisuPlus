@@ -3,8 +3,9 @@ import {
   ResearchStructureIdentifier,
   ResearchStructureIdentifierType,
 } from '@/types/ResearchStructureIdentifier'
+import { IAgent } from '@/types/IAgent'
 
-class ResearchStructure {
+class ResearchStructure implements IAgent {
   constructor(
     public uid: string,
     public acronym: string | null,
@@ -14,6 +15,7 @@ class ResearchStructure {
       type: ResearchStructureIdentifierType
       value: string
     }[] = [],
+    public type: 'research_structure' = 'research_structure',
   ) {
     this.identifiers = _identifiers
   }
