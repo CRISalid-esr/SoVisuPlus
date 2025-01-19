@@ -18,19 +18,19 @@ jest.mock('@lingui/macro', () => {
 })
 
 describe('SearchInput Component', () => {
-  const mockFetchPeople = jest.fn()
-  const mockFetchResearchStructures = jest.fn()
+  const mockFetchPeopleByName = jest.fn()
+  const mockFetchResearchStructuresByName = jest.fn()
 
   const mockState = {
     person: {
-      fetchPeople: mockFetchPeople,
+      fetchPeopleByName: mockFetchPeopleByName,
       loading: false,
       people: [{ id: '1', firstName: 'John', lastName: 'Doe', type: 'people' }],
       hasMore: true,
       total: 1,
     },
     researchStructure: {
-      fetchResearchStructures: mockFetchResearchStructures,
+      fetchResearchStructuresByName: mockFetchResearchStructuresByName,
       loading: false,
       researchStructures: [
         { id: '2', names: { en: 'Lab X' }, type: 'researchStructures' },
@@ -94,12 +94,19 @@ describe('SearchInput Component', () => {
     const searchInput = screen.getByPlaceholderText(
       t`sidebar_search_placeholder`,
     )
-    fireEvent.change(searchInput, { target: { value: 'John' } })
-
     await waitFor(() =>
-      expect(mockFetchPeople).toHaveBeenCalledWith({
+      // has been called twice, once for the initial render and once for the search term
+      expect(mockFetchPeopleByName).toHaveBeenCalledWith({
+        searchTerm: '',
+        page: 1,
+      }),
+    )
+    fireEvent.change(searchInput, { target: { value: 'John' } })
+    await waitFor(() =>
+      // has been called twice, once for the initial render and once for the search term
+      expect(mockFetchPeopleByName).toHaveBeenCalledWith({
         searchTerm: 'John',
-        page: '1',
+        page: 1,
       }),
     )
   })
@@ -129,8 +136,9 @@ describe('SearchInput Component', () => {
     })
 
     await waitFor(() =>
-      expect(mockFetchResearchStructures).toHaveBeenCalledWith({
+      expect(mockFetchResearchStructuresByName).toHaveBeenCalledWith({
         searchTerm: '',
+        searchLang: 'en',
         page: 1,
       }),
     )
