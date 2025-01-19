@@ -48,9 +48,10 @@ describe('addResearchStructureSlice', () => {
     }
     mockFetchResponse(response)
 
-    await store.getState().researchStructure.fetchResearchStructures({
+    await store.getState().researchStructure.fetchResearchStructuresByName({
       page: 1,
       searchTerm: 'test',
+      searchLang: 'en',
     })
 
     const state = store.getState().researchStructure
@@ -60,7 +61,7 @@ describe('addResearchStructureSlice', () => {
     expect(state.total).toBe(2)
     expect(state.error).toBe(null)
     expect(fetch).toHaveBeenCalledWith(
-      '/api/researchStructures?page=1&searchTerm=test',
+      '/api/researchStructures?page=1&searchTerm=test&searchLang=en',
       expect.objectContaining({
         headers: { 'accept-language': i18n.locale },
       }),
@@ -71,9 +72,10 @@ describe('addResearchStructureSlice', () => {
     const errorMessage = 'Network error'
     mockFetchError(new Error(errorMessage))
 
-    await store.getState().researchStructure.fetchResearchStructures({
+    await store.getState().researchStructure.fetchResearchStructuresByName({
       page: 1,
       searchTerm: 'test',
+      searchLang: 'en',
     })
 
     const state = store.getState().researchStructure
@@ -97,14 +99,18 @@ describe('addResearchStructureSlice', () => {
     }
 
     mockFetchResponse(responsePage1)
-    await store
-      .getState()
-      .researchStructure.fetchResearchStructures({ page: 1, searchTerm: '' })
+    await store.getState().researchStructure.fetchResearchStructuresByName({
+      page: 1,
+      searchTerm: '',
+      searchLang: 'en',
+    })
 
     mockFetchResponse(responsePage2)
-    await store
-      .getState()
-      .researchStructure.fetchResearchStructures({ page: 2, searchTerm: '' })
+    await store.getState().researchStructure.fetchResearchStructuresByName({
+      page: 2,
+      searchTerm: '',
+      searchLang: 'en',
+    })
 
     const state = store.getState().researchStructure
     expect(state.researchStructures).toEqual([

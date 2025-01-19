@@ -13,13 +13,13 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { t } from '@lingui/macro'
 import useStore from '@/stores/global_store'
-import { usePathname } from 'next/navigation'
 import Highlighter from 'react-highlight-words'
 import DoneIcon from '@mui/icons-material/Done'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { IAgent } from '@/types/IAgent'
 import { Person } from '@/types/Person'
 import { ResearchStructure } from '@/types/ResearchStructure'
+import { i18n } from '@lingui/core'
 
 interface IAutoCompleteGroupTag {
   label: string
@@ -50,7 +50,7 @@ const SearchInput: React.FC = () => {
   const theme = useTheme()
 
   const {
-    fetchPeople,
+    fetchPeopleByName,
     loading: peopleLoading,
     people = [],
     hasMore: hasMorePeople,
@@ -58,7 +58,7 @@ const SearchInput: React.FC = () => {
   } = useStore((state) => state.person)
 
   const {
-    fetchResearchStructures,
+    fetchResearchStructuresByName,
     loading: researchStructuresLoading,
     researchStructures = [],
     hasMore: hasMoreResearchStructures,
@@ -67,15 +67,14 @@ const SearchInput: React.FC = () => {
 
   const { setPerspective } = useStore((state) => state.user)
 
-  const pathname = usePathname()
-  const lang = pathname ? pathname.split('/')[1] : ''
+  const lang = i18n.locale
 
   useEffect(() => {
     const fetchData = async () => {
       if (searchTags.some((tag) => tag.selected && tag.value === 'people')) {
-        if (fetchPeople) {
+        if (fetchPeopleByName) {
           try {
-            await fetchPeople({ searchTerm, page: peoplePage.toString() })
+            await fetchPeopleByName({ searchTerm, page: peoplePage })
           } catch (error) {
             console.error('Error fetching people:', error)
           }
@@ -85,7 +84,7 @@ const SearchInput: React.FC = () => {
     fetchData().catch((error) => {
       console.error('Error fetching data:', error)
     })
-  }, [fetchPeople, peoplePage, searchTerm, searchTags])
+  }, [fetchPeopleByName, peoplePage, searchTerm, searchTags])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -94,10 +93,11 @@ const SearchInput: React.FC = () => {
           (tag) => tag.selected && tag.value === 'researchStructures',
         )
       ) {
-        if (fetchResearchStructures) {
+        if (fetchResearchStructuresByName) {
           try {
-            await fetchResearchStructures({
+            await fetchResearchStructuresByName({
               searchTerm,
+              searchLang: lang,
               page: researchStructuresPage,
             })
           } catch (error) {
@@ -109,7 +109,12 @@ const SearchInput: React.FC = () => {
     fetchData().catch((error) => {
       console.error('Error fetching data:', error)
     })
-  }, [fetchResearchStructures, researchStructuresPage, searchTerm, searchTags])
+  }, [
+    fetchResearchStructuresByName,
+    researchStructuresPage,
+    searchTerm,
+    searchTags,
+  ])
 
   const handleScroll = (e: React.UIEvent<HTMLLIElement>, group: string) => {
     const target = e.target as HTMLLIElement

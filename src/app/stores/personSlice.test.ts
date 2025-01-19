@@ -41,7 +41,9 @@ describe('addPersonSlice', () => {
     const response = { hasMore: true, people: peopleData, total: 2 }
     mockFetchResponse(response)
 
-    await store.getState().person.fetchPeople({ page: '1', searchTerm: 'test' })
+    await store
+      .getState()
+      .person.fetchPeopleByName({ page: 1, searchTerm: 'test' })
 
     const state = store.getState().person
     expect(state.loading).toBe(false)
@@ -61,7 +63,9 @@ describe('addPersonSlice', () => {
     const errorMessage = 'Network error'
     mockFetchError(new Error(errorMessage))
 
-    await store.getState().person.fetchPeople({ page: '1', searchTerm: 'test' })
+    await store
+      .getState()
+      .person.fetchPeopleByName({ page: 1, searchTerm: 'test' })
 
     const state = store.getState().person
     expect(state.loading).toBe(false)
@@ -76,10 +80,10 @@ describe('addPersonSlice', () => {
     const responsePage2 = { hasMore: false, people: newPeople, total: 2 }
 
     mockFetchResponse(responsePage1)
-    await store.getState().person.fetchPeople({ page: '1', searchTerm: '' })
+    await store.getState().person.fetchPeopleByName({ page: 1, searchTerm: '' })
 
     mockFetchResponse(responsePage2)
-    await store.getState().person.fetchPeople({ page: '2', searchTerm: '' })
+    await store.getState().person.fetchPeopleByName({ page: 2, searchTerm: '' })
 
     const state = store.getState().person
     expect(state.people).toEqual([...initialPeople, ...newPeople])
