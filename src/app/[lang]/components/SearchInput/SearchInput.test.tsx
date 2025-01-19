@@ -17,11 +17,6 @@ jest.mock('@lingui/macro', () => {
   }
 })
 
-//pathName should return /en/toto
-jest.mock('next/navigation', () => ({
-  usePathname: () => '/en/anypage',
-}))
-
 describe('SearchInput Component', () => {
   const mockFetchPeople = jest.fn()
   const mockFetchResearchStructures = jest.fn()
