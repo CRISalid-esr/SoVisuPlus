@@ -19,7 +19,8 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import { IAgent } from '@/types/IAgent'
 import { Person } from '@/types/Person'
 import { ResearchStructure } from '@/types/ResearchStructure'
-import { i18n } from '@lingui/core'
+import * as Lingui from '@lingui/core'
+console.log(Lingui)
 
 interface IAutoCompleteGroupTag {
   label: string
@@ -67,7 +68,7 @@ const SearchInput: React.FC = () => {
 
   const { setPerspective } = useStore((state) => state.user)
 
-  const lang = i18n.locale
+  const lang = Lingui.i18n.locale
 
   useEffect(() => {
     const fetchData = async () => {
