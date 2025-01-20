@@ -26,6 +26,11 @@ export class DocumentWorker extends MessageProcessingWorker<AMQPDocumentMessage>
     const { uid } = this.message.fields
     console.log(`Processing document with UID: ${uid}`)
 
+    if (!uid) {
+      console.warn('No UID found in document message')
+      return
+    }
+
     const document: Document | null =
       await this.documentGraphQLClient.getDocumentByUid(uid)
 

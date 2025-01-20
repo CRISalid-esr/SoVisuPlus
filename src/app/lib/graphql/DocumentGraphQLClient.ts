@@ -1,10 +1,17 @@
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
 import { Document } from '@/types/Document'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
+import {
+  GraphPersonResponse,
+  GraphPersonIdentifier,
+  PersonGraphQLClient,
+} from './PersonGraphQLClient'
+import { Person } from '@/types/Person'
 
 interface GraphDocumentResponse {
   uid: string
   titles: Record<string, string>
+  has_contributions: Array<GraphPersonResponse>
 }
 
 export interface GraphDocumentsResponse {
@@ -23,12 +30,12 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
         uid_EQ: uid,
       },
     }
+
     const documentQuery = loadQuery('document.graphql')
 
     const response: GraphDocumentsResponse =
       await this.query<GraphDocumentsResponse>(documentQuery, variables)
 
-    console.log('response', response)
     const [documentData] = response.textualDocuments
 
     if (!documentData) {
@@ -38,6 +45,12 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
   }
 
   private hydrate(personData: GraphDocumentResponse): Document {
-    return new Document(personData.uid, personData.titles)
+    return new Document(
+      personData.uid,
+      personData.titles,
+      personData.has_contributions.map((personData: GraphPersonResponse) => {
+        return new PersonGraphQLClient().hydrate(personData)
+      }),
+    )
   }
 }
