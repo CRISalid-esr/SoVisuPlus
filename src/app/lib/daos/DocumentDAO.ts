@@ -1,6 +1,7 @@
-import { Document as DbDocument } from '@prisma/client'
+import { Document as DbDocument, Person as DbPerson } from '@prisma/client'
 import { Document } from '@/types/Document'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
+import { PersonDAO } from './PersonDAO'
 
 export class DocumentDAO extends AbstractDAO {
   /**
@@ -9,19 +10,43 @@ export class DocumentDAO extends AbstractDAO {
    * @returns The created or updated Document record
    */
   public async createOrUpdateDocument(document: Document): Promise<DbDocument> {
+    const { uid, titles, contributions } = document
+
     try {
-      const dbDocument: DbDocument = await this.prismaClient.document.upsert({
-        where: { uid: document.uid },
+      const document: DbDocument = await this.prismaClient.document.upsert({
+        where: { uid: uid },
         update: {
-          titles: document.titles,
+          titles: titles,
         },
         create: {
-          uid: document.uid,
-          titles: document.titles,
+          uid: uid,
+          titles: titles,
         },
       })
 
-      return dbDocument
+      for await (const contribution of contributions) {
+        const person: DbPerson = await new PersonDAO().createOrUpdatePerson(
+          contribution,
+        )
+
+        await this.prismaClient.contribution.upsert({
+          where: {
+            personId_documentId_role: {
+              personId: person.id,
+              documentId: document.id,
+              role: 'AUTHOR', // You can adjust the role according to your logic
+            },
+          },
+          update: {}, // No update is necessary here, we only need to ensure uniqueness
+          create: {
+            personId: person.id,
+            documentId: document.id,
+            role: 'AUTHOR', // You can adjust the role according to your logic
+          },
+        })
+      }
+
+      return document
     } catch (error) {
       console.error('Error during document upsert:', error as Error)
       throw new Error(`Failed to upsert document: ${(error as Error).message}`)
