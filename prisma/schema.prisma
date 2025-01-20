@@ -35,7 +35,7 @@ model Person {
 model Document {
   id     Int      @id @default(autoincrement())
   uid    String   @unique
-  titles String[]
+  titles Json     @db.JsonB // Store internationalized names
   persons     Contribution[]
 }
 

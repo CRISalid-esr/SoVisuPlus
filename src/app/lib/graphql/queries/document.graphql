@@ -1,0 +1,9 @@
+query TextualDocuments($where: TextualDocumentWhere) {
+  textualDocuments(where: $where) {
+    uid
+    titles {
+      language
+      value
+    }
+  }
+}
