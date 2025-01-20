@@ -8,7 +8,7 @@ interface GraphDocumentResponse {
 }
 
 export interface GraphDocumentsResponse {
-  documents: Array<GraphDocumentResponse>
+  textualDocuments: Array<GraphDocumentResponse>
 }
 
 export class DocumentGraphQLClient extends AbstractGraphQLClient {
@@ -27,7 +27,9 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
 
     const response: GraphDocumentsResponse =
       await this.query<GraphDocumentsResponse>(documentQuery, variables)
-    const [documentData] = response.documents
+
+    console.log('response', response)
+    const [documentData] = response.textualDocuments
 
     if (!documentData) {
       return null

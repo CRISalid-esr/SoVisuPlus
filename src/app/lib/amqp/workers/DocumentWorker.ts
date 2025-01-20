@@ -1,6 +1,7 @@
-import { AMQPDocumentMessage } from '@/types/AMQPDocumentMessage'
-import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { MessageProcessingWorker } from '@/lib/amqp/workers/MessageProcessingWorker'
+import { DocumentDAO } from '@/lib/daos/DocumentDAO'
+import { DocumentGraphQLClient } from '@/lib/graphql/DocumentGraphQLClient'
+import { AMQPDocumentMessage } from '@/types/AMQPDocumentMessage'
 import { Document } from '@/types/Document'
 /**
  * Worker for processing document messages
@@ -13,6 +14,7 @@ export class DocumentWorker extends MessageProcessingWorker<AMQPDocumentMessage>
   constructor(
     message: AMQPDocumentMessage,
     private documentDAO: DocumentDAO,
+    private documentGraphQLClient: DocumentGraphQLClient,
   ) {
     super(message)
   }
@@ -21,31 +23,29 @@ export class DocumentWorker extends MessageProcessingWorker<AMQPDocumentMessage>
    * Process a document message by fetching data from the graph and updating the database
    */
   public async process(): Promise<void> {
-    const { uid, identifiers,titles } =
-      this.message.fields
+    const { uid } = this.message.fields
     console.log(`Processing document with UID: ${uid}`)
 
-    const transformedTitles= Object.fromEntries(
-      titles.map((title) => [title.language, title.value]),
-    )
- 
+    const document: Document | null =
+      await this.documentGraphQLClient.getDocumentByUid(uid)
 
     try {
+      if (!document) {
+        console.warn(`No document data found for UID: ${uid}`)
+        return
+      }
+      //const titles = Array.isArray(document.titles) ? document.titles : []
+      const titles = Array.isArray(document.titles) ? document.titles : []
+      const transformedTitles = Object.fromEntries(
+        titles.map((title) => [title.language, title.value]),
+      )
       await this.documentDAO.createOrUpdateDocument(
-        new Document(
-          uid,
-          transformedTitles,
-        ),
+        new Document(uid, transformedTitles),
       )
-      console.log(`Successfully processed document: ${uid}`)
+      return
     } catch (error) {
-      console.error(
-        `Failed to process document message for UID: ${uid}`,
-        error,
-      )
+      console.error(`Failed to process document message for UID: ${uid}`, error)
       throw error
     }
   }
-
-
 }

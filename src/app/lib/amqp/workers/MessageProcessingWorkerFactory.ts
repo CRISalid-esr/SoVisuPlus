@@ -10,8 +10,9 @@ import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { UserDAO } from '@/lib/daos/UserDAO'
-import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
+import { DocumentGraphQLClient } from '@/lib/graphql/DocumentGraphQLClient'
 import { AMQPDocumentMessage } from '@/types/AMQPDocumentMessage'
+import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 
 export class MessageProcessingWorkerFactory {
   createWorker(
@@ -34,6 +35,7 @@ export class MessageProcessingWorkerFactory {
         return new DocumentWorker(
           message as AMQPDocumentMessage,
           new DocumentDAO(),
+          new DocumentGraphQLClient(),
         )
       default:
         throw new Error(`Unsupported message type: ${message.type}`)
