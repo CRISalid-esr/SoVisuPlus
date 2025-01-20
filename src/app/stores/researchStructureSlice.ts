@@ -2,7 +2,7 @@ import { StateCreator } from 'zustand'
 import { ResearchStructure } from '@/types/ResearchStructure' // Assuming you have a Prisma model for Person
 import { i18n } from '@lingui/core'
 import { BaseQuery } from '@/types/BaseQuery'
-import { toQueryString } from '@/utils/query' // Import Lingui
+import { toQueryString } from '@/utils/query'
 
 // Define the queryObject interface correctly
 export interface ResearchStructuresByNameQuery extends BaseQuery {
