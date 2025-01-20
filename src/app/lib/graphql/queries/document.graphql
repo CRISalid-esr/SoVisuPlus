@@ -5,5 +5,39 @@ query TextualDocuments($where: TextualDocumentWhere) {
       language
       value
     }
+    has_contributions {
+      contributor {
+        uid
+        display_name
+        external
+        identifiers {
+          type
+          value
+        }
+        names {
+          first_names {
+            language
+            value
+          }
+          last_names {
+            language
+            value
+          }
+        }
+        memberships {
+          uid
+          acronym
+          names {
+            language
+            value
+          }
+          type
+        }
+      }
+    }
+    abstracts {
+      language
+      value
+    }
   }
 }
