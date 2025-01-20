@@ -38,6 +38,7 @@ describe('AMQPConnection', () => {
     expect(amqplib.connect).toHaveBeenCalledWith(
       `amqp://${process.env.AMQP_USER}:${process.env.AMQP_PASSWORD}@${process.env.AMQP_HOST}:${process.env.AMQP_PORT}`,
     )
+
     expect(mockConnection.createChannel).toHaveBeenCalled()
     expect(amqpConnection['connected']).toBe(true)
   })
