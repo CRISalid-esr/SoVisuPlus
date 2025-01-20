@@ -40,13 +40,7 @@ export class DocumentWorker extends MessageProcessingWorker<AMQPDocumentMessage>
         return
       }
       //const titles = Array.isArray(document.titles) ? document.titles : []
-      const titles = Array.isArray(document.titles) ? document.titles : []
-      const transformedTitles = Object.fromEntries(
-        titles.map((title) => [title.language, title.value]),
-      )
-      await this.documentDAO.createOrUpdateDocument(
-        new Document(uid, transformedTitles),
-      )
+      await this.documentDAO.createOrUpdateDocument(document)
       return
     } catch (error) {
       console.error(`Failed to process document message for UID: ${uid}`, error)

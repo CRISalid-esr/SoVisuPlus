@@ -8,10 +8,13 @@ import {
 } from './PersonGraphQLClient'
 import { Person } from '@/types/Person'
 
+interface GraphcontributorResponse {
+  contributor: Array<GraphPersonResponse>
+}
 interface GraphDocumentResponse {
   uid: string
   titles: Record<string, string>
-  has_contributions: Array<GraphPersonResponse>
+  has_contributions: Array<GraphcontributorResponse>
 }
 
 export interface GraphDocumentsResponse {
@@ -45,12 +48,19 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
   }
 
   private hydrate(personData: GraphDocumentResponse): Document {
+    const titles = Array.isArray(personData.titles) ? personData.titles : []
+    const transformedTitles = Object.fromEntries(
+      titles.map((title) => [title.language, title.value]),
+    )
     return new Document(
       personData.uid,
-      personData.titles,
-      personData.has_contributions.map((personData: GraphPersonResponse) => {
-        return new PersonGraphQLClient().hydrate(personData)
-      }),
+      transformedTitles,
+      personData.has_contributions.map(
+        (personData: GraphcontributorResponse) => {
+          const [contributor] = personData.contributor
+          return new PersonGraphQLClient().hydrate(contributor)
+        },
+      ),
     )
   }
 }

@@ -50,8 +50,8 @@ class Person implements IAgent {
       person.external,
       person.email,
       `${person.firstName} ${person.lastName}`,
-      person.firstName,
-      person.lastName,
+      person.firstName || '',
+      person.lastName || '',
       'identifiers' in person ? (person.identifiers as PersonIdentifier[]) : [],
     )
   }

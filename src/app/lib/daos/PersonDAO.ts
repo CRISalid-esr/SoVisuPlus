@@ -21,12 +21,14 @@ export class PersonDAO extends AbstractDAO {
           email: person.email,
           firstName: person.firstName,
           lastName: person.lastName,
+          external: person.external,
         },
         create: {
           uid: person.uid,
           email: person.email,
           firstName: person.firstName,
           lastName: person.lastName,
+          external: person.external,
         },
       })
 
