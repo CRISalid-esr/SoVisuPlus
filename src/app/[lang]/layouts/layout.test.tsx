@@ -64,7 +64,10 @@ describe('DashboardLayout', () => {
     mockStore.mockReturnValue({
       connectedUser: null,
       loading: true,
-      fetchConnectedUser: jest.fn(),
+      // fetchConnectedUser should support catch
+      fetchConnectedUser: jest
+        .fn()
+        .mockRejectedValue(new Error('Failed to fetch')),
     })
 
     renderWithStore(

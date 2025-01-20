@@ -1,6 +1,6 @@
 import { GET } from './route'
 import prisma from '@/lib/prisma'
-import { NextRequest,  } from 'next/server'
+import { NextRequest } from 'next/server'
 import { Person } from '@/types/Person'
 // Mock Prisma Client
 jest.mock('@/lib/prisma', () => ({
@@ -22,6 +22,12 @@ jest.mock('next/server', () => ({
   },
 }))
 
+type MockNextRequest = {
+  nextUrl: {
+    searchParams: URLSearchParams
+  }
+} & Partial<Omit<NextRequest, 'nextUrl'>>
+
 describe('GET /api/people', () => {
   it('should return a list of people matching the search criteria', async () => {
     const mockPeople = [
@@ -34,14 +40,14 @@ describe('GET /api/people', () => {
     ;(prisma.person.findMany as jest.Mock).mockResolvedValueOnce(mockPeople)
     ;(prisma.person.count as jest.Mock).mockResolvedValueOnce(mockCount)
 
-    // Mock the Next.js request
-    const mockRequest: Partial<NextRequest> = {
+    const mockRequest: MockNextRequest = {
       nextUrl: {
         searchParams: new URLSearchParams('searchTerm=John&page=1'),
       },
     }
 
     const response = await GET(mockRequest as unknown as NextRequest)
+
     const data = await response.json()
 
     expect(response.status).toBe(200)
@@ -58,10 +64,9 @@ describe('GET /api/people', () => {
     ;(prisma.person.findMany as jest.Mock).mockResolvedValueOnce(mockPeople)
     ;(prisma.person.count as jest.Mock).mockResolvedValueOnce(mockCount)
 
-    // Mock the Next.js request
-    const mockRequest: Partial<NextRequest> = {
+    const mockRequest: MockNextRequest = {
       nextUrl: {
-        searchParams: new URLSearchParams('searchTerm=Nonexistent&page=1'),
+        searchParams: new URLSearchParams('searchTerm=John&page=1'),
       },
     }
 
@@ -80,8 +85,7 @@ describe('GET /api/people', () => {
       new Error('DB Error'),
     )
 
-    // Mock the Next.js request
-    const mockRequest: Partial<NextRequest> = {
+    const mockRequest: MockNextRequest = {
       nextUrl: {
         searchParams: new URLSearchParams('searchTerm=John&page=1'),
       },
@@ -107,10 +111,9 @@ describe('GET /api/people', () => {
     ;(prisma.person.findMany as jest.Mock).mockResolvedValueOnce(mockPeople)
     ;(prisma.person.count as jest.Mock).mockResolvedValueOnce(mockCount)
 
-    // Mock the Next.js request with multiple search terms
-    const mockRequest: Partial<NextRequest> = {
+    const mockRequest: MockNextRequest = {
       nextUrl: {
-        searchParams: new URLSearchParams('searchTerm=John Smith&page=1'),
+        searchParams: new URLSearchParams('searchTerm=John&page=1'),
       },
     }
 

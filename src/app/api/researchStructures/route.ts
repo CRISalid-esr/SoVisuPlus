@@ -5,18 +5,29 @@ export const GET = async (req: NextRequest) => {
   const urlParams = req.nextUrl.searchParams
   const searchTerm = urlParams.get('searchTerm') || ''
   const page = urlParams.get('page') || '1'
-  // Default pagination parameters
   const pageNumber = page ? parseInt(page as string, 10) : 1
   const itemsPerPage = 10
-  const lang = req.headers.get('accept-language') || 'fr'
+  const lang = urlParams.get('searchLang') || 'en'
 
+  // Prisma does not support case insensitive search at the moment
+  // https://github.com/prisma/prisma/issues/7390
   try {
     const researchStructures = await prisma.researchStructure.findMany({
       where: {
-        names: {
-          path: [lang],
-          string_contains: searchTerm as string,
-        },
+        OR: [
+          {
+            names: {
+              path: [lang],
+              string_contains: searchTerm.toLowerCase() as string,
+            },
+          },
+          {
+            names: {
+              path: [lang],
+              string_contains: searchTerm.toUpperCase() as string,
+            },
+          },
+        ],
       },
       skip: (pageNumber - 1) * itemsPerPage,
       take: itemsPerPage,
@@ -27,10 +38,20 @@ export const GET = async (req: NextRequest) => {
 
     const researchStructuresCount = await prisma.researchStructure.count({
       where: {
-        names: {
-          path: [lang],
-          string_contains: searchTerm as string,
-        },
+        OR: [
+          {
+            names: {
+              path: [lang],
+              string_contains: searchTerm.toLowerCase() as string,
+            },
+          },
+          {
+            names: {
+              path: [lang],
+              string_contains: searchTerm.toUpperCase() as string,
+            },
+          },
+        ],
       },
     })
 

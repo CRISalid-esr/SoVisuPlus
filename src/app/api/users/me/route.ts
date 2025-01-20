@@ -14,12 +14,12 @@ export const GET = async () => {
   try {
     // Get the session to identify the connected user
     const session = (await getServerSession(authOptions)) as Session & {
-      user: { username?: string; orcid?: string }
+      user: { username?: string; orcid?: string; id?: string }
     }
-    //const
+
     let electedIdentifier: PersonIdentifier | null = null
 
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'User not authenticated' },
         { status: 401 },

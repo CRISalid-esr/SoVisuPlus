@@ -1,8 +1,15 @@
-import { createStore } from 'zustand'
+import { createStore, StoreApi } from 'zustand'
 import { addPersonSlice, PersonSlice } from './personSlice'
 import { i18n } from '@lingui/core'
-import { Person } from '@/types/Person'
-const mockFetchResponse = (data: Person[], ok = true) => {
+
+const mockFetchResponse = (
+  data: {
+    hasMore: boolean
+    people: { id: number; name: string }[]
+    total: number
+  },
+  ok = true,
+) => {
   global.fetch = jest.fn(() =>
     Promise.resolve({
       ok,
@@ -16,7 +23,7 @@ const mockFetchError = (error: Error) => {
 }
 
 describe('addPersonSlice', () => {
-  let store: ReturnType<typeof createStore<PersonSlice>>
+  let store: StoreApi<PersonSlice>
 
   beforeEach(() => {
     store = createStore(addPersonSlice)
@@ -34,7 +41,9 @@ describe('addPersonSlice', () => {
     const response = { hasMore: true, people: peopleData, total: 2 }
     mockFetchResponse(response)
 
-    await store.getState().person.fetchPeople({ page: '1', searchTerm: 'test' })
+    await store
+      .getState()
+      .person.fetchPeopleByName({ page: 1, searchTerm: 'test' })
 
     const state = store.getState().person
     expect(state.loading).toBe(false)
@@ -54,7 +63,9 @@ describe('addPersonSlice', () => {
     const errorMessage = 'Network error'
     mockFetchError(new Error(errorMessage))
 
-    await store.getState().person.fetchPeople({ page: '1', searchTerm: 'test' })
+    await store
+      .getState()
+      .person.fetchPeopleByName({ page: 1, searchTerm: 'test' })
 
     const state = store.getState().person
     expect(state.loading).toBe(false)
@@ -69,10 +80,10 @@ describe('addPersonSlice', () => {
     const responsePage2 = { hasMore: false, people: newPeople, total: 2 }
 
     mockFetchResponse(responsePage1)
-    await store.getState().person.fetchPeople({ page: '1', searchTerm: '' })
+    await store.getState().person.fetchPeopleByName({ page: 1, searchTerm: '' })
 
     mockFetchResponse(responsePage2)
-    await store.getState().person.fetchPeople({ page: '2', searchTerm: '' })
+    await store.getState().person.fetchPeopleByName({ page: 2, searchTerm: '' })
 
     const state = store.getState().person
     expect(state.people).toEqual([...initialPeople, ...newPeople])

@@ -1,8 +1,10 @@
 import { StateCreator } from 'zustand'
 import { Person } from '@/types/Person'
-import { i18n } from '@lingui/core' // Import Lingui
+import { i18n } from '@lingui/core'
+import { toQueryString } from '@/utils/query'
+import { BaseQuery } from '@/types/BaseQuery'
 
-export interface queryObject {
+export interface PeopleByNameQuery extends BaseQuery {
   searchTerm: string
   page: number
 }
@@ -13,7 +15,7 @@ export interface PersonSlice {
     loading: boolean
     total: number
     error: string | null | unknown
-    fetchPeople: (obj: Record<string, string>) => Promise<void>
+    fetchPeopleByName: (obj: PeopleByNameQuery) => Promise<void>
     hasMore: boolean
   }
 }
@@ -27,16 +29,8 @@ export const addPersonSlice: StateCreator<PersonSlice, [], [], PersonSlice> = (
     hasMore: true,
     total: 0,
     error: null,
-    fetchPeople: async (queryObject: Record<string, string>) => {
-      const queryString = new URLSearchParams(
-        Object.entries(queryObject).reduce(
-          (acc, [key, value]) => {
-            acc[key] = value.toString()
-            return acc
-          },
-          {} as Record<string, string>,
-        ),
-      ).toString()
+    fetchPeopleByName: async (queryObject: PeopleByNameQuery) => {
+      const queryString = toQueryString(queryObject)
       set((state) => ({ person: { ...state.person, loading: true } }))
       try {
         const response = await fetch(`/api/people?${queryString}`, {

@@ -1,12 +1,11 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import SearchInput from './SearchInput'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles'
 import useStore from '@/stores/global_store'
 import { t } from '@lingui/macro'
 
-// Mock Zustand store
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -18,25 +17,20 @@ jest.mock('@lingui/macro', () => {
   }
 })
 
-jest.mock('next/navigation', () => ({
-  usePathname: jest.fn(),
-}))
-const mockUsePathname = require('next/navigation').usePathname
-
 describe('SearchInput Component', () => {
-  const mockFetchPeople = jest.fn()
-  const mockFetchResearchStructures = jest.fn()
+  const mockFetchPeopleByName = jest.fn()
+  const mockFetchResearchStructuresByName = jest.fn()
 
   const mockState = {
     person: {
-      fetchPeople: mockFetchPeople,
+      fetchPeopleByName: mockFetchPeopleByName,
       loading: false,
       people: [{ id: '1', firstName: 'John', lastName: 'Doe', type: 'people' }],
       hasMore: true,
       total: 1,
     },
     researchStructure: {
-      fetchResearchStructures: mockFetchResearchStructures,
+      fetchResearchStructuresByName: mockFetchResearchStructuresByName,
       loading: false,
       researchStructures: [
         { id: '2', names: { en: 'Lab X' }, type: 'researchStructures' },
@@ -44,13 +38,15 @@ describe('SearchInput Component', () => {
       hasMore: true,
       total: 1,
     },
+    user: {
+      setPerspective: jest.fn(),
+    },
   }
 
   beforeEach(() => {
-    ;(useStore as jest.Mock).mockImplementation((selector) =>
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
       selector(mockState),
     )
-    mockUsePathname.mockReturnValue('/en/page')
   })
 
   const theme = createTheme({
@@ -66,7 +62,7 @@ describe('SearchInput Component', () => {
     utils: {
       pxToRem: (value: number) => `${value / 16}rem`,
     },
-  })
+  } as ThemeOptions)
 
   const renderComponent = () =>
     render(
@@ -98,12 +94,19 @@ describe('SearchInput Component', () => {
     const searchInput = screen.getByPlaceholderText(
       t`sidebar_search_placeholder`,
     )
-    fireEvent.change(searchInput, { target: { value: 'John' } })
-
     await waitFor(() =>
-      expect(mockFetchPeople).toHaveBeenCalledWith({
+      // has been called twice, once for the initial render and once for the search term
+      expect(mockFetchPeopleByName).toHaveBeenCalledWith({
+        searchTerm: '',
+        page: 1,
+      }),
+    )
+    fireEvent.change(searchInput, { target: { value: 'John' } })
+    await waitFor(() =>
+      // has been called twice, once for the initial render and once for the search term
+      expect(mockFetchPeopleByName).toHaveBeenCalledWith({
         searchTerm: 'John',
-        page: '1',
+        page: 1,
       }),
     )
   })
@@ -133,8 +136,9 @@ describe('SearchInput Component', () => {
     })
 
     await waitFor(() =>
-      expect(mockFetchResearchStructures).toHaveBeenCalledWith({
+      expect(mockFetchResearchStructuresByName).toHaveBeenCalledWith({
         searchTerm: '',
+        searchLang: 'en',
         page: 1,
       }),
     )

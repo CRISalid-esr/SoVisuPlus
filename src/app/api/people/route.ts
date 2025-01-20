@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const GET = async (req: NextRequest) => {
@@ -14,19 +15,18 @@ export const GET = async (req: NextRequest) => {
         {
           firstName: {
             contains: term,
-            mode: 'insensitive',
+            mode: Prisma.QueryMode.insensitive,
           },
         },
         {
           lastName: {
             contains: term,
-            mode: 'insensitive',
+            mode: Prisma.QueryMode.insensitive,
           },
         },
       ],
     }))
 
-    // Fetch people matching the search criteria
     const people = await prisma.person.findMany({
       where: {
         AND: searchCriteria, // Match all terms
@@ -38,7 +38,6 @@ export const GET = async (req: NextRequest) => {
       },
     })
 
-    // Count total results for pagination
     const peopleCount = await prisma.person.count({
       where: {
         AND: searchCriteria,

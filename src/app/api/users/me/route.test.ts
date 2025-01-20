@@ -25,6 +25,7 @@ jest.mock('next/server', () => {
 jest.mock('next-auth', () => ({
   getServerSession: jest.fn(() => ({
     user: {
+      id: '123-456-789',
       username: 'Test User',
       email: 'testuser@example.com',
       person: {
@@ -63,10 +64,8 @@ describe('GET /api/route', () => {
       personId: null,
     })
 
-    // Mock Prisma response
     ;(prisma.user.findFirst as jest.Mock).mockResolvedValueOnce(mockUser)
 
-    // Call the GET function
     const response = await GET()
     const data = await response.json()
 
@@ -75,7 +74,6 @@ describe('GET /api/route', () => {
   })
 
   it('should return 401 if the user is not authenticated', async () => {
-    // Simulate unauthenticated user
     ;(getServerSession as jest.Mock).mockResolvedValueOnce(null)
 
     const response = await GET()
