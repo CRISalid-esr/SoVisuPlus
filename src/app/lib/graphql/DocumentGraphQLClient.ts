@@ -1,12 +1,7 @@
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
 import { Document } from '@/types/Document'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
-import {
-  GraphPersonResponse,
-  GraphPersonIdentifier,
-  PersonGraphQLClient,
-} from './PersonGraphQLClient'
-import { Person } from '@/types/Person'
+import { GraphPersonResponse, PersonGraphQLClient } from './PersonGraphQLClient'
 
 interface GraphcontributorResponse {
   contributor: Array<GraphPersonResponse>
