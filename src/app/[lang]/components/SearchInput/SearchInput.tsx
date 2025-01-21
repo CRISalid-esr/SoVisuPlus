@@ -125,7 +125,8 @@ const SearchInput: React.FC = () => {
       if (
         searchTags.some((tag) => tag.selected && tag.value === 'people') &&
         hasMorePeople &&
-        !peopleLoading
+        !peopleLoading &&
+        group === t`sidebar_search_people`
       ) {
         setPeoplePage((prevPage) => prevPage + 1)
       }
@@ -135,7 +136,7 @@ const SearchInput: React.FC = () => {
         ) &&
         hasMoreResearchStructures &&
         !researchStructuresLoading &&
-        group === 'researchStructures'
+        group === t`sidebar_search_research_structures`
       ) {
         setResearchStructuresPage((prevPage) => prevPage + 1)
       }
@@ -281,7 +282,12 @@ const SearchInput: React.FC = () => {
       ) => {
         return option.label
       }}
-      groupBy={(option) => option.type} // Group options by type (Chercheur, Unité de recherche)
+      groupBy={(option: IAutoCompleteOption<Person | ResearchStructure>) => {
+        if (option.type == 'people') return t`sidebar_search_people`
+        else if (option.type == 'researchStructures')
+          return t`sidebar_search_research_structures`
+        return ''
+      }}
       renderInput={(params) => (
         <TextField
           {...params}
