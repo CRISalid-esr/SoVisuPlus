@@ -4,14 +4,14 @@ import { useEffect, useState } from 'react'
 import { Alert } from '@mui/material'
 
 export default function StoreChecker() {
-  const loading = useStore<boolean>((state) => state.publication.loading)
-  const fetchPublications = useStore((state) => state.publication.fetchPublications)
+  const loading = useStore<boolean>((state) => state.document.loading)
+  const fetchDocuments = useStore((state) => state.document.fetchDocuments)
   const [failure, setFailure] = useState<boolean>(false)
   useEffect(() => {
-    fetchPublications().then(() => {
+    fetchDocuments().then(() => {
       setFailure(false)
     })
-  }, [fetchPublications])
+  }, [fetchDocuments])
   if (loading && !failure) {
     return <Alert severity='info'>Waiting for server data...</Alert>
   }
