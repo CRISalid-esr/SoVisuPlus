@@ -34,14 +34,14 @@ export class DocumentDAO extends AbstractDAO {
             personId_documentId_role: {
               personId: person.id,
               documentId: document.id,
-              role: 'AUTHOR', // You can adjust the role according to your logic
+              role: 'AUTHOR',
             },
           },
           update: {}, // No update is necessary here, we only need to ensure uniqueness
           create: {
             personId: person.id,
             documentId: document.id,
-            role: 'AUTHOR', // You can adjust the role according to your logic
+            role: 'AUTHOR',
           },
         })
       }
