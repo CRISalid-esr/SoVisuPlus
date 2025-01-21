@@ -8,12 +8,12 @@ import {
   addResearchStructureSlice,
 } from './researchStructureSlice'
 import { PersonSlice, addPersonSlice } from './personSlice'
-import { PublicationSlice, addPublicationSlice } from './publication_slice'
+import { DocumentSlice, addDocumentSlice } from './documentSlice'
 import { UserSlice, addUserSlice } from './userSlice'
 
 export type GlobalStore = ResearchStructureSlice &
   PersonSlice &
-  PublicationSlice &
+  DocumentSlice &
   UserSlice
 
 const useStore = create<GlobalStore>()(
@@ -21,7 +21,7 @@ const useStore = create<GlobalStore>()(
     (...a) => ({
       ...addResearchStructureSlice(...a),
       ...addPersonSlice(...a),
-      ...addPublicationSlice(...a),
+      ...addDocumentSlice(...a),
       ...addUserSlice(...a),
     }),
     { name: 'GlobalStore' }, // Optional: Name for debugging in devtools
