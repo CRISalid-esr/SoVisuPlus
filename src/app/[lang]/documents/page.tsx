@@ -2,7 +2,11 @@
 
 import { t, Trans } from '@lingui/macro'
 import { Box, Button, Typography } from '@mui/material'
-import { MaterialReactTable } from 'material-react-table'
+import {
+  MaterialReactTable,
+  MRT_ColumnFiltersState,
+  MRT_SortingState,
+} from 'material-react-table'
 import { useEffect, useMemo, useState } from 'react'
 
 interface Document {
@@ -23,6 +27,10 @@ export default function DocumentsPage() {
     pageIndex: 0,
     pageSize: 10, // customize the default page size
   })
+
+  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([])
+  const [globalFilter, setGlobalFilter] = useState('')
+  const [sorting, setSorting] = useState<MRT_SortingState>([])
 
   const lang = Lingui.i18n.locale
 
@@ -68,13 +76,19 @@ export default function DocumentsPage() {
   } = useStore((state) => state.document)
 
   useEffect(() => {
-    console.log('pagination changed', pagination)
+    console.log('fetch')
     fetchDocuments({
       page: pagination.pageIndex + 1,
       pageSize: pagination.pageSize,
       searchTerm: '',
     })
-  }, [pagination.pageIndex, pagination.pageSize]) // Track specific pagination properties
+  }, [
+    columnFilters, //re-fetch when column filters change
+    globalFilter, //re-fetch when global filter changes
+    pagination.pageIndex, //re-fetch when page index changes
+    pagination.pageSize, //re-fetch when page size changes
+    sorting, //re-fetch when sorting changes
+  ]) // Track specific pagination properties
 
   const handleTabChange = (newValue: string) => {
     setSelectedTab(newValue)
@@ -112,11 +126,14 @@ export default function DocumentsPage() {
         onTabChange={handleTabChange}
       />
       <MaterialReactTable
+        initialState={{ showColumnFilters: true }}
+        manualFiltering
+        manualPagination
+        manualSorting
         columns={memoizedColumns}
         rowCount={totalItems}
         data={documents}
         enablePagination
-        manualPagination
         onPaginationChange={setPagination}
         state={{
           isLoading: loading,
