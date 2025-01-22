@@ -13,7 +13,6 @@ export interface DocumentSlice {
   document: {
     documents: Document[]
     totalItems?: number
-    totalPages?: number
     loading: boolean
     error: string | null | unknown
     fetchDocuments: (obj: DocumentQuery) => Promise<void>
@@ -31,7 +30,6 @@ export const addDocumentSlice: StateCreator<
     loading: true,
     error: null,
     totalItems: 0,
-    totalPages: 0,
     fetchDocuments: async (queryObject: DocumentQuery) => {
       const queryString = toQueryString(queryObject)
       set((state) => ({ document: { ...state.document, loading: true } }))
@@ -39,15 +37,13 @@ export const addDocumentSlice: StateCreator<
         const response = await fetch(`/api/documents?${queryString}`)
         const jsonData = await response.json()
         const documents: Document[] = jsonData.documents
-        const total = jsonData.total
-        const totalPages = jsonData.totalPages
+        const totalItems = jsonData.totalItems
         set((state) => ({
           document: {
             ...state.document,
             documents: documents,
+            totalItems,
             error: null,
-            totalItems: total,
-            totalPages: totalPages,
           },
         }))
       } catch (error) {

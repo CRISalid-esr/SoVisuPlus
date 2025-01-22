@@ -62,7 +62,6 @@ export const GET = async (request: Request) => {
       totalItems: totalDocuments,
       page: pageNumber,
       limit: pageSize,
-      totalPages: Math.ceil(totalDocuments / pageSize),
     })
   } catch (error) {
     console.error('Error fetching documents:', error)

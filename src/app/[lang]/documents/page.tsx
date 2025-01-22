@@ -19,14 +19,16 @@ import useStore from '@/stores/global_store'
 import * as Lingui from '@lingui/core'
 
 export default function DocumentsPage() {
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10, // customize the default page size
+  })
 
   const lang = Lingui.i18n.locale
 
   const columns = [
     {
-      accessorKey: `titles.${lang}`, //access nested data with dot notation
+      accessorKey: `titles.${lang}`, // access nested data with dot notation
       header: t`documents_page_title_column`,
       size: 150,
     },
@@ -62,14 +64,19 @@ export default function DocumentsPage() {
     fetchDocuments,
     loading,
     documents = [],
+    totalItems,
   } = useStore((state) => state.document)
 
   useEffect(() => {
-    console.log('fetch')
-    fetchDocuments({ page, pageSize, searchTerm: '' })
-  }, [])
+    console.log('pagination changed', pagination)
+    fetchDocuments({
+      page: pagination.pageIndex + 1,
+      pageSize: pagination.pageSize,
+      searchTerm: '',
+    })
+  }, [pagination.pageIndex, pagination.pageSize]) // Track specific pagination properties
 
-  const handleTabeChange = (newValue: string) => {
+  const handleTabChange = (newValue: string) => {
     setSelectedTab(newValue)
   }
 
@@ -102,12 +109,19 @@ export default function DocumentsPage() {
       <TabFilter
         tabsData={tabs}
         selectedValue={selectedTab}
-        onTabChange={handleTabeChange}
+        onTabChange={handleTabChange}
       />
       <MaterialReactTable
         columns={memoizedColumns}
+        rowCount={totalItems}
         data={documents}
         enablePagination
+        manualPagination
+        onPaginationChange={setPagination}
+        state={{
+          isLoading: loading,
+          pagination,
+        }}
       />
     </Box>
   )
