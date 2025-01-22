@@ -415,7 +415,7 @@ export default function Sidebar({
               </ListItem>
               <ListItem
                 component={Link}
-                href={`/${lang}/publications`}
+                href={`/${lang}/documents`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   marginBottom: theme.utils.pxToRem(4),
@@ -423,7 +423,7 @@ export default function Sidebar({
                   justifyContent: 'center',
                   alignItems: 'center',
                   color: theme.palette.primaryContainer,
-                  ...(pathname === `/${lang}/publications`
+                  ...(pathname === `/${lang}/documents`
                     ? {
                         backgroundColor: theme.palette.primaryContainer,
                         borderRadius: theme.utils.pxToRem(8),
@@ -458,7 +458,7 @@ export default function Sidebar({
                         lineHeight: theme.typography.lineHeight.lineHeight24px,
                       },
                     }}
-                    primary={<Trans>side_bar_publications</Trans>}
+                    primary={<Trans>side_bar_documents</Trans>}
                   />
                 )}
               </ListItem>

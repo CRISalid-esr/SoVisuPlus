@@ -85,23 +85,23 @@ const columns = [
   },
 ]
 
-export default function PublicationsPage() {
+export default function DocumentsPage() {
   const theme = useTheme()
 
   const tabs = [
     {
-      label: t`publications_page_all_publications_filter`,
-      value: 'all_publications',
+      label: t`documents_page_all_documents_filter`,
+      value: 'all_documents',
       color: theme.palette.primary.main,
     },
     {
-      label: t`publications_page_incomplete_hal_repository_filter`,
+      label: t`documents_page_incomplete_hal_repository_filter`,
       value: 'incomplete_hal_repository',
       numberOfItems: 2,
       color: theme.palette.primary.main,
     },
     {
-      label: t`publications_page_keywords_to_validate`,
+      label: t`documents_page_keywords_to_validate`,
       value: 'keywords_to_validate',
       numberOfItems: 1,
       color: theme.palette.primary.main,
@@ -136,11 +136,11 @@ export default function PublicationsPage() {
       >
         <Box>
           <Typography variant='h4' gutterBottom>
-            <Trans>publications_page_main_title</Trans>
+            <Trans>documents_page_main_title</Trans>
           </Typography>
         </Box>
         <Button startIcon={<SyncIcon />} variant='outlined'>
-          <Trans>publications_page_synchronize_button</Trans>
+          <Trans>documents_page_synchronize_button</Trans>
         </Button>
       </Box>
       <TabFilter

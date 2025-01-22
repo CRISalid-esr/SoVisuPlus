@@ -22,21 +22,21 @@ jest.mock('next/server', () => {
 
 describe('GET /api/document', () => {
   it('should return a list of documents', async () => {
-    const mockPublications = [
+    const mockDocuments = [
       { id: 1, title: 'Document 1', content: 'Content 1' },
       { id: 2, title: 'Document 2', content: 'Content 2' },
     ]
 
     // Mock Prisma's findMany to return mock data
     ;(prisma.document.findMany as jest.Mock).mockResolvedValueOnce(
-      mockPublications,
+      mockDocuments,
     )
 
     const response = await GET()
     const data = await response.json()
 
     expect(response.status).toBe(200)
-    expect(data).toEqual(mockPublications)
+    expect(data).toEqual(mockDocuments)
   })
 
   it('should return a 500 error on Prisma failure', async () => {

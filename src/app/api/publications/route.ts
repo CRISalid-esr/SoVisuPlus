@@ -4,10 +4,10 @@ import { Document } from '@prisma/client'
 
 export const GET = async () => {
   try {
-    const publications: Document[] = await prisma.document.findMany()
-    return NextResponse.json(publications)
+    const documents: Document[] = await prisma.document.findMany()
+    return NextResponse.json(documents)
   } catch (error) {
-    console.error('Error fetching publications:', error)
+    console.error('Error fetching documents:', error)
     return NextResponse.json({ error: 'An error occurred' }, { status: 500 })
   }
 }
