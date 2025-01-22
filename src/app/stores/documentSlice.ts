@@ -7,6 +7,9 @@ export interface DocumentQuery extends BaseQuery {
   searchTerm: string
   page: number
   pageSize: number
+  columnFilters: string
+  searchLang: string
+  sorting: string
 }
 
 export interface DocumentSlice {

@@ -9,13 +9,7 @@ import {
 } from 'material-react-table'
 import { useEffect, useMemo, useState } from 'react'
 
-interface Document {
-  titles: {
-    fr?: string
-  } | null
-  [key: string]: any
-}
-
+import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import { TabFilter } from '@/components/TabFilter'
 import { useTheme } from '@mui/system'
 import SyncIcon from '@mui/icons-material/Sync'
@@ -38,7 +32,16 @@ export default function DocumentsPage() {
     {
       accessorKey: `titles.${lang}`, // access nested data with dot notation
       header: t`documents_page_title_column`,
-      size: 150,
+      Cell({ row }: { row: { original: { titles: Record<string, string> } } }) {
+        const titles = row.original.titles
+        const localizedTitle = getLocalizedValue(
+          titles,
+          lang,
+          ['en'],
+          t`no_title_available`,
+        )
+        return localizedTitle
+      },
     },
   ]
 
@@ -76,19 +79,21 @@ export default function DocumentsPage() {
   } = useStore((state) => state.document)
 
   useEffect(() => {
-    console.log('fetch')
     fetchDocuments({
       page: pagination.pageIndex + 1,
       pageSize: pagination.pageSize,
-      searchTerm: '',
+      searchTerm: globalFilter,
+      columnFilters: JSON.stringify(columnFilters),
+      sorting: JSON.stringify(sorting),
+      searchLang: lang,
     })
   }, [
-    columnFilters, //re-fetch when column filters change
-    globalFilter, //re-fetch when global filter changes
-    pagination.pageIndex, //re-fetch when page index changes
-    pagination.pageSize, //re-fetch when page size changes
-    sorting, //re-fetch when sorting changes
-  ]) // Track specific pagination properties
+    columnFilters,
+    globalFilter,
+    pagination.pageIndex,
+    pagination.pageSize,
+    sorting,
+  ])
 
   const handleTabChange = (newValue: string) => {
     setSelectedTab(newValue)
@@ -135,9 +140,15 @@ export default function DocumentsPage() {
         data={documents}
         enablePagination
         onPaginationChange={setPagination}
+        onColumnFiltersChange={setColumnFilters}
+        onGlobalFilterChange={setGlobalFilter}
+        onSortingChange={setSorting}
         state={{
           isLoading: loading,
           pagination,
+          sorting,
+          columnFilters,
+          globalFilter,
         }}
       />
     </Box>
