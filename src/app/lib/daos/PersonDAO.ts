@@ -5,6 +5,7 @@ import {
 import { Person } from '@/types/Person'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
 /** PersonDAO: Handles operations related to Person and PersonIdentifiers */
 export class PersonDAO extends AbstractDAO {
@@ -70,7 +71,6 @@ export class PersonDAO extends AbstractDAO {
       )
     }
   }
-
   /**
    * Upsert PersonIdentifiers for a given person
    * @param identifiers - The list of identifiers to upsert
@@ -79,19 +79,40 @@ export class PersonDAO extends AbstractDAO {
   private async upsertIdentifiers(
     identifiers: PersonIdentifier[],
     personId: number,
+    retries = 0,
   ): Promise<void> {
     // Remove old identifiers
-    await this.prismaClient.personIdentifier.deleteMany({
-      where: { personId },
-    })
+    try {
+      await this.prismaClient.personIdentifier.deleteMany({
+        where: { personId },
+      })
 
-    // Insert new identifiers
-    await this.prismaClient.personIdentifier.createMany({
-      data: identifiers.map((identifier) => ({
-        personId,
-        type: identifier.type.toUpperCase() as DbPersonIdentifierType,
-        value: identifier.value,
-      })),
-    })
+      // Insert new identifiers
+
+      await this.prismaClient.personIdentifier.createMany({
+        data: identifiers.map((identifier) => ({
+          personId,
+          type: identifier.type.toUpperCase() as DbPersonIdentifierType,
+          value: identifier.value,
+        })),
+      })
+    } catch (error: unknown) {
+      console.error('Error during identifier upsert:', error as Error)
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        if (retries < 3) {
+          console.warn('Retrying identifier upsert...')
+          await this.upsertIdentifiers(identifiers, personId, retries + 1)
+        } else {
+          throw new Error('Failed to upsert identifiers after 3 retries')
+        }
+      } else {
+        throw new Error(
+          `Failed to upsert identifiers: ${(error as Error).message}`,
+        )
+      }
+    }
   }
 }
