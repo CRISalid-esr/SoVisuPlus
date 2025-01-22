@@ -111,17 +111,33 @@ msgstr "Research activities"
 msgid "side_bar_publications"
 msgstr "Publications"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:29
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:85
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:155
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:173
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:43
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:129
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:220
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:286
 msgid "sidebar_search_people"
 msgstr "researchers"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:209
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:95
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:315
 msgid "sidebar_search_placeholder"
 msgstr "Search"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:31
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:87
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:123
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:176
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:45
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:139
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:288
 msgid "sidebar_search_research_structures"
 msgstr "Research structures"
+
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:182
+msgid "sidebar_search_unknown_label"
+msgstr ""
 
 #: src/app/[lang]/components/sidebar/Sidebar.tsx:115
 #: src/app/[lang]/components/sidebar/Sidebar.tsx:138
