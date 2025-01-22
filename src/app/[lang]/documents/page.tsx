@@ -3,89 +3,33 @@
 import { t, Trans } from '@lingui/macro'
 import { Box, Button, Typography } from '@mui/material'
 import { MaterialReactTable } from 'material-react-table'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+
+interface Document {
+  titles: {
+    fr?: string
+  } | null
+  [key: string]: any
+}
 
 import { TabFilter } from '@/components/TabFilter'
 import { useTheme } from '@mui/system'
 import SyncIcon from '@mui/icons-material/Sync'
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-const data: any[] = [
-  {
-    name: {
-      firstName: 'John',
-      lastName: 'Doe',
-    },
-    address: '261 Erdman Ford',
-    city: 'East Daphne',
-    state: 'Kentucky',
-  },
-  {
-    name: {
-      firstName: 'Jane',
-      lastName: 'Doe',
-    },
-    address: '769 Dominic Grove',
-    city: 'Columbus',
-    state: 'Ohio',
-  },
-  {
-    name: {
-      firstName: 'Joe',
-      lastName: 'Doe',
-    },
-    address: '566 Brakus Inlet',
-    city: 'South Linda',
-    state: 'West Virginia',
-  },
-  {
-    name: {
-      firstName: 'Kevin',
-      lastName: 'Vandy',
-    },
-    address: '722 Emie Stream',
-    city: 'Lincoln',
-    state: 'Nebraska',
-  },
-  {
-    name: {
-      firstName: 'Joshua',
-      lastName: 'Rolluffs',
-    },
-    address: '32188 Larkin Turnpike',
-    city: 'Omaha',
-    state: 'Nebraska',
-  },
-]
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-const columns = [
-  {
-    accessorKey: 'name.firstName', //access nested data with dot notation
-    header: 'First Name',
-    size: 150,
-  },
-  {
-    accessorKey: 'name.lastName',
-    header: 'Last Name',
-    size: 150,
-  },
-  {
-    accessorKey: 'address', //normal accessorKey
-    header: 'Address',
-    size: 200,
-  },
-  {
-    accessorKey: 'city',
-    header: 'City',
-    size: 150,
-  },
-  {
-    accessorKey: 'state',
-    header: 'State',
-    size: 150,
-  },
-]
+import useStore from '@/stores/global_store'
+import * as Lingui from '@lingui/core'
 
 export default function DocumentsPage() {
+  const [documentPage, setDocumentPage] = useState(1)
+  const lang = Lingui.i18n.locale
+
+  const columns = [
+    {
+      accessorKey: `titles.${lang}`, //access nested data with dot notation
+      header: t`documents_page_title_column`,
+      size: 150,
+    },
+  ]
+
   const theme = useTheme()
 
   const tabs = [
@@ -111,7 +55,17 @@ export default function DocumentsPage() {
   const [selectedTab, setSelectedTab] = useState(tabs[0].value)
 
   const memoizedColumns = useMemo(() => columns, [columns])
-  const memoizedData = useMemo(() => data, [data])
+
+  const {
+    fetchDocuments,
+    loading: documentLoading,
+    documents = [],
+  } = useStore((state) => state.document)
+
+  useEffect(() => {
+    console.log('fetch')
+    fetchDocuments()
+  }, [])
 
   const handleTabeChange = (newValue: string) => {
     setSelectedTab(newValue)
@@ -150,7 +104,7 @@ export default function DocumentsPage() {
       />
       <MaterialReactTable
         columns={memoizedColumns}
-        data={memoizedData}
+        data={documents}
         enablePagination
       />
     </Box>
