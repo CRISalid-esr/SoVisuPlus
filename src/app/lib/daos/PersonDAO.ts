@@ -98,7 +98,10 @@ export class PersonDAO extends AbstractDAO {
       })
     } catch (error: unknown) {
       console.error('Error during identifier upsert:', error as Error)
-      if ((error as PrismaClientKnownRequestError).code == 'P2002') {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         if (retries < 3) {
           console.warn('Retrying identifier upsert...')
           await this.upsertIdentifiers(identifiers, personId, retries + 1)
