@@ -19,7 +19,9 @@ import useStore from '@/stores/global_store'
 import * as Lingui from '@lingui/core'
 
 export default function DocumentsPage() {
-  const [documentPage, setDocumentPage] = useState(1)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+
   const lang = Lingui.i18n.locale
 
   const columns = [
@@ -58,13 +60,13 @@ export default function DocumentsPage() {
 
   const {
     fetchDocuments,
-    loading: documentLoading,
+    loading,
     documents = [],
   } = useStore((state) => state.document)
 
   useEffect(() => {
     console.log('fetch')
-    fetchDocuments()
+    fetchDocuments({ page, pageSize, searchTerm: '' })
   }, [])
 
   const handleTabeChange = (newValue: string) => {
