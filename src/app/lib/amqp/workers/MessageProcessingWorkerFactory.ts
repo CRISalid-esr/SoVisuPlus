@@ -3,11 +3,15 @@ import { AMQPEntityData } from '@/types/AMQPEntityData'
 import { PersonWorker } from '@/lib/amqp/workers/PersonWorker'
 import { MessageProcessingWorker } from '@/lib/amqp/workers/MessageProcessingWorker'
 import { ResearchStructureWorker } from '@/lib/amqp/workers/ResearchStructureWorker'
+import { DocumentWorker } from '@/lib/amqp/workers/DocumentWorker'
 import { AMQPPersonMessage } from '@/types/AMQPPersonMessage'
 import { AMQPResearchStructureMessage } from '@/types/AMQPResearchStructureMessage'
 import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
+import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { UserDAO } from '@/lib/daos/UserDAO'
+import { DocumentGraphQLClient } from '@/lib/graphql/DocumentGraphQLClient'
+import { AMQPDocumentMessage } from '@/types/AMQPDocumentMessage'
 import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 
 export class MessageProcessingWorkerFactory {
@@ -26,6 +30,12 @@ export class MessageProcessingWorkerFactory {
         return new ResearchStructureWorker(
           message as AMQPResearchStructureMessage,
           new ResearchStructureDAO(),
+        )
+      case 'document':
+        return new DocumentWorker(
+          message as AMQPDocumentMessage,
+          new DocumentDAO(),
+          new DocumentGraphQLClient(),
         )
       default:
         throw new Error(`Unsupported message type: ${message.type}`)

@@ -16,6 +16,8 @@ describe('AMQPConnection', () => {
     mockChannel = {
       prefetch: jest.fn(),
       assertQueue: jest.fn(),
+      assertExchange: jest.fn(), // Make sure to mock this method
+      bindQueue: jest.fn(),
       consume: jest.fn(),
       ack: jest.fn(),
     }
@@ -38,7 +40,14 @@ describe('AMQPConnection', () => {
     expect(amqplib.connect).toHaveBeenCalledWith(
       `amqp://${process.env.AMQP_USER}:${process.env.AMQP_PASSWORD}@${process.env.AMQP_HOST}:${process.env.AMQP_PORT}`,
     )
+
     expect(mockConnection.createChannel).toHaveBeenCalled()
+    expect(mockChannel.prefetch).toHaveBeenCalledWith(1)
+    expect(mockChannel.assertExchange).toHaveBeenCalledWith(
+      'amqp.topic',
+      'topic',
+      { durable: true },
+    )
     expect(amqpConnection['connected']).toBe(true)
   })
 

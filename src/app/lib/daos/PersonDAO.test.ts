@@ -56,12 +56,14 @@ describe('PersonDAO', () => {
         email: person.email,
         firstName: person.firstName,
         lastName: person.lastName,
+        external: person.external,
       },
       create: {
         uid: person.uid,
         email: person.email,
         firstName: person.firstName,
         lastName: person.lastName,
+        external: person.external,
       },
     })
 

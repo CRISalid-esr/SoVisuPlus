@@ -21,20 +21,83 @@ model Person {
   id          Int                @id @default(autoincrement())
   uid         String             @unique
   email       String?            @unique
-  firstName   String
-  lastName    String
+  firstName   String?
+  lastName    String?
   identifiers PersonIdentifier[]
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
   external    Boolean            @default(false)
   user        User?
+  documents   Contribution[]     
+
 }
 
-model Publication {
+model Document {
   id     Int      @id @default(autoincrement())
   uid    String   @unique
-  titles String[]
+  titles Json     @db.JsonB // Store internationalized names
+  persons     Contribution[]
 }
+
+model Contribution {
+ id          Int      @id @default(autoincrement()) // Optional: add a unique ID for the relation table
+  personId    Int
+  documentId  Int
+  role        ContributionRole
+  person      Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, documentId, role]) // Ensure a unique combination of person, document, and role
+}
+
+
+enum ContributionRole {
+  ACTOR      @map("actor")
+  ADAPTER    @map("adapter")
+  ARTIST     @map("artist")
+  AUTHOR     @map("author")
+  AUTHOR_OF_INTRODUCTION @map("author_of_introduction")
+  BUILDER    @map("builder")
+  BINDER     @map("binder")
+  COMMENTATOR @map("commentator")
+  COMPILER   @map("compiler")
+  CONTRIBUTOR @map("contributor")
+  CONDUCTOR  @map("conductor")
+  CREATOR    @map("creator")
+  DEBATER    @map("debater")
+  DANCER     @map("dancer")
+  DIRECTOR   @map("director")
+  DESIGNER   @map("designer")
+  EDITOR     @map("editor")
+  ENFORCER   @map("enforcer")
+  ENGRAVER   @map("engraver")
+  EXECUTIVE_PRODUCER @map("executive_producer")
+  FUNDER     @map("funder")
+  GRADER     @map("grader")
+  ILLUSTRATOR @map("illustrator")
+  LABORATOR  @map("laborator")
+  LENDER     @map("lender")
+  LIBRARIAN  @map("librarian")
+  MANAGER    @map("manager")
+  OPERATOR   @map("operator")
+  ORGANIZER  @map("organizer")
+  PERFORMER  @map("performer")
+  PARTY      @map("party")
+  PATRON     @map("patron")
+  RECORDED_BY @map("recorded_by")
+  READER     @map("reader")
+  RECEPTOR   @map("receptor")
+  RECEPTION  @map("reception")
+  SCORER     @map("scorer")
+  SCRIPTWRITER @map("scriptwriter")
+  SPOKESPERSON @map("spokesperson")
+  SESSION_CREATOR @map("session_creator")
+  TRANSCRIBER @map("transcriber")
+  TRANSLATOR  @map("translator")
+  VIDEO_PRODUCER @map("video_producer")
+}
+
+
 
 enum PersonIdentifierType {
   ORCID      @map("orcid")

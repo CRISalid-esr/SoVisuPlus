@@ -43,5 +43,7 @@ yarn-error.log*
 next-env.d.ts
 
 .idea
+.run
 
 *storybook.log
+.vscode/launch.json

@@ -4,6 +4,7 @@ import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
+import { Person } from '@/types/Person'
 
 jest.mock('./AbstractGraphQLClient')
 
@@ -39,7 +40,7 @@ describe('PersonGraphQLClient', () => {
         AND: [
           {
             identifiers_SOME: {
-              type_EQ: 'ORCID',
+              type_EQ: 'orcid',
               value_EQ: '12345',
             },
           },
@@ -74,24 +75,25 @@ describe('PersonGraphQLClient', () => {
     const personIdentifier: PersonIdentifier = { type: 'ORCID', value: '12345' }
     const person = await client.getPersonByIdentifier(personIdentifier)
 
-    expect(person).toEqual({
-      uid: 'person-123',
-      external: false,
-      displayName: 'John Doe',
-      identifiers: [
+    const expectedPerson = new Person(
+      'person-123',
+      false,
+      null,
+      'John Doe',
+      'John',
+      'Doe',
+      [
         { type: PersonIdentifierType.ORCID, value: '12345' },
         { type: PersonIdentifierType.SCOPUS_EID, value: '67890' },
       ],
-      firstName: 'John',
-      lastName: 'Doe',
-      email: null,
-    })
+    )
+    expect(person).toEqual(expectedPerson)
     expect(mockQuery).toHaveBeenCalledWith(expect.any(String), {
       where: {
         AND: [
           {
             identifiers_SOME: {
-              type_EQ: 'ORCID',
+              type_EQ: 'orcid',
               value_EQ: '12345',
             },
           },
@@ -126,15 +128,16 @@ describe('PersonGraphQLClient', () => {
     const personIdentifier: PersonIdentifier = { type: 'ORCID', value: '98765' }
     const person = await client.getPersonByIdentifier(personIdentifier)
 
-    expect(person).toEqual({
-      uid: 'person-456',
-      external: true,
-      displayName: 'Jane Smith',
-      identifiers: [{ type: PersonIdentifierType.ORCID, value: '98765' }], // Unsupported identifier is skipped
-      firstName: 'Jane',
-      lastName: 'Smith',
-      email: null,
-    })
+    const expectedPerson = new Person(
+      'person-456',
+      true,
+      null,
+      'Jane Smith',
+      'Jane',
+      'Smith',
+      [{ type: PersonIdentifierType.ORCID, value: '98765' }],
+    )
+    expect(person).toEqual(expectedPerson)
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       'Unsupported identifier type for abcde: unknown_type',
     )
@@ -143,7 +146,7 @@ describe('PersonGraphQLClient', () => {
         AND: [
           {
             identifiers_SOME: {
-              type_EQ: 'ORCID',
+              type_EQ: 'orcid',
               value_EQ: '98765',
             },
           },

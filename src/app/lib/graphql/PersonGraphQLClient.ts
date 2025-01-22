@@ -14,7 +14,7 @@ enum GraphPersonIdentifierType {
   ID_HAL = 'id_hal',
 }
 
-interface GraphPersonIdentifier {
+export interface GraphPersonIdentifier {
   type: GraphPersonIdentifierType
   value: string
 }
@@ -28,7 +28,7 @@ interface GraphPersonName {
   }[]
 }
 
-interface GraphPersonResponse {
+export interface GraphPersonResponse {
   uid: string
   display_name: string
   external: boolean
@@ -100,7 +100,7 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
     return this.hydrate(personData)
   }
 
-  private hydrate(personData: GraphPersonResponse): Person {
+  public hydrate(personData: GraphPersonResponse): Person {
     return new Person(
       personData.uid,
       personData.external,
