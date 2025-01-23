@@ -15,6 +15,7 @@ import { useTheme } from '@mui/system'
 import SyncIcon from '@mui/icons-material/Sync'
 import useStore from '@/stores/global_store'
 import * as Lingui from '@lingui/core'
+import { Person } from '@/types/Person'
 
 export default function DocumentsPage() {
   const [pagination, setPagination] = useState({
@@ -41,6 +42,20 @@ export default function DocumentsPage() {
           t`no_title_available`,
         )
         return localizedTitle
+      },
+    },
+    {
+      accessorKey: 'persons',
+      header: t`documents_page_contributors_column`,
+      Cell({ row }: { row: { original: { contributions: Array<Person> } } }) {
+        const contributors = row.original.persons
+        return contributors.reduce((acc, { person }, index) => {
+          const separator = index > 0 ? ', ' : ''
+          if (person.firstName && person.lastName) {
+            return `${acc}${separator}${person.firstName} ${person.lastName}`
+          }
+          return `${acc}`
+        }, '')
       },
     },
   ]
