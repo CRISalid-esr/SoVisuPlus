@@ -8,7 +8,7 @@ import {
   MRT_SortingState,
 } from 'material-react-table'
 import { useEffect, useMemo, useState } from 'react'
-
+import ArticleIcon from '@mui/icons-material/Article'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import { TabFilter } from '@/components/TabFilter'
 import { useTheme } from '@mui/system'
@@ -30,6 +30,13 @@ export default function DocumentsPage() {
   const lang = Lingui.i18n.locale
 
   const columns = [
+    {
+      accessorKey: 'type',
+      header: t`documents_page_type_column`,
+      Cell({ row }: { row: { original: { type: string } } }) {
+        return <ArticleIcon />
+      },
+    },
     {
       accessorKey: `titles.${lang}`, // access nested data with dot notation
       header: t`documents_page_title_column`,
@@ -56,6 +63,34 @@ export default function DocumentsPage() {
           }
           return `${acc}`
         }, '')
+      },
+    },
+    {
+      accessorKey: 'date',
+      header: t`documents_page_date_column`,
+      Cell({ row }: { row: { original: { type: string } } }) {
+        return ''
+      },
+    },
+    {
+      accessorKey: 'publishedIn',
+      header: t`documents_page_publishedIn_column`,
+      Cell({ row }: { row: { original: { doi: string } } }) {
+        return ''
+      },
+    },
+    {
+      accessorKey: 'halStatus',
+      header: t`documents_page_halStatus_column`,
+      Cell({ row }: { row: { original: { doi: string } } }) {
+        return ''
+      },
+    },
+    {
+      accessorKey: 'version',
+      header: t`documents_page_version_column`,
+      Cell({ row }: { row: { original: { doi: string } } }) {
+        return ''
       },
     },
   ]
