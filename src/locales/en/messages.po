@@ -48,32 +48,52 @@ msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1
 #~ msgid "pageNotFound"
 #~ msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:67
+#: src/app/[lang]/documents/page.tsx:102
 msgid "documents_page_all_documents_filter"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:49
+#: src/app/[lang]/documents/page.tsx:56
 msgid "documents_page_contributors_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:72
+#: src/app/[lang]/documents/page.tsx:70
+msgid "documents_page_date_column"
+msgstr ""
+
+#: src/app/[lang]/documents/page.tsx:84
+msgid "documents_page_halStatus_column"
+msgstr ""
+
+#: src/app/[lang]/documents/page.tsx:107
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:78
+#: src/app/[lang]/documents/page.tsx:113
 msgid "documents_page_keywords_to_validate"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:136
+#: src/app/[lang]/documents/page.tsx:171
 msgid "documents_page_main_title"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:140
+#: src/app/[lang]/documents/page.tsx:77
+msgid "documents_page_publishedIn_column"
+msgstr ""
+
+#: src/app/[lang]/documents/page.tsx:175
 msgid "documents_page_synchronize_button"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:35
+#: src/app/[lang]/documents/page.tsx:42
 msgid "documents_page_title_column"
+msgstr ""
+
+#: src/app/[lang]/documents/page.tsx:35
+msgid "documents_page_type_column"
+msgstr ""
+
+#: src/app/[lang]/documents/page.tsx:91
+msgid "documents_page_version_column"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -82,7 +102,7 @@ msgstr ""
 msgid "hello"
 msgstr "Hello"
 
-#: src/app/[lang]/documents/page.tsx:42
+#: src/app/[lang]/documents/page.tsx:49
 msgid "no_title_available"
 msgstr ""
 

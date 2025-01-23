@@ -43,33 +43,53 @@ msgstr "Retour à la page d'accueil"
 msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
-#: src/app/[lang]/documents/page.tsx:67
+#: src/app/[lang]/documents/page.tsx:102
 msgid "documents_page_all_documents_filter"
 msgstr "Toutes mes publications"
 
-#: src/app/[lang]/documents/page.tsx:49
+#: src/app/[lang]/documents/page.tsx:56
 msgid "documents_page_contributors_column"
 msgstr "auteurs"
 
-#: src/app/[lang]/documents/page.tsx:72
+#: src/app/[lang]/documents/page.tsx:70
+msgid "documents_page_date_column"
+msgstr "Date"
+
+#: src/app/[lang]/documents/page.tsx:84
+msgid "documents_page_halStatus_column"
+msgstr "Statut hal"
+
+#: src/app/[lang]/documents/page.tsx:107
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "Dépôt HAL incomplet"
 
-#: src/app/[lang]/documents/page.tsx:78
+#: src/app/[lang]/documents/page.tsx:113
 msgid "documents_page_keywords_to_validate"
 msgstr "Mots-clés à valider"
 
-#: src/app/[lang]/documents/page.tsx:136
+#: src/app/[lang]/documents/page.tsx:171
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:140
+#: src/app/[lang]/documents/page.tsx:77
+msgid "documents_page_publishedIn_column"
+msgstr "paru dans"
+
+#: src/app/[lang]/documents/page.tsx:175
 msgid "documents_page_synchronize_button"
 msgstr "Synchroniser"
 
-#: src/app/[lang]/documents/page.tsx:35
+#: src/app/[lang]/documents/page.tsx:42
 msgid "documents_page_title_column"
 msgstr "titre"
+
+#: src/app/[lang]/documents/page.tsx:35
+msgid "documents_page_type_column"
+msgstr "type"
+
+#: src/app/[lang]/documents/page.tsx:91
+msgid "documents_page_version_column"
+msgstr "versions"
 
 #: src/app/[lang]/not-found.tsx:44
 #: src/app/[lang]/forbidden.tsx:43
@@ -82,7 +102,7 @@ msgstr "titre"
 msgid "hello"
 msgstr "Bonjour"
 
-#: src/app/[lang]/documents/page.tsx:42
+#: src/app/[lang]/documents/page.tsx:49
 msgid "no_title_available"
 msgstr "aucun titre disponible"
 
