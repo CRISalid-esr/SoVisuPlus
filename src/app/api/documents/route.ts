@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const GET = async (req: NextRequest) => {
   try {
-    // Parse query parameters for pagination, search, and sorting
     const urlParams = req.nextUrl.searchParams
     const searchTerm = urlParams.get('searchTerm') || ''
     const page = urlParams.get('page') || '1'
@@ -12,13 +11,12 @@ export const GET = async (req: NextRequest) => {
     const lang = urlParams.get('searchLang') || 'en'
     const columnFilters = urlParams.get('columnFilters')
       ? JSON.parse(urlParams.get('columnFilters') || '[]')
-      : [] // Column-specific filters
+      : []
     const sorting = urlParams.get('sorting')
       ? JSON.parse(urlParams.get('sorting') || '[]')
-      : [] // Sorting parameters
+      : []
     const skip = (pageNumber - 1) * Number(pageSize)
 
-    // Prepare Prisma `where` condition for search
     const where: any = {}
 
     if (searchTerm) {
@@ -32,8 +30,7 @@ export const GET = async (req: NextRequest) => {
       ]
     }
 
-    // Apply column-specific filters (if any)
-    columnFilters.forEach((filter) => {
+    columnFilters.forEach((filter: { id: string; value: string }) => {
       const { id, value } = filter
       if (value) {
         where[id] = { contains: value, mode: 'insensitive' }
@@ -41,29 +38,27 @@ export const GET = async (req: NextRequest) => {
     })
 
     const orderBy: any = {}
-    sorting.forEach((sort) => {
+    sorting.forEach((sort: { id: string; desc: boolean }) => {
       const { id, desc } = sort
       if (id) {
-        // Apply dynamic sorting directly using the id (e.g., 'titles.fr', 'titles.en', etc.)
-        orderBy[id] = desc ? 'desc' : 'asc' // Use the provided id directly for sorting
+        orderBy[id] = desc ? 'desc' : 'asc'
       }
     })
 
-    // Fetch documents with pagination, search, and sorting
     const documents = await prisma.document.findMany({
       where,
       skip,
+      orderBy,
       take: pageSize,
       include: {
         persons: {
           include: {
-            person: true, // Include associated Person data
+            person: true,
           },
         },
       },
     })
 
-    // Count total documents matching the criteria
     const totalDocuments = await prisma.document.count({ where })
 
     return NextResponse.json({
