@@ -43,6 +43,34 @@ msgstr "Retour à la page d'accueil"
 msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
+#: src/app/[lang]/documents/page.tsx:67
+msgid "documents_page_all_documents_filter"
+msgstr "Toutes mes publications"
+
+#: src/app/[lang]/documents/page.tsx:49
+msgid "documents_page_contributors_column"
+msgstr "auteurs"
+
+#: src/app/[lang]/documents/page.tsx:72
+msgid "documents_page_incomplete_hal_repository_filter"
+msgstr "Dépôt HAL incomplet"
+
+#: src/app/[lang]/documents/page.tsx:78
+msgid "documents_page_keywords_to_validate"
+msgstr "Mots-clés à valider"
+
+#: src/app/[lang]/documents/page.tsx:136
+msgid "documents_page_main_title"
+msgstr "Publications"
+
+#: src/app/[lang]/documents/page.tsx:140
+msgid "documents_page_synchronize_button"
+msgstr "Synchroniser"
+
+#: src/app/[lang]/documents/page.tsx:35
+msgid "documents_page_title_column"
+msgstr "titre"
+
 #: src/app/[lang]/not-found.tsx:44
 #: src/app/[lang]/forbidden.tsx:43
 #~ msgid "forbidden_page_back_home"
@@ -54,30 +82,38 @@ msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> 
 msgid "hello"
 msgstr "Bonjour"
 
+#: src/app/[lang]/documents/page.tsx:42
+msgid "no_title_available"
+msgstr "aucun titre disponible"
+
 #: src/app/[lang]/publications/page.tsx:93
-msgid "publications_page_all_publications_filter"
-msgstr "Toutes mes publications"
+#~ msgid "publications_page_all_publications_filter"
+#~ msgstr "Toutes mes publications"
 
 #: src/app/[lang]/publications/page.tsx:98
-msgid "publications_page_incomplete_hal_repository_filter"
-msgstr "Dépôt HAL incomplet"
+#~ msgid "publications_page_incomplete_hal_repository_filter"
+#~ msgstr "Dépôt HAL incomplet"
 
 #: src/app/[lang]/publications/page.tsx:104
-msgid "publications_page_keywords_to_validate"
-msgstr "Mots-clés à valider"
+#~ msgid "publications_page_keywords_to_validate"
+#~ msgstr "Mots-clés à valider"
 
 #: src/app/[lang]/publications/page.tsx:139
-msgid "publications_page_main_title"
-msgstr "Publications"
+#~ msgid "publications_page_main_title"
+#~ msgstr "Publications"
 
 #: src/app/[lang]/publications/page.tsx:143
-msgid "publications_page_synchronize_button"
-msgstr "Synchroniser"
+#~ msgid "publications_page_synchronize_button"
+#~ msgstr "Synchroniser"
 
 #: src/app/[lang]/components/sidebar/Sidebar.tsx:412
 #: src/app/[lang]/dashboard/page.tsx:10
 msgid "side_bar_dashboard"
 msgstr "Tableau de bord"
+
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:461
+msgid "side_bar_documents"
+msgstr "Publications"
 
 #: src/app/[lang]/components/sidebar/Sidebar.tsx:510
 #: src/app/[lang]/expertise/page.tsx:10
@@ -108,8 +144,8 @@ msgid "side_bar_my_research_activities"
 msgstr "Activités de recherche"
 
 #: src/app/[lang]/components/sidebar/Sidebar.tsx:461
-msgid "side_bar_publications"
-msgstr "Publications"
+#~ msgid "side_bar_publications"
+#~ msgstr "Publications"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:85
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:155
@@ -137,7 +173,7 @@ msgstr "Unités de recherche"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:182
 msgid "sidebar_search_unknown_label"
-msgstr ""
+msgstr "label inconnu"
 
 #: src/app/[lang]/components/sidebar/Sidebar.tsx:115
 #: src/app/[lang]/components/sidebar/Sidebar.tsx:138
