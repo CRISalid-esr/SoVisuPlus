@@ -16,6 +16,7 @@ import SyncIcon from '@mui/icons-material/Sync'
 import useStore from '@/stores/global_store'
 import * as Lingui from '@lingui/core'
 import { Person } from '@/types/Person'
+import Highlighter from 'react-highlight-words'
 
 export default function DocumentsPage() {
   const [pagination, setPagination] = useState({
@@ -48,7 +49,14 @@ export default function DocumentsPage() {
           ['en'],
           t`no_title_available`,
         )
-        return localizedTitle
+        return (
+          <Highlighter
+            highlightClassName='highlight'
+            searchWords={[globalFilter]}
+            autoEscape
+            textToHighlight={localizedTitle}
+          />
+        )
       },
     },
     {
