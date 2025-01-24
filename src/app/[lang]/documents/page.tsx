@@ -21,9 +21,8 @@ import Highlighter from 'react-highlight-words'
 export default function DocumentsPage() {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10, // customize the default page size
+    pageSize: 10,
   })
-
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
   const [sorting, setSorting] = useState<MRT_SortingState>([])
@@ -34,7 +33,7 @@ export default function DocumentsPage() {
     {
       accessorKey: 'type',
       header: t`documents_page_type_column`,
-      Cell({ row }: { row: { original: { type: string } } }) {
+      Cell() {
         return <ArticleIcon />
       },
     },
@@ -81,28 +80,28 @@ export default function DocumentsPage() {
     {
       accessorKey: 'date',
       header: t`documents_page_date_column`,
-      Cell({ row }: { row: { original: { type: string } } }) {
+      Cell() {
         return ''
       },
     },
     {
       accessorKey: 'publishedIn',
       header: t`documents_page_publishedIn_column`,
-      Cell({ row }: { row: { original: { doi: string } } }) {
+      Cell() {
         return ''
       },
     },
     {
       accessorKey: 'halStatus',
       header: t`documents_page_halStatus_column`,
-      Cell({ row }: { row: { original: { doi: string } } }) {
+      Cell() {
         return ''
       },
     },
     {
       accessorKey: 'version',
       header: t`documents_page_version_column`,
-      Cell({ row }: { row: { original: { doi: string } } }) {
+      Cell() {
         return ''
       },
     },
