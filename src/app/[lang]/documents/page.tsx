@@ -64,12 +64,17 @@ export default function DocumentsPage() {
       header: t`documents_page_contributors_column`,
       Cell({ row }: { row: { original: { contributions: Array<Person> } } }) {
         const contributors = row.original.persons
-        return contributors.reduce((acc, { person }, index) => {
-          const separator = index > 0 ? ', ' : ''
-          if (person.firstName && person.lastName) {
-            return `${acc}${separator}${person.firstName} ${person.lastName}`
+        return contributors.reduce((acc: string, { person }) => {
+          const { firstName, lastName } = person
+          const name = [firstName, lastName].filter(Boolean).join(' ')
+          if (name) {
+            if (acc) {
+              return `${acc}, ${name}`
+            }
+            return name
           }
-          return `${acc}`
+
+          return acc
         }, '')
       },
     },
