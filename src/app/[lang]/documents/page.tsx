@@ -61,10 +61,9 @@ export default function DocumentsPage() {
     {
       accessorKey: 'persons',
       header: t`documents_page_contributors_column`,
-      Cell({ row }: { row: { original: { contributions: Array<Person> } } }) {
+      Cell({ row }: { row: { original: { persons: Array<Person> } } }) {
         const contributors = row.original.persons
-        return contributors.reduce((acc: string, { person }) => {
-          const { firstName, lastName } = person
+        return contributors.reduce((acc: string, { firstName, lastName }) => {
           const name = [firstName, lastName].filter(Boolean).join(' ')
           if (name) {
             if (acc) {

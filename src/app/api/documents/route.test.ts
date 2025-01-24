@@ -26,8 +26,20 @@ jest.mock('next/server', () => ({
 describe('GET /api/documents', () => {
   it('should return a list of documents', async () => {
     const mockDocuments: Document[] = [
-      { id: 1, title: 'Document A', persons: [] },
-      { id: 2, title: 'Document B', persons: [] },
+      {
+        id: 1, titles: {
+          en: 'Document A',
+          fr: 'Document A',
+        },
+        uid: ''
+      },
+      {
+        id: 2, titles: {
+          en: 'Document B',
+          fr: 'Document B',
+        },
+        uid: ''
+      },
     ]
     const mockCount = 2
 

@@ -8,7 +8,14 @@ export default function StoreChecker() {
   const fetchDocuments = useStore((state) => state.document.fetchDocuments)
   const [failure, setFailure] = useState<boolean>(false)
   useEffect(() => {
-    fetchDocuments().then(() => {
+    fetchDocuments({
+      page: 1,
+      searchTerm: '',
+      pageSize: 0,
+      columnFilters: '',
+      searchLang: '',
+      sorting: ''
+    }).then(() => {
       setFailure(false)
     })
   }, [fetchDocuments])
