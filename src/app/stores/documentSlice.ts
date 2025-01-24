@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand'
-import { Document } from '@prisma/client'
+import { Document } from '@/types/Document'
 import { toQueryString } from '@/utils/query'
 import { BaseQuery } from '@/types/BaseQuery'
 

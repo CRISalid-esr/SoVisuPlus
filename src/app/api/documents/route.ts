@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const GET = async (req: NextRequest) => {
@@ -17,14 +18,14 @@ export const GET = async (req: NextRequest) => {
       : []
     const skip = (pageNumber - 1) * Number(pageSize)
 
-    const where: any = {}
+    const where: Prisma.DocumentWhereInput = {}
 
     if (searchTerm) {
-      where.OR = [
+      where['OR'] = [
         {
           titles: {
             path: [lang],
-            string_contains: searchTerm.toLowerCase() as string,
+            string_contains: searchTerm.toLowerCase(),
           },
         },
       ]
@@ -32,12 +33,13 @@ export const GET = async (req: NextRequest) => {
 
     columnFilters.forEach((filter: { id: string; value: string }) => {
       const { id, value } = filter
-      if (value) {
-        where[id] = { contains: value, mode: 'insensitive' }
+      if (value && id in where) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(where as any)[id] = { contains: value, mode: 'insensitive' }
       }
     })
 
-    const orderBy: any = {}
+    const orderBy: { [x: string]: string } = {}
     sorting.forEach((sort: { id: string; desc: boolean }) => {
       const { id, desc } = sort
       if (id) {

@@ -4,6 +4,7 @@ import { t, Trans } from '@lingui/macro'
 import { Box, Button, Typography } from '@mui/material'
 import {
   MaterialReactTable,
+  MRT_ColumnDef,
   MRT_ColumnFiltersState,
   MRT_SortingState,
 } from 'material-react-table'
@@ -29,83 +30,6 @@ export default function DocumentsPage() {
 
   const lang = Lingui.i18n.locale
 
-  const columns = [
-    {
-      accessorKey: 'type',
-      header: t`documents_page_type_column`,
-      Cell() {
-        return <ArticleIcon />
-      },
-    },
-    {
-      accessorKey: `titles.${lang}`, // access nested data with dot notation
-      header: t`documents_page_title_column`,
-      Cell({ row }: { row: { original: { titles: Record<string, string> } } }) {
-        const titles = row.original.titles
-        const localizedTitle = getLocalizedValue(
-          titles,
-          lang,
-          ['en'],
-          t`no_title_available`,
-        )
-        return (
-          <Highlighter
-            highlightClassName='highlight'
-            searchWords={[globalFilter]}
-            autoEscape
-            textToHighlight={localizedTitle}
-          />
-        )
-      },
-    },
-    {
-      accessorKey: 'persons',
-      header: t`documents_page_contributors_column`,
-      Cell({ row }: { row: { original: { persons: Array<Person> } } }) {
-        const contributors = row.original.persons
-        return contributors.reduce((acc: string, { firstName, lastName }) => {
-          const name = [firstName, lastName].filter(Boolean).join(' ')
-          if (name) {
-            if (acc) {
-              return `${acc}, ${name}`
-            }
-            return name
-          }
-
-          return acc
-        }, '')
-      },
-    },
-    {
-      accessorKey: 'date',
-      header: t`documents_page_date_column`,
-      Cell() {
-        return ''
-      },
-    },
-    {
-      accessorKey: 'publishedIn',
-      header: t`documents_page_publishedIn_column`,
-      Cell() {
-        return ''
-      },
-    },
-    {
-      accessorKey: 'halStatus',
-      header: t`documents_page_halStatus_column`,
-      Cell() {
-        return ''
-      },
-    },
-    {
-      accessorKey: 'version',
-      header: t`documents_page_version_column`,
-      Cell() {
-        return ''
-      },
-    },
-  ]
-
   const theme = useTheme()
 
   const tabs = [
@@ -130,7 +54,89 @@ export default function DocumentsPage() {
 
   const [selectedTab, setSelectedTab] = useState(tabs[0].value)
 
-  const memoizedColumns = useMemo(() => columns, [columns])
+  const columns = useMemo<MRT_ColumnDef<Document>[]>(
+    () => [
+      {
+        accessorKey: 'type',
+        header: t`documents_page_type_column`,
+        Cell() {
+          return <ArticleIcon />
+        },
+      },
+      {
+        accessorKey: `titles.${lang}`, // access nested data with dot notation
+        header: t`documents_page_title_column`,
+        Cell({
+          row,
+        }: {
+          row: { original: { titles: Record<string, string> } }
+        }) {
+          const titles = row.original.titles
+          const localizedTitle = getLocalizedValue(
+            titles,
+            lang,
+            ['en'],
+            t`no_title_available`,
+          )
+          return (
+            <Highlighter
+              highlightClassName='highlight'
+              searchWords={[globalFilter]}
+              autoEscape
+              textToHighlight={localizedTitle}
+            />
+          )
+        },
+      },
+      {
+        accessorKey: 'persons',
+        header: t`documents_page_contributors_column`,
+        Cell({ row }: { row: { original: { persons: Array<Person> } } }) {
+          const contributors = row.original.persons
+          return contributors.reduce((acc: string, { firstName, lastName }) => {
+            const name = [firstName, lastName].filter(Boolean).join(' ')
+            if (name) {
+              if (acc) {
+                return `${acc}, ${name}`
+              }
+              return name
+            }
+
+            return acc
+          }, '')
+        },
+      },
+      {
+        accessorKey: 'date',
+        header: t`documents_page_date_column`,
+        Cell() {
+          return ''
+        },
+      },
+      {
+        accessorKey: 'publishedIn',
+        header: t`documents_page_publishedIn_column`,
+        Cell() {
+          return ''
+        },
+      },
+      {
+        accessorKey: 'halStatus',
+        header: t`documents_page_halStatus_column`,
+        Cell() {
+          return ''
+        },
+      },
+      {
+        accessorKey: 'version',
+        header: t`documents_page_version_column`,
+        Cell() {
+          return ''
+        },
+      },
+    ],
+    [],
+  )
 
   const {
     fetchDocuments,
@@ -196,7 +202,7 @@ export default function DocumentsPage() {
         manualFiltering
         manualPagination
         manualSorting
-        columns={memoizedColumns}
+        columns={columns}
         rowCount={totalItems}
         data={documents}
         enablePagination
