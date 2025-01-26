@@ -1,6 +1,6 @@
 import {
-  PersonIdentifierType as DbPersonIdentifierType,
   Person as DbPerson,
+  PersonIdentifierType as DbPersonIdentifierType,
 } from '@prisma/client'
 import { Person } from '@/types/Person'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
@@ -71,6 +71,7 @@ export class PersonDAO extends AbstractDAO {
       )
     }
   }
+
   /**
    * Upsert PersonIdentifiers for a given person
    * @param identifiers - The list of identifiers to upsert
@@ -106,7 +107,7 @@ export class PersonDAO extends AbstractDAO {
           console.warn('Retrying identifier upsert...')
           await this.upsertIdentifiers(identifiers, personId, retries + 1)
         } else {
-          throw new Error('Failed to upsert identifiers after 3 retries')
+          console.error('Failed to upsert identifiers after 3 retries')
         }
       } else {
         throw new Error(

@@ -3,9 +3,12 @@ import AmqpConnection from '@/lib/amqp/AmqpConnection'
 import MessageProcessingService from '@/lib/amqp/services/MessageProcessingService'
 import { AMQPMessage } from '@/types/AMQPMessage'
 import { AMQPEntityData } from '@/types/AMQPEntityData'
+import { Sema } from 'async-sema'
 
 dotenv.config()
 ;(async () => {
+  // Migrate to application configuration
+  const semaphore = new Sema(5)
   try {
     console.log('Connecting to RabbitMQ...')
     const connection = new AmqpConnection()
@@ -13,13 +16,16 @@ dotenv.config()
     console.log('Connected to RabbitMQ')
     const processingService = MessageProcessingService.getInstance()
 
-    await connection.consume((msg: string) => {
+    await connection.consume(async (msg: string) => {
       try {
         const parsedMessage: AMQPMessage<AMQPEntityData> = JSON.parse(msg)
         console.log('Processing message:', parsedMessage)
-        processingService.processMessage(parsedMessage)
+        await semaphore.acquire()
+        await processingService.processMessage(parsedMessage)
       } catch (parseError) {
         console.error('Failed to parse or process message:', parseError)
+      } finally {
+        semaphore.release()
       }
     })
   } catch (error) {

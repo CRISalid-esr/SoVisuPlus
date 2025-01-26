@@ -7,6 +7,7 @@ import {
   OperationVariables,
 } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
+import { RetryLink } from '@apollo/client/link/retry'
 
 export class AbstractGraphQLClient {
   private readonly client: ApolloClient<NormalizedCacheObject>
@@ -49,8 +50,10 @@ export class AbstractGraphQLClient {
       return { headers }
     })
 
+    const link = new RetryLink()
+
     this.client = new ApolloClient({
-      link: authLink.concat(httpLink),
+      link: link.concat(authLink.concat(httpLink)),
       cache: new InMemoryCache(),
     })
   }
