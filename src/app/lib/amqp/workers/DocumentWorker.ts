@@ -23,13 +23,17 @@ export class DocumentWorker extends MessageProcessingWorker<AMQPDocumentMessage>
    * Process a document message by fetching data from the graph and updating the database
    */
   public async process(): Promise<void> {
+    if (!this.message.fields) {
+      console.warn('No fields found in document message')
+      return
+    }
     const { uid } = this.message.fields
-    console.log(`Processing document with UID: ${uid}`)
 
     if (!uid) {
       console.warn('No UID found in document message')
       return
     }
+    console.log(`Processing document with UID: ${uid}`)
 
     const document: Document | null =
       await this.documentGraphQLClient.getDocumentByUid(uid)
