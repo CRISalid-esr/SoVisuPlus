@@ -1,17 +1,18 @@
+import { Literal } from '@/types/Literal'
+
 export function getLocalizedValue(
-  data: Record<string, string>,
+  data: Literal[],
   lang: string,
   fallbackLangs: string[],
   defaultValue: string,
 ): string {
-  // Check the value for the current language
-  if (data[lang]) return data[lang]
+  const preferred = data?.find((literal) => literal.language === lang)
+  if (preferred) return preferred.value
 
-  // Iterate through fallback languages
   for (const fallbackLang of fallbackLangs) {
-    if (data[fallbackLang]) return data[fallbackLang]
+    const fallback = data?.find((literal) => literal.language === fallbackLang)
+    if (fallback) return fallback.value
   }
 
-  // Return the default value if nothing is found
   return defaultValue
 }

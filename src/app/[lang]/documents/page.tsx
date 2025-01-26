@@ -16,7 +16,6 @@ import { useTheme } from '@mui/system'
 import SyncIcon from '@mui/icons-material/Sync'
 import useStore from '@/stores/global_store'
 import * as Lingui from '@lingui/core'
-import { Person } from '@/types/Person'
 import Highlighter from 'react-highlight-words'
 
 export default function DocumentsPage() {
@@ -66,11 +65,7 @@ export default function DocumentsPage() {
       {
         accessorKey: `titles.${lang}`, // access nested data with dot notation
         header: t`documents_page_title_column`,
-        Cell({
-          row,
-        }: {
-          row: { original: { titles: Record<string, string> } }
-        }) {
+        Cell({ row }: { row: { original: { titles: Literal[] } } }) {
           const titles = row.original.titles
           const localizedTitle = getLocalizedValue(
             titles,
@@ -91,8 +86,14 @@ export default function DocumentsPage() {
       {
         accessorKey: 'persons',
         header: t`documents_page_contributors_column`,
-        Cell({ row }: { row: { original: { persons: Array<Person> } } }) {
-          const contributors = row.original.persons
+        Cell({
+          row,
+        }: {
+          row: { original: { contributions: Array<Contribution> } }
+        }) {
+          const contributors = row.original.contributions.map(
+            (contribution) => contribution.person,
+          )
           return contributors.reduce((acc: string, { firstName, lastName }) => {
             const name = [firstName, lastName].filter(Boolean).join(' ')
             if (name) {

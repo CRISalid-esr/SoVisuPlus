@@ -24,8 +24,13 @@ export const GET = async (req: NextRequest) => {
       where['OR'] = [
         {
           titles: {
-            path: [lang],
-            string_contains: searchTerm.toLowerCase(),
+            some: {
+              language: lang,
+              value: {
+                contains: searchTerm,
+                mode: QueryMode.insensitive,
+              },
+            },
           },
         },
       ]
@@ -53,7 +58,9 @@ export const GET = async (req: NextRequest) => {
       orderBy,
       take: pageSize,
       include: {
-        persons: {
+        titles: true,
+        abstracts: true,
+        contributions: {
           include: {
             person: true,
           },

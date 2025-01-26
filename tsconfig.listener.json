@@ -21,6 +21,7 @@
       "@/theme/*": ["src/theme/*"],
       "@/public/*": ["public/*"],
       "@/middlewares/*": ["src/middlewares/*"],
+      "@/prisma-schema/*": ["prisma/*"],
       "@/*": ["src/*"]
     }
   },

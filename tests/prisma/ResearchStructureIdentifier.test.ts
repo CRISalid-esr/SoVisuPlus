@@ -1,88 +1,126 @@
+// file: tests/prisma/ResearchStructure.test.ts
 import prisma from '@/lib/daos/prisma'
 
-describe('ResearchIdentifier Model Tests', () => {
+describe('ResearchStructure Model Tests', () => {
+  beforeEach(async () => {
+    // Clear the database before each test
+    await prisma.researchStructure.deleteMany()
+    await prisma.researchStructureName.deleteMany()
+    await prisma.researchStructureDescription.deleteMany()
+  })
+
   afterAll(async () => {
+    // Disconnect Prisma after all tests
     await prisma.$disconnect()
   })
 
-  afterEach(async () => {
-    await prisma.researchStructureIdentifier.deleteMany()
-    await prisma.researchStructure.deleteMany()
-  })
-
-  test('should create a ResearchIdentifier for a research structure', async () => {
+  test('should create a new research structure with names and descriptions', async () => {
     const researchStructure = await prisma.researchStructure.create({
       data: {
-        uid: 'rs-789',
-        acronym: 'DEF',
+        uid: 'rs-123',
+        acronym: 'ABC',
         names: {
-          en: 'Data Science Institute',
-          fr: 'Institut des sciences des données',
+          create: [
+            { value: 'International Research Center', language: 'en' },
+            { value: 'Centre de recherche international', language: 'fr' },
+          ],
         },
         descriptions: {
-          en: 'Focuses on data-driven research.',
-          fr: 'Axé sur la recherche basée sur les données.',
+          create: [
+            { value: 'A leading research center.', language: 'en' },
+            { value: 'Un centre de recherche de pointe.', language: 'fr' },
+          ],
         },
       },
+      include: { names: true, descriptions: true },
     })
 
-    const researchStructureIdentifier =
-      await prisma.researchStructureIdentifier.create({
-        data: {
-          type: 'RNSR',
-          value: '98765',
-          researchStructure: {
-            connect: {
-              id: researchStructure.id,
-            },
-          },
-        },
-      })
-
-    expect(researchStructureIdentifier).toHaveProperty('id')
-    expect(researchStructureIdentifier.value).toBe('98765')
-    expect(researchStructureIdentifier.researchStructureId).toBe(
-      researchStructure.id,
+    expect(researchStructure).toHaveProperty('id')
+    expect(researchStructure.uid).toBe('rs-123')
+    expect(researchStructure.acronym).toBe('ABC')
+    expect(researchStructure.names).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          value: 'International Research Center',
+          language: 'en',
+        }),
+        expect.objectContaining({
+          value: 'Centre de recherche international',
+          language: 'fr',
+        }),
+      ]),
+    )
+    expect(researchStructure.descriptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          value: 'A leading research center.',
+          language: 'en',
+        }),
+        expect.objectContaining({
+          value: 'Un centre de recherche de pointe.',
+          language: 'fr',
+        }),
+      ]),
     )
   })
 
-  test('should fetch a ResearchIdentifier for a research structure', async () => {
-    const researchStructure = await prisma.researchStructure.create({
+  test('should find a research structure by UID with names and descriptions', async () => {
+    await prisma.researchStructure.create({
       data: {
-        uid: 'rs-101',
-        acronym: 'GHI',
-        names: { en: 'AI Research Hub', fr: 'Pôle de recherche en IA' },
+        uid: 'rs-456',
+        acronym: 'XYZ',
+        names: {
+          create: [
+            { value: 'Space Research Lab', language: 'en' },
+            { value: 'Laboratoire de recherche spatiale', language: 'fr' },
+          ],
+        },
         descriptions: {
-          en: 'Hub for artificial intelligence research.',
-          fr: 'Pôle axé sur la recherche en intelligence artificielle.',
+          create: [
+            {
+              value: 'Research lab focusing on space exploration.',
+              language: 'en',
+            },
+            {
+              value: 'Laboratoire axé sur l’exploration spatiale.',
+              language: 'fr',
+            },
+          ],
         },
       },
     })
 
-    const researchStructureIdentifier =
-      await prisma.researchStructureIdentifier.create({
-        data: {
-          type: 'LOCAL',
-          value: '54321',
-          researchStructure: {
-            connect: {
-              id: researchStructure.id,
-            },
-          },
-        },
-      })
+    const foundStructure = await prisma.researchStructure.findUnique({
+      where: { uid: 'rs-456' },
+      include: { names: true, descriptions: true },
+    })
 
-    const fetchedIdentifier =
-      await prisma.researchStructureIdentifier.findUnique({
-        where: {
-          type_value: {
-            type: researchStructureIdentifier.type,
-            value: researchStructureIdentifier.value,
-          },
-        },
-      })
-
-    expect(fetchedIdentifier).not.toBeNull()
-    expect(fetchedIdentifier?.value).toBe('54321')
+    expect(foundStructure).not.toBeNull()
+    expect(foundStructure?.uid).toBe('rs-456')
+    expect(foundStructure?.acronym).toBe('XYZ')
+    expect(foundStructure?.names).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          value: 'Space Research Lab',
+          language: 'en',
+        }),
+        expect.objectContaining({
+          value: 'Laboratoire de recherche spatiale',
+          language: 'fr',
+        }),
+      ]),
+    )
+    expect(foundStructure?.descriptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          value: 'Research lab focusing on space exploration.',
+          language: 'en',
+        }),
+        expect.objectContaining({
+          value: 'Laboratoire axé sur l’exploration spatiale.',
+          language: 'fr',
+        }),
+      ]),
+    )
   })
 })

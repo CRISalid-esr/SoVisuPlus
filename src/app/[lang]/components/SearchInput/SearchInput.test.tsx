@@ -33,7 +33,11 @@ describe('SearchInput Component', () => {
       fetchResearchStructuresByName: mockFetchResearchStructuresByName,
       loading: false,
       researchStructures: [
-        { id: '2', names: { en: 'Lab X' }, type: 'researchStructures' },
+        {
+          id: '2',
+          names: [{ value: 'Lab X', language: 'en' }],
+          type: 'researchStructures',
+        },
       ],
       hasMore: true,
       total: 1,

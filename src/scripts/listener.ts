@@ -8,7 +8,7 @@ import { Sema } from 'async-sema'
 dotenv.config()
 ;(async () => {
   // Migrate to application configuration
-  const semaphore = new Sema(5)
+  const semaphore = new Sema(1)
   try {
     console.log('Connecting to RabbitMQ...')
     const connection = new AmqpConnection()
