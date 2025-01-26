@@ -5,6 +5,8 @@ import {
 } from '@/types/PersonIdentifier'
 import { Person } from '@/types/Person'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
+import { ExternalPerson } from '@/types/ExternalPerson'
+import { InternalPerson } from '@/types/InternalPerson'
 
 enum GraphPersonIdentifierType {
   LOCAL = 'local',
@@ -12,6 +14,7 @@ enum GraphPersonIdentifierType {
   IDREF = 'idref',
   SCOPUS_EID = 'scopus_eid',
   ID_HAL = 'id_hal',
+  ID_HAL_S = 'id_hal_s',
 }
 
 export interface GraphPersonIdentifier {
@@ -101,9 +104,9 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
   }
 
   public hydrate(personData: GraphPersonResponse): Person {
-    return new Person(
+    const personType = personData.external ? ExternalPerson : InternalPerson
+    return new personType(
       personData.uid,
-      personData.external,
       null,
       personData.display_name,
       personData.names[0]?.first_names[0]?.value,
@@ -139,6 +142,8 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
       case GraphPersonIdentifierType.SCOPUS_EID:
         return PersonIdentifierType.SCOPUS_EID
       case GraphPersonIdentifierType.ID_HAL:
+        return PersonIdentifierType.ID_HAL_S
+      case GraphPersonIdentifierType.ID_HAL_S:
         return PersonIdentifierType.ID_HAL_S
       default:
         throw new Error(`Unknown identifier type: ${type}`)

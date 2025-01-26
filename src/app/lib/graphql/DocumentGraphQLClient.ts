@@ -6,6 +6,7 @@ import { GraphPersonResponse, PersonGraphQLClient } from './PersonGraphQLClient'
 interface GraphcontributorResponse {
   contributor: Array<GraphPersonResponse>
 }
+
 interface GraphDocumentResponse {
   uid: string
   titles: Record<string, string>
@@ -39,20 +40,28 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
     if (!documentData) {
       return null
     }
-    return this.hydrate(documentData)
+    // Protect application against potential empty contributions
+    const mutableDocumentData = {
+      ...documentData,
+      has_contributions: documentData.has_contributions.filter(
+        (contributionData) => contributionData.contributor.length > 0,
+      ),
+    }
+
+    return this.hydrate(mutableDocumentData)
   }
 
-  private hydrate(personData: GraphDocumentResponse): Document {
-    const titles = Array.isArray(personData.titles) ? personData.titles : []
+  private hydrate(documentData: GraphDocumentResponse): Document {
+    const titles = Array.isArray(documentData.titles) ? documentData.titles : []
     const transformedTitles = Object.fromEntries(
       titles.map((title) => [title.language, title.value]),
     )
     return new Document(
-      personData.uid,
+      documentData.uid,
       transformedTitles,
-      personData.has_contributions.map(
-        (personData: GraphcontributorResponse) => {
-          const [contributor] = personData.contributor
+      documentData.has_contributions.map(
+        (contributionData: GraphcontributorResponse) => {
+          const [contributor] = contributionData.contributor
           return new PersonGraphQLClient().hydrate(contributor)
         },
       ),

@@ -25,9 +25,16 @@ export class DocumentDAO extends AbstractDAO {
       })
 
       for await (const contribution of contributions) {
-        const person: DbPerson = await new PersonDAO().createOrUpdatePerson(
-          contribution,
-        )
+        let person: DbPerson
+        try {
+          person = await new PersonDAO().createOrUpdatePerson(contribution)
+        } catch (error) {
+          console.error(
+            `Failed to create or update person for contribution: ${contribution}`,
+            error,
+          )
+          continue
+        }
 
         await this.prismaClient.contribution.upsert({
           where: {
