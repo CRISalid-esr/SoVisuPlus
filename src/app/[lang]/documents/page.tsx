@@ -66,7 +66,11 @@ export default function DocumentsPage() {
         },
       },
       {
-        accessorKey: `titles.${lang}`,
+        filterColumn: 'titles',
+        accessorKey: `titles`,
+        accessorFn: (row) => {
+          return row.titles
+        },
         header: t`documents_page_title_column`,
         Cell({ row }: { row: { original: { titles: Array<Literal> } } }) {
           const titles = row.original.titles

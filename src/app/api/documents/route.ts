@@ -39,9 +39,18 @@ export const GET = async (req: NextRequest) => {
 
     columnFilters.forEach((filter: { id: string; value: string }) => {
       const { id, value } = filter
-      if (value && id in where) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ;(where as any)[id] = { contains: value, mode: 'insensitive' }
+
+      switch (id) {
+        case 'titles':
+          where['titles'] = {
+            some: {
+              language: lang,
+              value: { contains: value, mode: QueryMode.insensitive },
+            },
+          }
+          break
+        default:
+          break
       }
     })
 
