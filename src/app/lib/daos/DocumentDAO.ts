@@ -14,14 +14,22 @@ export class DocumentDAO extends AbstractDAO {
     const { uid, titles, abstracts, contributions } = document
 
     try {
-      let dbDocument = await this.prismaClient.document.findUnique({
+      let dbDocument = (await this.prismaClient.document.findUnique({
         where: { uid: uid },
-      })
+        include: {
+          titles: true, // Include related titles
+          abstracts: true, // Include related abstracts
+        },
+      })) as DbDocument | null
 
       if (!dbDocument) {
-        dbDocument = await this.prismaClient.document.create({
+        dbDocument = (await this.prismaClient.document.create({
           data: { uid: uid },
-        })
+          include: {
+            titles: true, // Include related titles
+            abstracts: true, // Include related abstracts
+          },
+        })) as DbDocument
       }
 
       for (const title of titles) {
@@ -64,7 +72,9 @@ export class DocumentDAO extends AbstractDAO {
       for (const contribution of contributions) {
         let person: DbPerson
         try {
-          person = await new PersonDAO().createOrUpdatePerson(contribution)
+          person = await new PersonDAO().createOrUpdatePerson(
+            contribution.person,
+          )
         } catch (error) {
           console.error(
             `Failed to create or update person for contribution: ${contribution}`,
@@ -85,7 +95,6 @@ export class DocumentDAO extends AbstractDAO {
           },
         })
       }
-
       return dbDocument
     } catch (error) {
       console.error('Error during document creation or update:', error as Error)

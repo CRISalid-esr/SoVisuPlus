@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
+import QueryMode = Prisma.QueryMode
 
 export const GET = async (req: NextRequest) => {
   try {

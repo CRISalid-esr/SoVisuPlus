@@ -16,24 +16,43 @@ export class ResearchStructureDAO extends AbstractDAO {
   ): Promise<DbResearchStructure> {
     try {
       let dbResearchStructure =
-        await this.prismaClient.researchStructure.findUnique({
+        (await this.prismaClient.researchStructure.findUnique({
           where: { uid: researchStructure.uid },
-        })
+          include: {
+            names: true,
+            descriptions: true,
+            identifiers: true,
+          },
+        })) as DbResearchStructure | null
 
       if (!dbResearchStructure) {
-        dbResearchStructure = await this.prismaClient.researchStructure.create({
-          data: {
-            uid: researchStructure.uid,
-            acronym: researchStructure.acronym,
+        dbResearchStructure = (await this.prismaClient.researchStructure.create(
+          {
+            data: {
+              uid: researchStructure.uid,
+              acronym: researchStructure.acronym,
+            },
+            include: {
+              names: true,
+              descriptions: true,
+              identifiers: true,
+            },
           },
-        })
+        )) as DbResearchStructure
       } else {
-        dbResearchStructure = await this.prismaClient.researchStructure.update({
-          where: { uid: researchStructure.uid },
-          data: {
-            acronym: researchStructure.acronym,
+        dbResearchStructure = (await this.prismaClient.researchStructure.update(
+          {
+            where: { uid: researchStructure.uid },
+            data: {
+              acronym: researchStructure.acronym,
+            },
+            include: {
+              names: true,
+              descriptions: true,
+              identifiers: true,
+            },
           },
-        })
+        )) as DbResearchStructure
       }
 
       for (const name of researchStructure.names) {
@@ -87,7 +106,6 @@ export class ResearchStructureDAO extends AbstractDAO {
           },
         })
       }
-
       return dbResearchStructure
     } catch (error) {
       console.error('Error during research structure upsert:', error as Error)

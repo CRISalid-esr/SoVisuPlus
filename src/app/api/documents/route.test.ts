@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { GET } from './route'
 import prisma from '@/lib/prisma'
-import { Document } from '@prisma/client'
+import { DocumentWithRelations as DbDocument } from '@/prisma-schema/extended-client'
 
 // Mock Prisma Client
 jest.mock('@/lib/prisma', () => ({
@@ -25,26 +25,34 @@ jest.mock('next/server', () => ({
 
 describe('GET /api/documents', () => {
   it('should return a list of documents', async () => {
-    const mockDocuments: Document[] = [
+    const mockDocuments: DbDocument[] = [
       {
-        id: 1, titles: {
-          en: 'Document A',
-          fr: 'Document A',
-        },
-        uid: ''
+        id: 1,
+        titles: [
+          { value: 'Document A', language: 'en', id: 1, documentId: 1 },
+          { value: 'Document A', language: 'fr', id: 2, documentId: 1 },
+        ],
+        abstracts: [],
+        contributions: [],
+        uid: '',
       },
       {
-        id: 2, titles: {
-          en: 'Document B',
-          fr: 'Document B',
-        },
-        uid: ''
+        id: 2,
+        titles: [
+          { value: 'Document B', language: 'en', id: 3, documentId: 2 },
+          { value: 'Document B', language: 'fr', id: 4, documentId: 2 },
+        ],
+        abstracts: [],
+        contributions: [],
+        uid: '',
       },
     ]
     const mockCount = 2
 
     // Mock Prisma's findMany and count to return mock data
-    ;(prisma.document.findMany as jest.Mock).mockResolvedValueOnce(mockDocuments)
+    ;(prisma.document.findMany as jest.Mock).mockResolvedValueOnce(
+      mockDocuments,
+    )
     ;(prisma.document.count as jest.Mock).mockResolvedValueOnce(mockCount)
 
     // Mock the Next.js request and response
@@ -71,11 +79,13 @@ describe('GET /api/documents', () => {
   })
 
   it('should return empty result when no documents are found', async () => {
-    const mockDocuments: Document[] = []
+    const mockDocuments: DbDocument[] = []
     const mockCount = 0
 
     // Mock Prisma's findMany and count to return empty result
-    ;(prisma.document.findMany as jest.Mock).mockResolvedValueOnce(mockDocuments)
+    ;(prisma.document.findMany as jest.Mock).mockResolvedValueOnce(
+      mockDocuments,
+    )
     ;(prisma.document.count as jest.Mock).mockResolvedValueOnce(mockCount)
 
     // Mock the Next.js request and response
@@ -103,7 +113,9 @@ describe('GET /api/documents', () => {
 
   it('should return a 500 error on Prisma failure', async () => {
     // Mock Prisma's findMany to throw an error
-    ;(prisma.document.findMany as jest.Mock).mockRejectedValueOnce(new Error('DB Error'))
+    ;(prisma.document.findMany as jest.Mock).mockRejectedValueOnce(
+      new Error('DB Error'),
+    )
 
     // Mock the Next.js request and response
     const mockRequest = {

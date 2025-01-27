@@ -65,11 +65,22 @@ describe('ResearchStructureDAO', () => {
     expect(dbResearchStructure.acronym).toEqual('RS001')
     expect(mockPrisma.researchStructure.findUnique).toHaveBeenCalledWith({
       where: { uid: 'local-rs001' },
+      include: {
+        descriptions: true,
+        identifiers: true,
+        names: true,
+      },
     })
     expect(mockPrisma.researchStructure.create).toHaveBeenCalledWith({
       data: {
         uid: researchStructure.uid,
         acronym: researchStructure.acronym,
+      },
+
+      include: {
+        descriptions: true,
+        identifiers: true,
+        names: true,
       },
     })
   })

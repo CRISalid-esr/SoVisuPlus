@@ -3,8 +3,9 @@ import { Document } from '@/types/Document'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
 import { GraphPersonResponse, PersonGraphQLClient } from './PersonGraphQLClient'
 import { Literal } from '@/types/Literal'
+import { Contribution } from '@/types/Contribution'
 
-interface GraphContributorResponse {
+interface GraphContributionResponse {
   contributor: Array<GraphPersonResponse>
 }
 
@@ -12,7 +13,7 @@ interface GraphDocumentResponse {
   uid: string
   titles: { language: string; value: string }[]
   abstracts: { language: string; value: string }[]
-  has_contributions: Array<GraphContributorResponse>
+  has_contributions: Array<GraphContributionResponse>
 }
 
 export interface GraphDocumentsResponse {
@@ -60,9 +61,10 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
       titles.map(Literal.fromObject),
       abstracts.map(Literal.fromObject),
       documentData.has_contributions.map(
-        (contributionData: GraphContributorResponse) => {
+        (contributionData: GraphContributionResponse) => {
           const [contributor] = contributionData.contributor
-          return new PersonGraphQLClient().hydrate(contributor)
+          const person = new PersonGraphQLClient().hydrate(contributor)
+          return new Contribution(person)
         },
       ),
     )

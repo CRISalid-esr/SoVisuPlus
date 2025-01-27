@@ -51,8 +51,8 @@ class ResearchStructure implements IAgent {
     return new ResearchStructure(
       researchStructure.uid,
       researchStructure.acronym,
-      researchStructure.names,
-      researchStructure.descriptions,
+      researchStructure.names.map(Literal.fromObject),
+      researchStructure.descriptions.map(Literal.fromObject),
       'identifiers' in researchStructure
         ? (researchStructure.identifiers as ResearchStructureIdentifier[])
         : [],
