@@ -139,7 +139,7 @@ export default function DocumentsPage() {
         },
       },
     ],
-    [],
+    [lang, globalFilter],
   )
 
   const {
@@ -157,6 +157,8 @@ export default function DocumentsPage() {
       columnFilters: JSON.stringify(columnFilters),
       sorting: JSON.stringify(sorting),
       searchLang: lang,
+    }).catch((error) => {
+      console.error('Error fetching documents:', error)
     })
   }, [
     columnFilters,
@@ -164,6 +166,8 @@ export default function DocumentsPage() {
     pagination.pageIndex,
     pagination.pageSize,
     sorting,
+    lang,
+    fetchDocuments,
   ])
 
   const handleTabChange = (newValue: string) => {
