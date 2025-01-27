@@ -17,6 +17,9 @@ import SyncIcon from '@mui/icons-material/Sync'
 import useStore from '@/stores/global_store'
 import * as Lingui from '@lingui/core'
 import Highlighter from 'react-highlight-words'
+import { Literal } from '@/types/Literal'
+import { Contribution } from '@/types/Contribution'
+import { Document } from '@/types/Document'
 
 export default function DocumentsPage() {
   const [pagination, setPagination] = useState({
@@ -63,9 +66,9 @@ export default function DocumentsPage() {
         },
       },
       {
-        accessorKey: `titles.${lang}`, // access nested data with dot notation
+        accessorKey: `titles.${lang}`,
         header: t`documents_page_title_column`,
-        Cell({ row }: { row: { original: { titles: Literal[] } } }) {
+        Cell({ row }: { row: { original: { titles: Array<Literal> } } }) {
           const titles = row.original.titles
           const localizedTitle = getLocalizedValue(
             titles,

@@ -14,7 +14,7 @@ export interface DocumentQuery extends BaseQuery {
 
 export interface DocumentSlice {
   document: {
-    documents: Document[]
+    documents: Array<Document>
     totalItems?: number
     loading: boolean
     error: string | null | unknown
