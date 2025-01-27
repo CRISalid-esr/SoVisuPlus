@@ -7,6 +7,7 @@ import {
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
   MRT_SortingState,
+  MRT_Column,
 } from 'material-react-table'
 import { useEffect, useMemo, useState } from 'react'
 import ArticleIcon from '@mui/icons-material/Article'
@@ -72,7 +73,13 @@ export default function DocumentsPage() {
           return row.titles
         },
         header: t`documents_page_title_column`,
-        Cell({ row }: { row: { original: { titles: Array<Literal> } } }) {
+        Cell({
+          row,
+          column,
+        }: {
+          row: { original: { titles: Array<Literal> } }
+          column: MRT_Column<Document>
+        }) {
           const titles = row.original.titles
           const localizedTitle = getLocalizedValue(
             titles,
@@ -80,10 +87,11 @@ export default function DocumentsPage() {
             ['en'],
             t`no_title_available`,
           )
+          const filterValue = column.getFilterValue()
           return (
             <Highlighter
               highlightClassName='highlight'
-              searchWords={[globalFilter]}
+              searchWords={[globalFilter, filterValue as string]}
               autoEscape
               textToHighlight={localizedTitle}
             />
