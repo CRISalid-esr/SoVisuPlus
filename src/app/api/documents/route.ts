@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
+import QueryMode = Prisma.QueryMode
 
 export const GET = async (req: NextRequest) => {
   try {
@@ -24,8 +25,13 @@ export const GET = async (req: NextRequest) => {
       where['OR'] = [
         {
           titles: {
-            path: [lang],
-            string_contains: searchTerm.toLowerCase(),
+            some: {
+              language: lang,
+              value: {
+                contains: searchTerm,
+                mode: QueryMode.insensitive,
+              },
+            },
           },
         },
       ]
@@ -53,7 +59,9 @@ export const GET = async (req: NextRequest) => {
       orderBy,
       take: pageSize,
       include: {
-        persons: {
+        titles: true,
+        abstracts: true,
+        contributions: {
           include: {
             person: true,
           },

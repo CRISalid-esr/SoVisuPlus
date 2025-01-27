@@ -7,8 +7,8 @@ describe('ResearchStructure', () => {
     const validResearchStructure = new ResearchStructure(
       'RS123',
       'ABC',
-      { en: 'Valid Research Structure' },
-      { en: 'Valid Description' },
+      [{ value: 'Valid Research Structure', language: 'en' }],
+      [{ value: 'Valid Description', language: 'en' }],
       [
         { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
         { type: ResearchStructureIdentifierType.ROR, value: '67890' },
@@ -19,12 +19,18 @@ describe('ResearchStructure', () => {
     expect(validResearchStructure).toBeInstanceOf(ResearchStructure)
     expect(validResearchStructure.uid).toBe('RS123')
     expect(validResearchStructure.acronym).toBe('ABC')
-    expect(validResearchStructure.names).toEqual({
-      en: 'Valid Research Structure',
-    })
-    expect(validResearchStructure.descriptions).toEqual({
-      en: 'Valid Description',
-    })
+    expect(validResearchStructure.names).toEqual([
+      {
+        value: 'Valid Research Structure',
+        language: 'en',
+      },
+    ])
+    expect(validResearchStructure.descriptions).toEqual([
+      {
+        value: 'Valid Description',
+        language: 'en',
+      },
+    ])
     expect(validResearchStructure.identifiers).toEqual([
       { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
       { type: ResearchStructureIdentifierType.ROR, value: '67890' },
@@ -37,8 +43,8 @@ describe('ResearchStructure', () => {
       new ResearchStructure(
         'RS456',
         'DEF',
-        { en: 'Invalid Research Structure' },
-        { en: 'Invalid Description' },
+        [{ value: 'Invalid Research Structure', language: 'en' }],
+        [{ value: 'Invalid Description', language: 'en' }],
         [
           {
             type: 'INVALID_TYPE' as ResearchStructureIdentifierType,
@@ -57,11 +63,34 @@ describe('ResearchStructure', () => {
       id: 1,
       uid: 'RS123',
       acronym: 'ABC',
-      names: { en: 'Research Structure', fr: 'Structure de Recherche' },
-      descriptions: {
-        en: 'Description in English',
-        fr: 'Description en Français',
-      },
+      names: [
+        {
+          value: 'Research Structure',
+          language: 'en',
+          id: 1,
+          researchStructureId: 1,
+        },
+        {
+          value: 'Structure de Recherche',
+          language: 'fr',
+          id: 2,
+          researchStructureId: 1,
+        },
+      ],
+      descriptions: [
+        {
+          value: 'Description in English',
+          language: 'en',
+          id: 3,
+          researchStructureId: 1,
+        },
+        {
+          value: 'Description en Français',
+          language: 'fr',
+          id: 4,
+          researchStructureId: 1,
+        },
+      ],
       identifiers: [
         { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
         { type: ResearchStructureIdentifierType.RNSR, value: '67890' },
@@ -74,14 +103,30 @@ describe('ResearchStructure', () => {
     expect(result).toBeInstanceOf(ResearchStructure)
     expect(result.uid).toBe('RS123')
     expect(result.acronym).toBe('ABC')
-    expect(result.names).toEqual({
-      en: 'Research Structure',
-      fr: 'Structure de Recherche',
-    })
-    expect(result.descriptions).toEqual({
-      en: 'Description in English',
-      fr: 'Description en Français',
-    })
+    expect(result.names).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          value: 'Research Structure',
+          language: 'en',
+        }),
+        expect.objectContaining({
+          value: 'Structure de Recherche',
+          language: 'fr',
+        }),
+      ]),
+    )
+    expect(result.descriptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          value: 'Description in English',
+          language: 'en',
+        }),
+        expect.objectContaining({
+          value: 'Description en Français',
+          language: 'fr',
+        }),
+      ]),
+    )
     expect(result.identifiers).toEqual([
       { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
       { type: ResearchStructureIdentifierType.RNSR, value: '67890' },
@@ -94,8 +139,22 @@ describe('ResearchStructure', () => {
       id: 2,
       uid: 'RS456',
       acronym: null,
-      names: { en: 'Another Research Structure' },
-      descriptions: { en: 'Another description' },
+      names: [
+        {
+          value: 'Another Research Structure',
+          language: 'en',
+          id: 5,
+          researchStructureId: 2,
+        },
+      ],
+      descriptions: [
+        {
+          value: 'Another description',
+          language: 'en',
+          id: 6,
+          researchStructureId: 2,
+        },
+      ],
     }
 
     const result =
@@ -104,8 +163,12 @@ describe('ResearchStructure', () => {
     expect(result).toBeInstanceOf(ResearchStructure)
     expect(result.uid).toBe('RS456')
     expect(result.acronym).toBeNull()
-    expect(result.names).toEqual({ en: 'Another Research Structure' })
-    expect(result.descriptions).toEqual({ en: 'Another description' })
+    expect(result.names).toEqual([
+      { value: 'Another Research Structure', language: 'en' },
+    ])
+    expect(result.descriptions).toEqual([
+      { value: 'Another description', language: 'en' },
+    ])
     expect(result.identifiers).toEqual([])
   })
 })

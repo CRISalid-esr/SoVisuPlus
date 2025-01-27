@@ -16,8 +16,10 @@ import { useTheme } from '@mui/system'
 import SyncIcon from '@mui/icons-material/Sync'
 import useStore from '@/stores/global_store'
 import * as Lingui from '@lingui/core'
-import { Person } from '@/types/Person'
 import Highlighter from 'react-highlight-words'
+import { Literal } from '@/types/Literal'
+import { Contribution } from '@/types/Contribution'
+import { Document } from '@/types/Document'
 
 export default function DocumentsPage() {
   const [pagination, setPagination] = useState({
@@ -64,13 +66,9 @@ export default function DocumentsPage() {
         },
       },
       {
-        accessorKey: `titles.${lang}`, // access nested data with dot notation
+        accessorKey: `titles.${lang}`,
         header: t`documents_page_title_column`,
-        Cell({
-          row,
-        }: {
-          row: { original: { titles: Record<string, string> } }
-        }) {
+        Cell({ row }: { row: { original: { titles: Array<Literal> } } }) {
           const titles = row.original.titles
           const localizedTitle = getLocalizedValue(
             titles,
@@ -91,8 +89,14 @@ export default function DocumentsPage() {
       {
         accessorKey: 'persons',
         header: t`documents_page_contributors_column`,
-        Cell({ row }: { row: { original: { persons: Array<Person> } } }) {
-          const contributors = row.original.persons
+        Cell({
+          row,
+        }: {
+          row: { original: { contributions: Array<Contribution> } }
+        }) {
+          const contributors = row.original.contributions.map(
+            (contribution) => contribution.person,
+          )
           return contributors.reduce((acc: string, { firstName, lastName }) => {
             const name = [firstName, lastName].filter(Boolean).join(' ')
             if (name) {
@@ -135,7 +139,7 @@ export default function DocumentsPage() {
         },
       },
     ],
-    [],
+    [lang, globalFilter],
   )
 
   const {
@@ -153,6 +157,8 @@ export default function DocumentsPage() {
       columnFilters: JSON.stringify(columnFilters),
       sorting: JSON.stringify(sorting),
       searchLang: lang,
+    }).catch((error) => {
+      console.error('Error fetching documents:', error)
     })
   }, [
     columnFilters,
@@ -160,6 +166,8 @@ export default function DocumentsPage() {
     pagination.pageIndex,
     pagination.pageSize,
     sorting,
+    lang,
+    fetchDocuments,
   ])
 
   const handleTabChange = (newValue: string) => {

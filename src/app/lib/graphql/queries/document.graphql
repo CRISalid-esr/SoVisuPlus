@@ -5,6 +5,10 @@ query TextualDocuments($where: TextualDocumentWhere) {
       language
       value
     }
+    abstracts {
+      language
+      value
+    }
     has_contributions {
       contributor {
         uid

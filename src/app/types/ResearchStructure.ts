@@ -1,16 +1,17 @@
-import { ResearchStructure as DbResearchStructure } from '@prisma/client'
+import { ResearchStructureWithRelations as DbResearchStructure } from '@/prisma-schema/extended-client'
 import {
   ResearchStructureIdentifier,
   ResearchStructureIdentifierType,
 } from '@/types/ResearchStructureIdentifier'
 import { IAgent } from '@/types/IAgent'
+import { Literal } from '@/types/Literal'
 
 class ResearchStructure implements IAgent {
   constructor(
     public uid: string,
     public acronym: string | null,
-    public names: Record<string, string>,
-    public descriptions: Record<string, string>,
+    public names: Array<Literal>,
+    public descriptions: Array<Literal>,
     private _identifiers: {
       type: ResearchStructureIdentifierType
       value: string
@@ -50,8 +51,8 @@ class ResearchStructure implements IAgent {
     return new ResearchStructure(
       researchStructure.uid,
       researchStructure.acronym,
-      researchStructure.names as Record<string, string>,
-      researchStructure.descriptions as Record<string, string>,
+      researchStructure.names.map(Literal.fromObject),
+      researchStructure.descriptions.map(Literal.fromObject),
       'identifiers' in researchStructure
         ? (researchStructure.identifiers as ResearchStructureIdentifier[])
         : [],
