@@ -34,6 +34,28 @@ export const GET = async (req: NextRequest) => {
             },
           },
         },
+        {
+          contributions: {
+            some: {
+              person: {
+                OR: [
+                  {
+                    firstName: {
+                      contains: searchTerm,
+                      mode: QueryMode.insensitive,
+                    },
+                  },
+                  {
+                    lastName: {
+                      contains: searchTerm,
+                      mode: QueryMode.insensitive,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
       ]
     }
 
@@ -46,6 +68,22 @@ export const GET = async (req: NextRequest) => {
             some: {
               language: lang,
               value: { contains: value, mode: QueryMode.insensitive },
+            },
+          }
+          break
+        case 'contributions':
+          where['contributions'] = {
+            some: {
+              person: {
+                OR: [
+                  {
+                    firstName: { contains: value, mode: QueryMode.insensitive },
+                  },
+                  {
+                    lastName: { contains: value, mode: QueryMode.insensitive },
+                  },
+                ],
+              },
             },
           }
           break

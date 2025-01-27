@@ -1,26 +1,26 @@
 'use client'
 
+import { TabFilter } from '@/components/TabFilter'
+import useStore from '@/stores/global_store'
+import { Contribution } from '@/types/Contribution'
+import { Document } from '@/types/Document'
+import { Literal } from '@/types/Literal'
+import { getLocalizedValue } from '@/utils/getLocalizedValue'
+import * as Lingui from '@lingui/core'
 import { t, Trans } from '@lingui/macro'
+import ArticleIcon from '@mui/icons-material/Article'
+import SyncIcon from '@mui/icons-material/Sync'
 import { Box, Button, Typography } from '@mui/material'
+import { useTheme } from '@mui/system'
 import {
   MaterialReactTable,
+  MRT_Column,
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
   MRT_SortingState,
-  MRT_Column,
 } from 'material-react-table'
 import { useEffect, useMemo, useState } from 'react'
-import ArticleIcon from '@mui/icons-material/Article'
-import { getLocalizedValue } from '@/utils/getLocalizedValue'
-import { TabFilter } from '@/components/TabFilter'
-import { useTheme } from '@mui/system'
-import SyncIcon from '@mui/icons-material/Sync'
-import useStore from '@/stores/global_store'
-import * as Lingui from '@lingui/core'
 import Highlighter from 'react-highlight-words'
-import { Literal } from '@/types/Literal'
-import { Contribution } from '@/types/Contribution'
-import { Document } from '@/types/Document'
 
 export default function DocumentsPage() {
   const [pagination, setPagination] = useState({
@@ -99,27 +99,44 @@ export default function DocumentsPage() {
         },
       },
       {
-        accessorKey: 'persons',
+        accessorFn: (row) => {
+          return row.contributions
+        },
+        accessorKey: 'contributions',
         header: t`documents_page_contributors_column`,
         Cell({
           row,
+          column,
         }: {
           row: { original: { contributions: Array<Contribution> } }
+          column: MRT_Column<Document>
         }) {
-          const contributors = row.original.contributions.map(
-            (contribution) => contribution.person,
-          )
-          return contributors.reduce((acc: string, { firstName, lastName }) => {
-            const name = [firstName, lastName].filter(Boolean).join(' ')
-            if (name) {
-              if (acc) {
-                return `${acc}, ${name}`
+          const contributors = row.original.contributions.reduce(
+            (acc: string, contribution: Contribution) => {
+              const person = contribution.person
+              const { firstName, lastName } = person
+              const name = [firstName, lastName].filter(Boolean).join(' ')
+              if (name) {
+                if (acc) {
+                  return `${acc}, ${name}`
+                }
+                return name
               }
-              return name
-            }
 
-            return acc
-          }, '')
+              return acc
+            },
+            '',
+          )
+          const filterValue = column.getFilterValue()
+
+          return (
+            <Highlighter
+              highlightClassName='highlight'
+              searchWords={[globalFilter, filterValue as string]}
+              autoEscape
+              textToHighlight={contributors}
+            />
+          )
         },
       },
       {
