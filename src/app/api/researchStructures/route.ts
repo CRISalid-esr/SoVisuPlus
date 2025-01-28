@@ -10,20 +10,27 @@ export const GET = async (req: NextRequest) => {
   const pageNumber = parseInt(page, 10) || 1
   const itemsPerPage = 10
   const lang = urlParams.get('searchLang') || 'en'
+  const includeExternal = urlParams.get('includeExternal') === 'true'
 
   try {
-    const researchStructures = await prisma.researchStructure.findMany({
-      where: {
-        names: {
-          some: {
-            language: lang,
-            value: {
-              contains: searchTerm,
-              mode: QueryMode.insensitive,
-            },
+    const whereClause: Prisma.ResearchStructureWhereInput = {
+      names: {
+        some: {
+          language: lang,
+          value: {
+            contains: searchTerm,
+            mode: QueryMode.insensitive,
           },
         },
       },
+    }
+
+    if (!includeExternal) {
+      whereClause.external = false
+    }
+
+    const researchStructures = await prisma.researchStructure.findMany({
+      where: whereClause,
       skip: (pageNumber - 1) * itemsPerPage,
       take: itemsPerPage,
       select: {
@@ -45,17 +52,7 @@ export const GET = async (req: NextRequest) => {
     })
 
     const researchStructuresCount = await prisma.researchStructure.count({
-      where: {
-        names: {
-          some: {
-            language: lang,
-            value: {
-              contains: searchTerm,
-              mode: QueryMode.insensitive,
-            },
-          },
-        },
-      },
+      where: whereClause,
     })
 
     return NextResponse.json({
