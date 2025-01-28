@@ -17,13 +17,11 @@ export const GET = async (req: NextRequest) => {
     // Base query
     let query = Prisma.sql`
       SELECT d.id,
-        d.uid, 
-        t.value AS title_value, t.language AS title_language, 
+        d.uid,
         p."firstName" AS contributor_firstName, p."lastName" AS contributor_lastName,
-        p."id" AS contributor_id,
-        p."uid" AS contributor_uid, p."email" AS contributor_email,
-	     	c."role" as role,
-        c."id" as contribution_id
+        p."id" AS contributor_id, p."uid" AS contributor_uid, p."email" AS contributor_email,
+        c."role" as role, c."id" as contribution_id,
+        t.value AS title_value, t.language AS title_language, t.id AS title_id
       FROM "Document" d
       LEFT JOIN "DocumentTitle" t ON t."documentId" = d.id
       LEFT JOIN "Contribution" c ON c."documentId" = d.id
@@ -63,47 +61,32 @@ export const GET = async (req: NextRequest) => {
       query = Prisma.sql`${query} ORDER BY ${Prisma.join(orderBy, ', ')}`
     }
 
-    // Add pagination
-    query = Prisma.sql`${query} OFFSET ${skip} LIMIT ${pageSize}`
+    // Group by document and collect related titles and contributions
+    query = Prisma.sql`
+      WITH grouped_documents AS (
+        ${query}
+      )
+      SELECT
+        id, 
+        uid,
+        ARRAY_AGG(DISTINCT JSONB_BUILD_OBJECT(
+          'id', title_id, 'language', title_language, 'value', title_value
+        )) AS titles,
+        ARRAY_AGG(DISTINCT JSONB_BUILD_OBJECT(
+          'id', contribution_id, 'role', role, 'person', JSONB_BUILD_OBJECT(
+            'id', contributor_id, 'firstName', contributor_firstName,
+            'lastName', contributor_lastName, 'uid', contributor_uid, 'email', contributor_email
+          )
+        )) AS contributions
+      FROM grouped_documents
+      GROUP BY id, uid
+      OFFSET ${skip} LIMIT ${pageSize}
+    `
 
-    // Fetch documents
+    console.log('Query:', query.sql)
+
+    // Fetch documents with titles and contributions
     const documents: any[] = await prisma.$queryRaw(query)
-
-    // Group documents and contributions
-    const documentMap = new Map<number, any>()
-    documents.forEach((doc) => {
-      if (!documentMap.has(doc.id)) {
-        documentMap.set(doc.id, {
-          id: doc.id,
-          uid: doc.uid,
-          titles: [],
-          contributions: [],
-        })
-      }
-
-      if (doc.title_value && doc.title_language === lang) {
-        documentMap.get(doc.id).titles.push({
-          value: doc.title_value,
-          language: doc.title_language,
-        })
-      }
-
-      if (doc.contributor_firstname || doc.contributor_lastname) {
-        documentMap.get(doc.id).contributions.push({
-          id: doc.contribution_id,
-          role: doc.role || '',
-          person: {
-            firstName: doc.contributor_firstname,
-            lastName: doc.contributor_lastname,
-            id: doc.contributor_id,
-            uid: doc.contributor_uid,
-            email: doc.contributor_email,
-          },
-        })
-      }
-    })
-
-    const resultDocuments = Array.from(documentMap.values())
 
     // Count total items
     const countQuery = Prisma.sql`
@@ -125,7 +108,7 @@ export const GET = async (req: NextRequest) => {
     )
 
     return NextResponse.json({
-      documents: resultDocuments,
+      documents: documents,
       totalItems: parseInt(totalCount[0].total, 10),
       page,
       limit: pageSize,
