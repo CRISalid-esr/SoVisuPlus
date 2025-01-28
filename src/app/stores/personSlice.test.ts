@@ -5,7 +5,7 @@ import { i18n } from '@lingui/core'
 const mockFetchResponse = (
   data: {
     hasMore: boolean
-    people: { id: number; name: string }[]
+    people: { uid: number; name: string }[]
     total: number
   },
   ok = true,
@@ -35,8 +35,8 @@ describe('addPersonSlice', () => {
 
   it('should fetch and store people successfully', async () => {
     const peopleData = [
-      { id: 1, name: 'John Doe' },
-      { id: 2, name: 'Jane Smith' },
+      { uid: 1, name: 'John Doe' },
+      { uid: 2, name: 'Jane Smith' },
     ]
     const response = { hasMore: true, people: peopleData, total: 2 }
     mockFetchResponse(response)
@@ -74,8 +74,8 @@ describe('addPersonSlice', () => {
   })
 
   it('should append people data on subsequent pages', async () => {
-    const initialPeople = [{ id: 1, name: 'John Doe' }]
-    const newPeople = [{ id: 2, name: 'Jane Smith' }]
+    const initialPeople = [{ uid: 1, name: 'John Doe' }]
+    const newPeople = [{ uid: 2, name: 'Jane Smith' }]
     const responsePage1 = { hasMore: true, people: initialPeople, total: 2 }
     const responsePage2 = { hasMore: false, people: newPeople, total: 2 }
 

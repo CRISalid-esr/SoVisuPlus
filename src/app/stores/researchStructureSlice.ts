@@ -4,7 +4,6 @@ import { i18n } from '@lingui/core'
 import { BaseQuery } from '@/types/BaseQuery'
 import { toQueryString } from '@/utils/query'
 
-// Define the queryObject interface correctly
 export interface ResearchStructuresByNameQuery extends BaseQuery {
   searchTerm: string
   searchLang: string
@@ -12,7 +11,7 @@ export interface ResearchStructuresByNameQuery extends BaseQuery {
 
 export interface ResearchStructureSlice {
   researchStructure: {
-    researchStructures: ResearchStructure[] // Assuming you have a Prisma model for Person
+    researchStructures: ResearchStructure[]
     loading: boolean
     total: number
     error: string | null | unknown
@@ -55,24 +54,46 @@ export const addResearchStructureSlice: StateCreator<
           throw new Error(`Failed to fetch: ${response.statusText}`)
         }
 
-        const jsonData = await response.json()
+        const jsonData = (await response.json()) as {
+          hasMore: boolean
+          researchStructures: ResearchStructure[]
+          total: number
+        }
         const { hasMore, researchStructures, total } = jsonData
 
-        set((state) => ({
-          researchStructure: {
-            ...state.researchStructure,
-            researchStructures:
-              Number(queryObject.page) === 1
-                ? researchStructures
-                : [
-                    ...state.researchStructure.researchStructures,
-                    ...researchStructures,
-                  ],
-            hasMore,
-            total,
-            error: null, // Reset error state
-          },
-        }))
+        set((state) => {
+          const reinit = Number(queryObject.page) === 1
+          let updatedResearchStructures = researchStructures
+
+          if (!reinit) {
+            // Push data to a transient map to avoid duplicates
+            const combinedResearchStructureMap = new Map<
+              string,
+              ResearchStructure
+            >([
+              ...state.researchStructure.researchStructures.map(
+                (rs): [string, ResearchStructure] => [rs.uid, rs],
+              ),
+              ...researchStructures.map((rs): [string, ResearchStructure] => [
+                rs.uid,
+                rs,
+              ]),
+            ])
+            updatedResearchStructures = Array.from(
+              combinedResearchStructureMap.values(),
+            )
+          }
+
+          return {
+            researchStructure: {
+              ...state.researchStructure,
+              researchStructures: updatedResearchStructures,
+              hasMore,
+              total,
+              error: null,
+            },
+          }
+        })
       } catch (error) {
         set((state) => ({
           researchStructure: {

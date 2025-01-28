@@ -8,7 +8,7 @@ import { i18n } from '@lingui/core'
 const mockFetchResponse = (
   data: {
     hasMore: boolean
-    researchStructures: { id: number; name: string }[]
+    researchStructures: { uid: number; name: string }[]
     total: number
   },
   ok = true,
@@ -38,8 +38,8 @@ describe('addResearchStructureSlice', () => {
 
   it('should fetch and store research structures successfully', async () => {
     const researchStructuresData = [
-      { id: 1, name: 'Research Structure A' },
-      { id: 2, name: 'Research Structure B' },
+      { uid: 1, name: 'Research Structure A' },
+      { uid: 2, name: 'Research Structure B' },
     ]
     const response = {
       hasMore: true,
@@ -85,8 +85,8 @@ describe('addResearchStructureSlice', () => {
   })
 
   it('should append research structures data on subsequent pages', async () => {
-    const initialResearchStructures = [{ id: 1, name: 'Research Structure A' }]
-    const newResearchStructures = [{ id: 2, name: 'Research Structure B' }]
+    const initialResearchStructures = [{ uid: 1, name: 'Research Structure A' }]
+    const newResearchStructures = [{ uid: 2, name: 'Research Structure B' }]
     const responsePage1 = {
       hasMore: true,
       researchStructures: initialResearchStructures,
