@@ -6,7 +6,7 @@ class Literal {
     public language: LanguageCode | 'ul', // ISO 639-1 code or
     // undetermined language
   ) {
-    if (language !== null && !ISO6391.validate(language)) {
+    if (language !== 'ul' && !ISO6391.validate(language)) {
       throw new Error(`Invalid ISO 639-1 language code: ${language}`)
     }
   }
