@@ -21,6 +21,7 @@ model Person {
   id            Int                @id @default(autoincrement())
   uid           String             @unique
   email         String?            @unique
+  displayName   String?
   firstName     String?
   lastName      String?
   identifiers   PersonIdentifier[]

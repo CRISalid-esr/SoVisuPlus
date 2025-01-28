@@ -56,6 +56,7 @@ describe('UserService', () => {
       uid: 'local-johndoe',
       external: false,
       email: 'johndo@university.edu',
+      displayName: 'John Doe',
       firstName: 'John',
       lastName: 'Doe',
       createdAt: new Date(),

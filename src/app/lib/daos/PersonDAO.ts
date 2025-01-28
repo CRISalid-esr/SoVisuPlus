@@ -20,6 +20,7 @@ export class PersonDAO extends AbstractDAO {
         where: { uid: person.uid },
         update: {
           email: person.email,
+          displayName: person.displayName,
           firstName: person.firstName,
           lastName: person.lastName,
           external: person.external,
@@ -27,6 +28,7 @@ export class PersonDAO extends AbstractDAO {
         create: {
           uid: person.uid,
           email: person.email,
+          displayName: person.displayName,
           firstName: person.firstName,
           lastName: person.lastName,
           external: person.external,
