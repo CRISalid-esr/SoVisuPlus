@@ -54,6 +54,7 @@ describe('PersonDAO', () => {
       where: { uid: person.uid },
       update: {
         email: person.email,
+        displayName: person.displayName,
         firstName: person.firstName,
         lastName: person.lastName,
         external: person.external,
@@ -61,6 +62,7 @@ describe('PersonDAO', () => {
       create: {
         uid: person.uid,
         email: person.email,
+        displayName: person.displayName,
         firstName: person.firstName,
         lastName: person.lastName,
         external: person.external,

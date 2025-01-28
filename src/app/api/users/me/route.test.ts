@@ -55,6 +55,7 @@ describe('GET /api/route', () => {
         uid: '123',
         external: false,
         email: 'test',
+        displayName: 'Test User',
         firstName: 'Test',
         lastName: 'User',
         id: 0,
