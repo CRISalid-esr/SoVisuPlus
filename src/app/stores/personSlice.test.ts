@@ -52,7 +52,7 @@ describe('addPersonSlice', () => {
     expect(state.total).toBe(2)
     expect(state.error).toBe(null)
     expect(fetch).toHaveBeenCalledWith(
-      '/api/people?page=1&searchTerm=test',
+      '/api/people?searchTerm=test&page=1&includeExternal=',
       expect.objectContaining({
         headers: { 'accept-language': i18n.locale },
       }),

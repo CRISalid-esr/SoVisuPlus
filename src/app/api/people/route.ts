@@ -6,6 +6,7 @@ export const GET = async (req: NextRequest) => {
   const urlParams = req.nextUrl.searchParams
   const searchTerm = urlParams.get('searchTerm') || ''
   const page = parseInt(urlParams.get('page') || '1', 10)
+  const includeExternal = urlParams.get('includeExternal') === 'true'
   const itemsPerPage = 10
 
   try {
@@ -27,10 +28,16 @@ export const GET = async (req: NextRequest) => {
       ],
     }))
 
+    const whereClause: Prisma.PersonWhereInput = {
+      AND: searchCriteria,
+    }
+
+    if (!includeExternal) {
+      whereClause.external = false
+    }
+
     const people = await prisma.person.findMany({
-      where: {
-        AND: searchCriteria, // Match all terms
-      },
+      where: whereClause,
       skip: (page - 1) * itemsPerPage,
       take: itemsPerPage,
       orderBy: {

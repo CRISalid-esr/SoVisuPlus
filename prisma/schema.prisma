@@ -140,8 +140,9 @@ model ResearchStructure {
   uid          String                         @unique
   acronym      String?
   names        ResearchStructureName[]
-  descriptions ResearchStructureDescription[] // Separate table for descriptions
+  descriptions ResearchStructureDescription[]
   identifiers  ResearchStructureIdentifier[]
+  external     Boolean                        @default(false)
 }
 
 model ResearchStructureName {

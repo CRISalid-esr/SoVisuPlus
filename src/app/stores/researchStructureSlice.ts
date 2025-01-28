@@ -7,6 +7,14 @@ import { toQueryString } from '@/utils/query'
 export interface ResearchStructuresByNameQuery extends BaseQuery {
   searchTerm: string
   searchLang: string
+  includeExternal?: boolean
+}
+
+const defaultResearchStructuresByNameQuery: ResearchStructuresByNameQuery = {
+  searchTerm: '',
+  searchLang: 'en',
+  page: 1,
+  includeExternal: false,
 }
 
 export interface ResearchStructureSlice {
@@ -37,7 +45,11 @@ export const addResearchStructureSlice: StateCreator<
     fetchResearchStructuresByName: async (
       queryObject: ResearchStructuresByNameQuery,
     ) => {
-      const queryString = toQueryString(queryObject)
+      const mergedQueryObject = {
+        ...defaultResearchStructuresByNameQuery,
+        ...queryObject,
+      }
+      const queryString = toQueryString(mergedQueryObject)
 
       set((state) => ({
         researchStructure: { ...state.researchStructure, loading: true },

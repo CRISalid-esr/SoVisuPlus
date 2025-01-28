@@ -7,6 +7,13 @@ import { BaseQuery } from '@/types/BaseQuery'
 export interface PeopleByNameQuery extends BaseQuery {
   searchTerm: string
   page: number
+  includeExternal?: boolean
+}
+
+const defaultPeopleByNameQuery: PeopleByNameQuery = {
+  searchTerm: '',
+  page: 1,
+  includeExternal: false,
 }
 
 export interface PersonSlice {
@@ -36,7 +43,8 @@ export const addPersonSlice: StateCreator<PersonSlice, [], [], PersonSlice> = (
     total: 0,
     error: null,
     fetchPeopleByName: async (queryObject: PeopleByNameQuery) => {
-      const queryString = toQueryString(queryObject)
+      const mergedQueryObject = { ...defaultPeopleByNameQuery, ...queryObject }
+      const queryString = toQueryString(mergedQueryObject)
       set((state) => ({ person: { ...state.person, loading: true } }))
       try {
         const response = await fetch(`/api/people?${queryString}`, {
