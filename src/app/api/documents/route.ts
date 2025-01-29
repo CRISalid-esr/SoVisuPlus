@@ -28,19 +28,25 @@ export const GET = async (req: NextRequest) => {
       WHERE 1 = 1
     `
 
+    // Apply searchTerm filter (with fallback to en and es for titles)
     if (searchTerm) {
       query = Prisma.sql`
         ${query} AND (
           (t.language = ${lang} AND t.value ILIKE ${`%${searchTerm}%`})
+          OR (t.language IN ('en', 'es') AND t.value ILIKE ${`%${searchTerm}%`})
           OR (p."firstName" ILIKE ${`%${searchTerm}%`} OR p."lastName" ILIKE ${`%${searchTerm}%`})
         )
       `
     }
 
+    // Apply column filters (with title filtering also considering fallback languages)
     columnFilters.forEach((filter: { id: string; value: string }) => {
       if (filter.id === 'titles') {
         query = Prisma.sql`
-          ${query} AND (t.language = ${lang} AND t.value ILIKE ${`%${filter.value}%`})
+          ${query} AND (
+            (t.language = ${lang} AND t.value ILIKE ${`%${filter.value}%`})
+            OR (t.language IN ('en', 'es') AND t.value ILIKE ${`%${filter.value}%`})
+          )
         `
       } else if (filter.id === 'contributions') {
         query = Prisma.sql`
@@ -49,6 +55,7 @@ export const GET = async (req: NextRequest) => {
       }
     })
 
+    // Apply sorting (with fallback order for titles)
     let orderQuery = Prisma.empty
     if (sorting.length > 0) {
       const orderClauses = sorting.map(
@@ -57,8 +64,15 @@ export const GET = async (req: NextRequest) => {
           switch (sort.id) {
             case 'titles':
               orderByClause = `
-            NULLIF(title_value, '') IS NULL ASC, title_value ${sort.desc ? 'DESC' : 'ASC'} NULLS LAST
-          `
+                NULLIF(title_value, '') IS NULL ASC, 
+                CASE
+                  WHEN title_language = ${lang} THEN 1
+                  WHEN title_language = 'en' THEN 2
+                  WHEN title_language = 'es' THEN 3
+                  ELSE 4
+                END ASC, 
+                title_value ${sort.desc ? 'DESC' : 'ASC'} NULLS LAST
+              `
               break
             case 'contributions':
               orderByClause = `
@@ -113,6 +127,7 @@ export const GET = async (req: NextRequest) => {
       searchTerm
         ? Prisma.sql`${countQuery} AND (
             (t.language = ${lang} AND t.value ILIKE ${`%${searchTerm}%`})
+            OR (t.language IN ('en', 'es') AND t.value ILIKE ${`%${searchTerm}%`})
             OR (p."firstName" ILIKE ${`%${searchTerm}%`} OR p."lastName" ILIKE ${`%${searchTerm}%`})
           )`
         : countQuery,
