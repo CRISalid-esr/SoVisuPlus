@@ -14,7 +14,6 @@ export const GET = async (req: NextRequest) => {
 
     const skip = (page - 1) * pageSize
 
-    // Base query
     let query = Prisma.sql`
       SELECT d.id,
         d.uid,
@@ -29,7 +28,6 @@ export const GET = async (req: NextRequest) => {
       WHERE 1 = 1
     `
 
-    // Add search term filters
     if (searchTerm) {
       query = Prisma.sql`
         ${query} AND (
@@ -39,7 +37,6 @@ export const GET = async (req: NextRequest) => {
       `
     }
 
-    // Add column filters
     columnFilters.forEach((filter: { id: string; value: string }) => {
       if (filter.id === 'titles') {
         query = Prisma.sql`
@@ -58,8 +55,16 @@ export const GET = async (req: NextRequest) => {
         (sort: { id: string; desc: boolean }) => {
           let orderByClause = ''
           switch (sort.id) {
-            case 'titles': // Adding case for sorting by title_value
-              orderByClause = `title_value ${sort.desc ? 'DESC' : 'ASC'}`
+            case 'titles':
+              orderByClause = `
+            NULLIF(title_value, '') IS NULL ASC, title_value ${sort.desc ? 'DESC' : 'ASC'} NULLS LAST
+          `
+              break
+            case 'contributions':
+              orderByClause = `
+                NULLIF(contributor_firstName, '') IS NULL ASC, contributor_firstName ${sort.desc ? 'DESC' : 'ASC'} NULLS LAST,
+                NULLIF(contributor_lastName, '') IS NULL ASC, contributor_lastName ${sort.desc ? 'DESC' : 'ASC'} NULLS LAST
+              `
               break
             default:
               break
@@ -88,15 +93,13 @@ export const GET = async (req: NextRequest) => {
           )
         )) AS contributions
       FROM grouped_documents
-      GROUP BY id, uid ,title_value
+      GROUP BY id, uid ,title_value ,contributor_firstName, contributor_lastName
       ${orderQuery}
       OFFSET ${skip} LIMIT ${pageSize}
     `
 
-    // Fetch documents with titles and contributions
     const documents: any[] = await prisma.$queryRaw(query)
 
-    // Count total items
     const countQuery = Prisma.sql`
       SELECT COUNT(DISTINCT d.id) AS total
       FROM "Document" d
