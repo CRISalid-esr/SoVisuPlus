@@ -66,7 +66,7 @@ export const GET = async (req: NextRequest) => {
               orderByClause = `
                 NULLIF(title_value, '') IS NULL ASC, 
                 CASE
-                  WHEN title_language = ${lang} THEN 1
+                  WHEN title_language = '${lang}' THEN 1
                   WHEN title_language = 'en' THEN 2
                   WHEN title_language = 'es' THEN 3
                   ELSE 4
@@ -107,7 +107,7 @@ export const GET = async (req: NextRequest) => {
           )
         )) AS contributions
       FROM grouped_documents
-      GROUP BY id, uid ,title_value ,contributor_firstName, contributor_lastName
+      GROUP BY id, uid ,title_value ,contributor_firstName, contributor_lastName,title_language
       ${orderQuery}
       OFFSET ${skip} LIMIT ${pageSize}
     `
