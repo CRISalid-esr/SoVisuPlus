@@ -52,13 +52,22 @@ export const GET = async (req: NextRequest) => {
       }
     })
 
-    // Add sorting
+    let orderQuery = Prisma.empty
     if (sorting.length > 0) {
-      const orderBy = sorting.map(
-        (sort: { id: string; desc: boolean }) =>
-          Prisma.sql`${Prisma.raw(sort.id)} ${sort.desc ? Prisma.raw('DESC') : Prisma.raw('ASC')}`,
+      const orderClauses = sorting.map(
+        (sort: { id: string; desc: boolean }) => {
+          let orderByClause = ''
+          switch (sort.id) {
+            case 'titles': // Adding case for sorting by title_value
+              orderByClause = `title_value ${sort.desc ? 'DESC' : 'ASC'}`
+              break
+            default:
+              break
+          }
+          return Prisma.raw(orderByClause)
+        },
       )
-      query = Prisma.sql`${query} ORDER BY ${Prisma.join(orderBy, ', ')}`
+      orderQuery = Prisma.sql`ORDER BY ${Prisma.join(orderClauses, ', ')}`
     }
 
     // Group by document and collect related titles and contributions
@@ -79,11 +88,10 @@ export const GET = async (req: NextRequest) => {
           )
         )) AS contributions
       FROM grouped_documents
-      GROUP BY id, uid
+      GROUP BY id, uid ,title_value
+      ${orderQuery}
       OFFSET ${skip} LIMIT ${pageSize}
     `
-
-    console.log('Query:', query.sql)
 
     // Fetch documents with titles and contributions
     const documents: any[] = await prisma.$queryRaw(query)
