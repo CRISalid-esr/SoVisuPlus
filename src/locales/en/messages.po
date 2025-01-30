@@ -48,51 +48,51 @@ msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1
 #~ msgid "pageNotFound"
 #~ msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:102
+#: src/app/[lang]/documents/page.tsx:40
 msgid "documents_page_all_documents_filter"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:56
+#: src/app/[lang]/documents/page.tsx:106
 msgid "documents_page_contributors_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:70
+#: src/app/[lang]/documents/page.tsx:144
 msgid "documents_page_date_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:84
+#: src/app/[lang]/documents/page.tsx:158
 msgid "documents_page_halStatus_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:107
+#: src/app/[lang]/documents/page.tsx:45
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:113
+#: src/app/[lang]/documents/page.tsx:51
 msgid "documents_page_keywords_to_validate"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:171
+#: src/app/[lang]/documents/page.tsx:225
 msgid "documents_page_main_title"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:77
+#: src/app/[lang]/documents/page.tsx:151
 msgid "documents_page_publishedIn_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:175
+#: src/app/[lang]/documents/page.tsx:229
 msgid "documents_page_synchronize_button"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:42
+#: src/app/[lang]/documents/page.tsx:75
 msgid "documents_page_title_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:35
+#: src/app/[lang]/documents/page.tsx:64
 msgid "documents_page_type_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:91
+#: src/app/[lang]/documents/page.tsx:165
 msgid "documents_page_version_column"
 msgstr ""
 
@@ -102,7 +102,7 @@ msgstr ""
 msgid "hello"
 msgstr "Hello"
 
-#: src/app/[lang]/documents/page.tsx:49
+#: src/app/[lang]/documents/page.tsx:88
 msgid "no_title_available"
 msgstr ""
 
@@ -167,27 +167,27 @@ msgstr "Research activities"
 #~ msgid "side_bar_publications"
 #~ msgstr "Publications"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:85
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:155
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:173
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:43
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:129
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:220
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:286
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:89
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:159
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:177
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:44
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:130
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:223
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:289
 msgid "sidebar_search_people"
 msgstr "researchers"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:95
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:315
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:99
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:318
 msgid "sidebar_search_placeholder"
 msgstr "Search"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:87
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:123
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:176
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:45
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:139
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:288
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:91
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:127
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:180
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:46
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:140
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:291
 msgid "sidebar_search_research_structures"
 msgstr "Research structures"
 
