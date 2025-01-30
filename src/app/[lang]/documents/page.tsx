@@ -84,7 +84,7 @@ export default function DocumentsPage() {
           const localizedTitle = getLocalizedValue(
             titles,
             lang,
-            ['en', 'es'],
+            ['fr', 'en', 'es'],
             t`no_title_available`,
           )
           const filterValue = column.getFilterValue()

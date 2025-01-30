@@ -8,11 +8,18 @@ export const GET = async (req: NextRequest) => {
     const searchTerm = urlParams.get('searchTerm') || ''
     const page = parseInt(urlParams.get('page') || '1', 10)
     const pageSize = parseInt(urlParams.get('pageSize') || '10', 10)
-    const lang = urlParams.get('searchLang') || 'en'
+    const lang = urlParams.get('searchLang') || 'fr'
     const columnFilters = JSON.parse(urlParams.get('columnFilters') || '[]')
     const sorting = JSON.parse(urlParams.get('sorting') || '[]')
 
     const skip = (page - 1) * pageSize
+
+    // Define language priority order
+    const languagePriority = ['fr', 'en', 'es', 'it'] // Default languages
+    const langOrder = [
+      lang,
+      ...languagePriority.filter((language) => language !== lang),
+    ]
 
     let query = Prisma.sql`
       SELECT d.id,
@@ -28,12 +35,19 @@ export const GET = async (req: NextRequest) => {
       WHERE 1 = 1
     `
 
-    // Apply searchTerm filter (with fallback to en and es for titles)
+    // Apply searchTerm filter (dynamically handle fallback languages)
     if (searchTerm) {
+      // Construct the search condition for each language in langOrder
+      const languageSearchConditions = langOrder.map((language) => {
+        return Prisma.sql`
+          (t.language = ${language} AND t.value ILIKE ${`%${searchTerm}%`})
+        `
+      })
+
+      // Combine all language search conditions with OR
       query = Prisma.sql`
         ${query} AND (
-          (t.language = ${lang} AND t.value ILIKE ${`%${searchTerm}%`})
-          OR (t.language IN ('en', 'es') AND t.value ILIKE ${`%${searchTerm}%`})
+          ${Prisma.join(languageSearchConditions, ' OR ')}
           OR (p."firstName" ILIKE ${`%${searchTerm}%`} OR p."lastName" ILIKE ${`%${searchTerm}%`})
         )
       `
@@ -44,8 +58,14 @@ export const GET = async (req: NextRequest) => {
       if (filter.id === 'titles') {
         query = Prisma.sql`
           ${query} AND (
-            (t.language = ${lang} AND t.value ILIKE ${`%${filter.value}%`})
-            OR (t.language IN ('en', 'es') AND t.value ILIKE ${`%${filter.value}%`})
+            ${Prisma.join(
+              langOrder.map(
+                (language) => Prisma.sql`
+                (t.language = ${language} AND t.value ILIKE ${`%${filter.value}%`})
+              `,
+              ),
+              ' OR ',
+            )}
           )
         `
       } else if (filter.id === 'contributions') {
@@ -55,38 +75,18 @@ export const GET = async (req: NextRequest) => {
       }
     })
 
-    // Apply sorting (with fallback order for titles)
+    // Apply sorting (using dynamic language order)
     let orderQuery = Prisma.empty
     if (sorting.length > 0) {
-      const orderClauses = sorting.map(
-        (sort: { id: string; desc: boolean }) => {
-          let orderByClause = ''
-          switch (sort.id) {
-            case 'titles':
-              orderByClause = `
-                NULLIF(title_value, '') IS NULL ASC, 
-                CASE
-                  WHEN title_language = '${lang}' THEN 1
-                  WHEN title_language = 'en' THEN 2
-                  WHEN title_language = 'es' THEN 3
-                  ELSE 4
-                END ASC, 
-                title_value ${sort.desc ? 'DESC' : 'ASC'} NULLS LAST
-              `
-              break
-            case 'contributions':
-              orderByClause = `
-                NULLIF(contributor_firstName, '') IS NULL ASC, contributor_firstName ${sort.desc ? 'DESC' : 'ASC'} NULLS LAST,
-                NULLIF(contributor_lastName, '') IS NULL ASC, contributor_lastName ${sort.desc ? 'DESC' : 'ASC'} NULLS LAST
-              `
-              break
-            default:
-              break
-          }
-          return Prisma.raw(orderByClause)
-        },
-      )
-      orderQuery = Prisma.sql`ORDER BY ${Prisma.join(orderClauses, ', ')}`
+      const orderClauses = langOrder.map((language) => {
+        return Prisma.raw(`
+          NULLIF(title_value, '') IS NULL ASC,
+          title_language = '${language}' DESC,
+          title_language != '${language}' ASC
+        `)
+      })
+      console.log('sorting[0].desc:', sorting[0].desc)
+      orderQuery = Prisma.sql`ORDER BY ${Prisma.join(orderClauses, ', ')}, title_value ${sorting[0].desc ? Prisma.raw('DESC') : Prisma.raw('ASC')} NULLS LAST`
     }
 
     // Group by document and collect related titles and contributions
@@ -112,7 +112,13 @@ export const GET = async (req: NextRequest) => {
       OFFSET ${skip} LIMIT ${pageSize}
     `
 
-    const documents: any[] = await prisma.$queryRaw(query)
+    console.log('=>', query.sql)
+    console.log('=>', query.values)
+
+    const documents: any[] = await prisma.$queryRaw(query).catch((error) => {
+      console.error(error)
+      return []
+    })
 
     const countQuery = Prisma.sql`
       SELECT COUNT(DISTINCT d.id) AS total
@@ -123,15 +129,22 @@ export const GET = async (req: NextRequest) => {
       WHERE 1 = 1
     `
 
+    const languageSearchConditions = langOrder.map((language) => {
+      return Prisma.sql`
+        (t.language = ${language} AND t.value ILIKE ${`%${searchTerm}%`})
+      `
+    })
+
     const totalCount = await prisma.$queryRaw(
       searchTerm
         ? Prisma.sql`${countQuery} AND (
-            (t.language = ${lang} AND t.value ILIKE ${`%${searchTerm}%`})
-            OR (t.language IN ('en', 'es') AND t.value ILIKE ${`%${searchTerm}%`})
+            ${Prisma.join(languageSearchConditions, ' OR ')}
             OR (p."firstName" ILIKE ${`%${searchTerm}%`} OR p."lastName" ILIKE ${`%${searchTerm}%`})
           )`
         : countQuery,
     )
+
+    console.log('totalCount[0].total:', parseInt(totalCount[0].total, 10))
 
     return NextResponse.json({
       documents: documents,
