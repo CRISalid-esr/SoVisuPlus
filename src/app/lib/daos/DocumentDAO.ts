@@ -97,13 +97,23 @@ export class DocumentDAO extends AbstractDAO {
 
         const { id: personId } = person
         const { id: documentId } = dbDocument
-        await this.prismaClient.contribution.create({
-          data: {
-            personId,
-            documentId,
-            role: 'AUTHOR', // You can dynamically determine the role if necessary
-          },
-        })
+        try {
+          await this.prismaClient.contribution.create({
+            data: {
+              personId,
+              documentId,
+              role: 'AUTHOR', // You can dynamically determine the role if necessary
+            },
+          })
+        } catch (error) {
+          console.error(
+            `Failed to create contribution for person ID: ${personId} and document ID: ${documentId}`,
+            error,
+          )
+          // don't discard the whole document if a contribution fails to create
+          // just skip this contribution
+          continue
+        }
       }
       return dbDocument
     } catch (error) {
