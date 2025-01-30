@@ -75,21 +75,30 @@ export const GET = async (req: NextRequest) => {
       }
     })
 
-    // Apply sorting (using dynamic language order)
     let orderQuery = Prisma.empty
-    if (sorting.length > 0) {
-      const orderClauses = langOrder.map((language) => {
-        return Prisma.raw(`
-          NULLIF(title_value, '') IS NULL ASC,
-          title_language = '${language}' DESC,
-          title_language != '${language}' ASC
-        `)
-      })
-      console.log('sorting[0].desc:', sorting[0].desc)
-      orderQuery = Prisma.sql`ORDER BY ${Prisma.join(orderClauses, ', ')}, title_value ${sorting[0].desc ? Prisma.raw('DESC') : Prisma.raw('ASC')} NULLS LAST`
-    }
+    sorting.forEach((sort: { id: string; desc: boolean }) => {
+      if (sort.id === 'contributions') {
+        orderQuery = Prisma.sql`
+          ORDER BY 
+            NULLIF(contributor_firstName, '') IS NULL ASC, contributor_firstName ${sort.desc ? Prisma.raw('DESC') : Prisma.raw('ASC')} NULLS LAST, 
+            NULLIF(contributor_lastName, '') IS NULL ASC, contributor_lastName ${sort.desc ? Prisma.raw('DESC') : Prisma.raw('ASC')} NULLS LAST
+        `
+      } else if (sort.id === 'titles') {
+        const orderClauses = langOrder.map((language) => {
+          return Prisma.raw(`
+            NULLIF(title_value, '') IS NULL ASC,
+            title_language = '${language}' DESC,
+            title_language != '${language}' ASC
+          `)
+        })
+        orderQuery = Prisma.sql`
+          ORDER BY 
+            ${Prisma.join(orderClauses, ', ')}, 
+            title_value ${sort.desc ? Prisma.raw('DESC') : Prisma.raw('ASC')} NULLS LAST
+        `
+      }
+    })
 
-    // Group by document and collect related titles and contributions
     query = Prisma.sql`
       WITH grouped_documents AS (
         ${query}
