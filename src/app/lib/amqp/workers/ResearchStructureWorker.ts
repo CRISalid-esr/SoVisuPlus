@@ -6,6 +6,7 @@ import {
   ResearchStructureIdentifier,
   ResearchStructureIdentifierType,
 } from '@/types/ResearchStructureIdentifier'
+import { Literal } from '@/types/Literal'
 
 /**
  * Worker for processing research structure-related messages
@@ -30,15 +31,6 @@ export class ResearchStructureWorker extends MessageProcessingWorker<AMQPResearc
       this.message.fields
     console.log(`Processing research structure with UID: ${uid}`)
 
-    const transformedNames = Object.fromEntries(
-      names.map((name) => [name.language, name.value]),
-    )
-    const transformedDescriptions = Object.fromEntries(
-      descriptions.map((description) => [
-        description.language,
-        description.value,
-      ]),
-    )
     const transformedIdentifiers: ResearchStructureIdentifier[] =
       identifiers.map((identifier) => {
         return {
@@ -52,8 +44,8 @@ export class ResearchStructureWorker extends MessageProcessingWorker<AMQPResearc
         new ResearchStructure(
           uid,
           acronym,
-          transformedNames,
-          transformedDescriptions,
+          names as Literal[],
+          descriptions as Literal[],
           transformedIdentifiers,
         ),
       )

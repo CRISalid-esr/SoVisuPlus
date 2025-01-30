@@ -11,11 +11,18 @@ jest.mock('@prisma/client', () => {
   const actualPrismaClient: PrismaClient = jest.requireActual('@prisma/client')
   const mockPrismaClient = {
     researchStructure: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+    },
+    researchStructureName: {
+      upsert: jest.fn(),
+    },
+    researchStructureDescription: {
       upsert: jest.fn(),
     },
     researchStructureIdentifier: {
       deleteMany: jest.fn(),
-      createMany: jest.fn(),
+      create: jest.fn(),
     },
   }
   return {
@@ -35,13 +42,16 @@ describe('ResearchStructureDAO', () => {
   const researchStructure: ResearchStructure = new ResearchStructure(
     'local-rs001',
     'RS001',
-    { en: 'Research Structure 001' },
-    { en: 'A description for Research Structure 001' },
+    [{ value: 'Research Structure 001', language: 'en' }],
+    [{ value: 'A description for Research Structure 001', language: 'en' }],
     [{ type: ResearchStructureIdentifierType.RNSR, value: '001234567Z' }],
   )
 
   it('should upsert a research structure', async () => {
-    ;(mockPrisma.researchStructure.upsert as jest.Mock).mockResolvedValue({
+    ;(mockPrisma.researchStructure.findUnique as jest.Mock).mockResolvedValue(
+      null,
+    )
+    ;(mockPrisma.researchStructure.create as jest.Mock).mockResolvedValue({
       ...researchStructure,
       id: 1,
     })
@@ -53,24 +63,30 @@ describe('ResearchStructureDAO', () => {
 
     expect(dbResearchStructure.uid).toEqual('local-rs001')
     expect(dbResearchStructure.acronym).toEqual('RS001')
-    expect(mockPrisma.researchStructure.upsert).toHaveBeenCalledWith({
-      where: { uid: researchStructure.uid },
-      update: {
-        acronym: researchStructure.acronym,
-        names: researchStructure.names,
-        descriptions: researchStructure.descriptions,
+    expect(mockPrisma.researchStructure.findUnique).toHaveBeenCalledWith({
+      where: { uid: 'local-rs001' },
+      include: {
+        descriptions: true,
+        identifiers: true,
+        names: true,
       },
-      create: {
+    })
+    expect(mockPrisma.researchStructure.create).toHaveBeenCalledWith({
+      data: {
         uid: researchStructure.uid,
         acronym: researchStructure.acronym,
-        names: researchStructure.names,
-        descriptions: researchStructure.descriptions,
+      },
+
+      include: {
+        descriptions: true,
+        identifiers: true,
+        names: true,
       },
     })
   })
 
   it('should call deleteMany and createMany for upsertIdentifiers', async () => {
-    ;(mockPrisma.researchStructure.upsert as jest.Mock).mockResolvedValue({
+    ;(mockPrisma.researchStructure.create as jest.Mock).mockResolvedValue({
       ...researchStructure,
       id: 1,
     })
@@ -78,7 +94,7 @@ describe('ResearchStructureDAO', () => {
       mockPrisma.researchStructureIdentifier.deleteMany as jest.Mock
     ).mockResolvedValue({})
     ;(
-      mockPrisma.researchStructureIdentifier.createMany as jest.Mock
+      mockPrisma.researchStructureIdentifier.create as jest.Mock
     ).mockResolvedValue({})
 
     await researchStructureDAO.createOrUpdateResearchStructure(
@@ -91,28 +107,26 @@ describe('ResearchStructureDAO', () => {
       where: { researchStructureId: 1 },
     })
 
-    expect(
-      mockPrisma.researchStructureIdentifier.createMany,
-    ).toHaveBeenCalledWith({
-      data: [
-        {
-          researchStructureId: 1,
-          type: 'RNSR',
-          value: '001234567Z',
-        },
-      ],
+    expect(mockPrisma.researchStructureIdentifier.create).toHaveBeenCalledWith({
+      data: {
+        researchStructureId: 1,
+        type: 'RNSR',
+        value: '001234567Z',
+      },
     })
   })
 
   it('should handle errors during upsert', async () => {
-    ;(mockPrisma.researchStructure.upsert as jest.Mock).mockRejectedValue(
+    ;(mockPrisma.researchStructure.create as jest.Mock).mockRejectedValue(
       new Error('Upsert failed'),
     )
 
     await expect(
       researchStructureDAO.createOrUpdateResearchStructure(researchStructure),
-    ).rejects.toThrow('Failed to upsert research structure: Upsert failed')
+    ).rejects.toThrow(
+      'Failed to create or update research structure: Upsert failed',
+    )
 
-    expect(mockPrisma.researchStructure.upsert).toHaveBeenCalled()
+    expect(mockPrisma.researchStructure.create).toHaveBeenCalled()
   })
 })

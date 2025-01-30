@@ -44,6 +44,7 @@ describe('Person', () => {
       uid: 'P123',
       external: true,
       email: 'example@example.com',
+      displayName: 'John Doe',
       firstName: 'John',
       lastName: 'Doe',
       identifiers: [
@@ -75,6 +76,7 @@ describe('Person', () => {
       uid: 'P789',
       external: false,
       email: null,
+      displayName: 'Alice Smith',
       firstName: 'Alice',
       lastName: 'Smith',
       createdAt: new Date(),

@@ -7,6 +7,13 @@ import { BaseQuery } from '@/types/BaseQuery'
 export interface PeopleByNameQuery extends BaseQuery {
   searchTerm: string
   page: number
+  includeExternal?: boolean
+}
+
+const defaultPeopleByNameQuery: PeopleByNameQuery = {
+  searchTerm: '',
+  page: 1,
+  includeExternal: false,
 }
 
 export interface PersonSlice {
@@ -20,6 +27,12 @@ export interface PersonSlice {
   }
 }
 
+interface FindPeopleResponse {
+  hasMore: boolean
+  people: Person[]
+  total: number
+}
+
 export const addPersonSlice: StateCreator<PersonSlice, [], [], PersonSlice> = (
   set,
 ) => ({
@@ -30,7 +43,8 @@ export const addPersonSlice: StateCreator<PersonSlice, [], [], PersonSlice> = (
     total: 0,
     error: null,
     fetchPeopleByName: async (queryObject: PeopleByNameQuery) => {
-      const queryString = toQueryString(queryObject)
+      const mergedQueryObject = { ...defaultPeopleByNameQuery, ...queryObject }
+      const queryString = toQueryString(mergedQueryObject)
       set((state) => ({ person: { ...state.person, loading: true } }))
       try {
         const response = await fetch(`/api/people?${queryString}`, {
@@ -38,22 +52,37 @@ export const addPersonSlice: StateCreator<PersonSlice, [], [], PersonSlice> = (
             'accept-language': i18n.locale,
           },
         })
-        const jsonData = await response.json()
-        const hasMore = jsonData.hasMore
-        const people = jsonData.people
-        const total = jsonData.total
-        set((state) => ({
-          person: {
-            ...state.person,
-            people:
-              Number(queryObject.page) === 1
-                ? people
-                : [...state.person.people, ...people],
-            hasMore,
-            total,
-            error: null, // Reset error state
-          },
-        }))
+
+        const { hasMore, people, total } =
+          (await response.json()) as FindPeopleResponse
+
+        set((state) => {
+          const reinit = Number(queryObject.page) === 1
+
+          let updatedPeople = people
+
+          if (!reinit) {
+            // Push data to a transient map to avoid duplicates
+            const combinedPeopleMap = new Map<string, Person>([
+              ...state.person.people.map((person): [string, Person] => [
+                person.uid,
+                person,
+              ]),
+              ...people.map((person): [string, Person] => [person.uid, person]),
+            ])
+            updatedPeople = Array.from(combinedPeopleMap.values())
+          }
+
+          return {
+            person: {
+              ...state.person,
+              people: updatedPeople,
+              hasMore,
+              total,
+              error: null,
+            },
+          }
+        })
       } catch (error) {
         console.error('Failed to fetch people', error)
         set((state) => ({

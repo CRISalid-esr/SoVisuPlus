@@ -7,11 +7,11 @@ import '@testing-library/jest-dom'
 jest.mock('@/stores/global_store')
 
 describe('StoreChecker', () => {
-  test('displays success message when publications are loaded', async () => {
-    // Mock loading to be false and fetchPublications to resolve
+  test('displays success message when documents are loaded', async () => {
+    // Mock loading to be false and fetchDocuments to resolve
     useStore
       .mockReturnValueOnce(false) // for loading state
-      .mockReturnValueOnce(() => Promise.resolve()) // for fetchPublications function
+      .mockReturnValueOnce(() => Promise.resolve()) // for fetchDocuments function
 
     render(<StoreChecker />)
 

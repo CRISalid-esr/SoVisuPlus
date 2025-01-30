@@ -38,48 +38,12 @@ describe('ResearchStructureWorker', () => {
     worker = new ResearchStructureWorker(message, mockDAO)
 
     await worker.process()
-    // - Expected
-    // + Received
-    //
-    // @@ -1,6 +1,6 @@
-    // - Object {
-    // + ResearchStructure {
-    //     "_identifiers": Array [
-    //       Object {
-    //         "type": "RNSR",
-    //         "value": "12345",
-    //       },
-    // @@ -10,7 +10,8 @@
-    //       "en": "A description",
-    //     },
-    //     "names": Object {
-    //       "en": "Research Structure",
-    //     },
-    // +   "type": "research_structure",
-    //     "uid": "rs-123",
-    //   },
-    // }
-
-    //class ResearchStructure implements IAgent {
-    //   constructor(
-    //     public uid: string,
-    //     public acronym: string | null,
-    //     public names: Record<string, string>,
-    //     public descriptions: Record<string, string>,
-    //     private _identifiers: {
-    //       type: ResearchStructureIdentifierType
-    //       value: string
-    //     }[] = [],
-    //     public type: 'research_structure' = 'research_structure',
-    //   ) {
-    //     this.identifiers = _identifiers
-    //   }
 
     const expectedResearchStructure = new ResearchStructure(
       'rs-123',
       'RS',
-      { en: 'Research Structure' },
-      { en: 'A description' },
+      [{ value: 'Research Structure', language: 'en' }],
+      [{ value: 'A description', language: 'en' }],
       [{ type: 'RNSR', value: '12345' }],
     )
 
@@ -111,8 +75,8 @@ describe('ResearchStructureWorker', () => {
     const expectedResearchStructure = new ResearchStructure(
       'rs-123',
       'RS',
-      { en: 'Research Structure' },
-      { en: 'A description' },
+      [{ value: 'Research Structure', language: 'en' }],
+      [{ value: 'A description', language: 'en' }],
       [{ type: 'RNSR', value: '12345' }],
     )
 

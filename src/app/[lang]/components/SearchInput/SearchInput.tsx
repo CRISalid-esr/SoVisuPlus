@@ -20,6 +20,7 @@ import { IAgent } from '@/types/IAgent'
 import { Person } from '@/types/Person'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import * as Lingui from '@lingui/core'
+
 console.log(Lingui)
 
 interface IAutoCompleteGroupTag {
@@ -171,19 +172,21 @@ const SearchInput: React.FC = () => {
           (tag) => tag.selected && tag.value === 'researchStructures',
         )
       ) {
-        const researchStructureOptions = researchStructures.map(
-          (researchStructure) => {
+        const researchStructureOptions: IAutoCompleteOption<ResearchStructure>[] =
+          researchStructures.map((researchStructure) => {
+            const label: string =
+              researchStructure.names.filter(
+                (name) => name.language === lang,
+              )[0]?.value ||
+              researchStructure.acronym ||
+              t`sidebar_search_unknown_label`
             return {
               type: 'researchStructures',
               id: researchStructure.uid,
-              label:
-                researchStructure.names[lang] ||
-                researchStructure.acronym ||
-                t`sidebar_search_unknown_label`,
+              label: label,
               agent: researchStructure,
             }
-          },
-        )
+          })
         mergedOptions.push(...researchStructureOptions)
       }
       return mergedOptions

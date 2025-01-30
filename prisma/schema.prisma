@@ -18,86 +18,104 @@ model User {
 }
 
 model Person {
-  id          Int                @id @default(autoincrement())
-  uid         String             @unique
-  email       String?            @unique
-  firstName   String?
-  lastName    String?
-  identifiers PersonIdentifier[]
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  external    Boolean            @default(false)
-  user        User?
-  documents   Contribution[]     
-
+  id            Int                @id @default(autoincrement())
+  uid           String             @unique
+  email         String?            @unique
+  displayName   String?
+  firstName     String?
+  lastName      String?
+  identifiers   PersonIdentifier[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  external      Boolean            @default(false)
+  user          User?
+  contributions Contribution[]
 }
 
 model Document {
-  id     Int      @id @default(autoincrement())
-  uid    String   @unique
-  titles Json     @db.JsonB // Store internationalized names
-  persons     Contribution[]
+  id            Int                @id @default(autoincrement())
+  uid           String             @unique
+  titles        DocumentTitle[]
+  abstracts     DocumentAbstract[]
+  contributions Contribution[]
+}
+
+model DocumentTitle {
+  id         Int      @id @default(autoincrement())
+  documentId Int
+  language   String // ISO 639-1 code (e.g., 'en', 'fr')
+  value      String   @db.VarChar(2000)
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, language]) // Ensure no duplicate languages for the same document
+}
+
+model DocumentAbstract {
+  id         Int      @id @default(autoincrement())
+  documentId Int
+  language   String // ISO 639-1 code (e.g., 'en', 'fr')
+  value      String   @db.Text
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, language]) // Ensure no duplicate languages for the same document
 }
 
 model Contribution {
- id          Int      @id @default(autoincrement()) // Optional: add a unique ID for the relation table
-  personId    Int
-  documentId  Int
-  role        ContributionRole
-  person      Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
-  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  id         Int              @id @default(autoincrement()) // Optional: add a unique ID for the relation table
+  personId   Int
+  documentId Int
+  role       ContributionRole
+  person     Person           @relation(fields: [personId], references: [id], onDelete: Cascade)
+  document   Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@unique([personId, documentId, role]) // Ensure a unique combination of person, document, and role
 }
 
-
 enum ContributionRole {
-  ACTOR      @map("actor")
-  ADAPTER    @map("adapter")
-  ARTIST     @map("artist")
-  AUTHOR     @map("author")
+  ACTOR                  @map("actor")
+  ADAPTER                @map("adapter")
+  ARTIST                 @map("artist")
+  AUTHOR                 @map("author")
   AUTHOR_OF_INTRODUCTION @map("author_of_introduction")
-  BUILDER    @map("builder")
-  BINDER     @map("binder")
-  COMMENTATOR @map("commentator")
-  COMPILER   @map("compiler")
-  CONTRIBUTOR @map("contributor")
-  CONDUCTOR  @map("conductor")
-  CREATOR    @map("creator")
-  DEBATER    @map("debater")
-  DANCER     @map("dancer")
-  DIRECTOR   @map("director")
-  DESIGNER   @map("designer")
-  EDITOR     @map("editor")
-  ENFORCER   @map("enforcer")
-  ENGRAVER   @map("engraver")
-  EXECUTIVE_PRODUCER @map("executive_producer")
-  FUNDER     @map("funder")
-  GRADER     @map("grader")
-  ILLUSTRATOR @map("illustrator")
-  LABORATOR  @map("laborator")
-  LENDER     @map("lender")
-  LIBRARIAN  @map("librarian")
-  MANAGER    @map("manager")
-  OPERATOR   @map("operator")
-  ORGANIZER  @map("organizer")
-  PERFORMER  @map("performer")
-  PARTY      @map("party")
-  PATRON     @map("patron")
-  RECORDED_BY @map("recorded_by")
-  READER     @map("reader")
-  RECEPTOR   @map("receptor")
-  RECEPTION  @map("reception")
-  SCORER     @map("scorer")
-  SCRIPTWRITER @map("scriptwriter")
-  SPOKESPERSON @map("spokesperson")
-  SESSION_CREATOR @map("session_creator")
-  TRANSCRIBER @map("transcriber")
-  TRANSLATOR  @map("translator")
-  VIDEO_PRODUCER @map("video_producer")
+  BUILDER                @map("builder")
+  BINDER                 @map("binder")
+  COMMENTATOR            @map("commentator")
+  COMPILER               @map("compiler")
+  CONTRIBUTOR            @map("contributor")
+  CONDUCTOR              @map("conductor")
+  CREATOR                @map("creator")
+  DEBATER                @map("debater")
+  DANCER                 @map("dancer")
+  DIRECTOR               @map("director")
+  DESIGNER               @map("designer")
+  EDITOR                 @map("editor")
+  ENFORCER               @map("enforcer")
+  ENGRAVER               @map("engraver")
+  EXECUTIVE_PRODUCER     @map("executive_producer")
+  FUNDER                 @map("funder")
+  GRADER                 @map("grader")
+  ILLUSTRATOR            @map("illustrator")
+  LABORATOR              @map("laborator")
+  LENDER                 @map("lender")
+  LIBRARIAN              @map("librarian")
+  MANAGER                @map("manager")
+  OPERATOR               @map("operator")
+  ORGANIZER              @map("organizer")
+  PERFORMER              @map("performer")
+  PARTY                  @map("party")
+  PATRON                 @map("patron")
+  RECORDED_BY            @map("recorded_by")
+  READER                 @map("reader")
+  RECEPTOR               @map("receptor")
+  RECEPTION              @map("reception")
+  SCORER                 @map("scorer")
+  SCRIPTWRITER           @map("scriptwriter")
+  SPOKESPERSON           @map("spokesperson")
+  SESSION_CREATOR        @map("session_creator")
+  TRANSCRIBER            @map("transcriber")
+  TRANSLATOR             @map("translator")
+  VIDEO_PRODUCER         @map("video_producer")
 }
-
-
 
 enum PersonIdentifierType {
   ORCID      @map("orcid")
@@ -119,12 +137,33 @@ model PersonIdentifier {
 }
 
 model ResearchStructure {
-  id           Int                           @id @default(autoincrement())
-  uid          String                        @unique
+  id           Int                            @id @default(autoincrement())
+  uid          String                         @unique
   acronym      String?
+  names        ResearchStructureName[]
+  descriptions ResearchStructureDescription[]
   identifiers  ResearchStructureIdentifier[]
-  names        Json                          @db.JsonB // Store internationalized names
-  descriptions Json                          @db.JsonB // Store internationalized descriptions
+  external     Boolean                        @default(false)
+}
+
+model ResearchStructureName {
+  id                  Int               @id @default(autoincrement())
+  researchStructureId Int
+  language            String // ISO 639-1 code
+  value               String            @db.VarChar(255)
+  researchStructure   ResearchStructure @relation(fields: [researchStructureId], references: [id], onDelete: Cascade)
+
+  @@unique([researchStructureId, language])
+}
+
+model ResearchStructureDescription {
+  id                  Int               @id @default(autoincrement())
+  researchStructureId Int
+  language            String // ISO 639-1 code
+  value               String            @db.VarChar(2000)
+  researchStructure   ResearchStructure @relation(fields: [researchStructureId], references: [id], onDelete: Cascade)
+
+  @@unique([researchStructureId, language])
 }
 
 model ResearchStructureIdentifier {

@@ -1,6 +1,6 @@
-  import DefaultLayout from '../layouts/MainLayout'
+import DefaultLayout from '../layouts/MainLayout'
 
-export default function PublicationsLayout({
+export default function DocumentsLayout({
   children,
 }: {
   children: React.ReactNode

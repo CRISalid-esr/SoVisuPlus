@@ -1,69 +1,94 @@
 import { create } from 'zustand'
-import { addDocumentSlice, DocumentSlice } from './documentSlice'
+import { addDocumentSlice, DocumentSlice, DocumentQuery } from './documentSlice'
+import { toQueryString } from '@/utils/query'
 
-// Mock data for testing
-const mockDocuments = [
-  { id: 1, title: 'Document 1', content: 'Content 1' },
-  { id: 2, title: 'Document 2', content: 'Content 2' },
-]
+// Mock the toQueryString utility
+jest.mock('@/utils/query', () => ({
+  toQueryString: jest.fn().mockReturnValue('mockQueryString'),
+}))
 
-// Create a test store with the DocumentSlice
+// Mock fetch
+global.fetch = jest.fn()
+
 const createTestStore = () => {
-  return create<DocumentSlice>((set, get, store) => ({
-    ...addDocumentSlice(set, get, store),
-  }))
+  return create<DocumentSlice>((set, get, store) =>
+    addDocumentSlice(set, get, store),
+  )
 }
 
-describe('addDocumentSlice Tests', () => {
+describe('addDocumentSlice', () => {
   let useStore: ReturnType<typeof createTestStore>
 
   beforeEach(() => {
-    // Initialize the store before each test
-    useStore = createTestStore()
-    // Clear the mock fetch before each test
-    global.fetch = jest.fn()
+    // Create the store before each test
+    useStore =createTestStore()
   })
 
-  it('should initialize with default values', () => {
-    const state = useStore.getState()
-    expect(state.document.documents).toEqual([])
-    expect(state.document.loading).toBe(true)
-    expect(state.document.error).toBeNull()
+  afterEach(() => {
+    jest.clearAllMocks() // Clear mocks after each test
   })
 
   it('should fetch documents successfully', async () => {
-    // Mock the global fetch API to return mock documents data
-    global.fetch = jest.fn().mockResolvedValue({
-      json: async () => mockDocuments,
+    const mockDocuments = [
+      { id: 1, title: 'Document 1' },
+      { id: 2, title: 'Document 2' },
+    ]
+    const mockTotalItems = 2
+
+    // Mock the response of fetch
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      json: jest
+        .fn()
+        .mockResolvedValueOnce({
+          documents: mockDocuments,
+          totalItems: mockTotalItems,
+        }),
     })
 
+    const queryObject: DocumentQuery = {
+      searchTerm: 'test',
+      page: 1,
+      pageSize: 10,
+      columnFilters: '',
+      searchLang: 'en',
+      sorting: '',
+    }
+
     // Call the fetchDocuments method
-    await useStore.getState().document.fetchDocuments()
+    await useStore.getState().document.fetchDocuments(queryObject)
 
-    // Retrieve the updated state
-    const updatedState = useStore.getState()
-
-    // Ensure the state is updated correctly after the async fetch
-    expect(updatedState.document.loading).toBe(false)
-    expect(updatedState.document.error).toBeNull()
-    expect(updatedState.document.documents).toEqual(mockDocuments)
+    // Check if the state was updated correctly
+    const state = useStore.getState().document
+    expect(state.loading).toBe(false)
+    expect(state.documents).toEqual(mockDocuments)
+    expect(state.totalItems).toBe(mockTotalItems)
+    expect(state.error).toBeNull()
+    expect(toQueryString).toHaveBeenCalledWith(queryObject) // Ensure toQueryString was called with the right arguments
+    expect(fetch).toHaveBeenCalledWith('/api/documents?mockQueryString') // Ensure fetch was called with the right URL
   })
 
-  it('should handle fetch error', async () => {
-    // Mock the global fetch API to throw an error
-    const mockError = new Error('Fetch error')
-    global.fetch = jest.fn().mockRejectedValue(mockError)
+  it('should handle error while fetching documents', async () => {
+    const mockError = new Error('Failed to fetch')
+
+    // Mock the response of fetch to simulate an error
+    ;(fetch as jest.Mock).mockRejectedValueOnce(mockError)
+
+    const queryObject: DocumentQuery = {
+      searchTerm: 'test',
+      page: 1,
+      pageSize: 10,
+      columnFilters: '',
+      searchLang: 'en',
+      sorting: '',
+    }
 
     // Call the fetchDocuments method
-    await useStore.getState().document.fetchDocuments()
+    await useStore.getState().document.fetchDocuments(queryObject)
 
-    // Retrieve the updated state
-    const updatedState = useStore.getState()
-
-    // Ensure error state is set correctly
-    expect(updatedState.document.loading).toBe(false)
-    expect(updatedState.document.documents).toEqual([])
-    expect(updatedState.document.error).toBeInstanceOf(Error)
-    expect((updatedState.document.error as Error).message).toBe('Fetch error')
+    // Check if the state was updated correctly in case of error
+    const state = useStore.getState().document
+    expect(state.loading).toBe(false)
+    expect(state.documents).toEqual([])
+    expect(state.error).toBe(mockError)
   })
 })
