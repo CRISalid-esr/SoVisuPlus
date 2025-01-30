@@ -5,8 +5,8 @@ interface FetchDocumentsParams {
   page: number
   pageSize: number
   lang: string
-  columnFilters: any[]
-  sorting: any[]
+  columnFilters: { id: string; value: string }[]
+  sorting: { id: string; desc: boolean }[]
 }
 
 export class DocumentService {

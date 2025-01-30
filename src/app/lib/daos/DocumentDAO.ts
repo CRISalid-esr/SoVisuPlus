@@ -10,8 +10,8 @@ interface FetchDocumentsFromDBParams {
   page: number
   pageSize: number
   lang: string
-  columnFilters: any[]
-  sorting: any[]
+  columnFilters: { id: string; value: string }[]
+  sorting: { id: string; desc: boolean }[]
 }
 
 export class DocumentDAO extends AbstractDAO {
@@ -121,7 +121,10 @@ export class DocumentDAO extends AbstractDAO {
     lang,
     columnFilters,
     sorting,
-  }: FetchDocumentsFromDBParams): Promise<DbDocument[]> {
+  }: FetchDocumentsFromDBParams): Promise<{
+    documents: DbDocument[]
+    totalItems: number
+  }> {
     const skip = (page - 1) * pageSize
 
     const languagePriority = ['fr', 'en', 'es', 'it']
@@ -226,12 +229,12 @@ export class DocumentDAO extends AbstractDAO {
       OFFSET ${skip} LIMIT ${pageSize}
     `
 
-    const documents: any[] = await this.prismaClient
+    const documents = (await this.prismaClient
       .$queryRaw(query)
       .catch((error) => {
         console.error(error)
         return []
-      })
+      })) as DbDocument[]
 
     const countQuery = Prisma.sql`
       SELECT COUNT(DISTINCT d.id) AS total
@@ -248,7 +251,7 @@ export class DocumentDAO extends AbstractDAO {
       `
     })
 
-    const totalCount = await this.prismaClient.$queryRaw(
+    const totalCount = await this.prismaClient.$queryRaw<{ total: string }[]>(
       searchTerm
         ? Prisma.sql`${countQuery} AND (
             ${Prisma.join(languageSearchConditions, ' OR ')}
@@ -257,6 +260,11 @@ export class DocumentDAO extends AbstractDAO {
         : countQuery,
     )
 
-    return { documents, totalItems: parseInt(totalCount[0].total, 10) }
+    console.log('documents', documents)
+
+    return {
+      documents: documents,
+      totalItems: parseInt(totalCount[0].total, 10),
+    }
   }
 }
