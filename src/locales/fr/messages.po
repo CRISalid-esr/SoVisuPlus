@@ -51,11 +51,11 @@ msgstr "Toutes mes publications"
 msgid "documents_page_contributors_column"
 msgstr "auteurs"
 
-#: src/app/[lang]/documents/page.tsx:144
+#: src/app/[lang]/documents/page.tsx:147
 msgid "documents_page_date_column"
 msgstr "Date"
 
-#: src/app/[lang]/documents/page.tsx:158
+#: src/app/[lang]/documents/page.tsx:161
 msgid "documents_page_halStatus_column"
 msgstr "Statut hal"
 
@@ -67,15 +67,15 @@ msgstr "Dépôt HAL incomplet"
 msgid "documents_page_keywords_to_validate"
 msgstr "Mots-clés à valider"
 
-#: src/app/[lang]/documents/page.tsx:225
+#: src/app/[lang]/documents/page.tsx:228
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:151
+#: src/app/[lang]/documents/page.tsx:154
 msgid "documents_page_publishedIn_column"
 msgstr "paru dans"
 
-#: src/app/[lang]/documents/page.tsx:229
+#: src/app/[lang]/documents/page.tsx:232
 msgid "documents_page_synchronize_button"
 msgstr "Synchroniser"
 
@@ -87,7 +87,7 @@ msgstr "titre"
 msgid "documents_page_type_column"
 msgstr "type"
 
-#: src/app/[lang]/documents/page.tsx:165
+#: src/app/[lang]/documents/page.tsx:168
 msgid "documents_page_version_column"
 msgstr "versions"
 
