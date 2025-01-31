@@ -115,7 +115,10 @@ export default function DocumentsPage() {
             (acc: string, contribution: Contribution) => {
               const person = contribution.person
               const { firstName, lastName } = person
-              const name = [firstName, lastName].filter(Boolean).join(' ')
+              let name = [firstName, lastName].filter(Boolean).join(' ')
+              if (name.match(/^\s*$/)) {
+                name = person.displayName
+              }
               if (name) {
                 if (acc) {
                   return `${acc}, ${name}`
