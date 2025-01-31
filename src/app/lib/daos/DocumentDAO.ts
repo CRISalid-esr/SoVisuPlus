@@ -240,7 +240,7 @@ export class DocumentDAO extends AbstractDAO {
           )
         )) AS contributions
       FROM grouped_documents
-      GROUP BY id, uid ,title_value ,contributor_firstName, contributor_lastName,title_language
+      GROUP BY id, uid
       ${orderQuery}
       OFFSET ${skip} LIMIT ${pageSize}
     `
