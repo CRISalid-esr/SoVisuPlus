@@ -146,10 +146,15 @@ export class DocumentDAO extends AbstractDAO {
     let query = Prisma.sql`
       SELECT d.id,
         d.uid,
-        p."firstName" AS contributor_firstName, p."lastName" AS contributor_lastName,
-        p."id" AS contributor_id, p."uid" AS contributor_uid, p."email" AS contributor_email,
+        p."firstName" AS contributor_firstName, 
+        p."lastName" AS contributor_lastName, 
+        p."displayName" AS contributor_displayName,
+        p."id" AS contributor_id, p."uid" AS contributor_uid, 
+        p."email" AS contributor_email,
         c."role" as role, c."id" as contribution_id,
-        t.value AS title_value, t.language AS title_language, t.id AS title_id
+        t.value AS title_value, 
+        t.language AS title_language, 
+        t.id AS title_id
       FROM "Document" d
       LEFT JOIN "DocumentTitle" t ON t."documentId" = d.id
       LEFT JOIN "Contribution" c ON c."documentId" = d.id
@@ -229,8 +234,9 @@ export class DocumentDAO extends AbstractDAO {
         )) AS titles,
         ARRAY_AGG(DISTINCT JSONB_BUILD_OBJECT(
           'id', contribution_id, 'role', role, 'person', JSONB_BUILD_OBJECT(
-            'id', contributor_id, 'firstName', contributor_firstName,
-            'lastName', contributor_lastName, 'uid', contributor_uid, 'email', contributor_email
+            'id', contributor_id, 'firstName', contributor_firstName, 
+            'lastName', contributor_lastName, 'displayName', contributor_displayName,
+            'uid', contributor_uid, 'email', contributor_email
           )
         )) AS contributions
       FROM grouped_documents
@@ -269,8 +275,6 @@ export class DocumentDAO extends AbstractDAO {
           )`
         : countQuery,
     )
-
-    console.log('documents', documents)
 
     return {
       documents: documents,
