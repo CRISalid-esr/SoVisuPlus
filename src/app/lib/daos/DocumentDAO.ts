@@ -251,37 +251,6 @@ export class DocumentDAO extends AbstractDAO {
         return []
       })) as DbDocument[]
 
-    const mergeDocumentsByUid = (documents: DbDocument[]) => {
-      return documents.reduce(
-        (acc, document) => {
-          const { uid, titles, contributions, ...rest } = document
-          if (!acc[uid]) {
-            acc[uid] = {
-              uid,
-              titles: [],
-              contributions: [],
-              ...rest,
-            }
-          }
-
-          titles.forEach((title) => {
-            if (!acc[uid].titles.some((t) => t.id === title.id)) {
-              acc[uid].titles.push(title)
-            }
-          })
-
-          contributions.forEach((contribution) => {
-            if (!acc[uid].contributions.some((c) => c.id === contribution.id)) {
-              acc[uid].contributions.push(contribution)
-            }
-          })
-
-          return acc
-        },
-        {} as Record<string, DbDocument>,
-      )
-    }
-
     const countQuery = Prisma.sql`
       SELECT COUNT(DISTINCT d.id) AS total
       FROM "Document" d
@@ -306,10 +275,8 @@ export class DocumentDAO extends AbstractDAO {
         : countQuery,
     )
 
-    const mergedDocuments = mergeDocumentsByUid(documents)
-
     return {
-      documents: Object.values(mergedDocuments),
+      documents,
       totalItems: parseInt(totalCount[0].total, 10),
     }
   }
