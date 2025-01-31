@@ -1,9 +1,8 @@
 import { DocumentWithRelations as DbDocument } from '@/prisma-schema/extended-client'
-import { Person as DbPerson } from '@prisma/client'
+import { Person as DbPerson, Prisma } from '@prisma/client'
 import { Document } from '@/types/Document'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PersonDAO } from './PersonDAO'
-import { Prisma } from '@prisma/client'
 
 interface FetchDocumentsFromDBParams {
   searchTerm: string
@@ -240,7 +239,7 @@ export class DocumentDAO extends AbstractDAO {
           )
         )) AS contributions
       FROM grouped_documents
-      GROUP BY id, uid
+      GROUP BY id, uid, title_value, contributor_firstName, contributor_lastName, title_language
       ${orderQuery}
       OFFSET ${skip} LIMIT ${pageSize}
     `
@@ -251,6 +250,37 @@ export class DocumentDAO extends AbstractDAO {
         console.error(error)
         return []
       })) as DbDocument[]
+
+    const mergeDocumentsByUid = (documents: DbDocument[]) => {
+      return documents.reduce(
+        (acc, document) => {
+          const { uid, titles, contributions, ...rest } = document
+          if (!acc[uid]) {
+            acc[uid] = {
+              uid,
+              titles: [],
+              contributions: [],
+              ...rest,
+            }
+          }
+
+          titles.forEach((title) => {
+            if (!acc[uid].titles.some((t) => t.id === title.id)) {
+              acc[uid].titles.push(title)
+            }
+          })
+
+          contributions.forEach((contribution) => {
+            if (!acc[uid].contributions.some((c) => c.id === contribution.id)) {
+              acc[uid].contributions.push(contribution)
+            }
+          })
+
+          return acc
+        },
+        {} as Record<string, DbDocument>,
+      )
+    }
 
     const countQuery = Prisma.sql`
       SELECT COUNT(DISTINCT d.id) AS total
@@ -276,8 +306,10 @@ export class DocumentDAO extends AbstractDAO {
         : countQuery,
     )
 
+    const mergedDocuments = mergeDocumentsByUid(documents)
+
     return {
-      documents: documents,
+      documents: Object.values(mergedDocuments),
       totalItems: parseInt(totalCount[0].total, 10),
     }
   }
