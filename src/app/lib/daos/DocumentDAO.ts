@@ -3,6 +3,7 @@ import { Person as DbPerson, Prisma } from '@prisma/client'
 import { Document } from '@/types/Document'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PersonDAO } from './PersonDAO'
+import QueryMode = Prisma.QueryMode
 
 interface FetchDocumentsFromDBParams {
   searchTerm: string
@@ -134,45 +135,48 @@ export class DocumentDAO extends AbstractDAO {
   }> {
     const skip = (page - 1) * pageSize
 
-     let where: Prisma.DocumentWhereInput = {}
+    let where: Prisma.DocumentWhereInput = {}
 
-     if(searchTerm){
-        where = {
-          OR: [
-            {
-              titles: {
-                some: {
-                  value: {
+    if (searchTerm) {
+      where = {
+        OR: [
+          {
+            titles: {
+              some: {
+                value: {
+                  contains: searchTerm,
+                  mode: QueryMode.insensitive,
+                },
+              },
+            },
+          },
+          {
+            abstracts: {
+              some: {
+                value: {
+                  contains: searchTerm,
+                  mode: QueryMode.insensitive,
+                },
+              },
+            },
+          },
+          {
+            contributions: {
+              some: {
+                person: {
+                  displayName: {
                     contains: searchTerm,
+                    mode: QueryMode.insensitive,
                   },
                 },
               },
             },
-            {
-              abstracts: {
-                some: {
-                  value: {
-                    contains: searchTerm,
-                  },
-                },
-              },
-            },
-            {
-              contributions: {
-                some: {
-                  person: {
-                    displayName: {
-                      contains: searchTerm,
-                    },
-                  },
-                },
-              },
-            },
-          ],
-        }
+          },
+        ],
       }
+    }
 
-     columnFilters.forEach((filter) => {
+    columnFilters.forEach((filter) => {
       if (filter.id === 'titles') {
         where = {
           ...where,
@@ -180,6 +184,7 @@ export class DocumentDAO extends AbstractDAO {
             some: {
               value: {
                 contains: filter.value,
+                mode: QueryMode.insensitive,
               },
             },
           },
@@ -193,6 +198,7 @@ export class DocumentDAO extends AbstractDAO {
             some: {
               value: {
                 contains: filter.value,
+                mode: QueryMode.insensitive,
               },
             },
           },
@@ -207,6 +213,7 @@ export class DocumentDAO extends AbstractDAO {
               person: {
                 displayName: {
                   contains: filter.value,
+                  mode: QueryMode.insensitive,
                 },
               },
             },
@@ -215,51 +222,44 @@ export class DocumentDAO extends AbstractDAO {
       }
     })
 
+    const orderBy: Prisma.DocumentOrderByWithRelationInput[] = sorting.map(
+      (sort) => {
+        if (sort.id === 'contributions') {
+          return {
+            contributions: {
+              _count: sort.desc ? 'desc' : 'asc',
+            },
+          }
+        }
 
-
-    const orderBy: Prisma.DocumentOrderByWithRelationInput[] = sorting.map((sort) => {
-      if (sort.id === 'contributions') {
-        return {
-          contributions: {
-            _count: sort.desc ? 'desc' : 'asc',
-          },
-        };
-      }
-
-
-      if (sort.id === 'titles') {
-        return {
-          titles: {
-            _count: sort.desc ? 'desc' : 'asc',
-          },
-        };
-      }
-      return { [sort.id]: sort.desc ? 'desc' : 'asc' };
-    });
-
-
-
+        if (sort.id === 'titles') {
+          return {
+            titles: {
+              _count: sort.desc ? 'desc' : 'asc',
+            },
+          }
+        }
+        return { [sort.id]: sort.desc ? 'desc' : 'asc' }
+      },
+    )
 
     const documents = await this.prismaClient.document.findMany({
-      where,  
+      where,
       skip,
       take: pageSize,
       orderBy,
       include: {
-        titles:true,
-        abstracts:true  ,
+        titles: true,
+        abstracts: true,
         contributions: {
           include: {
-            person: true
+            person: true,
           },
         },
       },
     })
 
-
     const totalItems = await this.prismaClient.document.count({ where })
-
-
 
     return {
       documents,

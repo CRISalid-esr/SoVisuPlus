@@ -4,7 +4,6 @@ interface FetchDocumentsParams {
   searchTerm: string
   page: number
   pageSize: number
-  lang: string
   columnFilters: { id: string; value: string }[]
   sorting: { id: string; desc: boolean }[]
 }
@@ -19,7 +18,6 @@ export class DocumentService {
     searchTerm,
     page,
     pageSize,
-    lang,
     columnFilters,
     sorting,
   }: FetchDocumentsParams) {
@@ -29,7 +27,6 @@ export class DocumentService {
           searchTerm,
           page,
           pageSize,
-          lang,
           columnFilters,
           sorting,
         })

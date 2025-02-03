@@ -7,7 +7,6 @@ export const GET = async (req: NextRequest) => {
     const searchTerm = urlParams.get('searchTerm') || ''
     const page = parseInt(urlParams.get('page') || '1', 10)
     const pageSize = parseInt(urlParams.get('pageSize') || '10', 10)
-    const lang = urlParams.get('searchLang') || 'fr'
     const columnFilters = JSON.parse(urlParams.get('columnFilters') || '[]')
     const sorting = JSON.parse(urlParams.get('sorting') || '[]')
 
@@ -16,7 +15,6 @@ export const GET = async (req: NextRequest) => {
       searchTerm,
       page,
       pageSize,
-      lang,
       columnFilters,
       sorting,
     })
