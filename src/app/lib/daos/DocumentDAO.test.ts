@@ -7,7 +7,6 @@ import {
 import { Document } from '@/types/Document'
 import { DocumentDAO } from './DocumentDAO'
 import { PersonDAO } from './PersonDAO'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { Person } from '@/types/Person'
 
 jest.mock('@prisma/client', () => {
@@ -18,8 +17,8 @@ jest.mock('@prisma/client', () => {
       findUnique: jest.fn(),
       create: jest.fn(),
       findMany: jest.fn(),
+      count: jest.fn(),
     },
-    count: jest.fn(),
     documentTitle: {
       upsert: jest.fn(),
     },
@@ -142,11 +141,10 @@ describe('DocumentDAO', () => {
     ] as unknown as DbDocument[]
 
     // Mock fetch documents query
-    ;(mockPrisma.document.findMany as jest.Mock)
-      .mockResolvedValue(mockDbDocuments)(
-        mockPrisma.document.count as jest.Mock,
-      )
-      .mockResolvedValue(1)
+    ;(mockPrisma.document.findMany as jest.Mock).mockResolvedValue(
+      mockDbDocuments,
+    )
+    ;(mockPrisma.document.count as jest.Mock).mockResolvedValue(1)
 
     const fetchParams = {
       searchTerm: 'Sample',
@@ -173,7 +171,37 @@ describe('DocumentDAO', () => {
               },
             },
           },
+          {
+            abstracts: {
+              some: {
+                value: {
+                  contains: 'Sample',
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+            },
+          },
+          {
+            contributions: {
+              some: {
+                person: {
+                  displayName: {
+                    contains: 'Sample',
+                    mode: Prisma.QueryMode.insensitive,
+                  },
+                },
+              },
+            },
+          },
         ],
+        titles: {
+          some: {
+            value: {
+              contains: 'Sample Document Title',
+              mode: Prisma.QueryMode.insensitive,
+            },
+          },
+        },
       },
       skip: 0,
       take: 10,
