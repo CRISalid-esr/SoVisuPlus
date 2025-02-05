@@ -14,7 +14,8 @@ export default function StoreChecker() {
       pageSize: 0,
       columnFilters: '',
       searchLang: '',
-      sorting: ''
+      sorting: '',
+      contributorUid: null,
     }).then(() => {
       setFailure(false)
     })

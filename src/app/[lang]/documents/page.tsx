@@ -191,6 +191,7 @@ export default function DocumentsPage() {
       columnFilters: JSON.stringify(columnFilters),
       sorting: JSON.stringify(sorting),
       searchLang: lang,
+      contributorUid: currentPerspective?.uid || '',
     }).catch((error) => {
       console.error('Error fetching documents:', error)
     })
@@ -202,6 +203,7 @@ export default function DocumentsPage() {
     sorting,
     lang,
     fetchDocuments,
+    currentPerspective,
   ])
 
   const handleTabChange = (newValue: string) => {

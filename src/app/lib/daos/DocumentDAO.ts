@@ -11,6 +11,7 @@ interface FetchDocumentsFromDBParams {
   pageSize: number
   columnFilters: { id: string; value: string }[]
   sorting: { id: string; desc: boolean }[]
+  contributorUid: string | null
 }
 
 export class DocumentDAO extends AbstractDAO {
@@ -129,6 +130,7 @@ export class DocumentDAO extends AbstractDAO {
     pageSize,
     columnFilters,
     sorting,
+    contributorUid,
   }: FetchDocumentsFromDBParams): Promise<{
     documents: DbDocument[]
     totalItems: number
@@ -221,6 +223,19 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
     })
+
+    if (contributorUid) {
+      where = {
+        ...where,
+        contributions: {
+          some: {
+            person: {
+              uid: contributorUid,
+            },
+          },
+        },
+      }
+    }
 
     const orderBy: Prisma.DocumentOrderByWithRelationInput[] = sorting.map(
       (sort) => {

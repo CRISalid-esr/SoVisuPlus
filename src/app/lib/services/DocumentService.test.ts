@@ -30,6 +30,7 @@ describe('DocumentService', () => {
       pageSize: 10,
       columnFilters: [{ id: 'category', value: 'reports' }],
       sorting: [{ id: 'name', desc: false }],
+      contributorUid: 'local-124',
     }
 
     await expect(documentService.fetchDocuments(params)).resolves.toEqual(
@@ -48,6 +49,7 @@ describe('DocumentService', () => {
       pageSize: 10,
       columnFilters: [],
       sorting: [],
+      contributorUid: 'local-124',
     }
 
     await expect(documentService.fetchDocuments(params)).rejects.toThrow(

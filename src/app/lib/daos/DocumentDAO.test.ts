@@ -152,6 +152,7 @@ describe('DocumentDAO', () => {
       pageSize: 10,
       columnFilters: [{ id: 'titles', value: 'Sample Document Title' }],
       sorting: [{ id: 'titles', desc: false }],
+      contributorUid: 'local-123',
     }
 
     const result = await documentDAO.fetchDocumentsFromDB(fetchParams)

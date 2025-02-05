@@ -73,45 +73,51 @@ const SearchInput: React.FC = () => {
   const lang = Lingui.i18n.locale
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (searchTags.some((tag) => tag.selected && tag.value === 'people')) {
-        if (fetchPeopleByName) {
-          try {
-            await fetchPeopleByName({ searchTerm, page: peoplePage })
-          } catch (error) {
-            console.error('Error fetching people:', error)
+    const handler = setTimeout(() => {
+      const fetchData = async () => {
+        if (searchTags.some((tag) => tag.selected && tag.value === 'people')) {
+          if (fetchPeopleByName) {
+            try {
+              await fetchPeopleByName({ searchTerm, page: peoplePage })
+            } catch (error) {
+              console.error('Error fetching people:', error)
+            }
           }
         }
       }
-    }
-    fetchData().catch((error) => {
-      console.error('Error fetching data:', error)
-    })
+      fetchData().catch((error) => {
+        console.error('Error fetching data:', error)
+      })
+    }, 3000)
+    return () => clearTimeout(handler) // Clear timeout if input changes before 2 seconds
   }, [fetchPeopleByName, peoplePage, searchTerm, searchTags])
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (
-        searchTags.some(
-          (tag) => tag.selected && tag.value === 'researchStructures',
-        )
-      ) {
-        if (fetchResearchStructuresByName) {
-          try {
-            await fetchResearchStructuresByName({
-              searchTerm,
-              searchLang: lang,
-              page: researchStructuresPage,
-            })
-          } catch (error) {
-            console.error('Error fetching research structures:', error)
+    const handler = setTimeout(() => {
+      const fetchData = async () => {
+        if (
+          searchTags.some(
+            (tag) => tag.selected && tag.value === 'researchStructures',
+          )
+        ) {
+          if (fetchResearchStructuresByName) {
+            try {
+              await fetchResearchStructuresByName({
+                searchTerm,
+                searchLang: lang,
+                page: researchStructuresPage,
+              })
+            } catch (error) {
+              console.error('Error fetching research structures:', error)
+            }
           }
         }
       }
-    }
-    fetchData().catch((error) => {
-      console.error('Error fetching data:', error)
-    })
+      fetchData().catch((error) => {
+        console.error('Error fetching data:', error)
+      })
+    }, 3000)
+    return () => clearTimeout(handler) // Clear timeout if input changes before 2 seconds
   }, [
     fetchResearchStructuresByName,
     researchStructuresPage,
