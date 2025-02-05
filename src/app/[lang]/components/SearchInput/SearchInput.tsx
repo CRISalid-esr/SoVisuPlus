@@ -52,6 +52,7 @@ const SearchInput: React.FC = () => {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const theme = useTheme()
+  const perspectiveId = searchParams.get('perspective')
 
   const {
     fetchPeopleByName,
@@ -126,6 +127,7 @@ const SearchInput: React.FC = () => {
     searchTags,
   ])
 
+
   const handleScroll = (e: React.UIEvent<HTMLLIElement>, group: string) => {
     const target = e.target as HTMLLIElement
     const bottom =
@@ -197,8 +199,10 @@ const SearchInput: React.FC = () => {
           })
         mergedOptions.push(...researchStructureOptions)
       }
+      const foundOption = mergedOptions.find(option => option.id === perspectiveId) || null;
+      setSearchTerm(foundOption?.label || '');
       return mergedOptions
-    }, [people, researchStructures, searchTags, lang])
+    }, [people, researchStructures, searchTags, lang,perspectiveId])
 
   const renderGroup = (params: AutocompleteRenderGroupParams) => {
     const { key, ...rest } = params
