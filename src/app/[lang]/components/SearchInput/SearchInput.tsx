@@ -15,7 +15,6 @@ import { t } from '@lingui/macro'
 import useStore from '@/stores/global_store'
 import Highlighter from 'react-highlight-words'
 import DoneIcon from '@mui/icons-material/Done'
-import DeleteIcon from '@mui/icons-material/Delete'
 import { IAgent } from '@/types/IAgent'
 import { Person } from '@/types/Person'
 import { ResearchStructure } from '@/types/ResearchStructure'
@@ -256,7 +255,7 @@ const SearchInput: React.FC = () => {
               onClick={() => handleTagClick(tag.value)}
               color={tag.selected ? 'primary' : 'default'}
               sx={{ cursor: 'pointer' }}
-              icon={tag.selected ? <DeleteIcon /> : <DoneIcon />}
+              icon={tag.selected ? <DoneIcon /> : <></>}
             />
           ))}
         </Box>
