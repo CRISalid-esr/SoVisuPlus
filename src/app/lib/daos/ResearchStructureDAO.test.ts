@@ -5,6 +5,7 @@ import {
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
 import { ResearchStructureIdentifierType } from '@/types/ResearchStructureIdentifier'
+import { Literal } from '@/types/Literal'
 
 jest.mock('@prisma/client', () => {
   // avoid PersonIdentifierType to be mocked
@@ -42,8 +43,8 @@ describe('ResearchStructureDAO', () => {
   const researchStructure: ResearchStructure = new ResearchStructure(
     'local-rs001',
     'RS001',
-    [{ value: 'Research Structure 001', language: 'en' }],
-    [{ value: 'A description for Research Structure 001', language: 'en' }],
+    [new Literal('Research Structure 001', 'en')],
+    [new Literal('A description for Research Structure 001', 'en')],
     [{ type: ResearchStructureIdentifierType.RNSR, value: '001234567Z' }],
   )
 

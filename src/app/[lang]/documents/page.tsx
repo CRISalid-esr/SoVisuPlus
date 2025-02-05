@@ -200,9 +200,9 @@ export default function DocumentsPage() {
       page: pagination.pageIndex + 1,
       pageSize: pagination.pageSize,
       searchTerm: globalFilter,
+      searchLang: lang,
       columnFilters: JSON.stringify(columnFilters),
       sorting: JSON.stringify(sorting),
-      searchLang: lang,
       contributorUid: currentPerspective?.uid || '',
     }).catch((error) => {
       console.error('Error fetching documents:', error)

@@ -11,6 +11,16 @@ class Literal {
     }
   }
 
+  public normalize(): string {
+    return this.value
+      .toLowerCase()
+      .normalize('NFD') // Decompose accents (é → e + ́ )
+      .replace(/[\u0300-\u036f]/g, '') // Remove combining diacritical marks
+      .replace(/[^\w\s]|_/g, '') // Remove punctuation
+      .replace(/\s+/g, ' ') // Normalize spaces
+      .trim()
+  }
+
   static fromObject(object: {
     language: string | null
     value: string

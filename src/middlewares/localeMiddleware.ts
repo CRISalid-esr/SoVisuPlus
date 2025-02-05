@@ -1,13 +1,20 @@
 import type { NextFetchEvent, NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { CustomMiddleware } from '@/middlewares/chain'
-
-// Define supported locales and the default locale
-const supportedLocales = ['en', 'fr']
-const defaultLocale = 'fr'
+import process from 'process'
 
 export function localeMiddleware(middleware: CustomMiddleware) {
   return async (request: NextRequest, event: NextFetchEvent) => {
+    let supportedLocales: string[] = []
+    if (process.env.SUPPORTED_LOCALES) {
+      console.log('SUPPORTED LOCALES:', process.env.SUPPORTED_LOCALES)
+      supportedLocales = process.env.SUPPORTED_LOCALES.split(',')
+    } else {
+      console.error('SUPPORTED_LOCALES environment variable is not set')
+      supportedLocales = ['fr', 'en']
+    }
+
+    const defaultLocale = supportedLocales[0]
     const { pathname } = request.nextUrl
     const response = NextResponse.next()
     const pathLocale = pathname.split('/')[1]

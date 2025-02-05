@@ -26,6 +26,7 @@ describe('DocumentService', () => {
 
     const params = {
       searchTerm: 'test',
+      searchLang: 'en',
       page: 1,
       pageSize: 10,
       columnFilters: [{ id: 'category', value: 'reports' }],
@@ -45,6 +46,7 @@ describe('DocumentService', () => {
 
     const params = {
       searchTerm: 'test',
+      searchLang: 'en',
       page: 1,
       pageSize: 10,
       columnFilters: [],
