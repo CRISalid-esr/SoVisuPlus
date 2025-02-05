@@ -18,8 +18,8 @@ import DoneIcon from '@mui/icons-material/Done'
 import { IAgent } from '@/types/IAgent'
 import { Person } from '@/types/Person'
 import { ResearchStructure } from '@/types/ResearchStructure'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
-
 console.log(Lingui)
 
 interface IAutoCompleteGroupTag {
@@ -48,7 +48,9 @@ const SearchInput: React.FC = () => {
       selected: true,
     },
   ])
-
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const theme = useTheme()
 
   const {
@@ -273,8 +275,20 @@ const SearchInput: React.FC = () => {
     value: IAutoCompleteOption<Person | ResearchStructure> | null,
   ) => {
     if (value) {
+      //set to url
       setPerspective(value.agent)
       setSearchMenuOpen(false)
+
+      const params = new URLSearchParams(searchParams.toString())
+
+      if (value.id) {
+        params.set('perspective', value.id) // Use `id` to track selection
+      } else {
+        params.delete('perspective') // Remove if empty
+      }
+
+      // Push updated query parameters without full page reload
+      router.push(`${pathname}?${params.toString()}`, { scroll: false })
     }
   }
 
