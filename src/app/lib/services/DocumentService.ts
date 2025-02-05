@@ -2,6 +2,7 @@ import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 
 interface FetchDocumentsParams {
   searchTerm: string
+  searchLang: string
   page: number
   pageSize: number
   columnFilters: { id: string; value: string }[]
@@ -18,6 +19,7 @@ export class DocumentService {
 
   async fetchDocuments({
     searchTerm,
+    searchLang,
     page,
     pageSize,
     columnFilters,
@@ -28,6 +30,7 @@ export class DocumentService {
       const { documents, totalItems } =
         await this.documentDAO.fetchDocumentsFromDB({
           searchTerm,
+          searchLang: searchLang,
           page,
           pageSize,
           columnFilters,

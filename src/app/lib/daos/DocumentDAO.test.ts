@@ -1,13 +1,14 @@
 import {
-  PrismaClient,
   Document as DbDocument,
   Person as DbPerson,
   Prisma,
+  PrismaClient,
 } from '@prisma/client'
 import { Document } from '@/types/Document'
 import { DocumentDAO } from './DocumentDAO'
 import { PersonDAO } from './PersonDAO'
 import { Person } from '@/types/Person'
+import { Literal } from '@/types/Literal'
 
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
@@ -45,11 +46,11 @@ describe('DocumentDAO', () => {
     documentDAO = new DocumentDAO()
   })
 
-  const document: Document = {
-    uid: 'doc-123',
-    titles: [{ language: 'en', value: 'Sample Document Title' }],
-    abstracts: [{ language: 'en', value: 'Sample Abstract' }],
-    contributions: [
+  const document: Document = new Document(
+    'doc-123',
+    [new Literal('Sample Document Title', 'en')],
+    [new Literal('Sample Abstract', 'en')],
+    [
       {
         person: new Person(
           'person-1',
@@ -60,9 +61,10 @@ describe('DocumentDAO', () => {
           'Doe',
           [],
         ),
+        role: 'AUTHOR',
       },
     ],
-  }
+  )
 
   it('should create or update a document', async () => {
     const mockDbDocument = {
@@ -70,6 +72,9 @@ describe('DocumentDAO', () => {
       uid: 'doc-123',
       titles: [],
       abstracts: [],
+      title_locale_0: '',
+      title_locale_1: '',
+      title_locale_2: '',
     } as DbDocument
 
     // Mock the document retrieval
@@ -118,6 +123,9 @@ describe('DocumentDAO', () => {
       uid: 'doc-123',
       titles: [],
       abstracts: [],
+      title_locale_0: '',
+      title_locale_1: '',
+      title_locale_2: '',
     } as DbDocument
 
     // Simulate no existing document, so create a new one
@@ -148,6 +156,7 @@ describe('DocumentDAO', () => {
 
     const fetchParams = {
       searchTerm: 'Sample',
+      searchLang: 'en',
       page: 1,
       pageSize: 10,
       columnFilters: [{ id: 'titles', value: 'Sample Document Title' }],
