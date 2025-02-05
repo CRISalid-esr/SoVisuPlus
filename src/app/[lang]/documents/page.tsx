@@ -10,7 +10,7 @@ import * as Lingui from '@lingui/core'
 import { t, Trans } from '@lingui/macro'
 import ArticleIcon from '@mui/icons-material/Article'
 import SyncIcon from '@mui/icons-material/Sync'
-import { Box, Button, Typography } from '@mui/material'
+import { Box, Button, Chip, Typography } from '@mui/material'
 import { useTheme } from '@mui/system'
 import {
   MaterialReactTable,
@@ -91,12 +91,24 @@ export default function DocumentsPage() {
           )
           const filterValue = column.getFilterValue()
           return (
-            <Highlighter
-              highlightClassName='highlight'
-              searchWords={[globalFilter, filterValue as string]}
-              autoEscape
-              textToHighlight={localizedTitle}
-            />
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Highlighter
+                highlightClassName='highlight'
+                searchWords={[globalFilter, filterValue as string]}
+                autoEscape
+                textToHighlight={localizedTitle}
+              />
+              <Box>
+                <Chip
+                  size='small'
+                  sx={{
+                    marginRight: theme.spacing(1),
+                  }}
+                  label='FR'
+                />
+                <Chip size='small' label='EN' />
+              </Box>
+            </Box>
           )
         },
       },
