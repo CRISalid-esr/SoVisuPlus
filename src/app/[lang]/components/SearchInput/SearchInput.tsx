@@ -94,6 +94,7 @@ const SearchInput: React.FC = () => {
     return () => clearTimeout(handler) // Clear timeout if input changes before 2 seconds
   }, [fetchPeopleByName, peoplePage, searchTerm, searchTags])
 
+
   useEffect(() => {
     const handler = setTimeout(() => {
       const fetchData = async () => {
