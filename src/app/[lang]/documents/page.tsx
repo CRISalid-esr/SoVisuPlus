@@ -21,6 +21,7 @@ import {
 } from 'material-react-table'
 import { useEffect, useMemo, useState } from 'react'
 import Highlighter from 'react-highlight-words'
+import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 
 export default function DocumentsPage() {
   const [pagination, setPagination] = useState({
@@ -30,6 +31,7 @@ export default function DocumentsPage() {
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
   const [sorting, setSorting] = useState<MRT_SortingState>([])
+  const { currentPerspective } = useStore((state) => state.user)
 
   const lang = Lingui.i18n.locale
 
@@ -225,7 +227,9 @@ export default function DocumentsPage() {
       >
         <Box>
           <Typography variant='h4' gutterBottom>
-            <Trans>documents_page_main_title</Trans>
+            {/*dislay name of the agent in the current perspective */}
+            <Trans>documents_page_main_title</Trans> :{' '}
+            {currentPerspective?.getDisplayName(lang as ExtendedLanguageCode)}
           </Typography>
         </Box>
         <Button startIcon={<SyncIcon />} variant='outlined'>

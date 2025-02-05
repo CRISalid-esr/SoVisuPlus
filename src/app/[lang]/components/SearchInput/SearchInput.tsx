@@ -40,6 +40,7 @@ const SearchInput: React.FC = () => {
   const [peoplePage, setPeoplePage] = useState(1)
   const [researchStructuresPage, setResearchStructuresPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
+  const [searchMenuOpen, setSearchMenuOpen] = useState(false)
   const [searchTags, setSearchTags] = useState<IAutoCompleteGroupTag[]>([
     { label: t`sidebar_search_people`, value: 'people', selected: true },
     {
@@ -268,6 +269,7 @@ const SearchInput: React.FC = () => {
   ) => {
     if (value) {
       setPerspective(value.agent)
+      setSearchMenuOpen(false)
     }
   }
 
@@ -275,6 +277,10 @@ const SearchInput: React.FC = () => {
     <Autocomplete
       onClose={() => {
         setSearchTerm(searchTerm)
+      }}
+      open={searchMenuOpen}
+      onOpen={() => {
+        setSearchMenuOpen(true)
       }}
       onChange={handlePerspectiveSelections}
       renderGroup={renderGroup}

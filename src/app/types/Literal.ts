@@ -1,10 +1,10 @@
-import ISO6391, { LanguageCode } from 'iso-639-1'
+import ISO6391 from 'iso-639-1'
+import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 
 class Literal {
   constructor(
     public value: string,
-    public language: LanguageCode | 'ul', // ISO 639-1 code or
-    // undetermined language
+    public language: ExtendedLanguageCode, // ISO 639-1 code or undetermined language
   ) {
     if (language !== 'ul' && !ISO6391.validate(language)) {
       throw new Error(`Invalid ISO 639-1 language code: ${language}`)
@@ -19,7 +19,7 @@ class Literal {
     if (language === null || !ISO6391.validate(language)) {
       language = 'ul'
     }
-    return new Literal(object.value, language as LanguageCode | 'ul')
+    return new Literal(object.value, language as ExtendedLanguageCode)
   }
 }
 

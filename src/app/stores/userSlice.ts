@@ -25,12 +25,14 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
       set((state) => ({ user: { ...state.user, loading: true } }))
       try {
         const response = await fetch('/api/users/me')
-        const jsonData = await response.json()
+        const jsonUser = await response.json()
+
+        const user = User.fromJsonUser(jsonUser)
+
         set((state) => ({
           user: {
             ...state.user,
-            connectedUser: jsonData,
-            currentPerspective: jsonData.person,
+            connectedUser: user,
           },
         }))
       } catch (error) {
