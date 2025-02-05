@@ -2,6 +2,9 @@ import type { NextConfig } from 'next'
 import * as path from 'node:path'
 
 const nextConfig: NextConfig = {
+  env: {
+    SUPPORTED_LOCALES: process.env.SUPPORTED_LOCALES || 'en,fr,de',
+  },
   // for docker https://github.com/vercel/next.js/tree/canary/examples/with-docker
   output: 'standalone',
   reactStrictMode: true,
