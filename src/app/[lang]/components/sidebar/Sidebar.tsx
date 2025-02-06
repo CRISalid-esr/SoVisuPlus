@@ -1011,7 +1011,7 @@ export default function Sidebar({
               <ListItem>
                 <ListItemIcon
                   onClick={() => {
-                    router.push(`/${lang}/my-account`)
+                    router.push(`/${lang}/myA   ccount`)
                     handleToggleDrawerAction()
                   }}
                   sx={{
