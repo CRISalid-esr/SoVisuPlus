@@ -64,8 +64,6 @@ const SearchInput: React.FC = () => {
     total: totalPeople,
   } = useStore((state) => state.person)
 
-  const { connectedUser } = useStore((state) => state.user)
-
   const {
     fetchResearchStructuresByName,
     loading: researchStructuresLoading,
@@ -74,7 +72,9 @@ const SearchInput: React.FC = () => {
     total: totalResearchStructures,
   } = useStore((state) => state.researchStructure)
 
-  const { setPerspective } = useStore((state) => state.user)
+  const { setPerspective, currentPerspective, connectedUser } = useStore(
+    (state) => state.user,
+  )
 
   const lang = Lingui.i18n.locale
 
@@ -392,23 +392,25 @@ const SearchInput: React.FC = () => {
         loading={peopleLoading || researchStructuresLoading} // Display loading when data is being fetched
         loadingText={<CircularProgress size={24} />} // Show spinner when loading
       />
-      <Button
-        onClick={backToMyPerspective}
-        sx={{
-          fontFamily: 'Inter, Roboto, sans-serif',
-          fontSize: theme.utils.pxToRem(14),
-          fontWeight: theme.typography.fontWeightMedium,
-          lineHeight: theme.typography.lineHeight.lineHeight24px,
-          color: theme.palette.primaryContainer,
-          '&:hover': {
-            backgroundColor: theme.palette.sidebarItemHover,
+      {connectedUser?.person?.uid !== currentPerspective?.uid && (
+        <Button
+          onClick={backToMyPerspective}
+          sx={{
+            fontFamily: 'Inter, Roboto, sans-serif',
+            fontSize: theme.utils.pxToRem(14),
+            fontWeight: theme.typography.fontWeightMedium,
+            lineHeight: theme.typography.lineHeight.lineHeight24px,
             color: theme.palette.primaryContainer,
-          },
-        }}
-        startIcon={<KeyboardReturnIcon />}
-      >
-        {t`sidebar_back_to_my_perspective`}
-      </Button>
+            '&:hover': {
+              backgroundColor: theme.palette.sidebarItemHover,
+              color: theme.palette.primaryContainer,
+            },
+          }}
+          startIcon={<KeyboardReturnIcon />}
+        >
+          {t`sidebar_back_to_my_perspective`}
+        </Button>
+      )}
     </>
   )
 }
