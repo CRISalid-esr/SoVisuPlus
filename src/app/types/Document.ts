@@ -10,7 +10,7 @@ class Document {
   ) {}
 
   getTitleInLocale(localeNumber: number): string {
-    const locales = (process.env.SUPPORTED_LOCALES || '').split(',')
+    const locales = (process.env.SUPPORTED_LOCALES || 'fr,en').split(',')
     if (localeNumber >= locales.length) {
       return ''
     }

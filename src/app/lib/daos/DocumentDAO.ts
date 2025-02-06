@@ -157,9 +157,11 @@ export class DocumentDAO extends AbstractDAO {
   }> {
     const skip = (page - 1) * pageSize
 
-    // find the index of the serach lang in the array of process.env.SUPPORTED_LOCALES
+    // find the index of the search lang in the array of process.env.SUPPORTED_LOCALES
     const searchLangIndex =
-      process.env.SUPPORTED_LOCALES?.split(',').indexOf(searchLang) || 0
+      (process.env.SUPPORTED_LOCALES || 'fr,en')
+        ?.split(',')
+        .indexOf(searchLang) || 0
     const sortingTitleFieldName = `title_locale_${searchLangIndex}`
 
     let where: Prisma.DocumentWhereInput = {}
