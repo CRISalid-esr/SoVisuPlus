@@ -94,7 +94,7 @@ const SearchInput: React.FC = () => {
       fetchData().catch((error) => {
         console.error('Error fetching data:', error)
       })
-    }, 3000)
+    }, 2000)
     return () => clearTimeout(handler) // Clear timeout if input changes before 2 seconds
   }, [fetchPeopleByName, peoplePage, searchTerm, searchTags])
 
@@ -122,7 +122,7 @@ const SearchInput: React.FC = () => {
       fetchData().catch((error) => {
         console.error('Error fetching data:', error)
       })
-    }, 3000)
+    }, 2000)
     return () => clearTimeout(handler) // Clear timeout if input changes before 2 seconds
   }, [
     fetchResearchStructuresByName,
@@ -400,7 +400,7 @@ const SearchInput: React.FC = () => {
           fontWeight: theme.typography.fontWeightMedium,
           lineHeight: theme.typography.lineHeight.lineHeight24px,
           color: theme.palette.primaryContainer,
-          "&:hover": {
+          '&:hover': {
             backgroundColor: theme.palette.sidebarItemHover,
             color: theme.palette.primaryContainer,
           },

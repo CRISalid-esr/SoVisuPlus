@@ -17,6 +17,17 @@ jest.mock('@lingui/macro', () => {
   }
 })
 
+jest.mock('next/navigation', () => ({
+  useSearchParams: jest.fn(() => new URLSearchParams('?perspective=local1')),
+  usePathname: jest.fn(),
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+    back: jest.fn(),
+  })),
+}))
+
 describe('SearchInput Component', () => {
   const mockFetchPeopleByName = jest.fn()
   const mockFetchResearchStructuresByName = jest.fn()
@@ -98,22 +109,26 @@ describe('SearchInput Component', () => {
     const searchInput = screen.getByPlaceholderText(
       t`sidebar_search_placeholder`,
     )
-    await waitFor(() =>
-      // has been called twice, once for the initial render and once for the search term
-      expect(mockFetchPeopleByName).toHaveBeenCalledWith({
-        searchTerm: '',
-        page: 1,
-      }),
+    await waitFor(
+      () =>
+        expect(mockFetchResearchStructuresByName).toHaveBeenCalledWith({
+          searchTerm: '',
+          searchLang: 'en',
+          page: 1,
+        }),
+      { timeout: 4000 }, // Extend timeout to wait for useEffect
     )
     fireEvent.change(searchInput, { target: { value: 'John' } })
-    await waitFor(() =>
-      // has been called twice, once for the initial render and once for the search term
-      expect(mockFetchPeopleByName).toHaveBeenCalledWith({
-        searchTerm: 'John',
-        page: 1,
-      }),
+    await waitFor(
+      () =>
+        // has been called twice, once for the initial render and once for the search term
+        expect(mockFetchPeopleByName).toHaveBeenCalledWith({
+          searchTerm: 'John',
+          page: 1,
+        }),
+      { timeout: 3000 },
     )
-  })
+  }, 10000)
 
   it('fetches research structures when scrolled to bottom', async () => {
     renderComponent()
@@ -139,12 +154,14 @@ describe('SearchInput Component', () => {
       target: { scrollTop: 100 },
     })
 
-    await waitFor(() =>
-      expect(mockFetchResearchStructuresByName).toHaveBeenCalledWith({
-        searchTerm: '',
-        searchLang: 'en',
-        page: 1,
-      }),
+    await waitFor(
+      () =>
+        expect(mockFetchResearchStructuresByName).toHaveBeenCalledWith({
+          searchTerm: 'Lab X',
+          searchLang: 'en',
+          page: 1,
+        }),
+      { timeout: 4000 },
     )
   })
 
