@@ -99,7 +99,12 @@ describe('DocumentDAO', () => {
 
     expect(dbDocument.uid).toEqual('doc-123')
     expect(mockPrisma.document.create).toHaveBeenCalledWith({
-      data: { uid: 'doc-123' },
+      data: {
+        uid: 'doc-123',
+        title_locale_0: 'sample document title',
+        title_locale_1: 'sample document title',
+        title_locale_2: '',
+      },
       include: { titles: true, abstracts: true },
     })
 
@@ -204,6 +209,13 @@ describe('DocumentDAO', () => {
             },
           },
         ],
+        contributions: {
+          some: {
+            person: {
+              uid: fetchParams.contributorUid,
+            },
+          },
+        },
         titles: {
           some: {
             value: {
@@ -217,9 +229,7 @@ describe('DocumentDAO', () => {
       take: 10,
       orderBy: [
         {
-          titles: {
-            _count: 'asc',
-          },
+          title_locale_1: 'asc',
         },
       ],
       include: {
