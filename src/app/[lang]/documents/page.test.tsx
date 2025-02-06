@@ -45,6 +45,12 @@ const mockState = {
     ],
     totalItems: 1,
   },
+  user: {
+    currentPerspective: {
+      type: 'person',
+      getDisplayName: () => 'John Doe',
+    },
+  },
 }
 beforeEach(() => {
   ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
@@ -73,11 +79,14 @@ describe('DocumentsPage Component', () => {
   it('renders DocumentsPage correctly', async () => {
     renderComponent()
 
-    expect(screen.getByText('documents_page_main_title')).toBeInTheDocument()
+    expect(
+      screen.getByText((content) =>
+        content.startsWith('documents_page_main_title'),
+      ),
+    ).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: 'documents_page_synchronize_button' }),
     ).toBeInTheDocument()
-    // expect(screen.getByText('Test Title')).toBeInTheDocument()
   })
 
   it('fetches documents on mount', async () => {
@@ -91,6 +100,7 @@ describe('DocumentsPage Component', () => {
         columnFilters: JSON.stringify([]),
         sorting: JSON.stringify([]),
         searchLang: 'en',
+        contributorUid: '',
       })
     })
   })
