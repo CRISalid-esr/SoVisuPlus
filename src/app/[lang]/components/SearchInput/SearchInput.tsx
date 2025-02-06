@@ -204,7 +204,11 @@ const SearchInput: React.FC = () => {
       }
       const foundOption =
         mergedOptions.find((option) => option.id === perspectiveId) || null
-      setSearchTerm(foundOption?.label || '')
+
+      if (foundOption) {
+        setSearchTerm(foundOption.label)
+      }
+
       return mergedOptions
     }, [people, researchStructures, searchTags, lang, perspectiveId])
 
