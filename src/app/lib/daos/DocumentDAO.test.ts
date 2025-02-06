@@ -102,7 +102,7 @@ describe('DocumentDAO', () => {
       data: {
         uid: 'doc-123',
         title_locale_0: 'sample document title',
-        title_locale_1: 'sample document title',
+        title_locale_1: '',
         title_locale_2: '',
       },
       include: { titles: true, abstracts: true },
@@ -229,7 +229,7 @@ describe('DocumentDAO', () => {
       take: 10,
       orderBy: [
         {
-          title_locale_1: 'asc',
+          title_locale_0: 'asc',
         },
       ],
       include: {

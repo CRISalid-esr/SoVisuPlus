@@ -45,7 +45,6 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
       }
     },
     setPerspective: (perspective: IAgent) => {
-      console.log('Setting perspective', perspective)
       set((state) => ({
         user: { ...state.user, currentPerspective: perspective },
       }))
