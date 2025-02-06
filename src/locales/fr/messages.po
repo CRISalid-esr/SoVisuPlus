@@ -167,7 +167,7 @@ msgstr "Activités de recherche"
 #~ msgid "side_bar_publications"
 #~ msgstr "Publications"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:410
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:415
 msgid "sidebar_back_to_my_perspective"
 msgstr "Retour à mon profil"
 
@@ -176,13 +176,13 @@ msgstr "Retour à mon profil"
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:194
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:46
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:143
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:239
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:331
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:243
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:335
 msgid "sidebar_search_people"
 msgstr "Chercheurs"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:110
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:360
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:364
 msgid "sidebar_search_placeholder"
 msgstr "Chercher"
 
@@ -191,7 +191,7 @@ msgstr "Chercher"
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:197
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:48
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:153
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:333
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:337
 msgid "sidebar_search_research_structures"
 msgstr "Unités de recherche"
 
