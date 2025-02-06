@@ -1,5 +1,8 @@
 import { StateCreator } from 'zustand'
-import { ResearchStructure } from '@/types/ResearchStructure' // Assuming you have a Prisma model for Person
+import {
+  ResearchStructure,
+  ResearchStructureJson,
+} from '@/types/ResearchStructure' // Assuming you have a Prisma model for Person
 import { i18n } from '@lingui/core'
 import { BaseQuery } from '@/types/BaseQuery'
 import { toQueryString } from '@/utils/query'
@@ -68,14 +71,16 @@ export const addResearchStructureSlice: StateCreator<
 
         const jsonData = (await response.json()) as {
           hasMore: boolean
-          researchStructures: ResearchStructure[]
+          researchStructures: ResearchStructureJson[]
           total: number
         }
         const { hasMore, researchStructures, total } = jsonData
 
         set((state) => {
           const reinit = Number(queryObject.page) === 1
-          let updatedResearchStructures = researchStructures
+          let updatedResearchStructures = researchStructures.map(
+            ResearchStructure.fromJsonResearchStructure,
+          )
 
           if (!reinit) {
             // Push data to a transient map to avoid duplicates
@@ -88,7 +93,7 @@ export const addResearchStructureSlice: StateCreator<
               ),
               ...researchStructures.map((rs): [string, ResearchStructure] => [
                 rs.uid,
-                rs,
+                ResearchStructure.fromJsonResearchStructure(rs),
               ]),
             ])
             updatedResearchStructures = Array.from(

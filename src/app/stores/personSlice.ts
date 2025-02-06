@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand'
-import { Person } from '@/types/Person'
+import { Person, PersonJson } from '@/types/Person'
 import { i18n } from '@lingui/core'
 import { toQueryString } from '@/utils/query'
 import { BaseQuery } from '@/types/BaseQuery'
@@ -29,7 +29,7 @@ export interface PersonSlice {
 
 interface FindPeopleResponse {
   hasMore: boolean
-  people: Person[]
+  people: PersonJson[]
   total: number
 }
 
@@ -59,7 +59,7 @@ export const addPersonSlice: StateCreator<PersonSlice, [], [], PersonSlice> = (
         set((state) => {
           const reinit = Number(queryObject.page) === 1
 
-          let updatedPeople = people
+          let updatedPeople: Person[] = people.map(Person.fromJsonPerson)
 
           if (!reinit) {
             // Push data to a transient map to avoid duplicates
@@ -68,7 +68,10 @@ export const addPersonSlice: StateCreator<PersonSlice, [], [], PersonSlice> = (
                 person.uid,
                 person,
               ]),
-              ...people.map((person): [string, Person] => [person.uid, person]),
+              ...people.map((person): [string, Person] => [
+                person.uid,
+                Person.fromJsonPerson(person),
+              ]),
             ])
             updatedPeople = Array.from(combinedPeopleMap.values())
           }

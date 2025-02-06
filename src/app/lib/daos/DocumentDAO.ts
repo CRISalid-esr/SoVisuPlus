@@ -7,10 +7,12 @@ import QueryMode = Prisma.QueryMode
 
 interface FetchDocumentsFromDBParams {
   searchTerm: string
+  searchLang: string
   page: number
   pageSize: number
   columnFilters: { id: string; value: string }[]
   sorting: { id: string; desc: boolean }[]
+  contributorUid: string | null
 }
 
 export class DocumentDAO extends AbstractDAO {
@@ -33,7 +35,25 @@ export class DocumentDAO extends AbstractDAO {
 
       if (!dbDocument) {
         dbDocument = (await this.prismaClient.document.create({
-          data: { uid: uid },
+          data: {
+            uid: uid,
+            title_locale_0: document.getTitleInLocale(0),
+            title_locale_1: document.getTitleInLocale(1),
+            title_locale_2: document.getTitleInLocale(2),
+          },
+          include: {
+            titles: true, // Include related titles
+            abstracts: true, // Include related abstracts
+          },
+        })) as DbDocument
+      } else {
+        dbDocument = (await this.prismaClient.document.update({
+          where: { uid: uid },
+          data: {
+            title_locale_0: document.getTitleInLocale(0),
+            title_locale_1: document.getTitleInLocale(1),
+            title_locale_2: document.getTitleInLocale(2),
+          },
           include: {
             titles: true, // Include related titles
             abstracts: true, // Include related abstracts
@@ -125,15 +145,22 @@ export class DocumentDAO extends AbstractDAO {
 
   public async fetchDocumentsFromDB({
     searchTerm,
+    searchLang,
     page,
     pageSize,
     columnFilters,
     sorting,
+    contributorUid,
   }: FetchDocumentsFromDBParams): Promise<{
     documents: DbDocument[]
     totalItems: number
   }> {
     const skip = (page - 1) * pageSize
+
+    // find the index of the serach lang in the array of process.env.SUPPORTED_LOCALES
+    const searchLangIndex =
+      process.env.SUPPORTED_LOCALES?.split(',').indexOf(searchLang) || 0
+    const sortingTitleFieldName = `title_locale_${searchLangIndex}`
 
     let where: Prisma.DocumentWhereInput = {}
 
@@ -222,6 +249,19 @@ export class DocumentDAO extends AbstractDAO {
       }
     })
 
+    if (contributorUid) {
+      where = {
+        ...where,
+        contributions: {
+          some: {
+            person: {
+              uid: contributorUid,
+            },
+          },
+        },
+      }
+    }
+
     const orderBy: Prisma.DocumentOrderByWithRelationInput[] = sorting.map(
       (sort) => {
         if (sort.id === 'contributions') {
@@ -234,9 +274,7 @@ export class DocumentDAO extends AbstractDAO {
 
         if (sort.id === 'titles') {
           return {
-            titles: {
-              _count: sort.desc ? 'desc' : 'asc',
-            },
+            [sortingTitleFieldName]: sort.desc ? 'desc' : 'asc',
           }
         }
         return { [sort.id]: sort.desc ? 'desc' : 'asc' }

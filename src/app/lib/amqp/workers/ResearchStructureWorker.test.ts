@@ -2,6 +2,7 @@ import { ResearchStructureWorker } from '@/lib/amqp/workers/ResearchStructureWor
 import { AMQPResearchStructureMessage } from '@/types/AMQPResearchStructureMessage'
 import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
 import { ResearchStructure } from '@/types/ResearchStructure'
+import { Literal } from '@/types/Literal'
 
 jest.mock('@/lib/daos/ResearchStructureDAO', () => {
   return {
@@ -42,8 +43,8 @@ describe('ResearchStructureWorker', () => {
     const expectedResearchStructure = new ResearchStructure(
       'rs-123',
       'RS',
-      [{ value: 'Research Structure', language: 'en' }],
-      [{ value: 'A description', language: 'en' }],
+      [new Literal('Research Structure', 'en')],
+      [new Literal('A description', 'en')],
       [{ type: 'RNSR', value: '12345' }],
     )
 
@@ -75,8 +76,8 @@ describe('ResearchStructureWorker', () => {
     const expectedResearchStructure = new ResearchStructure(
       'rs-123',
       'RS',
-      [{ value: 'Research Structure', language: 'en' }],
-      [{ value: 'A description', language: 'en' }],
+      [new Literal('Research Structure', 'en')],
+      [new Literal('A description', 'en')],
       [{ type: 'RNSR', value: '12345' }],
     )
 

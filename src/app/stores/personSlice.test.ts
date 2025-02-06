@@ -1,11 +1,12 @@
 import { createStore, StoreApi } from 'zustand'
 import { addPersonSlice, PersonSlice } from './personSlice'
 import { i18n } from '@lingui/core'
+import { Person } from '@/types/Person'
 
 const mockFetchResponse = (
   data: {
     hasMore: boolean
-    people: { uid: number; name: string }[]
+    people: Person[]
     total: number
   },
   ok = true,
@@ -34,10 +35,25 @@ describe('addPersonSlice', () => {
   })
 
   it('should fetch and store people successfully', async () => {
-    const peopleData = [
-      { uid: 1, name: 'John Doe' },
-      { uid: 2, name: 'Jane Smith' },
-    ]
+    const person: Person = new Person(
+      'person-123',
+      false,
+      'john.doe@example.com',
+      'John Doe',
+      'John',
+      'Doe',
+      [],
+    )
+    const person2: Person = new Person(
+      'person-1223',
+      false,
+      'Jane.smith@example.com',
+      'Jane Smith',
+      'Jane',
+      'Doe',
+      [],
+    )
+    const peopleData = [person, person2]
     const response = { hasMore: true, people: peopleData, total: 2 }
     mockFetchResponse(response)
 
@@ -74,8 +90,28 @@ describe('addPersonSlice', () => {
   })
 
   it('should append people data on subsequent pages', async () => {
-    const initialPeople = [{ uid: 1, name: 'John Doe' }]
-    const newPeople = [{ uid: 2, name: 'Jane Smith' }]
+    const initialPeople = [
+      new Person(
+        'person-123',
+        false,
+        'john.doe@example.com',
+        'John Doe',
+        'John',
+        'Doe',
+        [],
+      ),
+    ]
+    const newPeople = [
+      new Person(
+        'person-1223',
+        false,
+        'Jane.smith@example.com',
+        'Jane Smith',
+        'Jane',
+        'Doe',
+        [],
+      ),
+    ]
     const responsePage1 = { hasMore: true, people: initialPeople, total: 2 }
     const responsePage2 = { hasMore: false, people: newPeople, total: 2 }
 

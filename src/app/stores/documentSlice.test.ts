@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { addDocumentSlice, DocumentSlice, DocumentQuery } from './documentSlice'
+import { addDocumentSlice, DocumentQuery, DocumentSlice } from './documentSlice'
 import { toQueryString } from '@/utils/query'
 
 // Mock the toQueryString utility
@@ -21,7 +21,7 @@ describe('addDocumentSlice', () => {
 
   beforeEach(() => {
     // Create the store before each test
-    useStore =createTestStore()
+    useStore = createTestStore()
   })
 
   afterEach(() => {
@@ -37,12 +37,10 @@ describe('addDocumentSlice', () => {
 
     // Mock the response of fetch
     ;(fetch as jest.Mock).mockResolvedValueOnce({
-      json: jest
-        .fn()
-        .mockResolvedValueOnce({
-          documents: mockDocuments,
-          totalItems: mockTotalItems,
-        }),
+      json: jest.fn().mockResolvedValueOnce({
+        documents: mockDocuments,
+        totalItems: mockTotalItems,
+      }),
     })
 
     const queryObject: DocumentQuery = {
@@ -52,6 +50,7 @@ describe('addDocumentSlice', () => {
       columnFilters: '',
       searchLang: 'en',
       sorting: '',
+      contributorUid: null,
     }
 
     // Call the fetchDocuments method
@@ -80,6 +79,7 @@ describe('addDocumentSlice', () => {
       columnFilters: '',
       searchLang: 'en',
       sorting: '',
+      contributorUid: null,
     }
 
     // Call the fetchDocuments method

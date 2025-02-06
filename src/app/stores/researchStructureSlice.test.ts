@@ -4,11 +4,14 @@ import {
   ResearchStructureSlice,
 } from './researchStructureSlice'
 import { i18n } from '@lingui/core'
+import { ResearchStructureIdentifierType } from '@prisma/client'
+import { Literal } from '@/types/Literal'
+import { ResearchStructure } from '@/types/ResearchStructure'
 
 const mockFetchResponse = (
   data: {
     hasMore: boolean
-    researchStructures: { uid: number; name: string }[]
+    researchStructures:ResearchStructure[]
     total: number
   },
   ok = true,
@@ -37,9 +40,29 @@ describe('addResearchStructureSlice', () => {
   })
 
   it('should fetch and store research structures successfully', async () => {
+
     const researchStructuresData = [
-      { uid: 1, name: 'Research Structure A' },
-      { uid: 2, name: 'Research Structure B' },
+      new ResearchStructure(
+      'RS123',
+      'ABC',
+      [new Literal('Valid Research Structure', 'en')],
+      [new Literal('Valid Description', 'en')],
+      [
+        { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
+        { type: ResearchStructureIdentifierType.ROR, value: '67890' },
+      ],
+    ),
+    new ResearchStructure(
+      'RS124',
+      'ADF',
+      [new Literal('Valid Research Structure', 'en')],
+      [new Literal('Valid Description', 'en')],
+      [
+        { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
+        { type: ResearchStructureIdentifierType.ROR, value: '67890' },
+      ],
+    )
+     
     ]
     const response = {
       hasMore: true,
@@ -85,8 +108,25 @@ describe('addResearchStructureSlice', () => {
   })
 
   it('should append research structures data on subsequent pages', async () => {
-    const initialResearchStructures = [{ uid: 1, name: 'Research Structure A' }]
-    const newResearchStructures = [{ uid: 2, name: 'Research Structure B' }]
+    const initialResearchStructures = [  new ResearchStructure(
+      'RS123',
+      'ABC',
+      [new Literal('Valid Research Structure', 'en')],
+      [new Literal('Valid Description', 'en')],
+      [
+        { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
+        { type: ResearchStructureIdentifierType.ROR, value: '67890' },
+      ])]
+    const newResearchStructures = [ new ResearchStructure(
+      'RS124',
+      'ADF',
+      [new Literal('Valid Research Structure', 'en')],
+      [new Literal('Valid Description', 'en')],
+      [
+        { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
+        { type: ResearchStructureIdentifierType.ROR, value: '67890' },
+      ],
+    )]
     const responsePage1 = {
       hasMore: true,
       researchStructures: initialResearchStructures,

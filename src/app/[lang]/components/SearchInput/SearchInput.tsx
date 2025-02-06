@@ -3,6 +3,7 @@ import {
   Autocomplete,
   AutocompleteRenderGroupParams,
   Box,
+  Button,
   Chip,
   CircularProgress,
   Paper,
@@ -15,12 +16,12 @@ import { t } from '@lingui/macro'
 import useStore from '@/stores/global_store'
 import Highlighter from 'react-highlight-words'
 import DoneIcon from '@mui/icons-material/Done'
-import DeleteIcon from '@mui/icons-material/Delete'
 import { IAgent } from '@/types/IAgent'
 import { Person } from '@/types/Person'
 import { ResearchStructure } from '@/types/ResearchStructure'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
-
+import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn'
 console.log(Lingui)
 
 interface IAutoCompleteGroupTag {
@@ -40,6 +41,7 @@ const SearchInput: React.FC = () => {
   const [peoplePage, setPeoplePage] = useState(1)
   const [researchStructuresPage, setResearchStructuresPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
+  const [searchMenuOpen, setSearchMenuOpen] = useState(false)
   const [searchTags, setSearchTags] = useState<IAutoCompleteGroupTag[]>([
     { label: t`sidebar_search_people`, value: 'people', selected: true },
     {
@@ -48,8 +50,11 @@ const SearchInput: React.FC = () => {
       selected: true,
     },
   ])
-
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const theme = useTheme()
+  const perspectiveId = searchParams.get('perspective')
 
   const {
     fetchPeopleByName,
@@ -67,50 +72,58 @@ const SearchInput: React.FC = () => {
     total: totalResearchStructures,
   } = useStore((state) => state.researchStructure)
 
-  const { setPerspective } = useStore((state) => state.user)
+  const { setPerspective, currentPerspective, connectedUser } = useStore(
+    (state) => state.user,
+  )
 
   const lang = Lingui.i18n.locale
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (searchTags.some((tag) => tag.selected && tag.value === 'people')) {
-        if (fetchPeopleByName) {
-          try {
-            await fetchPeopleByName({ searchTerm, page: peoplePage })
-          } catch (error) {
-            console.error('Error fetching people:', error)
+    const handler = setTimeout(() => {
+      const fetchData = async () => {
+        if (searchTags.some((tag) => tag.selected && tag.value === 'people')) {
+          if (fetchPeopleByName) {
+            try {
+              await fetchPeopleByName({ searchTerm, page: peoplePage })
+            } catch (error) {
+              console.error('Error fetching people:', error)
+            }
           }
         }
       }
-    }
-    fetchData().catch((error) => {
-      console.error('Error fetching data:', error)
-    })
+      fetchData().catch((error) => {
+        console.error('Error fetching data:', error)
+      })
+    }, 2000)
+    return () => clearTimeout(handler) // Clear timeout if input changes before 2 seconds
   }, [fetchPeopleByName, peoplePage, searchTerm, searchTags])
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (
-        searchTags.some(
-          (tag) => tag.selected && tag.value === 'researchStructures',
-        )
-      ) {
-        if (fetchResearchStructuresByName) {
-          try {
-            await fetchResearchStructuresByName({
-              searchTerm,
-              searchLang: lang,
-              page: researchStructuresPage,
-            })
-          } catch (error) {
-            console.error('Error fetching research structures:', error)
+    const handler = setTimeout(() => {
+      const fetchData = async () => {
+        if (
+          searchTags.some(
+            (tag) => tag.selected && tag.value === 'researchStructures',
+          )
+        ) {
+          if (fetchResearchStructuresByName) {
+            try {
+              await fetchResearchStructuresByName({
+                searchTerm,
+                searchLang: lang,
+                page: researchStructuresPage,
+              })
+            } catch (error) {
+              console.error('Error fetching research structures:', error)
+            }
           }
         }
       }
-    }
-    fetchData().catch((error) => {
-      console.error('Error fetching data:', error)
-    })
+      fetchData().catch((error) => {
+        console.error('Error fetching data:', error)
+      })
+    }, 2000)
+    return () => clearTimeout(handler) // Clear timeout if input changes before 2 seconds
   }, [
     fetchResearchStructuresByName,
     researchStructuresPage,
@@ -189,8 +202,15 @@ const SearchInput: React.FC = () => {
           })
         mergedOptions.push(...researchStructureOptions)
       }
+      const foundOption =
+        mergedOptions.find((option) => option.id === perspectiveId) || null
+
+      if (foundOption) {
+        setSearchTerm(foundOption.label)
+      }
+
       return mergedOptions
-    }, [people, researchStructures, searchTags, lang])
+    }, [people, researchStructures, searchTags, lang, perspectiveId])
 
   const renderGroup = (params: AutocompleteRenderGroupParams) => {
     const { key, ...rest } = params
@@ -249,7 +269,7 @@ const SearchInput: React.FC = () => {
               onClick={() => handleTagClick(tag.value)}
               color={tag.selected ? 'primary' : 'default'}
               sx={{ cursor: 'pointer' }}
-              icon={tag.selected ? <DeleteIcon /> : <DoneIcon />}
+              icon={tag.selected ? <DoneIcon /> : <></>}
             />
           ))}
         </Box>
@@ -267,89 +287,135 @@ const SearchInput: React.FC = () => {
     value: IAutoCompleteOption<Person | ResearchStructure> | null,
   ) => {
     if (value) {
+      //set to url
       setPerspective(value.agent)
+      setSearchMenuOpen(false)
+
+      const params = new URLSearchParams(searchParams.toString())
+
+      if (value.id) {
+        params.set('perspective', value.id) // Use `id` to track selection
+      } else {
+        params.delete('perspective') // Remove if empty
+      }
+
+      // Push updated query parameters without full page reload
+      router.push(`${pathname}?${params.toString()}`, { scroll: false })
     }
   }
 
+  const backToMyPerspective = () => {
+    setPerspective(connectedUser?.person as IAgent)
+    setSearchMenuOpen(false)
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('perspective')
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
   return (
-    <Autocomplete
-      onClose={() => {
-        setSearchTerm(searchTerm)
-      }}
-      onChange={handlePerspectiveSelections}
-      renderGroup={renderGroup}
-      disableCloseOnSelect={true}
-      options={mergedOptions}
-      getOptionLabel={(
-        option: IAutoCompleteOption<Person | ResearchStructure>,
-      ) => {
-        return option.label
-      }}
-      groupBy={(option: IAutoCompleteOption<Person | ResearchStructure>) => {
-        if (option.type == 'people') return t`sidebar_search_people`
-        else if (option.type == 'researchStructures')
-          return t`sidebar_search_research_structures`
-        return ''
-      }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          sx={{
-            backgroundColor: theme.palette.white,
-            borderRadius: theme.utils.pxToRem(8),
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                border: 'none',
+    <>
+      <Autocomplete
+        onClose={() => {
+          setSearchTerm(searchTerm)
+        }}
+        open={searchMenuOpen}
+        onOpen={() => {
+          setSearchMenuOpen(true)
+        }}
+        onChange={handlePerspectiveSelections}
+        renderGroup={renderGroup}
+        disableCloseOnSelect={true}
+        options={mergedOptions}
+        getOptionLabel={(
+          option: IAutoCompleteOption<Person | ResearchStructure>,
+        ) => {
+          return option.label
+        }}
+        groupBy={(option: IAutoCompleteOption<Person | ResearchStructure>) => {
+          if (option.type == 'people') return t`sidebar_search_people`
+          else if (option.type == 'researchStructures')
+            return t`sidebar_search_research_structures`
+          return ''
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            sx={{
+              backgroundColor: theme.palette.white,
+              borderRadius: theme.utils.pxToRem(8),
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  border: 'none',
+                },
               },
-            },
-            '& .MuiInputBase-input': {
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-            },
-            '& .MuiInputBase-input::placeholder': {
-              fontSize: theme.utils.pxToRem(16),
-              fontWeight: theme.typography.fontWeightRegular,
-              color: theme.palette.primary.main,
-              opacity: 1,
-              lineHeight: theme.typography.lineHeight.lineHeight24px,
+              '& .MuiInputBase-input': {
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+              },
+              '& .MuiInputBase-input::placeholder': {
+                fontSize: theme.utils.pxToRem(16),
+                fontWeight: theme.typography.fontWeightRegular,
+                color: theme.palette.primary.main,
+                opacity: 1,
+                lineHeight: theme.typography.lineHeight.lineHeight24px,
+              },
+            }}
+            placeholder={t`sidebar_search_placeholder`}
+            fullWidth
+          />
+        )}
+        slots={{
+          paper: customPaper,
+        }}
+        fullWidth
+        inputValue={searchTerm}
+        onInputChange={(_, newInputValue, reason) => {
+          if (reason === 'reset') {
+            setSearchTerm(searchTerm)
+          } else {
+            setSearchTerm(newInputValue)
+          }
+          setPeoplePage(1)
+          setResearchStructuresPage(1)
+        }}
+        filterOptions={(x) => x} // Disables filtering
+        renderOption={(props, option, { inputValue }) => {
+          return (
+            <li {...props} key={option.id}>
+              <Highlighter
+                highlightClassName='highlight'
+                searchWords={[inputValue]}
+                autoEscape
+                textToHighlight={option.label}
+              />
+            </li>
+          )
+        }}
+        sx={{ mb: 2 }}
+        loading={peopleLoading || researchStructuresLoading} // Display loading when data is being fetched
+        loadingText={<CircularProgress size={24} />} // Show spinner when loading
+      />
+      {connectedUser?.person?.uid !== currentPerspective?.uid && (
+        <Button
+          onClick={backToMyPerspective}
+          sx={{
+            fontFamily: 'Inter, Roboto, sans-serif',
+            fontSize: theme.utils.pxToRem(14),
+            fontWeight: theme.typography.fontWeightMedium,
+            lineHeight: theme.typography.lineHeight.lineHeight24px,
+            color: theme.palette.primaryContainer,
+            '&:hover': {
+              backgroundColor: theme.palette.sidebarItemHover,
+              color: theme.palette.primaryContainer,
             },
           }}
-          placeholder={t`sidebar_search_placeholder`}
-          fullWidth
-        />
+          startIcon={<KeyboardReturnIcon />}
+        >
+          {t`sidebar_back_to_my_perspective`}
+        </Button>
       )}
-      slots={{
-        paper: customPaper,
-      }}
-      fullWidth
-      inputValue={searchTerm}
-      onInputChange={(_, newInputValue, reason) => {
-        if (reason === 'reset') {
-          setSearchTerm(searchTerm)
-        } else {
-          setSearchTerm(newInputValue)
-        }
-        setPeoplePage(1)
-        setResearchStructuresPage(1)
-      }}
-      filterOptions={(x) => x} // Disables filtering
-      renderOption={(props, option, { inputValue }) => {
-        return (
-          <li {...props} key={option.id}>
-            <Highlighter
-              highlightClassName='highlight'
-              searchWords={[inputValue]}
-              autoEscape
-              textToHighlight={option.label}
-            />
-          </li>
-        )
-      }}
-      sx={{ mb: 2 }}
-      loading={peopleLoading || researchStructuresLoading} // Display loading when data is being fetched
-      loadingText={<CircularProgress size={24} />} // Show spinner when loading
-    />
+    </>
   )
 }
 

@@ -10,6 +10,7 @@ export interface DocumentQuery extends BaseQuery {
   columnFilters: string
   searchLang: string
   sorting: string
+  contributorUid: string | null
 }
 
 export interface DocumentSlice {

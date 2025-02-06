@@ -26,10 +26,12 @@ describe('DocumentService', () => {
 
     const params = {
       searchTerm: 'test',
+      searchLang: 'en',
       page: 1,
       pageSize: 10,
       columnFilters: [{ id: 'category', value: 'reports' }],
       sorting: [{ id: 'name', desc: false }],
+      contributorUid: 'local-124',
     }
 
     await expect(documentService.fetchDocuments(params)).resolves.toEqual(
@@ -44,10 +46,12 @@ describe('DocumentService', () => {
 
     const params = {
       searchTerm: 'test',
+      searchLang: 'en',
       page: 1,
       pageSize: 10,
       columnFilters: [],
       sorting: [],
+      contributorUid: 'local-124',
     }
 
     await expect(documentService.fetchDocuments(params)).rejects.toThrow(

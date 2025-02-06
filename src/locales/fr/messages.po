@@ -43,51 +43,51 @@ msgstr "Retour à la page d'accueil"
 msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
-#: src/app/[lang]/documents/page.tsx:40
+#: src/app/[lang]/documents/page.tsx:42
 msgid "documents_page_all_documents_filter"
 msgstr "Toutes mes publications"
 
-#: src/app/[lang]/documents/page.tsx:106
+#: src/app/[lang]/documents/page.tsx:120
 msgid "documents_page_contributors_column"
 msgstr "auteurs"
 
-#: src/app/[lang]/documents/page.tsx:147
+#: src/app/[lang]/documents/page.tsx:161
 msgid "documents_page_date_column"
 msgstr "Date"
 
-#: src/app/[lang]/documents/page.tsx:161
+#: src/app/[lang]/documents/page.tsx:175
 msgid "documents_page_halStatus_column"
 msgstr "Statut hal"
 
-#: src/app/[lang]/documents/page.tsx:45
+#: src/app/[lang]/documents/page.tsx:47
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "Dépôt HAL incomplet"
 
-#: src/app/[lang]/documents/page.tsx:51
+#: src/app/[lang]/documents/page.tsx:53
 msgid "documents_page_keywords_to_validate"
 msgstr "Mots-clés à valider"
 
-#: src/app/[lang]/documents/page.tsx:228
+#: src/app/[lang]/documents/page.tsx:245
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:154
+#: src/app/[lang]/documents/page.tsx:168
 msgid "documents_page_publishedIn_column"
 msgstr "paru dans"
 
-#: src/app/[lang]/documents/page.tsx:232
+#: src/app/[lang]/documents/page.tsx:250
 msgid "documents_page_synchronize_button"
 msgstr "Synchroniser"
 
-#: src/app/[lang]/documents/page.tsx:75
+#: src/app/[lang]/documents/page.tsx:77
 msgid "documents_page_title_column"
 msgstr "titre"
 
-#: src/app/[lang]/documents/page.tsx:64
+#: src/app/[lang]/documents/page.tsx:66
 msgid "documents_page_type_column"
 msgstr "type"
 
-#: src/app/[lang]/documents/page.tsx:168
+#: src/app/[lang]/documents/page.tsx:182
 msgid "documents_page_version_column"
 msgstr "versions"
 
@@ -102,7 +102,7 @@ msgstr "versions"
 msgid "hello"
 msgstr "Bonjour"
 
-#: src/app/[lang]/documents/page.tsx:88
+#: src/app/[lang]/documents/page.tsx:90
 msgid "no_title_available"
 msgstr "aucun titre disponible"
 
@@ -167,31 +167,35 @@ msgstr "Activités de recherche"
 #~ msgid "side_bar_publications"
 #~ msgstr "Publications"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:89
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:159
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:177
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:44
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:130
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:223
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:289
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:410
+msgid "sidebar_back_to_my_perspective"
+msgstr "Retour à mon profil"
+
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:100
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:176
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:194
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:46
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:143
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:239
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:331
 msgid "sidebar_search_people"
 msgstr "Chercheurs"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:99
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:318
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:110
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:360
 msgid "sidebar_search_placeholder"
 msgstr "Chercher"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:91
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:127
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:180
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:46
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:140
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:291
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:102
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:142
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:197
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:48
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:153
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:333
 msgid "sidebar_search_research_structures"
 msgstr "Unités de recherche"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:182
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:195
 msgid "sidebar_search_unknown_label"
 msgstr "label inconnu"
 

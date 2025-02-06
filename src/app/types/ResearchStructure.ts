@@ -5,6 +5,15 @@ import {
 } from '@/types/ResearchStructureIdentifier'
 import { IAgent } from '@/types/IAgent'
 import { Literal } from '@/types/Literal'
+import { ExtendedLanguageCode } from './ExtendLanguageCode'
+
+interface ResearchStructureJson {
+  uid: string
+  acronym: string | null
+  names: Array<Literal>
+  descriptions: Array<Literal>
+  identifiers: ResearchStructureIdentifier[]
+}
 
 class ResearchStructure implements IAgent {
   constructor(
@@ -19,6 +28,10 @@ class ResearchStructure implements IAgent {
     public type: 'research_structure' = 'research_structure',
   ) {
     this.identifiers = _identifiers
+  }
+
+  getDisplayName(language?: ExtendedLanguageCode): string {
+    return this.names.find((name) => name.language === language)?.value || ''
   }
 
   set identifiers(value: ResearchStructureIdentifier[]) {
@@ -58,6 +71,19 @@ class ResearchStructure implements IAgent {
         : [],
     )
   }
+
+  static fromJsonResearchStructure(
+    researchStructure: ResearchStructureJson,
+  ): ResearchStructure {
+    return new ResearchStructure(
+      researchStructure.uid,
+      researchStructure.acronym || null,
+      researchStructure.names?.map(Literal.fromObject),
+      researchStructure.descriptions?.map(Literal.fromObject),
+      'identifiers' in researchStructure ? researchStructure.identifiers : [],
+    )
+  }
 }
 
 export { ResearchStructure }
+export type { ResearchStructureJson }

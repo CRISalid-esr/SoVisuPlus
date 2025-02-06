@@ -2,8 +2,19 @@ import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
-import { Person as DbPerson } from '@prisma/client'
 import { IAgent } from '@/types/IAgent'
+import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
+import { Person as DbPerson } from '@prisma/client'
+
+interface PersonJson {
+  uid: string
+  external: boolean
+  email?: string | null
+  displayName?: string
+  firstName?: string
+  lastName?: string
+  identifiers?: Array<{ type: PersonIdentifierType; value: string }>
+}
 
 class Person implements IAgent {
   constructor(
@@ -17,6 +28,11 @@ class Person implements IAgent {
     public type: 'person' = 'person',
   ) {
     this.validateIdentifiers(identifiers) // Use the setter to validate on initialization
+  }
+
+  getDisplayName(language?: ExtendedLanguageCode): string {
+    void language
+    return this.displayName
   }
 
   getIdentifiers(): PersonIdentifier[] {
@@ -49,12 +65,26 @@ class Person implements IAgent {
       person.uid,
       person.external,
       person.email,
-      `${person.firstName} ${person.lastName}`,
+      person.displayName || `${person.firstName} ${person.lastName}`,
       person.firstName || '',
       person.lastName || '',
       'identifiers' in person ? (person.identifiers as PersonIdentifier[]) : [],
     )
   }
+
+  static fromJsonPerson(json: PersonJson): Person {
+    return new Person(
+      json.uid,
+      json.external,
+      json.email ?? null,
+      json.displayName ||
+        `${json.firstName ?? ''} ${json.lastName ?? ''}`.trim(),
+      json.firstName ?? '',
+      json.lastName ?? '',
+      json.identifiers ?? [],
+    )
+  }
 }
 
 export { Person }
+export type { PersonJson }

@@ -37,6 +37,7 @@ describe('DashboardLayout', () => {
       connectedUser: { name: 'Test User' },
       loading: false,
       fetchConnectedUser: jest.fn(),
+      setPerspective: jest.fn(),
     })
   })
 

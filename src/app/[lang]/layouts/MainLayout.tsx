@@ -7,6 +7,7 @@ import { Box, useMediaQuery } from '@mui/system'
 import { useEffect, useState } from 'react'
 import AuthenticatedRoute from '@/components/AuthenticatedRoute'
 import useStore from '@/stores/global_store'
+import { IAgent } from '@/types/IAgent'
 
 export default function MainLayout({
   children,
@@ -14,6 +15,8 @@ export default function MainLayout({
   children: React.ReactNode
 }) {
   const [open, setOpen] = useState(true) // Determines if the drawer is expanded or collapsed
+
+  const { currentPerspective, setPerspective } = useStore((state) => state.user)
 
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
@@ -33,6 +36,13 @@ export default function MainLayout({
       })
     }
   }, [connectedUser, fetchConnectedUser])
+
+  // if the current perspective is not set, set it to the connected user
+  useEffect(() => {
+    if (connectedUser && !currentPerspective) {
+      setPerspective(connectedUser.person as IAgent)
+    }
+  }, [connectedUser, currentPerspective, setPerspective])
 
   if (loading && !connectedUser) {
     return <p>Loading...</p>

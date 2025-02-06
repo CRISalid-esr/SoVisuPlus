@@ -1,14 +1,15 @@
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { describe, expect, it } from '@jest/globals'
 import { ResearchStructureIdentifierType } from '@/types/ResearchStructureIdentifier'
+import { Literal } from '@/types/Literal'
 
 describe('ResearchStructure', () => {
   it('should create a valid ResearchStructure object', () => {
     const validResearchStructure = new ResearchStructure(
       'RS123',
       'ABC',
-      [{ value: 'Valid Research Structure', language: 'en' }],
-      [{ value: 'Valid Description', language: 'en' }],
+      [new Literal('Valid Research Structure', 'en')],
+      [new Literal('Valid Description', 'en')],
       [
         { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
         { type: ResearchStructureIdentifierType.ROR, value: '67890' },
@@ -43,8 +44,8 @@ describe('ResearchStructure', () => {
       new ResearchStructure(
         'RS456',
         'DEF',
-        [{ value: 'Invalid Research Structure', language: 'en' }],
-        [{ value: 'Invalid Description', language: 'en' }],
+        [new Literal('Invalid Research Structure', 'en')],
+        [new Literal('Invalid Description', 'en')],
         [
           {
             type: 'INVALID_TYPE' as ResearchStructureIdentifierType,

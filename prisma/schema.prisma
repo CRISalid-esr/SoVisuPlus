@@ -33,11 +33,14 @@ model Person {
 }
 
 model Document {
-  id            Int                @id @default(autoincrement())
-  uid           String             @unique
-  titles        DocumentTitle[]
-  abstracts     DocumentAbstract[]
-  contributions Contribution[]
+  id             Int                @id @default(autoincrement())
+  uid            String             @unique
+  titles         DocumentTitle[]
+  abstracts      DocumentAbstract[]
+  contributions  Contribution[]
+  title_locale_0 String?
+  title_locale_1 String?
+  title_locale_2 String?
 }
 
 model DocumentTitle {
