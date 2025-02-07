@@ -42,6 +42,7 @@ const SearchInput: React.FC = () => {
   const [researchStructuresPage, setResearchStructuresPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
   const [searchMenuOpen, setSearchMenuOpen] = useState(false)
+  const [isCleared, setIsCleared] = useState(false)
   const [searchTags, setSearchTags] = useState<IAutoCompleteGroupTag[]>([
     { label: t`sidebar_search_people`, value: 'people', selected: true },
     {
@@ -202,12 +203,6 @@ const SearchInput: React.FC = () => {
           })
         mergedOptions.push(...researchStructureOptions)
       }
-      const foundOption =
-        mergedOptions.find((option) => option.id === perspectiveId) || null
-
-      if (foundOption) {
-        setSearchTerm(foundOption.label)
-      }
 
       return mergedOptions
     }, [people, researchStructures, searchTags, lang, perspectiveId])
@@ -312,6 +307,9 @@ const SearchInput: React.FC = () => {
     router.push(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
+  const perspectiveLabel =
+    mergedOptions.find((option) => option.id === perspectiveId)?.label || ''
+
   return (
     <>
       <Autocomplete
@@ -369,11 +367,16 @@ const SearchInput: React.FC = () => {
           paper: customPaper,
         }}
         fullWidth
-        inputValue={searchTerm}
+        inputValue={isCleared ? searchTerm : searchTerm || perspectiveLabel}
         onInputChange={(_, newInputValue, reason) => {
           if (reason === 'reset') {
             setSearchTerm(searchTerm)
           } else {
+            if (newInputValue === '') {
+              setIsCleared(true)
+            } else {
+              setIsCleared(false)
+            }
             setSearchTerm(newInputValue)
           }
           setPeoplePage(1)
