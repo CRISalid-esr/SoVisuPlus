@@ -22,6 +22,14 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import Highlighter from 'react-highlight-words'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
+import { MRT_Localization } from 'material-react-table'
+import { MRT_Localization_FR } from 'material-react-table/locales/fr'
+import { MRT_Localization_EN } from 'material-react-table/locales/en'
+
+const localization: Record<string, MRT_Localization> = {
+  fr: MRT_Localization_FR,
+  en: MRT_Localization_EN,
+}
 
 export default function DocumentsPage() {
   const [pagination, setPagination] = useState({
@@ -33,7 +41,7 @@ export default function DocumentsPage() {
   const [sorting, setSorting] = useState<MRT_SortingState>([])
   const { currentPerspective } = useStore((state) => state.user)
 
-  const lang = Lingui.i18n.locale
+  const lang = Lingui.i18n.locale as 'fr' | 'en'
 
   const theme = useTheme()
 
@@ -275,6 +283,7 @@ export default function DocumentsPage() {
           columnFilters,
           globalFilter,
         }}
+        localization={localization[lang]}
       />
     </Box>
   )
