@@ -42,6 +42,7 @@ const SearchInput: React.FC = () => {
   const [researchStructuresPage, setResearchStructuresPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
   const [searchMenuOpen, setSearchMenuOpen] = useState(false)
+  const [isCleared, setIsCleared] = useState(false)
   const [searchTags, setSearchTags] = useState<IAutoCompleteGroupTag[]>([
     { label: t`sidebar_search_people`, value: 'people', selected: true },
     {
@@ -306,7 +307,6 @@ const SearchInput: React.FC = () => {
     router.push(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
-  const [isCleared, setIsCleared] = useState(false) // Track if input was cleared
   const perspectiveLabel =
     mergedOptions.find((option) => option.id === perspectiveId)?.label || ''
 
