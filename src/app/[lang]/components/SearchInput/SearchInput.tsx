@@ -202,12 +202,6 @@ const SearchInput: React.FC = () => {
           })
         mergedOptions.push(...researchStructureOptions)
       }
-      const foundOption =
-        mergedOptions.find((option) => option.id === perspectiveId) || null
-
-      if (foundOption) {
-        setSearchTerm(foundOption.label)
-      }
 
       return mergedOptions
     }, [people, researchStructures, searchTags, lang, perspectiveId])
@@ -312,6 +306,10 @@ const SearchInput: React.FC = () => {
     router.push(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
+  const [isCleared, setIsCleared] = useState(false) // Track if input was cleared
+  const perspectiveLabel =
+    mergedOptions.find((option) => option.id === perspectiveId)?.label || ''
+
   return (
     <>
       <Autocomplete
@@ -369,11 +367,16 @@ const SearchInput: React.FC = () => {
           paper: customPaper,
         }}
         fullWidth
-        inputValue={searchTerm}
+        inputValue={isCleared ? searchTerm : searchTerm || perspectiveLabel}
         onInputChange={(_, newInputValue, reason) => {
           if (reason === 'reset') {
             setSearchTerm(searchTerm)
           } else {
+            if (newInputValue === '') {
+              setIsCleared(true)
+            } else {
+              setIsCleared(false)
+            }
             setSearchTerm(newInputValue)
           }
           setPeoplePage(1)
