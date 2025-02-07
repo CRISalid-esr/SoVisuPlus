@@ -167,35 +167,35 @@ msgstr "Activités de recherche"
 #~ msgid "side_bar_publications"
 #~ msgstr "Publications"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:418
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:411
 msgid "sidebar_back_to_my_perspective"
 msgstr "Retour à mon profil"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:100
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:176
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:194
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:47
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:144
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:238
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:333
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:46
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:143
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:237
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:326
 msgid "sidebar_search_people"
 msgstr "Chercheurs"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:110
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:362
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:355
 msgid "sidebar_search_placeholder"
 msgstr "Chercher"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:102
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:142
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:197
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:49
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:154
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:335
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:48
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:153
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:328
 msgid "sidebar_search_research_structures"
 msgstr "Unités de recherche"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:196
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:195
 msgid "sidebar_search_unknown_label"
 msgstr "label inconnu"
 
