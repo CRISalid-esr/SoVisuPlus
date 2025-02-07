@@ -41,7 +41,6 @@ const SearchInput: React.FC = () => {
   const [peoplePage, setPeoplePage] = useState(1)
   const [researchStructuresPage, setResearchStructuresPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchMenuOpen, setSearchMenuOpen] = useState(false)
   const [isCleared, setIsCleared] = useState(false)
   const [searchTags, setSearchTags] = useState<IAutoCompleteGroupTag[]>([
     { label: t`sidebar_search_people`, value: 'people', selected: true },
@@ -284,7 +283,6 @@ const SearchInput: React.FC = () => {
     if (value) {
       //set to url
       setPerspective(value.agent)
-      setSearchMenuOpen(false)
 
       const params = new URLSearchParams(searchParams.toString())
 
@@ -301,7 +299,6 @@ const SearchInput: React.FC = () => {
 
   const backToMyPerspective = () => {
     setPerspective(connectedUser?.person as IAgent)
-    setSearchMenuOpen(false)
     const params = new URLSearchParams(searchParams.toString())
     params.delete('perspective')
     router.push(`${pathname}?${params.toString()}`, { scroll: false })
@@ -315,10 +312,6 @@ const SearchInput: React.FC = () => {
       <Autocomplete
         onClose={() => {
           setSearchTerm(searchTerm)
-        }}
-        open={searchMenuOpen}
-        onOpen={() => {
-          setSearchMenuOpen(true)
         }}
         onChange={handlePerspectiveSelections}
         renderGroup={renderGroup}
