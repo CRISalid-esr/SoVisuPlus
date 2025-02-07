@@ -128,6 +128,7 @@ declare module '@mui/material/styles' {
     gray950: string
     sidebarItemHover: string
     cardBorder: string
+    textSecondary: string
   }
 
   interface PaletteOptions {
@@ -175,6 +176,7 @@ declare module '@mui/material/styles' {
     gray950?: string
     sidebarItemHover?: string
     cardBorder?: string
+    textSecondary?: string
   }
 }
 

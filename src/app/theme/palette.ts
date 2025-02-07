@@ -59,6 +59,7 @@ const light: Theme = {
   shadows: colors.neutral0,
   white: colors.white,
   cardBorder: colors.cardBorder,
+  textSecondary: colors.textSecondary,
   primary: {
     main: colors.primary40,
     light: colors.primary40,

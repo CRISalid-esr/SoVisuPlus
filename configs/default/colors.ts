@@ -92,4 +92,5 @@ export const colors = {
   gray950: '#555961',
   sidebarItemHover: '#197971',
   cardBorder: '#E3EAE7',
+  textSecondary: '#625B71',
 }
