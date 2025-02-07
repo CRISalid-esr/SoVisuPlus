@@ -4,10 +4,18 @@ import { TabFilter } from '@/components/TabFilter'
 import { t, Trans } from '@lingui/macro'
 import { Box, Typography } from '@mui/material'
 import { useTheme } from '@mui/system'
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+
+// Import tab content components
+import Authorizations from './components/authorizations/'
+import MyProfile from './components/myProfile'
+import Notifications from './components/notification'
 
 export default function MyAccountPage() {
   const theme = useTheme()
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   const tabs = [
     {
@@ -24,10 +32,31 @@ export default function MyAccountPage() {
     },
   ]
 
-  const [selectedTab, setSelectedTab] = useState(tabs[0].value)
+  // Get the initial tab from the URL, defaulting to the first tab
+  const initialTab = searchParams.get('tab') || tabs[0].value
+  const [selectedTab, setSelectedTab] = useState(initialTab)
 
-  const handleTabeChange = (newValue: string) => {
+  useEffect(() => {
+    setSelectedTab(initialTab)
+  }, [initialTab])
+
+  const handleTabChange = (newValue: string) => {
     setSelectedTab(newValue)
+    router.push(`?tab=${newValue}`, { scroll: false }) // Update URL without full page reload
+  }
+
+  // Function to render tab content
+  const renderTabContent = () => {
+    switch (selectedTab) {
+      case 'my_profile':
+        return <MyProfile />
+      case 'authorizations':
+        return <Authorizations />
+      case 'notification':
+        return <Notifications />
+      default:
+        return <MyProfile />
+    }
   }
 
   return (
@@ -56,8 +85,9 @@ export default function MyAccountPage() {
       <TabFilter
         tabsData={tabs}
         selectedValue={selectedTab}
-        onTabChange={handleTabeChange}
+        onTabChange={handleTabChange}
       />
+      <Box mt={3}>{renderTabContent()}</Box>
     </Box>
   )
 }
