@@ -1,25 +1,18 @@
-import Button from '@/app/theme/overrides/Button'
-import { CardActions, CardContent, Typography } from '@mui/material'
+import { CardActions, CardContent, Typography ,Button} from '@mui/material'
+import { CustomCard } from '@/components/Card'
+import { Box } from '@mui/system'
 
 export default function NotificationPage() {
   return (
-    <>
-      <CardContent>
-        <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
-          Word of the Day
-        </Typography>
-        <Typography variant='h5' component='div'>
-          lorem
-        </Typography>
-        <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>
-          adjective
-        </Typography>
-        <Typography variant='body2'>
-          well meaning and kindly.
-          <br />
-          {'"a benevolent smile"'}
-        </Typography>
-      </CardContent>
-    </>
+    <Box >
+     <CustomCard header={<Typography variant="h4">Notification</Typography>}>
+        <CardContent>
+          <Typography variant="h5">Notification</Typography>
+        </CardContent>
+        <CardActions>
+          <Button>Click me</Button>
+        </CardActions>
+      </CustomCard>
+    </Box>
   )
 }
