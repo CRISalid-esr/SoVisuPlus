@@ -58,6 +58,7 @@ const light: Theme = {
   scrim: colors.neutral0,
   shadows: colors.neutral0,
   white: colors.white,
+  cardBorder: colors.cardBorder,
   primary: {
     main: colors.primary40,
     light: colors.primary40,
@@ -123,6 +124,7 @@ const dark: Theme = {
   scrim: colors.neutral0,
   shadows: colors.neutral0,
   white: colors.white,
+  cardBorder: colors.cardBorder,
   primary: {
     main: colors.primary80,
     light: colors.primary40,

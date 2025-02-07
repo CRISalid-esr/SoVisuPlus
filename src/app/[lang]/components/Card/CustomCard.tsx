@@ -15,11 +15,25 @@ const CustomCard: React.FC<CustomCardProps> = ({
 }) => {
   const theme = useTheme()
   return (
-    <Card
-      sx={{ borderRadius: 1, boxShadow: 1, padding: theme.spacing(2) }}
-    >
-      {header && <Box>{header}</Box>}
-      {children}
+    <Card sx={{ borderRadius: 1, boxShadow: 1 }}>
+      {header && (
+        <Box
+          sx={{
+            borderBottom: '1px solid',
+            borderColor: theme.palette.cardBorder,
+            padding: theme.spacing(2),
+          }}
+        >
+          {header}
+        </Box>
+      )}
+      <Box
+        sx={{
+          padding: theme.spacing(2),
+        }}
+      >
+        {children}
+      </Box>
       {footer && <Box>{footer}</Box>}
     </Card>
   )
