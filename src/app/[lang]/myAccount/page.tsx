@@ -3,7 +3,6 @@
 import { TabFilter } from '@/components/TabFilter'
 import { t, Trans } from '@lingui/macro'
 import { Box, Typography } from '@mui/material'
-import { useTheme } from '@mui/system'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -13,7 +12,6 @@ import MyProfile from './components/myProfile'
 import Notifications from './components/notification'
 
 export default function MyAccountPage() {
-  const theme = useTheme()
   const router = useRouter()
   const searchParams = useSearchParams()
 
