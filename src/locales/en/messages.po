@@ -14,6 +14,26 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/notification/index.tsx:27
+msgid "notification_page_notification_title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/notification/index.tsx:49
+msgid "notification_page_description"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/notification/index.tsx:53
+msgid "notification_page_new_publication_referenced"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/notification/index.tsx:58
+msgid "notification_page_new_expertise_awaiting_validation"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Back to home page"
@@ -102,7 +122,19 @@ msgstr ""
 msgid "hello"
 msgstr "Hello"
 
-#: src/app/[lang]/documents/page.tsx:98
+#: src/app/[lang]/myAccount/page.tsx:26
+msgid "my_account_page_authorizations_tab"
+msgstr ""
+
+#: src/app/[lang]/myAccount/page.tsx:22
+msgid "my_account_page_my_profile_tab"
+msgstr ""
+
+#: src/app/[lang]/myAccount/page.tsx:30
+msgid "my_account_page_notification_tab"
+msgstr ""
+
+#: src/app/[lang]/documents/page.tsx:90
 msgid "no_title_available"
 msgstr ""
 
@@ -150,7 +182,7 @@ msgstr "Institutions"
 msgid "side_bar_laboratories"
 msgstr "Laboratories"
 
-#: src/app/[lang]/my-account/page.tsx:10
+#: src/app/[lang]/myAccount/page.tsx:81
 msgid "side_bar_my_account"
 msgstr "Account manager"
 
