@@ -941,7 +941,7 @@ export default function Sidebar({
               >
                 <IconButton
                   title='account'
-                  onClick={() => router.push(`/${lang}/my-account`)}
+                  onClick={() => router.push(`/${lang}/myAccount`)}
                 >
                   <Image
                     src='/icons/avatar.png'
@@ -1011,7 +1011,7 @@ export default function Sidebar({
               <ListItem>
                 <ListItemIcon
                   onClick={() => {
-                    router.push(`/${lang}/my-account`)
+                    router.push(`/${lang}/myAccount`)
                     handleToggleDrawerAction()
                   }}
                   sx={{

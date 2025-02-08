@@ -94,7 +94,7 @@ const SearchInput: React.FC = () => {
       fetchData().catch((error) => {
         console.error('Error fetching data:', error)
       })
-    }, 2000)
+    }, 500)
     return () => clearTimeout(handler) // Clear timeout if input changes before 2 seconds
   }, [fetchPeopleByName, peoplePage, searchTerm, searchTags])
 
@@ -122,7 +122,7 @@ const SearchInput: React.FC = () => {
       fetchData().catch((error) => {
         console.error('Error fetching data:', error)
       })
-    }, 2000)
+    }, 500)
     return () => clearTimeout(handler) // Clear timeout if input changes before 2 seconds
   }, [
     fetchResearchStructuresByName,

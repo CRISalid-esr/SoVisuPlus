@@ -1,5 +1,4 @@
-
-  import DefaultLayout from '../layouts/MainLayout'
+import DefaultLayout from '../layouts/MainLayout'
 
 export default function MyAccountLayout({
   children,

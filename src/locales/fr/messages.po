@@ -14,6 +14,26 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:28
+msgid "authorizations_page_authorizations_title"
+msgstr "Mes autorisations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:50
+msgid "authorizations_page_description"
+msgstr "J’autorise l’application SoVisu+ à transmettre ces informations à l’application Idya : "
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:54
+msgid "authorizations_page_list_publications"
+msgstr "Liste de mes publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:58
+msgid "authorizations_page_my_expertise"
+msgstr "Mes expertises"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Retour à la page d'accueil"
@@ -32,6 +52,26 @@ msgstr ""
 #: src/app/[lang]/forbidden.tsx:108
 msgid "forbidden_page_description"
 msgstr "Vous n'êtes pas autorisé à accéder à cette ressource. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/notification/index.tsx:27
+msgid "notification_page_notification_title"
+msgstr "Notifications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/notification/index.tsx:49
+msgid "notification_page_description"
+msgstr "Sélectionnez les activités pour lesquelles vous souhaitez recevoir une notification par e-mail ou une notification push."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/notification/index.tsx:53
+msgid "notification_page_new_publication_referenced"
+msgstr "Une nouvelle publication est référencée"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/notification/index.tsx:58
+msgid "notification_page_new_expertise_awaiting_validation"
+msgstr "Une nouvelle expertise est en attente de validation"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/not-found.tsx:43
@@ -102,6 +142,18 @@ msgstr "versions"
 msgid "hello"
 msgstr "Bonjour"
 
+#: src/app/[lang]/myAccount/page.tsx:26
+msgid "my_account_page_authorizations_tab"
+msgstr "Autorisations"
+
+#: src/app/[lang]/myAccount/page.tsx:22
+msgid "my_account_page_my_profile_tab"
+msgstr "Mon profil"
+
+#: src/app/[lang]/myAccount/page.tsx:30
+msgid "my_account_page_notification_tab"
+msgstr "Notifications"
+
 #: src/app/[lang]/documents/page.tsx:98
 msgid "no_title_available"
 msgstr "aucun titre disponible"
@@ -150,7 +202,7 @@ msgstr "Institutions"
 msgid "side_bar_laboratories"
 msgstr "Laboratoires"
 
-#: src/app/[lang]/my-account/page.tsx:10
+#: src/app/[lang]/myAccount/page.tsx:81
 msgid "side_bar_my_account"
 msgstr "Mon compte"
 

@@ -5,7 +5,7 @@ type TabData = {
   label: string
   value: string
   numberOfItems?: number
-  color: string
+  color?: string
 }
 
 type TabFilterProps = {
