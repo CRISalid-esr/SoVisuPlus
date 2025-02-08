@@ -14,26 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:28
-msgid "authorizations_page_authorizations_title"
-msgstr "Mes autorisations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:50
-msgid "authorizations_page_description"
-msgstr "J’autorise l’application SoVisu+ à transmettre ces informations à l’application Idya : "
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:54
-msgid "authorizations_page_list_publications"
-msgstr "Liste de mes publications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:58
-msgid "authorizations_page_my_expertise"
-msgstr "Mes expertises"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Retour à la page d'accueil"
@@ -52,6 +32,26 @@ msgstr ""
 #: src/app/[lang]/forbidden.tsx:108
 msgid "forbidden_page_description"
 msgstr "Vous n'êtes pas autorisé à accéder à cette ressource. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:28
+msgid "authorizations_page_authorizations_title"
+msgstr "Mes autorisations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:50
+msgid "authorizations_page_description"
+msgstr "J’autorise l’application SoVisu+ à transmettre ces informations à l’application Idya : "
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:54
+msgid "authorizations_page_list_publications"
+msgstr "Liste de mes publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:58
+msgid "authorizations_page_my_expertise"
+msgstr "Mes expertises"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/myAccount/components/notification/index.tsx:27
@@ -142,15 +142,15 @@ msgstr "versions"
 msgid "hello"
 msgstr "Bonjour"
 
-#: src/app/[lang]/myAccount/page.tsx:26
+#: src/app/[lang]/myAccount/page.tsx:24
 msgid "my_account_page_authorizations_tab"
 msgstr "Autorisations"
 
-#: src/app/[lang]/myAccount/page.tsx:22
+#: src/app/[lang]/myAccount/page.tsx:20
 msgid "my_account_page_my_profile_tab"
 msgstr "Mon profil"
 
-#: src/app/[lang]/myAccount/page.tsx:30
+#: src/app/[lang]/myAccount/page.tsx:28
 msgid "my_account_page_notification_tab"
 msgstr "Notifications"
 
@@ -202,7 +202,7 @@ msgstr "Institutions"
 msgid "side_bar_laboratories"
 msgstr "Laboratoires"
 
-#: src/app/[lang]/myAccount/page.tsx:81
+#: src/app/[lang]/myAccount/page.tsx:79
 msgid "side_bar_my_account"
 msgstr "Mon compte"
 

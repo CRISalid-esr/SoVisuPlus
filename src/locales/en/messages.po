@@ -14,26 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:28
-msgid "authorizations_page_authorizations_title"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:50
-msgid "authorizations_page_description"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:54
-msgid "authorizations_page_list_publications"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:58
-msgid "authorizations_page_my_expertise"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Back to home page"
@@ -52,6 +32,26 @@ msgstr "Back to home page"
 #: src/app/[lang]/forbidden.tsx:108
 msgid "forbidden_page_description"
 msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:28
+msgid "authorizations_page_authorizations_title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:50
+msgid "authorizations_page_description"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:54
+msgid "authorizations_page_list_publications"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:58
+msgid "authorizations_page_my_expertise"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/myAccount/components/notification/index.tsx:27
@@ -142,15 +142,15 @@ msgstr ""
 msgid "hello"
 msgstr "Hello"
 
-#: src/app/[lang]/myAccount/page.tsx:26
+#: src/app/[lang]/myAccount/page.tsx:24
 msgid "my_account_page_authorizations_tab"
 msgstr ""
 
-#: src/app/[lang]/myAccount/page.tsx:22
+#: src/app/[lang]/myAccount/page.tsx:20
 msgid "my_account_page_my_profile_tab"
 msgstr ""
 
-#: src/app/[lang]/myAccount/page.tsx:30
+#: src/app/[lang]/myAccount/page.tsx:28
 msgid "my_account_page_notification_tab"
 msgstr ""
 
@@ -202,7 +202,7 @@ msgstr "Institutions"
 msgid "side_bar_laboratories"
 msgstr "Laboratories"
 
-#: src/app/[lang]/myAccount/page.tsx:81
+#: src/app/[lang]/myAccount/page.tsx:79
 msgid "side_bar_my_account"
 msgstr "Account manager"
 
