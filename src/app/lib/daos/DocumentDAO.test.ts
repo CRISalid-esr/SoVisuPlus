@@ -27,7 +27,7 @@ jest.mock('@prisma/client', () => {
       upsert: jest.fn(),
     },
     contribution: {
-      create: jest.fn(),
+      upsert: jest.fn(),
     },
   }
 
@@ -48,6 +48,9 @@ describe('DocumentDAO', () => {
 
   const document: Document = new Document(
     'doc-123',
+    '2022',
+    new Date('2022-01-01T00:00:00.000Z'),
+    new Date('2022-12-31T23:59:59.000Z'),
     [new Literal('Sample Document Title', 'en')],
     [new Literal('Sample Abstract', 'en')],
     [
@@ -75,17 +78,16 @@ describe('DocumentDAO', () => {
       title_locale_0: '',
       title_locale_1: '',
       title_locale_2: '',
+      publicationDate: '2022',
+      publicationDateStart: new Date('2022-01-01T00:00:00.000Z'),
+      publicationDateEnd: new Date('2022-12-31T23:59:59.000Z'),
     } as DbDocument
 
-    // Mock the document retrieval
-    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null) // No existing document found
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
     ;(mockPrisma.document.create as jest.Mock).mockResolvedValue(mockDbDocument)
-
-    // Mock the upsert methods for titles and abstracts
     ;(mockPrisma.documentTitle.upsert as jest.Mock).mockResolvedValue(null)
     ;(mockPrisma.documentAbstract.upsert as jest.Mock).mockResolvedValue(null)
 
-    // Mock the person DAO
     const mockPerson = {
       id: 1,
       displayName: 'John Doe',
@@ -104,20 +106,28 @@ describe('DocumentDAO', () => {
         title_locale_0: 'sample document title',
         title_locale_1: 'sample document title',
         title_locale_2: '',
+        publicationDate: '2022',
+        publicationDateStart: '2022-01-01T00:00:00.000Z',
+        publicationDateEnd: '2022-12-31T23:59:59.000Z',
       },
       include: { titles: true, abstracts: true },
     })
 
-    // Ensure that the titles and abstracts upsert methods were called
     expect(mockPrisma.documentTitle.upsert).toHaveBeenCalled()
     expect(mockPrisma.documentAbstract.upsert).toHaveBeenCalled()
-
-    // Ensure the person contribution was created
-    expect(mockPrisma.contribution.create).toHaveBeenCalledWith({
-      data: {
-        personId: 1,
+    expect(mockPrisma.contribution.upsert).toHaveBeenCalledWith({
+      create: {
         documentId: 1,
+        personId: 1,
         role: 'AUTHOR',
+      },
+      update: {},
+      where: {
+        personId_documentId_role: {
+          documentId: 1,
+          personId: 1,
+          role: 'AUTHOR',
+        },
       },
     })
   })
@@ -131,9 +141,11 @@ describe('DocumentDAO', () => {
       title_locale_0: '',
       title_locale_1: '',
       title_locale_2: '',
+      publicationDate: '2022',
+      publicationDateStart: new Date('2022-01-01T00:00:00.000Z'),
+      publicationDateEnd: new Date('2022-12-31T23:59:59.000Z'),
     } as DbDocument
 
-    // Simulate no existing document, so create a new one
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
     ;(mockPrisma.document.create as jest.Mock).mockResolvedValue(mockDbDocument)
 
@@ -150,10 +162,12 @@ describe('DocumentDAO', () => {
         uid: 'doc-123',
         titles: [{ language: 'en', value: 'Sample Document Title' }],
         abstracts: [{ language: 'en', value: 'Sample Abstract' }],
+        publicationDate: '2022',
+        publicationDateStart: new Date('2022-01-01T00:00:00.000Z'),
+        publicationDateEnd: new Date('2022-12-31T23:59:59.000Z'),
       },
     ] as unknown as DbDocument[]
 
-    // Mock fetch documents query
     ;(mockPrisma.document.findMany as jest.Mock).mockResolvedValue(
       mockDbDocuments,
     )

@@ -40,6 +40,13 @@ export class DocumentDAO extends AbstractDAO {
             title_locale_0: document.getTitleInLocale(0),
             title_locale_1: document.getTitleInLocale(1),
             title_locale_2: document.getTitleInLocale(2),
+            publicationDate: document.publicationDate,
+            publicationDateStart: document.publicationDateStart
+              ? document.publicationDateStart.toISOString()
+              : null,
+            publicationDateEnd: document.publicationDateEnd
+              ? document.publicationDateEnd.toISOString()
+              : null,
           },
           include: {
             titles: true, // Include related titles
@@ -53,6 +60,13 @@ export class DocumentDAO extends AbstractDAO {
             title_locale_0: document.getTitleInLocale(0),
             title_locale_1: document.getTitleInLocale(1),
             title_locale_2: document.getTitleInLocale(2),
+            publicationDate: document.publicationDate,
+            publicationDateStart: document.publicationDateStart
+              ? document.publicationDateStart.toISOString()
+              : null,
+            publicationDateEnd: document.publicationDateEnd
+              ? document.publicationDateEnd.toISOString()
+              : null,
           },
           include: {
             titles: true, // Include related titles
@@ -109,31 +123,36 @@ export class DocumentDAO extends AbstractDAO {
             `Failed to create or update person for contribution: ${contribution}`,
             error,
           )
-          // don't discard the whole document if a person fails to create/update
-          // just skip this contribution
           continue
         }
 
         const { id: personId } = person
         const { id: documentId } = dbDocument
+
         try {
-          await this.prismaClient.contribution.create({
-            data: {
+          await this.prismaClient.contribution.upsert({
+            where: {
+              personId_documentId_role: {
+                personId,
+                documentId,
+                role: 'AUTHOR',
+              },
+            },
+            update: {}, // No update needed since the combination must remain unique
+            create: {
               personId,
               documentId,
-              role: 'AUTHOR', // You can dynamically determine the role if necessary
+              role: 'AUTHOR',
             },
           })
         } catch (error) {
           console.error(
-            `Failed to create contribution for person ID: ${personId} and document ID: ${documentId}`,
+            `Failed to upsert contribution for person ID: ${personId} and document ID: ${documentId}`,
             error,
           )
-          // don't discard the whole document if a contribution fails to create
-          // just skip this contribution
-          continue
         }
       }
+
       return dbDocument
     } catch (error) {
       console.error('Error during document creation or update:', error as Error)

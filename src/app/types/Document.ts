@@ -4,6 +4,9 @@ import { Contribution } from '@/types/Contribution'
 class Document {
   constructor(
     public uid: string,
+    public publicationDate: string | null,
+    public publicationDateStart: Date | null,
+    public publicationDateEnd: Date | null,
     public titles: Array<Literal>,
     public abstracts: Array<Literal>,
     public contributions: Array<Contribution> = [],
