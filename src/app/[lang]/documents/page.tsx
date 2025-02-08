@@ -17,12 +17,12 @@ import {
   MRT_Column,
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
+  MRT_Localization,
   MRT_SortingState,
 } from 'material-react-table'
 import { useEffect, useMemo, useState } from 'react'
 import Highlighter from 'react-highlight-words'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import { MRT_Localization } from 'material-react-table'
 import { MRT_Localization_FR } from 'material-react-table/locales/fr'
 import { MRT_Localization_EN } from 'material-react-table/locales/en'
 
@@ -167,8 +167,8 @@ export default function DocumentsPage() {
       {
         accessorKey: 'date',
         header: t`documents_page_date_column`,
-        Cell() {
-          return ''
+        Cell({ row }: { row: { original: Document } }) {
+          return row.original.publicationDate
         },
       },
       {
