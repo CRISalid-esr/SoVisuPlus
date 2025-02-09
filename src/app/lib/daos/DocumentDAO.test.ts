@@ -9,6 +9,8 @@ import { DocumentDAO } from './DocumentDAO'
 import { PersonDAO } from './PersonDAO'
 import { Person } from '@/types/Person'
 import { Literal } from '@/types/Literal'
+import { LocRelator } from '@/types/LocRelator'
+import { Contribution } from '@/types/Contribution'
 
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
@@ -54,8 +56,8 @@ describe('DocumentDAO', () => {
     [new Literal('Sample Document Title', 'en')],
     [new Literal('Sample Abstract', 'en')],
     [
-      {
-        person: new Person(
+      new Contribution(
+        new Person(
           'person-1',
           false,
           'john@example.com',
@@ -64,8 +66,8 @@ describe('DocumentDAO', () => {
           'Doe',
           [],
         ),
-        role: 'AUTHOR',
-      },
+        [LocRelator.AUTHOR_OF_INTRODUCTION__ETC_],
+      ),
     ],
   )
 
@@ -119,14 +121,19 @@ describe('DocumentDAO', () => {
       create: {
         documentId: 1,
         personId: 1,
-        role: 'AUTHOR',
+        roles: {
+          set: ['author of introduction, etc.'],
+        },
       },
-      update: {},
+      update: {
+        roles: {
+          set: ['author of introduction, etc.'],
+        },
+      },
       where: {
-        personId_documentId_role: {
+        personId_documentId: {
           documentId: 1,
           personId: 1,
-          role: 'AUTHOR',
         },
       },
     })

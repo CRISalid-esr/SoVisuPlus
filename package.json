@@ -8,6 +8,7 @@
     "build:paris1": "cross-env NEXT_PUBLIC_UNIVERSITY=paris1 next build",
     "dev:paris1": "cross-env NEXT_PUBLIC_UNIVERSITY=paris1 next dev",
     "dev:listener": "ts-node --project tsconfig.listener.json src/scripts/listener.ts",
+    "dev:relators": "ts-node --project tsconfig.listener.json src/scripts/generateRelators.ts",
     "build:listener": "tsc --project tsconfig.listener.json --outDir dist-listener && npx tsc-alias --project tsconfig.listener.json --outDir dist-listener",
     "start:listener": "node dist-listener/src/scripts/listener.js",
     "start:web": "next start",
