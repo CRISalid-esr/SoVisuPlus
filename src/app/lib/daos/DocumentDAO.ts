@@ -132,17 +132,18 @@ export class DocumentDAO extends AbstractDAO {
         try {
           await this.prismaClient.contribution.upsert({
             where: {
-              personId_documentId_role: {
+              personId_documentId: {
                 personId,
                 documentId,
-                role: 'AUTHOR',
               },
             },
-            update: {}, // No update needed since the combination must remain unique
+            update: {
+              roles: { set: contribution.getRoleLabels() },
+            },
             create: {
               personId,
               documentId,
-              role: 'AUTHOR',
+              roles: { set: contribution.getRoleLabels() },
             },
           })
         } catch (error) {

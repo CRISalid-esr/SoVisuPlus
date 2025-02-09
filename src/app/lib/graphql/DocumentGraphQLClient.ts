@@ -4,8 +4,10 @@ import { loadQuery } from '@/lib/graphql/queries/loadQuery'
 import { GraphPersonResponse, PersonGraphQLClient } from './PersonGraphQLClient'
 import { Literal } from '@/types/Literal'
 import { Contribution } from '@/types/Contribution'
+import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
 
 interface GraphContributionResponse {
+  roles: string[]
   contributor: Array<GraphPersonResponse>
 }
 
@@ -77,7 +79,11 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
         (contributionData: GraphContributionResponse) => {
           const [contributor] = contributionData.contributor
           const person = new PersonGraphQLClient().hydrate(contributor)
-          return new Contribution(person)
+          const { roles } = contributionData
+          const locRelators = roles
+            .map(LocRelatorHelper.fromURI)
+            .filter(Boolean) as LocRelator[]
+          return new Contribution(person, locRelators)
         },
       ),
     )

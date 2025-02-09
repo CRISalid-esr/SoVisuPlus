@@ -1622,18 +1622,23 @@ export class LocRelatorHelper {
   }
 
   static fromURI(uri: string): LocRelator | null {
-    return this.uriToRelatorMap[uri] || null
+    return Object.prototype.hasOwnProperty.call(
+      LocRelatorHelper.uriToRelatorMap,
+      uri,
+    )
+      ? LocRelatorHelper.uriToRelatorMap[uri]
+      : null
   }
 
   static toLabel(relator: LocRelator): string {
-    return this.relatorToLabelMap[relator] || relator
+    return LocRelatorHelper.relatorToLabelMap[relator] || relator
   }
 
   static fromLabel(label: string): LocRelator | null {
-    return this.labelToRelatorMap[label] || null
+    return LocRelatorHelper.labelToRelatorMap[label] || null
   }
 
   static toUri(relator: LocRelator): string | null {
-    return this.relatorToUriMap[relator] || null
+    return LocRelatorHelper.relatorToUriMap[relator] || null
   }
 }

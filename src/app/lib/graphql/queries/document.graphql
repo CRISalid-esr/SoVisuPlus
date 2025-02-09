@@ -13,6 +13,7 @@ query TextualDocuments($where: TextualDocumentWhere) {
       value
     }
     has_contributions {
+      roles
       contributor {
         uid
         display_name
