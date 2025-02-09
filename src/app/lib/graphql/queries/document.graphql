@@ -1,6 +1,9 @@
 query TextualDocuments($where: TextualDocumentWhere) {
   textualDocuments(where: $where) {
     uid
+    publication_date
+    publication_date_start
+    publication_date_end
     titles {
       language
       value

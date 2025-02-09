@@ -1,5 +1,6 @@
 import {
   ApolloClient,
+  ApolloError,
   gql,
   HttpLink,
   InMemoryCache,
@@ -59,15 +60,18 @@ export class AbstractGraphQLClient {
   }
 
   /**
-   * Performs a GraphQL query.
+   * Performs a GraphQL query with automatic retry on network failure.
    * @param query - The GraphQL query as a string.
    * @param variables - Optional variables for the query.
+   * @param retries - Number of retry attempts (default: 1).
    */
   public async query<T>(
     query: string,
     variables?: OperationVariables,
+    retries = 3,
   ): Promise<T> {
     this.assertEnabled()
+
     try {
       const result = await this.client.query<T>({
         query: gql`
@@ -79,6 +83,19 @@ export class AbstractGraphQLClient {
       return result.data as T
     } catch (error) {
       console.error('Query error:', error)
+
+      if (
+        retries > 0 &&
+        error instanceof ApolloError &&
+        error.networkError &&
+        'message' in error &&
+        error.message === 'fetch failed'
+      ) {
+        console.log(`Retrying query in 1 second... (Attempts left: ${retries})`)
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        return this.query<T>(query, variables, retries - 1)
+      }
+
       throw error
     }
   }

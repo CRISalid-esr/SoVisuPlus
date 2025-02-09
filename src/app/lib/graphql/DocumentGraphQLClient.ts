@@ -11,6 +11,9 @@ interface GraphContributionResponse {
 
 interface GraphDocumentResponse {
   uid: string
+  publication_date: string | null
+  publication_date_start: string | null
+  publication_date_end: string | null
   titles: { language: string; value: string }[]
   abstracts: { language: string; value: string }[]
   has_contributions: Array<GraphContributionResponse>
@@ -55,9 +58,19 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
   }
 
   private hydrate(documentData: GraphDocumentResponse): Document {
-    const { uid, titles, abstracts } = documentData
+    const {
+      uid,
+      titles,
+      abstracts,
+      publication_date,
+      publication_date_start,
+      publication_date_end,
+    } = documentData
     return new Document(
       uid,
+      publication_date,
+      publication_date_start ? new Date(publication_date_start) : null,
+      publication_date_end ? new Date(publication_date_end) : null,
       titles.map(Literal.fromObject),
       abstracts.map(Literal.fromObject),
       documentData.has_contributions.map(
