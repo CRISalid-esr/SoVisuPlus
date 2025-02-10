@@ -260,7 +260,7 @@ export default function Sidebar({
                 >
                   <Image
                     src={renderUnversityLogo()}
-                    alt='soVisuPlus logo'
+                    alt='logo'
                     width={0}
                     height={0}
                     sizes='100vw'
@@ -311,13 +311,15 @@ export default function Sidebar({
                     />
                   </IconButton>
                 }
-                <Image
-                  src='/icons/logo.svg'
-                  alt='Crisalid logo'
-                  width={32}
-                  height={32}
-                  priority
-                />
+             <Image
+                    src={renderUnversityLogo()}
+                    alt='logo'
+                    width={0}
+                    height={0}
+                    sizes='100vw'
+                    style={{ width: '100%', height: 'auto' }} // optional
+                    priority
+                  />
               </Box>
             )}
           </Box>
