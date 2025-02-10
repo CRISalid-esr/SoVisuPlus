@@ -25,6 +25,7 @@ import Highlighter from 'react-highlight-words'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { MRT_Localization_FR } from 'material-react-table/locales/fr'
 import { MRT_Localization_EN } from 'material-react-table/locales/en'
+import Image from 'next/image'
 
 const localization: Record<string, MRT_Localization> = {
   fr: MRT_Localization_FR,
@@ -187,9 +188,52 @@ export default function DocumentsPage() {
       },
       {
         accessorKey: 'version',
-        header: t`documents_page_version_column`,
+        header: t`documents_page_source_column`,
         Cell() {
-          return ''
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Image
+                src='/icons/hal.png'
+                alt='hal'
+                width={24}
+                height={24}
+                priority
+              />
+              <Image
+                src='/icons/scanr.png'
+                alt='scanr'
+                width={24}
+                height={24}
+                priority
+              />
+              <Image
+                src='/icons/idref.png'
+                alt='idref'
+                width={24}
+                height={24}
+                priority
+              />
+              <Image
+                src='/icons/openalex.png'
+                alt='openalex'
+                width={24}
+                height={24}
+                priority
+              />
+              <Image
+                src='/icons/scopus.png'
+                alt='scopus'
+                width={24}
+                height={24}
+                priority
+              />
+            </Box>
+          )
         },
       },
     ],
