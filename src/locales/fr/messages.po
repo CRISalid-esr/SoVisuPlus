@@ -178,26 +178,26 @@ msgstr "aucun titre disponible"
 #~ msgid "publications_page_synchronize_button"
 #~ msgstr "Synchroniser"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:412
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:417
 #: src/app/[lang]/dashboard/page.tsx:10
 msgid "side_bar_dashboard"
 msgstr "Tableau de bord"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:461
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:466
 msgid "side_bar_documents"
 msgstr "Publications"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:510
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:515
 #: src/app/[lang]/expertise/page.tsx:10
 msgid "side_bar_expertise"
 msgstr "Expertises"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:621
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:626
 #: src/app/[lang]/institutions/page.tsx:10
 msgid "side_bar_institutions"
 msgstr "Institutions"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:671
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:676
 #: src/app/[lang]/laboratories/page.tsx:10
 msgid "side_bar_laboratories"
 msgstr "Laboratoires"
@@ -206,7 +206,7 @@ msgstr "Laboratoires"
 msgid "side_bar_my_account"
 msgstr "Mon compte"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:571
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:576
 #: src/app/[lang]/my-groups/page.tsx:10
 msgid "side_bar_my_groups"
 msgstr "Groupes"
@@ -251,18 +251,18 @@ msgstr "Unités de recherche"
 msgid "sidebar_search_unknown_label"
 msgstr "label inconnu"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:115
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:138
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:748
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:116
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:139
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:753
 msgid "sidebar_theme_dark"
 msgstr "Thème sombre"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:92
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:729
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:93
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:734
 msgid "sidebar_theme_light"
 msgstr "Thème clair"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:767
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:772
 msgid "sidebar_theme_system"
 msgstr "Thème automatique"
 
