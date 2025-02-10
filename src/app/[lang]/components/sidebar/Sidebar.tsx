@@ -40,7 +40,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
 import { SearchInput } from '../SearchInput'
 import { signOut } from 'next-auth/react'
-import { universityConfig } from '@/configs/index'
+import { institutionalConfig } from '@/configs/index'
 
 interface SidebarProps {
   handleToggleDrawerAction: () => void
@@ -176,11 +176,11 @@ export default function Sidebar({
     }
   }
 
-  const renderUnversityLogo = () => {
+  const renderInstitutionalLogo = () => {
     if (currentTheme === ThemeMode.light) {
-      return universityConfig.logos.lightSideBarLogo
+      return institutionalConfig.logos.lightSideBarLogo
     }
-    return universityConfig.logos.darkSideBarLogo
+    return institutionalConfig.logos.darkSideBarLogo
   }
 
   return (
@@ -257,7 +257,7 @@ export default function Sidebar({
                   }}
                 >
                   <Image
-                    src={renderUnversityLogo()}
+                    src={renderInstitutionalLogo()}
                     alt='logo'
                     width={0}
                     height={0}
@@ -310,7 +310,7 @@ export default function Sidebar({
                   </IconButton>
                 }
                 <Image
-                  src={renderUnversityLogo()}
+                  src={renderInstitutionalLogo()}
                   alt='logo'
                   width={0}
                   height={0}

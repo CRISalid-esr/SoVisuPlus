@@ -1,48 +1,48 @@
 // config.ts
-import { UniversityLogos } from '@/types/UniversityLogos'
+import { InstitutionalLogos } from '@/types/InstitutionalLogos'
 
-export class UniversityConfig {
-  private static instance: UniversityConfig
+export class InstitutionalConfig {
+  private static instance: InstitutionalConfig
   public colors: Record<string, string>
-  public logos: UniversityLogos
-  private university: string | undefined
+  public logos: InstitutionalLogos
+  private institutional: string | undefined
 
   private constructor() {
-    this.university = process.env.NEXT_PUBLIC_UNIVERSITY
+    this.institutional = process.env.NEXT_PUBLIC_INSTITUTIONAL
     this.colors = {}
     this.logos = this.loadLogos()
     this.loadConfig()
   }
 
   private loadConfig() {
-    switch (this.university) {
+    switch (this.institutional) {
       case 'custom':
         this.colors = require('./custom/colors').colors
         break
       default:
-        console.log('Using default university colors')
+        console.log('Using default institutional colors')
         this.colors = require('./default/colors').colors
         break
     }
   }
 
-  private loadLogos(): UniversityLogos {
-    switch (this.university) {
+  private loadLogos(): InstitutionalLogos {
+    switch (this.institutional) {
       case 'custom':
-        return require('./custom/logos').logos as UniversityLogos
+        return require('./custom/logos').logos as InstitutionalLogos
       default:
-        console.log('Using default university logos')
-        return require('./default/logos').logos as UniversityLogos
+        console.log('Using default institutional logos')
+        return require('./default/logos').logos as InstitutionalLogos
     }
   }
 
-  public static getInstance(): UniversityConfig {
+  public static getInstance(): InstitutionalConfig {
     if (!this.instance) {
-      this.instance = new UniversityConfig()
+      this.instance = new InstitutionalConfig()
     }
     return this.instance
   }
 }
 
 // Export a singleton instance
-export const universityConfig = UniversityConfig.getInstance()
+export const institutionalConfig = InstitutionalConfig.getInstance()

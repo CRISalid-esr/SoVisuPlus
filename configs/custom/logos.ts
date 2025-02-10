@@ -1,6 +1,6 @@
-import { UniversityLogos } from '@/types/UniversityLogos'
+import { InstitutionalLogos } from '@/types/InstitutionalLogos'
 
-export const logos: UniversityLogos = {
-  darkSideBarLogo: '/icons/logo-pantheon-sorbonne-dark.svg',
-  lightSideBarLogo: '/icons/logo-pantheon-sorbonne-light.svg',
+export const logos: InstitutionalLogos = {
+  darkSideBarLogo: '/icons/logo-dark.svg',
+  lightSideBarLogo: '/icons/logo-light.svg',
 }

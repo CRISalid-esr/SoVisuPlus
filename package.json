@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:custom": "cross-env NEXT_PUBLIC_UNIVERSITY=custom next build",
-    "dev:custom": "cross-env NEXT_PUBLIC_UNIVERSITY=custom next dev",
+    "build:custom": "cross-env NEXT_PUBLIC_INSTITUTIONAL=custom next build",
+    "dev:custom": "cross-env NEXT_PUBLIC_INSTITUTIONAL=custom next dev",
     "dev:listener": "ts-node --project tsconfig.listener.json src/scripts/listener.ts",
     "dev:relators": "ts-node --project tsconfig.listener.json src/scripts/generateRelators.ts",
     "build:listener": "tsc --project tsconfig.listener.json --outDir dist-listener && npx tsc-alias --project tsconfig.listener.json --outDir dist-listener",

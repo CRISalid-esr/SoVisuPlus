@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import Appbar from './Appbar'
 import { ThemeProvider, ThemeMode } from '../../context/ThemeContext'
-import { universityConfig } from '@/configs/index'
+import { institutionalConfig } from '@/configs/index'
 
 jest.mock('next/image', () => {
   const MockImage = ({
@@ -72,12 +72,22 @@ describe('Appbar Component', () => {
   test('displays the correct logo for light theme', () => {
     renderComponent()
     const logo = screen.getByAltText('Crisalid logo')
-    expect(logo).toHaveAttribute('src', universityConfig.logos.lightSideBarLogo)
+    expect(logo).toHaveAttribute(
+      'src',
+      institutionalConfig.logos.lightSideBarLogo,
+    )
   })
 
   test('displays the correct logo for dark theme', () => {
+    Storage.prototype.getItem = jest.fn((key) => {
+      if (key === 'theme-mode') return ThemeMode.dark
+      return null
+    })
     renderComponent()
     const logo = screen.getByAltText('Crisalid logo')
-    expect(logo).toHaveAttribute('src', universityConfig.logos.darkSideBarLogo)
+    expect(logo).toHaveAttribute(
+      'src',
+      institutionalConfig.logos.darkSideBarLogo,
+    )
   })
 })

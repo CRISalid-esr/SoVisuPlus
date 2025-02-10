@@ -1,5 +1,5 @@
 // types.ts
-export interface UniversityLogos {
+export interface InstitutionalLogos {
   darkSideBarLogo: string
   lightSideBarLogo: string
 }

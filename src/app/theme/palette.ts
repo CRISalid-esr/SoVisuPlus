@@ -1,8 +1,8 @@
 type ColorPalette = Record<string, string>
 
-import { UniversityConfig } from '@/configs/index'
+import { institutionalConfig } from '@/configs/index'
 
-const colors: ColorPalette = UniversityConfig.getInstance().colors
+const colors: ColorPalette = institutionalConfig.colors
 
 interface Theme {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

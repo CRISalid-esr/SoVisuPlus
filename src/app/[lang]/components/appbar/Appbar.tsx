@@ -1,4 +1,4 @@
-import { universityConfig } from '@/configs/index'
+import { institutionalConfig } from '@/configs/index'
 import AppBar from '@mui/material/AppBar'
 import IconButton from '@mui/material/IconButton'
 import Toolbar from '@mui/material/Toolbar'
@@ -15,11 +15,11 @@ export default function Appbar({
   const toggleDrawer = () => handleToggleDrawer()
   const { currentTheme } = useThemeContext()
 
-  const renderUnversityLogo = () => {
+  const renderInstitutionalLogo = () => {
     if (currentTheme === ThemeMode.light) {
-      return universityConfig.logos.lightSideBarLogo
+      return institutionalConfig.logos.lightSideBarLogo
     }
-    return universityConfig.logos.darkSideBarLogo
+    return institutionalConfig.logos.darkSideBarLogo
   }
   return (
     <AppBar
@@ -43,7 +43,7 @@ export default function Appbar({
             }}
           >
             <Image
-              src={renderUnversityLogo()}
+              src={renderInstitutionalLogo()}
               alt='Crisalid logo'
               width={0}
               height={0}
