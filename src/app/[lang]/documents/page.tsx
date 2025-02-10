@@ -175,6 +175,7 @@ export default function DocumentsPage() {
         Cell({ row }: { row: { original: Document } }) {
           return row.original.publicationDate
         },
+        filterVariant: 'date-range',
       },
       {
         accessorKey: 'publishedIn',
