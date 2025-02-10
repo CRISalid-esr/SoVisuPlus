@@ -83,53 +83,57 @@ msgstr "Retour à la page d'accueil"
 msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
-#: src/app/[lang]/documents/page.tsx:50
+#: src/app/[lang]/documents/page.tsx:51
 msgid "documents_page_all_documents_filter"
 msgstr "Toutes mes publications"
 
-#: src/app/[lang]/documents/page.tsx:128
+#: src/app/[lang]/documents/page.tsx:129
 msgid "documents_page_contributors_column"
 msgstr "auteurs"
 
-#: src/app/[lang]/documents/page.tsx:169
+#: src/app/[lang]/documents/page.tsx:170
 msgid "documents_page_date_column"
 msgstr "Date"
 
-#: src/app/[lang]/documents/page.tsx:183
+#: src/app/[lang]/documents/page.tsx:184
 msgid "documents_page_halStatus_column"
 msgstr "Statut hal"
 
-#: src/app/[lang]/documents/page.tsx:55
+#: src/app/[lang]/documents/page.tsx:56
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "Dépôt HAL incomplet"
 
-#: src/app/[lang]/documents/page.tsx:61
+#: src/app/[lang]/documents/page.tsx:62
 msgid "documents_page_keywords_to_validate"
 msgstr "Mots-clés à valider"
 
-#: src/app/[lang]/documents/page.tsx:253
+#: src/app/[lang]/documents/page.tsx:297
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:176
+#: src/app/[lang]/documents/page.tsx:177
 msgid "documents_page_publishedIn_column"
 msgstr "paru dans"
 
-#: src/app/[lang]/documents/page.tsx:258
+#: src/app/[lang]/documents/page.tsx:191
+msgid "documents_page_source_column"
+msgstr "Sources"
+
+#: src/app/[lang]/documents/page.tsx:302
 msgid "documents_page_synchronize_button"
 msgstr "Synchroniser"
 
-#: src/app/[lang]/documents/page.tsx:85
+#: src/app/[lang]/documents/page.tsx:86
 msgid "documents_page_title_column"
 msgstr "titre"
 
-#: src/app/[lang]/documents/page.tsx:74
+#: src/app/[lang]/documents/page.tsx:75
 msgid "documents_page_type_column"
 msgstr "type"
 
 #: src/app/[lang]/documents/page.tsx:190
-msgid "documents_page_version_column"
-msgstr "versions"
+#~ msgid "documents_page_version_column"
+#~ msgstr "versions"
 
 #: src/app/[lang]/not-found.tsx:44
 #: src/app/[lang]/forbidden.tsx:43
@@ -154,7 +158,7 @@ msgstr "Mon profil"
 msgid "my_account_page_notification_tab"
 msgstr "Notifications"
 
-#: src/app/[lang]/documents/page.tsx:98
+#: src/app/[lang]/documents/page.tsx:99
 msgid "no_title_available"
 msgstr "aucun titre disponible"
 
@@ -178,26 +182,26 @@ msgstr "aucun titre disponible"
 #~ msgid "publications_page_synchronize_button"
 #~ msgstr "Synchroniser"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:412
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:417
 #: src/app/[lang]/dashboard/page.tsx:10
 msgid "side_bar_dashboard"
 msgstr "Tableau de bord"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:461
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:466
 msgid "side_bar_documents"
 msgstr "Publications"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:510
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:515
 #: src/app/[lang]/expertise/page.tsx:10
 msgid "side_bar_expertise"
 msgstr "Expertises"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:621
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:626
 #: src/app/[lang]/institutions/page.tsx:10
 msgid "side_bar_institutions"
 msgstr "Institutions"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:671
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:676
 #: src/app/[lang]/laboratories/page.tsx:10
 msgid "side_bar_laboratories"
 msgstr "Laboratoires"
@@ -206,7 +210,7 @@ msgstr "Laboratoires"
 msgid "side_bar_my_account"
 msgstr "Mon compte"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:571
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:576
 #: src/app/[lang]/my-groups/page.tsx:10
 msgid "side_bar_my_groups"
 msgstr "Groupes"
@@ -251,18 +255,18 @@ msgstr "Unités de recherche"
 msgid "sidebar_search_unknown_label"
 msgstr "label inconnu"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:115
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:138
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:748
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:116
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:139
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:753
 msgid "sidebar_theme_dark"
 msgstr "Thème sombre"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:92
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:729
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:93
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:734
 msgid "sidebar_theme_light"
 msgstr "Thème clair"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:767
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:772
 msgid "sidebar_theme_system"
 msgstr "Thème automatique"
 
