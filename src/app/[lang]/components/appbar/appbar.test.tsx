@@ -2,12 +2,29 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import Appbar from './Appbar'
 import { ThemeProvider, ThemeMode } from '../../context/ThemeContext'
-import { universityLogos } from '../../../../../configs'
+import { universityConfig } from '@/configs/index'
 
-// Mock Next.js Image component
-jest.mock('next/image', () => ({ src, alt, width, height, style }: any) => (
-  <img src={src} alt={alt} style={{ ...style, width, height }} />
-))
+jest.mock('next/image', () => {
+  const MockImage = ({
+    src,
+    alt,
+    width,
+    height,
+    style,
+  }: {
+    src: string
+    alt: string
+    width: number
+    height: number
+    style?: React.CSSProperties
+  }) => {
+    return <img src={src} alt={alt} style={{ ...style, width, height }} />
+  }
+
+  MockImage.displayName = 'NextImageMock' // ✅ Set display name to prevent ESLint warning
+
+  return MockImage
+})
 
 describe('Appbar Component', () => {
   const handleToggleDrawerMock = jest.fn()
@@ -55,12 +72,12 @@ describe('Appbar Component', () => {
   test('displays the correct logo for light theme', () => {
     renderComponent()
     const logo = screen.getByAltText('Crisalid logo')
-    expect(logo).toHaveAttribute('src', universityLogos.lightSideBarLogo)
+    expect(logo).toHaveAttribute('src', universityConfig.logos.lightSideBarLogo)
   })
 
   test('displays the correct logo for dark theme', () => {
     renderComponent()
     const logo = screen.getByAltText('Crisalid logo')
-    expect(logo).toHaveAttribute('src', universityLogos.darkSideBarLogo)
+    expect(logo).toHaveAttribute('src', universityConfig.logos.darkSideBarLogo)
   })
 })

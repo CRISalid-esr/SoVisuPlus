@@ -1,11 +1,11 @@
+import { universityConfig } from '@/configs/index'
 import AppBar from '@mui/material/AppBar'
 import IconButton from '@mui/material/IconButton'
 import Toolbar from '@mui/material/Toolbar'
 import { Box } from '@mui/system'
-import Image from 'next/image'
 import { Menu02 as Menu } from '@untitled-ui/icons-react'
+import Image from 'next/image'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
-import { universityLogos } from '../../../../../configs'
 
 export default function Appbar({
   handleToggleDrawer,
@@ -17,9 +17,9 @@ export default function Appbar({
 
   const renderUnversityLogo = () => {
     if (currentTheme === ThemeMode.light) {
-      return universityLogos.lightSideBarLogo
+      return universityConfig.logos.lightSideBarLogo
     }
-    return universityLogos.darkSideBarLogo
+    return universityConfig.logos.darkSideBarLogo
   }
   return (
     <AppBar
