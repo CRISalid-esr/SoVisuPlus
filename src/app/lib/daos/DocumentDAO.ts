@@ -299,6 +299,17 @@ export class DocumentDAO extends AbstractDAO {
             [sortingTitleFieldName]: sort.desc ? 'desc' : 'asc',
           }
         }
+
+        if (sort.id === 'date') {
+          console.log('sort.id', sort.id)
+          return {
+            publicationDateStart: {
+              sort: sort.desc ? 'desc' : 'asc',
+              nulls: 'last',
+            },
+          }
+        }
+
         return { [sort.id]: sort.desc ? 'desc' : 'asc' }
       },
     )
