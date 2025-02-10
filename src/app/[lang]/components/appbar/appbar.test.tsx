@@ -1,48 +1,93 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import Appbar from './Appbar'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
 import '@testing-library/jest-dom'
+import Appbar from './Appbar'
+import { ThemeProvider, ThemeMode } from '../../context/ThemeContext'
+import { institutionalConfig } from '@/configs/index'
+
+jest.mock('next/image', () => {
+  const MockImage = ({
+    src,
+    alt,
+    width,
+    height,
+    style,
+  }: {
+    src: string
+    alt: string
+    width: number
+    height: number
+    style?: React.CSSProperties
+  }) => {
+    return <img src={src} alt={alt} style={{ ...style, width, height }} />
+  }
+
+  MockImage.displayName = 'NextImageMock' // ✅ Set display name to prevent ESLint warning
+
+  return MockImage
+})
 
 describe('Appbar Component', () => {
-  it('renders AppBar with correct logo and button', () => {
-    // Mock the handleToggleDrawer function
-    const mockHandleToggleDrawer = jest.fn()
+  const handleToggleDrawerMock = jest.fn()
 
-    // Create a basic theme with pxToRem mock
-    const theme = createTheme({
-      typography: {
-        fontSize: 14,
-      },
-      utils: {
-        pxToRem: (value: number) => `${value / 16}rem`, // Mocking pxToRem function
-      },
+  beforeEach(() => {
+    // Mock localStorage
+    Storage.prototype.getItem = jest.fn((key) => {
+      if (key === 'theme-mode') return ThemeMode.light
+      return null
     })
+    Storage.prototype.setItem = jest.fn()
 
+    // Mock matchMedia
+    window.matchMedia = jest.fn().mockImplementation((query) => ({
+      matches: query === '(prefers-color-scheme: dark)' ? false : true,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    }))
+  })
+
+  const renderComponent = () =>
     render(
-      <ThemeProvider theme={theme}>
-        <Appbar handleToggleDrawer={mockHandleToggleDrawer} />
+      <ThemeProvider>
+        <Appbar handleToggleDrawer={handleToggleDrawerMock} />
       </ThemeProvider>,
     )
 
-    // Check if the logos are rendered
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
+  test('renders without crashing', () => {
+    renderComponent()
     expect(screen.getByAltText('Crisalid logo')).toBeInTheDocument()
-    expect(screen.getByAltText('Crisalid logo').getAttribute('src')).toBe(
-      '/icons/logo.svg',
-    )
+    expect(screen.getByRole('button', { name: /menu/i })).toBeInTheDocument()
+  })
 
-    expect(screen.getByAltText('Crisalid logo plus')).toBeInTheDocument()
-    expect(screen.getByAltText('Crisalid logo plus').getAttribute('src')).toBe(
-      '/icons/soVisuPlus.svg',
-    )
-
-    // Check if the IconButton with Menu icon is rendered
-    const menuButton = screen.getByLabelText('menu')
-    expect(menuButton).toBeInTheDocument()
-
-    // Simulate a click event on the button
+  test('calls handleToggleDrawer when menu button is clicked', () => {
+    renderComponent()
+    const menuButton = screen.getByRole('button', { name: /menu/i })
     fireEvent.click(menuButton)
+    expect(handleToggleDrawerMock).toHaveBeenCalledTimes(1)
+  })
 
-    // Check if the handleToggleDrawer function was called
-    expect(mockHandleToggleDrawer).toHaveBeenCalledTimes(1)
+  test('displays the correct logo for light theme', () => {
+    renderComponent()
+    const logo = screen.getByAltText('Crisalid logo')
+    expect(logo).toHaveAttribute(
+      'src',
+      institutionalConfig.logos.lightSideBarLogo,
+    )
+  })
+
+  test('displays the correct logo for dark theme', () => {
+    Storage.prototype.getItem = jest.fn((key) => {
+      if (key === 'theme-mode') return ThemeMode.dark
+      return null
+    })
+    renderComponent()
+    const logo = screen.getByAltText('Crisalid logo')
+    expect(logo).toHaveAttribute(
+      'src',
+      institutionalConfig.logos.darkSideBarLogo,
+    )
   })
 })

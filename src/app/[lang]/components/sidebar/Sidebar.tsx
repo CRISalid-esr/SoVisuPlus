@@ -34,12 +34,13 @@ import {
   User01 as Users,
   XClose as Close,
 } from '@untitled-ui/icons-react'
-import { signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
 import { SearchInput } from '../SearchInput'
+import { signOut } from 'next-auth/react'
+import { institutionalConfig } from '@/configs/index'
 
 interface SidebarProps {
   handleToggleDrawerAction: () => void
@@ -175,6 +176,13 @@ export default function Sidebar({
     }
   }
 
+  const renderInstitutionalLogo = () => {
+    if (currentTheme === ThemeMode.light) {
+      return institutionalConfig.logos.lightSideBarLogo
+    }
+    return institutionalConfig.logos.darkSideBarLogo
+  }
+
   return (
     <>
       {open && isMobile && (
@@ -249,17 +257,12 @@ export default function Sidebar({
                   }}
                 >
                   <Image
-                    src='/icons/logo.svg'
-                    alt='soVisuPlus logo'
-                    width={32}
-                    height={32}
-                    priority
-                  />
-                  <Image
-                    src='/icons/soVisuPlus.svg'
-                    alt='soVisuPlus logo'
-                    width={123.966}
-                    height={24.795}
+                    src={renderInstitutionalLogo()}
+                    alt='logo'
+                    width={0}
+                    height={0}
+                    sizes='100vw'
+                    style={{ width: '100%', height: 'auto' }} // optional
                     priority
                   />
                 </Box>
@@ -307,10 +310,12 @@ export default function Sidebar({
                   </IconButton>
                 }
                 <Image
-                  src='/icons/logo.svg'
-                  alt='Crisalid logo'
-                  width={32}
-                  height={32}
+                  src={renderInstitutionalLogo()}
+                  alt='logo'
+                  width={0}
+                  height={0}
+                  sizes='100vw'
+                  style={{ width: '100%', height: 'auto' }} // optional
                   priority
                 />
               </Box>

@@ -28,6 +28,7 @@
       "@/locales/*": ["src/locales/*"],
       "@/theme/*": ["src/theme/*"],
       "@/public/*": ["public/*"],
+      "@/configs/*": ["configs/*"], 
       "@/middlewares/*": ["src/middlewares/*"],
       "@/prisma-schema/*": ["prisma/*"],
       "@/*": ["src/*"]

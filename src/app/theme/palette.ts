@@ -1,10 +1,8 @@
 type ColorPalette = Record<string, string>
 
-// @ts-expect-error: Temporarily ignoring type inference for universityColors
-import { universityColors } from '../../../configs'
+import { institutionalConfig } from '@/configs/index'
 
-// @ts-expect-error: Temporarily ignoring type inference for universityColors
-const colors: ColorPalette = universityColors as unknown as ColorPalette
+const colors: ColorPalette = institutionalConfig.colors
 
 interface Theme {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
