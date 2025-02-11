@@ -194,7 +194,6 @@ export default function DocumentsPage() {
         accessorKey: 'version',
         header: t`documents_page_source_column`,
         Cell({ row }: { row: { original: Document } }) {
-          // Apply uniform order to platforms for display
           const orderedPlatforms = Object.values(BibliographicPlatform)
 
           return (
@@ -205,28 +204,27 @@ export default function DocumentsPage() {
                 gap: 1,
               }}
             >
-              {orderedPlatforms
-                .map((platform) =>
-                  row.original.records.find(
-                    (record) => record.platform === platform,
-                  ),
+              {orderedPlatforms.reduce<JSX.Element[]>((acc, platform) => {
+                const record = row.original.records.find(
+                  (record) => record.platform === platform,
                 )
-                .filter(Boolean)
-                .map((record) => {
+                if (record) {
                   const metadata =
-                    BibliographicPlatformMetadata[record!.platform]
-                  return (
+                    BibliographicPlatformMetadata[record.platform]
+                  acc.push(
                     <Image
-                      key={record!.platform}
+                      key={record.platform}
                       src={metadata?.icon || '/icons/default.png'}
                       alt={metadata?.name || 'Unknown Source'}
                       width={24}
                       height={24}
                       priority
                       title={metadata?.name || 'Unknown Source'} // Tooltip on hover
-                    />
+                    />,
                   )
-                })}
+                }
+                return acc
+              }, [])}
             </Box>
           )
         },
