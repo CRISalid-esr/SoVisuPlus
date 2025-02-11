@@ -86,33 +86,46 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
       publication_date_end ? new Date(publication_date_end) : null,
       titles.map(Literal.fromObject),
       abstracts.map(Literal.fromObject),
-      documentData.has_contributions.map(
-        (contributionData: GraphContributionResponse) => {
+      documentData.has_contributions.reduce<Contribution[]>(
+        (acc, contributionData: GraphContributionResponse) => {
           const [contributor] = contributionData.contributor
           const person = new PersonGraphQLClient().hydrate(contributor)
           const { roles } = contributionData
-          const locRelators = roles
-            .map(LocRelatorHelper.fromURI)
-            .filter(Boolean) as LocRelator[]
-          return new Contribution(person, locRelators)
+          const locRelators = roles.reduce<LocRelator[]>((roleAcc, role) => {
+            const relator = LocRelatorHelper.fromURI(role)
+            if (relator) {
+              roleAcc.push(relator)
+            }
+            return roleAcc
+          }, [])
+
+          acc.push(new Contribution(person, locRelators))
+          return acc
         },
+        [],
       ),
-      recorded_by
-        .map((recordData: GraphDocumentRecordResponse) => {
+      recorded_by.reduce<DocumentRecord[]>(
+        (acc, recordData: GraphDocumentRecordResponse) => {
           const platform = getBibliographicPlatformByNameIgnoreCase(
             recordData.harvester,
           )
           if (!platform) {
             console.error(`Unknown platform: ${recordData.harvester}`)
-            return null
+            return acc
           }
-          return new DocumentRecord(
-            recordData.uid,
-            platform,
-            recordData.titles.map(Literal.fromObject),
+
+          acc.push(
+            new DocumentRecord(
+              recordData.uid,
+              platform,
+              recordData.titles.map(Literal.fromObject),
+            ),
           )
-        })
-        .filter(Boolean) as DocumentRecord[],
+
+          return acc
+        },
+        [],
+      ),
     )
   }
 }
