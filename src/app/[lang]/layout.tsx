@@ -29,18 +29,18 @@ export default async function RootLayout({ params, children }: Props) {
         <title>sovisuplus</title>
       </head>
       <body>
-        <DateProvider>
-          <ThemeProvider>
-            <CssBaseline />
-            <LanguageProvider locale={lang} messages={selectedMessages}>
+        <ThemeProvider>
+          <CssBaseline />
+          <LanguageProvider locale={lang} messages={selectedMessages}>
+            <DateProvider>
               <AppRouterCacheProvider>
                 <ErrorBoundary FallbackComponent={ErrorFallback}>
                   <SessionProviderWrapper>{children}</SessionProviderWrapper>
                 </ErrorBoundary>
               </AppRouterCacheProvider>
-            </LanguageProvider>
-          </ThemeProvider>
-        </DateProvider>
+            </DateProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -299,105 +299,43 @@ export class DocumentDAO extends AbstractDAO {
           },
         }
       }
-      if (filter.id === 'date') {
-        const extractDateParts = (isoString: string) => {
-          const datePart = isoString.split('T')[0] // Extract YYYY-MM-DD
-          const [year, month, day] = datePart.split('-')
-          return { year, month, day }
-        }
+      columnFilters.forEach((filter) => {
+        if (filter.id === 'date' && Array.isArray(filter.value)) {
+          const startDate = filter.value[0]
+            ? filter.value[0].split('T')[0]
+            : null // Extract YYYY-MM-DD
+          const endDate = filter.value[1] ? filter.value[1].split('T')[0] : null // Extract YYYY-MM-DD
 
-        const startParts = filter.value[0]
-          ? extractDateParts(filter.value[0])
-          : null
-        const endParts = filter.value[1]
-          ? extractDateParts(filter.value[1])
-          : null
+          let dateConditions: Prisma.DocumentWhereInput[] = []
 
-        let conditions: Prisma.DocumentWhereInput[] = []
+          if (startDate) {
+            dateConditions.push({
+              OR: [
+                { publicationDate: { gte: startDate } }, // Full date (YYYY-MM-DD) match
+                { publicationDate: { gte: startDate.slice(0, 7) } }, // Year-Month (YYYY-MM) match
+                //{ publicationDate: { gte: startDate.slice(0, 4) } }, // Year (YYYY) match
+              ],
+            })
+          }
 
-        if (startParts && endParts) {
-          conditions.push({
-            OR: [
-              // Match full date
-              {
-                AND: [
-                  {
-                    publicationDate: {
-                      gte: `${startParts.year}-${startParts.month || '01'}-${startParts.day || '01'}`,
-                    },
-                  },
-                  {
-                    publicationDate: {
-                      lte: `${endParts.year}-${endParts.month || '12'}-${endParts.day || '31'}`,
-                    },
-                  },
-                ],
-              },
-              // Match only Year-Month
-              {
-                AND: [
-                  {
-                    publicationDate: {
-                      gte: `${startParts.year}-${startParts.month || '01'}`,
-                    },
-                  },
-                  {
-                    publicationDate: {
-                      lte: `${endParts.year}-${endParts.month || '12'}`,
-                    },
-                  },
-                ],
-              },
-              // Match only Year
-              {
-                AND: [
-                  { publicationDate: { gte: startParts.year } },
-                  { publicationDate: { lte: endParts.year } },
-                ],
-              },
-            ],
-          })
-        } else if (startParts) {
-          conditions.push({
-            OR: [
-              {
-                publicationDate: {
-                  gte: `${startParts.year}-${startParts.month || '01'}-${startParts.day || '01'}`,
-                },
-              },
-              {
-                publicationDate: {
-                  gte: `${startParts.year}-${startParts.month || '01'}`,
-                },
-              },
-              { publicationDate: { gte: startParts.year } },
-            ],
-          })
-        } else if (endParts) {
-          conditions.push({
-            OR: [
-              {
-                publicationDate: {
-                  lte: `${endParts.year}-${endParts.month || '12'}-${endParts.day || '31'}`,
-                },
-              },
-              {
-                publicationDate: {
-                  lte: `${endParts.year}-${endParts.month || '12'}`,
-                },
-              },
-              { publicationDate: { lte: endParts.year } },
-            ],
-          })
-        }
+          if (endDate) {
+            dateConditions.push({
+              OR: [
+                { publicationDate: { lte: endDate } }, // Full date (YYYY-MM-DD) match
+                { publicationDate: { lte: endDate.slice(0, 7) } }, // Year-Month (YYYY-MM) match
+                { publicationDate: { lte: endDate.slice(0, 4) } }, // Year (YYYY) match
+              ],
+            })
+          }
 
-        if (conditions.length) {
-          where = {
-            ...where,
-            AND: conditions,
+          if (dateConditions.length > 0) {
+            where = {
+              ...where,
+              AND: dateConditions,
+            }
           }
         }
-      }
+      })
     })
 
     if (contributorUid) {
