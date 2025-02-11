@@ -105,8 +105,8 @@ describe('DocumentDAO', () => {
     expect(mockPrisma.document.create).toHaveBeenCalledWith({
       data: {
         uid: 'doc-123',
-        title_locale_0: 'sample document title',
-        title_locale_1: 'sample document title',
+        title_locale_0: 'Sample Document Title',
+        title_locale_1: 'Sample Document Title',
         title_locale_2: '',
         publicationDate: '2022',
         publicationDateStart: '2022-01-01T00:00:00.000Z',
@@ -261,6 +261,7 @@ describe('DocumentDAO', () => {
             person: true,
           },
         },
+        records: true,
       },
     })
   })

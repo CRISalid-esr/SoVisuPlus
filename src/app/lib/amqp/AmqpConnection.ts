@@ -28,7 +28,7 @@ class AmqpConnection {
       )
       this.channel = await this.connection.createChannel()
 
-      await this.channel.prefetch(1)
+      await this.channel.prefetch(10)
 
       await this.channel.assertExchange(this.EXCHANGE_NAME, 'topic', {
         durable: true,
@@ -53,11 +53,11 @@ class AmqpConnection {
 
     await this.channel.consume(
       queueName,
-      (message) => {
+      async (message) => {
         if (!message) {
           return console.error(`Invalid incoming message`)
         }
-        handleIncomingNotification(message.content.toString())
+        await handleIncomingNotification(message.content.toString())
         this.channel.ack(message)
       },
       {

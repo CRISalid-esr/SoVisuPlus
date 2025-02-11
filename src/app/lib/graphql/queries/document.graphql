@@ -43,9 +43,13 @@ query TextualDocuments($where: TextualDocumentWhere) {
         }
       }
     }
-    abstracts {
-      language
-      value
+    recorded_by {
+      uid
+      harvester
+      titles {
+        language
+        value
+      }
     }
   }
 }

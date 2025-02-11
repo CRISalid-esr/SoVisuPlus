@@ -3,6 +3,7 @@ import { Person as DbPerson, Prisma } from '@prisma/client'
 import { Document } from '@/types/Document'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PersonDAO } from './PersonDAO'
+import { getBibliographicPlatformDbValue } from '@/types/BibliographicPlatform'
 import QueryMode = Prisma.QueryMode
 
 interface FetchDocumentsFromDBParams {
@@ -22,7 +23,7 @@ export class DocumentDAO extends AbstractDAO {
    * @returns The created or updated Document record
    */
   public async createOrUpdateDocument(document: Document): Promise<DbDocument> {
-    const { uid, titles, abstracts, contributions } = document
+    const { uid, titles, abstracts, contributions, records } = document
 
     try {
       let dbDocument = (await this.prismaClient.document.findUnique({
@@ -149,6 +150,33 @@ export class DocumentDAO extends AbstractDAO {
         } catch (error) {
           console.error(
             `Failed to upsert contribution for person ID: ${personId} and document ID: ${documentId}`,
+            error,
+          )
+        }
+      }
+
+      for (const record of records) {
+        try {
+          await this.prismaClient.documentRecord.upsert({
+            where: {
+              uid: record.uid,
+            },
+            update: {
+              platform: {
+                set: getBibliographicPlatformDbValue(record.platform),
+              },
+              titles: record.titles.map((title) => title.toJson()),
+            },
+            create: {
+              uid: record.uid,
+              platform: getBibliographicPlatformDbValue(record.platform),
+              titles: record.titles.map((title) => title.toJson()),
+              documentId: dbDocument.id, // Link to document
+            },
+          })
+        } catch (error) {
+          console.error(
+            `Failed to upsert document record: ${record.uid}`,
             error,
           )
         }
@@ -327,6 +355,7 @@ export class DocumentDAO extends AbstractDAO {
             person: true,
           },
         },
+        records: true,
       },
     })
 

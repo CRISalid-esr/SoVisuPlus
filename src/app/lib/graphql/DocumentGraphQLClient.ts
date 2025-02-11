@@ -5,10 +5,18 @@ import { GraphPersonResponse, PersonGraphQLClient } from './PersonGraphQLClient'
 import { Literal } from '@/types/Literal'
 import { Contribution } from '@/types/Contribution'
 import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
+import { getBibliographicPlatformByNameIgnoreCase } from '@/types/BibliographicPlatform'
+import { DocumentRecord } from '@/types/DocumentRecord'
 
 interface GraphContributionResponse {
   roles: string[]
   contributor: Array<GraphPersonResponse>
+}
+
+interface GraphDocumentRecordResponse {
+  uid: string
+  harvester: string
+  titles: { language: string; value: string }[]
 }
 
 interface GraphDocumentResponse {
@@ -19,6 +27,7 @@ interface GraphDocumentResponse {
   titles: { language: string; value: string }[]
   abstracts: { language: string; value: string }[]
   has_contributions: Array<GraphContributionResponse>
+  recorded_by: Array<GraphDocumentRecordResponse> // Add record information
 }
 
 export interface GraphDocumentsResponse {
@@ -67,7 +76,9 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
       publication_date,
       publication_date_start,
       publication_date_end,
+      recorded_by,
     } = documentData
+
     return new Document(
       uid,
       publication_date,
@@ -86,6 +97,22 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
           return new Contribution(person, locRelators)
         },
       ),
+      recorded_by
+        .map((recordData: GraphDocumentRecordResponse) => {
+          const platform = getBibliographicPlatformByNameIgnoreCase(
+            recordData.harvester,
+          )
+          if (!platform) {
+            console.error(`Unknown platform: ${recordData.harvester}`)
+            return null
+          }
+          return new DocumentRecord(
+            recordData.uid,
+            platform,
+            recordData.titles.map(Literal.fromObject),
+          )
+        })
+        .filter(Boolean) as DocumentRecord[],
     )
   }
 }

@@ -26,6 +26,10 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { MRT_Localization_FR } from 'material-react-table/locales/fr'
 import { MRT_Localization_EN } from 'material-react-table/locales/en'
 import Image from 'next/image'
+import {
+  BibliographicPlatform,
+  BibliographicPlatformMetadata,
+} from '@/types/BibliographicPlatform'
 
 const localization: Record<string, MRT_Localization> = {
   fr: MRT_Localization_FR,
@@ -189,49 +193,40 @@ export default function DocumentsPage() {
       {
         accessorKey: 'version',
         header: t`documents_page_source_column`,
-        Cell() {
+        Cell({ row }: { row: { original: Document } }) {
+          // Apply uniform order to platforms for display
+          const orderedPlatforms = Object.values(BibliographicPlatform)
+
           return (
             <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center',
+                gap: 1,
               }}
             >
-              <Image
-                src='/icons/hal.png'
-                alt='hal'
-                width={24}
-                height={24}
-                priority
-              />
-              <Image
-                src='/icons/scanr.png'
-                alt='scanr'
-                width={24}
-                height={24}
-                priority
-              />
-              <Image
-                src='/icons/idref.png'
-                alt='idref'
-                width={24}
-                height={24}
-                priority
-              />
-              <Image
-                src='/icons/openalex.png'
-                alt='openalex'
-                width={24}
-                height={24}
-                priority
-              />
-              <Image
-                src='/icons/scopus.png'
-                alt='scopus'
-                width={24}
-                height={24}
-                priority
-              />
+              {orderedPlatforms
+                .map((platform) =>
+                  row.original.records.find(
+                    (record) => record.platform === platform,
+                  ),
+                )
+                .filter(Boolean)
+                .map((record) => {
+                  const metadata =
+                    BibliographicPlatformMetadata[record!.platform]
+                  return (
+                    <Image
+                      key={record!.platform}
+                      src={metadata?.icon || '/icons/default.png'}
+                      alt={metadata?.name || 'Unknown Source'}
+                      width={24}
+                      height={24}
+                      priority
+                      title={metadata?.name || 'Unknown Source'} // Tooltip on hover
+                    />
+                  )
+                })}
             </Box>
           )
         },

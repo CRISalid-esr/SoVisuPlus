@@ -31,6 +31,13 @@ class Literal {
     }
     return new Literal(object.value, language as ExtendedLanguageCode)
   }
+
+  toJson(): { language: string; value: string } {
+    return {
+      language: this.language,
+      value: this.value,
+    }
+  }
 }
 
 export { Literal }
