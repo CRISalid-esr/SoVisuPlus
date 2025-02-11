@@ -299,24 +299,102 @@ export class DocumentDAO extends AbstractDAO {
           },
         }
       }
-
       if (filter.id === 'date') {
-        const startDate = filter.value[0]
-        const endDate = filter.value[1]
-        if (startDate) {
-          where = {
-            ...where,
-            publicationDate: {
-              gte: new Date(startDate).toISOString(),
-            },
-          }
+        const extractDateParts = (isoString: string) => {
+          const datePart = isoString.split('T')[0] // Extract YYYY-MM-DD
+          const [year, month, day] = datePart.split('-')
+          return { year, month, day }
         }
-        if (endDate) {
+
+        const startParts = filter.value[0]
+          ? extractDateParts(filter.value[0])
+          : null
+        const endParts = filter.value[1]
+          ? extractDateParts(filter.value[1])
+          : null
+
+        let conditions: Prisma.DocumentWhereInput[] = []
+
+        if (startParts && endParts) {
+          conditions.push({
+            OR: [
+              // Match full date
+              {
+                AND: [
+                  {
+                    publicationDate: {
+                      gte: `${startParts.year}-${startParts.month || '01'}-${startParts.day || '01'}`,
+                    },
+                  },
+                  {
+                    publicationDate: {
+                      lte: `${endParts.year}-${endParts.month || '12'}-${endParts.day || '31'}`,
+                    },
+                  },
+                ],
+              },
+              // Match only Year-Month
+              {
+                AND: [
+                  {
+                    publicationDate: {
+                      gte: `${startParts.year}-${startParts.month || '01'}`,
+                    },
+                  },
+                  {
+                    publicationDate: {
+                      lte: `${endParts.year}-${endParts.month || '12'}`,
+                    },
+                  },
+                ],
+              },
+              // Match only Year
+              {
+                AND: [
+                  { publicationDate: { gte: startParts.year } },
+                  { publicationDate: { lte: endParts.year } },
+                ],
+              },
+            ],
+          })
+        } else if (startParts) {
+          conditions.push({
+            OR: [
+              {
+                publicationDate: {
+                  gte: `${startParts.year}-${startParts.month || '01'}-${startParts.day || '01'}`,
+                },
+              },
+              {
+                publicationDate: {
+                  gte: `${startParts.year}-${startParts.month || '01'}`,
+                },
+              },
+              { publicationDate: { gte: startParts.year } },
+            ],
+          })
+        } else if (endParts) {
+          conditions.push({
+            OR: [
+              {
+                publicationDate: {
+                  lte: `${endParts.year}-${endParts.month || '12'}-${endParts.day || '31'}`,
+                },
+              },
+              {
+                publicationDate: {
+                  lte: `${endParts.year}-${endParts.month || '12'}`,
+                },
+              },
+              { publicationDate: { lte: endParts.year } },
+            ],
+          })
+        }
+
+        if (conditions.length) {
           where = {
             ...where,
-            publicationDate: {
-              lte: new Date(endDate).toISOString(),
-            },
+            AND: conditions,
           }
         }
       }
