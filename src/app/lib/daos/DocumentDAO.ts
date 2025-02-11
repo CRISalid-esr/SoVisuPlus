@@ -299,6 +299,27 @@ export class DocumentDAO extends AbstractDAO {
           },
         }
       }
+
+      if (filter.id === 'date') {
+        const startDate = filter.value[0]
+        const endDate = filter.value[1]
+        if (startDate) {
+          where = {
+            ...where,
+            publicationDate: {
+              gte: new Date(startDate).toISOString(),
+            },
+          }
+        }
+        if (endDate) {
+          where = {
+            ...where,
+            publicationDate: {
+              lte: new Date(endDate).toISOString(),
+            },
+          }
+        }
+      }
     })
 
     if (contributorUid) {
