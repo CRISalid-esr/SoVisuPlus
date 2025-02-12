@@ -313,7 +313,7 @@ export class DocumentDAO extends AbstractDAO {
               OR: [
                 { publicationDate: { gte: startDate } }, // Full date (YYYY-MM-DD) match
                 { publicationDate: { gte: startDate.slice(0, 7) } }, // Year-Month (YYYY-MM) match
-                //{ publicationDate: { gte: startDate.slice(0, 4) } }, // Year (YYYY) match
+                { publicationDate: { gte: startDate.slice(0, 4) } }, // Year (YYYY) match
               ],
             })
           }
