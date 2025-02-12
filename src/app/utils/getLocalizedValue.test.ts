@@ -1,39 +1,11 @@
-import { getLocalizedValue } from '@/utils/getLocalizedValue' // Adjust path if needed
+import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import { Literal } from '@/types/Literal'
 
 describe('getLocalizedValue', () => {
-  const data: Literal[] = [
-    {
-      language: 'en',
-      value: 'Hello',
-      normalize: function (): string {
-        throw new Error('Function not implemented.')
-      },
-      toJson: function (): { language: string; value: string } {
-        throw new Error('Function not implemented.')
-      },
-    },
-    {
-      language: 'fr',
-      value: 'Bonjour',
-      normalize: function (): string {
-        throw new Error('Function not implemented.')
-      },
-      toJson: function (): { language: string; value: string } {
-        throw new Error('Function not implemented.')
-      },
-    },
-    {
-      language: 'es',
-      value: 'Hola',
-      normalize: function (): string {
-        throw new Error('Function not implemented.')
-      },
-      toJson: function (): { language: string; value: string } {
-        throw new Error('Function not implemented.')
-      },
-    },
-  ]
+  const fr = new Literal('Bonjour', 'fr')
+  const en = new Literal('Hello', 'en')
+  const es = new Literal('Hola', 'es')
+  const data: Literal[] = [fr, en, es]
 
   it('returns the value in the preferred language if available', () => {
     expect(getLocalizedValue(data, 'fr', ['es', 'en'], 'Default')).toBe(
