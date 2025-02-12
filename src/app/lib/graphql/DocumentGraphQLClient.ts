@@ -5,10 +5,18 @@ import { GraphPersonResponse, PersonGraphQLClient } from './PersonGraphQLClient'
 import { Literal } from '@/types/Literal'
 import { Contribution } from '@/types/Contribution'
 import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
+import { getBibliographicPlatformByNameIgnoreCase } from '@/types/BibliographicPlatform'
+import { DocumentRecord } from '@/types/DocumentRecord'
 
 interface GraphContributionResponse {
   roles: string[]
   contributor: Array<GraphPersonResponse>
+}
+
+interface GraphDocumentRecordResponse {
+  uid: string
+  harvester: string
+  titles: { language: string; value: string }[]
 }
 
 interface GraphDocumentResponse {
@@ -19,6 +27,7 @@ interface GraphDocumentResponse {
   titles: { language: string; value: string }[]
   abstracts: { language: string; value: string }[]
   has_contributions: Array<GraphContributionResponse>
+  recorded_by: Array<GraphDocumentRecordResponse> // Add record information
 }
 
 export interface GraphDocumentsResponse {
@@ -67,7 +76,9 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
       publication_date,
       publication_date_start,
       publication_date_end,
+      recorded_by,
     } = documentData
+
     return new Document(
       uid,
       publication_date,
@@ -75,16 +86,45 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
       publication_date_end ? new Date(publication_date_end) : null,
       titles.map(Literal.fromObject),
       abstracts.map(Literal.fromObject),
-      documentData.has_contributions.map(
-        (contributionData: GraphContributionResponse) => {
+      documentData.has_contributions.reduce<Contribution[]>(
+        (acc, contributionData: GraphContributionResponse) => {
           const [contributor] = contributionData.contributor
           const person = new PersonGraphQLClient().hydrate(contributor)
           const { roles } = contributionData
-          const locRelators = roles
-            .map(LocRelatorHelper.fromURI)
-            .filter(Boolean) as LocRelator[]
-          return new Contribution(person, locRelators)
+          const locRelators = roles.reduce<LocRelator[]>((roleAcc, role) => {
+            const relator = LocRelatorHelper.fromURI(role)
+            if (relator) {
+              roleAcc.push(relator)
+            }
+            return roleAcc
+          }, [])
+
+          acc.push(new Contribution(person, locRelators))
+          return acc
         },
+        [],
+      ),
+      recorded_by.reduce<DocumentRecord[]>(
+        (acc, recordData: GraphDocumentRecordResponse) => {
+          const platform = getBibliographicPlatformByNameIgnoreCase(
+            recordData.harvester,
+          )
+          if (!platform) {
+            console.error(`Unknown platform: ${recordData.harvester}`)
+            return acc
+          }
+
+          acc.push(
+            new DocumentRecord(
+              recordData.uid,
+              platform,
+              recordData.titles.map(Literal.fromObject),
+            ),
+          )
+
+          return acc
+        },
+        [],
       ),
     )
   }

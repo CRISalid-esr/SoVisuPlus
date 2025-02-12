@@ -42,7 +42,7 @@ describe('AMQPConnection', () => {
     )
 
     expect(mockConnection.createChannel).toHaveBeenCalled()
-    expect(mockChannel.prefetch).toHaveBeenCalledWith(1)
+    expect(mockChannel.prefetch).toHaveBeenCalledWith(10)
     expect(mockChannel.assertExchange).toHaveBeenCalledWith(
       'amqp.topic',
       'topic',

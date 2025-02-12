@@ -41,6 +41,18 @@ const mockState = {
           },
         ],
         date: '2024-01-01',
+        records: [
+          {
+            uid: 'rec1',
+            platform: 'Platform A',
+            titles: [{ value: 'Record Title 1', lang: 'en' }],
+          },
+          {
+            uid: 'rec2',
+            platform: 'Platform B',
+            titles: [{ value: 'Record Title 2', lang: 'fr' }],
+          },
+        ],
       },
     ],
     totalItems: 1,

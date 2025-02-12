@@ -44,6 +44,24 @@ model Document {
   title_locale_0       String?
   title_locale_1       String?
   title_locale_2       String?
+  records              DocumentRecord[]
+}
+
+model DocumentRecord {
+  id         Int                   @id @default(autoincrement())
+  uid        String                @unique
+  platform   BibliographicPlatform
+  titles     Json
+  documentId Int
+  document   Document              @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+enum BibliographicPlatform {
+  hal
+  scanr
+  idref
+  openalex
+  scopus
 }
 
 model DocumentTitle {
