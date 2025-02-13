@@ -299,6 +299,38 @@ export class DocumentDAO extends AbstractDAO {
           },
         }
       }
+      columnFilters.forEach((filter) => {
+        if (filter.id === 'date' && Array.isArray(filter.value)) {
+          const startDate = filter.value[0] || null // Full ISO string date
+          const endDate = filter.value[1] || null // Full ISO string date
+
+          const dateConditions: Prisma.DocumentWhereInput[] = []
+
+          if (startDate && endDate) {
+            dateConditions.push({
+              OR: [
+                { publicationDateEnd: { gte: startDate } }, // Document ends after or on startDate
+                { publicationDateStart: { lte: endDate } }, // Document starts before or on endDate
+              ],
+            })
+          } else if (startDate) {
+            dateConditions.push({
+              publicationDateEnd: { gte: startDate }, // Only filter by start date
+            })
+          } else if (endDate) {
+            dateConditions.push({
+              publicationDateStart: { lte: endDate }, // Only filter by end date
+            })
+          }
+
+          if (dateConditions.length > 0) {
+            where = {
+              ...where,
+              AND: dateConditions,
+            }
+          }
+        }
+      })
     })
 
     if (contributorUid) {
