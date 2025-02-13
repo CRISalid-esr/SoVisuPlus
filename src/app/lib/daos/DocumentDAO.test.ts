@@ -1,5 +1,6 @@
 import {
   Document as DbDocument,
+  DocumentType,
   Person as DbPerson,
   Prisma,
   PrismaClient,
@@ -50,6 +51,7 @@ describe('DocumentDAO', () => {
 
   const document: Document = new Document(
     'doc-123',
+    DocumentType.Document,
     '2022',
     new Date('2022-01-01T00:00:00.000Z'),
     new Date('2022-12-31T23:59:59.000Z'),
@@ -75,6 +77,7 @@ describe('DocumentDAO', () => {
     const mockDbDocument = {
       id: 1,
       uid: 'doc-123',
+      documentType: DocumentType.Document,
       titles: [],
       abstracts: [],
       title_locale_0: '',
@@ -105,6 +108,7 @@ describe('DocumentDAO', () => {
     expect(mockPrisma.document.create).toHaveBeenCalledWith({
       data: {
         uid: 'doc-123',
+        documentType: 'Document',
         title_locale_0: 'Sample Document Title',
         title_locale_1: 'Sample Document Title',
         title_locale_2: '',
@@ -143,6 +147,7 @@ describe('DocumentDAO', () => {
     const mockDbDocument = {
       id: 1,
       uid: 'doc-123',
+      documentType: DocumentType.Document,
       titles: [],
       abstracts: [],
       title_locale_0: '',
