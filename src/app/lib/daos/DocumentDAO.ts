@@ -308,7 +308,7 @@ export class DocumentDAO extends AbstractDAO {
 
           if (startDate && endDate) {
             dateConditions.push({
-              AND: [
+              OR: [
                 { publicationDateEnd: { gte: startDate } }, // Document ends after or on startDate
                 { publicationDateStart: { lte: endDate } }, // Document starts before or on endDate
               ],
