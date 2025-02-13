@@ -1,11 +1,19 @@
 import {
   Person as DbPerson,
   PersonIdentifierType as DbPersonIdentifierType,
+  Prisma,
 } from '@prisma/client'
 import { Person } from '@/types/Person'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+
+interface FetchPeopleFromDbDBParams {
+  searchTerm: string
+  page: number
+  includeExternal: boolean
+  itemsPerPage: number
+}
 
 /** PersonDAO: Handles operations related to Person and PersonIdentifiers */
 export class PersonDAO extends AbstractDAO {
@@ -116,6 +124,63 @@ export class PersonDAO extends AbstractDAO {
           `Failed to upsert identifiers: ${(error as Error).message}`,
         )
       }
+    }
+  }
+
+  public fetchPeopleFromDb = async ({
+    searchTerm,
+    page,
+    includeExternal,
+    itemsPerPage,
+  }: FetchPeopleFromDbDBParams): Promise<{
+    people: DbPerson[]
+    total: number 
+    hasMore: boolean
+  }> => {
+    const searchTerms = searchTerm.trim().split(/\s+/)
+    const searchCriteria = searchTerms.map((term) => ({
+      OR: [
+        {
+          firstName: {
+            contains: term,
+            mode: Prisma.QueryMode.insensitive,
+          },
+        },
+        {
+          lastName: {
+            contains: term,
+            mode: Prisma.QueryMode.insensitive,
+          },
+        },
+      ],
+    }))
+
+    const whereClause: Prisma.PersonWhereInput = {
+      AND: searchCriteria,
+    }
+
+    if (!includeExternal) {
+      whereClause.external = false
+    }
+
+    const people = await this.prismaClient.person.findMany({
+      where: whereClause,
+      skip: (page - 1) * itemsPerPage,
+      take: itemsPerPage,
+      orderBy: {
+        lastName: 'asc',
+      },
+    })
+
+    const peopleCount = await this.prismaClient.person.count({
+      where: {
+        AND: searchCriteria,
+      },
+    })
+    return {
+      people,
+      total: peopleCount,
+      hasMore: peopleCount > page * itemsPerPage,
     }
   }
 }
