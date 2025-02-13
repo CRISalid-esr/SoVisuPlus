@@ -301,30 +301,25 @@ export class DocumentDAO extends AbstractDAO {
       }
       columnFilters.forEach((filter) => {
         if (filter.id === 'date' && Array.isArray(filter.value)) {
-          const startDate = filter.value[0]
-            ? filter.value[0].split('T')[0]
-            : null // Extract YYYY-MM-DD
-          const endDate = filter.value[1] ? filter.value[1].split('T')[0] : null // Extract YYYY-MM-DD
+          const startDate = filter.value[0] || null // Full ISO string date
+          const endDate = filter.value[1] || null // Full ISO string date
 
           let dateConditions: Prisma.DocumentWhereInput[] = []
 
-          if (startDate) {
+          if (startDate && endDate) {
             dateConditions.push({
-              OR: [
-                { publicationDate: { gte: startDate } }, // Full date (YYYY-MM-DD) match
-                { publicationDate: { gte: startDate.slice(0, 7) } }, // Year-Month (YYYY-MM) match
-                { publicationDate: { gte: startDate.slice(0, 4) } }, // Year (YYYY) match
+              AND: [
+                { publicationDateEnd: { gte: startDate } }, // Document ends after or on startDate
+                { publicationDateStart: { lte: endDate } }, // Document starts before or on endDate
               ],
             })
-          }
-
-          if (endDate) {
+          } else if (startDate) {
             dateConditions.push({
-              OR: [
-                { publicationDate: { lte: endDate } }, // Full date (YYYY-MM-DD) match
-                { publicationDate: { lte: endDate.slice(0, 7) } }, // Year-Month (YYYY-MM) match
-                { publicationDate: { lte: endDate.slice(0, 4) } }, // Year (YYYY) match
-              ],
+              publicationDateEnd: { gte: startDate }, // Only filter by start date
+            })
+          } else if (endDate) {
+            dateConditions.push({
+              publicationDateStart: { lte: endDate }, // Only filter by end date
             })
           }
 
