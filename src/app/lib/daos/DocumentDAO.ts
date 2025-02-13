@@ -304,7 +304,7 @@ export class DocumentDAO extends AbstractDAO {
           const startDate = filter.value[0] || null // Full ISO string date
           const endDate = filter.value[1] || null // Full ISO string date
 
-          let dateConditions: Prisma.DocumentWhereInput[] = []
+          const dateConditions: Prisma.DocumentWhereInput[] = []
 
           if (startDate && endDate) {
             dateConditions.push({

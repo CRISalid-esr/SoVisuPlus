@@ -30,7 +30,6 @@ import {
   BibliographicPlatform,
   BibliographicPlatformMetadata,
 } from '@/types/BibliographicPlatform'
-import { DatePicker } from '@mui/x-date-pickers'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 
@@ -50,7 +49,7 @@ export default function DocumentsPage() {
   const [globalFilter, setGlobalFilter] = useState('')
   const [sorting, setSorting] = useState<MRT_SortingState>([])
   const { currentPerspective } = useStore((state) => state.user)
- 
+
   const lang = Lingui.i18n.locale as 'fr' | 'en'
 
   const theme = useTheme()
@@ -245,14 +244,60 @@ export default function DocumentsPage() {
     documents = [],
     totalItems,
   } = useStore((state) => state.document)
-
   useEffect(() => {
+    const adjustedFilters = columnFilters.map((filter) => {
+      if (filter.id === 'date' && Array.isArray(filter.value)) {
+        const [startDate, endDate] = filter.value
+
+        // Function to safely convert startDate to 00:00:00 and endDate to 23:59:59.999
+        const toUTCISOString = (dateStr: string | null, isEndDate = false) => {
+          if (!dateStr) return null // Return null if no date
+
+          const parsedDate = dayjs(dateStr)
+          if (!parsedDate.isValid()) return null // Return null if invalid date
+
+          // If it's an end date, set it to 23:59:59.999, otherwise 00:00:00
+          const utcDate = isEndDate
+            ? new Date(
+                Date.UTC(
+                  parsedDate.year(),
+                  parsedDate.month(),
+                  parsedDate.date(),
+                  23,
+                  59,
+                  59,
+                  999,
+                ),
+              ) // Last second of the day
+            : new Date(
+                Date.UTC(
+                  parsedDate.year(),
+                  parsedDate.month(),
+                  parsedDate.date(),
+                  0,
+                  0,
+                  0,
+                  0,
+                ),
+              ) // Start of the day
+
+          return utcDate.toISOString()
+        }
+
+        return {
+          ...filter,
+          value: [toUTCISOString(startDate), toUTCISOString(endDate, true)], // Pass true for end date
+        }
+      }
+      return filter
+    })
+
     fetchDocuments({
       page: pagination.pageIndex + 1,
       pageSize: pagination.pageSize,
       searchTerm: globalFilter,
       searchLang: lang,
-      columnFilters: JSON.stringify(columnFilters),
+      columnFilters: JSON.stringify(adjustedFilters), // Use adjusted date filter
       sorting: JSON.stringify(sorting),
       contributorUid: currentPerspective?.uid || '',
     }).catch((error) => {
