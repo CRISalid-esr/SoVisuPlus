@@ -7,6 +7,7 @@ import { i18n } from '@lingui/core'
 import { messages as enMessages } from '@/locales/en/messages'
 import { messages as frMessages } from '@/locales/fr/messages'
 import useStore from '@/stores/global_store'
+import DateProvider from '@/components/DateProvider'
 
 // Mock Zustand store
 jest.mock('@/stores/global_store', () => ({
@@ -82,7 +83,9 @@ const renderComponent = () =>
   render(
     <ThemeProvider theme={theme}>
       <I18nProvider i18n={i18n}>
-        <DocumentsPage />
+        <DateProvider>
+          <DocumentsPage />
+        </DateProvider>
       </I18nProvider>
     </ThemeProvider>,
   )
