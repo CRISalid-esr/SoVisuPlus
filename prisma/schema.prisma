@@ -35,6 +35,7 @@ model Person {
 model Document {
   id                   Int                @id @default(autoincrement())
   uid                  String             @unique
+  documentType         DocumentType       @default(Document)
   publicationDate      String?
   publicationDateStart DateTime?
   publicationDateEnd   DateTime?
@@ -45,6 +46,17 @@ model Document {
   title_locale_1       String?
   title_locale_2       String?
   records              DocumentRecord[]
+}
+
+enum DocumentType {
+  Document
+  ScholarlyPublication
+  JournalArticle
+  Book
+  Monograph
+  BookChapter
+  ConferenceArticle
+  Proceedings
 }
 
 model DocumentRecord {

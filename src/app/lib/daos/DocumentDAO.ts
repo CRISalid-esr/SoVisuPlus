@@ -38,6 +38,7 @@ export class DocumentDAO extends AbstractDAO {
         dbDocument = (await this.prismaClient.document.create({
           data: {
             uid: uid,
+            documentType: document.documentType,
             title_locale_0: document.getTitleInLocale(0),
             title_locale_1: document.getTitleInLocale(1),
             title_locale_2: document.getTitleInLocale(2),
@@ -58,6 +59,7 @@ export class DocumentDAO extends AbstractDAO {
         dbDocument = (await this.prismaClient.document.update({
           where: { uid: uid },
           data: {
+            documentType: document.documentType,
             title_locale_0: document.getTitleInLocale(0),
             title_locale_1: document.getTitleInLocale(1),
             title_locale_2: document.getTitleInLocale(2),

@@ -11,6 +11,7 @@ import {
 } from '@/types/BibliographicPlatform'
 import { Literal } from '@/types/Literal'
 import { Person } from '@/types/Person'
+import { DocumentType } from '@prisma/client'
 
 jest.mock('./AbstractGraphQLClient')
 jest.mock('./PersonGraphQLClient')
@@ -27,7 +28,7 @@ describe('DocumentGraphQLClient', () => {
   })
 
   test('should return null if no document matches the UID', async () => {
-    mockQuery.mockResolvedValue({ textualDocuments: [] })
+    mockQuery.mockResolvedValue({ documents: [] })
 
     const document = await client.getDocumentByUid('doc-123')
 
@@ -41,9 +42,10 @@ describe('DocumentGraphQLClient', () => {
 
   test('should return a hydrated document object if a match is found', async () => {
     const mockResponse = {
-      textualDocuments: [
+      documents: [
         {
           uid: 'doc-456',
+          document_type: 'ConferenceArticle',
           publication_date: '2022-01-01',
           publication_date_start: '2022-01-01',
           publication_date_end: '2022-12-31',
@@ -85,6 +87,7 @@ describe('DocumentGraphQLClient', () => {
 
     const expectedDocument = new Document(
       'doc-456',
+      DocumentType.ConferenceArticle,
       '2022-01-01',
       new Date('2022-01-01'),
       new Date('2022-12-31'),
@@ -123,9 +126,10 @@ describe('DocumentGraphQLClient', () => {
 
   test('should filter out contributions with no contributors', async () => {
     const mockResponse = {
-      textualDocuments: [
+      documents: [
         {
           uid: 'doc-789',
+          document_type: 'Monograph',
           publication_date: null,
           publication_date_start: null,
           publication_date_end: null,

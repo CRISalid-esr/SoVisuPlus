@@ -1,6 +1,7 @@
-query TextualDocuments($where: TextualDocumentWhere) {
-  textualDocuments(where: $where) {
+query Documents($where: DocumentWhere) {
+  documents(where: $where) {
     uid
+    document_type
     publication_date
     publication_date_start
     publication_date_end

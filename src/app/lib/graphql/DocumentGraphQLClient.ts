@@ -21,6 +21,7 @@ interface GraphDocumentRecordResponse {
 
 interface GraphDocumentResponse {
   uid: string
+  document_type: string
   publication_date: string | null
   publication_date_start: string | null
   publication_date_end: string | null
@@ -31,7 +32,7 @@ interface GraphDocumentResponse {
 }
 
 export interface GraphDocumentsResponse {
-  textualDocuments: Array<GraphDocumentResponse>
+  documents: Array<GraphDocumentResponse>
 }
 
 export class DocumentGraphQLClient extends AbstractGraphQLClient {
@@ -52,7 +53,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
     const response: GraphDocumentsResponse =
       await this.query<GraphDocumentsResponse>(documentQuery, variables)
 
-    const [documentData] = response.textualDocuments
+    const [documentData] = response.documents
 
     if (!documentData) {
       return null
@@ -71,6 +72,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
   private hydrate(documentData: GraphDocumentResponse): Document {
     const {
       uid,
+      document_type,
       titles,
       abstracts,
       publication_date,
@@ -81,6 +83,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
 
     return new Document(
       uid,
+      Document.documentTypeFromString(document_type),
       publication_date,
       publication_date_start ? new Date(publication_date_start) : null,
       publication_date_end ? new Date(publication_date_end) : null,
