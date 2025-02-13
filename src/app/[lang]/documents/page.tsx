@@ -50,10 +50,7 @@ export default function DocumentsPage() {
   const [globalFilter, setGlobalFilter] = useState('')
   const [sorting, setSorting] = useState<MRT_SortingState>([])
   const { currentPerspective } = useStore((state) => state.user)
-  const [dateFilter, setDateFilter] = useState<[string | null, string | null]>([
-    null,
-    null,
-  ])
+ 
   const lang = Lingui.i18n.locale as 'fr' | 'en'
 
   const theme = useTheme()
@@ -183,57 +180,7 @@ export default function DocumentsPage() {
         Cell({ row }) {
           return row.original.publicationDate
         },
-        Filter: ({ column }) => {
-          return (
-            <>
-              <DatePicker
-                label='Start Date'
-                value={dateFilter[0] ? dayjs.utc(dateFilter[0]) : null}
-                onChange={(newValue) => {
-                  if (!newValue) {
-                    setDateFilter([null, dateFilter[1]])
-                    column.setFilterValue([null, dateFilter[1]])
-                    return
-                  }
-
-                  // Manually create a UTC Date object
-                  const utcDate = new Date(
-                    Date.UTC(
-                      newValue.year(),
-                      newValue.month(),
-                      newValue.date(),
-                    ),
-                  )
-
-                  setDateFilter([utcDate.toISOString(), dateFilter[1]])
-                  column.setFilterValue([utcDate.toISOString(), dateFilter[1]])
-                }}
-              />
-              <DatePicker
-                label='End Date'
-                value={dateFilter[1] ? dayjs.utc(dateFilter[1]) : null}
-                onChange={(newValue) => {
-                  if (!newValue) {
-                    setDateFilter([dateFilter[0], null])
-                    column.setFilterValue([dateFilter[0], null])
-                    return
-                  }
-
-                  const utcDate = new Date(
-                    Date.UTC(
-                      newValue.year(),
-                      newValue.month(),
-                      newValue.date(),
-                    ),
-                  )
-
-                  setDateFilter([dateFilter[0], utcDate.toISOString()])
-                  column.setFilterValue([dateFilter[0], utcDate.toISOString()])
-                }}
-              />
-            </>
-          )
-        },
+        filterVariant: 'date-range',
       },
       {
         accessorKey: 'publishedIn',
@@ -300,7 +247,6 @@ export default function DocumentsPage() {
   } = useStore((state) => state.document)
 
   useEffect(() => {
-        console.log('columnFilters', columnFilters)
     fetchDocuments({
       page: pagination.pageIndex + 1,
       pageSize: pagination.pageSize,
@@ -314,7 +260,6 @@ export default function DocumentsPage() {
     })
   }, [
     columnFilters,
-    dateFilter,
     globalFilter,
     pagination.pageIndex,
     pagination.pageSize,
