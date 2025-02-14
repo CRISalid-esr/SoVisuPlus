@@ -14,7 +14,6 @@ export const GET = async (req: NextRequest) => {
     const columnFilters = JSON.parse(urlParams.get('columnFilters') || '[]')
     const sorting = JSON.parse(urlParams.get('sorting') || '[]')
     const contributorUid = urlParams.get('contributorUid') || ''
-
     const documentService = new DocumentService()
     const { documents, totalItems } = await documentService.fetchDocuments({
       searchTerm,

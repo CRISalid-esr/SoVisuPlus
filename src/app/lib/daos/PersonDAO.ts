@@ -1,11 +1,19 @@
 import {
   Person as DbPerson,
   PersonIdentifierType as DbPersonIdentifierType,
+  Prisma,
 } from '@prisma/client'
 import { Person } from '@/types/Person'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+
+interface FetchPeopleFromDbDBParams {
+  searchTerm: string
+  page: number
+  includeExternal: boolean
+  itemsPerPage: number
+}
 
 /** PersonDAO: Handles operations related to Person and PersonIdentifiers */
 export class PersonDAO extends AbstractDAO {
@@ -116,6 +124,75 @@ export class PersonDAO extends AbstractDAO {
           `Failed to upsert identifiers: ${(error as Error).message}`,
         )
       }
+    }
+  }
+
+  public fetchPeopleFromDb = async ({
+    searchTerm,
+    page,
+    includeExternal,
+    itemsPerPage,
+  }: FetchPeopleFromDbDBParams): Promise<{
+    people: Person[]
+    total: number
+    hasMore: boolean
+  }> => {
+    const perspectiveRolesFilter =
+      process.env.PERSPECTIVES_ROLES_FILTER?.split(',') || []
+    const searchTerms = searchTerm.trim().split(/\s+/)
+    const searchCriteria = searchTerms.map((term) => ({
+      OR: [
+        { firstName: { contains: term, mode: Prisma.QueryMode.insensitive } },
+        { lastName: { contains: term, mode: Prisma.QueryMode.insensitive } },
+      ],
+    }))
+
+    let whereClause: Prisma.PersonWhereInput = {
+      AND: searchCriteria,
+    }
+
+    if (perspectiveRolesFilter.length > 0) {
+      whereClause = {
+        ...whereClause,
+        contributions: {
+          some: {
+            roles: {
+              hasSome: perspectiveRolesFilter,
+            },
+          },
+        },
+      }
+    }
+
+    if (!includeExternal) {
+      whereClause.external = false
+    }
+
+    const data = await this.prismaClient.person.findMany({
+      where: whereClause,
+      skip: (page - 1) * itemsPerPage,
+      take: itemsPerPage,
+      include: {
+        contributions: {
+          select: {
+            roles: true,
+          },
+        },
+      },
+      orderBy: {
+        lastName: 'asc',
+      },
+    })
+
+    const people = data.map((person) => Person.fromDbPerson(person))
+
+    // Fix: Ensure total count query uses the same whereClause
+    const total = await this.prismaClient.person.count({ where: whereClause })
+
+    return {
+      people,
+      total,
+      hasMore: total > page * itemsPerPage,
     }
   }
 }

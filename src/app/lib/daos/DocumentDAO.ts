@@ -209,6 +209,9 @@ export class DocumentDAO extends AbstractDAO {
   }> {
     const skip = (page - 1) * pageSize
 
+    const publicationListRolesFilter =
+      process.env.PUBLICATION_LIST_ROLES_FILTER?.split(',') || []
+
     // find the index of the search lang in the array of process.env.SUPPORTED_LOCALES
     const searchLangIndex =
       (process.env.SUPPORTED_LOCALES || 'fr,en')
@@ -217,6 +220,18 @@ export class DocumentDAO extends AbstractDAO {
     const sortingTitleFieldName = `title_locale_${searchLangIndex}`
 
     let where: Prisma.DocumentWhereInput = {}
+
+    if (publicationListRolesFilter.length > 0) {
+      where = {
+        contributions: {
+          some: {
+            roles: {
+              hasSome: publicationListRolesFilter,
+            },
+          },
+        },
+      }
+    }
 
     if (searchTerm) {
       where = {

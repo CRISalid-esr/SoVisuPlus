@@ -1,6 +1,5 @@
-import prisma from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
+import { PersonService } from '@/lib/services/PersonService'
 
 export const GET = async (req: NextRequest) => {
   const urlParams = req.nextUrl.searchParams
@@ -9,51 +8,20 @@ export const GET = async (req: NextRequest) => {
   const includeExternal = urlParams.get('includeExternal') === 'true'
   const itemsPerPage = 10
 
+  const personService = new PersonService()
+
   try {
-    const searchTerms = searchTerm.trim().split(/\s+/)
-    const searchCriteria = searchTerms.map((term) => ({
-      OR: [
-        {
-          firstName: {
-            contains: term,
-            mode: Prisma.QueryMode.insensitive,
-          },
-        },
-        {
-          lastName: {
-            contains: term,
-            mode: Prisma.QueryMode.insensitive,
-          },
-        },
-      ],
-    }))
-
-    const whereClause: Prisma.PersonWhereInput = {
-      AND: searchCriteria,
-    }
-
-    if (!includeExternal) {
-      whereClause.external = false
-    }
-
-    const people = await prisma.person.findMany({
-      where: whereClause,
-      skip: (page - 1) * itemsPerPage,
-      take: itemsPerPage,
-      orderBy: {
-        lastName: 'asc',
-      },
+    const { people, total, hasMore } = await personService.fetchPeople({
+      searchTerm,
+      page,
+      includeExternal,
+      itemsPerPage,
     })
 
-    const peopleCount = await prisma.person.count({
-      where: {
-        AND: searchCriteria,
-      },
-    })
     return NextResponse.json({
       people,
-      total: peopleCount,
-      hasMore: peopleCount > page * itemsPerPage,
+      total,
+      hasMore,
     })
   } catch (error) {
     console.error('Error fetching people:', error)
