@@ -62,6 +62,7 @@ enum DocumentType {
 model DocumentRecord {
   id         Int                   @id @default(autoincrement())
   uid        String                @unique
+  url        String?
   platform   BibliographicPlatform
   titles     Json
   documentId Int

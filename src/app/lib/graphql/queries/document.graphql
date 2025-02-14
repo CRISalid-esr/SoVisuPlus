@@ -46,6 +46,7 @@ query Documents($where: DocumentWhere) {
     }
     recorded_by {
       uid
+      url
       harvester
       titles {
         language

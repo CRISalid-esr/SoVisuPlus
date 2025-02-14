@@ -15,6 +15,7 @@ interface GraphContributionResponse {
 
 interface GraphDocumentRecordResponse {
   uid: string
+  url: string | null
   harvester: string
   titles: { language: string; value: string }[]
 }
@@ -122,6 +123,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
               recordData.uid,
               platform,
               recordData.titles.map(Literal.fromObject),
+              recordData.url,
             ),
           )
 

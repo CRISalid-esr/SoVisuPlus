@@ -60,6 +60,7 @@ describe('DocumentGraphQLClient', () => {
           recorded_by: [
             {
               uid: 'record-001',
+              url: 'http://platform.com/record/record-001',
               harvester: 'idref',
               titles: [{ language: 'en', value: 'Record Title' }],
             },
@@ -112,6 +113,7 @@ describe('DocumentGraphQLClient', () => {
           getBibliographicPlatformByNameIgnoreCase('idref') ??
             ({ name: 'idref' } as unknown as BibliographicPlatform),
           [Literal.fromObject({ language: 'en', value: 'Record Title' })],
+          'http://platform.com/record/record-001',
         ),
       ],
     )

@@ -168,11 +168,13 @@ export class DocumentDAO extends AbstractDAO {
                 set: getBibliographicPlatformDbValue(record.platform),
               },
               titles: record.titles.map((title) => title.toJson()),
+              url: record.url,
             },
             create: {
               uid: record.uid,
               platform: getBibliographicPlatformDbValue(record.platform),
               titles: record.titles.map((title) => title.toJson()),
+              url: record.url,
               documentId: dbDocument.id, // Link to document
             },
           })
