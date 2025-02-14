@@ -10,7 +10,7 @@ import * as Lingui from '@lingui/core'
 import { t, Trans } from '@lingui/macro'
 import ArticleIcon from '@mui/icons-material/Article'
 import SyncIcon from '@mui/icons-material/Sync'
-import { Box, Button, Chip, Typography } from '@mui/material'
+import { Box, Button, Chip, IconButton, Typography } from '@mui/material'
 import { useTheme } from '@mui/system'
 import {
   MaterialReactTable,
@@ -216,16 +216,32 @@ export default function DocumentsPage() {
                 if (record) {
                   const metadata =
                     BibliographicPlatformMetadata[record.platform]
-                  acc.push(
+                  const imageElement = (
                     <Image
-                      key={record.platform}
                       src={metadata?.icon || '/icons/default.png'}
                       alt={metadata?.name || 'Unknown Source'}
                       width={24}
                       height={24}
                       priority
                       title={metadata?.name || 'Unknown Source'} // Tooltip on hover
-                    />,
+                    />
+                  )
+
+                  acc.push(
+                    record.url ? (
+                      <IconButton
+                        key={record.platform}
+                        component='a'
+                        href={record.url}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        sx={{ padding: 0 }}
+                      >
+                        {imageElement}
+                      </IconButton>
+                    ) : (
+                      <Box key={record.platform}>{imageElement}</Box>
+                    ),
                   )
                 }
                 return acc
