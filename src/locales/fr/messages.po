@@ -107,7 +107,7 @@ msgstr "Dépôt HAL incomplet"
 msgid "documents_page_keywords_to_validate"
 msgstr "Mots-clés à valider"
 
-#: src/app/[lang]/documents/page.tsx:341
+#: src/app/[lang]/documents/page.tsx:357
 msgid "documents_page_main_title"
 msgstr "Publications"
 
@@ -119,7 +119,7 @@ msgstr "paru dans"
 msgid "documents_page_source_column"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/page.tsx:346
+#: src/app/[lang]/documents/page.tsx:362
 msgid "documents_page_synchronize_button"
 msgstr "Synchroniser"
 
