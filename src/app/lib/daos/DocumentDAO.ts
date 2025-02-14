@@ -208,7 +208,7 @@ export class DocumentDAO extends AbstractDAO {
     const skip = (page - 1) * pageSize
 
     const publicationListRolesFilter =
-      process.env.PUBLICATION_LIST_ROLES_FILTER.split(',') || []
+      process.env.PUBLICATION_LIST_ROLES_FILTER?.split(',') || []
 
     // find the index of the search lang in the array of process.env.SUPPORTED_LOCALES
     const searchLangIndex =
