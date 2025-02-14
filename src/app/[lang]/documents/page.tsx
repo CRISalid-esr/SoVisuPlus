@@ -47,7 +47,12 @@ export default function DocumentsPage() {
   })
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
-  const [sorting, setSorting] = useState<MRT_SortingState>([])
+  const [sorting, setSorting] = useState<MRT_SortingState>([
+    {
+      id: 'date',
+      desc: true,
+    },
+  ])
   const { currentPerspective } = useStore((state) => state.user)
 
   const lang = Lingui.i18n.locale as 'fr' | 'en'
