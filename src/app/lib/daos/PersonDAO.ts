@@ -134,7 +134,7 @@ export class PersonDAO extends AbstractDAO {
     itemsPerPage,
   }: FetchPeopleFromDbDBParams): Promise<{
     people: DbPerson[]
-    total: number 
+    total: number
     hasMore: boolean
   }> => {
     const searchTerms = searchTerm.trim().split(/\s+/)
@@ -172,15 +172,15 @@ export class PersonDAO extends AbstractDAO {
       },
     })
 
-    const peopleCount = await this.prismaClient.person.count({
+    const total = await this.prismaClient.person.count({
       where: {
         AND: searchCriteria,
       },
     })
     return {
       people,
-      total: peopleCount,
-      hasMore: peopleCount > page * itemsPerPage,
+      total,
+      hasMore: total > page * itemsPerPage,
     }
   }
 }

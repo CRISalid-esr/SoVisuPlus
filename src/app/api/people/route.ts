@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 import { PersonService } from '@/lib/services/PersonService'
 
@@ -12,11 +11,7 @@ export const GET = async (req: NextRequest) => {
   const personService = new PersonService()
 
   try {
-    const {
-      people,
-      total: peopleCount,
-      hasMore,
-    } = await personService.fetchPeople({
+    const { people, total, hasMore } = await personService.fetchPeople({
       searchTerm,
       page,
       includeExternal,
@@ -25,7 +20,7 @@ export const GET = async (req: NextRequest) => {
 
     return NextResponse.json({
       people,
-      total: peopleCount,
+      total,
       hasMore,
     })
   } catch (error) {
