@@ -91,6 +91,7 @@ export default function DocumentsPage() {
         },
       },
       {
+        size: 200,
         filterColumn: 'titles',
         accessorKey: `titles`,
         accessorFn: (row) => {
@@ -179,6 +180,7 @@ export default function DocumentsPage() {
         },
       },
       {
+        size: 100,
         accessorKey: 'date',
         header: 'Publication Date',
         Cell({ row }) {
