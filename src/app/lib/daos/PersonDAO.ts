@@ -137,26 +137,31 @@ export class PersonDAO extends AbstractDAO {
     total: number
     hasMore: boolean
   }> => {
+    const perspectiveRolesFilter =
+      process.env.PERSPECTIVES_ROLES_FILTER?.split(',') || []
     const searchTerms = searchTerm.trim().split(/\s+/)
     const searchCriteria = searchTerms.map((term) => ({
       OR: [
-        {
-          firstName: {
-            contains: term,
-            mode: Prisma.QueryMode.insensitive,
-          },
-        },
-        {
-          lastName: {
-            contains: term,
-            mode: Prisma.QueryMode.insensitive,
-          },
-        },
+        { firstName: { contains: term, mode: Prisma.QueryMode.insensitive } },
+        { lastName: { contains: term, mode: Prisma.QueryMode.insensitive } },
       ],
     }))
 
-    const whereClause: Prisma.PersonWhereInput = {
+    let whereClause: Prisma.PersonWhereInput = {
       AND: searchCriteria,
+    }
+
+    if (perspectiveRolesFilter.length > 0) {
+      whereClause = {
+        ...whereClause,
+        contributions: {
+          some: {
+            roles: {
+              hasSome: perspectiveRolesFilter,
+            },
+          },
+        },
+      }
     }
 
     if (!includeExternal) {
@@ -167,16 +172,21 @@ export class PersonDAO extends AbstractDAO {
       where: whereClause,
       skip: (page - 1) * itemsPerPage,
       take: itemsPerPage,
+      include: {
+        contributions: {
+          select: {
+            roles: true,
+          },
+        },
+      },
       orderBy: {
         lastName: 'asc',
       },
     })
 
-    const total = await this.prismaClient.person.count({
-      where: {
-        AND: searchCriteria,
-      },
-    })
+    // Fix: Ensure total count query uses the same whereClause
+    const total = await this.prismaClient.person.count({ where: whereClause })
+
     return {
       people,
       total,
