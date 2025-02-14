@@ -113,7 +113,12 @@ describe('DocumentsPage Component', () => {
         pageSize: 10,
         searchTerm: '',
         columnFilters: JSON.stringify([]),
-        sorting: JSON.stringify([]),
+        sorting: JSON.stringify([
+          {
+            id: 'date',
+            desc: true,
+          },
+        ]),
         searchLang: 'en',
         contributorUid: '',
       })
