@@ -377,6 +377,7 @@ export default function DocumentsPage() {
         manualFiltering
         manualPagination
         manualSorting
+        enableColumnResizing
         columns={columns}
         rowCount={totalItems}
         data={documents}
