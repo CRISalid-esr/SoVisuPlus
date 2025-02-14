@@ -133,7 +133,7 @@ export class PersonDAO extends AbstractDAO {
     includeExternal,
     itemsPerPage,
   }: FetchPeopleFromDbDBParams): Promise<{
-    people: DbPerson[]
+    people: Person[]
     total: number
     hasMore: boolean
   }> => {
@@ -168,7 +168,7 @@ export class PersonDAO extends AbstractDAO {
       whereClause.external = false
     }
 
-    const people = await this.prismaClient.person.findMany({
+    const data = await this.prismaClient.person.findMany({
       where: whereClause,
       skip: (page - 1) * itemsPerPage,
       take: itemsPerPage,
@@ -183,6 +183,8 @@ export class PersonDAO extends AbstractDAO {
         lastName: 'asc',
       },
     })
+
+    const people = data.map((person) => Person.fromDbPerson(person))
 
     // Fix: Ensure total count query uses the same whereClause
     const total = await this.prismaClient.person.count({ where: whereClause })
