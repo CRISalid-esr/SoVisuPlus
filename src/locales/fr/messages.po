@@ -83,11 +83,11 @@ msgstr "Retour à la page d'accueil"
 msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
-#: src/app/[lang]/documents/page.tsx:64
+#: src/app/[lang]/documents/page.tsx:69
 msgid "documents_page_all_documents_filter"
 msgstr "Toutes mes publications"
 
-#: src/app/[lang]/documents/page.tsx:143
+#: src/app/[lang]/documents/page.tsx:171
 msgid "documents_page_contributors_column"
 msgstr "auteurs"
 
@@ -95,39 +95,39 @@ msgstr "auteurs"
 #~ msgid "documents_page_date_column"
 #~ msgstr "Date"
 
-#: src/app/[lang]/documents/page.tsx:200
+#: src/app/[lang]/documents/page.tsx:228
 msgid "documents_page_halStatus_column"
 msgstr "Statut hal"
 
-#: src/app/[lang]/documents/page.tsx:69
+#: src/app/[lang]/documents/page.tsx:74
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "Dépôt HAL incomplet"
 
-#: src/app/[lang]/documents/page.tsx:75
+#: src/app/[lang]/documents/page.tsx:80
 msgid "documents_page_keywords_to_validate"
 msgstr "Mots-clés à valider"
 
-#: src/app/[lang]/documents/page.tsx:364
+#: src/app/[lang]/documents/page.tsx:392
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:193
+#: src/app/[lang]/documents/page.tsx:221
 msgid "documents_page_publishedIn_column"
 msgstr "paru dans"
 
-#: src/app/[lang]/documents/page.tsx:207
+#: src/app/[lang]/documents/page.tsx:235
 msgid "documents_page_source_column"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/page.tsx:369
+#: src/app/[lang]/documents/page.tsx:397
 msgid "documents_page_synchronize_button"
 msgstr "Synchroniser"
 
-#: src/app/[lang]/documents/page.tsx:100
+#: src/app/[lang]/documents/page.tsx:105
 msgid "documents_page_title_column"
 msgstr "titre"
 
-#: src/app/[lang]/documents/page.tsx:88
+#: src/app/[lang]/documents/page.tsx:93
 msgid "documents_page_type_column"
 msgstr "type"
 
@@ -146,6 +146,14 @@ msgstr "type"
 msgid "hello"
 msgstr "Bonjour"
 
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:880
+msgid "language_{locale}"
+msgstr ""
+
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:873
+msgid "language_{value}"
+msgstr ""
+
 #: src/app/[lang]/myAccount/page.tsx:24
 msgid "my_account_page_authorizations_tab"
 msgstr "Autorisations"
@@ -158,7 +166,7 @@ msgstr "Mon profil"
 msgid "my_account_page_notification_tab"
 msgstr "Notifications"
 
-#: src/app/[lang]/documents/page.tsx:113
+#: src/app/[lang]/documents/page.tsx:119
 msgid "no_title_available"
 msgstr "aucun titre disponible"
 
@@ -182,26 +190,26 @@ msgstr "aucun titre disponible"
 #~ msgid "publications_page_synchronize_button"
 #~ msgstr "Synchroniser"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:417
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:419
 #: src/app/[lang]/dashboard/page.tsx:10
 msgid "side_bar_dashboard"
 msgstr "Tableau de bord"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:466
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:468
 msgid "side_bar_documents"
 msgstr "Publications"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:515
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:517
 #: src/app/[lang]/expertise/page.tsx:10
 msgid "side_bar_expertise"
 msgstr "Expertises"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:626
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:628
 #: src/app/[lang]/institutions/page.tsx:10
 msgid "side_bar_institutions"
 msgstr "Institutions"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:676
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:678
 #: src/app/[lang]/laboratories/page.tsx:10
 msgid "side_bar_laboratories"
 msgstr "Laboratoires"
@@ -210,7 +218,7 @@ msgstr "Laboratoires"
 msgid "side_bar_my_account"
 msgstr "Mon compte"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:576
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:578
 #: src/app/[lang]/my-groups/page.tsx:10
 msgid "side_bar_my_groups"
 msgstr "Groupes"
@@ -223,50 +231,50 @@ msgstr "Activités de recherche"
 #~ msgid "side_bar_publications"
 #~ msgstr "Publications"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:411
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:410
 msgid "sidebar_back_to_my_perspective"
 msgstr "Retour à mon profil"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:100
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:176
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:194
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:46
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:143
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:237
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:326
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:45
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:142
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:236
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:325
 msgid "sidebar_search_people"
 msgstr "Chercheurs"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:110
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:355
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:354
 msgid "sidebar_search_placeholder"
 msgstr "Chercher"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:102
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:142
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:197
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:48
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:153
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:328
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:47
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:152
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:327
 msgid "sidebar_search_research_structures"
 msgstr "Unités de recherche"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:195
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:194
 msgid "sidebar_search_unknown_label"
 msgstr "label inconnu"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:116
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:139
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:753
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:118
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:141
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:755
 msgid "sidebar_theme_dark"
 msgstr "Thème sombre"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:93
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:734
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:95
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:736
 msgid "sidebar_theme_light"
 msgstr "Thème clair"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:772
+#: src/app/[lang]/components/sidebar/Sidebar.tsx:774
 msgid "sidebar_theme_system"
 msgstr "Thème automatique"
 
