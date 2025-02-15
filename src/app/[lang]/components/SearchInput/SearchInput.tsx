@@ -22,7 +22,6 @@ import { ResearchStructure } from '@/types/ResearchStructure'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
 import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn'
-console.log(Lingui)
 
 interface IAutoCompleteGroupTag {
   label: string

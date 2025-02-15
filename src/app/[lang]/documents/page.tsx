@@ -41,6 +41,7 @@ const localization: Record<string, MRT_Localization> = {
 }
 
 export default function DocumentsPage() {
+  const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -55,7 +56,11 @@ export default function DocumentsPage() {
   ])
   const { currentPerspective } = useStore((state) => state.user)
 
-  const lang = Lingui.i18n.locale as 'fr' | 'en'
+  const lang = Lingui.i18n.locale as ExtendedLanguageCode
+
+  const [selectedTitleLangs, setSelectedTitleLangs] = useState<
+    Record<string, string>
+  >({})
 
   const theme = useTheme()
 
@@ -102,35 +107,58 @@ export default function DocumentsPage() {
           row,
           column,
         }: {
-          row: { original: { titles: Array<Literal> } }
+          row: { original: { titles: Array<Literal>; uid: string } }
           column: MRT_Column<Document>
         }) {
-          const titles = row.original.titles
+          const { titles, uid } = row.original
+          const preferredRowLang = selectedTitleLangs[uid] || lang
           const localizedTitle = getLocalizedValue(
             titles,
-            lang,
-            ['fr', 'en', 'es', 'ul'],
+            preferredRowLang,
+            supportedLocales,
             t`no_title_available`,
           )
+          const effectiveRowLang = localizedTitle.language
           const filterValue = column.getFilterValue()
+          const chips = titles.map((title, index) => {
+            // skip ul : undetermined language
+            if (title.language === 'ul') {
+              return null
+            }
+            return (
+              <Chip
+                key={index}
+                size='small'
+                sx={{
+                  marginRight: theme.spacing(1),
+                }}
+                clickable={title.language !== effectiveRowLang}
+                label={title.language}
+                onClick={(e) => {
+                  if (title.language === effectiveRowLang) {
+                    e.preventDefault()
+                    return
+                  }
+                  setSelectedTitleLangs({
+                    ...selectedTitleLangs,
+                    [uid]: title.language,
+                  })
+                }}
+                color={
+                  title.language === effectiveRowLang ? 'primary' : 'default'
+                }
+              />
+            )
+          })
           return (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Highlighter
                 highlightClassName='highlight'
                 searchWords={[globalFilter, filterValue as string]}
                 autoEscape
-                textToHighlight={localizedTitle}
+                textToHighlight={localizedTitle.value}
               />
-              <Box>
-                <Chip
-                  size='small'
-                  sx={{
-                    marginRight: theme.spacing(1),
-                  }}
-                  label='FR'
-                />
-                <Chip size='small' label='EN' />
-              </Box>
+              <Box>{chips}</Box>
             </Box>
           )
         },
@@ -258,7 +286,7 @@ export default function DocumentsPage() {
         },
       },
     ],
-    [lang, globalFilter],
+    [lang, globalFilter, selectedTitleLangs],
   )
 
   const {

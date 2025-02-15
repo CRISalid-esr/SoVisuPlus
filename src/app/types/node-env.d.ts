@@ -1,6 +1,6 @@
 declare namespace NodeJS {
   export interface ProcessEnv {
-    SUPPORTED_LOCALES: string
+    NEXT_PUBLIC_SUPPORTED_LOCALES: string
     PERSPECTIVES_ROLES_FILTER: string
     PUBLICATION_LIST_ROLES_FILTER: string
     DATABASE_URL: string

@@ -17,7 +17,7 @@ export const dbCheckup = async (): Promise<DbCheckup> => {
   } catch (error) {
     dbError = error as Error
     dbStatus = 'not connected'
-    console.log(error)
+    console.error(error)
   }
 
   return {

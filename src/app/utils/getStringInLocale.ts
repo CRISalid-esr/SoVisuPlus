@@ -4,7 +4,7 @@ export function getStringInLocale(
   items: Array<Literal>,
   localeNumber: number,
 ): string {
-  const locales = (process.env.SUPPORTED_LOCALES || 'fr,en').split(',')
+  const locales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES.split(',')
   if (localeNumber >= locales.length) {
     return ''
   }
