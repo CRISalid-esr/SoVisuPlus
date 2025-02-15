@@ -2,6 +2,9 @@ import type { NextConfig } from 'next'
 import * as path from 'node:path'
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_SUPPORTED_LOCALES: process.env.NEXT_PUBLIC_SUPPORTED_LOCALES,
+  },
   // for docker https://github.com/vercel/next.js/tree/canary/examples/with-docker
   output: 'standalone',
   reactStrictMode: true,
