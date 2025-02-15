@@ -92,7 +92,7 @@ msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1
 msgid "documents_page_all_documents_filter"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:142
+#: src/app/[lang]/documents/page.tsx:143
 msgid "documents_page_contributors_column"
 msgstr ""
 
@@ -100,7 +100,7 @@ msgstr ""
 #~ msgid "documents_page_date_column"
 #~ msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:198
+#: src/app/[lang]/documents/page.tsx:200
 msgid "documents_page_halStatus_column"
 msgstr ""
 
@@ -112,23 +112,23 @@ msgstr ""
 msgid "documents_page_keywords_to_validate"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:362
+#: src/app/[lang]/documents/page.tsx:364
 msgid "documents_page_main_title"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:191
+#: src/app/[lang]/documents/page.tsx:193
 msgid "documents_page_publishedIn_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:205
+#: src/app/[lang]/documents/page.tsx:207
 msgid "documents_page_source_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:367
+#: src/app/[lang]/documents/page.tsx:369
 msgid "documents_page_synchronize_button"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:99
+#: src/app/[lang]/documents/page.tsx:100
 msgid "documents_page_title_column"
 msgstr ""
 
@@ -158,7 +158,7 @@ msgstr ""
 msgid "my_account_page_notification_tab"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:112
+#: src/app/[lang]/documents/page.tsx:113
 msgid "no_title_available"
 msgstr ""
 
