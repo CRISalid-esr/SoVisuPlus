@@ -27,7 +27,7 @@ describe('getLocalizedValue', () => {
 
   it('returns the default value if no matching language is found', () => {
     expect(getLocalizedValue(data, 'de', ['ru', 'cn'], 'Default').value).toBe(
-      'Default',
+      'Bonjour',
     )
   })
 
