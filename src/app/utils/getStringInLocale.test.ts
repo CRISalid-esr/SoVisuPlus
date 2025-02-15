@@ -3,11 +3,11 @@ import { Literal } from '@/types/Literal'
 
 describe('getStringInLocale', () => {
   beforeEach(() => {
-    process.env.SUPPORTED_LOCALES = 'fr,en,es'
+    process.env.NEXT_PUBLIC_SUPPORTED_LOCALES = 'fr,en,es'
   })
 
   afterEach(() => {
-    process.env.SUPPORTED_LOCALES = '' // Reset to avoid side effects
+    process.env.NEXT_PUBLIC_SUPPORTED_LOCALES = '' // Reset to avoid side effects
   })
 
   const data: Literal[] = [
@@ -105,8 +105,8 @@ describe('getStringInLocale', () => {
     expect(getStringInLocale([], 0)).toBe('n/c')
   })
 
-  it('handles a custom SUPPORTED_LOCALES environment variable', () => {
-    process.env.SUPPORTED_LOCALES = 'it,de'
+  it('handles a custom NEXT_PUBLIC_SUPPORTED_LOCALES environment variable', () => {
+    process.env.NEXT_PUBLIC_SUPPORTED_LOCALES = 'it,de'
     const italianData: Literal[] = [
       {
         language: 'it',

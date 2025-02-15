@@ -7,7 +7,7 @@ export const GET = async (req: NextRequest) => {
     const searchTerm = urlParams.get('searchTerm') || ''
     const searchlang =
       urlParams.get('searchLang') ||
-      process.env.SUPPORTED_LOCALES?.split(',')[0] ||
+      process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0] ||
       ''
     const page = parseInt(urlParams.get('page') || '1', 10)
     const pageSize = parseInt(urlParams.get('pageSize') || '10', 10)

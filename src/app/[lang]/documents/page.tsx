@@ -41,6 +41,7 @@ const localization: Record<string, MRT_Localization> = {
 }
 
 export default function DocumentsPage() {
+  const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -55,7 +56,7 @@ export default function DocumentsPage() {
   ])
   const { currentPerspective } = useStore((state) => state.user)
 
-  const lang = Lingui.i18n.locale as 'fr' | 'en'
+  const lang = Lingui.i18n.locale as ExtendedLanguageCode
 
   const [selectedTitleLangs, setSelectedTitleLangs] = useState<
     Record<string, string>
@@ -114,7 +115,7 @@ export default function DocumentsPage() {
           const localizedTitle = getLocalizedValue(
             titles,
             preferredRowLang,
-            ['fr', 'en', 'es', 'ul'],
+            supportedLocales,
             t`no_title_available`,
           )
           const effectiveRowLang = localizedTitle.language

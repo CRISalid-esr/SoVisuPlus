@@ -212,11 +212,11 @@ export class DocumentDAO extends AbstractDAO {
     const publicationListRolesFilter =
       process.env.PUBLICATION_LIST_ROLES_FILTER?.split(',') || []
 
-    // find the index of the search lang in the array of process.env.SUPPORTED_LOCALES
+    // find the index of the search lang in the array of process.env.NEXT_PUBLIC_SUPPORTED_LOCALES
     const searchLangIndex =
-      (process.env.SUPPORTED_LOCALES || 'fr,en')
-        ?.split(',')
-        .indexOf(searchLang) || 0
+      process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',').indexOf(
+        searchLang,
+      ) || 0
     const sortingTitleFieldName = `title_locale_${searchLangIndex}`
 
     let where: Prisma.DocumentWhereInput = {}
@@ -380,7 +380,6 @@ export class DocumentDAO extends AbstractDAO {
         }
 
         if (sort.id === 'date') {
-          console.log('sort.id', sort.id)
           return {
             publicationDateStart: {
               sort: sort.desc ? 'desc' : 'asc',

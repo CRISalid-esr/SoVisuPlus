@@ -47,7 +47,7 @@ export class UserService {
         return false
       }
       if (person.external) {
-        console.log(
+        console.warn(
           `Person {${person.uid}} is external, skipping user creation`,
         )
         return false

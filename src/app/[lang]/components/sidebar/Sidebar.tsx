@@ -6,7 +6,7 @@ import LightMode from '@/public/icons/light_mode.svg'
 import SystemMode from '@/public/icons/system_mode.svg'
 
 import { User } from '@/types/User'
-import { Trans } from '@lingui/macro'
+import { t, Trans } from '@lingui/macro'
 import {
   Backdrop,
   Drawer,
@@ -47,6 +47,8 @@ interface SidebarProps {
   open: boolean
   user: User | null
 }
+
+const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
 
 export default function Sidebar({
   open,
@@ -868,17 +870,16 @@ export default function Sidebar({
                           }}
                           ml={1}
                         >
-                          {value === 'en' ? 'English' : 'Français'}
+                          {t`language_${value}`}
                         </Typography>
                       </Box>
                     )}
                   >
-                    <MenuItem id='en' value='en'>
-                      English
-                    </MenuItem>
-                    <MenuItem id='fr' value='fr'>
-                      Français
-                    </MenuItem>
+                    {supportedLocales?.map((locale) => (
+                      <MenuItem key={locale} value={locale}>
+                        {t`language_${locale}`}
+                      </MenuItem>
+                    ))}
                   </Select>
                 ) : (
                   <ListItem
