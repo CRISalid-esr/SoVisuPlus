@@ -23,6 +23,9 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
+      - name: Copy .env.test to .env
+        run: cp .env.test .env
+
       - name: Run Jest tests
         run: npm test
   integration-tests:
