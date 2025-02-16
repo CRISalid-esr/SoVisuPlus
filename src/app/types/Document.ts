@@ -2,7 +2,17 @@ import { Literal } from '@/types/Literal'
 import { Contribution } from '@/types/Contribution'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 import { DocumentRecord } from '@/types/DocumentRecord'
-import { DocumentType } from '@prisma/client'
+
+enum DocumentType {
+  Document = 'Document',
+  ScholarlyPublication = 'ScholarlyPublication',
+  JournalArticle = 'JournalArticle',
+  Book = 'Book',
+  Monograph = 'Monograph',
+  BookChapter = 'BookChapter',
+  ConferenceArticle = 'ConferenceArticle',
+  Proceedings = 'Proceedings',
+}
 
 class Document {
   constructor(
@@ -33,4 +43,4 @@ class Document {
   }
 }
 
-export { Document }
+export { Document, DocumentType }

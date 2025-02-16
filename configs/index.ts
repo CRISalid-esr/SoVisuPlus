@@ -20,7 +20,6 @@ export class InstitutionalConfig {
         this.colors = require('./custom/colors').colors
         break
       default:
-        console.log('Using default institutional colors')
         this.colors = require('./default/colors').colors
         break
     }
@@ -31,7 +30,6 @@ export class InstitutionalConfig {
       case 'custom':
         return require('./custom/logos').logos as InstitutionalLogos
       default:
-        console.log('Using default institutional logos')
         return require('./default/logos').logos as InstitutionalLogos
     }
   }

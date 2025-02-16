@@ -1,18 +1,16 @@
 import {
   Document as DbDocument,
-  DocumentType,
   Person as DbPerson,
   Prisma,
   PrismaClient,
 } from '@prisma/client'
-import { Document } from '@/types/Document'
+import { Document, DocumentType } from '@/types/Document'
 import { DocumentDAO } from './DocumentDAO'
 import { PersonDAO } from './PersonDAO'
 import { Person } from '@/types/Person'
 import { Literal } from '@/types/Literal'
 import { LocRelator } from '@/types/LocRelator'
 import { Contribution } from '@/types/Contribution'
-
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
 
