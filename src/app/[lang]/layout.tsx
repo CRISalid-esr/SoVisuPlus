@@ -26,6 +26,10 @@ export default async function RootLayout({ params, children }: Props) {
   return (
     <html lang={lang}>
       <head>
+        <link
+          rel='stylesheet'
+          href='https://fonts.googleapis.com/icon?family=Material+Icons'
+        />
         <title>sovisuplus</title>
       </head>
       <body>
