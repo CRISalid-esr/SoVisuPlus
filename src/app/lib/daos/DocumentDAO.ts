@@ -322,38 +322,57 @@ export class DocumentDAO extends AbstractDAO {
           },
         }
       }
-      columnFilters.forEach((filter) => {
-        if (filter.id === 'date' && Array.isArray(filter.value)) {
-          const startDate = filter.value[0] || null // Full ISO string date
-          const endDate = filter.value[1] || null // Full ISO string date
+      if (filter.id === 'date' && Array.isArray(filter.value)) {
+        const startDate = filter.value[0] || null // Full ISO string date
+        const endDate = filter.value[1] || null // Full ISO string date
 
-          const dateConditions: Prisma.DocumentWhereInput[] = []
+        const dateConditions: Prisma.DocumentWhereInput[] = []
 
-          if (startDate && endDate) {
-            dateConditions.push({
-              AND: [
-                { publicationDateEnd: { gte: startDate } }, // Document ends after or on startDate
-                { publicationDateStart: { lte: endDate } }, // Document starts before or on endDate
-              ],
-            })
-          } else if (startDate) {
-            dateConditions.push({
-              publicationDateEnd: { gte: startDate }, // Only filter by start date
-            })
-          } else if (endDate) {
-            dateConditions.push({
-              publicationDateStart: { lte: endDate }, // Only filter by end date
-            })
-          }
+        if (startDate && endDate) {
+          dateConditions.push({
+            AND: [
+              { publicationDateEnd: { gte: startDate } }, // Document ends after or on startDate
+              { publicationDateStart: { lte: endDate } }, // Document starts before or on endDate
+            ],
+          })
+        } else if (startDate) {
+          dateConditions.push({
+            publicationDateEnd: { gte: startDate }, // Only filter by start date
+          })
+        } else if (endDate) {
+          dateConditions.push({
+            publicationDateStart: { lte: endDate }, // Only filter by end date
+          })
+        }
 
-          if (dateConditions.length > 0) {
-            where = {
-              ...where,
-              AND: dateConditions,
-            }
+        if (dateConditions.length > 0) {
+          where = {
+            ...where,
+            AND: dateConditions,
           }
         }
-      })
+      }
+      if (filter.id === 'type' && Array.isArray(filter.value)) {
+        where = {
+          ...where,
+          documentType: {
+            in: filter.value,
+          },
+        }
+      }
+
+      if (filter.id === 'source' && Array.isArray(filter.value)) {
+        where = {
+          ...where,
+          records: {
+            some: {
+              platform: {
+                in: filter.value,
+              },
+            },
+          },
+        }
+      }
     })
 
     if (contributorUid) {
