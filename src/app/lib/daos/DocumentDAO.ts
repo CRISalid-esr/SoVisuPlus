@@ -268,6 +268,12 @@ export class DocumentDAO extends AbstractDAO {
               },
             },
           },
+          {
+            publicationDate: {
+              contains: searchTerm,
+              mode: QueryMode.insensitive,
+            },
+          },
         ],
       }
     }

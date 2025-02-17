@@ -2,12 +2,21 @@
 
 import { TabFilter } from '@/components/TabFilter'
 import useStore from '@/stores/global_store'
+import {
+  BibliographicPlatform,
+  BibliographicPlatformMetadata,
+} from '@/types/BibliographicPlatform'
 import { Contribution } from '@/types/Contribution'
 import { Document, DocumentType } from '@/types/Document'
+import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
 import { t, Trans } from '@lingui/macro'
+import ArticleIcon from '@mui/icons-material/Article'
+import BookIcon from '@mui/icons-material/Book'
+import DescriptionIcon from '@mui/icons-material/Description'
+import SchoolIcon from '@mui/icons-material/School'
 import SyncIcon from '@mui/icons-material/Sync'
 import {
   Box,
@@ -18,6 +27,8 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/system'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import {
   MaterialReactTable,
   MRT_Column,
@@ -26,24 +37,20 @@ import {
   MRT_Localization,
   MRT_SortingState,
 } from 'material-react-table'
+import { MRT_Localization_EN } from 'material-react-table/locales/en'
+import { MRT_Localization_FR } from 'material-react-table/locales/fr'
+import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 import Highlighter from 'react-highlight-words'
-import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import { MRT_Localization_FR } from 'material-react-table/locales/fr'
-import { MRT_Localization_EN } from 'material-react-table/locales/en'
-import Image from 'next/image'
-import {
-  BibliographicPlatform,
-  BibliographicPlatformMetadata,
-} from '@/types/BibliographicPlatform'
-import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
-import DescriptionIcon from '@mui/icons-material/Description'
-import SchoolIcon from '@mui/icons-material/School'
-import ArticleIcon from '@mui/icons-material/Article'
-import BookIcon from '@mui/icons-material/Book'
 
 dayjs.extend(utc)
+
+const localeFormats: Record<string, string> = {
+  fr: 'DD-MM-YYYY',
+  en: 'MM-DD-YYYY',
+  de: 'DD.MM.YYYY',
+  es: 'DD/MM/YYYY',
+}
 
 const localization: Record<string, MRT_Localization> = {
   fr: MRT_Localization_FR,
@@ -266,9 +273,36 @@ export default function DocumentsPage() {
       {
         size: 100,
         accessorKey: 'date',
-        header: 'Publication Date',
-        Cell({ row }) {
-          return row.original.publicationDate
+        header: t`documents_page_publication_date_column`,
+        Cell({ row }: { row: { original: Document } }) {
+          const dateStr = row.original?.publicationDate
+
+          if (!dateStr) {
+            return t`documents_page_publication_date_column_no_date_available`
+          }
+
+          const dateFormat = localeFormats[lang] || 'MM-DD-YYYY'
+
+          if (!dayjs(dateStr, 'YYYY-MM-DD').isValid()) {
+            return (
+              <Highlighter
+                highlightClassName='highlight'
+                searchWords={[globalFilter]}
+                autoEscape
+                textToHighlight={dateStr}
+              />
+            )
+          }
+          const localizedDate = dayjs(dateStr, 'YYYY-MM-DD').format(dateFormat)
+
+          return (
+            <Highlighter
+              highlightClassName='highlight'
+              searchWords={[globalFilter]}
+              autoEscape
+              textToHighlight={localizedDate}
+            />
+          )
         },
         filterVariant: 'date-range',
       },

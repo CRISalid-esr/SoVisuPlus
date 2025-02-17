@@ -232,7 +232,14 @@ describe('DocumentDAO', () => {
               },
             },
           },
+          {
+            publicationDate: {
+              contains: 'Sample',
+              mode: Prisma.QueryMode.insensitive,
+            },
+          },
         ],
+
         contributions: {
           some: {
             person: {
@@ -240,6 +247,7 @@ describe('DocumentDAO', () => {
             },
           },
         },
+
         titles: {
           some: {
             value: {
