@@ -267,9 +267,10 @@ export default function DocumentsPage() {
       {
         size: 100,
         accessorKey: 'date',
-        header: 'Publication Date',
+        header: t`documents_page_publishedIn_column`,
         Cell({ row }: { row: { original: Document } }) {
-          if (!row.original?.publicationDate) return ''
+          if (!row.original?.publicationDate)
+            return t`documents_page_publishedIn_column_no_date_available`
           return (
             <Highlighter
               highlightClassName='highlight'
@@ -283,13 +284,6 @@ export default function DocumentsPage() {
           )
         },
         filterVariant: 'date-range',
-      },
-      {
-        accessorKey: 'publishedIn',
-        header: t`documents_page_publishedIn_column`,
-        Cell() {
-          return ''
-        },
       },
       {
         accessorKey: 'halStatus',

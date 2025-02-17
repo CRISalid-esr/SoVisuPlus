@@ -88,23 +88,23 @@ msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1
 #~ msgid "pageNotFound"
 #~ msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:121
+#: src/app/[lang]/documents/page.tsx:122
 msgid "documents_page_all_documents_filter"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:85
+#: src/app/[lang]/documents/page.tsx:86
 msgid "documents_page_book_chapter_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:79
+#: src/app/[lang]/documents/page.tsx:80
 msgid "documents_page_book_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:88
+#: src/app/[lang]/documents/page.tsx:89
 msgid "documents_page_conference_article_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:227
+#: src/app/[lang]/documents/page.tsx:228
 msgid "documents_page_contributors_column"
 msgstr ""
 
@@ -112,59 +112,63 @@ msgstr ""
 #~ msgid "documents_page_date_column"
 #~ msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:70
+#: src/app/[lang]/documents/page.tsx:71
 msgid "documents_page_document_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:284
+#: src/app/[lang]/documents/page.tsx:289
 msgid "documents_page_halStatus_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:126
+#: src/app/[lang]/documents/page.tsx:127
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:76
+#: src/app/[lang]/documents/page.tsx:77
 msgid "documents_page_journal_article_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:132
+#: src/app/[lang]/documents/page.tsx:133
 msgid "documents_page_keywords_to_validate"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:448
+#: src/app/[lang]/documents/page.tsx:453
 msgid "documents_page_main_title"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:82
+#: src/app/[lang]/documents/page.tsx:83
 msgid "documents_page_monograph_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:91
+#: src/app/[lang]/documents/page.tsx:92
 msgid "documents_page_proceedings_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:277
+#: src/app/[lang]/documents/page.tsx:270
 msgid "documents_page_publishedIn_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:73
+#: src/app/[lang]/documents/page.tsx:272
+msgid "documents_page_publishedIn_column_no_date_available"
+msgstr ""
+
+#: src/app/[lang]/documents/page.tsx:74
 msgid "documents_page_scholarly_publication_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:291
+#: src/app/[lang]/documents/page.tsx:296
 msgid "documents_page_source_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:453
+#: src/app/[lang]/documents/page.tsx:458
 msgid "documents_page_synchronize_button"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:161
+#: src/app/[lang]/documents/page.tsx:162
 msgid "documents_page_title_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:145
+#: src/app/[lang]/documents/page.tsx:146
 msgid "documents_page_type_column"
 msgstr ""
 
@@ -198,7 +202,7 @@ msgstr ""
 msgid "my_account_page_notification_tab"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:175
+#: src/app/[lang]/documents/page.tsx:176
 msgid "no_title_available"
 msgstr ""
 
