@@ -157,10 +157,34 @@ export default function DocumentsPage() {
             </Tooltip>
           )
         },
+        filterVariant: 'multi-select',
+        filterColumn: 'type',
+        //@ts-expect-error:  overide filterSelectOptions to accept Element.jsx instead of Element
+        filterSelectOptions: Object.values(DocumentType).map((type) => ({
+          value: type,
+          label: (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                width: '100%',
+              }}
+            >
+              {documentTypeLabels[type]}
+              <Box
+                sx={{
+                  marginLeft: 'auto',
+                }}
+              >
+                {documentTypeIcons[type]}
+              </Box>
+            </Box>
+          ),
+        })),
       },
       {
         size: 200,
-        filterColumn: 'titles',
         accessorKey: `titles`,
         accessorFn: (row) => {
           return row.titles
@@ -276,13 +300,10 @@ export default function DocumentsPage() {
         header: t`documents_page_publication_date_column`,
         Cell({ row }: { row: { original: Document } }) {
           const dateStr = row.original?.publicationDate
-
           if (!dateStr) {
             return t`documents_page_publication_date_column_no_date_available`
           }
-
           const dateFormat = localeFormats[lang] || 'MM-DD-YYYY'
-
           if (!dayjs(dateStr, 'YYYY-MM-DD').isValid()) {
             return (
               <Highlighter
