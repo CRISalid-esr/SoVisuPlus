@@ -360,6 +360,19 @@ export class DocumentDAO extends AbstractDAO {
           },
         }
       }
+
+      if (filter.id === 'source' && Array.isArray(filter.value)) {
+        where = {
+          ...where,
+          records: {
+            some: {
+              platform: {
+                in: filter.value,
+              },
+            },
+          },
+        }
+      }
     })
 
     if (contributorUid) {

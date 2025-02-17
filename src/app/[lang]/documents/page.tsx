@@ -342,7 +342,7 @@ export default function DocumentsPage() {
         },
       },
       {
-        accessorKey: 'version',
+        accessorKey: 'source',
         header: t`documents_page_source_column`,
         Cell({ row }: { row: { original: Document } }) {
           const orderedPlatforms = Object.values(BibliographicPlatform)
@@ -395,6 +395,36 @@ export default function DocumentsPage() {
             </Box>
           )
         },
+        filterVariant: 'multi-select',
+        filterColumn: 'source',
+        //@ts-expect-error:  overide filterSelectOptions to accept Element.jsx instead of Element
+        filterSelectOptions: Object.values(BibliographicPlatform).map(
+          (platform) => {
+            const metadata = BibliographicPlatformMetadata[platform]
+            return {
+              value: platform,
+              label: (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                  }}
+                >
+                  <Typography>{metadata?.name || platform}</Typography>
+                  <Image
+                    src={metadata?.icon || '/icons/default.png'}
+                    alt={metadata?.name || 'Unknown Source'}
+                    width={24}
+                    height={24}
+                    priority
+                  />
+                </Box>
+              ),
+            }
+          },
+        ),
       },
     ],
     [lang, globalFilter, selectedTitleLangs],
