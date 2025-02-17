@@ -5,7 +5,7 @@ import process from 'process'
 
 export function localeMiddleware(middleware: CustomMiddleware) {
   return async (request: NextRequest, event: NextFetchEvent) => {
-    let supportedLocales: string[] = ['fr']
+    let supportedLocales: string[] = ['fr', 'en']
     if (process.env.NEXT_PUBLIC_SUPPORTED_LOCALES) {
       const localesFromEnv =
         process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')

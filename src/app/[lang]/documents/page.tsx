@@ -42,6 +42,7 @@ import DescriptionIcon from '@mui/icons-material/Description'
 import SchoolIcon from '@mui/icons-material/School'
 import ArticleIcon from '@mui/icons-material/Article'
 import BookIcon from '@mui/icons-material/Book'
+import { formatLocalizedDate } from '@/utils/formatLocalizedDate'
 
 dayjs.extend(utc)
 
@@ -268,7 +269,8 @@ export default function DocumentsPage() {
         accessorKey: 'date',
         header: 'Publication Date',
         Cell({ row }) {
-          return row.original.publicationDate
+          if (!row.original?.publicationDate) return ''
+          return formatLocalizedDate(row.original.publicationDate, lang)
         },
         filterVariant: 'date-range',
       },
