@@ -268,9 +268,19 @@ export default function DocumentsPage() {
         size: 100,
         accessorKey: 'date',
         header: 'Publication Date',
-        Cell({ row }) {
+        Cell({ row }: { row: { original: Document } }) {
           if (!row.original?.publicationDate) return ''
-          return formatLocalizedDate(row.original.publicationDate, lang)
+          return (
+            <Highlighter
+              highlightClassName='highlight'
+              searchWords={[globalFilter]}
+              autoEscape
+              textToHighlight={formatLocalizedDate(
+                row.original.publicationDate,
+                lang,
+              )}
+            />
+          )
         },
         filterVariant: 'date-range',
       },
