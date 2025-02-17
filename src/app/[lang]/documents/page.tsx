@@ -50,7 +50,7 @@ const localization: Record<string, MRT_Localization> = {
   en: MRT_Localization_EN,
 }
 
-export const documentTypeIcons: Record<DocumentType, JSX.Element> = {
+const documentTypeIcons: Record<DocumentType, JSX.Element> = {
   [DocumentType.Document]: <DescriptionIcon />,
   [DocumentType.ScholarlyPublication]: <SchoolIcon />,
   [DocumentType.JournalArticle]: <ArticleIcon />,
@@ -65,28 +65,30 @@ export const documentTypeIcons: Record<DocumentType, JSX.Element> = {
   ),
 }
 
-export const documentTypeLabels: Record<DocumentType, JSX.Element> = {
+const documentTypeLabels: Record<DocumentType, JSX.Element> = {
   [DocumentType.Document]: (
-    <Typography>{t`documents_page_document_icon`}</Typography>
+    <Typography>{t`documents_page_document_icon_label`}</Typography>
   ),
   [DocumentType.ScholarlyPublication]: (
-    <Typography>{t`documents_page_scholarly_publication_icon`}</Typography>
+    <Typography>{t`documents_page_scholarly_publication_icon_label`}</Typography>
   ),
   [DocumentType.JournalArticle]: (
-    <Typography>{t`documents_page_journal_article_icon`}</Typography>
+    <Typography>{t`documents_page_journal_article_icon_label`}</Typography>
   ),
-  [DocumentType.Book]: <Typography>{t`documents_page_book_icon`}</Typography>,
+  [DocumentType.Book]: (
+    <Typography>{t`documents_page_book_icon_label`}</Typography>
+  ),
   [DocumentType.Monograph]: (
-    <Typography>{t`documents_page_monograph_icon`}</Typography>
+    <Typography>{t`documents_page_monograph_icon_label`}</Typography>
   ),
   [DocumentType.BookChapter]: (
-    <Typography>{t`documents_page_book_chapter_icon`}</Typography>
+    <Typography>{t`documents_page_book_chapter_icon_label`}</Typography>
   ),
   [DocumentType.ConferenceArticle]: (
-    <Typography>{t`documents_page_conference_article_icon`}</Typography>
+    <Typography>{t`documents_page_conference_article_icon_label`}</Typography>
   ),
   [DocumentType.Proceedings]: (
-    <Typography>{t`documents_page_proceedings_icon`}</Typography>
+    <Typography>{t`documents_page_proceedings_icon_label`}</Typography>
   ),
 }
 
