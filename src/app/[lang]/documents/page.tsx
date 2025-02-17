@@ -454,6 +454,8 @@ export default function DocumentsPage() {
       return filter
     })
 
+    console.log('columnFilters', columnFilters)
+
     fetchDocuments({
       page: pagination.pageIndex + 1,
       pageSize: pagination.pageSize,
