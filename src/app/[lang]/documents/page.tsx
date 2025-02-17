@@ -57,50 +57,7 @@ const localization: Record<string, MRT_Localization> = {
   en: MRT_Localization_EN,
 }
 
-const documentTypeIcons: Record<DocumentType, JSX.Element> = {
-  [DocumentType.Document]: <DescriptionIcon />,
-  [DocumentType.ScholarlyPublication]: <SchoolIcon />,
-  [DocumentType.JournalArticle]: <ArticleIcon />,
-  [DocumentType.Book]: <BookIcon />,
-  [DocumentType.Monograph]: <BookIcon />, //TDOO: change icon later
-  [DocumentType.BookChapter]: <BookIcon />,
-  [DocumentType.ConferenceArticle]: (
-    <span className='material-symbols-outlined'>podium</span>
-  ),
-  [DocumentType.Proceedings]: (
-    <span className='material-symbols-outlined'>podium</span>
-  ),
-}
-
-const documentTypeLabels: Record<DocumentType, JSX.Element> = {
-  [DocumentType.Document]: (
-    <Typography>{t`documents_page_document_icon_label`}</Typography>
-  ),
-  [DocumentType.ScholarlyPublication]: (
-    <Typography>{t`documents_page_scholarly_publication_icon_label`}</Typography>
-  ),
-  [DocumentType.JournalArticle]: (
-    <Typography>{t`documents_page_journal_article_icon_label`}</Typography>
-  ),
-  [DocumentType.Book]: (
-    <Typography>{t`documents_page_book_icon_label`}</Typography>
-  ),
-  [DocumentType.Monograph]: (
-    <Typography>{t`documents_page_monograph_icon_label`}</Typography>
-  ),
-  [DocumentType.BookChapter]: (
-    <Typography>{t`documents_page_book_chapter_icon_label`}</Typography>
-  ),
-  [DocumentType.ConferenceArticle]: (
-    <Typography>{t`documents_page_conference_article_icon_label`}</Typography>
-  ),
-  [DocumentType.Proceedings]: (
-    <Typography>{t`documents_page_proceedings_icon_label`}</Typography>
-  ),
-}
-
 export default function DocumentsPage() {
-  const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -116,6 +73,7 @@ export default function DocumentsPage() {
   const { currentPerspective } = useStore((state) => state.user)
 
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
+  const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
 
   const [selectedTitleLangs, setSelectedTitleLangs] = useState<
     Record<string, string>
@@ -142,6 +100,48 @@ export default function DocumentsPage() {
       color: theme.palette.primary.main,
     },
   ]
+
+  const documentTypeLabels: Record<DocumentType, JSX.Element> = {
+    [DocumentType.Document]: (
+      <Typography>{t`documents_page_document_icon_label`}</Typography>
+    ),
+    [DocumentType.ScholarlyPublication]: (
+      <Typography>{t`documents_page_scholarly_publication_icon_label`}</Typography>
+    ),
+    [DocumentType.JournalArticle]: (
+      <Typography>{t`documents_page_journal_article_icon_label`}</Typography>
+    ),
+    [DocumentType.Book]: (
+      <Typography>{t`documents_page_book_icon_label`}</Typography>
+    ),
+    [DocumentType.Monograph]: (
+      <Typography>{t`documents_page_monograph_icon_label`}</Typography>
+    ),
+    [DocumentType.BookChapter]: (
+      <Typography>{t`documents_page_book_chapter_icon_label`}</Typography>
+    ),
+    [DocumentType.ConferenceArticle]: (
+      <Typography>{t`documents_page_conference_article_icon_label`}</Typography>
+    ),
+    [DocumentType.Proceedings]: (
+      <Typography>{t`documents_page_proceedings_icon_label`}</Typography>
+    ),
+  }
+
+  const documentTypeIcons: Record<DocumentType, JSX.Element> = {
+    [DocumentType.Document]: <DescriptionIcon />,
+    [DocumentType.ScholarlyPublication]: <SchoolIcon />,
+    [DocumentType.JournalArticle]: <ArticleIcon />,
+    [DocumentType.Book]: <BookIcon />,
+    [DocumentType.Monograph]: <BookIcon />, //TDOO: change icon later
+    [DocumentType.BookChapter]: <BookIcon />,
+    [DocumentType.ConferenceArticle]: (
+      <span className='material-symbols-outlined'>podium</span>
+    ),
+    [DocumentType.Proceedings]: (
+      <span className='material-symbols-outlined'>podium</span>
+    ),
+  }
 
   const [selectedTab, setSelectedTab] = useState(tabs[0].value)
 
