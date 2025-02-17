@@ -3,14 +3,20 @@
 import { TabFilter } from '@/components/TabFilter'
 import useStore from '@/stores/global_store'
 import { Contribution } from '@/types/Contribution'
-import { Document } from '@/types/Document'
+import { Document, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
 import { t, Trans } from '@lingui/macro'
-import ArticleIcon from '@mui/icons-material/Article'
 import SyncIcon from '@mui/icons-material/Sync'
-import { Box, Button, Chip, IconButton, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/system'
 import {
   MaterialReactTable,
@@ -32,12 +38,58 @@ import {
 } from '@/types/BibliographicPlatform'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
+import DescriptionIcon from '@mui/icons-material/Description'
+import SchoolIcon from '@mui/icons-material/School'
+import ArticleIcon from '@mui/icons-material/Article'
+import BookIcon from '@mui/icons-material/Book'
 
 dayjs.extend(utc)
 
 const localization: Record<string, MRT_Localization> = {
   fr: MRT_Localization_FR,
   en: MRT_Localization_EN,
+}
+
+const documentTypeIcons: Record<DocumentType, JSX.Element> = {
+  [DocumentType.Document]: <DescriptionIcon />,
+  [DocumentType.ScholarlyPublication]: <SchoolIcon />,
+  [DocumentType.JournalArticle]: <ArticleIcon />,
+  [DocumentType.Book]: <BookIcon />,
+  [DocumentType.Monograph]: <BookIcon />, //TDOO: change icon later
+  [DocumentType.BookChapter]: <BookIcon />,
+  [DocumentType.ConferenceArticle]: (
+    <span className='material-symbols-outlined'>podium</span>
+  ),
+  [DocumentType.Proceedings]: (
+    <span className='material-symbols-outlined'>podium</span>
+  ),
+}
+
+const documentTypeLabels: Record<DocumentType, JSX.Element> = {
+  [DocumentType.Document]: (
+    <Typography>{t`documents_page_document_icon_label`}</Typography>
+  ),
+  [DocumentType.ScholarlyPublication]: (
+    <Typography>{t`documents_page_scholarly_publication_icon_label`}</Typography>
+  ),
+  [DocumentType.JournalArticle]: (
+    <Typography>{t`documents_page_journal_article_icon_label`}</Typography>
+  ),
+  [DocumentType.Book]: (
+    <Typography>{t`documents_page_book_icon_label`}</Typography>
+  ),
+  [DocumentType.Monograph]: (
+    <Typography>{t`documents_page_monograph_icon_label`}</Typography>
+  ),
+  [DocumentType.BookChapter]: (
+    <Typography>{t`documents_page_book_chapter_icon_label`}</Typography>
+  ),
+  [DocumentType.ConferenceArticle]: (
+    <Typography>{t`documents_page_conference_article_icon_label`}</Typography>
+  ),
+  [DocumentType.Proceedings]: (
+    <Typography>{t`documents_page_proceedings_icon_label`}</Typography>
+  ),
 }
 
 export default function DocumentsPage() {
@@ -91,8 +143,12 @@ export default function DocumentsPage() {
       {
         accessorKey: 'type',
         header: t`documents_page_type_column`,
-        Cell() {
-          return <ArticleIcon />
+        Cell({ row }: { row: { original: { documentType: DocumentType } } }) {
+          return (
+            <Tooltip title={documentTypeLabels[row.original.documentType]}>
+              {documentTypeIcons[row.original.documentType]}
+            </Tooltip>
+          )
         },
       },
       {

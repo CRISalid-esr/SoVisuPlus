@@ -1,6 +1,6 @@
 import { DocumentGraphQLClient } from './DocumentGraphQLClient'
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
-import { Document } from '@/types/Document'
+import { Document,DocumentType } from '@/types/Document'
 import { Contribution } from '@/types/Contribution'
 import { PersonGraphQLClient } from './PersonGraphQLClient'
 import { LocRelatorHelper } from '@/types/LocRelator'
@@ -11,7 +11,6 @@ import {
 } from '@/types/BibliographicPlatform'
 import { Literal } from '@/types/Literal'
 import { Person } from '@/types/Person'
-import { DocumentType } from '@prisma/client'
 
 jest.mock('./AbstractGraphQLClient')
 jest.mock('./PersonGraphQLClient')

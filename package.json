@@ -39,7 +39,7 @@
     "@lingui/macro": "^4.14.0",
     "@lingui/react": "^4.14.0",
     "@lingui/swc-plugin": "^4.1.0",
-    "@mui/icons-material": "^6.2.1",
+    "@mui/icons-material": "^6.4.4",
     "@mui/material": "^6.4.3",
     "@mui/material-nextjs": "^6.1.6",
     "@mui/styles": "^6.1.8",

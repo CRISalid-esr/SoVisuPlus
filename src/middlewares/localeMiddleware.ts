@@ -7,10 +7,6 @@ export function localeMiddleware(middleware: CustomMiddleware) {
   return async (request: NextRequest, event: NextFetchEvent) => {
     let supportedLocales: string[] = ['fr']
     if (process.env.NEXT_PUBLIC_SUPPORTED_LOCALES) {
-      console.log(
-        'SUPPORTED LOCALES:',
-        process.env.NEXT_PUBLIC_SUPPORTED_LOCALES,
-      )
       const localesFromEnv =
         process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
       if (localesFromEnv) {
