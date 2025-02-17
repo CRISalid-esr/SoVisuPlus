@@ -148,6 +148,7 @@ export default function DocumentsPage() {
   const columns = useMemo<MRT_ColumnDef<Document>[]>(
     () => [
       {
+        enableSorting: false,
         accessorKey: 'type',
         header: t`documents_page_type_column`,
         Cell({ row }: { row: { original: { documentType: DocumentType } } }) {
@@ -342,6 +343,7 @@ export default function DocumentsPage() {
         },
       },
       {
+        enableSorting: false,
         accessorKey: 'source',
         header: t`documents_page_source_column`,
         Cell({ row }: { row: { original: Document } }) {
