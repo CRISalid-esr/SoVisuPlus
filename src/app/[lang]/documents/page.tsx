@@ -23,6 +23,10 @@ import {
   Button,
   Chip,
   IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -44,7 +48,7 @@ import Highlighter from 'react-highlight-words'
 import { Modal } from '@/components/Modal'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useTheme } from '@mui/material/styles'
-
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
 dayjs.extend(utc)
 
 const synchronizeBibliographicPlatformStatus: Record<string, string> = {
@@ -536,6 +540,54 @@ export default function DocumentsPage() {
     setSelectedTab(newValue)
   }
 
+  const renderBibliographicPlatformChanges = (platform: {
+    changes: { added: number; updated: number; deleted: number }
+  }) => {
+    return (
+      <List>
+        <ListItem
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            flexWrap: 'no-wrap',
+          }}
+        >
+          <ListItemIcon>
+            <FiberManualRecordIcon sx={{ fontSize: theme.utils.pxToRem(8) }} />
+          </ListItemIcon>
+          <ListItemText>
+            {platform.changes.added}{' '}
+            <Trans>
+              documents_page_synchronize_modal_synchronize_success_tooltip_added_message
+            </Trans>
+          </ListItemText>
+        </ListItem>
+        <ListItem>
+          <ListItemIcon>
+            <FiberManualRecordIcon sx={{ fontSize: theme.utils.pxToRem(8) }} />
+          </ListItemIcon>
+          <ListItemText>
+            {platform.changes.updated}{' '}
+            <Trans>
+              documents_page_synchronize_modal_synchronize_success_tooltip_updated_message
+            </Trans>
+          </ListItemText>
+        </ListItem>
+        <ListItem>
+          <ListItemIcon>
+            <FiberManualRecordIcon sx={{ fontSize: theme.utils.pxToRem(8) }} />
+          </ListItemIcon>
+          <ListItemText>
+            {platform.changes.deleted}{' '}
+            <Trans>
+              documents_page_synchronize_modal_synchronize_success_tooltip_deleted_message
+            </Trans>
+          </ListItemText>
+        </ListItem>
+      </List>
+    )
+  }
+
   return (
     <Box>
       <Box
@@ -697,13 +749,15 @@ export default function DocumentsPage() {
                 )}
                 {platform.status ===
                   synchronizeBibliographicPlatformStatus.success && (
-                  <Image
-                    src='/icons/success.svg'
-                    alt='language'
-                    width={40}
-                    height={40}
-                    priority
-                  />
+                  <Tooltip title={renderBibliographicPlatformChanges(platform)}>
+                    <Image
+                      src='/icons/success.svg'
+                      alt='language'
+                      width={40}
+                      height={40}
+                      priority
+                    />
+                  </Tooltip>
                 )}
                 {platform.status ===
                   synchronizeBibliographicPlatformStatus.error && (
