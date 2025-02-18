@@ -49,6 +49,7 @@ import { Modal } from '@/components/Modal'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useTheme } from '@mui/material/styles'
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
 dayjs.extend(utc)
 
 const synchronizeBibliographicPlatformStatus: Record<string, string> = {
@@ -83,6 +84,7 @@ export default function DocumentsPage() {
       desc: true,
     },
   ])
+
   const [openSynchronizeModal, setOpenSynchronizeModal] = useState(false)
   const [
     synchronizeBibliographicPlatform,
@@ -540,6 +542,58 @@ export default function DocumentsPage() {
     setSelectedTab(newValue)
   }
 
+  function SuccessSynchronization({
+    platform,
+  }: {
+    platform: { changes: { added: number; updated: number; deleted: number } }
+  }) {
+    const [hovered, setHovered] = useState(false)
+
+    return (
+      <Tooltip title={renderBibliographicPlatformChanges(platform)} arrow>
+        <Box
+          sx={{
+            position: 'relative',
+            display: 'inline-block',
+            width: 40,
+            height: 40,
+          }}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+        >
+          {/* Success Image */}
+          <Image
+            src='/icons/success.svg'
+            alt='language'
+            width={40}
+            height={40}
+            priority
+          />
+
+          {/* Plus Icon (Only Visible on Hover) */}
+          {hovered && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'rgba(0, 0, 0, 0.3)', // Optional: Dark overlay
+                borderRadius: '50%',
+              }}
+            >
+              <AddOutlinedIcon sx={{ color: 'white', fontSize: 24 }} />
+            </Box>
+          )}
+        </Box>
+      </Tooltip>
+    )
+  }
+
   const renderBibliographicPlatformChanges = (platform: {
     changes: { added: number; updated: number; deleted: number }
   }) => {
@@ -749,15 +803,7 @@ export default function DocumentsPage() {
                 )}
                 {platform.status ===
                   synchronizeBibliographicPlatformStatus.success && (
-                  <Tooltip title={renderBibliographicPlatformChanges(platform)}>
-                    <Image
-                      src='/icons/success.svg'
-                      alt='language'
-                      width={40}
-                      height={40}
-                      priority
-                    />
-                  </Tooltip>
+                  <SuccessSynchronization platform={platform} />
                 )}
                 {platform.status ===
                   synchronizeBibliographicPlatformStatus.error && (
