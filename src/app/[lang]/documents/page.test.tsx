@@ -100,7 +100,7 @@ describe('DocumentsPage Component', () => {
       ),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: 'documents_page_synchronize_button' }),
+      screen.getByText('documents_page_synchronize_button'),
     ).toBeInTheDocument()
   })
 

@@ -42,8 +42,16 @@ import { MRT_Localization_FR } from 'material-react-table/locales/fr'
 import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 import Highlighter from 'react-highlight-words'
-
+import { Modal } from '@/components/Modal'
+import CircularProgress from '@mui/material/CircularProgress'
 dayjs.extend(utc)
+
+const synchronizeBibliographicPlatformStatus: Record<string, string> = {
+  loading: 'loading',
+  success: 'success',
+  error: 'error',
+  none: 'none',
+}
 
 const localeFormats: Record<string, string> = {
   fr: 'DD-MM-YYYY',
@@ -71,6 +79,22 @@ export default function DocumentsPage() {
     },
   ])
   const { currentPerspective } = useStore((state) => state.user)
+
+  const [
+    synchronizeBibliographicPlatform,
+    setSynchronizeBibliographicPlatform,
+  ] = useState(
+    Object.values(BibliographicPlatform).map((platform) => ({
+      platform,
+      status: synchronizeBibliographicPlatformStatus.success,
+      selected: false,
+      changes: {
+        added: 0,
+        updated: 0,
+        deleted: 0,
+      },
+    })),
+  )
 
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
@@ -486,8 +510,6 @@ export default function DocumentsPage() {
       return filter
     })
 
-    console.log('columnFilters', columnFilters)
-
     fetchDocuments({
       page: pagination.pageIndex + 1,
       pageSize: pagination.pageSize,
@@ -547,6 +569,93 @@ export default function DocumentsPage() {
         selectedValue={selectedTab}
         onTabChange={handleTabChange}
       />
+      <Modal
+        open={true}
+        onClose={() => {}}
+        header={<Box>header</Box>}
+        actions={
+          <Box>
+            <Button>Cancel</Button>
+            <Button>Save</Button>
+          </Box>
+        }
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          {synchronizeBibliographicPlatform.map((platform) => {
+            return (
+              <Box
+                key={platform.platform}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexDirection: 'column',
+                }}
+              >
+                <Button
+                  variant='outlined'
+                  sx={{
+                    marginRight: 1,
+                    marginBottom: 2,
+                    backgroundColor: platform.selected ? 'green' : 'white',
+                    color: platform.selected ? 'white' : 'black',
+                  }}
+                  onClick={() => {
+                    setSynchronizeBibliographicPlatform(
+                      synchronizeBibliographicPlatform.map((item) => {
+                        if (item.platform === platform.platform) {
+                          return {
+                            ...item,
+                            selected: !item.selected,
+                          }
+                        }
+                        return item
+                      }),
+                    )
+                  }}
+                >
+                  {platform.platform}
+                </Button>
+                {platform.status ===
+                  synchronizeBibliographicPlatformStatus.loading && (
+                  <CircularProgress
+                    sx={{
+                      width: 40,
+                      height: 40,
+                    }}
+                  />
+                )}
+                {platform.status ===
+                  synchronizeBibliographicPlatformStatus.success && (
+                  <Image
+                    src='/icons/success.svg'
+                    alt='language'
+                    width={40}
+                    height={40}
+                    priority
+                  />
+                )}
+                {platform.status ===
+                  synchronizeBibliographicPlatformStatus.error && (
+                  <Image
+                    src='/icons/error.svg'
+                    alt='language'
+                    width={40}
+                    height={40}
+                    priority
+                  />
+                )}
+              </Box>
+            )
+          })}
+        </Box>
+      </Modal>
       <MaterialReactTable
         initialState={{ showColumnFilters: true }}
         manualFiltering
