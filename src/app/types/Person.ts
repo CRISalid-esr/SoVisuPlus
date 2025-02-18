@@ -8,6 +8,7 @@ import { Person as DbPerson } from '@prisma/client'
 
 interface PersonJson {
   uid: string
+  slug: string | null // TODO remove when slug will be not nullable
   external: boolean
   email?: string | null
   displayName?: string
@@ -26,6 +27,7 @@ class Person implements IAgent {
     public lastName: string,
     private identifiers: PersonIdentifier[] = [],
     public type: 'person' = 'person',
+    public slug: string | null = null, //TODO make non-nullable
   ) {
     this.validateIdentifiers(identifiers) // Use the setter to validate on initialization
   }
@@ -69,6 +71,8 @@ class Person implements IAgent {
       person.firstName || '',
       person.lastName || '',
       'identifiers' in person ? (person.identifiers as PersonIdentifier[]) : [],
+      'person',
+      person.slug,
     )
   }
 
@@ -82,6 +86,8 @@ class Person implements IAgent {
       json.firstName ?? '',
       json.lastName ?? '',
       json.identifiers ?? [],
+      'person',
+      json.slug ?? null,
     )
   }
 }

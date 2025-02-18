@@ -53,6 +53,7 @@ describe('GET /api/route', () => {
       id: 123,
       person: {
         uid: '123',
+        slug: 'test-user',
         external: false,
         email: 'test',
         displayName: 'Test User',

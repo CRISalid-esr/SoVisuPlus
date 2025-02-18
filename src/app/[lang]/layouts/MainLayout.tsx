@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import AuthenticatedRoute from '@/components/AuthenticatedRoute'
 import useStore from '@/stores/global_store'
 import { IAgent } from '@/types/IAgent'
+import { useSearchParams } from 'next/navigation'
 
 export default function MainLayout({
   children,
@@ -16,8 +17,10 @@ export default function MainLayout({
 }) {
   const [open, setOpen] = useState(true) // Determines if the drawer is expanded or collapsed
 
-  const { currentPerspective, setPerspective } = useStore((state) => state.user)
-
+  const { currentPerspective, setPerspective, setPerspectiveBySlug } = useStore(
+    (state) => state.user,
+  )
+  const searchParams = useSearchParams()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -39,10 +42,21 @@ export default function MainLayout({
 
   // if the current perspective is not set, set it to the connected user
   useEffect(() => {
-    if (connectedUser && !currentPerspective) {
+    const perspectiveSlugFromUrl = searchParams?.get('perspective')
+    // If the perspective is set from the url, and there is no current
+    // perspective, or he current perspective does not match the slug
+    // provided through the url, force the current perspective
+    if (
+      perspectiveSlugFromUrl &&
+      (!currentPerspective || currentPerspective.slug != perspectiveSlugFromUrl)
+    ) {
+      setPerspectiveBySlug(perspectiveSlugFromUrl)
+    } else if (connectedUser && !currentPerspective) {
+      // If there is no current perspective, the connected user
+      // will watch her/his own works
       setPerspective(connectedUser.person as IAgent)
     }
-  }, [connectedUser, currentPerspective, setPerspective])
+  }, [connectedUser, currentPerspective, setPerspective, searchParams])
 
   if (loading && !connectedUser) {
     return <p>Loading...</p>

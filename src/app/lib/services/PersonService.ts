@@ -40,4 +40,17 @@ export class PersonService {
       throw new Error('Error fetching people from service')
     }
   }
+
+  async fetchPersonBySlug(slug: string): Promise<Person | null> {
+    try {
+      const person = await this.personDAO.fetchPersonBySlug(slug)
+      if (!person) {
+        throw new Error(`Person with UID ${slug} not found`)
+      }
+      return person
+    } catch (error) {
+      console.error('Error fetching person by UID:', error)
+      throw new Error('Error fetching person from service')
+    }
+  }
 }

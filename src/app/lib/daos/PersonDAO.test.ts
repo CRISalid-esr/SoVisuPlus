@@ -9,6 +9,7 @@ jest.mock('@prisma/client', () => {
   const mockPrismaClient = {
     person: {
       upsert: jest.fn(),
+      findFirst: jest.fn(),
     },
     personIdentifier: {
       findMany: jest.fn(),
@@ -46,6 +47,7 @@ describe('PersonDAO', () => {
       ...person,
       id: 1,
     })
+    ;(mockPrisma.person.findFirst as jest.Mock).mockResolvedValue(null)
     ;(mockPrisma.personIdentifier.findMany as jest.Mock).mockResolvedValue([])
     const dbPerson: DbPerson = await personDAO.createOrUpdatePerson(person)
     expect(dbPerson.uid).toEqual('local-johndoe')
@@ -57,6 +59,7 @@ describe('PersonDAO', () => {
         displayName: person.displayName,
         firstName: person.firstName,
         lastName: person.lastName,
+        slug: 'doe-john-doe',
         external: person.external,
       },
       create: {
@@ -65,6 +68,7 @@ describe('PersonDAO', () => {
         displayName: person.displayName,
         firstName: person.firstName,
         lastName: person.lastName,
+        slug: 'doe-john-doe',
         external: person.external,
       },
     })

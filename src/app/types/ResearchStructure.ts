@@ -9,6 +9,7 @@ import { ExtendedLanguageCode } from './ExtendLanguageCode'
 
 interface ResearchStructureJson {
   uid: string
+  slug: string | null
   acronym: string | null
   names: Array<Literal>
   descriptions: Array<Literal>
@@ -26,6 +27,7 @@ class ResearchStructure implements IAgent {
       value: string
     }[] = [],
     public type: 'research_structure' = 'research_structure',
+    public slug: string | null = null,
   ) {
     this.identifiers = _identifiers
   }
@@ -81,6 +83,8 @@ class ResearchStructure implements IAgent {
       researchStructure.names?.map(Literal.fromObject),
       researchStructure.descriptions?.map(Literal.fromObject),
       'identifiers' in researchStructure ? researchStructure.identifiers : [],
+      'research_structure',
+      researchStructure.slug,
     )
   }
 }

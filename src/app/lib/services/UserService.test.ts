@@ -54,6 +54,7 @@ describe('UserService', () => {
     personDAOMock = createMockPersonDAO({
       id: 1,
       uid: 'local-johndoe',
+      slug: 'john-doe',
       external: false,
       email: 'johndo@university.edu',
       displayName: 'John Doe',

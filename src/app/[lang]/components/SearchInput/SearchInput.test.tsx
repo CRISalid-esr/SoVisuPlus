@@ -36,7 +36,15 @@ describe('SearchInput Component', () => {
     person: {
       fetchPeopleByName: mockFetchPeopleByName,
       loading: false,
-      people: [{ id: '1', firstName: 'John', lastName: 'Doe', type: 'people' }],
+      people: [
+        {
+          id: '1',
+          firstName: 'John',
+          lastName: 'Doe',
+          type: 'people',
+          slug: 'john-doe',
+        },
+      ],
       hasMore: true,
       total: 1,
     },
@@ -46,7 +54,7 @@ describe('SearchInput Component', () => {
       researchStructures: [
         {
           id: '2',
-          names: [{ value: 'Lab X', language: 'en' }],
+          names: [{ value: 'Lab X', language: 'en', slug: 'lab-x' }],
           type: 'researchStructures',
         },
       ],

@@ -75,6 +75,7 @@ describe('PersonWorker', () => {
     const dbPerson: DbPerson = {
       id: 1,
       uid: 'person-123',
+      slug: 'john-doe',
       email: 'john.doe@example.com',
       displayName: 'John Doe',
       firstName: 'John',
@@ -131,6 +132,7 @@ describe('PersonWorker', () => {
     const dbPerson: DbPerson = {
       id: 1,
       uid: 'person-123',
+      slug: 'john-doe',
       email: 'john.doe@example.com',
       displayName: 'John Doe',
       firstName: 'John',

@@ -42,6 +42,7 @@ describe('Person', () => {
     const dbPerson = {
       id: 1,
       uid: 'P123',
+      slug: 'alice-smith',
       external: true,
       email: 'example@example.com',
       displayName: 'John Doe',
@@ -74,6 +75,7 @@ describe('Person', () => {
     const dbPerson = {
       id: 1,
       uid: 'P789',
+      slug: 'alice-smith',
       external: false,
       email: null,
       displayName: 'Alice Smith',

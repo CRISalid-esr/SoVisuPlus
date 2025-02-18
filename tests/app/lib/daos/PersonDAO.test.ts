@@ -145,4 +145,42 @@ describe('PersonDAO Integration Tests', () => {
       ]),
     )
   })
+
+  test('should append -1 to the slug when a second person with the same name is added', async () => {
+    const person1 = new Person(
+      'local-johndoe-1',
+      false,
+      'johndoe1@example.com',
+      'John Doe',
+      'John',
+      'Doe',
+      [{ type: PersonIdentifierType.ORCID, value: '0000-0001-2345-6789' }],
+    )
+
+    const person2 = new Person(
+      'local-johndoe-2',
+      false,
+      'johndoe2@example.com',
+      'John Doe',
+      'John',
+      'Doe',
+      [{ type: PersonIdentifierType.ORCID, value: '0000-0001-9876-5432' }],
+    )
+
+    // Insert first person
+    const dbPerson1 = await personDAO.createOrUpdatePerson(person1)
+    expect(dbPerson1.slug).toBe('john-doe') // First one gets base slug
+
+    // Insert second person with the same name
+    const dbPerson2 = await personDAO.createOrUpdatePerson(person2)
+    expect(dbPerson2.slug).toBe('john-doe-1') // Second one gets -1 suffix
+
+    // Ensure both records exist in the database
+    const savedPeople = await prisma.person.findMany({
+      where: { lastName: 'Doe', firstName: 'John' },
+    })
+
+    expect(savedPeople).toHaveLength(2)
+    expect(savedPeople.map((p) => p.slug)).toEqual(['john-doe', 'john-doe-1'])
+  })
 })
