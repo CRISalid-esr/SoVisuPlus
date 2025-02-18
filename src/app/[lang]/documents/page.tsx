@@ -26,7 +26,6 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useTheme } from '@mui/system'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import {
@@ -44,6 +43,8 @@ import { useEffect, useMemo, useState } from 'react'
 import Highlighter from 'react-highlight-words'
 import { Modal } from '@/components/Modal'
 import CircularProgress from '@mui/material/CircularProgress'
+import { useTheme } from '@mui/material/styles'
+
 dayjs.extend(utc)
 
 const synchronizeBibliographicPlatformStatus: Record<string, string> = {
@@ -600,11 +601,28 @@ export default function DocumentsPage() {
               >
                 <Button
                   variant='outlined'
+                  size='small'
                   sx={{
                     marginRight: 1,
                     marginBottom: 2,
-                    backgroundColor: platform.selected ? 'green' : 'white',
-                    color: platform.selected ? 'white' : 'black',
+                    fontSize: theme.utils.pxToRem(16),
+                    backgroundColor: platform.selected
+                      ? theme.palette.primary.main
+                      : theme.palette.white,
+                    color: platform.selected
+                      ? theme.palette.white
+                      : theme.palette.primary.main,
+                    fontWeight: theme.typography['500'],
+                    lineHeight: theme.typography.lineHeight.lineHeight16px,
+                    letterSpacing: '0.5px',
+                    '&:hover': {
+                      backgroundColor: platform.selected
+                        ? theme.palette.primary.main
+                        : theme.palette.white,
+                      color: platform.selected
+                        ? theme.palette.white
+                        : theme.palette.primary.main,
+                    },
                   }}
                   onClick={() => {
                     setSynchronizeBibliographicPlatform(

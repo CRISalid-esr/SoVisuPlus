@@ -19,6 +19,7 @@ declare module '@mui/material/styles' {
       fontWeightRegular: number
       fontWeightMedium: number
       fontWeightBold: number
+      500: number
       bodyLarge?: React.CSSProperties // Allow customization for `bodyLarge`
       displayLarge: React.CSSProperties // Allow customization for `displayLarge`
       bodySmall?: React.CSSProperties // Allow customization for `bodySmall`
