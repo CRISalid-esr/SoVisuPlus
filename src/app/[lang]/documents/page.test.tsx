@@ -1,13 +1,13 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import '@testing-library/jest-dom'
-import DocumentsPage from './page'
-import { createTheme, ThemeProvider } from '@mui/material/styles'
-import { I18nProvider } from '@lingui/react'
-import { i18n } from '@lingui/core'
+import DateProvider from '@/components/DateProvider'
 import { messages as enMessages } from '@/locales/en/messages'
 import { messages as frMessages } from '@/locales/fr/messages'
 import useStore from '@/stores/global_store'
-import DateProvider from '@/components/DateProvider'
+import { i18n } from '@lingui/core'
+import { I18nProvider } from '@lingui/react'
+import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles'
+import '@testing-library/jest-dom'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import DocumentsPage from './page'
 
 // Mock Zustand store
 jest.mock('@/stores/global_store', () => ({
@@ -77,7 +77,20 @@ beforeEach(() => {
   })
 })
 
-const theme = createTheme()
+const theme = createTheme({
+  typography: {
+    fontWeightRegular: 400,
+    lineHeight: { lineHeight24px: '24px' },
+  },
+  palette: {
+    white: '#ffffff',
+    primary: { main: '#1976d2' },
+    background: { paper: '#ffffff' },
+  },
+  utils: {
+    pxToRem: (value: number) => `${value / 16}rem`,
+  },
+} as ThemeOptions)
 
 const renderComponent = () =>
   render(
@@ -100,7 +113,7 @@ describe('DocumentsPage Component', () => {
       ),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: 'documents_page_synchronize_button' }),
+      screen.getByText('documents_page_synchronize_button'),
     ).toBeInTheDocument()
   })
 
