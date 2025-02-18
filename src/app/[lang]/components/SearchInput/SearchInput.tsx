@@ -19,7 +19,7 @@ import DoneIcon from '@mui/icons-material/Done'
 import { IAgent } from '@/types/IAgent'
 import { Person } from '@/types/Person'
 import { ResearchStructure } from '@/types/ResearchStructure'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
 import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn'
 
@@ -169,14 +169,22 @@ const SearchInput: React.FC = () => {
       const mergedOptions: IAutoCompleteOption<Person | ResearchStructure>[] =
         []
       if (searchTags.some((tag) => tag.selected && tag.value === 'people')) {
-        const peopleOptions = people.map((person) => {
-          return {
-            type: 'people',
-            id: person.uid,
-            label: `${person.firstName} ${person.lastName}`,
-            agent: person,
-          }
-        })
+        const peopleOptions = people
+          .map((person) => {
+            if (!person.slug) {
+              console.error(
+                `Person ${person.uid} is not selectable as it does not have a slug`,
+              )
+              return null
+            }
+            return {
+              type: 'people',
+              id: person.slug || 'nc', //TODO remove when slug will be non-nullable
+              label: `${person.firstName} ${person.lastName}`,
+              agent: person,
+            }
+          })
+          .filter(Boolean) as IAutoCompleteOption<Person | ResearchStructure>[]
         mergedOptions.push(...peopleOptions)
       }
       if (
@@ -275,20 +283,17 @@ const SearchInput: React.FC = () => {
     return CustomPaper
   }, [searchTags])
 
-  const handlePerspectiveSelections = (
+  const handlePerspectiveSelection = (
     event: React.SyntheticEvent,
     value: IAutoCompleteOption<Person | ResearchStructure> | null,
   ) => {
     if (value) {
-      //set to url
-      setPerspective(value.agent)
-
       const params = new URLSearchParams(searchParams.toString())
 
       if (value.id) {
-        params.set('perspective', value.id) // Use `id` to track selection
+        params.set('perspective', value.id)
       } else {
-        params.delete('perspective') // Remove if empty
+        params.delete('perspective')
       }
 
       // Push updated query parameters without full page reload
@@ -312,7 +317,7 @@ const SearchInput: React.FC = () => {
         onClose={() => {
           setSearchTerm(searchTerm)
         }}
-        onChange={handlePerspectiveSelections}
+        onChange={handlePerspectiveSelection}
         renderGroup={renderGroup}
         disableCloseOnSelect={true}
         options={mergedOptions}

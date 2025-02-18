@@ -1,3 +1,4 @@
+import slugify from 'slugify'
 import {
   Person as DbPerson,
   PersonIdentifierType as DbPersonIdentifierType,
@@ -24,6 +25,20 @@ export class PersonDAO extends AbstractDAO {
    */
   public async createOrUpdatePerson(person: Person): Promise<DbPerson> {
     try {
+      const baseSlug = slugify(`${person.firstName}-${person.lastName}`, {
+        lower: true,
+        strict: true,
+      })
+
+      let uniqueSlug = baseSlug
+      let counter = 1
+
+      // Ensure uniqueness of the slug
+      while (await this.slugExists(uniqueSlug, person.uid)) {
+        uniqueSlug = `${baseSlug}-${counter}`
+        counter++
+      }
+
       const dbPerson: DbPerson = await this.prismaClient.person.upsert({
         where: { uid: person.uid },
         update: {
@@ -32,6 +47,7 @@ export class PersonDAO extends AbstractDAO {
           firstName: person.firstName,
           lastName: person.lastName,
           external: person.external,
+          slug: uniqueSlug,
         },
         create: {
           uid: person.uid,
@@ -40,6 +56,7 @@ export class PersonDAO extends AbstractDAO {
           firstName: person.firstName,
           lastName: person.lastName,
           external: person.external,
+          slug: uniqueSlug,
         },
       })
 
@@ -48,9 +65,29 @@ export class PersonDAO extends AbstractDAO {
 
       return dbPerson
     } catch (error) {
-      console.error('Error during person upsert:', error as Error)
-      throw new Error(`Failed to upsert person: ${(error as Error).message}`)
+      console.error('Error during person upsert:', error)
+      throw new Error(
+        `Failed to upsert person: ${(error as unknown as Error).message}`,
+      )
     }
+  }
+
+  /**
+   * Checks if a given slug already exists in the database.
+   * If updating, it ensures the conflict is not caused by the same person.
+   */
+  private async slugExists(
+    slug: string,
+    excludeUid?: string,
+  ): Promise<boolean> {
+    const existingPerson = await this.prismaClient.person.findFirst({
+      where: {
+        slug,
+        uid: excludeUid ? { not: excludeUid } : undefined, // Avoid self-collision on updates
+      },
+    })
+
+    return existingPerson !== null
   }
 
   /**
@@ -193,6 +230,23 @@ export class PersonDAO extends AbstractDAO {
       people,
       total,
       hasMore: total > page * itemsPerPage,
+    }
+  }
+
+  public async fetchPersonBySlug(slug: string): Promise<Person | null> {
+    try {
+      const dbPerson = await this.prismaClient.person.findUnique({
+        where: { slug },
+      })
+
+      if (!dbPerson) {
+        return null
+      }
+
+      return Person.fromDbPerson(dbPerson)
+    } catch (error) {
+      console.error(`Error fetching person with slug ${slug}:`, error)
+      throw new Error(`Failed to fetch person with slug ${slug}`)
     }
   }
 }

@@ -20,6 +20,7 @@ model User {
 model Person {
   id            Int                @id @default(autoincrement())
   uid           String             @unique
+  slug          String?            @unique //TODO make non-nullable
   email         String?            @unique
   displayName   String?
   firstName     String?
