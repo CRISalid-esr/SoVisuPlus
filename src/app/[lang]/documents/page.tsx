@@ -556,7 +556,6 @@ export default function DocumentsPage() {
       >
         <Box>
           <Typography variant='h4' gutterBottom>
-            {/*dislay name of the agent in the current perspective */}
             <Trans>documents_page_main_title</Trans> :{' '}
             {currentPerspective?.getDisplayName(lang as ExtendedLanguageCode)}
           </Typography>
@@ -573,11 +572,21 @@ export default function DocumentsPage() {
       <Modal
         open={true}
         onClose={() => {}}
-        header={<Box>header</Box>}
+        header={
+          <Box>
+            <Typography variant='h6' gutterBottom>
+              <Trans>documents_page_synchronize_modal_title</Trans> :
+            </Typography>
+          </Box>
+        }
         actions={
           <Box>
-            <Button>Cancel</Button>
-            <Button>Save</Button>
+            <Button variant='outlined'>
+              <Trans>documents_page_synchronize_modal_cancel_button</Trans>
+            </Button>
+            <Button variant='contained'>
+              <Trans>documents_page_synchronize_modal_synchronize_button</Trans>
+            </Button>
           </Box>
         }
       >

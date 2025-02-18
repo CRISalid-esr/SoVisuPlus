@@ -83,23 +83,23 @@ msgstr "Retour à la page d'accueil"
 msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
-#: src/app/[lang]/documents/page.tsx:128
+#: src/app/[lang]/documents/page.tsx:111
 msgid "documents_page_all_documents_filter"
 msgstr "Toutes mes publications"
 
-#: src/app/[lang]/documents/page.tsx:92
+#: src/app/[lang]/documents/page.tsx:146
 msgid "documents_page_book_chapter_icon_label"
 msgstr "Chapitre de livre"
 
-#: src/app/[lang]/documents/page.tsx:86
+#: src/app/[lang]/documents/page.tsx:140
 msgid "documents_page_book_icon_label"
 msgstr "Livre"
 
-#: src/app/[lang]/documents/page.tsx:95
+#: src/app/[lang]/documents/page.tsx:149
 msgid "documents_page_conference_article_icon_label"
 msgstr "Article de conférence"
 
-#: src/app/[lang]/documents/page.tsx:234
+#: src/app/[lang]/documents/page.tsx:284
 msgid "documents_page_contributors_column"
 msgstr "auteurs"
 
@@ -107,67 +107,79 @@ msgstr "auteurs"
 #~ msgid "documents_page_date_column"
 #~ msgstr "Date"
 
-#: src/app/[lang]/documents/page.tsx:77
+#: src/app/[lang]/documents/page.tsx:131
 msgid "documents_page_document_icon_label"
 msgstr "Article"
 
-#: src/app/[lang]/documents/page.tsx:318
+#: src/app/[lang]/documents/page.tsx:365
 msgid "documents_page_halStatus_column"
 msgstr "Statut hal"
 
-#: src/app/[lang]/documents/page.tsx:133
+#: src/app/[lang]/documents/page.tsx:116
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "Dépôt HAL incomplet"
 
-#: src/app/[lang]/documents/page.tsx:83
+#: src/app/[lang]/documents/page.tsx:137
 msgid "documents_page_journal_article_icon_label"
 msgstr "Article de journal"
 
-#: src/app/[lang]/documents/page.tsx:139
+#: src/app/[lang]/documents/page.tsx:122
 msgid "documents_page_keywords_to_validate"
 msgstr "Mots-clés à valider"
 
-#: src/app/[lang]/documents/page.tsx:482
+#: src/app/[lang]/documents/page.tsx:559
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:89
+#: src/app/[lang]/documents/page.tsx:143
 msgid "documents_page_monograph_icon_label"
 msgstr "Monographie"
 
-#: src/app/[lang]/documents/page.tsx:98
+#: src/app/[lang]/documents/page.tsx:152
 msgid "documents_page_proceedings_icon_label"
 msgstr "Procédure"
 
-#: src/app/[lang]/documents/page.tsx:276
+#: src/app/[lang]/documents/page.tsx:326
 msgid "documents_page_publication_date_column"
 msgstr "Date de publication"
 
-#: src/app/[lang]/documents/page.tsx:281
+#: src/app/[lang]/documents/page.tsx:330
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "Aucune date"
 
-#: src/app/[lang]/documents/page.tsx:311
+#: src/app/[lang]/documents/page.tsx:358
 msgid "documents_page_publishedIn_column"
 msgstr "paru dans"
 
-#: src/app/[lang]/documents/page.tsx:80
+#: src/app/[lang]/documents/page.tsx:134
 msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Publication scientifique"
 
-#: src/app/[lang]/documents/page.tsx:325
+#: src/app/[lang]/documents/page.tsx:373
 msgid "documents_page_source_column"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/page.tsx:487
+#: src/app/[lang]/documents/page.tsx:564
 msgid "documents_page_synchronize_button"
 msgstr "Synchroniser"
 
-#: src/app/[lang]/documents/page.tsx:168
+#: src/app/[lang]/documents/page.tsx:585
+msgid "documents_page_synchronize_modal_cancel_button"
+msgstr "Annuler"
+
+#: src/app/[lang]/documents/page.tsx:588
+msgid "documents_page_synchronize_modal_synchronize_button"
+msgstr "Synchroniser"
+
+#: src/app/[lang]/documents/page.tsx:578
+msgid "documents_page_synchronize_modal_title"
+msgstr "Sources à synchroniser"
+
+#: src/app/[lang]/documents/page.tsx:218
 msgid "documents_page_title_column"
 msgstr "titre"
 
-#: src/app/[lang]/documents/page.tsx:152
+#: src/app/[lang]/documents/page.tsx:178
 msgid "documents_page_type_column"
 msgstr "type"
 
@@ -206,7 +218,7 @@ msgstr "Mon profil"
 msgid "my_account_page_notification_tab"
 msgstr "Notifications"
 
-#: src/app/[lang]/documents/page.tsx:182
+#: src/app/[lang]/documents/page.tsx:232
 msgid "no_title_available"
 msgstr "aucun titre disponible"
 
