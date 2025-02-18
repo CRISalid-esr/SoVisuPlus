@@ -79,8 +79,7 @@ export default function DocumentsPage() {
       desc: true,
     },
   ])
-  const { currentPerspective } = useStore((state) => state.user)
-
+  const [openSynchronizeModal, setOpenSynchronizeModal] = useState(false)
   const [
     synchronizeBibliographicPlatform,
     setSynchronizeBibliographicPlatform,
@@ -96,7 +95,7 @@ export default function DocumentsPage() {
       },
     })),
   )
-
+  const { currentPerspective } = useStore((state) => state.user)
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
 
@@ -560,7 +559,11 @@ export default function DocumentsPage() {
             {currentPerspective?.getDisplayName(lang as ExtendedLanguageCode)}
           </Typography>
         </Box>
-        <Button startIcon={<SyncIcon />} variant='outlined'>
+        <Button
+          startIcon={<SyncIcon />}
+          variant='outlined'
+          onClick={() => setOpenSynchronizeModal(true)}
+        >
           <Trans>documents_page_synchronize_button</Trans>
         </Button>
       </Box>
@@ -570,24 +573,58 @@ export default function DocumentsPage() {
         onTabChange={handleTabChange}
       />
       <Modal
-        open={true}
-        onClose={() => {}}
+        open={openSynchronizeModal}
+        onClose={() => setOpenSynchronizeModal(false)}
         header={
-          <Box>
-            <Typography variant='h6' gutterBottom>
+          <Box
+            sx={{
+              marginTop: theme.spacing(2),
+              marginLeft: theme.utils.pxToRem(20),
+            }}
+          >
+            <Typography
+              variant='h6'
+              gutterBottom
+              sx={{
+                lineHeight: theme.typography.lineHeight.lineHeight28px,
+                fontStyle: 'normal',
+                fontSize: theme.utils.pxToRem(28),
+                fontWeight: theme.typography.fontWeightBold,
+              }}
+            >
               <Trans>documents_page_synchronize_modal_title</Trans> :
             </Typography>
           </Box>
         }
         actions={
-          <Box>
-            <Button variant='outlined'>
+          <>
+            <Button
+              variant='outlined'
+              onClick={() => setOpenSynchronizeModal(false)}
+              sx={{
+                marginRight: 1,
+                fontStyle: 'normal',
+                fontSize: theme.utils.pxToRem(14),
+                letterSpacing: '0.1px',
+                lineHeight: theme.typography.lineHeight.lineHeight20px,
+                fontWeight: theme.typography['500'],
+              }}
+            >
               <Trans>documents_page_synchronize_modal_cancel_button</Trans>
             </Button>
-            <Button variant='contained'>
+            <Button
+              sx={{
+                fontStyle: 'normal',
+                fontSize: theme.utils.pxToRem(14),
+                letterSpacing: '0.1px',
+                lineHeight: theme.typography.lineHeight.lineHeight20px,
+                fontWeight: theme.typography['500'],
+              }}
+              variant='contained'
+            >
               <Trans>documents_page_synchronize_modal_synchronize_button</Trans>
             </Button>
-          </Box>
+          </>
         }
       >
         <Box
