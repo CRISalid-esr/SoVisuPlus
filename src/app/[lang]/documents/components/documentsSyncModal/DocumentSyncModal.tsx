@@ -1,6 +1,6 @@
 import { Modal } from '@/components/Modal'
-import { BibliographicSyncData } from '@/types/BibliographicSyncData'
-import { BibliographicSyncDataStatus } from '@/types/BibliographicSyncDataStatus'
+import { DocumentSync } from '@/types/DocumentSync'
+import { DocumentSyncStatus } from '@/types/DocumentSyncStatus'
 import { Trans } from '@lingui/macro'
 import { Box, Button, CircularProgress, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -9,16 +9,16 @@ import { FC } from 'react'
 import ModalActions from './ModalActions'
 import SuccessSynchronization from './SuccessSynchronization'
 
-interface BibliographicSyncDataModalProps {
-  bibliographicSyncData: BibliographicSyncData[]
-  setBibliographicSyncData: (value: BibliographicSyncData[]) => void
+interface DocumentSyncModalProps {
+  documentSync: DocumentSync[]
+  setDocumentSync: (value: DocumentSync[]) => void
   openSynchronizeModal: boolean
   setOpenSynchronizeModal: (value: boolean) => void
 }
 
-const BibliographicSyncDataModal: FC<BibliographicSyncDataModalProps> = ({
-  bibliographicSyncData,
-  setBibliographicSyncData,
+const DocumentSyncModalProps: FC<DocumentSyncModalProps> = ({
+  documentSync,
+  setDocumentSync,
   openSynchronizeModal,
   setOpenSynchronizeModal,
 }) => {
@@ -53,7 +53,7 @@ const BibliographicSyncDataModal: FC<BibliographicSyncDataModalProps> = ({
           alignItems: 'center',
         }}
       >
-        {bibliographicSyncData.map((platform) => (
+        {documentSync.map((platform) => (
           <Box
             key={platform.name}
             sx={{
@@ -71,8 +71,8 @@ const BibliographicSyncDataModal: FC<BibliographicSyncDataModalProps> = ({
                 fontWeight: '500',
               }}
               onClick={() =>
-                setBibliographicSyncData(
-                  bibliographicSyncData.map((item) =>
+                setDocumentSync(
+                  documentSync.map((item) =>
                     item.name === platform.name
                       ? { ...item, selected: !item.selected }
                       : item,
@@ -82,13 +82,13 @@ const BibliographicSyncDataModal: FC<BibliographicSyncDataModalProps> = ({
             >
               {platform.name}
             </Button>
-            {platform.status === BibliographicSyncDataStatus.loading && (
+            {platform.status === DocumentSyncStatus.loading && (
               <CircularProgress sx={{ width: 40, height: 40 }} />
             )}
-            {platform.status === BibliographicSyncDataStatus.success && (
+            {platform.status === DocumentSyncStatus.success && (
               <SuccessSynchronization platform={platform} />
             )}
-            {platform.status === BibliographicSyncDataStatus.error && (
+            {platform.status === DocumentSyncStatus.error && (
               <Image
                 src='/icons/error.svg'
                 alt='error'
@@ -104,4 +104,4 @@ const BibliographicSyncDataModal: FC<BibliographicSyncDataModalProps> = ({
   )
 }
 
-export default BibliographicSyncDataModal
+export default DocumentSyncModalProps

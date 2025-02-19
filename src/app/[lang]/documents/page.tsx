@@ -14,8 +14,8 @@ import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
 import { t } from '@lingui/macro'
 
-import { BibliographicSyncData } from '@/types/BibliographicSyncData'
-import { BibliographicSyncDataStatus } from '@/types/BibliographicSyncDataStatus'
+import { DocumentSync } from '@/types/DocumentSync'
+import { DocumentSyncStatus } from '@/types/DocumentSyncStatus'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import { Localization } from '@/types/Localization'
 import { Box, Chip, IconButton, Tooltip, Typography } from '@mui/material'
@@ -32,7 +32,7 @@ import {
 import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 import Highlighter from 'react-highlight-words'
-import BibliographicSyncDataModal from './components/BibliographicSyncDataModal'
+import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
 import DocumentHeader from './components/DocumentHeader'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
 dayjs.extend(utc)
@@ -53,12 +53,10 @@ export default function DocumentsPage() {
 
   const [openSynchronizeModal, setOpenSynchronizeModal] =
     useState<boolean>(false)
-  const [bibliographicSyncData, setBibliographicSyncData] = useState<
-    BibliographicSyncData[]
-  >(
+  const [documentSync, setDocumentSync] = useState<DocumentSync[]>(
     Object.values(BibliographicPlatform).map((platform) => ({
       name: platform,
-      status: BibliographicSyncDataStatus.success,
+      status: DocumentSyncStatus.success,
       selected: false,
       changes: {
         added: 0,
@@ -511,8 +509,8 @@ export default function DocumentsPage() {
       <BibliographicSyncDataModal
         openSynchronizeModal={openSynchronizeModal}
         setOpenSynchronizeModal={setOpenSynchronizeModal}
-        bibliographicSyncData={bibliographicSyncData}
-        setBibliographicSyncData={setBibliographicSyncData}
+        documentSync={documentSync}
+        setDocumentSync={setDocumentSync}
       />
 
       <MaterialReactTable

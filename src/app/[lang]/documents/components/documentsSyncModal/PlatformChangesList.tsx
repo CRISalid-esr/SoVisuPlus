@@ -16,7 +16,7 @@ const PlatformChangesList: FC<{ changes: Record<ChangeType, number> }> = ({
       <ListItem>
         <ListItemIcon
           sx={{
-            marginRight: 0,
+            minWidth: theme.spacing(2),
           }}
         >
           <FiberManualRecordIcon
@@ -44,7 +44,7 @@ const PlatformChangesList: FC<{ changes: Record<ChangeType, number> }> = ({
       <ListItem>
         <ListItemIcon
           sx={{
-            marginRight: 0,
+            minWidth: theme.spacing(2),
           }}
         >
           <FiberManualRecordIcon
@@ -72,7 +72,7 @@ const PlatformChangesList: FC<{ changes: Record<ChangeType, number> }> = ({
       <ListItem>
         <ListItemIcon
           sx={{
-            marginRight: 0,
+            minWidth: theme.spacing(2),
           }}
         >
           <FiberManualRecordIcon
