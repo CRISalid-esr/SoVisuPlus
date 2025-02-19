@@ -50,14 +50,8 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { useTheme } from '@mui/material/styles'
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
+import { BibliographicSyncDataStatus } from '@/types/BibliographicSyncDataStatus'
 dayjs.extend(utc)
-
-const synchronizeBibliographicPlatformStatus: Record<string, string> = {
-  loading: 'loading',
-  success: 'success',
-  error: 'error',
-  none: 'none',
-}
 
 const localeFormats: Record<string, string> = {
   fr: 'DD-MM-YYYY',
@@ -86,13 +80,10 @@ export default function DocumentsPage() {
   ])
 
   const [openSynchronizeModal, setOpenSynchronizeModal] = useState(false)
-  const [
-    synchronizeBibliographicPlatform,
-    setSynchronizeBibliographicPlatform,
-  ] = useState(
+  const [bibliographicSyncData, setBibliographicSyncData] = useState(
     Object.values(BibliographicPlatform).map((platform) => ({
       platform,
-      status: synchronizeBibliographicPlatformStatus.success,
+      status: BibliographicSyncDataStatus.success,
       selected: false,
       changes: {
         added: 0,
@@ -101,6 +92,7 @@ export default function DocumentsPage() {
       },
     })),
   )
+
   const { currentPerspective } = useStore((state) => state.user)
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
