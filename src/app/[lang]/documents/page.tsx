@@ -12,20 +12,13 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
-import { t, Trans } from '@lingui/macro'
+import { t } from '@lingui/macro'
 
+import { BibliographicSyncData } from '@/types/BibliographicSyncData'
 import { BibliographicSyncDataStatus } from '@/types/BibliographicSyncDataStatus'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import { Localization } from '@/types/Localization'
-import SyncIcon from '@mui/icons-material/Sync'
-import {
-  Box,
-  Button,
-  Chip,
-  IconButton,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Box, Chip, IconButton, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -39,9 +32,9 @@ import {
 import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 import Highlighter from 'react-highlight-words'
-import { DocumentTypeIcons } from './components/DocumentTypeIcons'
 import BibliographicSyncDataModal from './components/BibliographicSyncDataModal'
-import { BibliographicSyncData } from '@/types/BibliographicSyncData'
+import DocumentHeader from './components/DocumentHeader'
+import { DocumentTypeIcons } from './components/DocumentTypeIcons'
 dayjs.extend(utc)
 
 export default function DocumentsPage() {
@@ -503,35 +496,12 @@ export default function DocumentsPage() {
 
   return (
     <Box>
-      <Box
-        mb={3}
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: {
-            xs: 'flex-start',
-            md: 'center',
-          },
-          flexDirection: {
-            xs: 'column',
-            sm: 'row',
-          },
-        }}
-      >
-        <Box>
-          <Typography variant='h4' gutterBottom>
-            <Trans>documents_page_main_title</Trans> :{' '}
-            {currentPerspective?.getDisplayName(lang as ExtendedLanguageCode)}
-          </Typography>
-        </Box>
-        <Button
-          startIcon={<SyncIcon />}
-          variant='outlined'
-          onClick={() => setOpenSynchronizeModal(true)}
-        >
-          <Trans>documents_page_synchronize_button</Trans>
-        </Button>
-      </Box>
+      <DocumentHeader
+        perspective={
+          currentPerspective?.getDisplayName(lang as ExtendedLanguageCode) || ''
+        }
+        onSyncClick={() => setOpenSynchronizeModal(true)}
+      />
       <TabFilter
         tabsData={tabs}
         selectedValue={selectedTab}
