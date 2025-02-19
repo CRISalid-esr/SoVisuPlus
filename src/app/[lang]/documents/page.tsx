@@ -13,10 +13,12 @@ import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
 import { t, Trans } from '@lingui/macro'
-import ArticleIcon from '@mui/icons-material/Article'
-import BookIcon from '@mui/icons-material/Book'
-import DescriptionIcon from '@mui/icons-material/Description'
-import SchoolIcon from '@mui/icons-material/School'
+
+import { Modal } from '@/components/Modal'
+import { BibliographicSyncDataStatus } from '@/types/BibliographicSyncDataStatus'
+import { LocaleDateFormats } from '@/types/LocaleDateFormats'
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
 import SyncIcon from '@mui/icons-material/Sync'
 import {
   Box,
@@ -30,6 +32,8 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import CircularProgress from '@mui/material/CircularProgress'
+import { useTheme } from '@mui/material/styles'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import {
@@ -37,27 +41,14 @@ import {
   MRT_Column,
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
-  MRT_Localization,
   MRT_SortingState,
 } from 'material-react-table'
-import { MRT_Localization_EN } from 'material-react-table/locales/en'
-import { MRT_Localization_FR } from 'material-react-table/locales/fr'
 import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 import Highlighter from 'react-highlight-words'
-import { Modal } from '@/components/Modal'
-import CircularProgress from '@mui/material/CircularProgress'
-import { useTheme } from '@mui/material/styles'
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
-import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
-import { BibliographicSyncDataStatus } from '@/types/BibliographicSyncDataStatus'
-import { LocaleDateFormats } from '@/types/LocaleDateFormats'
+import { DocumentTypeIcons } from './components/DocumentTypeIcons'
+import { Localization } from '@/types/Localization'
 dayjs.extend(utc)
-
-const localization: Record<string, MRT_Localization> = {
-  fr: MRT_Localization_FR,
-  en: MRT_Localization_EN,
-}
 
 export default function DocumentsPage() {
   const [pagination, setPagination] = useState({
@@ -144,21 +135,6 @@ export default function DocumentsPage() {
     ),
   }
 
-  const documentTypeIcons: Record<DocumentType, JSX.Element> = {
-    [DocumentType.Document]: <DescriptionIcon />,
-    [DocumentType.ScholarlyPublication]: <SchoolIcon />,
-    [DocumentType.JournalArticle]: <ArticleIcon />,
-    [DocumentType.Book]: <BookIcon />,
-    [DocumentType.Monograph]: <BookIcon />, //TDOO: change icon later
-    [DocumentType.BookChapter]: <BookIcon />,
-    [DocumentType.ConferenceArticle]: (
-      <span className='material-symbols-outlined'>podium</span>
-    ),
-    [DocumentType.Proceedings]: (
-      <span className='material-symbols-outlined'>podium</span>
-    ),
-  }
-
   const [selectedTab, setSelectedTab] = useState(tabs[0].value)
 
   const columns = useMemo<MRT_ColumnDef<Document>[]>(
@@ -170,7 +146,7 @@ export default function DocumentsPage() {
         Cell({ row }: { row: { original: { documentType: DocumentType } } }) {
           return (
             <Tooltip title={documentTypeLabels[row.original.documentType]}>
-              {documentTypeIcons[row.original.documentType]}
+              {DocumentTypeIcons[row.original.documentType]}
             </Tooltip>
           )
         },
@@ -194,7 +170,7 @@ export default function DocumentsPage() {
                   marginLeft: 'auto',
                 }}
               >
-                {documentTypeIcons[type]}
+                {DocumentTypeIcons[type]}
               </Box>
             </Box>
           ),
@@ -824,7 +800,7 @@ export default function DocumentsPage() {
           columnFilters,
           globalFilter,
         }}
-        localization={localization[lang]}
+        localization={Localization[lang]}
       />
     </Box>
   )
