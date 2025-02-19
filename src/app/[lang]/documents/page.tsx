@@ -51,14 +51,8 @@ import { useTheme } from '@mui/material/styles'
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
 import { BibliographicSyncDataStatus } from '@/types/BibliographicSyncDataStatus'
+import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 dayjs.extend(utc)
-
-const localeFormats: Record<string, string> = {
-  fr: 'DD-MM-YYYY',
-  en: 'MM-DD-YYYY',
-  de: 'DD.MM.YYYY',
-  es: 'DD/MM/YYYY',
-}
 
 const localization: Record<string, MRT_Localization> = {
   fr: MRT_Localization_FR,
@@ -82,7 +76,7 @@ export default function DocumentsPage() {
   const [openSynchronizeModal, setOpenSynchronizeModal] = useState(false)
   const [bibliographicSyncData, setBibliographicSyncData] = useState(
     Object.values(BibliographicPlatform).map((platform) => ({
-      platform,
+      name: platform,
       status: BibliographicSyncDataStatus.success,
       selected: false,
       changes: {
@@ -326,7 +320,7 @@ export default function DocumentsPage() {
           if (!dateStr) {
             return t`documents_page_publication_date_column_no_date_available`
           }
-          const dateFormat = localeFormats[lang] || 'MM-DD-YYYY'
+          const dateFormat = LocaleDateFormats['lang'] || 'MM-DD-YYYY'
           if (!dayjs(dateStr, 'YYYY-MM-DD').isValid()) {
             return (
               <Highlighter
@@ -732,10 +726,10 @@ export default function DocumentsPage() {
             alignItems: 'center',
           }}
         >
-          {synchronizeBibliographicPlatform.map((platform) => {
+          {bibliographicSyncData.map((platform) => {
             return (
               <Box
-                key={platform.platform}
+                key={platform.name}
                 sx={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -769,9 +763,9 @@ export default function DocumentsPage() {
                     },
                   }}
                   onClick={() => {
-                    setSynchronizeBibliographicPlatform(
-                      synchronizeBibliographicPlatform.map((item) => {
-                        if (item.platform === platform.platform) {
+                    setBibliographicSyncData(
+                      bibliographicSyncData.map((item) => {
+                        if (item.name === platform.name) {
                           return {
                             ...item,
                             selected: !item.selected,
@@ -782,10 +776,9 @@ export default function DocumentsPage() {
                     )
                   }}
                 >
-                  {platform.platform}
+                  {platform.name}
                 </Button>
-                {platform.status ===
-                  synchronizeBibliographicPlatformStatus.loading && (
+                {platform.status === BibliographicSyncDataStatus.loading && (
                   <CircularProgress
                     sx={{
                       width: 40,
@@ -793,12 +786,10 @@ export default function DocumentsPage() {
                     }}
                   />
                 )}
-                {platform.status ===
-                  synchronizeBibliographicPlatformStatus.success && (
+                {platform.status === BibliographicSyncDataStatus.success && (
                   <SuccessSynchronization platform={platform} />
                 )}
-                {platform.status ===
-                  synchronizeBibliographicPlatformStatus.error && (
+                {platform.status === BibliographicSyncDataStatus.error && (
                   <Image
                     src='/icons/error.svg'
                     alt='language'
