@@ -25,45 +25,75 @@ export class PersonDAO extends AbstractDAO {
    */
   public async createOrUpdatePerson(person: Person): Promise<DbPerson> {
     try {
+      // baseSlug could be null for people with only a display name
       const baseSlug = slugify(`${person.firstName}-${person.lastName}`, {
         lower: true,
         strict: true,
       })
 
-      let uniqueSlug = baseSlug
+      let uniqueSlug = null
       let counter = 1
-
-      // Ensure uniqueness of the slug
-      while (await this.slugExists(uniqueSlug, person.uid)) {
-        uniqueSlug = `${baseSlug}-${counter}`
-        counter++
+      if (baseSlug.trim()) {
+        uniqueSlug = baseSlug
+        while (await this.slugExists(uniqueSlug, person.uid)) {
+          uniqueSlug = `${baseSlug}-${counter}`
+          counter++
+        }
       }
+      console.log(`Unique slug : ${uniqueSlug}`)
+      const maxRetries = 3
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          const dbPerson = await this.prismaClient.person.upsert({
+            where: { uid: person.uid },
+            update: {
+              email: person.email,
+              displayName: person.displayName,
+              firstName: person.firstName,
+              lastName: person.lastName,
+              external: person.external,
+              slug: uniqueSlug,
+            },
+            create: {
+              uid: person.uid,
+              email: person.email,
+              displayName: person.displayName,
+              firstName: person.firstName,
+              lastName: person.lastName,
+              external: person.external,
+              slug: uniqueSlug,
+            },
+          })
+          await this.handleIdentifierConflicts(
+            person.getIdentifiers(),
+            dbPerson?.id,
+          )
+          await this.upsertIdentifiers(person.getIdentifiers(), dbPerson.id)
+          return dbPerson
+        } catch (error) {
+          if (
+            error instanceof PrismaClientKnownRequestError &&
+            error.code === 'P2002' && // Unique constraint violation
+            baseSlug
+          ) {
+            console.error(
+              `Slug collision detected for '${uniqueSlug}', retrying...`,
+            )
 
-      const dbPerson: DbPerson = await this.prismaClient.person.upsert({
-        where: { uid: person.uid },
-        update: {
-          email: person.email,
-          displayName: person.displayName,
-          firstName: person.firstName,
-          lastName: person.lastName,
-          external: person.external,
-          slug: uniqueSlug,
-        },
-        create: {
-          uid: person.uid,
-          email: person.email,
-          displayName: person.displayName,
-          firstName: person.firstName,
-          lastName: person.lastName,
-          external: person.external,
-          slug: uniqueSlug,
-        },
-      })
+            uniqueSlug = `${baseSlug}-${counter}`
+            counter++
 
-      await this.handleIdentifierConflicts(person.getIdentifiers(), dbPerson.id)
-      await this.upsertIdentifiers(person.getIdentifiers(), dbPerson.id)
-
-      return dbPerson
+            const delay = Math.floor(
+              Math.random() * (100 * Math.pow(2, attempt)),
+            )
+            await new Promise((resolve) => setTimeout(resolve, delay))
+          } else {
+            // rethrow the other errors
+            throw error
+          }
+        }
+      }
+      throw new Error(`Num of max retries reached`)
     } catch (error) {
       console.error('Error during person upsert:', error)
       throw new Error(

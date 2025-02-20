@@ -90,6 +90,8 @@ describe('PersonDAO', () => {
     ;(mockPrisma.personIdentifier.findMany as jest.Mock).mockResolvedValue([
       { type: 'ORCID', value: '0000-0001-2345-6789', personId: 999 },
     ])
+    // for duplicate slug resolution
+    ;(mockPrisma.person.findFirst as jest.Mock).mockResolvedValue(null)
 
     await expect(personDAO.createOrUpdatePerson(person)).rejects.toThrow(
       'Conflicting identifiers found: ORCID:0000-0001-2345-6789',
