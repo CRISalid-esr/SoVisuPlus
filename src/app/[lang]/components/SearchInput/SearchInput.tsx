@@ -172,7 +172,7 @@ const SearchInput: React.FC = () => {
         const peopleOptions = people
           .map((person) => {
             if (!person.slug) {
-              console.error(
+              console.log(
                 `Person ${person.uid} is not selectable as it does not have a slug`,
               )
               return null
