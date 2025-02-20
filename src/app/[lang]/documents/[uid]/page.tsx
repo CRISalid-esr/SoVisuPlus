@@ -8,7 +8,7 @@ import { t } from '@lingui/macro'
 import { useTheme } from '@mui/material/styles'
 import { TabFilter } from '@/components/TabFilter'
 import DocumentDetailsHeader from './components/DocumentDetailsHeader'
-import DocumentDetailsTitle from './components/DpcumentDetailsTtitle'
+import DocumentDetailsTitle from './components/DocumentDetailsTtitle'
 import DocumentDetailsCard from './components/DocumentDetailsCard'
 
 export default function DocumentDetailsPage() {

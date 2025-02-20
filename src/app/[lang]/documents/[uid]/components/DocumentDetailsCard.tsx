@@ -28,12 +28,11 @@ const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
 
   const documentTypeFields: Record<string, string[]> = {
     Book: ['titles'],
+    JournalArticle: ['titles'],
   }
 
   const fieldsToDisplay =
     documentTypeFields[selectedDocument?.documentType ?? ''] || []
-
-  console.log('fieldsToDisplay', fieldsToDisplay)
 
   return (
     <CustomCard

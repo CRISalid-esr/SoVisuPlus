@@ -25,7 +25,7 @@ const DocumentDetailsHeader: FC<DocumentDetailsHeaderProps> = ({}) => {
         <ArrowBackIcon />
       </IconButton>
       <Typography>
-        <Trans>documents_page_main_title</Trans>
+        <Trans>document_details_page_main_title</Trans>
       </Typography>
     </Box>
   )
