@@ -37,6 +37,7 @@ import BibliographicSyncDataModal from './components/documentsSyncModal/Document
 import DocumentHeader from './components/DocumentHeader'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
 import InfoIcon from '@mui/icons-material/Info'
+import { useRouter } from 'next/navigation' // Import useRouter
 dayjs.extend(utc)
 
 export default function DocumentsPage() {
@@ -77,7 +78,7 @@ export default function DocumentsPage() {
   >({})
 
   const theme = useTheme()
-
+  const router = useRouter() // Initialize the router
   const tabs = [
     {
       label: t`documents_page_all_documents_filter`,
@@ -545,7 +546,10 @@ export default function DocumentsPage() {
               icon={<InfoIcon />}
               key='edit'
               label={t`documents_page_action_column_details`}
-              onClick={() => console.info('details')}
+              onClick={() => {
+                const documentUid = row.original.uid // Assuming 'uid' is the unique identifier
+                router.push(`/documents/${documentUid}`) // Navigate to the details page
+              }}
               table={table}
             />
           </Box>,
