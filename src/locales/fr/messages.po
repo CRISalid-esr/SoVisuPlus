@@ -83,23 +83,23 @@ msgstr "Retour à la page d'accueil"
 msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
-#: src/app/[lang]/documents/page.tsx:111
+#: src/app/[lang]/documents/page.tsx:114
 msgid "documents_page_all_documents_filter"
 msgstr "Toutes mes publications"
 
-#: src/app/[lang]/documents/page.tsx:146
+#: src/app/[lang]/documents/page.tsx:149
 msgid "documents_page_book_chapter_icon_label"
 msgstr "Chapitre de livre"
 
-#: src/app/[lang]/documents/page.tsx:140
+#: src/app/[lang]/documents/page.tsx:143
 msgid "documents_page_book_icon_label"
 msgstr "Livre"
 
-#: src/app/[lang]/documents/page.tsx:149
+#: src/app/[lang]/documents/page.tsx:152
 msgid "documents_page_conference_article_icon_label"
 msgstr "Article de conférence"
 
-#: src/app/[lang]/documents/page.tsx:284
+#: src/app/[lang]/documents/page.tsx:287
 msgid "documents_page_contributors_column"
 msgstr "auteurs"
 
@@ -107,79 +107,91 @@ msgstr "auteurs"
 #~ msgid "documents_page_date_column"
 #~ msgstr "Date"
 
-#: src/app/[lang]/documents/page.tsx:131
+#: src/app/[lang]/documents/page.tsx:134
 msgid "documents_page_document_icon_label"
 msgstr "Article"
 
-#: src/app/[lang]/documents/page.tsx:365
+#: src/app/[lang]/documents/page.tsx:368
 msgid "documents_page_halStatus_column"
 msgstr "Statut hal"
 
-#: src/app/[lang]/documents/page.tsx:116
+#: src/app/[lang]/documents/page.tsx:119
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "Dépôt HAL incomplet"
 
-#: src/app/[lang]/documents/page.tsx:137
+#: src/app/[lang]/documents/page.tsx:140
 msgid "documents_page_journal_article_icon_label"
 msgstr "Article de journal"
 
-#: src/app/[lang]/documents/page.tsx:122
+#: src/app/[lang]/documents/page.tsx:125
 msgid "documents_page_keywords_to_validate"
 msgstr "Mots-clés à valider"
 
-#: src/app/[lang]/documents/page.tsx:559
+#: src/app/[lang]/documents/page.tsx:610
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:143
+#: src/app/[lang]/documents/page.tsx:146
 msgid "documents_page_monograph_icon_label"
 msgstr "Monographie"
 
-#: src/app/[lang]/documents/page.tsx:152
+#: src/app/[lang]/documents/page.tsx:155
 msgid "documents_page_proceedings_icon_label"
 msgstr "Procédure"
 
-#: src/app/[lang]/documents/page.tsx:326
+#: src/app/[lang]/documents/page.tsx:329
 msgid "documents_page_publication_date_column"
 msgstr "Date de publication"
 
-#: src/app/[lang]/documents/page.tsx:330
+#: src/app/[lang]/documents/page.tsx:333
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "Aucune date"
 
-#: src/app/[lang]/documents/page.tsx:358
+#: src/app/[lang]/documents/page.tsx:361
 msgid "documents_page_publishedIn_column"
 msgstr "paru dans"
 
-#: src/app/[lang]/documents/page.tsx:134
+#: src/app/[lang]/documents/page.tsx:137
 msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Publication scientifique"
 
-#: src/app/[lang]/documents/page.tsx:373
+#: src/app/[lang]/documents/page.tsx:376
 msgid "documents_page_source_column"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/page.tsx:564
+#: src/app/[lang]/documents/page.tsx:619
 msgid "documents_page_synchronize_button"
 msgstr "Synchroniser"
 
-#: src/app/[lang]/documents/page.tsx:585
+#: src/app/[lang]/documents/page.tsx:665
 msgid "documents_page_synchronize_modal_cancel_button"
 msgstr "Annuler"
 
-#: src/app/[lang]/documents/page.tsx:588
+#: src/app/[lang]/documents/page.tsx:677
 msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr "Synchroniser"
 
-#: src/app/[lang]/documents/page.tsx:578
+#: src/app/[lang]/documents/page.tsx:560
+msgid "documents_page_synchronize_modal_synchronize_success_tooltip_added_message"
+msgstr ""
+
+#: src/app/[lang]/documents/page.tsx:582
+msgid "documents_page_synchronize_modal_synchronize_success_tooltip_deleted_message"
+msgstr ""
+
+#: src/app/[lang]/documents/page.tsx:571
+msgid "documents_page_synchronize_modal_synchronize_success_tooltip_updated_message"
+msgstr ""
+
+#: src/app/[lang]/documents/page.tsx:647
 msgid "documents_page_synchronize_modal_title"
 msgstr "Sources à synchroniser"
 
-#: src/app/[lang]/documents/page.tsx:218
+#: src/app/[lang]/documents/page.tsx:221
 msgid "documents_page_title_column"
 msgstr "titre"
 
-#: src/app/[lang]/documents/page.tsx:178
+#: src/app/[lang]/documents/page.tsx:181
 msgid "documents_page_type_column"
 msgstr "type"
 
@@ -218,7 +230,7 @@ msgstr "Mon profil"
 msgid "my_account_page_notification_tab"
 msgstr "Notifications"
 
-#: src/app/[lang]/documents/page.tsx:232
+#: src/app/[lang]/documents/page.tsx:235
 msgid "no_title_available"
 msgstr "aucun titre disponible"
 
@@ -283,35 +295,35 @@ msgstr "Activités de recherche"
 #~ msgid "side_bar_publications"
 #~ msgstr "Publications"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:410
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:415
 msgid "sidebar_back_to_my_perspective"
 msgstr "Retour à mon profil"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:100
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:176
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:194
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:108
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:184
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:202
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:45
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:142
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:236
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:325
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:244
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:330
 msgid "sidebar_search_people"
 msgstr "Chercheurs"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:110
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:354
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:118
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:359
 msgid "sidebar_search_placeholder"
 msgstr "Chercher"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:102
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:142
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:197
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:110
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:150
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:205
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:47
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:152
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:327
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:332
 msgid "sidebar_search_research_structures"
 msgstr "Unités de recherche"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:194
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:202
 msgid "sidebar_search_unknown_label"
 msgstr "label inconnu"
 
