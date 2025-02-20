@@ -2,10 +2,51 @@
 
 import { useParams } from 'next/navigation'
 import { Box, Typography } from '@mui/material'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import useStore from '@/stores/global_store'
+import DocumentDetailsHeader from './components/DocumentDetailsHeader'
+import DocumentDetailsTitle from './components/DpcumentDetailsTtitle'
+import { t } from '@lingui/macro'
+import { useTheme } from '@mui/material/styles'
+import { TabFilter } from '@/components/TabFilter'
 
 export default function DocumentDetailsPage() {
+  const theme = useTheme()
+
+  const tabs = [
+    {
+      label: t`document_details_bibliographic_information`,
+      value: 'bibliographic_information',
+      color: theme.palette.primary.main,
+    },
+    {
+      label: t`document_details_keywords`,
+      value: 'keywords',
+      color: theme.palette.primary.main,
+    },
+    {
+      label: t`document_details_domains`,
+      value: 'document_details_domains',
+      color: theme.palette.primary.main,
+    },
+    {
+      label: t`document_details_domains`,
+      value: 'domains',
+      color: theme.palette.primary.main,
+    },
+    {
+      label: t`document_details_HAL_referencing`,
+      value: 'HAL_referencing',
+      color: theme.palette.primary.main,
+    },
+    {
+      label: t`document_details_authors`,
+      value: 'authors',
+      color: theme.palette.primary.main,
+    },
+  ]
+  const [selectedTab, setSelectedTab] = useState(tabs[0].value)
+
   const { uid } = useParams() // Get the document UID from the URL
   const {
     fetchDocumentById,
@@ -20,11 +61,19 @@ export default function DocumentDetailsPage() {
     return <Typography>Loading...</Typography>
   }
 
-  console.log('selectedDocument', selectedDocument)
+  const handleTabChange = (newValue: string) => {
+    setSelectedTab(newValue)
+  }
+
   return (
     <Box>
-      <Typography variant='h4'>Document Details</Typography>
-      <Typography variant='body1'>UID: {uid}</Typography>
+      <DocumentDetailsHeader />
+      <DocumentDetailsTitle />
+      <TabFilter
+        tabsData={tabs}
+        selectedValue={selectedTab}
+        onTabChange={handleTabChange}
+      />
     </Box>
   )
 }

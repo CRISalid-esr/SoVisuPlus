@@ -1,25 +1,32 @@
 import { Trans } from '@lingui/macro'
-import SyncIcon from '@mui/icons-material/Sync'
-import { Button, Typography } from '@mui/material'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import { IconButton, Typography } from '@mui/material'
 import { Box } from '@mui/system'
 import { FC } from 'react'
+import { useRouter } from 'next/navigation' // Import useRouter
 
 interface DocumentDetailsHeaderProps {}
 
 const DocumentDetailsHeader: FC<DocumentDetailsHeaderProps> = ({}) => {
+  const router = useRouter()
+
   return (
     <Box
       mb={3}
+      onClick={() => router.back()}
       sx={{
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
         alignItems: 'center',
+        cursor: 'pointer',
       }}
     >
-      <Typography variant='h4' gutterBottom>
+      <IconButton>
+        <ArrowBackIcon />
+      </IconButton>
+      <Typography>
         <Trans>documents_page_main_title</Trans>
       </Typography>
-      <Button startIcon={<SyncIcon />} variant='outlined' />
     </Box>
   )
 }

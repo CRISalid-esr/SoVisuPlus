@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma' // Ensure Prisma is set up correctly
 import { DocumentService } from '@/lib/services/DocumentService'
 
 export async function GET(
   request: Request,
-  { params }: { params: { uid: string } },
+  context: { params: Promise<{ uid: string }> }, // params is a Promise
 ) {
-  const { uid } = params
+  const { uid } = await context.params
 
   if (!uid) {
     return NextResponse.json(
