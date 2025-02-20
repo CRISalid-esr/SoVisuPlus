@@ -24,6 +24,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import {
   MaterialReactTable,
+  MRT_ActionMenuItem,
   MRT_Column,
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
@@ -35,6 +36,7 @@ import Highlighter from 'react-highlight-words'
 import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
 import DocumentHeader from './components/DocumentHeader'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
+import InfoIcon from '@mui/icons-material/Info'
 dayjs.extend(utc)
 
 export default function DocumentsPage() {
@@ -535,6 +537,19 @@ export default function DocumentsPage() {
           globalFilter,
         }}
         localization={Localization[lang]}
+        enableRowActions
+        positionActionsColumn='last' // Ensures actions column is at the right end
+        renderRowActionMenuItems={({ row, table }) => [
+          <Box sx={{ display: 'flex' }}>
+            <MRT_ActionMenuItem //or just use a normal MUI MenuItem component
+              icon={<InfoIcon />}
+              key='edit'
+              label={t`documents_page_action_column_details`}
+              onClick={() => console.info('details')}
+              table={table}
+            />
+          </Box>,
+        ]}
       />
     </Box>
   )
