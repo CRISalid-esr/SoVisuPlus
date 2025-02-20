@@ -88,23 +88,23 @@ msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1
 #~ msgid "pageNotFound"
 #~ msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:114
+#: src/app/[lang]/documents/page.tsx:81
 msgid "documents_page_all_documents_filter"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:149
+#: src/app/[lang]/documents/page.tsx:116
 msgid "documents_page_book_chapter_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:143
+#: src/app/[lang]/documents/page.tsx:110
 msgid "documents_page_book_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:152
+#: src/app/[lang]/documents/page.tsx:119
 msgid "documents_page_conference_article_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:287
+#: src/app/[lang]/documents/page.tsx:239
 msgid "documents_page_contributors_column"
 msgstr ""
 
@@ -112,47 +112,47 @@ msgstr ""
 #~ msgid "documents_page_date_column"
 #~ msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:134
+#: src/app/[lang]/documents/page.tsx:101
 msgid "documents_page_document_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:368
+#: src/app/[lang]/documents/page.tsx:320
 msgid "documents_page_halStatus_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:119
+#: src/app/[lang]/documents/page.tsx:86
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:140
+#: src/app/[lang]/documents/page.tsx:107
 msgid "documents_page_journal_article_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:125
+#: src/app/[lang]/documents/page.tsx:92
 msgid "documents_page_keywords_to_validate"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:610
+#: src/app/[lang]/documents/components/DocumentHeader.tsx:26
 msgid "documents_page_main_title"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:146
+#: src/app/[lang]/documents/page.tsx:113
 msgid "documents_page_monograph_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:155
+#: src/app/[lang]/documents/page.tsx:122
 msgid "documents_page_proceedings_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:329
+#: src/app/[lang]/documents/page.tsx:281
 msgid "documents_page_publication_date_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:333
+#: src/app/[lang]/documents/page.tsx:285
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:361
+#: src/app/[lang]/documents/page.tsx:313
 msgid "documents_page_publishedIn_column"
 msgstr ""
 
@@ -160,47 +160,47 @@ msgstr ""
 #~ msgid "documents_page_publishedIn_column_no_date_available"
 #~ msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:137
+#: src/app/[lang]/documents/page.tsx:104
 msgid "documents_page_scholarly_publication_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:376
+#: src/app/[lang]/documents/page.tsx:328
 msgid "documents_page_source_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:619
+#: src/app/[lang]/documents/components/DocumentHeader.tsx:29
 msgid "documents_page_synchronize_button"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:665
+#: src/app/[lang]/documents/components/documentsSyncModal/ModalActions.tsx:15
 msgid "documents_page_synchronize_modal_cancel_button"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:677
+#: src/app/[lang]/documents/components/documentsSyncModal/ModalActions.tsx:18
 msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:560
+#: src/app/[lang]/documents/components/documentsSyncModal/PlatformChangesList.tsx:39
 msgid "documents_page_synchronize_modal_synchronize_success_tooltip_added_message"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:582
+#: src/app/[lang]/documents/components/documentsSyncModal/PlatformChangesList.tsx:95
 msgid "documents_page_synchronize_modal_synchronize_success_tooltip_deleted_message"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:571
+#: src/app/[lang]/documents/components/documentsSyncModal/PlatformChangesList.tsx:67
 msgid "documents_page_synchronize_modal_synchronize_success_tooltip_updated_message"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:647
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncModal.tsx:43
 msgid "documents_page_synchronize_modal_title"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:221
+#: src/app/[lang]/documents/page.tsx:173
 msgid "documents_page_title_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:181
+#: src/app/[lang]/documents/page.tsx:133
 msgid "documents_page_type_column"
 msgstr ""
 
@@ -234,7 +234,7 @@ msgstr ""
 msgid "my_account_page_notification_tab"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:235
+#: src/app/[lang]/documents/page.tsx:187
 msgid "no_title_available"
 msgstr ""
 
