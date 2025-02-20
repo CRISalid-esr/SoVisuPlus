@@ -66,7 +66,7 @@ export class PersonDAO extends AbstractDAO {
           })
           await this.handleIdentifierConflicts(
             person.getIdentifiers(),
-            dbPerson.id,
+            dbPerson?.id,
           )
           await this.upsertIdentifiers(person.getIdentifiers(), dbPerson.id)
           return dbPerson
@@ -87,6 +87,9 @@ export class PersonDAO extends AbstractDAO {
               Math.random() * (100 * Math.pow(2, attempt)),
             )
             await new Promise((resolve) => setTimeout(resolve, delay))
+          } else {
+            // rethrow the other errors
+            throw error
           }
         }
       }
