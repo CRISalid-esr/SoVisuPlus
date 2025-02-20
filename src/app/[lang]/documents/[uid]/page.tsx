@@ -4,11 +4,12 @@ import { useParams } from 'next/navigation'
 import { Box, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import useStore from '@/stores/global_store'
-import DocumentDetailsHeader from './components/DocumentDetailsHeader'
-import DocumentDetailsTitle from './components/DpcumentDetailsTtitle'
 import { t } from '@lingui/macro'
 import { useTheme } from '@mui/material/styles'
 import { TabFilter } from '@/components/TabFilter'
+import DocumentDetailsHeader from './components/DocumentDetailsHeader'
+import DocumentDetailsTitle from './components/DpcumentDetailsTtitle'
+import DocumentDetailsCard from './components/DocumentDetailsCard'
 
 export default function DocumentDetailsPage() {
   const theme = useTheme()
@@ -74,6 +75,7 @@ export default function DocumentDetailsPage() {
         selectedValue={selectedTab}
         onTabChange={handleTabChange}
       />
+      <DocumentDetailsCard />
     </Box>
   )
 }
