@@ -40,7 +40,9 @@ describe('GET /api/person/slug/[slug]', () => {
   })
 
   it('should return a person when found', async () => {
-    const response = await GET(req, { params })
+    const response = await GET(req, {
+      params: Promise.resolve(params),
+    })
 
     expect(response.status).toBe(200)
     const jsonResponse = await response.json()
@@ -58,7 +60,9 @@ describe('GET /api/person/slug/[slug]', () => {
 
   it('should return 404 when person is not found', async () => {
     params = { slug: 'jane-doe-1234' } // Non-existing UID
-    const response = await GET(req, { params })
+    const response = await GET(req, {
+      params: Promise.resolve(params),
+    })
 
     expect(response.status).toBe(404)
     const jsonResponse = await response.json()
