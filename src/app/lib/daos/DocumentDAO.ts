@@ -463,4 +463,20 @@ export class DocumentDAO extends AbstractDAO {
       totalItems,
     }
   }
+
+  fetchDocumentByIdFromDB(uid: string): Promise<DbDocument | null> {
+    return this.prismaClient.document.findUnique({
+      where: { uid },
+      include: {
+        titles: true,
+        abstracts: true,
+        contributions: {
+          include: {
+            person: true,
+          },
+        },
+        records: true,
+      },
+    })
+  }
 }
