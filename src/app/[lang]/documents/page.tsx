@@ -12,24 +12,14 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
-import { t, Trans } from '@lingui/macro'
-import ArticleIcon from '@mui/icons-material/Article'
-import BookIcon from '@mui/icons-material/Book'
-import DescriptionIcon from '@mui/icons-material/Description'
-import SchoolIcon from '@mui/icons-material/School'
-import SyncIcon from '@mui/icons-material/Sync'
-import {
-  Box,
-  Button,
-  Chip,
-  IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { t } from '@lingui/macro'
+
+import { DocumentSync } from '@/types/DocumentSync'
+import { DocumentSyncStatus } from '@/types/DocumentSyncStatus'
+import { LocaleDateFormats } from '@/types/LocaleDateFormats'
+import { Localization } from '@/types/Localization'
+import { Box, Chip, IconButton, Tooltip, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import {
@@ -37,38 +27,15 @@ import {
   MRT_Column,
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
-  MRT_Localization,
   MRT_SortingState,
 } from 'material-react-table'
-import { MRT_Localization_EN } from 'material-react-table/locales/en'
-import { MRT_Localization_FR } from 'material-react-table/locales/fr'
 import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 import Highlighter from 'react-highlight-words'
-import { Modal } from '@/components/Modal'
-import CircularProgress from '@mui/material/CircularProgress'
-import { useTheme } from '@mui/material/styles'
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
+import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
+import DocumentHeader from './components/DocumentHeader'
+import { DocumentTypeIcons } from './components/DocumentTypeIcons'
 dayjs.extend(utc)
-
-const synchronizeBibliographicPlatformStatus: Record<string, string> = {
-  loading: 'loading',
-  success: 'success',
-  error: 'error',
-  none: 'none',
-}
-
-const localeFormats: Record<string, string> = {
-  fr: 'DD-MM-YYYY',
-  en: 'MM-DD-YYYY',
-  de: 'DD.MM.YYYY',
-  es: 'DD/MM/YYYY',
-}
-
-const localization: Record<string, MRT_Localization> = {
-  fr: MRT_Localization_FR,
-  en: MRT_Localization_EN,
-}
 
 export default function DocumentsPage() {
   const [pagination, setPagination] = useState({
@@ -83,14 +50,13 @@ export default function DocumentsPage() {
       desc: true,
     },
   ])
-  const [openSynchronizeModal, setOpenSynchronizeModal] = useState(false)
-  const [
-    synchronizeBibliographicPlatform,
-    setSynchronizeBibliographicPlatform,
-  ] = useState(
+
+  const [openSynchronizeModal, setOpenSynchronizeModal] =
+    useState<boolean>(false)
+  const [documentSync, setDocumentSync] = useState<DocumentSync[]>(
     Object.values(BibliographicPlatform).map((platform) => ({
-      platform,
-      status: synchronizeBibliographicPlatformStatus.success,
+      name: platform,
+      status: DocumentSyncStatus.success,
       selected: false,
       changes: {
         added: 0,
@@ -99,6 +65,7 @@ export default function DocumentsPage() {
       },
     })),
   )
+
   const { currentPerspective } = useStore((state) => state.user)
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
@@ -156,21 +123,6 @@ export default function DocumentsPage() {
     ),
   }
 
-  const documentTypeIcons: Record<DocumentType, JSX.Element> = {
-    [DocumentType.Document]: <DescriptionIcon />,
-    [DocumentType.ScholarlyPublication]: <SchoolIcon />,
-    [DocumentType.JournalArticle]: <ArticleIcon />,
-    [DocumentType.Book]: <BookIcon />,
-    [DocumentType.Monograph]: <BookIcon />, //TDOO: change icon later
-    [DocumentType.BookChapter]: <BookIcon />,
-    [DocumentType.ConferenceArticle]: (
-      <span className='material-symbols-outlined'>podium</span>
-    ),
-    [DocumentType.Proceedings]: (
-      <span className='material-symbols-outlined'>podium</span>
-    ),
-  }
-
   const [selectedTab, setSelectedTab] = useState(tabs[0].value)
 
   const columns = useMemo<MRT_ColumnDef<Document>[]>(
@@ -182,7 +134,7 @@ export default function DocumentsPage() {
         Cell({ row }: { row: { original: { documentType: DocumentType } } }) {
           return (
             <Tooltip title={documentTypeLabels[row.original.documentType]}>
-              {documentTypeIcons[row.original.documentType]}
+              {DocumentTypeIcons[row.original.documentType]}
             </Tooltip>
           )
         },
@@ -206,7 +158,7 @@ export default function DocumentsPage() {
                   marginLeft: 'auto',
                 }}
               >
-                {documentTypeIcons[type]}
+                {DocumentTypeIcons[type]}
               </Box>
             </Box>
           ),
@@ -332,7 +284,7 @@ export default function DocumentsPage() {
           if (!dateStr) {
             return t`documents_page_publication_date_column_no_date_available`
           }
-          const dateFormat = localeFormats[lang] || 'MM-DD-YYYY'
+          const dateFormat = LocaleDateFormats['lang'] || 'MM-DD-YYYY'
           if (!dayjs(dateStr, 'YYYY-MM-DD').isValid()) {
             return (
               <Highlighter
@@ -540,240 +492,27 @@ export default function DocumentsPage() {
     setSelectedTab(newValue)
   }
 
-  const renderBibliographicPlatformChanges = (platform: {
-    changes: { added: number; updated: number; deleted: number }
-  }) => {
-    return (
-      <List>
-        <ListItem
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            flexWrap: 'no-wrap',
-          }}
-        >
-          <ListItemIcon>
-            <FiberManualRecordIcon sx={{ fontSize: theme.utils.pxToRem(8) }} />
-          </ListItemIcon>
-          <ListItemText>
-            {platform.changes.added}{' '}
-            <Trans>
-              documents_page_synchronize_modal_synchronize_success_tooltip_added_message
-            </Trans>
-          </ListItemText>
-        </ListItem>
-        <ListItem>
-          <ListItemIcon>
-            <FiberManualRecordIcon sx={{ fontSize: theme.utils.pxToRem(8) }} />
-          </ListItemIcon>
-          <ListItemText>
-            {platform.changes.updated}{' '}
-            <Trans>
-              documents_page_synchronize_modal_synchronize_success_tooltip_updated_message
-            </Trans>
-          </ListItemText>
-        </ListItem>
-        <ListItem>
-          <ListItemIcon>
-            <FiberManualRecordIcon sx={{ fontSize: theme.utils.pxToRem(8) }} />
-          </ListItemIcon>
-          <ListItemText>
-            {platform.changes.deleted}{' '}
-            <Trans>
-              documents_page_synchronize_modal_synchronize_success_tooltip_deleted_message
-            </Trans>
-          </ListItemText>
-        </ListItem>
-      </List>
-    )
-  }
-
   return (
     <Box>
-      <Box
-        mb={3}
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: {
-            xs: 'flex-start',
-            md: 'center',
-          },
-          flexDirection: {
-            xs: 'column',
-            sm: 'row',
-          },
-        }}
-      >
-        <Box>
-          <Typography variant='h4' gutterBottom>
-            <Trans>documents_page_main_title</Trans> :{' '}
-            {currentPerspective?.getDisplayName(lang as ExtendedLanguageCode)}
-          </Typography>
-        </Box>
-        <Button
-          startIcon={<SyncIcon />}
-          variant='outlined'
-          onClick={() => setOpenSynchronizeModal(true)}
-        >
-          <Trans>documents_page_synchronize_button</Trans>
-        </Button>
-      </Box>
+      <DocumentHeader
+        perspective={
+          currentPerspective?.getDisplayName(lang as ExtendedLanguageCode) || ''
+        }
+        onSyncClick={() => setOpenSynchronizeModal(true)}
+      />
       <TabFilter
         tabsData={tabs}
         selectedValue={selectedTab}
         onTabChange={handleTabChange}
       />
-      <Modal
-        open={openSynchronizeModal}
-        onClose={() => setOpenSynchronizeModal(false)}
-        header={
-          <Box
-            sx={{
-              marginTop: theme.spacing(2),
-              marginLeft: theme.utils.pxToRem(20),
-            }}
-          >
-            <Typography
-              variant='h6'
-              gutterBottom
-              sx={{
-                lineHeight: theme.typography.lineHeight.lineHeight28px,
-                fontStyle: 'normal',
-                fontSize: theme.utils.pxToRem(28),
-                fontWeight: theme.typography.fontWeightBold,
-              }}
-            >
-              <Trans>documents_page_synchronize_modal_title</Trans> :
-            </Typography>
-          </Box>
-        }
-        actions={
-          <>
-            <Button
-              variant='outlined'
-              onClick={() => setOpenSynchronizeModal(false)}
-              sx={{
-                marginRight: 1,
-                fontStyle: 'normal',
-                fontSize: theme.utils.pxToRem(14),
-                letterSpacing: '0.1px',
-                lineHeight: theme.typography.lineHeight.lineHeight20px,
-                fontWeight: theme.typography['500'],
-              }}
-            >
-              <Trans>documents_page_synchronize_modal_cancel_button</Trans>
-            </Button>
-            <Button
-              sx={{
-                fontStyle: 'normal',
-                fontSize: theme.utils.pxToRem(14),
-                letterSpacing: '0.1px',
-                lineHeight: theme.typography.lineHeight.lineHeight20px,
-                fontWeight: theme.typography['500'],
-              }}
-              variant='contained'
-            >
-              <Trans>documents_page_synchronize_modal_synchronize_button</Trans>
-            </Button>
-          </>
-        }
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          {synchronizeBibliographicPlatform.map((platform) => {
-            return (
-              <Box
-                key={platform.platform}
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexDirection: 'column',
-                }}
-              >
-                <Button
-                  variant='outlined'
-                  size='small'
-                  sx={{
-                    marginRight: 1,
-                    marginBottom: 2,
-                    fontSize: theme.utils.pxToRem(16),
-                    backgroundColor: platform.selected
-                      ? theme.palette.primary.main
-                      : theme.palette.white,
-                    color: platform.selected
-                      ? theme.palette.white
-                      : theme.palette.primary.main,
-                    fontWeight: theme.typography['500'],
-                    lineHeight: theme.typography.lineHeight.lineHeight16px,
-                    letterSpacing: '0.5px',
-                    '&:hover': {
-                      backgroundColor: platform.selected
-                        ? theme.palette.primary.main
-                        : theme.palette.white,
-                      color: platform.selected
-                        ? theme.palette.white
-                        : theme.palette.primary.main,
-                    },
-                  }}
-                  onClick={() => {
-                    setSynchronizeBibliographicPlatform(
-                      synchronizeBibliographicPlatform.map((item) => {
-                        if (item.platform === platform.platform) {
-                          return {
-                            ...item,
-                            selected: !item.selected,
-                          }
-                        }
-                        return item
-                      }),
-                    )
-                  }}
-                >
-                  {platform.platform}
-                </Button>
-                {platform.status ===
-                  synchronizeBibliographicPlatformStatus.loading && (
-                  <CircularProgress
-                    sx={{
-                      width: 40,
-                      height: 40,
-                    }}
-                  />
-                )}
-                {platform.status ===
-                  synchronizeBibliographicPlatformStatus.success && (
-                  <Tooltip title={renderBibliographicPlatformChanges(platform)}>
-                    <Image
-                      src='/icons/success.svg'
-                      alt='language'
-                      width={40}
-                      height={40}
-                      priority
-                    />
-                  </Tooltip>
-                )}
-                {platform.status ===
-                  synchronizeBibliographicPlatformStatus.error && (
-                  <Image
-                    src='/icons/error.svg'
-                    alt='language'
-                    width={40}
-                    height={40}
-                    priority
-                  />
-                )}
-              </Box>
-            )
-          })}
-        </Box>
-      </Modal>
+
+      <BibliographicSyncDataModal
+        openSynchronizeModal={openSynchronizeModal}
+        setOpenSynchronizeModal={setOpenSynchronizeModal}
+        documentSync={documentSync}
+        setDocumentSync={setDocumentSync}
+      />
+
       <MaterialReactTable
         initialState={{ showColumnFilters: true }}
         manualFiltering
@@ -795,7 +534,7 @@ export default function DocumentsPage() {
           columnFilters,
           globalFilter,
         }}
-        localization={localization[lang]}
+        localization={Localization[lang]}
       />
     </Box>
   )
