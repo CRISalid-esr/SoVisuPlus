@@ -3,9 +3,9 @@ import { PersonService } from '@/lib/services/PersonService'
 
 export const GET = async (
   req: NextRequest,
-  { params }: { params: { slug: string } },
+  context: { params: Promise<{ slug: string }> },
 ) => {
-  const { slug } = params
+  const { slug } = await context.params
   const personService = new PersonService()
 
   try {
