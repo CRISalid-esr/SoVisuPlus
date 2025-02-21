@@ -27,6 +27,7 @@ const DocumentDetailsCardAuthors: FC<
       >
         <Trans>document_details_page_authors_row_label</Trans>
       </Typography>
+      <Box />
       <Box
         sx={{
           display: 'flex',

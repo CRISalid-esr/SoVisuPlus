@@ -14,6 +14,11 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCard.tsx:74
+msgid "document_details_page_card_validate_button"
+msgstr "Valider"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Retour à la page d'accueil"
@@ -24,7 +29,7 @@ msgid "internal_server_page_description"
 msgstr "Le serveur a détecté une erreur interne et n'a  pas pu traiter votre demande. Réessayez un peu plus tard !"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCard.tsx:57
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCard.tsx:71
 msgid "document_details_page_card_title"
 msgstr "Informations bibliographiques"
 
@@ -109,11 +114,11 @@ msgstr "Référencement HAL"
 msgid "document_details_keywords_tab"
 msgstr "Mots-clés"
 
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardAuthors.tsx:29
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardAuthors.tsx:28
 msgid "document_details_page_authors_row_label"
 msgstr "Auteurs"
 
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardAuthors.tsx:67
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardAuthors.tsx:66
 msgid "document_details_page_authors_row_update_author"
 msgstr "Modifier les auteurs"
 
@@ -121,7 +126,7 @@ msgstr "Modifier les auteurs"
 msgid "document_details_page_main_title"
 msgstr "Mes publications"
 
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardTitles.tsx:30
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardTitles.tsx:32
 msgid "document_details_page_titles_row_label"
 msgstr "Titre"
 

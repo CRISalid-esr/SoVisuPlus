@@ -3,7 +3,14 @@ import useStore from '@/stores/global_store'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import * as Lingui from '@lingui/core'
 import { Trans } from '@lingui/react'
-import { CardContent, Typography, List, ListItem } from '@mui/material'
+import {
+  CardContent,
+  Typography,
+  List,
+  ListItem,
+  Box,
+  Button,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { FC } from 'react'
 
@@ -45,17 +52,28 @@ const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
   return (
     <CustomCard
       header={
-        <Typography
+        <Box
           sx={{
-            color: theme.palette.primary.main,
-            fontSize: theme.utils.pxToRem(20),
-            fontStyle: 'normal',
-            fontWeight: theme.typography.fontWeightRegular,
-            lineHeight: 'normal',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
         >
-          <Trans id='document_details_page_card_title' />
-        </Typography>
+          <Typography
+            sx={{
+              color: theme.palette.primary.main,
+              fontSize: theme.utils.pxToRem(20),
+              fontStyle: 'normal',
+              fontWeight: theme.typography.fontWeightRegular,
+              lineHeight: 'normal',
+            }}
+          >
+            <Trans id='document_details_page_card_title' />
+          </Typography>
+          <Button variant='contained' color='primary'>
+            <Trans id='document_details_page_card_validate_button' />
+          </Button>
+        </Box>
       }
     >
       <CardContent
