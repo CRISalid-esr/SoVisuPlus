@@ -14,11 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCard.tsx:49
-msgid "document_details_page_card_title"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Back to home page"
@@ -27,6 +22,11 @@ msgstr "Back to home page"
 #: src/app/[lang]/components/ErrorFallback.tsx:103
 msgid "internal_server_page_description"
 msgstr "The server detected an internal error and was unable to process your request. Please try again later!"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCard.tsx:57
+msgid "document_details_page_card_title"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/forbidden.tsx:43
@@ -114,12 +114,24 @@ msgstr ""
 msgid "document_details_keywords_tab"
 msgstr ""
 
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardAuthors.tsx:29
+msgid "document_details_page_authors_row_label"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardAuthors.tsx:67
+msgid "document_details_page_authors_row_update_author"
+msgstr ""
+
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.tsx:28
 msgid "document_details_page_main_title"
 msgstr ""
 
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardTitles.tsx:22
-msgid "document_details_page_titles_row"
+#~ msgid "document_details_page_titles_row"
+#~ msgstr ""
+
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardTitles.tsx:30
+msgid "document_details_page_titles_row_label"
 msgstr ""
 
 #: src/app/[lang]/documents/page.tsx:548
@@ -272,7 +284,7 @@ msgstr ""
 msgid "my_account_page_notification_tab"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsTtitle.tsx:18
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:18
 #: src/app/[lang]/documents/page.tsx:190
 msgid "no_title_available"
 msgstr ""

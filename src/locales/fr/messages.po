@@ -14,11 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCard.tsx:49
-msgid "document_details_page_card_title"
-msgstr "Informations bibliographiques"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Retour à la page d'accueil"
@@ -27,6 +22,11 @@ msgstr "Retour à la page d'accueil"
 #: src/app/[lang]/components/ErrorFallback.tsx:103
 msgid "internal_server_page_description"
 msgstr "Le serveur a détecté une erreur interne et n'a  pas pu traiter votre demande. Réessayez un peu plus tard !"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCard.tsx:57
+msgid "document_details_page_card_title"
+msgstr "Informations bibliographiques"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/forbidden.tsx:43
@@ -109,12 +109,20 @@ msgstr "Référencement HAL"
 msgid "document_details_keywords_tab"
 msgstr "Mots-clés"
 
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardAuthors.tsx:29
+msgid "document_details_page_authors_row_label"
+msgstr "Auteurs"
+
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardAuthors.tsx:67
+msgid "document_details_page_authors_row_update_author"
+msgstr "Modifier les auteurs"
+
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.tsx:28
 msgid "document_details_page_main_title"
 msgstr "Mes publications"
 
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardTitles.tsx:22
-msgid "document_details_page_titles_row"
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardTitles.tsx:30
+msgid "document_details_page_titles_row_label"
 msgstr "Titre"
 
 #: src/app/[lang]/documents/page.tsx:548
@@ -268,7 +276,7 @@ msgstr "Mon profil"
 msgid "my_account_page_notification_tab"
 msgstr "Notifications"
 
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsTtitle.tsx:18
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:18
 #: src/app/[lang]/documents/page.tsx:190
 msgid "no_title_available"
 msgstr "aucun titre disponible"

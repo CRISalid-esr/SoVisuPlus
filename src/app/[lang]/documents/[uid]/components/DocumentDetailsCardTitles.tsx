@@ -3,10 +3,9 @@ import useStore from '@/stores/global_store'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import * as Lingui from '@lingui/core'
 import { Trans } from '@lingui/macro'
-import { ListItem, Typography } from '@mui/material'
-import { Box } from '@mui/system'
-import { FC, useState } from 'react'
+import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import { FC, useState } from 'react'
 
 interface DocumentDetailsCardTitlesProps {}
 const DocumentDetailsCardTitles: FC<DocumentDetailsCardTitlesProps> = ({}) => {
@@ -20,8 +19,17 @@ const DocumentDetailsCardTitles: FC<DocumentDetailsCardTitlesProps> = ({}) => {
 
   return (
     <>
-      <Typography>
-        <Trans>document_details_page_titles_row</Trans>
+      <Typography
+        sx={{
+          color: theme.palette.primary.main,
+          fontSize: theme.utils.pxToRem(14),
+          fontStyle: 'normal',
+          fontWeight: theme.typography[500],
+          lineHeight: 'normal',
+          letterSpacing: '0.1px',
+        }}
+      >
+        <Trans>document_details_page_titles_row_label</Trans>
       </Typography>
       <LanguageChips
         titles={selectedDocument?.titles ?? []}

@@ -6,9 +6,10 @@ import { Trans } from '@lingui/react'
 import { CardContent, Typography, List, ListItem } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { FC } from 'react'
-import { Box } from '@mui/system'
 
 import DocumentDetailsCardTitles from './DocumentDetailsCardTitles'
+import DocumentDetailsCardAuthors from './DocumentDetailsCardAuthors'
+
 interface DocumentDetailsCardProps {}
 const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
   const { selectedDocument = null } = useStore((state) => state.document)
@@ -25,11 +26,17 @@ const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
         <DocumentDetailsCardTitles />
       ) : null,
     },
+    authors: {
+      value: 'authors',
+      component: <DocumentDetailsCardAuthors />,
+    },
   }
 
   const documentTypeFields: Record<string, string[]> = {
-    Book: ['titles'],
-    JournalArticle: ['titles'],
+    Book: ['titles', 'authors'],
+    JournalArticle: ['titles', 'authors'],
+    ConferencePaper: ['titles', 'authors'],
+    Report: ['titles', 'authors'],
   }
 
   const fieldsToDisplay =
@@ -73,7 +80,8 @@ const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: theme.spacing(2), // Adds spacing between icon/text if needed
+                  gap: theme.spacing(2),
+                  borderBottom: `1px solid ${theme.palette.grey[300]}`,
                 }}
               >
                 {field.component}
