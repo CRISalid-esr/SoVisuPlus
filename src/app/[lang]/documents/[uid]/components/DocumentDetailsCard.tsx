@@ -46,7 +46,7 @@ const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
             lineHeight: 'normal',
           }}
         >
-          <Trans id='authorizations_page_authorizations_title' />
+          <Trans id='document_details_page_card_title' />
         </Typography>
       }
     >

@@ -14,6 +14,11 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCard.tsx:49
+msgid "document_details_page_card_title"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Back to home page"
@@ -88,23 +93,56 @@ msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1
 #~ msgid "pageNotFound"
 #~ msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:81
+#: src/app/[lang]/documents/[uid]/page.tsx:44
+msgid "document_details_authors_tab"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/page.tsx:19
+msgid "document_details_bibliographic_information_tab"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/page.tsx:29
+#: src/app/[lang]/documents/[uid]/page.tsx:34
+msgid "document_details_domains_tab"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/page.tsx:39
+msgid "document_details_HAL_referencing_tab"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/page.tsx:24
+msgid "document_details_keywords_tab"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.tsx:28
+msgid "document_details_page_main_title"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardTitles.tsx:22
+msgid "document_details_page_titles_row"
+msgstr ""
+
+#: src/app/[lang]/documents/page.tsx:548
+msgid "documents_page_action_column_details"
+msgstr ""
+
+#: src/app/[lang]/documents/page.tsx:84
 msgid "documents_page_all_documents_filter"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:116
+#: src/app/[lang]/documents/page.tsx:119
 msgid "documents_page_book_chapter_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:110
+#: src/app/[lang]/documents/page.tsx:113
 msgid "documents_page_book_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:119
+#: src/app/[lang]/documents/page.tsx:122
 msgid "documents_page_conference_article_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:239
+#: src/app/[lang]/documents/page.tsx:242
 msgid "documents_page_contributors_column"
 msgstr ""
 
@@ -112,23 +150,23 @@ msgstr ""
 #~ msgid "documents_page_date_column"
 #~ msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:101
+#: src/app/[lang]/documents/page.tsx:104
 msgid "documents_page_document_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:320
+#: src/app/[lang]/documents/page.tsx:323
 msgid "documents_page_halStatus_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:86
+#: src/app/[lang]/documents/page.tsx:89
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:107
+#: src/app/[lang]/documents/page.tsx:110
 msgid "documents_page_journal_article_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:92
+#: src/app/[lang]/documents/page.tsx:95
 msgid "documents_page_keywords_to_validate"
 msgstr ""
 
@@ -136,23 +174,23 @@ msgstr ""
 msgid "documents_page_main_title"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:113
+#: src/app/[lang]/documents/page.tsx:116
 msgid "documents_page_monograph_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:122
+#: src/app/[lang]/documents/page.tsx:125
 msgid "documents_page_proceedings_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:281
+#: src/app/[lang]/documents/page.tsx:284
 msgid "documents_page_publication_date_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:285
+#: src/app/[lang]/documents/page.tsx:288
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:313
+#: src/app/[lang]/documents/page.tsx:316
 msgid "documents_page_publishedIn_column"
 msgstr ""
 
@@ -160,11 +198,11 @@ msgstr ""
 #~ msgid "documents_page_publishedIn_column_no_date_available"
 #~ msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:104
+#: src/app/[lang]/documents/page.tsx:107
 msgid "documents_page_scholarly_publication_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:328
+#: src/app/[lang]/documents/page.tsx:331
 msgid "documents_page_source_column"
 msgstr ""
 
@@ -196,11 +234,11 @@ msgstr ""
 msgid "documents_page_synchronize_modal_title"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:173
+#: src/app/[lang]/documents/page.tsx:176
 msgid "documents_page_title_column"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:133
+#: src/app/[lang]/documents/page.tsx:136
 msgid "documents_page_type_column"
 msgstr ""
 
@@ -234,7 +272,8 @@ msgstr ""
 msgid "my_account_page_notification_tab"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:187
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsTtitle.tsx:18
+#: src/app/[lang]/documents/page.tsx:190
 msgid "no_title_available"
 msgstr ""
 
