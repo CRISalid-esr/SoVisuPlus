@@ -3,11 +3,12 @@ import useStore from '@/stores/global_store'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import * as Lingui from '@lingui/core'
 import { Trans } from '@lingui/react'
-import { CardContent, Typography } from '@mui/material'
+import { CardContent, Typography, List, ListItem } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { FC } from 'react'
-import DocumentDetailsCardTitles from './DocumentDetailsCardTitles'
 import { Box } from '@mui/system'
+
+import DocumentDetailsCardTitles from './DocumentDetailsCardTitles'
 interface DocumentDetailsCardProps {}
 const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
   const { selectedDocument = null } = useStore((state) => state.document)
@@ -58,12 +59,28 @@ const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
           gap: theme.spacing(4),
         }}
       >
-        <Box component='ul' sx={{ paddingLeft: theme.spacing(2) }}>
+        <List
+          sx={{
+            paddingLeft: theme.spacing(2),
+            width: '100%',
+          }}
+        >
           {fieldsToDisplay.map((fieldKey) => {
             const field = documentFields[fieldKey]
-            return field?.component ? field?.component : null
+            return field?.component ? (
+              <ListItem
+                key={fieldKey}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: theme.spacing(2), // Adds spacing between icon/text if needed
+                }}
+              >
+                {field.component}
+              </ListItem>
+            ) : null
           })}
-        </Box>
+        </List>
       </CardContent>
     </CustomCard>
   )

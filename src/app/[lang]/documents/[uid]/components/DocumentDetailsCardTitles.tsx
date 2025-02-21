@@ -3,12 +3,14 @@ import useStore from '@/stores/global_store'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import * as Lingui from '@lingui/core'
 import { Trans } from '@lingui/macro'
-import { Typography } from '@mui/material'
+import { ListItem, Typography } from '@mui/material'
 import { Box } from '@mui/system'
 import { FC, useState } from 'react'
+import { useTheme } from '@mui/material/styles'
 
 interface DocumentDetailsCardTitlesProps {}
 const DocumentDetailsCardTitles: FC<DocumentDetailsCardTitlesProps> = ({}) => {
+  const theme = useTheme()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const [selectedLangue, setSelectedLangue] = useState<string | null>(lang)
   const { selectedDocument = null } = useStore((state) => state.document)
@@ -17,7 +19,7 @@ const DocumentDetailsCardTitles: FC<DocumentDetailsCardTitlesProps> = ({}) => {
   }
 
   return (
-    <Box component='li'>
+    <>
       <Typography>
         <Trans>document_details_page_titles_row</Trans>
       </Typography>
@@ -33,7 +35,7 @@ const DocumentDetailsCardTitles: FC<DocumentDetailsCardTitlesProps> = ({}) => {
           )?.value
         }
       </Typography>
-    </Box>
+    </>
   )
 }
 

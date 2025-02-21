@@ -2,6 +2,7 @@ import { Literal } from '@/types/Literal'
 import { Chip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { FC } from 'react'
+import { Box } from '@mui/system'
 
 interface LanguageChipsProps {
   titles: Literal[]
@@ -16,7 +17,7 @@ const LanguageChips: FC<LanguageChipsProps> = ({
 }) => {
   const theme = useTheme()
   return (
-    <>
+    <Box>
       {titles.map((title, index) => {
         if (title.language === 'ul') {
           return null
@@ -41,7 +42,7 @@ const LanguageChips: FC<LanguageChipsProps> = ({
           />
         )
       })}
-    </>
+    </Box>
   )
 }
 
