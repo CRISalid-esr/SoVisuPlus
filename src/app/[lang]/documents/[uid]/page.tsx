@@ -66,7 +66,7 @@ export default function DocumentDetailsPage() {
     )
   }
 
-  if (!selectedDocument) {
+  if (!loading && !selectedDocument) {
     notFound()
   }
 
