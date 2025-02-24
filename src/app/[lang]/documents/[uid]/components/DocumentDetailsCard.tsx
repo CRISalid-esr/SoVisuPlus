@@ -20,7 +20,6 @@ import DocumentDetailsCardAuthors from './DocumentDetailsCardAuthors'
 interface DocumentDetailsCardProps {}
 const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
   const { selectedDocument = null } = useStore((state) => state.document)
-  const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const theme = useTheme()
 
   const documentFields: Record<

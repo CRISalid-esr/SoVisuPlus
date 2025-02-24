@@ -1,11 +1,9 @@
 import useStore from '@/stores/global_store'
-import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import * as Lingui from '@lingui/core'
 import { Trans } from '@lingui/macro'
 import EditIcon from '@mui/icons-material/Edit'
 import { Box, Button, Chip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { FC, useState } from 'react'
+import { FC } from 'react'
 interface DocumentDetailsCardAuthorsProps {}
 const DocumentDetailsCardAuthors: FC<
   DocumentDetailsCardAuthorsProps
