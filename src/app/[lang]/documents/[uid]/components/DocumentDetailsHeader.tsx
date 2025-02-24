@@ -2,12 +2,9 @@ import { Trans } from '@lingui/macro'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { IconButton, Typography } from '@mui/material'
 import { Box } from '@mui/system'
-import { FC } from 'react'
 import { useRouter } from 'next/navigation' // Import useRouter
 
-interface DocumentDetailsHeaderProps {}
-
-const DocumentDetailsHeader: FC<DocumentDetailsHeaderProps> = ({}) => {
+const DocumentDetailsHeader = () => {
   const router = useRouter()
 
   return (

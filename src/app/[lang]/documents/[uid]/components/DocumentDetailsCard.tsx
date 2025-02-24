@@ -1,24 +1,21 @@
 import { CustomCard } from '@/components/Card'
 import useStore from '@/stores/global_store'
-import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import * as Lingui from '@lingui/core'
 import { Trans } from '@lingui/react'
 import {
-  CardContent,
-  Typography,
-  List,
-  ListItem,
   Box,
   Button,
+  CardContent,
+  List,
+  ListItem,
+  Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { FC } from 'react'
 
-import DocumentDetailsCardTitles from './DocumentDetailsCardTitles'
+import { DocumentType } from '@/types/Document'
 import DocumentDetailsCardAuthors from './DocumentDetailsCardAuthors'
 import DocumentDetailsCardDate from './DocumentDetailsCardDate'
 import DocumentDetailsCardSources from './DocumentDetailsCardSources'
-import { DocumentType } from '@/types/Document'
+import DocumentDetailsCardTitles from './DocumentDetailsCardTitles'
 
 type DocumentFieldKey = 'titles' | 'authors' | 'date' | 'sources'
 
@@ -27,9 +24,7 @@ interface DocumentField {
   component: JSX.Element | null
 }
 
-interface DocumentDetailsCardProps {}
-
-const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
+const DocumentDetailsCard = () => {
   const { selectedDocument = null } = useStore((state) => state.document)
   const theme = useTheme()
 
@@ -53,7 +48,7 @@ const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
       component: <DocumentDetailsCardSources />,
     },
   }
-  const documentTypeFields: Record<DocumentType, string[]> = {
+  const documentTypeFields: Record<DocumentType, DocumentFieldKey[]> = {
     [DocumentType.JournalArticle]: ['titles', 'authors', 'date', 'sources'],
     [DocumentType.Document]: ['titles', 'authors', 'date', 'sources'],
     [DocumentType.ScholarlyPublication]: [
@@ -69,7 +64,7 @@ const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
     [DocumentType.Proceedings]: ['titles', 'authors', 'date', 'sources'],
   }
 
-  const fieldsToDisplay =
+  const fieldsToDisplay: DocumentFieldKey[] =
     selectedDocument?.documentType &&
     documentTypeFields[selectedDocument.documentType]
       ? documentTypeFields[selectedDocument.documentType]

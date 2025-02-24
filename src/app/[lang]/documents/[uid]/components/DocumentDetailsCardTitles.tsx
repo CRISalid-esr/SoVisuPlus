@@ -5,10 +5,9 @@ import * as Lingui from '@lingui/core'
 import { Trans } from '@lingui/macro'
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { FC, useState } from 'react'
+import { useState } from 'react'
 
-interface DocumentDetailsCardTitlesProps {}
-const DocumentDetailsCardTitles: FC<DocumentDetailsCardTitlesProps> = ({}) => {
+const DocumentDetailsCardTitles = () => {
   const theme = useTheme()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const [selectedLangue, setSelectedLangue] = useState<string | null>(lang)

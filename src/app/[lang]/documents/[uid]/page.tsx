@@ -1,15 +1,15 @@
 'use client'
 
-import { useParams } from 'next/navigation'
-import { Box, Typography } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { TabFilter } from '@/components/TabFilter'
 import useStore from '@/stores/global_store'
 import { t } from '@lingui/macro'
+import { Box, CircularProgress } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { TabFilter } from '@/components/TabFilter'
+import { notFound, useParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import DocumentDetailsCard from './components/DocumentDetailsCard'
 import DocumentDetailsHeader from './components/DocumentDetailsHeader'
 import DocumentDetailsTitle from './components/DocumentDetailsTitle'
-import DocumentDetailsCard from './components/DocumentDetailsCard'
 
 export default function DocumentDetailsPage() {
   const theme = useTheme()
@@ -59,7 +59,15 @@ export default function DocumentDetailsPage() {
   }, [uid])
 
   if (loading) {
-    return <Typography>Loading...</Typography>
+    return (
+      <Box>
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  if (!selectedDocument) {
+    notFound()
   }
 
   const handleTabChange = (newValue: string) => {

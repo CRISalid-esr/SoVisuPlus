@@ -15,6 +15,17 @@ jest.mock('@/stores/global_store', () => ({
   default: jest.fn(),
 }))
 
+jest.mock('next/navigation', () => ({
+  useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+    back: jest.fn(),
+  })),
+}))
+
 // Mock Lingui internationalization
 i18n.load({
   en: enMessages,

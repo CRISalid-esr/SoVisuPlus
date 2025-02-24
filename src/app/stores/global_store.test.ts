@@ -5,10 +5,12 @@ describe('Zustand Global Store - useStore with DocumentSlice', () => {
     // Reset Zustand state before each test to avoid state pollution
     useStore.setState({
       document: {
+        selectedDocument: null,
         documents: [],
         loading: true,
         error: null,
         fetchDocuments: jest.fn(),
+        fetchDocumentById: jest.fn(),
       },
     })
   })

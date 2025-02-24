@@ -1,14 +1,12 @@
 import useStore from '@/stores/global_store'
-import { Typography } from '@mui/material'
-import { FC } from 'react'
-import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import { t } from '@lingui/macro'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
+import * as Lingui from '@lingui/core'
+import { t } from '@lingui/macro'
+import { Typography } from '@mui/material'
 
-interface DocumentDetailsTitleProps {}
 const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
-const DocumentDetailsTitle: FC<DocumentDetailsTitleProps> = ({}) => {
+const DocumentDetailsTitle = () => {
   const { selectedDocument = null } = useStore((state) => state.document)
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const localizedTitle = getLocalizedValue(

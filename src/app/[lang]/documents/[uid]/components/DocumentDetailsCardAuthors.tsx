@@ -3,11 +3,8 @@ import { Trans } from '@lingui/macro'
 import EditIcon from '@mui/icons-material/Edit'
 import { Box, Button, Chip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { FC } from 'react'
-interface DocumentDetailsCardAuthorsProps {}
-const DocumentDetailsCardAuthors: FC<
-  DocumentDetailsCardAuthorsProps
-> = ({}) => {
+
+const DocumentDetailsCardAuthors = () => {
   const theme = useTheme()
   const { selectedDocument = null } = useStore((state) => state.document)
 
@@ -36,6 +33,7 @@ const DocumentDetailsCardAuthors: FC<
       >
         {selectedDocument?.contributions.map((contribution, index) => (
           <Chip
+            key={index}
             sx={{
               borderRadius: theme.utils.pxToRem(4),
               backgroundColor: 'rgba(0, 106, 97, 0.10)',

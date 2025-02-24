@@ -1,25 +1,15 @@
 import useStore from '@/stores/global_store'
 import { Trans } from '@lingui/macro'
 import EditIcon from '@mui/icons-material/Edit'
-import {
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  Typography
-} from '@mui/material'
+import { Avatar, Box, Button, Chip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import Image from 'next/image'
-import { FC } from 'react'
 // Make sure to import your enums/metadata for bibliographic platforms
 import {
   BibliographicPlatform,
   BibliographicPlatformMetadata,
 } from '@/types/BibliographicPlatform'
 
-interface DocumentDetailsCardSourcesProps {}
-
-const DocumentDetailsCardSources: FC<DocumentDetailsCardSourcesProps> = () => {
+const DocumentDetailsCardSources = () => {
   const theme = useTheme()
   const { selectedDocument = null } = useStore((state) => state.document)
 
@@ -55,16 +45,6 @@ const DocumentDetailsCardSources: FC<DocumentDetailsCardSourcesProps> = () => {
           )
           if (record) {
             const metadata = BibliographicPlatformMetadata[record.platform]
-            const imageElement = (
-              <Image
-                src={metadata?.icon || '/icons/default.png'}
-                alt={metadata?.name || 'Unknown Source'}
-                width={24}
-                height={24}
-                priority
-                title={metadata?.name || 'Unknown Source'} // Tooltip on hover
-              />
-            )
             acc.push(
               <Chip
                 sx={{

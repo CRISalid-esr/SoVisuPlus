@@ -541,7 +541,7 @@ export default function DocumentsPage() {
         enableRowActions
         positionActionsColumn='last' // Ensures actions column is at the right end
         renderRowActionMenuItems={({ row, table }) => [
-          <Box sx={{ display: 'flex' }}>
+          <Box sx={{ display: 'flex' }} key={row.original.uid}>
             <MRT_ActionMenuItem //or just use a normal MUI MenuItem component
               icon={<InfoIcon />}
               key='edit'
