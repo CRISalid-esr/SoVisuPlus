@@ -26,16 +26,18 @@ export class DocumentDAO extends AbstractDAO {
     const { uid, titles, abstracts, contributions, records } = document
 
     try {
-      let dbDocument = (await this.prismaClient.document.findUnique({
-        where: { uid: uid },
-        include: {
-          titles: true, // Include related titles
-          abstracts: true, // Include related abstracts
-        },
-      })) as DbDocument | null
+      let dbDocument: DbDocument | null =
+        await this.prismaClient.document.findUnique({
+          where: { uid: uid },
+          include: {
+            titles: true,
+            abstracts: true,
+            contributions: { include: { person: true } },
+          },
+        })
 
       if (!dbDocument) {
-        dbDocument = (await this.prismaClient.document.create({
+        dbDocument = await this.prismaClient.document.create({
           data: {
             uid: uid,
             documentType: document.documentType,
@@ -51,11 +53,31 @@ export class DocumentDAO extends AbstractDAO {
               : null,
           },
           include: {
-            titles: true, // Include related titles
-            abstracts: true, // Include related abstracts
+            titles: true,
+            abstracts: true,
+            contributions: { include: { person: true } },
           },
-        })) as DbDocument
+        })
       } else {
+        // Remove obsolete contributions
+        const existingContributors = new Set(
+          dbDocument.contributions.map((c) => c.person.uid),
+        )
+        const newContributors = new Set(contributions.map((c) => c.person.uid))
+        const contributorsToRemove = [...existingContributors].filter(
+          (uid) => !newContributors.has(uid),
+        )
+
+        if (contributorsToRemove.length > 0) {
+          await this.prismaClient.contribution.deleteMany({
+            where: {
+              documentId: dbDocument.id,
+              person: {
+                uid: { in: contributorsToRemove },
+              },
+            },
+          })
+        }
         dbDocument = (await this.prismaClient.document.update({
           where: { uid: uid },
           data: {

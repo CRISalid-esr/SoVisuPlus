@@ -11,6 +11,7 @@ import { Person } from '@/types/Person'
 import { Literal } from '@/types/Literal'
 import { LocRelator } from '@/types/LocRelator'
 import { Contribution } from '@/types/Contribution'
+
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
 
@@ -114,7 +115,11 @@ describe('DocumentDAO', () => {
         publicationDateStart: '2022-01-01T00:00:00.000Z',
         publicationDateEnd: '2022-12-31T23:59:59.000Z',
       },
-      include: { titles: true, abstracts: true },
+      include: {
+        titles: true,
+        abstracts: true,
+        contributions: { include: { person: true } },
+      },
     })
 
     expect(mockPrisma.documentTitle.upsert).toHaveBeenCalled()
