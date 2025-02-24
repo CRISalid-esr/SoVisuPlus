@@ -67,6 +67,45 @@ export class ConceptDAO {
           include: { labels: true },
         })
 
+        // 1. Fetch all existing labels for the concept
+        const existingLabels = await this.prismaClient.conceptLabel.findMany({
+          where: { conceptId: dbConcept.id },
+        })
+
+        // 2. For preflabels, determine obsolete labels (one per language)
+        const providedPrefLanguages = new Set(
+          uniquePrefLabels.map((label) => label.language?.toString()),
+        )
+        const obsoletePrefLabels = existingLabels.filter(
+          (label) =>
+            label.type === LabelType.PREF &&
+            !providedPrefLanguages.has(label.language.toString()),
+        )
+
+        // Delete obsolete preflabels
+        for (const label of obsoletePrefLabels) {
+          await this.prismaClient.conceptLabel.delete({
+            where: { id: label.id },
+          })
+        }
+
+        // 3. For altlabels, determine obsolete labels (match by language and value)
+        const providedAltSet = new Set(
+          uniqueAltLabels.map((label) => `${label.language}:${label.value}`),
+        )
+        const obsoleteAltLabels = existingLabels.filter(
+          (label) =>
+            label.type === LabelType.ALT &&
+            !providedAltSet.has(`${label.language}:${label.value}`),
+        )
+
+        // Delete obsolete altlabels
+        for (const label of obsoleteAltLabels) {
+          await this.prismaClient.conceptLabel.delete({
+            where: { id: label.id },
+          })
+        }
+
         // Upsert preferred labels
         // For preflabels: enforce only one label per language manually
         for (const label of uniquePrefLabels) {
