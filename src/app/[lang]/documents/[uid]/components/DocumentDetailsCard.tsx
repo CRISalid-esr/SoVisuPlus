@@ -20,15 +20,20 @@ import DocumentDetailsCardDate from './DocumentDetailsCardDate'
 import DocumentDetailsCardSources from './DocumentDetailsCardSources'
 import { DocumentType } from '@/types/Document'
 
+type DocumentFieldKey = 'titles' | 'authors' | 'date' | 'sources'
+
+interface DocumentField {
+  value: DocumentFieldKey
+  component: JSX.Element | null
+}
+
 interface DocumentDetailsCardProps {}
+
 const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
   const { selectedDocument = null } = useStore((state) => state.document)
   const theme = useTheme()
 
-  const documentFields: Record<
-    string,
-    { value: string; component: JSX.Element | null }
-  > = {
+  const documentFields: Record<DocumentFieldKey, DocumentField> = {
     titles: {
       value: 'titles',
       component: selectedDocument?.titles ? (
