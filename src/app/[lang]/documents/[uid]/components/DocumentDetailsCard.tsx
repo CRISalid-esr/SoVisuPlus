@@ -16,6 +16,9 @@ import { FC } from 'react'
 
 import DocumentDetailsCardTitles from './DocumentDetailsCardTitles'
 import DocumentDetailsCardAuthors from './DocumentDetailsCardAuthors'
+import DocumentDetailsCardDate from './DocumentDetailsCardDate'
+import DocumentDetailsCardSources from './DocumentDetailsCardSources'
+import { DocumentType } from '@/types/Document'
 
 interface DocumentDetailsCardProps {}
 const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
@@ -36,17 +39,36 @@ const DocumentDetailsCard: FC<DocumentDetailsCardProps> = ({}) => {
       value: 'authors',
       component: <DocumentDetailsCardAuthors />,
     },
+    date: {
+      value: 'date',
+      component: <DocumentDetailsCardDate />,
+    },
+    sources: {
+      value: 'sources',
+      component: <DocumentDetailsCardSources />,
+    },
   }
-
-  const documentTypeFields: Record<string, string[]> = {
-    Book: ['titles', 'authors'],
-    JournalArticle: ['titles', 'authors'],
-    ConferencePaper: ['titles', 'authors'],
-    Report: ['titles', 'authors'],
+  const documentTypeFields: Record<DocumentType, string[]> = {
+    [DocumentType.JournalArticle]: ['titles', 'authors', 'date', 'sources'],
+    [DocumentType.Document]: ['titles', 'authors', 'date', 'sources'],
+    [DocumentType.ScholarlyPublication]: [
+      'titles',
+      'authors',
+      'date',
+      'sources',
+    ],
+    [DocumentType.Book]: ['titles', 'authors', 'date', 'sources'],
+    [DocumentType.Monograph]: ['titles', 'authors', 'date', 'sources'],
+    [DocumentType.BookChapter]: ['titles', 'authors', 'date', 'sources'],
+    [DocumentType.ConferenceArticle]: ['titles', 'authors', 'date', 'sources'],
+    [DocumentType.Proceedings]: ['titles', 'authors', 'date', 'sources'],
   }
 
   const fieldsToDisplay =
-    documentTypeFields[selectedDocument?.documentType ?? ''] || []
+    selectedDocument?.documentType &&
+    documentTypeFields[selectedDocument.documentType]
+      ? documentTypeFields[selectedDocument.documentType]
+      : []
 
   return (
     <CustomCard
