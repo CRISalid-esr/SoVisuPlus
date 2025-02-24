@@ -24,6 +24,17 @@ export class ConceptDAO {
           include: { labels: true },
         })
 
+      const uniquePrefLabels = Array.from(
+        new Map(
+          concept.prefLabels.map((label) => [label.language, label]),
+        ).values(),
+      )
+      const uniqueAltLabels = Array.from(
+        new Map(
+          concept.altLabels.map((label) => [label.language, label]),
+        ).values(),
+      )
+
       if (!dbConcept) {
         dbConcept = await this.prismaClient.concept.create({
           data: {
@@ -31,12 +42,12 @@ export class ConceptDAO {
             uri: concept.uri,
             labels: {
               create: [
-                ...concept.prefLabels.map((label: Literal) => ({
+                ...uniquePrefLabels.map((label: Literal) => ({
                   language: label.language,
                   value: label.value,
                   type: LabelType.PREF,
                 })),
-                ...concept.altLabels.map((label: Literal) => ({
+                ...uniqueAltLabels.map((label: Literal) => ({
                   language: label.language,
                   value: label.value,
                   type: LabelType.ALT,
@@ -57,33 +68,47 @@ export class ConceptDAO {
         })
 
         // Upsert preferred labels
-        for (const label of concept.prefLabels) {
-          await this.prismaClient.conceptLabel.upsert({
-            where: {
-              conceptId_language_type: {
+        // For preflabels: enforce only one label per language manually
+        for (const label of uniquePrefLabels) {
+          const existingPrefLabel =
+            await this.prismaClient.conceptLabel.findFirst({
+              where: {
                 conceptId: dbConcept.id,
                 language: label.language,
                 type: LabelType.PREF,
               },
-            },
-            update: { value: label.value },
-            create: {
-              conceptId: dbConcept.id,
-              language: label.language,
-              value: label.value,
-              type: LabelType.PREF,
-            },
-          })
+            })
+          if (existingPrefLabel) {
+            // Update the existing label if the value is different
+            if (existingPrefLabel.value !== label.value) {
+              await this.prismaClient.conceptLabel.update({
+                where: { id: existingPrefLabel.id },
+                data: { value: label.value },
+              })
+            }
+          } else {
+            // Create a new preflabel record
+            await this.prismaClient.conceptLabel.create({
+              data: {
+                conceptId: dbConcept.id,
+                language: label.language,
+                value: label.value,
+                type: LabelType.PREF,
+              },
+            })
+          }
         }
 
         // Upsert alternative labels
-        for (const label of concept.altLabels) {
+        // For altlabels: allow multiple values per language with upsert
+        for (const label of uniqueAltLabels) {
           await this.prismaClient.conceptLabel.upsert({
             where: {
-              conceptId_language_type: {
+              conceptId_language_type_value: {
                 conceptId: dbConcept.id,
                 language: label.language,
                 type: LabelType.ALT,
+                value: label.value,
               },
             },
             update: { value: label.value },

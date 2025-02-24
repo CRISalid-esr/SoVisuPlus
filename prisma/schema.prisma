@@ -127,7 +127,7 @@ model ConceptLabel {
   value     String
   type      LabelType
 
-  @@unique([conceptId, language, type])
+  @@unique([conceptId, language, type, value])
 }
 
 enum LabelType {
