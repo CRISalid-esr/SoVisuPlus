@@ -3,6 +3,7 @@ import {
   Document,
   DocumentAbstract,
   DocumentTitle,
+  Person,
   PrismaClient,
   ResearchStructure,
   ResearchStructureDescription,
@@ -16,10 +17,14 @@ export type ResearchStructureWithRelations = ResearchStructure & {
   descriptions: ResearchStructureDescription[]
 }
 
+type ContributionWithRelations = Contribution & {
+  person: Person
+}
+
 export type DocumentWithRelations = Document & {
   titles: DocumentTitle[]
   abstracts: DocumentAbstract[]
-  contributions: Contribution[]
+  contributions: ContributionWithRelations[]
 }
 
 export default prisma
