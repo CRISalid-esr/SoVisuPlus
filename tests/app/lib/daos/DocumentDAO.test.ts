@@ -6,6 +6,7 @@ import prisma from '@/lib/daos/prisma'
 import { Literal } from '@/types/Literal'
 import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
 import { Contribution } from '@/types/Contribution'
+import { Concept } from '@/types/Concept'
 
 describe('DocumentDAO Integration Tests', () => {
   let documentDAO: DocumentDAO
@@ -85,5 +86,109 @@ describe('DocumentDAO Integration Tests', () => {
 
     expect(contributions).toHaveLength(1)
     expect(contributions[0].personId).toBe(person1.id)
+  })
+
+  test('should handle document subjects', async () => {
+    // Step 1: Create a subject concept
+    const subject1 = new Concept(
+      'concept-1',
+      [new Literal('Alt Label', 'en')],
+      [new Literal('Pref Label', 'en')],
+      'http://example.com/concept-1',
+    )
+
+    // Step 2: Create a document with a subject
+    const documentData = new Document(
+      'doc-2',
+      Document.documentTypeFromString('JournalArticle'),
+      '2023-02-01',
+      new Date('2023-02-01T00:00:00.000Z'),
+      new Date('2023-02-01T23:59:59.000Z'),
+      [new Literal('Subject Test Document', 'en')],
+      [], // No abstracts
+      [subject1], // subjects
+      [], // No contributions
+      [], // No records
+    )
+
+    const createdDocument =
+      await documentDAO.createOrUpdateDocument(documentData)
+
+    // Verify that the concept exists in the database
+    const dbConcept = await prisma.concept.findUnique({
+      where: { uid: subject1.uid },
+    })
+    expect(dbConcept).toBeDefined()
+
+    // Verify that the document is linked to the subject
+    const dbDocument = await prisma.document.findUnique({
+      where: { uid: createdDocument.uid },
+      include: { subjects: true },
+    })
+    expect(dbDocument).toBeDefined()
+    expect(dbDocument?.subjects).toHaveLength(1)
+    expect(dbDocument?.subjects[0].uid).toBe(subject1.uid)
+
+    // Step 3: Update the document by adding a second subject
+    const subject2 = new Concept(
+      'concept-2',
+      [new Literal('Alt Label 2', 'en')],
+      [new Literal('Pref Label 2', 'en')],
+      'http://example.com/concept-2',
+    )
+
+    const updatedDocumentData = new Document(
+      'doc-2',
+      Document.documentTypeFromString('JournalArticle'),
+      '2023-02-01',
+      new Date('2023-02-01T00:00:00.000Z'),
+      new Date('2023-02-01T23:59:59.000Z'),
+      [new Literal('Subject Test Document', 'en')],
+      [], // No abstracts
+      [subject1, subject2], // both subjects
+      [], // No contributions
+      [],
+    )
+
+    await documentDAO.createOrUpdateDocument(updatedDocumentData)
+
+    // Verify that the second subject exists and is linked correctly
+    const dbConcept2 = await prisma.concept.findUnique({
+      where: { uid: subject2.uid },
+    })
+    expect(dbConcept2).toBeDefined()
+
+    const updatedDbDocument = await prisma.document.findUnique({
+      where: { uid: createdDocument.uid },
+      include: { subjects: true },
+    })
+    expect(updatedDbDocument).toBeDefined()
+    expect(updatedDbDocument?.subjects).toHaveLength(2)
+    expect(updatedDbDocument?.subjects[0].uid).toBe(subject1.uid)
+    expect(updatedDbDocument?.subjects[1].uid).toBe(subject2.uid)
+
+    // now lets remove the first subject
+    const updatedDocumentData2 = new Document(
+      'doc-2',
+      Document.documentTypeFromString('JournalArticle'),
+      '2023-02-01',
+      new Date('2023-02-01T00:00:00.000Z'),
+      new Date('2023-02-01T23:59:59.000Z'),
+      [new Literal('Subject Test Document', 'en')],
+      [], // No abstracts
+      [subject2], // only the second subject
+      [], // No contributions
+      [],
+    )
+
+    await documentDAO.createOrUpdateDocument(updatedDocumentData2)
+
+    const updatedDbDocument2 = await prisma.document.findUnique({
+      where: { uid: createdDocument.uid },
+      include: { subjects: true },
+    })
+    expect(updatedDbDocument2).toBeDefined()
+    expect(updatedDbDocument2?.subjects).toHaveLength(1)
+    expect(updatedDbDocument2?.subjects[0].uid).toBe(subject2.uid)
   })
 })

@@ -133,6 +133,7 @@ describe('DocumentDAO', () => {
       include: {
         titles: true,
         abstracts: true,
+        subjects: true,
         contributions: { include: { person: true } },
       },
     })
@@ -296,6 +297,7 @@ describe('DocumentDAO', () => {
       include: {
         titles: true,
         abstracts: true,
+        subjects: true,
         contributions: {
           include: {
             person: true,
