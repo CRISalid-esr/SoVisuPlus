@@ -5,7 +5,7 @@ import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import dayjs from 'dayjs'
 
-const DocumentDetailsCardDate = () => {
+const PublicationDate = () => {
   const theme = useTheme()
   const { selectedDocument = null } = useStore((state) => state.document)
 
@@ -36,4 +36,4 @@ const DocumentDetailsCardDate = () => {
   )
 }
 
-export default DocumentDetailsCardDate
+export default PublicationDate

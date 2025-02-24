@@ -12,10 +12,10 @@ import {
 import { useTheme } from '@mui/material/styles'
 
 import { DocumentType } from '@/types/Document'
-import DocumentDetailsCardAuthors from './DocumentDetailsCardAuthors'
-import DocumentDetailsCardDate from './DocumentDetailsCardDate'
-import DocumentDetailsCardSources from './DocumentDetailsCardSources'
-import DocumentDetailsCardTitles from './DocumentDetailsCardTitles'
+import Authors from './Authors'
+import PulicationDate from './PulicationDate'
+import Sources from './Sources'
+import Titles from './Titles'
 
 type DocumentFieldKey = 'titles' | 'authors' | 'date' | 'sources'
 
@@ -24,28 +24,26 @@ interface DocumentField {
   component: JSX.Element | null
 }
 
-const DocumentDetailsCard = () => {
+const BibliographicInformation = () => {
   const { selectedDocument = null } = useStore((state) => state.document)
   const theme = useTheme()
 
   const documentFields: Record<DocumentFieldKey, DocumentField> = {
     titles: {
       value: 'titles',
-      component: selectedDocument?.titles ? (
-        <DocumentDetailsCardTitles />
-      ) : null,
+      component: selectedDocument?.titles ? <Titles /> : null,
     },
     authors: {
       value: 'authors',
-      component: <DocumentDetailsCardAuthors />,
+      component: <Authors />,
     },
     date: {
       value: 'date',
-      component: <DocumentDetailsCardDate />,
+      component: <PulicationDate />,
     },
     sources: {
       value: 'sources',
-      component: <DocumentDetailsCardSources />,
+      component: <Sources />,
     },
   }
   const documentTypeFields: Record<DocumentType, DocumentFieldKey[]> = {
@@ -133,4 +131,4 @@ const DocumentDetailsCard = () => {
   )
 }
 
-export default DocumentDetailsCard
+export default BibliographicInformation

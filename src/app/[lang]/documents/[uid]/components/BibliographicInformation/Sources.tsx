@@ -9,7 +9,7 @@ import {
   BibliographicPlatformMetadata,
 } from '@/types/BibliographicPlatform'
 
-const DocumentDetailsCardSources = () => {
+const Sources = () => {
   const theme = useTheme()
   const { selectedDocument = null } = useStore((state) => state.document)
 
@@ -93,4 +93,4 @@ const DocumentDetailsCardSources = () => {
   )
 }
 
-export default DocumentDetailsCardSources
+export default Sources

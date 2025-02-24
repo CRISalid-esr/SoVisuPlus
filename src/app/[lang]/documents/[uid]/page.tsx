@@ -5,14 +5,21 @@ import useStore from '@/stores/global_store'
 import { t } from '@lingui/macro'
 import { Box, CircularProgress } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { notFound, useParams } from 'next/navigation'
+import {
+  notFound,
+  useParams,
+  useRouter,
+  useSearchParams,
+} from 'next/navigation'
 import { useEffect, useState } from 'react'
-import DocumentDetailsCard from './components/DocumentDetailsCard'
 import DocumentDetailsHeader from './components/DocumentDetailsHeader'
 import DocumentDetailsTitle from './components/DocumentDetailsTitle'
+import BibliographicInformation from './components/BibliographicInformation'
 
 export default function DocumentDetailsPage() {
   const theme = useTheme()
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   const tabs = [
     {
@@ -46,7 +53,11 @@ export default function DocumentDetailsPage() {
       color: theme.palette.primary.main,
     },
   ]
-  const [selectedTab, setSelectedTab] = useState(tabs[0].value)
+
+  // Get the initial tab from the URL query parameter, defaulting to the first tab's value
+  const initialTab = searchParams.get('tab') || ''
+  console.log('initialTab', searchParams.get('tab'))
+  const [selectedTab, setSelectedTab] = useState(initialTab)
 
   const { uid } = useParams() // Get the document UID from the URL
   const {
@@ -54,9 +65,15 @@ export default function DocumentDetailsPage() {
     loading,
     selectedDocument = null,
   } = useStore((state) => state.document)
+
   useEffect(() => {
     fetchDocumentById(uid as string)
   }, [uid])
+
+  // Update the tab state if the URL query parameter changes
+  useEffect(() => {
+    setSelectedTab(initialTab)
+  }, [initialTab])
 
   if (loading) {
     return (
@@ -72,6 +89,18 @@ export default function DocumentDetailsPage() {
 
   const handleTabChange = (newValue: string) => {
     setSelectedTab(newValue)
+    // Update the URL with the new tab query parameter without scrolling to the top
+    router.push(`?tab=${newValue}`, { scroll: false })
+  }
+
+  const renderTabContent = () => {
+    console.log('selectedTab', selectedTab)
+    switch (selectedTab) {
+      case 'bibliographic_information':
+        return <BibliographicInformation />
+      default:
+        return notFound()
+    }
   }
 
   return (
@@ -83,7 +112,7 @@ export default function DocumentDetailsPage() {
         selectedValue={selectedTab}
         onTabChange={handleTabChange}
       />
-      <DocumentDetailsCard />
+      {renderTabContent()}
     </Box>
   )
 }

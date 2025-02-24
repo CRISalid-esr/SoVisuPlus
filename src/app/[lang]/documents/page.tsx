@@ -548,7 +548,9 @@ export default function DocumentsPage() {
               label={t`documents_page_action_column_details`}
               onClick={() => {
                 const documentUid = row.original.uid // Assuming 'uid' is the unique identifier
-                router.push(`/documents/${documentUid}`) // Navigate to the details page
+                router.push(
+                  `/documents/${documentUid}?tab=bibliographic_information`,
+                ) // Navigate to the details page
               }}
               table={table}
             />

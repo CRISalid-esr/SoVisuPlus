@@ -7,7 +7,7 @@ import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 
-const DocumentDetailsCardTitles = () => {
+const Titles = () => {
   const theme = useTheme()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const [selectedLangue, setSelectedLangue] = useState<string | null>(lang)
@@ -46,4 +46,4 @@ const DocumentDetailsCardTitles = () => {
   )
 }
 
-export default DocumentDetailsCardTitles
+export default Titles

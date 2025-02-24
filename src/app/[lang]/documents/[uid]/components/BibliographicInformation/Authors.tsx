@@ -4,7 +4,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import { Box, Button, Chip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
-const DocumentDetailsCardAuthors = () => {
+const Authors = () => {
   const theme = useTheme()
   const { selectedDocument = null } = useStore((state) => state.document)
 
@@ -67,4 +67,4 @@ const DocumentDetailsCardAuthors = () => {
   )
 }
 
-export default DocumentDetailsCardAuthors
+export default Authors
