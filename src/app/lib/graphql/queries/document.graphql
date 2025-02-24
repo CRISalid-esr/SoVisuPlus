@@ -13,6 +13,18 @@ query Documents($where: DocumentWhere) {
       language
       value
     }
+    has_subjects {
+      uri
+      uid
+      alt_labels {
+        language
+        value
+      }
+      pref_labels {
+        language
+        value
+      }
+    }
     has_contributions {
       roles
       contributor {

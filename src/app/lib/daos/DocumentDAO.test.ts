@@ -11,6 +11,7 @@ import { Person } from '@/types/Person'
 import { Literal } from '@/types/Literal'
 import { LocRelator } from '@/types/LocRelator'
 import { Contribution } from '@/types/Contribution'
+import { Concept } from '@/types/Concept'
 
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
@@ -57,6 +58,19 @@ describe('DocumentDAO', () => {
     [new Literal('Sample Document Title', 'en')],
     [new Literal('Sample Abstract', 'en')],
     [
+      new Concept(
+        'concept-123',
+        [
+          Literal.fromObject({
+            value: 'Concept preferred label',
+            language: 'en',
+          }),
+        ],
+        [Literal.fromObject({ value: 'Concept alt label', language: 'en' })],
+        'http://example.com/concept/123',
+      ),
+    ],
+    [
       new Contribution(
         new Person(
           'person-1',
@@ -79,6 +93,7 @@ describe('DocumentDAO', () => {
       documentType: DocumentType.Document,
       titles: [],
       abstracts: [],
+      subjects: [],
       title_locale_0: '',
       title_locale_1: '',
       title_locale_2: '',
@@ -153,6 +168,7 @@ describe('DocumentDAO', () => {
       documentType: DocumentType.Document,
       titles: [],
       abstracts: [],
+      subjects: [],
       title_locale_0: '',
       title_locale_1: '',
       title_locale_2: '',
@@ -177,6 +193,14 @@ describe('DocumentDAO', () => {
         uid: 'doc-123',
         titles: [{ language: 'en', value: 'Sample Document Title' }],
         abstracts: [{ language: 'en', value: 'Sample Abstract' }],
+        subjects: [
+          {
+            uid: 'concept-123',
+            prefLabels: [{ language: 'en', value: 'Concept preferred label' }],
+            altLabels: [{ language: 'en', value: 'Concept alt label' }],
+            url: 'http://example.com/concept/123',
+          },
+        ],
         publicationDate: '2022',
         publicationDateStart: new Date('2022-01-01T00:00:00.000Z'),
         publicationDateEnd: new Date('2022-12-31T23:59:59.000Z'),

@@ -39,7 +39,8 @@ describe('DocumentDAO Integration Tests', () => {
       new Date('2023-01-01T00:00:00.000Z'),
       new Date('2023-01-01T23:59:59.000Z'),
       [new Literal('Test Document', 'en')],
-      [],
+      [], // No abstracts
+      [], // No subjects
       [
         new Contribution(Person.fromDbPerson(person1), [
           LocRelatorHelper.fromLabel('author') as LocRelator,
@@ -69,7 +70,8 @@ describe('DocumentDAO Integration Tests', () => {
       new Date('2023-01-01T00:00:00.000Z'),
       new Date('2023-01-01T23:59:59.000Z'),
       [new Literal('Test Document', 'en')],
-      [],
+      [], // No abstracts
+      [], // No subjects
       [new Contribution(Person.fromDbPerson(person1), [])],
       [],
     )

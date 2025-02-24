@@ -7,6 +7,7 @@ import { Contribution } from '@/types/Contribution'
 import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
 import { getBibliographicPlatformByNameIgnoreCase } from '@/types/BibliographicPlatform'
 import { DocumentRecord } from '@/types/DocumentRecord'
+import { Concept } from '@/types/Concept'
 
 interface GraphContributionResponse {
   roles: string[]
@@ -28,6 +29,12 @@ interface GraphDocumentResponse {
   publication_date_end: string | null
   titles: { language: string; value: string }[]
   abstracts: { language: string; value: string }[]
+  has_subjects: {
+    uid: string
+    url: string | null
+    pref_labels: [{ language: string; value: string }]
+    alt_labels: { language: string; value: string }[]
+  }[]
   has_contributions: Array<GraphContributionResponse>
   recorded_by: Array<GraphDocumentRecordResponse> // Add record information
 }
@@ -90,6 +97,14 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
       publication_date_end ? new Date(publication_date_end) : null,
       titles.map(Literal.fromObject),
       abstracts.map(Literal.fromObject),
+      documentData.has_subjects.map((subject) => {
+        return new Concept(
+          subject.uid,
+          subject.pref_labels.map(Literal.fromObject),
+          subject.alt_labels.map(Literal.fromObject),
+          subject.url,
+        )
+      }),
       documentData.has_contributions.reduce<Contribution[]>(
         (acc, contributionData: GraphContributionResponse) => {
           const [contributor] = contributionData.contributor
