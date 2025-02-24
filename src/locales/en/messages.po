@@ -14,11 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCard.tsx:74
-msgid "document_details_page_card_validate_button"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Back to home page"
@@ -29,8 +24,13 @@ msgid "internal_server_page_description"
 msgstr "The server detected an internal error and was unable to process your request. Please try again later!"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCard.tsx:71
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCard.tsx:97
 msgid "document_details_page_card_title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCard.tsx:100
+msgid "document_details_page_card_validate_button"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -119,16 +119,28 @@ msgstr ""
 msgid "document_details_keywords_tab"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardAuthors.tsx:28
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardAuthors.tsx:26
 msgid "document_details_page_authors_row_label"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardAuthors.tsx:66
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardAuthors.tsx:65
 msgid "document_details_page_authors_row_update_author"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardDate.tsx:27
+msgid "document_details_page_date_row_label"
 msgstr ""
 
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.tsx:28
 msgid "document_details_page_main_title"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardSources.tsx:41
+msgid "document_details_page_sources_row_label"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardSources.tsx:109
+msgid "document_details_page_sources_row_update_source"
 msgstr ""
 
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardTitles.tsx:22
@@ -203,6 +215,7 @@ msgstr ""
 msgid "documents_page_publication_date_column"
 msgstr ""
 
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsCardDate.tsx:32
 #: src/app/[lang]/documents/page.tsx:288
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
