@@ -14,11 +14,13 @@ import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
 import { t } from '@lingui/macro'
 
+import { LanguageChips } from '@/components/LanguageChips'
 import { DocumentSync } from '@/types/DocumentSync'
 import { DocumentSyncStatus } from '@/types/DocumentSyncStatus'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import { Localization } from '@/types/Localization'
-import { Box, Chip, IconButton, Tooltip, Typography } from '@mui/material'
+import InfoIcon from '@mui/icons-material/Info'
+import { Box, IconButton, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -31,13 +33,12 @@ import {
   MRT_SortingState,
 } from 'material-react-table'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation' // Import useRouter
 import { useEffect, useMemo, useState } from 'react'
 import Highlighter from 'react-highlight-words'
-import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
 import DocumentHeader from './components/DocumentHeader'
+import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
-import InfoIcon from '@mui/icons-material/Info'
-import { useRouter } from 'next/navigation' // Import useRouter
 dayjs.extend(utc)
 
 export default function DocumentsPage() {
@@ -190,46 +191,22 @@ export default function DocumentsPage() {
             t`no_title_available`,
           )
           const effectiveRowLang = localizedTitle.language
-          const filterValue = column.getFilterValue()
-          const chips = titles.map((title, index) => {
-            // skip ul : undetermined language
-            if (title.language === 'ul') {
-              return null
-            }
-            return (
-              <Chip
-                key={index}
-                size='small'
-                sx={{
-                  marginRight: theme.spacing(1),
-                }}
-                clickable={title.language !== effectiveRowLang}
-                label={title.language}
-                onClick={(e) => {
-                  if (title.language === effectiveRowLang) {
-                    e.preventDefault()
-                    return
-                  }
-                  setSelectedTitleLangs({
-                    ...selectedTitleLangs,
-                    [uid]: title.language,
-                  })
-                }}
-                color={
-                  title.language === effectiveRowLang ? 'primary' : 'default'
-                }
-              />
-            )
-          })
+
           return (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Highlighter
                 highlightClassName='highlight'
-                searchWords={[globalFilter, filterValue as string]}
+                searchWords={[globalFilter, column.getFilterValue() as string]}
                 autoEscape
                 textToHighlight={localizedTitle.value}
               />
-              <Box>{chips}</Box>
+              <LanguageChips
+                texts={titles}
+                selectedLang={effectiveRowLang}
+                onLanguageSelect={(newLang) =>
+                  setSelectedTitleLangs((prev) => ({ ...prev, [uid]: newLang }))
+                }
+              />
             </Box>
           )
         },

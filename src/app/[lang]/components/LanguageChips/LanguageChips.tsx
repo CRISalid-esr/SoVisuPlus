@@ -1,49 +1,44 @@
-import { Literal } from '@/types/Literal'
-import { Chip } from '@mui/material'
+import { Box, Chip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { FC } from 'react'
-import { Box } from '@mui/system'
+import { Literal } from '@/types/Literal'
 
 interface LanguageChipsProps {
-  titles: Literal[]
-  handleChangeSelectedLanguage: (lang: string) => void
-  selectedLangue?: string | null
+  texts: Literal[]
+  selectedLang: string
+  onLanguageSelect: (lang: string) => void
 }
 
-const LanguageChips: FC<LanguageChipsProps> = ({
-  titles,
-  handleChangeSelectedLanguage,
-  selectedLangue,
-}) => {
+/**
+ * A reusable component to display language selection chips.
+ */
+export default function LanguageChips({
+  texts,
+  selectedLang,
+  onLanguageSelect,
+}: LanguageChipsProps) {
   const theme = useTheme()
+
   return (
     <Box>
-      {titles.map((title, index) => {
-        if (title.language === 'ul') {
-          return null
-        }
-        return (
+      {texts
+        .filter((text) => text.language !== 'ul') // Ignore undetermined language
+        .map((text, index) => (
           <Chip
             key={index}
             size='small'
-            sx={{
-              marginRight: theme.spacing(1),
-            }}
-            clickable={title.language !== selectedLangue}
-            label={title.language}
+            sx={{ marginRight: theme.spacing(1) }}
+            clickable={text.language !== selectedLang}
+            label={text.language}
             onClick={(e) => {
-              if (title.language === selectedLangue) {
+              if (text.language === selectedLang) {
                 e.preventDefault()
                 return
               }
-              handleChangeSelectedLanguage(title.language)
+              onLanguageSelect(text.language)
             }}
-            color={title.language === selectedLangue ? 'primary' : 'default'}
+            color={text.language === selectedLang ? 'primary' : 'default'}
           />
-        )
-      })}
+        ))}
     </Box>
   )
 }
-
-export default LanguageChips
