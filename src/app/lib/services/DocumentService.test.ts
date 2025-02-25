@@ -6,14 +6,37 @@ jest.mock('@/lib/daos/DocumentDAO')
 describe('DocumentService', () => {
   let documentService: DocumentService
   let mockFetchDocumentsFromDB: jest.Mock
-
+  let mockFetchDocumentByIdFromDB: jest.Mock
   beforeEach(() => {
     mockFetchDocumentsFromDB = jest.fn()
+    mockFetchDocumentByIdFromDB = jest.fn()
     ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
       fetchDocumentsFromDB: mockFetchDocumentsFromDB,
+      fetchDocumentByIdFromDB: mockFetchDocumentByIdFromDB,
     }))
 
     documentService = new DocumentService()
+  })
+
+  it('should return a document when fetchDocumentById succeeds', async () => {
+    const mockDocument = { id: '123', name: 'Test Document' }
+    mockFetchDocumentByIdFromDB.mockResolvedValue(mockDocument)
+
+    await expect(documentService.fetchDocumentById('123')).resolves.toEqual(
+      mockDocument,
+    )
+
+    expect(mockFetchDocumentByIdFromDB).toHaveBeenCalledWith('123')
+  })
+
+  it('should throw an error when fetchDocumentByIdFromDB fails', async () => {
+    mockFetchDocumentByIdFromDB.mockRejectedValue(new Error('DB error'))
+
+    await expect(documentService.fetchDocumentById('123')).rejects.toThrow(
+      'Error fetching document from service',
+    )
+
+    expect(mockFetchDocumentByIdFromDB).toHaveBeenCalledWith('123')
   })
 
   it('should return documents and totalItems when fetchDocuments succeeds', async () => {
