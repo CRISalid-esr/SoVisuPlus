@@ -14,7 +14,7 @@ import {
 import { useEffect, useState } from 'react'
 import DocumentDetailsHeader from './components/DocumentDetailsHeader'
 import DocumentDetailsTitle from './components/DocumentDetailsTitle'
-import BibliographicInformation from './components/BibliographicInformation'
+import BibliographicInformation from './components/BibliographicInformation/BibliographicInformation'
 
 export default function DocumentDetailsPage() {
   const theme = useTheme()
