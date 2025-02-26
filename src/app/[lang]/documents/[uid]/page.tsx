@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react'
 import DocumentDetailsHeader from './components/DocumentDetailsHeader'
 import DocumentDetailsTitle from './components/DocumentDetailsTitle'
 import BibliographicInformation from './components/BibliographicInformation/BibliographicInformation'
-
+import Authors from './components/Authors/Authors'
 export default function DocumentDetailsPage() {
   const theme = useTheme()
   const router = useRouter()
@@ -91,6 +91,8 @@ export default function DocumentDetailsPage() {
     switch (selectedTab) {
       case 'bibliographic_information':
         return <BibliographicInformation />
+      case 'authors':
+        return <Authors />
       default:
         return notFound()
     }
