@@ -56,7 +56,6 @@ export default function DocumentDetailsPage() {
 
   // Get the initial tab from the URL query parameter, defaulting to the first tab's value
   const initialTab = searchParams.get('tab') || ''
-  console.log('initialTab', searchParams.get('tab'))
   const [selectedTab, setSelectedTab] = useState(initialTab)
 
   const { uid } = useParams() // Get the document UID from the URL
@@ -94,7 +93,6 @@ export default function DocumentDetailsPage() {
   }
 
   const renderTabContent = () => {
-    console.log('selectedTab', selectedTab)
     switch (selectedTab) {
       case 'bibliographic_information':
         return <BibliographicInformation />
