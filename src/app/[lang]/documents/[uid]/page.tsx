@@ -24,17 +24,12 @@ export default function DocumentDetailsPage() {
   const tabs = [
     {
       label: t`document_details_bibliographic_information_tab`,
-      value: 'bibliographic_information',
+      value: 'bibliographic-information',
       color: theme.palette.primary.main,
     },
     {
       label: t`document_details_keywords_tab`,
       value: 'keywords',
-      color: theme.palette.primary.main,
-    },
-    {
-      label: t`document_details_domains_tab`,
-      value: 'document_details_domains',
       color: theme.palette.primary.main,
     },
     {
