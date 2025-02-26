@@ -282,28 +282,8 @@ describe('DocumentDAO', () => {
     })
   })
   it('should fetch a document by UID', async () => {
-    const mockDbDocument = {
-      id: 1,
-      uid: 'doc-123',
-      documentType: DocumentType.Document,
-      titles: [{ language: 'en', value: 'Sample Document Title' }],
-      abstracts: [{ language: 'en', value: 'Sample Abstract' }],
-      contributions: [
-        {
-          person: {
-            id: 1,
-            displayName: 'John Doe',
-            uid: 'person-1',
-          },
-        },
-      ],
-      records: [],
-    } as unknown as DbDocument
-
     // Mock Prisma response
-    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(
-      mockDbDocument,
-    )
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(document)
 
     const fetchedDocument = await documentDAO.fetchDocumentByIdFromDB('doc-123')
 
