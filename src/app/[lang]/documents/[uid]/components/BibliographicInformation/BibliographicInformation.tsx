@@ -13,7 +13,7 @@ import { useTheme } from '@mui/material/styles'
 
 import { DocumentType } from '@/types/Document'
 import Authors from './Authors'
-import PulicationDate from './PulicationDate'
+import PulicationDate from './PublicationDate'
 import Sources from './Sources'
 import Titles from './Titles'
 
