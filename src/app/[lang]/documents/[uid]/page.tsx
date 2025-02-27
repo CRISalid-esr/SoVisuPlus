@@ -24,7 +24,7 @@ export default function DocumentDetailsPage() {
   const tabs = [
     {
       label: t`document_details_bibliographic_information_tab`,
-      value: 'bibliographic-information',
+      value: 'bibliographic_information',
       color: theme.palette.primary.main,
     },
     {
