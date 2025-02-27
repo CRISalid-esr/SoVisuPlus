@@ -1,4 +1,5 @@
 import {
+  Concept,
   Contribution,
   Document,
   DocumentAbstract,
@@ -24,6 +25,7 @@ type ContributionWithRelations = Contribution & {
 export type DocumentWithRelations = Document & {
   titles: DocumentTitle[]
   abstracts: DocumentAbstract[]
+  subjects: Concept[]
   contributions: ContributionWithRelations[]
 }
 

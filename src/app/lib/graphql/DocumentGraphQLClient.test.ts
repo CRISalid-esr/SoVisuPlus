@@ -1,6 +1,6 @@
 import { DocumentGraphQLClient } from './DocumentGraphQLClient'
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
-import { Document,DocumentType } from '@/types/Document'
+import { Document, DocumentType } from '@/types/Document'
 import { Contribution } from '@/types/Contribution'
 import { PersonGraphQLClient } from './PersonGraphQLClient'
 import { LocRelatorHelper } from '@/types/LocRelator'
@@ -11,6 +11,7 @@ import {
 } from '@/types/BibliographicPlatform'
 import { Literal } from '@/types/Literal'
 import { Person } from '@/types/Person'
+import { Concept } from '@/types/Concept'
 
 jest.mock('./AbstractGraphQLClient')
 jest.mock('./PersonGraphQLClient')
@@ -50,6 +51,16 @@ describe('DocumentGraphQLClient', () => {
           publication_date_end: '2022-12-31',
           titles: [{ language: 'en', value: 'Test Document' }],
           abstracts: [{ language: 'en', value: 'This is a test abstract.' }],
+          has_subjects: [
+            {
+              uid: 'concept-1234',
+              url: 'http://example.com/concept/1234',
+              pref_labels: [
+                { language: 'en', value: 'Concept preferred label' },
+              ],
+              alt_labels: [{ language: 'en', value: 'Concept alt label' }],
+            },
+          ],
           has_contributions: [
             {
               roles: ['http://example.com/relator/author'],
@@ -99,6 +110,19 @@ describe('DocumentGraphQLClient', () => {
         }),
       ],
       [
+        new Concept(
+          'concept-1234',
+          [
+            Literal.fromObject({
+              language: 'en',
+              value: 'Concept preferred label',
+            }),
+          ],
+          [Literal.fromObject({ language: 'en', value: 'Concept alt label' })],
+          'http://example.com/concept/1234',
+        ),
+      ],
+      [
         new Contribution(
           mockPerson,
           [
@@ -137,6 +161,16 @@ describe('DocumentGraphQLClient', () => {
           titles: [{ language: 'en', value: 'Filtered Document' }],
           abstracts: [
             { language: 'en', value: 'This is another test abstract.' },
+          ],
+          has_subjects: [
+            {
+              uid: 'concept-5678',
+              url: 'http://example.com/concept/5678',
+              pref_labels: [
+                { language: 'en', value: 'Concept preferred label' },
+              ],
+              alt_labels: [{ language: 'en', value: 'Concept alt label' }],
+            },
           ],
           has_contributions: [
             {

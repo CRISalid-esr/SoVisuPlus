@@ -43,6 +43,7 @@ model Document {
   titles               DocumentTitle[]
   abstracts            DocumentAbstract[]
   contributions        Contribution[]
+  subjects             Concept[]
   title_locale_0       String?
   title_locale_1       String?
   title_locale_2       String?
@@ -107,6 +108,31 @@ model Contribution {
   document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@unique([personId, documentId]) // Ensure unique person-document pair
+}
+
+model Concept {
+  id         Int            @id @default(autoincrement())
+  uid        String         @unique
+  uri        String?
+  labels     ConceptLabel[]
+  Document   Document?      @relation(fields: [documentId], references: [id])
+  documentId Int?
+}
+
+model ConceptLabel {
+  id        Int       @id @default(autoincrement())
+  conceptId Int
+  concept   Concept   @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  language  String // ISO 639-1 code
+  value     String
+  type      LabelType
+
+  @@unique([conceptId, language, type, value])
+}
+
+enum LabelType {
+  PREF
+  ALT
 }
 
 enum PersonIdentifierType {

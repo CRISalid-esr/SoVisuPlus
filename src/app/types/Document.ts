@@ -2,6 +2,7 @@ import { Literal } from '@/types/Literal'
 import { Contribution } from '@/types/Contribution'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 import { DocumentRecord } from '@/types/DocumentRecord'
+import { Concept } from '@/types/Concept'
 
 enum DocumentType {
   Document = 'Document',
@@ -23,6 +24,7 @@ class Document {
     public publicationDateEnd: Date | null,
     public titles: Array<Literal>,
     public abstracts: Array<Literal>,
+    public subjects: Array<Concept>,
     public contributions: Array<Contribution> = [],
     public records: Array<DocumentRecord> = [],
   ) {}

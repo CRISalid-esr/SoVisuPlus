@@ -1,9 +1,14 @@
 import { DocumentWithRelations as DbDocument } from '@/prisma-schema/extended-client'
-import { Person as DbPerson, Prisma } from '@prisma/client'
+import {
+  Concept as DbConcept,
+  Person as DbPerson,
+  Prisma,
+} from '@prisma/client'
 import { Document } from '@/types/Document'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PersonDAO } from './PersonDAO'
 import { getBibliographicPlatformDbValue } from '@/types/BibliographicPlatform'
+import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import QueryMode = Prisma.QueryMode
 
 interface FetchDocumentsFromDBParams {
@@ -23,7 +28,8 @@ export class DocumentDAO extends AbstractDAO {
    * @returns The created or updated Document record
    */
   public async createOrUpdateDocument(document: Document): Promise<DbDocument> {
-    const { uid, titles, abstracts, contributions, records } = document
+    const { uid, titles, abstracts, subjects, contributions, records } =
+      document
 
     try {
       let dbDocument: DbDocument | null =
@@ -32,6 +38,7 @@ export class DocumentDAO extends AbstractDAO {
           include: {
             titles: true,
             abstracts: true,
+            subjects: true,
             contributions: { include: { person: true } },
           },
         })
@@ -55,6 +62,7 @@ export class DocumentDAO extends AbstractDAO {
           include: {
             titles: true,
             abstracts: true,
+            subjects: true,
             contributions: { include: { person: true } },
           },
         })
@@ -78,6 +86,25 @@ export class DocumentDAO extends AbstractDAO {
             },
           })
         }
+
+        // Remove obsolete subjects
+        const existingSubjects = new Set(dbDocument.subjects.map((s) => s.uid))
+        const newSubjects = new Set(subjects.map((s) => s.uid))
+        const subjectsToRemove = [...existingSubjects].filter(
+          (uid) => !newSubjects.has(uid),
+        )
+
+        if (subjectsToRemove.length > 0) {
+          await this.prismaClient.document.update({
+            where: { id: dbDocument.id },
+            data: {
+              subjects: {
+                disconnect: subjectsToRemove.map((uid) => ({ uid })),
+              },
+            },
+          })
+        }
+
         dbDocument = (await this.prismaClient.document.update({
           where: { uid: uid },
           data: {
@@ -98,6 +125,10 @@ export class DocumentDAO extends AbstractDAO {
             abstracts: true, // Include related abstracts
           },
         })) as DbDocument
+      }
+
+      if (!dbDocument) {
+        throw new Error('dbDocument is null')
       }
 
       for (const title of titles) {
@@ -135,6 +166,32 @@ export class DocumentDAO extends AbstractDAO {
             value: abstract.value,
           },
         })
+      }
+
+      for (const subject of subjects) {
+        let concept: DbConcept
+        try {
+          concept = await new ConceptDAO().createOrUpdateConcept(subject)
+        } catch (error) {
+          console.error(
+            `Failed to create or update concept for subject: ${subject}`,
+            error,
+          )
+          continue
+        }
+        const { id: conceptId } = concept
+        const { id: documentId } = dbDocument
+        try {
+          await this.prismaClient.document.update({
+            where: { id: documentId },
+            data: { subjects: { connect: { id: conceptId } } },
+          })
+        } catch (error) {
+          console.error(
+            `Failed to upsert document subject for concept ID: ${conceptId} and document ID: ${documentId}`,
+            error,
+          )
+        }
       }
 
       for (const contribution of contributions) {
@@ -447,6 +504,7 @@ export class DocumentDAO extends AbstractDAO {
       include: {
         titles: true,
         abstracts: true,
+        subjects: true,
         contributions: {
           include: {
             person: true,
