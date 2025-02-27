@@ -61,8 +61,10 @@ export default function DocumentDetailsPage() {
   } = useStore((state) => state.document)
 
   useEffect(() => {
-    fetchDocumentById(uid as string)
-  }, [uid])
+    if (uid && fetchDocumentById) {
+      fetchDocumentById(uid as string)
+    }
+  }, [uid, fetchDocumentById])
 
   // Update the tab state if the URL query parameter changes
   useEffect(() => {
