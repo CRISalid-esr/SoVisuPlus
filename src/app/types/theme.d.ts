@@ -106,6 +106,7 @@ declare module '@mui/material/styles' {
     onSecondary: string
     secondaryContainer: string
     onSecondaryContainer: string
+    lightSecondaryContainer: string
     secondaryFixed: string
     secondaryFixedDim: string
     onSecondaryFixed: string
@@ -155,6 +156,7 @@ declare module '@mui/material/styles' {
     onSecondary?: string
     secondaryContainer?: string
     onSecondaryContainer?: string
+    lightSecondaryContainer?: string
     secondaryFixed?: string
     secondaryFixedDim?: string
     onSecondaryFixed?: string

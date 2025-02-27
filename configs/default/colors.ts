@@ -93,4 +93,5 @@ export const colors = {
   sidebarItemHover: '#197971',
   cardBorder: '#E3EAE7',
   textSecondary: '#625B71',
+  lightSecondaryContainer: '#CCE8E3',
 }

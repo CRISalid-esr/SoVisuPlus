@@ -14,26 +14,30 @@ import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
 import { t } from '@lingui/macro'
 
+import { LanguageChips } from '@/components/LanguageChips'
 import { DocumentSync } from '@/types/DocumentSync'
 import { DocumentSyncStatus } from '@/types/DocumentSyncStatus'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import { Localization } from '@/types/Localization'
-import { Box, Chip, IconButton, Tooltip, Typography } from '@mui/material'
+import InfoIcon from '@mui/icons-material/Info'
+import { Box, IconButton, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import {
   MaterialReactTable,
+  MRT_ActionMenuItem,
   MRT_Column,
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
   MRT_SortingState,
 } from 'material-react-table'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation' // Import useRouter
 import { useEffect, useMemo, useState } from 'react'
 import Highlighter from 'react-highlight-words'
-import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
 import DocumentHeader from './components/DocumentHeader'
+import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
 dayjs.extend(utc)
 
@@ -75,7 +79,7 @@ export default function DocumentsPage() {
   >({})
 
   const theme = useTheme()
-
+  const router = useRouter() // Initialize the router
   const tabs = [
     {
       label: t`documents_page_all_documents_filter`,
@@ -187,46 +191,22 @@ export default function DocumentsPage() {
             t`no_title_available`,
           )
           const effectiveRowLang = localizedTitle.language
-          const filterValue = column.getFilterValue()
-          const chips = titles.map((title, index) => {
-            // skip ul : undetermined language
-            if (title.language === 'ul') {
-              return null
-            }
-            return (
-              <Chip
-                key={index}
-                size='small'
-                sx={{
-                  marginRight: theme.spacing(1),
-                }}
-                clickable={title.language !== effectiveRowLang}
-                label={title.language}
-                onClick={(e) => {
-                  if (title.language === effectiveRowLang) {
-                    e.preventDefault()
-                    return
-                  }
-                  setSelectedTitleLangs({
-                    ...selectedTitleLangs,
-                    [uid]: title.language,
-                  })
-                }}
-                color={
-                  title.language === effectiveRowLang ? 'primary' : 'default'
-                }
-              />
-            )
-          })
+
           return (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Highlighter
                 highlightClassName='highlight'
-                searchWords={[globalFilter, filterValue as string]}
+                searchWords={[globalFilter, column.getFilterValue() as string]}
                 autoEscape
                 textToHighlight={localizedTitle.value}
               />
-              <Box>{chips}</Box>
+              <LanguageChips
+                texts={titles}
+                selectedLang={effectiveRowLang}
+                onLanguageSelect={(newLang) =>
+                  setSelectedTitleLangs((prev) => ({ ...prev, [uid]: newLang }))
+                }
+              />
             </Box>
           )
         },
@@ -535,6 +515,24 @@ export default function DocumentsPage() {
           globalFilter,
         }}
         localization={Localization[lang]}
+        enableRowActions
+        positionActionsColumn='last' // Ensures actions column is at the right end
+        renderRowActionMenuItems={({ row, table }) => [
+          <Box sx={{ display: 'flex' }} key={row.original.uid}>
+            <MRT_ActionMenuItem //or just use a normal MUI MenuItem component
+              icon={<InfoIcon />}
+              key='edit'
+              label={t`documents_page_action_column_details`}
+              onClick={() => {
+                const documentUid = row.original.uid // Assuming 'uid' is the unique identifier
+                router.push(
+                  `/documents/${documentUid}?tab=bibliographic_information`,
+                ) // Navigate to the details page
+              }}
+              table={table}
+            />
+          </Box>,
+        ]}
       />
     </Box>
   )

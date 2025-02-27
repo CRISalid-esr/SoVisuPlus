@@ -16,10 +16,12 @@ export interface DocumentQuery extends BaseQuery {
 export interface DocumentSlice {
   document: {
     documents: Array<Document>
+    selectedDocument: Document | null
     totalItems?: number
     loading: boolean
     error: string | null | unknown
     fetchDocuments: (obj: DocumentQuery) => Promise<void>
+    fetchDocumentById: (uid: string) => Promise<void>
   }
 }
 
@@ -33,6 +35,7 @@ export const addDocumentSlice: StateCreator<
     documents: [],
     loading: true,
     error: null,
+    selectedDocument: null,
     totalItems: 0,
     fetchDocuments: async (queryObject: DocumentQuery) => {
       const queryString = toQueryString(queryObject)
@@ -54,6 +57,30 @@ export const addDocumentSlice: StateCreator<
         console.error('Failed to fetch documents', error)
         set((state) => ({
           document: { ...state.document, error, documents: [] },
+        }))
+      } finally {
+        set((state) => ({ document: { ...state.document, loading: false } }))
+      }
+    },
+    fetchDocumentById: async (uid: string) => {
+      set((state) => ({ document: { ...state.document, loading: true } }))
+      try {
+        const response = await fetch(`/api/documents/${uid}`)
+        if (!response.ok) {
+          throw new Error('Failed to fetch document')
+        }
+        const document: Document = await response.json()
+        set((state) => ({
+          document: {
+            ...state.document,
+            selectedDocument: document, // Updated here
+            error: null,
+          },
+        }))
+      } catch (error) {
+        console.error('Failed to fetch document by ID', error)
+        set((state) => ({
+          document: { ...state.document, error, selectedDocument: null },
         }))
       } finally {
         set((state) => ({ document: { ...state.document, loading: false } }))

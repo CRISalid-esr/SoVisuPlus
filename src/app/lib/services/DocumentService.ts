@@ -43,4 +43,14 @@ export class DocumentService {
       throw new Error('Error fetching documents from service')
     }
   }
+
+  async fetchDocumentById(uid: string) {
+    try {
+      const document = await this.documentDAO.fetchDocumentByIdFromDB(uid)
+      return document
+    } catch (error) {
+      console.error('Error in service layer:', error)
+      throw new Error('Error fetching document from service')
+    }
+  }
 }
