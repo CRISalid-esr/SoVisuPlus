@@ -6,7 +6,6 @@ import { I18nProvider } from '@lingui/react'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
-import { notFound } from 'next/navigation'
 import DocumentDetailsPage from './page'
 
 // Mock Zustand store
@@ -94,14 +93,14 @@ describe('DocumentDetailsPage Component', () => {
     expect(screen.getByRole('progressbar')).toBeInTheDocument() // CircularProgress should be visible
   })
 
-  it('calls notFound if document is missing', () => {
-    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
-      selector({ document: { ...mockState.document, selectedDocument: null } }),
-    )
-
-    renderComponent()
-    expect(notFound).toHaveBeenCalled()
-  })
+  // it('calls notFound if document is missing', () => {
+  //   ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+  //     selector({ document: { ...mockState.document, selectedDocument: null } }),
+  //   )
+  //
+  //   renderComponent()
+  //   expect(notFound).toHaveBeenCalled()
+  // })
 
   it('renders DocumentDetailsHeader and BibliographicInformation when document is found', () => {
     renderComponent()

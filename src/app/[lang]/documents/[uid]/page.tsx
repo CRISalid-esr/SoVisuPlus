@@ -5,12 +5,7 @@ import useStore from '@/stores/global_store'
 import { t } from '@lingui/macro'
 import { Box, CircularProgress } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import {
-  notFound,
-  useParams,
-  useRouter,
-  useSearchParams,
-} from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import DocumentDetailsHeader from './components/DocumentDetailsHeader'
 import DocumentDetailsTitle from './components/DocumentDetailsTitle'
@@ -71,16 +66,12 @@ export default function DocumentDetailsPage() {
     setSelectedTab(initialTab)
   }, [initialTab])
 
-  if (loading) {
+  if (loading || !selectedDocument) {
     return (
       <Box>
         <CircularProgress />
       </Box>
     )
-  }
-
-  if (!loading && !selectedDocument) {
-    notFound()
   }
 
   const handleTabChange = (newValue: string) => {
