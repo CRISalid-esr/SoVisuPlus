@@ -54,6 +54,7 @@ const document: Document = new Document(
   new Date('2022-12-31T23:59:59.000Z'),
   [new Literal('Sample Document Title', 'en')],
   [new Literal('Sample Abstract', 'en')],
+  [], // empty subjects
   [
     new Contribution(
       new Person(

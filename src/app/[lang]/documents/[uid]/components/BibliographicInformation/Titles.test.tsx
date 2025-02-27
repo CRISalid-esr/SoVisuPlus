@@ -61,6 +61,7 @@ const document: Document = new Document(
     new Literal('Sample Abstract', 'fr'),
   ],
   [new Literal('Sample Abstract', 'fr')],
+  [], // empty subjects
   [
     new Contribution(
       new Person(

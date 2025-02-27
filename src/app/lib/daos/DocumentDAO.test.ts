@@ -324,6 +324,7 @@ describe('DocumentDAO', () => {
           include: { person: true },
         },
         records: true,
+        subjects: true,
       },
     })
   })

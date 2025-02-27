@@ -534,6 +534,7 @@ export class DocumentDAO extends AbstractDAO {
           },
         },
         records: true,
+        subjects: true,
       },
     })
   }
