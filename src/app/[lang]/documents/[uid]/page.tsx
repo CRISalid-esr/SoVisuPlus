@@ -94,7 +94,7 @@ export default function DocumentDetailsPage() {
       case 'bibliographic_information':
         return <BibliographicInformation />
       default:
-        return notFound()
+        return <BibliographicInformation />
     }
   }
 
