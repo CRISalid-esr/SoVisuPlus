@@ -5,12 +5,7 @@ import useStore from '@/stores/global_store'
 import { t } from '@lingui/macro'
 import { Box, CircularProgress } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import {
-  notFound,
-  useParams,
-  useRouter,
-  useSearchParams,
-} from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import DocumentDetailsHeader from './components/DocumentDetailsHeader'
 import DocumentDetailsTitle from './components/DocumentDetailsTitle'
@@ -24,7 +19,7 @@ export default function DocumentDetailsPage() {
   const tabs = [
     {
       label: t`document_details_bibliographic_information_tab`,
-      value: 'bibliographic-information',
+      value: 'bibliographic_information',
       color: theme.palette.primary.main,
     },
     {
@@ -61,24 +56,22 @@ export default function DocumentDetailsPage() {
   } = useStore((state) => state.document)
 
   useEffect(() => {
-    fetchDocumentById(uid as string)
-  }, [uid])
+    if (uid && fetchDocumentById) {
+      fetchDocumentById(uid as string)
+    }
+  }, [uid, fetchDocumentById])
 
   // Update the tab state if the URL query parameter changes
   useEffect(() => {
     setSelectedTab(initialTab)
   }, [initialTab])
 
-  if (loading) {
+  if (loading || !selectedDocument) {
     return (
       <Box>
         <CircularProgress />
       </Box>
     )
-  }
-
-  if (!loading && !selectedDocument) {
-    notFound()
   }
 
   const handleTabChange = (newValue: string) => {
@@ -92,7 +85,7 @@ export default function DocumentDetailsPage() {
       case 'bibliographic_information':
         return <BibliographicInformation />
       default:
-        return notFound()
+        return <BibliographicInformation />
     }
   }
 
