@@ -93,23 +93,23 @@ msgstr "Retour à la page d'accueil"
 msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
-#: src/app/[lang]/documents/[uid]/page.tsx:46
+#: src/app/[lang]/documents/[uid]/page.tsx:41
 msgid "document_details_authors_tab"
 msgstr "Auteurs"
 
-#: src/app/[lang]/documents/[uid]/page.tsx:26
+#: src/app/[lang]/documents/[uid]/page.tsx:21
 msgid "document_details_bibliographic_information_tab"
 msgstr "Informations bibliographiques"
 
-#: src/app/[lang]/documents/[uid]/page.tsx:36
+#: src/app/[lang]/documents/[uid]/page.tsx:31
 msgid "document_details_domains_tab"
 msgstr "Domaines"
 
-#: src/app/[lang]/documents/[uid]/page.tsx:41
+#: src/app/[lang]/documents/[uid]/page.tsx:36
 msgid "document_details_HAL_referencing_tab"
 msgstr "Référencement HAL"
 
-#: src/app/[lang]/documents/[uid]/page.tsx:31
+#: src/app/[lang]/documents/[uid]/page.tsx:26
 msgid "document_details_keywords_tab"
 msgstr "Mots-clés"
 

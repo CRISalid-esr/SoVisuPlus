@@ -98,23 +98,23 @@ msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1
 #~ msgid "pageNotFound"
 #~ msgstr ""
 
-#: src/app/[lang]/documents/[uid]/page.tsx:46
+#: src/app/[lang]/documents/[uid]/page.tsx:41
 msgid "document_details_authors_tab"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/page.tsx:26
+#: src/app/[lang]/documents/[uid]/page.tsx:21
 msgid "document_details_bibliographic_information_tab"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/page.tsx:36
+#: src/app/[lang]/documents/[uid]/page.tsx:31
 msgid "document_details_domains_tab"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/page.tsx:41
+#: src/app/[lang]/documents/[uid]/page.tsx:36
 msgid "document_details_HAL_referencing_tab"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/page.tsx:31
+#: src/app/[lang]/documents/[uid]/page.tsx:26
 msgid "document_details_keywords_tab"
 msgstr ""
 
