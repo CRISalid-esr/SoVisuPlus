@@ -275,9 +275,11 @@ describe('DocumentDAO', () => {
             person: {
               uid: fetchParams.contributorUid,
             },
+            roles: {
+              hasSome: [''],
+            },
           },
         },
-
         titles: {
           some: {
             value: {
