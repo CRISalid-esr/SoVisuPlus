@@ -108,6 +108,7 @@ model Contribution {
   document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@unique([personId, documentId]) // Ensure unique person-document pair
+  @@index([documentId])
 }
 
 model Concept {
@@ -117,6 +118,8 @@ model Concept {
   labels     ConceptLabel[]
   Document   Document?      @relation(fields: [documentId], references: [id])
   documentId Int?
+
+  @@index([documentId])
 }
 
 model ConceptLabel {
@@ -128,6 +131,7 @@ model ConceptLabel {
   type      LabelType
 
   @@unique([conceptId, language, type, value])
+  @@index([conceptId])
 }
 
 enum LabelType {
@@ -152,6 +156,7 @@ model PersonIdentifier {
   personId Int
 
   @@unique([type, value])
+  @@index([personId])
 }
 
 model ResearchStructure {
