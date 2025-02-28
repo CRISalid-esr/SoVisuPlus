@@ -45,8 +45,17 @@ const mockPrisma = new PrismaClient()
 describe('DocumentDAO', () => {
   let documentDAO: DocumentDAO
   beforeEach(() => {
+    process.env.PUBLICATION_LIST_ROLES_FILTER = 'editor,reviewer'
+    process.env.PERSPECTIVES_ROLES_FILTER = 'author,co-author'
+    process.env.NEXT_PUBLIC_SUPPORTED_LOCALES = 'en,fr'
     jest.clearAllMocks()
     documentDAO = new DocumentDAO()
+  })
+
+  afterAll(() => {
+    process.env.PUBLICATION_LIST_ROLES_FILTER = ''
+    process.env.PERSPECTIVES_ROLES_FILTER = ''
+    process.env.NEXT_PUBLIC_SUPPORTED_LOCALES = ''
   })
 
   const document: Document = new Document(
@@ -269,14 +278,13 @@ describe('DocumentDAO', () => {
             },
           },
         ],
-
         contributions: {
           some: {
             person: {
               uid: fetchParams.contributorUid,
             },
             roles: {
-              hasSome: [''],
+              hasSome: ['author', 'co-author'],
             },
           },
         },
@@ -293,7 +301,7 @@ describe('DocumentDAO', () => {
       take: 10,
       orderBy: [
         {
-          title_locale_1: 'asc',
+          title_locale_0: 'asc', // Since 'en' is the first in NEXT_PUBLIC_SUPPORTED_LOCALES
         },
       ],
       include: {
