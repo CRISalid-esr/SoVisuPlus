@@ -19,6 +19,7 @@ export interface DocumentSlice {
     selectedDocument: Document | null
     totalItems?: number
     loading: boolean
+    hasFetched?: boolean
     error: string | null | unknown
     fetchDocuments: (obj: DocumentQuery) => Promise<void>
     fetchDocumentById: (uid: string) => Promise<void>
@@ -37,53 +38,65 @@ export const addDocumentSlice: StateCreator<
     error: null,
     selectedDocument: null,
     totalItems: 0,
+    hasFetched: false,
     fetchDocuments: async (queryObject: DocumentQuery) => {
       const queryString = toQueryString(queryObject)
       set((state) => ({ document: { ...state.document, loading: true } }))
+
       try {
         const response = await fetch(`/api/documents?${queryString}`)
         const jsonData = await response.json()
         const documents: Document[] = jsonData.documents
         const totalItems = jsonData.totalItems
+
         set((state) => ({
           document: {
             ...state.document,
-            documents: documents,
+            documents,
             totalItems,
             error: null,
+            loading: false, // ✅ Ensure loading is false here
           },
         }))
       } catch (error) {
         console.error('Failed to fetch documents', error)
         set((state) => ({
-          document: { ...state.document, error, documents: [] },
+          document: { ...state.document, error, documents: [], loading: false },
         }))
-      } finally {
-        set((state) => ({ document: { ...state.document, loading: false } }))
       }
     },
+
     fetchDocumentById: async (uid: string) => {
       set((state) => ({ document: { ...state.document, loading: true } }))
+
       try {
         const response = await fetch(`/api/documents/${uid}`)
         if (!response.ok) {
           throw new Error('Failed to fetch document')
         }
+
         const document: Document = await response.json()
+
         set((state) => ({
           document: {
             ...state.document,
-            selectedDocument: document, // Updated here
+            selectedDocument: document,
             error: null,
+            loading: false,
+            hasFetched: true,
           },
         }))
       } catch (error) {
-        console.error('Failed to fetch document by ID', error)
+        console.error('❌ Failed to fetch document by ID', error)
         set((state) => ({
-          document: { ...state.document, error, selectedDocument: null },
+          document: {
+            ...state.document,
+            error,
+            selectedDocument: null,
+            loading: false,
+            hydrated: true,
+          },
         }))
-      } finally {
-        set((state) => ({ document: { ...state.document, loading: false } }))
       }
     },
   },
