@@ -10,11 +10,15 @@ import { useEffect, useState } from 'react'
 import DocumentDetailsHeader from './components/DocumentDetailsHeader'
 import DocumentDetailsTitle from './components/DocumentDetailsTitle'
 import BibliographicInformation from './components/BibliographicInformation/BibliographicInformation'
+import { notFound } from 'next/navigation'
+
+export const dynamic = 'force-dynamic'
 
 export default function DocumentDetailsPage() {
   const theme = useTheme()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { uid } = useParams<{ uid: string }>()
 
   const tabs = [
     {
@@ -44,39 +48,43 @@ export default function DocumentDetailsPage() {
     },
   ]
 
-  // Get the initial tab from the URL query parameter, defaulting to the first tab's value
   const initialTab = searchParams.get('tab') || ''
   const [selectedTab, setSelectedTab] = useState(initialTab)
 
-  const { uid } = useParams() // Get the document UID from the URL
-  const {
-    fetchDocumentById,
-    loading,
-    selectedDocument = null,
-  } = useStore((state) => state.document)
+  const { fetchDocumentById, loading, selectedDocument, hasFetched } = useStore(
+    (state) => state.document,
+  )
 
   useEffect(() => {
-    if (uid && fetchDocumentById) {
-      fetchDocumentById(uid as string)
+    if (uid && !hasFetched) {
+      fetchDocumentById(uid)
     }
-  }, [uid, fetchDocumentById])
+  }, [uid, fetchDocumentById, hasFetched])
 
-  // Update the tab state if the URL query parameter changes
   useEffect(() => {
     setSelectedTab(initialTab)
   }, [initialTab])
 
-  if (loading || !selectedDocument) {
+  if (!hasFetched || loading) {
     return (
-      <Box>
+      <Box
+        display='flex'
+        justifyContent='center'
+        alignItems='center'
+        minHeight='100vh'
+      >
         <CircularProgress />
       </Box>
     )
   }
 
+  // ✅ Only redirect to 404 **after Zustand has fetched**
+  if (hasFetched && !loading && selectedDocument === null) {
+    return notFound()
+  }
+
   const handleTabChange = (newValue: string) => {
     setSelectedTab(newValue)
-    // Update the URL with the new tab query parameter without scrolling to the top
     router.push(`?tab=${newValue}`, { scroll: false })
   }
 
@@ -85,7 +93,7 @@ export default function DocumentDetailsPage() {
       case 'bibliographic_information':
         return <BibliographicInformation />
       default:
-        return <BibliographicInformation />
+        return notFound()
     }
   }
 
