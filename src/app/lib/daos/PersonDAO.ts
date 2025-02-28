@@ -204,8 +204,6 @@ export class PersonDAO extends AbstractDAO {
     total: number
     hasMore: boolean
   }> => {
-    const perspectiveRolesFilter =
-      process.env.PERSPECTIVES_ROLES_FILTER?.split(',') || []
     const searchTerms = searchTerm.trim().split(/\s+/)
     const searchCriteria = searchTerms.map((term) => ({
       OR: [
@@ -214,21 +212,8 @@ export class PersonDAO extends AbstractDAO {
       ],
     }))
 
-    let whereClause: Prisma.PersonWhereInput = {
+    const whereClause: Prisma.PersonWhereInput = {
       AND: searchCriteria,
-    }
-
-    if (perspectiveRolesFilter.length > 0) {
-      whereClause = {
-        ...whereClause,
-        contributions: {
-          some: {
-            roles: {
-              hasSome: perspectiveRolesFilter,
-            },
-          },
-        },
-      }
     }
 
     if (!includeExternal) {

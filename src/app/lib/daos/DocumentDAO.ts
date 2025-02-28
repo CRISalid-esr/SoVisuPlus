@@ -288,8 +288,11 @@ export class DocumentDAO extends AbstractDAO {
   }> {
     const skip = (page - 1) * pageSize
 
-    const publicationListRolesFilter =
+    const publicationListRolesFilter: string[] =
       process.env.PUBLICATION_LIST_ROLES_FILTER?.split(',') || []
+
+    const perspectiveRolesFilter: string[] =
+      process.env.PERSPECTIVES_ROLES_FILTER?.split(',') || []
 
     // find the index of the search lang in the array of process.env.NEXT_PUBLIC_SUPPORTED_LOCALES
     const searchLangIndex =
@@ -303,7 +306,7 @@ export class DocumentDAO extends AbstractDAO {
     if (publicationListRolesFilter.length > 0) {
       where = {
         contributions: {
-          some: {
+          every: {
             roles: {
               hasSome: publicationListRolesFilter,
             },
@@ -455,15 +458,27 @@ export class DocumentDAO extends AbstractDAO {
     })
 
     if (contributorUid) {
-      where = {
-        ...where,
-        contributions: {
-          some: {
-            person: {
-              uid: contributorUid,
+      if (perspectiveRolesFilter.length > 0) {
+        where = {
+          ...where,
+          contributions: {
+            some: {
+              roles: {
+                hasSome: perspectiveRolesFilter,
+              },
+              person: { uid: contributorUid },
             },
           },
-        },
+        }
+      } else {
+        where = {
+          ...where,
+          contributions: {
+            some: {
+              person: { uid: contributorUid },
+            },
+          },
+        }
       }
     }
 
