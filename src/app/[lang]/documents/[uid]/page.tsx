@@ -7,11 +7,13 @@ import { Box, CircularProgress } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import DocumentDetailsHeader from './components/DocumentDetailsHeader'
-import DocumentDetailsTitle from './components/DocumentDetailsTitle'
-import BibliographicInformation from './components/BibliographicInformation/BibliographicInformation'
+import {
+  DocumentDetailsHeader,
+  DocumentDetailsTitle,
+  BibliographicInformation,
+  Sources,
+} from './components/'
 import { notFound } from 'next/navigation'
-
 export const dynamic = 'force-dynamic'
 
 export default function DocumentDetailsPage() {
@@ -37,8 +39,8 @@ export default function DocumentDetailsPage() {
       color: theme.palette.primary.main,
     },
     {
-      label: t`document_details_HAL_referencing_tab`,
-      value: 'HAL_referencing',
+      label: t`document_details_sources_tab`,
+      value: 'sources',
       color: theme.palette.primary.main,
     },
     {
@@ -92,6 +94,8 @@ export default function DocumentDetailsPage() {
     switch (selectedTab) {
       case 'bibliographic_information':
         return <BibliographicInformation />
+      case 'sources':
+        return <Sources />
       default:
         return notFound()
     }
