@@ -1,25 +1,26 @@
 import { CustomCard } from '@/components/Card'
+import { LanguageChips } from '@/components/LanguageChips'
 import useStore from '@/stores/global_store'
+import { BibliographicPlatformMetadata } from '@/types/BibliographicPlatform'
 import { DocumentType } from '@/types/Document'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
+import { Literal } from '@/types/Literal'
 import { Localization } from '@/types/Localization'
+import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
 import { t } from '@lingui/macro'
 import { Trans } from '@lingui/react'
-import { Box, Button, CardContent, Tooltip, Typography } from '@mui/material'
+import { Box, Button, CardContent, IconButton, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import {
   MaterialReactTable,
   MRT_Column,
   MRT_ColumnDef,
 } from 'material-react-table'
+import Image from 'next/image'
 import { useMemo, useState } from 'react'
 import { DocumentTypeIcons } from '../../../components/DocumentTypeIcons'
-import { Literal } from '@/types/Literal'
-import { getLocalizedValue } from '@/utils/getLocalizedValue'
-import Highlighter from 'react-highlight-words'
-import { LanguageChips } from '@/components/LanguageChips'
 
 function Sources() {
   const { selectedDocument = null } = useStore((state) => state.document)
@@ -115,12 +116,7 @@ function Sources() {
 
           return (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Highlighter
-                highlightClassName='highlight'
-                searchWords={[globalFilter, column.getFilterValue() as string]}
-                autoEscape
-                textToHighlight={localizedTitle.value}
-              />
+              <Typography>{localizedTitle.value}</Typography>
               <LanguageChips
                 texts={titles}
                 selectedLang={effectiveRowLang}
@@ -153,13 +149,49 @@ function Sources() {
         enableSorting: false,
         accessorKey: 'source',
         header: t`documents_page_source_column`,
+        Cell({ row }: { row: { original: DocumentRecord } }) {
+          const platform = row.original.platform
+          const metadata = BibliographicPlatformMetadata[platform]
+          const imageElement = (
+            <Image
+              src={metadata?.icon || '/icons/default.png'}
+              alt={metadata?.name || 'Unknown Source'}
+              width={24}
+              height={24}
+              priority
+              title={metadata?.name || 'Unknown Source'} // Tooltip on hover
+            />
+          )
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
+              {row.original.url ? (
+                <IconButton
+                  key={row.original.platform}
+                  component='a'
+                  href={row.original.url}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  sx={{ padding: 0 }}
+                >
+                  {imageElement}
+                </IconButton>
+              ) : (
+                <Box key={row.original.platform}>{imageElement}</Box>
+              )}
+            </Box>
+          )
+        },
         filterVariant: 'multi-select',
       },
     ],
     [],
   )
-
-  console.log('selectedDocument', selectedDocument)
 
   return (
     <CustomCard
