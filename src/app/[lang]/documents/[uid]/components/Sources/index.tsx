@@ -5,7 +5,6 @@ import { BibliographicPlatformMetadata } from '@/types/BibliographicPlatform'
 import { DocumentType } from '@/types/Document'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import { Literal } from '@/types/Literal'
 import { Localization } from '@/types/Localization'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
@@ -15,8 +14,10 @@ import { Box, Button, CardContent, IconButton, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import {
   MaterialReactTable,
+  MRT_Cell,
   MRT_Column,
   MRT_ColumnDef,
+  MRT_Row,
 } from 'material-react-table'
 import Image from 'next/image'
 import { useMemo, useState } from 'react'
@@ -56,7 +57,6 @@ function Sources() {
   const [selectedTitleLangs, setSelectedTitleLangs] = useState<
     Record<string, string>
   >({})
-  const [globalFilter, setGlobalFilter] = useState<String>('')
 
   const columns = useMemo<MRT_ColumnDef<DocumentRecord>[]>(
     () => [
@@ -94,15 +94,28 @@ function Sources() {
         size: 200,
         accessorKey: `titles`,
         accessorFn: (row) => {
-          return row.titles
+          const { titles, uid } = row
+          const preferredRowLang = selectedTitleLangs[uid] || lang
+          const localizedTitle = getLocalizedValue(
+            titles,
+            preferredRowLang,
+            supportedLocales,
+            t`no_title_available`,
+          )
+          return localizedTitle.value
         },
+        enableFilterMatchHighlighting: true,
         header: t`documents_page_title_column`,
         Cell({
-          row,
+          cell,
           column,
+          row,
+          renderedCellValue,
         }: {
-          row: { original: { titles: Array<Literal>; uid: string } }
-          column: MRT_Column<Document>
+          cell: MRT_Cell<DocumentRecord, unknown>
+          column: MRT_Column<DocumentRecord, unknown>
+          row: MRT_Row<DocumentRecord>
+          renderedCellValue: any
         }) {
           const { titles, uid } = row.original
           const preferredRowLang = selectedTitleLangs[uid] || lang
@@ -113,10 +126,9 @@ function Sources() {
             t`no_title_available`,
           )
           const effectiveRowLang = localizedTitle.language
-
           return (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography>{localizedTitle.value}</Typography>
+              <Typography>{renderedCellValue}</Typography>
               <LanguageChips
                 texts={titles}
                 selectedLang={effectiveRowLang}
@@ -222,6 +234,13 @@ function Sources() {
     >
       <CardContent>
         <MaterialReactTable
+          enableRowSelection
+          enableFilterMatchHighlighting
+          enableGlobalFilter
+          enableGlobalFilterModes
+          enableGlobalFilterRankedResults
+          manualFiltering={false}
+          globalFilterFn={'contains'}
           initialState={{ showColumnFilters: true }}
           enableColumnResizing
           columns={columns}
