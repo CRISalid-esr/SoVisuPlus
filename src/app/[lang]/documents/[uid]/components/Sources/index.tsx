@@ -8,21 +8,39 @@ import {
 import { DocumentType } from '@/types/Document'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import { Localization } from '@/types/Localization'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
 import { t } from '@lingui/macro'
 import { Trans } from '@lingui/react'
-import { Box, Button, CardContent, IconButton, Typography } from '@mui/material'
+import { CancelOutlined, Download, Warning } from '@mui/icons-material'
+import {
+  Box,
+  Button,
+  CardContent,
+  IconButton,
+  MenuItem,
+  Select,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import {
   MaterialReactTable,
   MRT_ColumnDef,
+  MRT_GlobalFilterTextField,
   MRT_Row,
+  MRT_ShowHideColumnsButton,
+  MRT_ToggleDensePaddingButton,
+  MRT_ToggleFullScreenButton,
+  useMaterialReactTable,
 } from 'material-react-table'
 import Image from 'next/image'
 import { ReactNode, useMemo, useState } from 'react'
 import { DocumentTypeIcons } from '../../../components/DocumentTypeIcons'
+import { CheckCircle } from '@untitled-ui/icons-react'
+import DeleteIcon from '@mui/icons-material/Delete'
+
+import CallMergeIcon from '@mui/icons-material/CallMerge'
 
 function Sources() {
   const { selectedDocument = null } = useStore((state) => state.document)
@@ -58,6 +76,7 @@ function Sources() {
   const [selectedTitleLangs, setSelectedTitleLangs] = useState<
     Record<string, string>
   >({})
+  const [action, setAction] = useState<string>('')
 
   const columns = useMemo<MRT_ColumnDef<DocumentRecord>[]>(
     () => [
@@ -235,6 +254,65 @@ function Sources() {
     [],
   )
 
+  const table = useMaterialReactTable({
+    columns,
+    data: selectedDocument?.records || [],
+    enableRowSelection: true,
+    positionToolbarAlertBanner: 'bottom', //show selected rows count on bottom toolbar
+    renderTopToolbarCustomActions: ({ table }) => (
+      <Box sx={{ display: 'flex', gap: '1rem', p: '4px' }}>
+        <Button
+          color='secondary'
+          onClick={() => {
+            alert('Create New Account')
+          }}
+          variant='contained'
+        >
+          Create Account
+        </Button>
+        <Button
+          color='error'
+          disabled={!table.getIsSomeRowsSelected()}
+          onClick={() => {
+            alert('Delete Selected Accounts')
+          }}
+          variant='contained'
+        >
+          Delete Selected Accounts
+        </Button>
+      </Box>
+    ),
+    renderToolbarInternalActions: ({ table }) => (
+      <Box>
+        <Select
+          value={action}
+          onChange={(event) => setAction(event.target.value)}
+          size='small'
+          label='Action'
+        >
+          <MenuItem value='pending'>
+            <Box display='flex' alignItems='center'>
+              <DeleteIcon />
+              Pending
+            </Box>{' '}
+            {/* Rejected */}
+          </MenuItem>
+
+          <MenuItem value='rejected'>
+            <Box display='flex' alignItems='center'>
+              <CallMergeIcon />
+              Rejected
+            </Box>
+          </MenuItem>
+        </Select>
+        <MRT_ToggleDensePaddingButton table={table} />
+        <MRT_ToggleFullScreenButton table={table} />
+        <MRT_ShowHideColumnsButton table={table} />
+        <MRT_GlobalFilterTextField table={table} />
+      </Box>
+    ),
+  })
+
   return (
     <CustomCard
       header={
@@ -263,23 +341,7 @@ function Sources() {
       }
     >
       <CardContent>
-        <MaterialReactTable
-          enableRowSelection
-          enableFilterMatchHighlighting
-          enableGlobalFilter
-          enableGlobalFilterModes
-          enableGlobalFilterRankedResults
-          enableSorting
-          manualFiltering={false}
-          globalFilterFn={'contains'}
-          initialState={{ showColumnFilters: true }}
-          enableColumnResizing
-          columns={columns}
-          rowCount={selectedDocument?.records.length || 0}
-          data={selectedDocument?.records || []}
-          enablePagination
-          localization={Localization[lang]}
-        />
+        <MaterialReactTable table={table} />;
       </CardContent>
     </CustomCard>
   )
