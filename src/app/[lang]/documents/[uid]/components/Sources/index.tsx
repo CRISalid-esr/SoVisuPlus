@@ -275,6 +275,7 @@ function Sources() {
           enableGlobalFilter
           enableGlobalFilterModes
           enableGlobalFilterRankedResults
+          enableSorting
           manualFiltering={false}
           globalFilterFn={'contains'}
           initialState={{ showColumnFilters: true }}
