@@ -17,13 +17,11 @@ import { Box, Button, CardContent, IconButton, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import {
   MaterialReactTable,
-  MRT_Cell,
-  MRT_Column,
   MRT_ColumnDef,
   MRT_Row,
 } from 'material-react-table'
 import Image from 'next/image'
-import { useMemo, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { DocumentTypeIcons } from '../../../components/DocumentTypeIcons'
 
 function Sources() {
@@ -110,15 +108,11 @@ function Sources() {
         enableFilterMatchHighlighting: true,
         header: t`documents_page_title_column`,
         Cell({
-          cell,
-          column,
           row,
           renderedCellValue,
         }: {
-          cell: MRT_Cell<DocumentRecord, unknown>
-          column: MRT_Column<DocumentRecord, unknown>
           row: MRT_Row<DocumentRecord>
-          renderedCellValue: any
+          renderedCellValue: ReactNode
         }) {
           const { titles, uid } = row.original
           const preferredRowLang = selectedTitleLangs[uid] || lang
@@ -232,7 +226,7 @@ function Sources() {
             }
           },
         ),
-        filterFn: (row, columnId, filterValues) => {
+        filterFn: (row, filterValues) => {
           if (!filterValues || filterValues.length === 0) return true
           return filterValues.includes(row.original.platform)
         },
@@ -260,10 +254,10 @@ function Sources() {
               lineHeight: 'normal',
             }}
           >
-            <Trans id='document_details_page_card_title' />
+            <Trans id='document_details_page_source_tab_card_title' />
           </Typography>
           <Button variant='contained' color='primary'>
-            <Trans id='document_details_page_card_validate_button' />
+            <Trans id='document_details_page_source_tab_card_validate_button' />
           </Button>
         </Box>
       }
