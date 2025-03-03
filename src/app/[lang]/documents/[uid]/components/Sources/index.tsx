@@ -9,14 +9,23 @@ import { t } from '@lingui/macro'
 import { Trans } from '@lingui/react'
 import { Box, Button, CardContent, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { MaterialReactTable, MRT_ColumnDef } from 'material-react-table'
-import { useMemo } from 'react'
+import {
+  MaterialReactTable,
+  MRT_Column,
+  MRT_ColumnDef,
+} from 'material-react-table'
+import { useMemo, useState } from 'react'
 import { DocumentTypeIcons } from '../../../components/DocumentTypeIcons'
+import { Literal } from '@/types/Literal'
+import { getLocalizedValue } from '@/utils/getLocalizedValue'
+import Highlighter from 'react-highlight-words'
+import { LanguageChips } from '@/components/LanguageChips'
 
 function Sources() {
   const { selectedDocument = null } = useStore((state) => state.document)
   const theme = useTheme()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
+  const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
   const documentTypeLabels: Record<DocumentType, JSX.Element> = {
     [DocumentType.Document]: (
       <Typography>{t`documents_page_document_icon_label`}</Typography>
@@ -43,19 +52,17 @@ function Sources() {
       <Typography>{t`documents_page_proceedings_icon_label`}</Typography>
     ),
   }
+  const [selectedTitleLangs, setSelectedTitleLangs] = useState<
+    Record<string, string>
+  >({})
+  const [globalFilter, setGlobalFilter] = useState<String>('')
+
   const columns = useMemo<MRT_ColumnDef<DocumentRecord>[]>(
     () => [
       {
         enableSorting: false,
         accessorKey: 'type',
         header: t`documents_page_type_column`,
-        Cell({ row }: { row: { original: { documentType: DocumentType } } }) {
-          return (
-            <Tooltip title={documentTypeLabels[row.original.documentType]}>
-              {DocumentTypeIcons[row.original.documentType]}
-            </Tooltip>
-          )
-        },
         filterVariant: 'multi-select',
         filterColumn: 'type',
         //@ts-expect-error:  overide filterSelectOptions to accept Element.jsx instead of Element
@@ -83,6 +90,49 @@ function Sources() {
         })),
       },
       {
+        size: 200,
+        accessorKey: `titles`,
+        accessorFn: (row) => {
+          return row.titles
+        },
+        header: t`documents_page_title_column`,
+        Cell({
+          row,
+          column,
+        }: {
+          row: { original: { titles: Array<Literal>; uid: string } }
+          column: MRT_Column<Document>
+        }) {
+          const { titles, uid } = row.original
+          const preferredRowLang = selectedTitleLangs[uid] || lang
+          const localizedTitle = getLocalizedValue(
+            titles,
+            preferredRowLang,
+            supportedLocales,
+            t`no_title_available`,
+          )
+          const effectiveRowLang = localizedTitle.language
+
+          return (
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Highlighter
+                highlightClassName='highlight'
+                searchWords={[globalFilter, column.getFilterValue() as string]}
+                autoEscape
+                textToHighlight={localizedTitle.value}
+              />
+              <LanguageChips
+                texts={titles}
+                selectedLang={effectiveRowLang}
+                onLanguageSelect={(newLang) =>
+                  setSelectedTitleLangs((prev) => ({ ...prev, [uid]: newLang }))
+                }
+              />
+            </Box>
+          )
+        },
+      },
+      {
         accessorKey: 'contributions',
         header: t`documents_page_contributors_column`,
       },
@@ -108,6 +158,8 @@ function Sources() {
     ],
     [],
   )
+
+  console.log('selectedDocument', selectedDocument)
 
   return (
     <CustomCard
