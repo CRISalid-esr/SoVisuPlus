@@ -12,15 +12,16 @@ import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
 import { t } from '@lingui/macro'
 import { Trans } from '@lingui/react'
-import { CancelOutlined, Download, Warning } from '@mui/icons-material'
+import DeleteIcon from '@mui/icons-material/Delete'
 import {
   Box,
   Button,
   CardContent,
+  FormControl,
   IconButton,
+  InputLabel,
   MenuItem,
   Select,
-  Tooltip,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -37,8 +38,6 @@ import {
 import Image from 'next/image'
 import { ReactNode, useMemo, useState } from 'react'
 import { DocumentTypeIcons } from '../../../components/DocumentTypeIcons'
-import { CheckCircle } from '@untitled-ui/icons-react'
-import DeleteIcon from '@mui/icons-material/Delete'
 
 import CallMergeIcon from '@mui/icons-material/CallMerge'
 
@@ -254,57 +253,62 @@ function Sources() {
     [],
   )
 
+  const handleChange = () => {
+    setAction('')
+  }
+
   const table = useMaterialReactTable({
     columns,
     data: selectedDocument?.records || [],
     enableRowSelection: true,
     positionToolbarAlertBanner: 'bottom', //show selected rows count on bottom toolbar
-    renderTopToolbarCustomActions: ({ table }) => (
-      <Box sx={{ display: 'flex', gap: '1rem', p: '4px' }}>
-        <Button
-          color='secondary'
-          onClick={() => {
-            alert('Create New Account')
+    renderTopToolbarCustomActions: () => (
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+        }}
+      >
+        <FormControl
+          sx={{
+            minWidth: 120,
+            width: '100%',
           }}
-          variant='contained'
         >
-          Create Account
-        </Button>
-        <Button
-          color='error'
-          disabled={!table.getIsSomeRowsSelected()}
-          onClick={() => {
-            alert('Delete Selected Accounts')
-          }}
-          variant='contained'
-        >
-          Delete Selected Accounts
-        </Button>
+          <InputLabel id='demo-simple-select-autowidth-label'>
+            {' '}
+            <Trans id='document_details_page_source_tab_select_action_label' />
+          </InputLabel>
+          <Select
+            labelId='demo-simple-select-autowidth-label'
+            id='demo-simple-select-autowidth'
+            value={action}
+            onChange={handleChange}
+            autoWidth
+            label={
+              <Trans id='document_details_page_source_tab_select_action_label' />
+            }
+          >
+            <MenuItem value='pending'>
+              <Box display='flex' alignItems='center'>
+                <DeleteIcon />
+                <Trans id='document_details_page_source_tab_select_action_delete_label' />
+              </Box>{' '}
+            </MenuItem>
+
+            <MenuItem value='rejected'>
+              <Box display='flex' alignItems='center'>
+                <CallMergeIcon />
+                <Trans id='document_details_page_source_tab_select_action_merge_label' />
+              </Box>
+            </MenuItem>
+          </Select>
+        </FormControl>
       </Box>
     ),
     renderToolbarInternalActions: ({ table }) => (
       <Box>
-        <Select
-          value={action}
-          onChange={(event) => setAction(event.target.value)}
-          size='small'
-          label='Action'
-        >
-          <MenuItem value='pending'>
-            <Box display='flex' alignItems='center'>
-              <DeleteIcon />
-              Pending
-            </Box>{' '}
-            {/* Rejected */}
-          </MenuItem>
-
-          <MenuItem value='rejected'>
-            <Box display='flex' alignItems='center'>
-              <CallMergeIcon />
-              Rejected
-            </Box>
-          </MenuItem>
-        </Select>
         <MRT_ToggleDensePaddingButton table={table} />
         <MRT_ToggleFullScreenButton table={table} />
         <MRT_ShowHideColumnsButton table={table} />
