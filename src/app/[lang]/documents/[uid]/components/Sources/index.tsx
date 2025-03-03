@@ -1,7 +1,10 @@
 import { CustomCard } from '@/components/Card'
 import { LanguageChips } from '@/components/LanguageChips'
 import useStore from '@/stores/global_store'
-import { BibliographicPlatformMetadata } from '@/types/BibliographicPlatform'
+import {
+  BibliographicPlatform,
+  BibliographicPlatformMetadata,
+} from '@/types/BibliographicPlatform'
 import { DocumentType } from '@/types/Document'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
@@ -200,6 +203,39 @@ function Sources() {
           )
         },
         filterVariant: 'multi-select',
+        filterColumn: 'source',
+        //@ts-expect-error:  overide filterSelectOptions to accept Element.jsx instead of Element
+        filterSelectOptions: Object.values(BibliographicPlatform).map(
+          (platform) => {
+            const metadata = BibliographicPlatformMetadata[platform]
+            return {
+              value: platform,
+              label: (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                  }}
+                >
+                  <Typography>{metadata?.name || platform}</Typography>
+                  <Image
+                    src={metadata?.icon || '/icons/default.png'}
+                    alt={metadata?.name || 'Unknown Source'}
+                    width={24}
+                    height={24}
+                    priority
+                  />
+                </Box>
+              ),
+            }
+          },
+        ),
+        filterFn: (row, columnId, filterValues) => {
+          if (!filterValues || filterValues.length === 0) return true
+          return filterValues.includes(row.original.platform)
+        },
       },
     ],
     [],
