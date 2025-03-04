@@ -1,44 +1,65 @@
 import useStore from '@/stores/global_store'
 import { Contribution } from '@/types/Contribution'
-import { Box, Paper, Typography } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
-import { t } from '@lingui/macro'
-import React, { useMemo } from 'react'
-import { MaterialReactTable, MRT_ColumnDef } from 'material-react-table'
-import { Localization } from '@/types/Localization'
-import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Person } from '@/types/Person'
-
+import * as Lingui from '@lingui/core'
+import { t } from '@lingui/macro'
+import { Box, Paper, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import {
+  MaterialReactTable,
+  MRT_Cell,
+  MRT_ColumnDef,
+  useMaterialReactTable,
+} from 'material-react-table'
+import { ReactNode, useMemo } from 'react'
 const Authors = () => {
   const { selectedDocument = null } = useStore((state) => state.document)
   const theme = useTheme()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
 
-  console.log('selectedDocument', selectedDocument)
-
-  const columns = useMemo<MRT_ColumnDef<Contribution>[]>(() => {
-    return [
+  const columns = useMemo<MRT_ColumnDef<Contribution>[]>(
+    () => [
       {
         id: 'person',
-        header: t`documents_page_type_column`,
+        header: t`documents_details_page_type_column_tab_select`,
         accessor: (row: { person: Person }) => row.person,
-        Cell({ row }: { row: { person: Person } }) {
-          return <Box>{row.person?.displayName}</Box>
+        Cell({
+          cell,
+          renderedCellValue,
+        }: {
+          cell: MRT_Cell<Contribution>
+          renderedCellValue: ReactNode
+        }) {
+          const { row } = cell
+          return <Box>{row.original.person?.displayName}</Box>
         },
       },
       {
         id: 'affiliation',
-        header: 'Affiliation',
-        //  accessor: (row) => row.affiliation,
+        header: 'documents_details_page_idref_column_tab_select',
       },
       {
         id: 'orcid',
-        header: 'ORCID',
-        //  accessor: (row) => row.orcid,
+        header: 'documents_details_page_orcid_column_tab_select',
       },
-    ]
-  }, [])
+      {
+        id: 'orcid',
+        header: 'documents_details_page_idref_column_tab_select',
+      },
+      {
+        id: 'orcid',
+        header: 'documents_details_page_scopus_column_tab_select',
+      },
+    ],
+    [],
+  )
+
+  const table = useMaterialReactTable({
+    columns,
+    data: selectedDocument?.contributions || [],
+    enableRowSelection: true,
+  })
 
   return (
     <Paper elevation={0}>
@@ -46,14 +67,7 @@ const Authors = () => {
         <Typography variant='h6'>Authors</Typography>
       </Box>
       <Box>
-        <MaterialReactTable
-          initialState={{ showColumnFilters: true }}
-          columns={columns}
-          data={selectedDocument?.contributions || []}
-          localization={Localization[lang]}
-          enableRowActions
-          positionActionsColumn='last' // Ensures actions column is at the right end
-        />
+        <MaterialReactTable table={table} />;
       </Box>
     </Paper>
   )
