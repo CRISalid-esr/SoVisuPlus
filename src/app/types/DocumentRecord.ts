@@ -60,7 +60,7 @@ class DocumentRecord {
     }
   }
 
-  fromObject(record: DocumentRecordJson): DocumentRecord {
+  static fromObject(record: DocumentRecordJson): DocumentRecord {
     return new DocumentRecord(
       record.uid,
       record.platform,

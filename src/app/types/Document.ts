@@ -1,9 +1,21 @@
-import { Literal } from '@/types/Literal'
-import { Contribution, ContributionJson } from '@/types/Contribution'
-import { getStringInLocale } from '@/utils/getStringInLocale'
-import { DocumentRecord } from '@/types/DocumentRecord'
 import { Concept, ConceptJson } from '@/types/Concept'
-import { DocumentWithRelations as DbDocument } from '@/prisma-schema/extended-client'
+import { Contribution, ContributionJson } from '@/types/Contribution'
+import { DocumentRecord } from '@/types/DocumentRecord'
+import { Literal } from '@/types/Literal'
+import { getStringInLocale } from '@/utils/getStringInLocale'
+
+interface DocumentJson {
+  uid: string
+  documentType: string
+  publicationDate: string | null
+  publicationDateStart: Date | null
+  publicationDateEnd: Date | null
+  titles: Array<Literal>
+  abstracts: Array<Literal>
+  subjects: Array<Concept>
+  contributions: Array<ContributionJson>
+  records: Array<DocumentRecord>
+}
 
 enum DocumentType {
   Document = 'Document',
@@ -45,7 +57,7 @@ class Document {
       : DocumentType.Document
   }
 
-  static documentFromDb(document: DbDocument): Document {
+  static fromJsonDocument(document: DocumentJson): Document {
     return new Document(
       document.uid,
       Document.documentTypeFromString(document.documentType),
@@ -54,13 +66,13 @@ class Document {
       document.publicationDateEnd,
       document.titles.map((title) => Literal.fromObject(title)),
       document.abstracts.map((abstract) => Literal.fromObject(abstract)),
-      (document.subjects as unknown as ConceptJson[]).map(
-        (subject: ConceptJson) => Concept.fromObject(subject),
+      document.subjects.map((subject: ConceptJson) =>
+        Concept.fromObject(subject),
       ),
-      document.contributions.map((contribution) =>
-        Contribution.fromObject(contribution as unknown as ContributionJson),
+      document.contributions.map((contribution: ContributionJson) =>
+        Contribution.fromObject(contribution),
       ),
-      (document.records ?? []).map((record) =>
+      document.records.map((record: DocumentRecord) =>
         DocumentRecord.fromObject(record),
       ),
     )
