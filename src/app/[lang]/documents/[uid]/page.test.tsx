@@ -160,8 +160,6 @@ describe('DocumentDetailsPage Component', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('document_details_domains_tab')).toBeInTheDocument()
     expect(screen.getByText('document_details_authors_tab')).toBeInTheDocument()
-    expect(
-      screen.getByText('document_details_HAL_referencing_tab'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('document_details_sources_tab')).toBeInTheDocument()
   })
 })
