@@ -37,19 +37,19 @@ const Authors = () => {
       },
       {
         id: 'idref',
-        header: 'documents_details_page_idref_column_tab_select',
+        header: t`documents_details_page_idref_column_tab_select`,
       },
       {
         id: 'orcid',
-        header: 'documents_details_page_orcid_column_tab_select',
+        header: t`documents_details_page_orcid_column_tab_select`,
       },
       {
         id: 'idhal',
-        header: 'documents_details_page_idhal_column_tab_select',
+        header: t`documents_details_page_idhal_column_tab_select`,
       },
       {
         id: 'scopus',
-        header: 'documents_details_page_scopus_column_tab_select',
+        header: t`documents_details_page_scopus_column_tab_select`,
       },
     ],
     [],
