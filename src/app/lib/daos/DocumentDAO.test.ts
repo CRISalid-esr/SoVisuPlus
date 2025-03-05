@@ -331,7 +331,13 @@ describe('DocumentDAO', () => {
         titles: true,
         abstracts: true,
         contributions: {
-          include: { person: true },
+          include: {
+            person: {
+              include: {
+                identifiers: true,
+              },
+            },
+          },
         },
         records: true,
         subjects: true,
