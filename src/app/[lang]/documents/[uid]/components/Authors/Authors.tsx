@@ -19,6 +19,8 @@ const Authors = () => {
   const theme = useTheme()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
 
+  console.log('selectedDocument', selectedDocument)
+
   const columns = useMemo<MRT_ColumnDef<Contribution>[]>(
     () => [
       {
@@ -39,6 +41,28 @@ const Authors = () => {
       {
         id: 'idref',
         header: t`documents_details_page_idref_column_tab_select`,
+        Cell({
+          cell,
+          renderedCellValue,
+        }: {
+          cell: MRT_Cell<Contribution>
+          renderedCellValue: ReactNode
+        }) {
+          const { row } = cell
+          console.log(
+            'row.original.person?.getIdentifiers().',
+            row.original.person,
+          )
+          return (
+            <Box>
+              {
+                row.original.person
+                  ?.getIdentifiers()
+                  .find((identifier) => identifier.type === 'IDREF')?.value
+              }
+            </Box>
+          )
+        },
       },
       {
         id: 'orcid',
@@ -60,7 +84,7 @@ const Authors = () => {
     columns,
     data: selectedDocument?.contributions || [],
     enableRowSelection: true,
-    localization:Localization[lang]
+    localization: Localization[lang],
   })
 
   return (

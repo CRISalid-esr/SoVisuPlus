@@ -545,7 +545,11 @@ export class DocumentDAO extends AbstractDAO {
         abstracts: true,
         contributions: {
           include: {
-            person: true,
+            person: {
+              include: {
+                identifiers: true,
+              },
+            },
           },
         },
         records: true,

@@ -1,8 +1,9 @@
 import { Literal } from '@/types/Literal'
-import { Contribution } from '@/types/Contribution'
+import { Contribution, ContributionJson } from '@/types/Contribution'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 import { DocumentRecord } from '@/types/DocumentRecord'
-import { Concept } from '@/types/Concept'
+import { Concept, ConceptJson } from '@/types/Concept'
+import { DocumentWithRelations as DbDocument } from '@/prisma-schema/extended-client'
 
 enum DocumentType {
   Document = 'Document',
@@ -42,6 +43,27 @@ class Document {
     return (Object.values(DocumentType) as string[]).includes(typeString)
       ? (typeString as DocumentType)
       : DocumentType.Document
+  }
+
+  static documentFromDb(document: DbDocument): Document {
+    return new Document(
+      document.uid,
+      Document.documentTypeFromString(document.documentType),
+      document.publicationDate,
+      document.publicationDateStart,
+      document.publicationDateEnd,
+      document.titles.map((title) => Literal.fromObject(title)),
+      document.abstracts.map((abstract) => Literal.fromObject(abstract)),
+      (document.subjects as unknown as ConceptJson[]).map(
+        (subject: ConceptJson) => Concept.fromObject(subject),
+      ),
+      document.contributions.map((contribution) =>
+        Contribution.fromObject(contribution as unknown as ContributionJson),
+      ),
+      (document.records ?? []).map((record) =>
+        DocumentRecord.fromObject(record),
+      ),
+    )
   }
 }
 
