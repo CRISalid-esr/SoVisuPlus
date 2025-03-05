@@ -40,6 +40,7 @@ import { ReactNode, useMemo, useState } from 'react'
 import { DocumentTypeIcons } from '../../../components/DocumentTypeIcons'
 
 import CallMergeIcon from '@mui/icons-material/CallMerge'
+import { Localization } from '@/types/Localization'
 
 function Sources() {
   const { selectedDocument = null } = useStore((state) => state.document)
@@ -261,6 +262,7 @@ function Sources() {
     columns,
     data: selectedDocument?.records || [],
     enableRowSelection: true,
+    localization:Localization[lang],
     positionToolbarAlertBanner: 'bottom', //show selected rows count on bottom toolbar
     renderTopToolbarCustomActions: () => (
       <Box

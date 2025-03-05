@@ -1,6 +1,7 @@
 import useStore from '@/stores/global_store'
 import { Contribution } from '@/types/Contribution'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
+import { Localization } from '@/types/Localization'
 import { Person } from '@/types/Person'
 import * as Lingui from '@lingui/core'
 import { t } from '@lingui/macro'
@@ -59,6 +60,7 @@ const Authors = () => {
     columns,
     data: selectedDocument?.contributions || [],
     enableRowSelection: true,
+    localization:Localization[lang]
   })
 
   return (
