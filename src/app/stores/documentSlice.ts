@@ -75,7 +75,9 @@ export const addDocumentSlice: StateCreator<
           throw new Error('Failed to fetch document')
         }
 
-        const document: Document = await response.json()
+        const document: Document = await Document.fromJsonDocument(
+          await response.json(),
+        )
 
         set((state) => ({
           document: {
