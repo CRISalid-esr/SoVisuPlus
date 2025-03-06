@@ -14,8 +14,8 @@ import {
   Sources,
 } from './components/'
 import { notFound } from 'next/navigation'
-export const dynamic = 'force-dynamic'
 
+import Authors from './components/Authors/Authors'
 export default function DocumentDetailsPage() {
   const theme = useTheme()
   const router = useRouter()
@@ -96,6 +96,8 @@ export default function DocumentDetailsPage() {
         return <BibliographicInformation />
       case 'sources':
         return <Sources />
+      case 'authors':
+        return <Authors />
       default:
         return notFound()
     }

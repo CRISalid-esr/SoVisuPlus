@@ -5,6 +5,13 @@ import {
 import { Literal } from '@/types/Literal'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 
+interface DocumentRecordJson {
+  uid: string
+  platform: BibliographicPlatform
+  titles: Array<Literal>
+  url: string | null
+}
+
 class DocumentRecord {
   private _url: URL | null = null
 
@@ -51,6 +58,15 @@ class DocumentRecord {
         `Invalid URL: ${value} - ${(error as Error | undefined)?.message}`,
       )
     }
+  }
+
+  static fromObject(record: DocumentRecordJson): DocumentRecord {
+    return new DocumentRecord(
+      record.uid,
+      record.platform,
+      record.titles.map((title) => Literal.fromObject(title)),
+      record.url,
+    )
   }
 }
 

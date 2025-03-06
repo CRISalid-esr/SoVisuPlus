@@ -1,8 +1,21 @@
-import { Literal } from '@/types/Literal'
-import { Contribution } from '@/types/Contribution'
-import { getStringInLocale } from '@/utils/getStringInLocale'
+import { Concept, ConceptJson } from '@/types/Concept'
+import { Contribution, ContributionJson } from '@/types/Contribution'
 import { DocumentRecord } from '@/types/DocumentRecord'
-import { Concept } from '@/types/Concept'
+import { Literal } from '@/types/Literal'
+import { getStringInLocale } from '@/utils/getStringInLocale'
+
+interface DocumentJson {
+  uid: string
+  documentType: string
+  publicationDate: string | null
+  publicationDateStart: Date | null
+  publicationDateEnd: Date | null
+  titles: Array<Literal>
+  abstracts: Array<Literal>
+  subjects: Array<Concept>
+  contributions: Array<ContributionJson>
+  records: Array<DocumentRecord>
+}
 
 enum DocumentType {
   Document = 'Document',
@@ -42,6 +55,27 @@ class Document {
     return (Object.values(DocumentType) as string[]).includes(typeString)
       ? (typeString as DocumentType)
       : DocumentType.Document
+  }
+
+  static fromJsonDocument(document: DocumentJson): Document {
+    return new Document(
+      document.uid,
+      Document.documentTypeFromString(document.documentType),
+      document.publicationDate,
+      document.publicationDateStart,
+      document.publicationDateEnd,
+      document.titles.map((title) => Literal.fromObject(title)),
+      document.abstracts.map((abstract) => Literal.fromObject(abstract)),
+      document.subjects.map((subject: ConceptJson) =>
+        Concept.fromObject(subject),
+      ),
+      document.contributions.map((contribution: ContributionJson) =>
+        Contribution.fromObject(contribution),
+      ),
+      document.records.map((record: DocumentRecord) =>
+        DocumentRecord.fromObject(record),
+      ),
+    )
   }
 }
 
