@@ -18,8 +18,8 @@ class Concept {
   static fromObject(concept: ConceptJson): Concept {
     return new Concept(
       concept.uid,
-      concept.altLabels.map((label) => Literal.fromObject(label)),
-      concept.prefLabels.map((label) => Literal.fromObject(label)),
+      concept.altLabels?.map((label) => Literal.fromObject(label)),
+      concept.prefLabels?.map((label) => Literal.fromObject(label)),
       concept.uri,
     )
   }
