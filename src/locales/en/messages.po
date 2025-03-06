@@ -34,28 +34,28 @@ msgid "document_details_page_card_validate_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:281
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:290
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:283
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:292
 msgid "document_details_page_source_tab_select_action_label"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:296
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:298
 msgid "document_details_page_source_tab_select_action_delete_label"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:303
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:305
 msgid "document_details_page_source_tab_select_action_merge_label"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:339
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:341
 msgid "document_details_page_source_tab_card_title"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:342
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:344
 msgid "document_details_page_source_tab_card_validate_button"
 msgstr ""
 
@@ -184,9 +184,29 @@ msgstr ""
 msgid "document_details_sources_tab"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:25
-msgid "documents_details_page_type_column_tab_select"
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:72
+msgid "documents_details_page_idhal_column_tab_select"
 msgstr ""
+
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:36
+msgid "documents_details_page_idref_column_tab_select"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:54
+msgid "documents_details_page_orcid_column_tab_select"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:90
+msgid "documents_details_page_scopus_column_tab_select"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:23
+msgid "documents_details_page_type_column_tab_author"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:25
+#~ msgid "documents_details_page_type_column_tab_select"
+#~ msgstr ""
 
 #: src/app/[lang]/documents/page.tsx:525
 msgid "documents_page_action_column_details"
@@ -196,22 +216,22 @@ msgstr ""
 msgid "documents_page_all_documents_filter"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:66
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:67
 #: src/app/[lang]/documents/page.tsx:120
 msgid "documents_page_book_chapter_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:60
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:61
 #: src/app/[lang]/documents/page.tsx:114
 msgid "documents_page_book_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:69
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:70
 #: src/app/[lang]/documents/page.tsx:123
 msgid "documents_page_conference_article_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:160
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:161
 #: src/app/[lang]/documents/page.tsx:219
 msgid "documents_page_contributors_column"
 msgstr ""
@@ -220,7 +240,7 @@ msgstr ""
 #~ msgid "documents_page_date_column"
 #~ msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:51
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:52
 #: src/app/[lang]/documents/page.tsx:105
 msgid "documents_page_document_icon_label"
 msgstr ""
@@ -233,7 +253,7 @@ msgstr ""
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:57
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:58
 #: src/app/[lang]/documents/page.tsx:111
 msgid "documents_page_journal_article_icon_label"
 msgstr ""
@@ -246,17 +266,17 @@ msgstr ""
 msgid "documents_page_main_title"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:63
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:64
 #: src/app/[lang]/documents/page.tsx:117
 msgid "documents_page_monograph_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:72
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:73
 #: src/app/[lang]/documents/page.tsx:126
 msgid "documents_page_proceedings_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:165
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:166
 #: src/app/[lang]/documents/page.tsx:261
 msgid "documents_page_publication_date_column"
 msgstr ""
@@ -266,7 +286,7 @@ msgstr ""
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:170
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:171
 #: src/app/[lang]/documents/page.tsx:293
 msgid "documents_page_publishedIn_column"
 msgstr ""
@@ -275,12 +295,12 @@ msgstr ""
 #~ msgid "documents_page_publishedIn_column_no_date_available"
 #~ msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:54
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:55
 #: src/app/[lang]/documents/page.tsx:108
 msgid "documents_page_scholarly_publication_icon_label"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:178
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:179
 #: src/app/[lang]/documents/page.tsx:308
 msgid "documents_page_source_column"
 msgstr ""
@@ -313,12 +333,12 @@ msgstr ""
 msgid "documents_page_synchronize_modal_title"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:127
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:128
 #: src/app/[lang]/documents/page.tsx:177
 msgid "documents_page_title_column"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:85
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:86
 #: src/app/[lang]/documents/page.tsx:137
 msgid "documents_page_type_column"
 msgstr ""
@@ -354,8 +374,8 @@ msgid "my_account_page_notification_tab"
 msgstr ""
 
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:16
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:122
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:141
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:123
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:142
 #: src/app/[lang]/documents/page.tsx:191
 msgid "no_title_available"
 msgstr ""
