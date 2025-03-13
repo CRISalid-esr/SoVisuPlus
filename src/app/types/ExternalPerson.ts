@@ -1,5 +1,6 @@
 import { Person } from '@/types/Person'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
+import { PersonMembership } from '@/types/PersonMembership'
 
 class ExternalPerson extends Person {
   constructor(
@@ -9,6 +10,7 @@ class ExternalPerson extends Person {
     firstName?: string,
     lastName?: string,
     identifiers: PersonIdentifier[] = [],
+    memberships: PersonMembership[] = [],
   ) {
     super(
       uid,
@@ -18,6 +20,7 @@ class ExternalPerson extends Person {
       firstName || '',
       lastName || '',
       identifiers,
+      memberships,
     )
   }
 }

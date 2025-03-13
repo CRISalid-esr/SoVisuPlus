@@ -1,46 +1,77 @@
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
 import {
+  convertStringPersonIdentifierType,
   PersonIdentifier,
-  PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { Person } from '@/types/Person'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
 import { ExternalPerson } from '@/types/ExternalPerson'
 import { InternalPerson } from '@/types/InternalPerson'
-
-enum GraphPersonIdentifierType {
-  LOCAL = 'local',
-  ORCID = 'orcid',
-  IDREF = 'idref',
-  SCOPUS_EID = 'scopus_eid',
-  ID_HAL = 'id_hal',
-  ID_HAL_S = 'id_hal_s',
-}
+import { ResearchStructure } from '@/types/ResearchStructure'
+import { Literal } from '@/types/Literal'
+import { convertStringResearchStructureIdentifierType } from '@/types/ResearchStructureIdentifier'
 
 export interface GraphPersonIdentifier {
-  type: GraphPersonIdentifierType
+  type: string
   value: string
 }
 
 interface GraphPersonName {
   first_names: {
+    language?: string
     value: string
   }[]
   last_names: {
+    language?: string
     value: string
   }[]
+}
+
+interface GraphOrganizationIdentifier {
+  type: string
+  value: string
+}
+
+interface GraphOrganizationName {
+  language?: string
+  value: string
+}
+
+interface GraphOrganization {
+  acronym?: string
+  identifiers: GraphOrganizationIdentifier[]
+  names: GraphOrganizationName[]
+  type: string
+  uid: string
+}
+
+interface GraphMembershipProperties {
+  start_date?: string
+  end_date?: string
+  position_code?: string
+}
+
+interface GraphMembershipEdge {
+  properties: GraphMembershipProperties
+  node: GraphOrganization
+}
+
+interface GraphMembershipConnection {
+  edges: GraphMembershipEdge[]
 }
 
 export interface GraphPersonResponse {
   uid: string
   display_name: string
   external: boolean
-  identifiers: Array<GraphPersonIdentifier>
-  names: Array<GraphPersonName>
+  identifiers: GraphPersonIdentifier[]
+  names: GraphPersonName[]
+  membershipsConnection?: GraphMembershipConnection
+  employmentsConnection?: GraphMembershipConnection
 }
 
 export interface GraphPeopleResponse {
-  people: Array<GraphPersonResponse>
+  people: GraphPersonResponse[]
 }
 
 export class PersonGraphQLClient extends AbstractGraphQLClient {
@@ -115,7 +146,7 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
         .map((identifier: GraphPersonIdentifier) => {
           try {
             return {
-              type: this.convertGraphIdentifierType(identifier.type),
+              type: convertStringPersonIdentifierType(identifier.type),
               value: identifier.value,
             }
           } catch {
@@ -126,27 +157,27 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
           }
         })
         .filter((identifier) => identifier !== null), // Remove null entries
+      personData.membershipsConnection?.edges?.map((edge) => ({
+        researchStructure: new ResearchStructure(
+          edge.node.uid,
+          edge.node.acronym ?? null,
+          edge.node.names.map((name) =>
+            Literal.fromObject({
+              language: name.language ?? null,
+              value: name.value,
+            }),
+          ),
+          [],
+          edge.node.identifiers.map((identifier) => ({
+            type: convertStringResearchStructureIdentifierType(identifier.type),
+            value: identifier.value,
+          })),
+          'research_structure',
+        ),
+        startDate: edge.properties.start_date ?? null,
+        endDate: edge.properties.end_date ?? null,
+        positionCode: edge.properties.position_code ?? null,
+      })) ?? [],
     )
-  }
-
-  private convertGraphIdentifierType(
-    type: GraphPersonIdentifierType,
-  ): PersonIdentifierType {
-    switch (type) {
-      case GraphPersonIdentifierType.LOCAL:
-        return PersonIdentifierType.LOCAL
-      case GraphPersonIdentifierType.ORCID:
-        return PersonIdentifierType.ORCID
-      case GraphPersonIdentifierType.IDREF:
-        return PersonIdentifierType.IDREF
-      case GraphPersonIdentifierType.SCOPUS_EID:
-        return PersonIdentifierType.SCOPUS_EID
-      case GraphPersonIdentifierType.ID_HAL:
-        return PersonIdentifierType.ID_HAL_S
-      case GraphPersonIdentifierType.ID_HAL_S:
-        return PersonIdentifierType.ID_HAL_S
-      default:
-        throw new Error(`Unknown identifier type: ${type}`)
-    }
   }
 }

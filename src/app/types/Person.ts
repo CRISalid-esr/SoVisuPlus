@@ -5,6 +5,7 @@ import {
 import { IAgent } from '@/types/IAgent'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Person as DbPerson } from '@prisma/client'
+import { PersonMembership } from '@/types/PersonMembership'
 
 interface PersonJson {
   uid: string
@@ -26,6 +27,7 @@ class Person implements IAgent {
     public firstName: string,
     public lastName: string,
     private identifiers: PersonIdentifier[] = [],
+    public memberships: PersonMembership[] = [],
     public type: 'person' = 'person',
     public slug: string | null = null, //TODO make non-nullable
   ) {
@@ -71,6 +73,7 @@ class Person implements IAgent {
       person.firstName || '',
       person.lastName || '',
       'identifiers' in person ? (person.identifiers as PersonIdentifier[]) : [],
+      [],
       'person',
       person.slug,
     )
@@ -86,6 +89,7 @@ class Person implements IAgent {
       json.firstName ?? '',
       json.lastName ?? '',
       json.identifiers ?? [],
+      [],
       'person',
       json.slug ?? null,
     )

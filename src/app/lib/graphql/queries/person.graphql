@@ -17,14 +17,50 @@ query PeopleQuery($where: PersonWhere) {
         value
       }
     }
-    memberships {
-      uid
-      acronym
-      names {
-        language
-        value
+
+    membershipsConnection {
+      edges {
+        properties {
+          start_date
+          end_date
+          position_code
+        }
+        node {
+          acronym
+          identifiers {
+            type
+            value
+          }
+          names {
+            language
+            value
+          }
+          types
+          uid
+        }
       }
-      type
+    }
+    employmentsConnection {
+      edges {
+        properties {
+          start_date
+          end_date
+          position_code
+        }
+        node {
+          acronym
+          identifiers {
+            type
+            value
+          }
+          names {
+            language
+            value
+          }
+          types
+          uid
+        }
+      }
     }
   }
 }

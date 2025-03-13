@@ -3,8 +3,8 @@ import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
 import { MessageProcessingWorker } from '@/lib/amqp/workers/MessageProcessingWorker'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import {
+  convertStringResearchStructureIdentifierType,
   ResearchStructureIdentifier,
-  ResearchStructureIdentifierType,
 } from '@/types/ResearchStructureIdentifier'
 import { Literal } from '@/types/Literal'
 
@@ -34,7 +34,7 @@ export class ResearchStructureWorker extends MessageProcessingWorker<AMQPResearc
     const transformedIdentifiers: ResearchStructureIdentifier[] =
       identifiers.map((identifier) => {
         return {
-          type: this.convertGraphIdentifierType(identifier.type),
+          type: convertStringResearchStructureIdentifierType(identifier.type),
           value: identifier.value,
         }
       })
@@ -56,21 +56,6 @@ export class ResearchStructureWorker extends MessageProcessingWorker<AMQPResearc
         error,
       )
       throw error
-    }
-  }
-
-  private convertGraphIdentifierType(
-    value: string,
-  ): ResearchStructureIdentifierType {
-    switch (value.toLowerCase()) {
-      case 'rnsr':
-        return ResearchStructureIdentifierType.RNSR
-      case 'idref':
-        return ResearchStructureIdentifierType.IDREF
-      case 'local':
-        return ResearchStructureIdentifierType.LOCAL
-      default:
-        throw new Error(`Unsupported identifier type: ${value}`)
     }
   }
 }
