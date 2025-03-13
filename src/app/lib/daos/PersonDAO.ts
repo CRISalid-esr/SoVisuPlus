@@ -8,6 +8,8 @@ import { Person } from '@/types/Person'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import { PersonMembership } from '@/types/PersonMembership'
+import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
 
 interface FetchPeopleFromDbDBParams {
   searchTerm: string
@@ -40,7 +42,6 @@ export class PersonDAO extends AbstractDAO {
           counter++
         }
       }
-      console.log(`Unique slug : ${uniqueSlug}`)
       const maxRetries = 3
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -69,6 +70,9 @@ export class PersonDAO extends AbstractDAO {
             dbPerson?.id,
           )
           await this.upsertIdentifiers(person.getIdentifiers(), dbPerson.id)
+
+          await this.upsertMemberships(person.memberships, dbPerson.id)
+
           return dbPerson
         } catch (error) {
           if (
@@ -99,6 +103,50 @@ export class PersonDAO extends AbstractDAO {
       throw new Error(
         `Failed to upsert person: ${(error as unknown as Error).message}`,
       )
+    }
+  }
+
+  /**
+   * Upsert memberships for a given person
+   * @param memberships - List of memberships to upsert
+   * @param personId - The ID of the person in the database
+   */
+  private async upsertMemberships(
+    memberships: PersonMembership[],
+    personId: number,
+  ): Promise<void> {
+    const researchStructureDAO = new ResearchStructureDAO()
+    for (const membership of memberships) {
+      const dbResearchStructure =
+        await researchStructureDAO.getResearchStructureByUid(
+          membership.researchStructure.uid,
+        )
+      if (!dbResearchStructure) {
+        console.error(
+          `Research structure not found for UID: ${membership.researchStructure.uid}`,
+        )
+        continue
+      }
+      await this.prismaClient.membership.upsert({
+        where: {
+          personId_researchStructureId: {
+            personId,
+            researchStructureId: dbResearchStructure.id,
+          },
+        },
+        update: {
+          startDate: membership.startDate,
+          endDate: membership.endDate,
+          positionCode: membership.positionCode,
+        },
+        create: {
+          personId,
+          researchStructureId: dbResearchStructure.id,
+          startDate: membership.startDate,
+          endDate: membership.endDate,
+          positionCode: membership.positionCode,
+        },
+      })
     }
   }
 

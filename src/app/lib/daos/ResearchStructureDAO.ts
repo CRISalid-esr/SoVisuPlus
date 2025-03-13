@@ -136,4 +136,22 @@ export class ResearchStructureDAO extends AbstractDAO {
       })),
     })
   }
+
+  /**
+   * Get a ResearchStructure record by its UID
+   * @param uid - The UID of the ResearchStructure to retrieve
+   * @returns The ResearchStructure record
+   */
+  public async getResearchStructureByUid(
+    uid: string,
+  ): Promise<DbResearchStructure | null> {
+    return this.prismaClient.researchStructure.findUnique({
+      where: { uid },
+      include: {
+        names: true,
+        descriptions: true,
+        identifiers: true,
+      },
+    })
+  }
 }

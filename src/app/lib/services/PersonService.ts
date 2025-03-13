@@ -12,7 +12,7 @@ export class PersonService {
   private personDAO: PersonDAO
 
   constructor() {
-    this.personDAO = new PersonDAO() // Instantiate the DAO class
+    this.personDAO = new PersonDAO()
   }
 
   async fetchPeople({
