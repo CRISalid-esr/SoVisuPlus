@@ -27,7 +27,7 @@ export class PersonDAO extends AbstractDAO {
    */
   public async createOrUpdatePerson(person: Person): Promise<DbPerson> {
     try {
-      const slugPrefix = 'person'
+      const slugPrefix = 'person:'
       // baseSlug could be null for people with only a display name
       let baseSlug: string | null = slugify(
         `${person.firstName}-${person.lastName}`,
@@ -37,7 +37,7 @@ export class PersonDAO extends AbstractDAO {
         },
       )
       // if baseSlug is not null, add the prefix
-      baseSlug = baseSlug ? `${slugPrefix}-${baseSlug}` : null
+      baseSlug = baseSlug ? `${slugPrefix}${baseSlug}` : null
 
       let uniqueSlug = null
       let counter = 1

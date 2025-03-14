@@ -183,16 +183,16 @@ export class ResearchStructureDAO extends AbstractDAO {
     const supportedLocales =
       process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',') || []
 
-    const slugPrefix = 'research-structure'
+    const slugPrefix = 'research-structure:'
 
     if (researchStructure.acronym) {
-      return `${slugPrefix}-${slugify(researchStructure.acronym, { lower: true, strict: true })}`
+      return `${slugPrefix}${slugify(researchStructure.acronym, { lower: true, strict: true })}`
     }
 
     for (const locale of supportedLocales) {
       const name = researchStructure.names.find((n) => n.language === locale)
       if (name) {
-        return `${slugPrefix}-${slugify(name.value, { lower: true, strict: true })}`
+        return `${slugPrefix}${slugify(name.value, { lower: true, strict: true })}`
       }
     }
 
