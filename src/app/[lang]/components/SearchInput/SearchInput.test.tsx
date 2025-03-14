@@ -56,6 +56,7 @@ describe('SearchInput Component', () => {
           id: '2',
           names: [{ value: 'Lab X', language: 'en', slug: 'lab-x' }],
           type: 'researchStructures',
+          slug: 'lab-x',
         },
       ],
       hasMore: true,

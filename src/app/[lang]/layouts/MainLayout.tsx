@@ -44,7 +44,7 @@ export default function MainLayout({
   useEffect(() => {
     const perspectiveSlugFromUrl = searchParams?.get('perspective')
     // If the perspective is set from the url, and there is no current
-    // perspective, or he current perspective does not match the slug
+    // perspective, or if current perspective does not match the slug
     // provided through the url, force the current perspective
     if (
       perspectiveSlugFromUrl &&

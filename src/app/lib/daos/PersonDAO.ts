@@ -27,15 +27,21 @@ export class PersonDAO extends AbstractDAO {
    */
   public async createOrUpdatePerson(person: Person): Promise<DbPerson> {
     try {
+      const slugPrefix = 'person'
       // baseSlug could be null for people with only a display name
-      const baseSlug = slugify(`${person.firstName}-${person.lastName}`, {
-        lower: true,
-        strict: true,
-      })
+      let baseSlug: string | null = slugify(
+        `${person.firstName}-${person.lastName}`,
+        {
+          lower: true,
+          strict: true,
+        },
+      )
+      // if baseSlug is not null, add the prefix
+      baseSlug = baseSlug ? `${slugPrefix}-${baseSlug}` : null
 
       let uniqueSlug = null
       let counter = 1
-      if (baseSlug.trim()) {
+      if (baseSlug?.trim()) {
         uniqueSlug = baseSlug
         while (await this.slugExists(uniqueSlug, person.uid)) {
           uniqueSlug = `${baseSlug}-${counter}`

@@ -75,19 +75,19 @@ describe('ResearchStructureDAO', () => {
     expect(dbResearchStructure.acronym).toEqual('RS001')
 
     expect(mockPrisma.researchStructure.findFirst).toHaveBeenCalledWith({
-      where: { NOT: { uid: 'local-rs001' }, slug: 'rs001' },
+      where: { NOT: { uid: 'local-rs001' }, slug: 'research-structure-rs001' },
     })
 
     expect(mockPrisma.researchStructure.upsert).toHaveBeenCalledWith({
       where: { uid: researchStructure.uid },
       update: {
         acronym: researchStructure.acronym,
-        slug: 'rs001',
+        slug: 'research-structure-rs001',
       },
       create: {
         uid: researchStructure.uid,
         acronym: researchStructure.acronym,
-        slug: 'rs001',
+        slug: 'research-structure-rs001',
       },
       include: { names: true, descriptions: true, identifiers: true },
     })

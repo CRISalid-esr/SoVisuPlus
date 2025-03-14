@@ -59,7 +59,7 @@ describe('PersonDAO', () => {
         displayName: person.displayName,
         firstName: person.firstName,
         lastName: person.lastName,
-        slug: 'doe-john-doe',
+        slug: 'person-doe-john-doe',
         external: person.external,
       },
       create: {
@@ -68,7 +68,7 @@ describe('PersonDAO', () => {
         displayName: person.displayName,
         firstName: person.firstName,
         lastName: person.lastName,
-        slug: 'doe-john-doe',
+        slug: 'person-doe-john-doe',
         external: person.external,
       },
     })

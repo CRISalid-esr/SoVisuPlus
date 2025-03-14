@@ -193,20 +193,28 @@ const SearchInput: React.FC = () => {
         )
       ) {
         const researchStructureOptions: IAutoCompleteOption<ResearchStructure>[] =
-          researchStructures.map((researchStructure) => {
-            const label: string =
-              researchStructure.names.filter(
-                (name) => name.language === lang,
-              )[0]?.value ||
-              researchStructure.acronym ||
-              t`sidebar_search_unknown_label`
-            return {
-              type: 'researchStructures',
-              id: researchStructure.uid,
-              label: label,
-              agent: researchStructure,
-            }
-          })
+          researchStructures
+            .map((researchStructure) => {
+              if (!researchStructure.slug) {
+                console.log(
+                  `Research structure ${researchStructure.uid} is not selectable as it does not have a slug`,
+                )
+                return null
+              }
+              const label: string =
+                researchStructure.names.filter(
+                  (name) => name.language === lang,
+                )[0]?.value ||
+                researchStructure.acronym ||
+                t`sidebar_search_unknown_label`
+              return {
+                type: 'researchStructures',
+                id: researchStructure.slug,
+                label: label,
+                agent: researchStructure,
+              }
+            })
+            .filter(Boolean) as IAutoCompleteOption<ResearchStructure>[]
         mergedOptions.push(...researchStructureOptions)
       }
 
@@ -289,24 +297,8 @@ const SearchInput: React.FC = () => {
   ) => {
     if (value) {
       const params = new URLSearchParams(searchParams.toString())
-      let prefix: string | null = null
-      switch (value.type) {
-        case 'people':
-          prefix = 'person'
-          break
-        case 'researchStructures':
-          prefix = 'research-structure'
-          break
-        case 'institutions':
-          prefix = 'institution'
-          break
-        default:
-          break
-      }
-      if (!prefix) return
-
       if (value.id) {
-        params.set('perspective', `${prefix}-${value.id}`)
+        params.set('perspective', value.id)
       } else {
         params.delete('perspective')
       }

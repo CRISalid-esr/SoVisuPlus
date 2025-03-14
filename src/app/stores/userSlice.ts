@@ -1,7 +1,8 @@
 import { StateCreator } from 'zustand'
 import { User } from '@/types/User'
-import { IAgent } from '@/types/IAgent'
-import { Person, PersonJson } from '@/types/Person'
+import { IAgent, IAgentClass } from '@/types/IAgent'
+import { Person } from '@/types/Person'
+import { ResearchStructure } from '@/types/ResearchStructure'
 
 export interface UserSlice {
   user: {
@@ -53,21 +54,35 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
     },
     setPerspectiveBySlug: async (slug: string) => {
       set((state) => ({ user: { ...state.user, loading: true } }))
-      try {
-        const response = await fetch(`/api/person/slug/${slug}`)
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch person with slug: ${slug}`)
+      try {
+        let endpoint = ''
+        let EntityClass: IAgentClass
+
+        if (slug.startsWith('person-')) {
+          endpoint = `/api/person/slug/${slug}`
+          EntityClass = Person
+        } else if (slug.startsWith('research-structure-')) {
+          endpoint = `/api/researchStructures/slug/${slug}`
+          EntityClass = ResearchStructure
+        } else {
+          throw new Error(`Unknown slug type: ${slug}`)
         }
 
-        const personJson = (await response.json()) as PersonJson
-        const person = Person.fromJsonPerson(personJson)
+        const response = await fetch(endpoint)
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch entity with slug: ${slug}`)
+        }
+
+        const entityJson = await response.json()
+        const entity = EntityClass.fromJson(entityJson)
 
         set((state) => ({
-          user: { ...state.user, currentPerspective: person },
+          user: { ...state.user, currentPerspective: entity },
         }))
       } catch (error) {
-        console.error('Failed to fetch person by uid', error)
+        console.error('Failed to fetch entity by slug', error)
         set((state) => ({
           user: {
             ...state.user,

@@ -2,14 +2,14 @@ import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
-import { IAgent } from '@/types/IAgent'
+import { IAgent, IAgentJson } from '@/types/IAgent'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Person as DbPerson } from '@prisma/client'
 import { PersonMembership } from '@/types/PersonMembership'
 
-interface PersonJson {
+interface PersonJson extends IAgentJson {
   uid: string
-  slug: string | null // TODO remove when slug will be not nullable
+  slug: string | null
   external: boolean
   email?: string | null
   displayName?: string
@@ -31,7 +31,7 @@ class Person implements IAgent {
     public type: 'person' = 'person',
     public slug: string | null = null,
   ) {
-    this.validateIdentifiers(identifiers) // Use the setter to validate on initialization
+    this.validateIdentifiers(identifiers)
   }
 
   getDisplayName(language?: ExtendedLanguageCode): string {
@@ -79,7 +79,7 @@ class Person implements IAgent {
     )
   }
 
-  static fromJsonPerson(json: PersonJson): Person {
+  static fromJson(json: PersonJson): Person {
     return new Person(
       json.uid,
       json.external,

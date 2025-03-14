@@ -183,14 +183,16 @@ export class ResearchStructureDAO extends AbstractDAO {
     const supportedLocales =
       process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',') || []
 
+    const slugPrefix = 'research-structure'
+
     if (researchStructure.acronym) {
-      return slugify(researchStructure.acronym, { lower: true, strict: true })
+      return `${slugPrefix}-${slugify(researchStructure.acronym, { lower: true, strict: true })}`
     }
 
     for (const locale of supportedLocales) {
       const name = researchStructure.names.find((n) => n.language === locale)
       if (name) {
-        return slugify(name.value, { lower: true, strict: true })
+        return `${slugPrefix}-${slugify(name.value, { lower: true, strict: true })}`
       }
     }
 
@@ -208,5 +210,27 @@ export class ResearchStructureDAO extends AbstractDAO {
       where: { slug, NOT: { uid } },
     })
     return !!existing
+  }
+
+  /**
+   * Get a ResearchStructure record by its slug
+   * @param slug - The slug of the ResearchStructure to retrieve
+   * @returns The ResearchStructure record as a ResearchStructure object
+   */
+  public async fetchResearchStructureBySlug(
+    slug: string,
+  ): Promise<ResearchStructure | null> {
+    const dbResearchStructure =
+      await this.prismaClient.researchStructure.findFirst({
+        where: { slug },
+        include: {
+          names: true,
+          descriptions: true,
+          identifiers: true,
+        },
+      })
+    return dbResearchStructure
+      ? ResearchStructure.fromDbResearchStructure(dbResearchStructure)
+      : null
   }
 }
