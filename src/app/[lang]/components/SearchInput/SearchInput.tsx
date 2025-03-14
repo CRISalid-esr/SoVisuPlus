@@ -289,9 +289,24 @@ const SearchInput: React.FC = () => {
   ) => {
     if (value) {
       const params = new URLSearchParams(searchParams.toString())
+      let prefix: string | null = null
+      switch (value.type) {
+        case 'people':
+          prefix = 'person'
+          break
+        case 'researchStructures':
+          prefix = 'research-structure'
+          break
+        case 'institutions':
+          prefix = 'institution'
+          break
+        default:
+          break
+      }
+      if (!prefix) return
 
       if (value.id) {
-        params.set('perspective', value.id)
+        params.set('perspective', `${prefix}-${value.id}`)
       } else {
         params.delete('perspective')
       }

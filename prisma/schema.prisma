@@ -20,7 +20,7 @@ model User {
 model Person {
   id            Int                @id @default(autoincrement())
   uid           String             @unique
-  slug          String?            @unique //TODO make non-nullable
+  slug          String?            @unique
   email         String?            @unique
   displayName   String?
   firstName     String?
@@ -183,6 +183,7 @@ model ResearchStructure {
   descriptions ResearchStructureDescription[]
   identifiers  ResearchStructureIdentifier[]
   external     Boolean                        @default(false)
+  slug         String?                        @unique
   Membership   Membership[]
 }
 

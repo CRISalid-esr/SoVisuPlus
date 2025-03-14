@@ -29,7 +29,7 @@ class Person implements IAgent {
     private identifiers: PersonIdentifier[] = [],
     public memberships: PersonMembership[] = [],
     public type: 'person' = 'person',
-    public slug: string | null = null, //TODO make non-nullable
+    public slug: string | null = null,
   ) {
     this.validateIdentifiers(identifiers) // Use the setter to validate on initialization
   }
