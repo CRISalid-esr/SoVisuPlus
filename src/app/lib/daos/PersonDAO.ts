@@ -11,7 +11,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
 import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
 
-interface FetchPeopleFromDbDBParams {
+interface FetchPeopleParams {
   searchTerm: string
   page: number
   includeExternal: boolean
@@ -98,7 +98,6 @@ export class PersonDAO extends AbstractDAO {
             )
             await new Promise((resolve) => setTimeout(resolve, delay))
           } else {
-            // rethrow the other errors
             throw error
           }
         }
@@ -207,6 +206,7 @@ export class PersonDAO extends AbstractDAO {
    * Upsert PersonIdentifiers for a given person
    * @param identifiers - The list of identifiers to upsert
    * @param personId - The ID of the person
+   * @param retries - The number of retries (to handle conflicts on upsert)
    */
   private async upsertIdentifiers(
     identifiers: PersonIdentifier[],
@@ -248,12 +248,12 @@ export class PersonDAO extends AbstractDAO {
     }
   }
 
-  public fetchPeopleFromDb = async ({
+  public fetchPeople = async ({
     searchTerm,
     page,
     includeExternal,
     itemsPerPage,
-  }: FetchPeopleFromDbDBParams): Promise<{
+  }: FetchPeopleParams): Promise<{
     people: Person[]
     total: number
     hasMore: boolean
@@ -317,5 +317,23 @@ export class PersonDAO extends AbstractDAO {
       console.error(`Error fetching person with slug ${slug}:`, error)
       throw new Error(`Failed to fetch person with slug ${slug}`)
     }
+  }
+
+  fetchPeopleByResearchStructureUid = async (
+    researchStructureUid: string,
+  ): Promise<Person[]> => {
+    const people = await this.prismaClient.person.findMany({
+      where: {
+        memberships: {
+          some: {
+            researchStructure: {
+              uid: researchStructureUid,
+            },
+          },
+        },
+      },
+    })
+
+    return people.map((person) => Person.fromDbPerson(person))
   }
 }

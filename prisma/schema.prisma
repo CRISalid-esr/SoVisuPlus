@@ -184,7 +184,7 @@ model ResearchStructure {
   identifiers  ResearchStructureIdentifier[]
   external     Boolean                        @default(false)
   slug         String?                        @unique
-  Membership   Membership[]
+  memberships  Membership[]
 }
 
 model ResearchStructureName {

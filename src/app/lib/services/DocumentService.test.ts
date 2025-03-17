@@ -1,18 +1,19 @@
 import { DocumentService } from '@/lib/services/DocumentService'
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
+import { AgentType } from '@/types/IAgent'
 
 jest.mock('@/lib/daos/DocumentDAO')
 
 describe('DocumentService', () => {
   let documentService: DocumentService
-  let mockFetchDocumentsFromDB: jest.Mock
-  let mockFetchDocumentByIdFromDB: jest.Mock
+  let mockFetchDocuments: jest.Mock
+  let mockfetchDocumentById: jest.Mock
   beforeEach(() => {
-    mockFetchDocumentsFromDB = jest.fn()
-    mockFetchDocumentByIdFromDB = jest.fn()
+    mockFetchDocuments = jest.fn()
+    mockfetchDocumentById = jest.fn()
     ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
-      fetchDocumentsFromDB: mockFetchDocumentsFromDB,
-      fetchDocumentByIdFromDB: mockFetchDocumentByIdFromDB,
+      fetchDocuments: mockFetchDocuments,
+      fetchDocumentById: mockfetchDocumentById,
     }))
 
     documentService = new DocumentService()
@@ -20,23 +21,23 @@ describe('DocumentService', () => {
 
   it('should return a document when fetchDocumentById succeeds', async () => {
     const mockDocument = { id: '123', name: 'Test Document' }
-    mockFetchDocumentByIdFromDB.mockResolvedValue(mockDocument)
+    mockfetchDocumentById.mockResolvedValue(mockDocument)
 
     await expect(documentService.fetchDocumentById('123')).resolves.toEqual(
       mockDocument,
     )
 
-    expect(mockFetchDocumentByIdFromDB).toHaveBeenCalledWith('123')
+    expect(mockfetchDocumentById).toHaveBeenCalledWith('123')
   })
 
-  it('should throw an error when fetchDocumentByIdFromDB fails', async () => {
-    mockFetchDocumentByIdFromDB.mockRejectedValue(new Error('DB error'))
+  it('should throw an error when fetchDocumentById fails', async () => {
+    mockfetchDocumentById.mockRejectedValue(new Error('DB error'))
 
     await expect(documentService.fetchDocumentById('123')).rejects.toThrow(
       'Error fetching document from service',
     )
 
-    expect(mockFetchDocumentByIdFromDB).toHaveBeenCalledWith('123')
+    expect(mockfetchDocumentById).toHaveBeenCalledWith('123')
   })
 
   it('should return documents and totalItems when fetchDocuments succeeds', async () => {
@@ -45,7 +46,7 @@ describe('DocumentService', () => {
       totalItems: 1,
     }
 
-    mockFetchDocumentsFromDB.mockResolvedValue(mockResponse)
+    mockFetchDocuments.mockResolvedValue(mockResponse)
 
     const params = {
       searchTerm: 'test',
@@ -55,17 +56,26 @@ describe('DocumentService', () => {
       columnFilters: [{ id: 'category', value: 'reports' }],
       sorting: [{ id: 'name', desc: false }],
       contributorUid: 'local-124',
+      contributorType: 'person' as AgentType,
     }
 
     await expect(documentService.fetchDocuments(params)).resolves.toEqual(
       mockResponse,
     )
 
-    expect(mockFetchDocumentsFromDB).toHaveBeenCalledWith(params)
+    // Replace contributorUid with contributorUids
+    const dbParams = {
+      ...params,
+      contributorUids: [params.contributorUid],
+    }
+    delete (dbParams as Partial<typeof dbParams>).contributorUid
+    delete (dbParams as Partial<typeof dbParams>).contributorType
+
+    expect(mockFetchDocuments).toHaveBeenCalledWith(dbParams)
   })
 
   it('should throw an error when fetchDocumentsFromDB fails', async () => {
-    mockFetchDocumentsFromDB.mockRejectedValue(new Error('DB error'))
+    mockFetchDocuments.mockRejectedValue(new Error('DB error'))
 
     const params = {
       searchTerm: 'test',
@@ -75,12 +85,20 @@ describe('DocumentService', () => {
       columnFilters: [],
       sorting: [],
       contributorUid: 'local-124',
+      contributorType: 'person' as AgentType,
     }
 
     await expect(documentService.fetchDocuments(params)).rejects.toThrow(
       'Error fetching documents from service',
     )
 
-    expect(mockFetchDocumentsFromDB).toHaveBeenCalledWith(params)
+    const dbParams = {
+      ...params,
+      contributorUids: [params.contributorUid],
+    }
+    delete (dbParams as Partial<typeof dbParams>).contributorUid
+    delete (dbParams as Partial<typeof dbParams>).contributorType
+
+    expect(mockFetchDocuments).toHaveBeenCalledWith(dbParams)
   })
 })

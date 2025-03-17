@@ -1,4 +1,6 @@
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
+import { AgentType } from '@/types/IAgent'
+import { PersonDAO } from '@/lib/daos/PersonDAO'
 
 interface FetchDocumentsParams {
   searchTerm: string
@@ -8,13 +10,16 @@ interface FetchDocumentsParams {
   columnFilters: { id: string; value: string }[]
   sorting: { id: string; desc: boolean }[]
   contributorUid: string | null
+  contributorType: AgentType
 }
 
 export class DocumentService {
   private documentDAO: DocumentDAO
+  private personDAO: PersonDAO
 
   constructor() {
-    this.documentDAO = new DocumentDAO() // Instantiate the DAO class
+    this.documentDAO = new DocumentDAO()
+    this.personDAO = new PersonDAO()
   }
 
   async fetchDocuments({
@@ -25,18 +30,36 @@ export class DocumentService {
     columnFilters,
     sorting,
     contributorUid,
+    contributorType,
   }: FetchDocumentsParams) {
+    let contributorUids: string[] = []
+    switch (contributorType) {
+      case 'person':
+        contributorUids = contributorUid ? [contributorUid] : []
+        break
+      case 'research_structure':
+        contributorUids = (
+          contributorUid
+            ? await this.personDAO.fetchPeopleByResearchStructureUid(
+                contributorUid,
+              )
+            : []
+        ).map((person) => person.uid)
+        break
+      case 'institution':
+        console.error('Institution filter not implemented yet')
+        break
+    }
     try {
-      const { documents, totalItems } =
-        await this.documentDAO.fetchDocumentsFromDB({
-          searchTerm,
-          searchLang: searchLang,
-          page,
-          pageSize,
-          columnFilters,
-          sorting,
-          contributorUid,
-        })
+      const { documents, totalItems } = await this.documentDAO.fetchDocuments({
+        searchTerm,
+        searchLang: searchLang,
+        page,
+        pageSize,
+        columnFilters,
+        sorting,
+        contributorUids,
+      })
       return { documents, totalItems }
     } catch (error) {
       console.error('Error in service layer:', error)
@@ -46,8 +69,7 @@ export class DocumentService {
 
   async fetchDocumentById(uid: string) {
     try {
-      const document = await this.documentDAO.fetchDocumentByIdFromDB(uid)
-      return document
+      return await this.documentDAO.fetchDocumentById(uid)
     } catch (error) {
       console.error('Error in service layer:', error)
       throw new Error('Error fetching document from service')

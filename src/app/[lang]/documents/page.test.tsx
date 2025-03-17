@@ -144,6 +144,7 @@ describe('DocumentsPage Component', () => {
           },
         ]),
         searchLang: 'en',
+        contributorType: 'person',
         contributorUid: '',
       })
     })

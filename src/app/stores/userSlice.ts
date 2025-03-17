@@ -59,10 +59,10 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
         let endpoint = ''
         let EntityClass: IAgentClass
 
-        if (slug.startsWith('person-')) {
+        if (slug.startsWith('person:')) {
           endpoint = `/api/person/slug/${slug}`
           EntityClass = Person
-        } else if (slug.startsWith('research-structure-')) {
+        } else if (slug.startsWith('research-structure:')) {
           endpoint = `/api/researchStructures/slug/${slug}`
           EntityClass = ResearchStructure
         } else {

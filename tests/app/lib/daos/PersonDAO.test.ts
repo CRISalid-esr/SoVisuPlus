@@ -169,11 +169,11 @@ describe('PersonDAO Integration Tests', () => {
 
     // Insert first person
     const dbPerson1 = await personDAO.createOrUpdatePerson(person1)
-    expect(dbPerson1.slug).toBe('john-doe') // First one gets base slug
+    expect(dbPerson1.slug).toBe('person:john-doe') // First one gets base slug
 
     // Insert second person with the same name
     const dbPerson2 = await personDAO.createOrUpdatePerson(person2)
-    expect(dbPerson2.slug).toBe('john-doe-1') // Second one gets -1 suffix
+    expect(dbPerson2.slug).toBe('person:john-doe-1') // Second one gets -1 suffix
 
     // Ensure both records exist in the database
     const savedPeople = await prisma.person.findMany({
@@ -181,6 +181,9 @@ describe('PersonDAO Integration Tests', () => {
     })
 
     expect(savedPeople).toHaveLength(2)
-    expect(savedPeople.map((p) => p.slug)).toEqual(['john-doe', 'john-doe-1'])
+    expect(savedPeople.map((p) => p.slug)).toEqual([
+      'person:john-doe',
+      'person:john-doe-1',
+    ])
   })
 })
