@@ -2,6 +2,10 @@ import { PersonIdentifierType } from '@prisma/client'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 import prisma from '@/lib/daos/prisma'
+import { PersonMembership } from '@/types/PersonMembership'
+import { ResearchStructure } from '@/types/ResearchStructure'
+import { Literal } from '@/types/Literal'
+import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
 
 describe('PersonDAO Integration Tests', () => {
   let personDAO: PersonDAO
@@ -18,6 +22,20 @@ describe('PersonDAO Integration Tests', () => {
     'Doe',
     'John Doe',
     [{ type: PersonIdentifierType.ORCID, value: '0000-0001-2345-6789' }],
+    [
+      new PersonMembership(
+        new ResearchStructure(
+          'local-structure',
+          'ACR',
+          [new Literal('JD Laboratory', 'en')],
+          [new Literal('Laboratory of John Doe', 'en')],
+          [],
+        ),
+        null,
+        null,
+        'MCF',
+      ),
+    ],
   )
 
   test('should create a new person with identifiers', async () => {
@@ -36,6 +54,37 @@ describe('PersonDAO Integration Tests', () => {
       type: PersonIdentifierType.ORCID,
       value: '0000-0001-2345-6789',
       personId: dbPerson.id,
+    })
+  })
+
+  test('should create a new person with memberships', async () => {
+    const researchStructureDAO = new ResearchStructureDAO()
+    const researchStructure =
+      await researchStructureDAO.createOrUpdateResearchStructure(
+        new ResearchStructure(
+          'local-structure',
+          'ACR',
+          [new Literal('JD Laboratory', 'en')],
+          [new Literal('Laboratory of John Doe', 'en')],
+          [],
+        ),
+      )
+    const dbPerson = await personDAO.createOrUpdatePerson(personData)
+
+    expect(dbPerson).toHaveProperty('id')
+    expect(dbPerson.uid).toBe(personData.uid)
+    expect(dbPerson.email).toBe(personData.email)
+
+    const savedMemberships = await prisma.membership.findMany({
+      where: { personId: dbPerson.id },
+      include: { researchStructure: true },
+    })
+
+    expect(savedMemberships).toHaveLength(1)
+    expect(savedMemberships[0]).toMatchObject({
+      personId: dbPerson.id,
+      researchStructureId: researchStructure.id,
+      positionCode: 'MCF',
     })
   })
 
