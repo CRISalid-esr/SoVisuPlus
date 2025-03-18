@@ -43,17 +43,27 @@ export default function MainLayout({
   // if the current perspective is not set, set it to the connected user
   useEffect(() => {
     const perspectiveSlugFromUrl = searchParams?.get('perspective')
-    // If the perspective is set from the url, and there is no current
-    // perspective, or if current perspective does not match the slug
-    // provided through the url, force the current perspective
+    // If the perspective is set from the url and matches
+    // the current perspective, do nothing
     if (
       perspectiveSlugFromUrl &&
-      (!currentPerspective || currentPerspective.slug != perspectiveSlugFromUrl)
+      currentPerspective &&
+      currentPerspective.slug == perspectiveSlugFromUrl
+    ) {
+      return
+    }
+    // If the perspective is set from the url and does not match the current
+    // perspective, set the perspective
+    const currentPerspectiveSlug = currentPerspective?.slug
+    if (
+      perspectiveSlugFromUrl &&
+      perspectiveSlugFromUrl !== currentPerspectiveSlug
     ) {
       setPerspectiveBySlug(perspectiveSlugFromUrl)
-    } else if (connectedUser && !currentPerspective) {
-      // If there is no current perspective, the connected user
-      // will watch her/his own works
+      return
+    }
+    if (connectedUser) {
+      // the connected user will watch her/his own works
       setPerspective(connectedUser.person as IAgent)
     }
   }, [connectedUser, currentPerspective, setPerspective, searchParams])

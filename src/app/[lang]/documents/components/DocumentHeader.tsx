@@ -23,7 +23,7 @@ const DocumentHeader: FC<DocumentHeaderProps> = ({
       }}
     >
       <Typography variant='h4' gutterBottom>
-        <Trans>documents_page_main_title</Trans> : : {perspective}
+        <Trans>documents_page_main_title</Trans> : {perspective}
       </Typography>
       <Button startIcon={<SyncIcon />} variant='outlined' onClick={onSyncClick}>
         <Trans>documents_page_synchronize_button</Trans>

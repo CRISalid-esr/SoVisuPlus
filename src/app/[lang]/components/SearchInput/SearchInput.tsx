@@ -40,7 +40,6 @@ const SearchInput: React.FC = () => {
   const [peoplePage, setPeoplePage] = useState(1)
   const [researchStructuresPage, setResearchStructuresPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
-  const [isCleared, setIsCleared] = useState(false)
   const [searchTags, setSearchTags] = useState<IAutoCompleteGroupTag[]>([
     { label: t`sidebar_search_people`, value: 'people', selected: true },
     {
@@ -53,7 +52,6 @@ const SearchInput: React.FC = () => {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const theme = useTheme()
-  const perspectiveId = searchParams.get('perspective')
 
   const {
     fetchPeopleByName,
@@ -71,9 +69,7 @@ const SearchInput: React.FC = () => {
     total: totalResearchStructures,
   } = useStore((state) => state.researchStructure)
 
-  const { setPerspective, currentPerspective, connectedUser } = useStore(
-    (state) => state.user,
-  )
+  const { currentPerspective, connectedUser } = useStore((state) => state.user)
 
   const lang = Lingui.i18n.locale
 
@@ -219,7 +215,7 @@ const SearchInput: React.FC = () => {
       }
 
       return mergedOptions
-    }, [people, researchStructures, searchTags, lang, perspectiveId])
+    }, [people, researchStructures, searchTags, lang])
 
   const renderGroup = (params: AutocompleteRenderGroupParams) => {
     const { key, ...rest } = params
@@ -309,14 +305,10 @@ const SearchInput: React.FC = () => {
   }
 
   const backToMyPerspective = () => {
-    setPerspective(connectedUser?.person as IAgent)
     const params = new URLSearchParams(searchParams.toString())
     params.delete('perspective')
     router.push(`${pathname}?${params.toString()}`, { scroll: false })
   }
-
-  const perspectiveLabel =
-    mergedOptions.find((option) => option.id === perspectiveId)?.label || ''
 
   return (
     <>
@@ -371,16 +363,11 @@ const SearchInput: React.FC = () => {
           paper: customPaper,
         }}
         fullWidth
-        inputValue={isCleared ? searchTerm : searchTerm || perspectiveLabel}
+        inputValue={searchTerm}
         onInputChange={(_, newInputValue, reason) => {
           if (reason === 'reset') {
             setSearchTerm(searchTerm)
           } else {
-            if (newInputValue === '') {
-              setIsCleared(true)
-            } else {
-              setIsCleared(false)
-            }
             setSearchTerm(newInputValue)
           }
           setPeoplePage(1)
