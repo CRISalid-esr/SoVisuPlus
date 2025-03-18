@@ -64,6 +64,7 @@ describe('ResearchStructure', () => {
       id: 1,
       uid: 'RS123',
       acronym: 'ABC',
+      slug: 'abc',
       external: false,
       names: [
         {
@@ -141,6 +142,7 @@ describe('ResearchStructure', () => {
       id: 2,
       uid: 'RS456',
       acronym: null,
+      slug: 'another-research-structure',
       external: false,
       names: [
         {

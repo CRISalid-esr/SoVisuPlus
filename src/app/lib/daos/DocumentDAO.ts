@@ -18,7 +18,7 @@ interface FetchDocumentsFromDBParams {
   pageSize: number
   columnFilters: { id: string; value: string }[]
   sorting: { id: string; desc: boolean }[]
-  contributorUid: string | null
+  contributorUids: string[]
 }
 
 export class DocumentDAO extends AbstractDAO {
@@ -274,14 +274,14 @@ export class DocumentDAO extends AbstractDAO {
     }
   }
 
-  public async fetchDocumentsFromDB({
+  public async fetchDocuments({
     searchTerm,
     searchLang,
     page,
     pageSize,
     columnFilters,
     sorting,
-    contributorUid,
+    contributorUids,
   }: FetchDocumentsFromDBParams): Promise<{
     documents: DbDocument[]
     totalItems: number
@@ -457,7 +457,7 @@ export class DocumentDAO extends AbstractDAO {
       }
     })
 
-    if (contributorUid) {
+    if (contributorUids && contributorUids.length > 0) {
       if (perspectiveRolesFilter.length > 0) {
         where = {
           ...where,
@@ -466,7 +466,7 @@ export class DocumentDAO extends AbstractDAO {
               roles: {
                 hasSome: perspectiveRolesFilter,
               },
-              person: { uid: contributorUid },
+              person: { uid: { in: contributorUids } },
             },
           },
         }
@@ -475,7 +475,7 @@ export class DocumentDAO extends AbstractDAO {
           ...where,
           contributions: {
             some: {
-              person: { uid: contributorUid },
+              person: { uid: { in: contributorUids } },
             },
           },
         }
@@ -537,7 +537,7 @@ export class DocumentDAO extends AbstractDAO {
     }
   }
 
-  fetchDocumentByIdFromDB(uid: string): Promise<DbDocument | null> {
+  fetchDocumentById(uid: string): Promise<DbDocument | null> {
     return this.prismaClient.document.findUnique({
       where: { uid },
       include: {

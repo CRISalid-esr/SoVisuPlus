@@ -2,6 +2,7 @@ import { StateCreator } from 'zustand'
 import { Document } from '@/types/Document'
 import { toQueryString } from '@/utils/query'
 import { BaseQuery } from '@/types/BaseQuery'
+import { AgentType } from '@/types/IAgent'
 
 export interface DocumentQuery extends BaseQuery {
   searchTerm: string
@@ -11,6 +12,7 @@ export interface DocumentQuery extends BaseQuery {
   searchLang: string
   sorting: string
   contributorUid: string | null
+  contributorType: AgentType
 }
 
 export interface DocumentSlice {

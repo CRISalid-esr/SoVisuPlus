@@ -6,12 +6,12 @@ jest.mock('@/lib/daos/PersonDAO') // Mock the DAO
 
 describe('PersonService', () => {
   let personService: PersonService
-  let mockFetchPeopleFromDb: jest.Mock
+  let mockFetchPeople: jest.Mock
 
   beforeEach(() => {
-    mockFetchPeopleFromDb = jest.fn()
+    mockFetchPeople = jest.fn()
     ;(PersonDAO as jest.Mock).mockImplementation(() => ({
-      fetchPeopleFromDb: mockFetchPeopleFromDb,
+      fetchPeople: mockFetchPeople,
     }))
 
     personService = new PersonService()
@@ -34,7 +34,7 @@ describe('PersonService', () => {
       total: 1,
     }
 
-    mockFetchPeopleFromDb.mockResolvedValue(mockResponse)
+    mockFetchPeople.mockResolvedValue(mockResponse)
 
     const params = {
       searchTerm: 'John',
@@ -47,11 +47,11 @@ describe('PersonService', () => {
       mockResponse,
     )
 
-    expect(mockFetchPeopleFromDb).toHaveBeenCalledWith(params)
+    expect(mockFetchPeople).toHaveBeenCalledWith(params)
   })
 
-  it('should throw an error when fetchPeopleFromDb fails', async () => {
-    mockFetchPeopleFromDb.mockRejectedValue(new Error('DB error'))
+  it('should throw an error when fetchPeople fails', async () => {
+    mockFetchPeople.mockRejectedValue(new Error('DB error'))
 
     const params = {
       searchTerm: 'John',
@@ -64,6 +64,6 @@ describe('PersonService', () => {
       'Error fetching people from service',
     )
 
-    expect(mockFetchPeopleFromDb).toHaveBeenCalledWith(params)
+    expect(mockFetchPeople).toHaveBeenCalledWith(params)
   })
 })

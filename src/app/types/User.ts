@@ -32,7 +32,7 @@ class User {
   }
 
   static fromJsonUser(user: UserJson): User {
-    const person = user.person ? Person.fromJsonPerson(user.person) : undefined
+    const person = user.person ? Person.fromJson(user.person) : undefined
     return new User(user.id, person)
   }
 }

@@ -51,6 +51,7 @@ describe('addDocumentSlice', () => {
       searchLang: 'en',
       sorting: '',
       contributorUid: null,
+      contributorType: 'person',
     }
 
     // Call the fetchDocuments method
@@ -80,6 +81,7 @@ describe('addDocumentSlice', () => {
       searchLang: 'en',
       sorting: '',
       contributorUid: null,
+      contributorType: 'person',
     }
 
     // Call the fetchDocuments method

@@ -12,7 +12,7 @@ export class PersonService {
   private personDAO: PersonDAO
 
   constructor() {
-    this.personDAO = new PersonDAO() // Instantiate the DAO class
+    this.personDAO = new PersonDAO()
   }
 
   async fetchPeople({
@@ -26,14 +26,12 @@ export class PersonService {
     total: number
   }> {
     try {
-      const { hasMore, people, total } = await this.personDAO.fetchPeopleFromDb(
-        {
-          searchTerm,
-          page,
-          includeExternal,
-          itemsPerPage,
-        },
-      )
+      const { hasMore, people, total } = await this.personDAO.fetchPeople({
+        searchTerm,
+        page,
+        includeExternal,
+        itemsPerPage,
+      })
       return { hasMore, people, total }
     } catch (error) {
       console.error('Error in service layer:', error)

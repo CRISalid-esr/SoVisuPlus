@@ -43,6 +43,7 @@ export const GET = async (req: NextRequest) => {
             language: true,
           },
         },
+        slug: true,
       },
       orderBy: {
         names: {

@@ -59,7 +59,7 @@ export const addPersonSlice: StateCreator<PersonSlice, [], [], PersonSlice> = (
         set((state) => {
           const reinit = Number(queryObject.page) === 1
 
-          let updatedPeople: Person[] = people.map(Person.fromJsonPerson)
+          let updatedPeople: Person[] = people.map(Person.fromJson)
 
           if (!reinit) {
             // Push data to a transient map to avoid duplicates
@@ -70,7 +70,7 @@ export const addPersonSlice: StateCreator<PersonSlice, [], [], PersonSlice> = (
               ]),
               ...people.map((person): [string, Person] => [
                 person.uid,
-                Person.fromJsonPerson(person),
+                Person.fromJson(person),
               ]),
             ])
             updatedPeople = Array.from(combinedPeopleMap.values())

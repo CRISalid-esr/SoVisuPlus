@@ -31,7 +31,7 @@ describe('GET handler', () => {
   beforeEach(() => {
     req = {
       nextUrl: new URL(
-        'http://localhost/api/endpoint?searchTerm=test&page=1&pageSize=10',
+        'http://localhost/api/endpoint?contributorType=person&searchTerm=test&page=1&pageSize=10',
       ),
     } as unknown as NextRequest
   })

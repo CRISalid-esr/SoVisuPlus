@@ -17,11 +17,13 @@ jest.mock('@lingui/macro', () => {
   }
 })
 
+const pushMock = jest.fn()
+
 jest.mock('next/navigation', () => ({
-  useSearchParams: jest.fn(() => new URLSearchParams('?perspective=local1')),
+  useSearchParams: jest.fn(() => new URLSearchParams()),
   usePathname: jest.fn(),
   useRouter: jest.fn(() => ({
-    push: jest.fn(),
+    push: pushMock,
     replace: jest.fn(),
     prefetch: jest.fn(),
     back: jest.fn(),
@@ -42,7 +44,7 @@ describe('SearchInput Component', () => {
           firstName: 'John',
           lastName: 'Doe',
           type: 'people',
-          slug: 'john-doe',
+          slug: 'person:john-doe',
         },
       ],
       hasMore: true,
@@ -56,6 +58,7 @@ describe('SearchInput Component', () => {
           id: '2',
           names: [{ value: 'Lab X', language: 'en', slug: 'lab-x' }],
           type: 'researchStructures',
+          slug: 'research-structure:lab-x',
         },
       ],
       hasMore: true,
@@ -208,5 +211,41 @@ describe('SearchInput Component', () => {
     // Check for options
     expect(screen.getByText('Lab X')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()
+  })
+
+  it('sets perspective to person on selecting a person menu item', () => {
+    renderComponent()
+    const searchInput = screen.getByPlaceholderText(
+      'sidebar_search_placeholder',
+    )
+    expect(searchInput).toBeInTheDocument()
+    fireEvent.change(searchInput, { target: { value: 'John Doe' } })
+
+    const peopleItem = screen.getByText('John Doe')
+    fireEvent.click(peopleItem)
+    // check if perpective param is set
+    expect(pushMock).toHaveBeenCalledTimes(1)
+    expect(pushMock).toHaveBeenCalledWith(
+      expect.stringContaining('perspective=person%3Ajohn-doe'),
+      { scroll: false },
+    )
+  })
+
+  it('sets perspective to research structure on selecting a research structure menu item', () => {
+    renderComponent()
+    const searchInput = screen.getByPlaceholderText(
+      'sidebar_search_placeholder',
+    )
+    expect(searchInput).toBeInTheDocument()
+    fireEvent.change(searchInput, { target: { value: 'Lab X' } })
+
+    const researchStructureItem = screen.getByText('Lab X')
+    fireEvent.click(researchStructureItem)
+    // check if perpective param is set
+    expect(pushMock).toHaveBeenCalledTimes(1)
+    expect(pushMock).toHaveBeenCalledWith(
+      expect.stringContaining('perspective=research-structure%3Alab-x'),
+      { scroll: false },
+    )
   })
 })

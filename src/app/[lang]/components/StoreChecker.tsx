@@ -16,6 +16,7 @@ export default function StoreChecker() {
       searchLang: '',
       sorting: '',
       contributorUid: null,
+      contributorType: 'person',
     }).then(() => {
       setFailure(false)
     })

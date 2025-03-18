@@ -2,6 +2,10 @@ import { PersonIdentifierType } from '@prisma/client'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 import prisma from '@/lib/daos/prisma'
+import { PersonMembership } from '@/types/PersonMembership'
+import { ResearchStructure } from '@/types/ResearchStructure'
+import { Literal } from '@/types/Literal'
+import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
 
 describe('PersonDAO Integration Tests', () => {
   let personDAO: PersonDAO
@@ -18,6 +22,20 @@ describe('PersonDAO Integration Tests', () => {
     'Doe',
     'John Doe',
     [{ type: PersonIdentifierType.ORCID, value: '0000-0001-2345-6789' }],
+    [
+      new PersonMembership(
+        new ResearchStructure(
+          'local-structure',
+          'ACR',
+          [new Literal('JD Laboratory', 'en')],
+          [new Literal('Laboratory of John Doe', 'en')],
+          [],
+        ),
+        null,
+        null,
+        'MCF',
+      ),
+    ],
   )
 
   test('should create a new person with identifiers', async () => {
@@ -36,6 +54,37 @@ describe('PersonDAO Integration Tests', () => {
       type: PersonIdentifierType.ORCID,
       value: '0000-0001-2345-6789',
       personId: dbPerson.id,
+    })
+  })
+
+  test('should create a new person with memberships', async () => {
+    const researchStructureDAO = new ResearchStructureDAO()
+    const researchStructure =
+      await researchStructureDAO.createOrUpdateResearchStructure(
+        new ResearchStructure(
+          'local-structure',
+          'ACR',
+          [new Literal('JD Laboratory', 'en')],
+          [new Literal('Laboratory of John Doe', 'en')],
+          [],
+        ),
+      )
+    const dbPerson = await personDAO.createOrUpdatePerson(personData)
+
+    expect(dbPerson).toHaveProperty('id')
+    expect(dbPerson.uid).toBe(personData.uid)
+    expect(dbPerson.email).toBe(personData.email)
+
+    const savedMemberships = await prisma.membership.findMany({
+      where: { personId: dbPerson.id },
+      include: { researchStructure: true },
+    })
+
+    expect(savedMemberships).toHaveLength(1)
+    expect(savedMemberships[0]).toMatchObject({
+      personId: dbPerson.id,
+      researchStructureId: researchStructure.id,
+      positionCode: 'MCF',
     })
   })
 
@@ -169,11 +218,11 @@ describe('PersonDAO Integration Tests', () => {
 
     // Insert first person
     const dbPerson1 = await personDAO.createOrUpdatePerson(person1)
-    expect(dbPerson1.slug).toBe('john-doe') // First one gets base slug
+    expect(dbPerson1.slug).toBe('person:john-doe') // First one gets base slug
 
     // Insert second person with the same name
     const dbPerson2 = await personDAO.createOrUpdatePerson(person2)
-    expect(dbPerson2.slug).toBe('john-doe-1') // Second one gets -1 suffix
+    expect(dbPerson2.slug).toBe('person:john-doe-1') // Second one gets -1 suffix
 
     // Ensure both records exist in the database
     const savedPeople = await prisma.person.findMany({
@@ -181,6 +230,9 @@ describe('PersonDAO Integration Tests', () => {
     })
 
     expect(savedPeople).toHaveLength(2)
-    expect(savedPeople.map((p) => p.slug)).toEqual(['john-doe', 'john-doe-1'])
+    expect(savedPeople.map((p) => p.slug)).toEqual([
+      'person:john-doe',
+      'person:john-doe-1',
+    ])
   })
 })

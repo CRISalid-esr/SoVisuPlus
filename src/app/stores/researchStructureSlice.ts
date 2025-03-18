@@ -79,7 +79,7 @@ export const addResearchStructureSlice: StateCreator<
         set((state) => {
           const reinit = Number(queryObject.page) === 1
           let updatedResearchStructures = researchStructures.map(
-            ResearchStructure.fromJsonResearchStructure,
+            ResearchStructure.fromJson,
           )
 
           if (!reinit) {
@@ -93,7 +93,7 @@ export const addResearchStructureSlice: StateCreator<
               ),
               ...researchStructures.map((rs): [string, ResearchStructure] => [
                 rs.uid,
-                ResearchStructure.fromJsonResearchStructure(rs),
+                ResearchStructure.fromJson(rs),
               ]),
             ])
             updatedResearchStructures = Array.from(

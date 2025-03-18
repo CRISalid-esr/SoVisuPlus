@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { DocumentService } from '@/lib/services/DocumentService'
+import { AgentType, agentTypeFromString } from '@/types/IAgent'
 
 export const GET = async (req: NextRequest) => {
   try {
@@ -14,6 +15,15 @@ export const GET = async (req: NextRequest) => {
     const columnFilters = JSON.parse(urlParams.get('columnFilters') || '[]')
     const sorting = JSON.parse(urlParams.get('sorting') || '[]')
     const contributorUid = urlParams.get('contributorUid') || ''
+    const contributorType: AgentType | null = agentTypeFromString(
+      urlParams.get('contributorType'),
+    )
+    if (!contributorType) {
+      return NextResponse.json(
+        { error: 'Invalid contributorType' },
+        { status: 400 },
+      )
+    }
     const documentService = new DocumentService()
     const { documents, totalItems } = await documentService.fetchDocuments({
       searchTerm,
@@ -23,6 +33,7 @@ export const GET = async (req: NextRequest) => {
       columnFilters,
       sorting,
       contributorUid,
+      contributorType,
     })
 
     return NextResponse.json({

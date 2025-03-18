@@ -20,7 +20,7 @@ model User {
 model Person {
   id            Int                @id @default(autoincrement())
   uid           String             @unique
-  slug          String?            @unique //TODO make non-nullable
+  slug          String?            @unique
   email         String?            @unique
   displayName   String?
   firstName     String?
@@ -31,6 +31,22 @@ model Person {
   external      Boolean            @default(false)
   user          User?
   contributions Contribution[]
+  memberships   Membership[]
+}
+
+model Membership {
+  id                  Int               @id @default(autoincrement())
+  personId            Int
+  researchStructureId Int
+  startDate           DateTime?
+  endDate             DateTime?
+  positionCode        String?
+  person              Person            @relation(fields: [personId], references: [id], onDelete: Cascade)
+  researchStructure   ResearchStructure @relation(fields: [researchStructureId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, researchStructureId])
+  @@index([researchStructureId])
+  @@index([personId])
 }
 
 model Document {
@@ -167,6 +183,8 @@ model ResearchStructure {
   descriptions ResearchStructureDescription[]
   identifiers  ResearchStructureIdentifier[]
   external     Boolean                        @default(false)
+  slug         String?                        @unique
+  memberships  Membership[]
 }
 
 model ResearchStructureName {

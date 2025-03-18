@@ -12,6 +12,7 @@ import { Literal } from '@/types/Literal'
 import { LocRelator } from '@/types/LocRelator'
 import { Contribution } from '@/types/Contribution'
 import { Concept } from '@/types/Concept'
+import { AgentType } from '@/types/IAgent'
 
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
@@ -229,10 +230,11 @@ describe('DocumentDAO', () => {
       pageSize: 10,
       columnFilters: [{ id: 'titles', value: 'Sample Document Title' }],
       sorting: [{ id: 'titles', desc: false }],
-      contributorUid: 'local-123',
+      contributorUids: ['local-123'],
+      contributorType: 'person' as AgentType,
     }
 
-    const result = await documentDAO.fetchDocumentsFromDB(fetchParams)
+    const result = await documentDAO.fetchDocuments(fetchParams)
 
     expect(result.documents).toHaveLength(1)
     expect(result.totalItems).toBe(1)
@@ -281,7 +283,9 @@ describe('DocumentDAO', () => {
         contributions: {
           some: {
             person: {
-              uid: fetchParams.contributorUid,
+              uid: {
+                in: fetchParams.contributorUids,
+              },
             },
             roles: {
               hasSome: ['author', 'co-author'],
@@ -321,7 +325,7 @@ describe('DocumentDAO', () => {
     // Mock Prisma response
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(document)
 
-    const fetchedDocument = await documentDAO.fetchDocumentByIdFromDB('doc-123')
+    const fetchedDocument = await documentDAO.fetchDocumentById('doc-123')
 
     expect(fetchedDocument).not.toBeNull()
     expect(fetchedDocument?.uid).toBe('doc-123')

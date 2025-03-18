@@ -1,10 +1,23 @@
 import { Person as DbPerson, PrismaClient } from '@prisma/client'
 import { Person } from '@/types/Person'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { PersonMembership } from '@/types/PersonMembership'
+import { ResearchStructure } from '@/types/ResearchStructure'
+import { Literal } from '@/types/Literal'
 
 jest.mock('@prisma/client', () => {
   // avoid PersonIdentifierType to be mocked
   const actualPrismaClient: PrismaClient = jest.requireActual('@prisma/client')
+
+  const mockResearchStructureFindUnique = jest.fn()
+
+  mockResearchStructureFindUnique.mockResolvedValue({
+    id: 1,
+    slug: 'local-structure',
+    type: 'ACR',
+    names: [{ value: 'JD Laboratory', language: 'en' }],
+    descriptions: [{ value: 'Laboratory of John Doe', language: 'en' }],
+  })
 
   const mockPrismaClient = {
     person: {
@@ -15,6 +28,12 @@ jest.mock('@prisma/client', () => {
       findMany: jest.fn(),
       deleteMany: jest.fn(),
       createMany: jest.fn(),
+    },
+    membership: {
+      upsert: jest.fn(),
+    },
+    researchStructure: {
+      findUnique: mockResearchStructureFindUnique,
     },
   }
 
@@ -31,7 +50,6 @@ describe('PersonDAO', () => {
     jest.clearAllMocks()
     personDAO = new PersonDAO()
   })
-
   const person: Person = new Person(
     'local-johndoe',
     false,
@@ -40,6 +58,17 @@ describe('PersonDAO', () => {
     'Doe',
     'John Doe',
     [{ type: 'ORCID', value: '0000-0001-2345-6789' }],
+    [
+      new PersonMembership(
+        new ResearchStructure(
+          'local-structure',
+          'ACR',
+          [new Literal('JD Laboratory', 'en')],
+          [new Literal('Laboratory of John Doe', 'en')],
+          [],
+        ),
+      ),
+    ],
   )
 
   it('should upsert a person', async () => {
@@ -59,7 +88,7 @@ describe('PersonDAO', () => {
         displayName: person.displayName,
         firstName: person.firstName,
         lastName: person.lastName,
-        slug: 'doe-john-doe',
+        slug: 'person:doe-john-doe',
         external: person.external,
       },
       create: {
@@ -68,7 +97,7 @@ describe('PersonDAO', () => {
         displayName: person.displayName,
         firstName: person.firstName,
         lastName: person.lastName,
-        slug: 'doe-john-doe',
+        slug: 'person:doe-john-doe',
         external: person.external,
       },
     })
@@ -115,6 +144,31 @@ describe('PersonDAO', () => {
           value: '0000-0001-2345-6789',
         },
       ],
+    })
+  })
+
+  it('should register person memberships', async () => {
+    await personDAO.createOrUpdatePerson(person)
+
+    expect(mockPrisma.membership.upsert).toHaveBeenCalledWith({
+      where: {
+        personId_researchStructureId: {
+          personId: 1,
+          researchStructureId: 1,
+        },
+      },
+      update: {
+        endDate: undefined,
+        positionCode: undefined,
+        startDate: undefined,
+      },
+      create: {
+        personId: 1,
+        researchStructureId: 1,
+        endDate: undefined,
+        positionCode: undefined,
+        startDate: undefined,
+      },
     })
   })
 })

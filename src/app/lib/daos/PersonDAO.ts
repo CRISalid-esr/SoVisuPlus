@@ -8,8 +8,10 @@ import { Person } from '@/types/Person'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import { PersonMembership } from '@/types/PersonMembership'
+import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
 
-interface FetchPeopleFromDbDBParams {
+interface FetchPeopleParams {
   searchTerm: string
   page: number
   includeExternal: boolean
@@ -25,22 +27,27 @@ export class PersonDAO extends AbstractDAO {
    */
   public async createOrUpdatePerson(person: Person): Promise<DbPerson> {
     try {
+      const slugPrefix = 'person:'
       // baseSlug could be null for people with only a display name
-      const baseSlug = slugify(`${person.firstName}-${person.lastName}`, {
-        lower: true,
-        strict: true,
-      })
+      let baseSlug: string | null = slugify(
+        `${person.firstName}-${person.lastName}`,
+        {
+          lower: true,
+          strict: true,
+        },
+      )
+      // if baseSlug is not null, add the prefix
+      baseSlug = baseSlug ? `${slugPrefix}${baseSlug}` : null
 
       let uniqueSlug = null
       let counter = 1
-      if (baseSlug.trim()) {
+      if (baseSlug?.trim()) {
         uniqueSlug = baseSlug
         while (await this.slugExists(uniqueSlug, person.uid)) {
           uniqueSlug = `${baseSlug}-${counter}`
           counter++
         }
       }
-      console.log(`Unique slug : ${uniqueSlug}`)
       const maxRetries = 3
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -69,6 +76,9 @@ export class PersonDAO extends AbstractDAO {
             dbPerson?.id,
           )
           await this.upsertIdentifiers(person.getIdentifiers(), dbPerson.id)
+
+          await this.upsertMemberships(person.memberships, dbPerson.id)
+
           return dbPerson
         } catch (error) {
           if (
@@ -88,7 +98,6 @@ export class PersonDAO extends AbstractDAO {
             )
             await new Promise((resolve) => setTimeout(resolve, delay))
           } else {
-            // rethrow the other errors
             throw error
           }
         }
@@ -99,6 +108,50 @@ export class PersonDAO extends AbstractDAO {
       throw new Error(
         `Failed to upsert person: ${(error as unknown as Error).message}`,
       )
+    }
+  }
+
+  /**
+   * Upsert memberships for a given person
+   * @param memberships - List of memberships to upsert
+   * @param personId - The ID of the person in the database
+   */
+  private async upsertMemberships(
+    memberships: PersonMembership[],
+    personId: number,
+  ): Promise<void> {
+    const researchStructureDAO = new ResearchStructureDAO()
+    for (const membership of memberships) {
+      const dbResearchStructure =
+        await researchStructureDAO.getResearchStructureByUid(
+          membership.researchStructure.uid,
+        )
+      if (!dbResearchStructure) {
+        console.error(
+          `Research structure not found for UID: ${membership.researchStructure.uid}`,
+        )
+        continue
+      }
+      await this.prismaClient.membership.upsert({
+        where: {
+          personId_researchStructureId: {
+            personId,
+            researchStructureId: dbResearchStructure.id,
+          },
+        },
+        update: {
+          startDate: membership.startDate,
+          endDate: membership.endDate,
+          positionCode: membership.positionCode,
+        },
+        create: {
+          personId,
+          researchStructureId: dbResearchStructure.id,
+          startDate: membership.startDate,
+          endDate: membership.endDate,
+          positionCode: membership.positionCode,
+        },
+      })
     }
   }
 
@@ -153,6 +206,7 @@ export class PersonDAO extends AbstractDAO {
    * Upsert PersonIdentifiers for a given person
    * @param identifiers - The list of identifiers to upsert
    * @param personId - The ID of the person
+   * @param retries - The number of retries (to handle conflicts on upsert)
    */
   private async upsertIdentifiers(
     identifiers: PersonIdentifier[],
@@ -194,12 +248,12 @@ export class PersonDAO extends AbstractDAO {
     }
   }
 
-  public fetchPeopleFromDb = async ({
+  public fetchPeople = async ({
     searchTerm,
     page,
     includeExternal,
     itemsPerPage,
-  }: FetchPeopleFromDbDBParams): Promise<{
+  }: FetchPeopleParams): Promise<{
     people: Person[]
     total: number
     hasMore: boolean
@@ -263,5 +317,23 @@ export class PersonDAO extends AbstractDAO {
       console.error(`Error fetching person with slug ${slug}:`, error)
       throw new Error(`Failed to fetch person with slug ${slug}`)
     }
+  }
+
+  fetchPeopleByResearchStructureUid = async (
+    researchStructureUid: string,
+  ): Promise<Person[]> => {
+    const people = await this.prismaClient.person.findMany({
+      where: {
+        memberships: {
+          some: {
+            researchStructure: {
+              uid: researchStructureUid,
+            },
+          },
+        },
+      },
+    })
+
+    return people.map((person) => Person.fromDbPerson(person))
   }
 }

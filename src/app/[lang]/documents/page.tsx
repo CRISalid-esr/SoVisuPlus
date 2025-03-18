@@ -39,6 +39,7 @@ import Highlighter from 'react-highlight-words'
 import DocumentHeader from './components/DocumentHeader'
 import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
+
 dayjs.extend(utc)
 
 export default function DocumentsPage() {
@@ -446,6 +447,8 @@ export default function DocumentsPage() {
       return filter
     })
 
+    const contributorType = currentPerspective?.type
+    if (!contributorType) return
     fetchDocuments({
       page: pagination.pageIndex + 1,
       pageSize: pagination.pageSize,
@@ -454,6 +457,7 @@ export default function DocumentsPage() {
       columnFilters: JSON.stringify(adjustedFilters), // Use adjusted date filter
       sorting: JSON.stringify(sorting),
       contributorUid: currentPerspective?.uid || '',
+      contributorType: contributorType,
     }).catch((error) => {
       console.error('Error fetching documents:', error)
     })

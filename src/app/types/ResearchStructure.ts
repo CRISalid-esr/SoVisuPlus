@@ -71,12 +71,12 @@ class ResearchStructure implements IAgent {
       'identifiers' in researchStructure
         ? (researchStructure.identifiers as ResearchStructureIdentifier[])
         : [],
+      'research_structure',
+      researchStructure.slug,
     )
   }
 
-  static fromJsonResearchStructure(
-    researchStructure: ResearchStructureJson,
-  ): ResearchStructure {
+  static fromJson(researchStructure: ResearchStructureJson): ResearchStructure {
     return new ResearchStructure(
       researchStructure.uid,
       researchStructure.acronym || null,
