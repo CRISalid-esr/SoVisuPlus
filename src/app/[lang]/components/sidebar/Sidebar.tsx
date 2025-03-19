@@ -36,7 +36,7 @@ import {
 } from '@untitled-ui/icons-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
 import { SearchInput } from '../SearchInput'
 import { signOut } from 'next-auth/react'
@@ -61,13 +61,16 @@ export default function Sidebar({
   const { setTheme, currentTheme } = useThemeContext()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const router = useRouter()
+  const searchParams = useSearchParams()
 
-  const handleChange = (event: SelectChangeEvent) => {
+  const handleLangChange = (event: SelectChangeEvent) => {
     const pathWithoutLang = pathname.split('/').slice(2).join('/') // Remove the current lang segment
-    router.push(`/${event.target.value}/${pathWithoutLang}`)
+    router.push(
+      `/${event.target.value}/${pathWithoutLang}?${searchParams.toString()}`,
+    )
   }
 
-  const handleChangeTheme = (event: SelectChangeEvent) => {
+  const handleThemeChange = (event: SelectChangeEvent) => {
     setTheme(event.target.value as 'light' | 'dark' | 'system')
   }
 
@@ -373,7 +376,7 @@ export default function Sidebar({
             <Box>
               <ListItem
                 component={Link}
-                href={`/${lang}/dashboard`}
+                href={`/${lang}/dashboard?${searchParams.toString()}`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   marginBottom: theme.utils.pxToRem(4),
@@ -422,7 +425,7 @@ export default function Sidebar({
               </ListItem>
               <ListItem
                 component={Link}
-                href={`/${lang}/documents`}
+                href={`/${lang}/documents?${searchParams.toString()}`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   marginBottom: theme.utils.pxToRem(4),
@@ -471,7 +474,7 @@ export default function Sidebar({
               </ListItem>
               <ListItem
                 component={Link}
-                href={`/${lang}/expertise`}
+                href={`/${lang}/expertise?${searchParams.toString()}`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   marginBottom: theme.utils.pxToRem(4),
@@ -550,7 +553,7 @@ export default function Sidebar({
                     },
                   }}
                   component={Link}
-                  href={`/${lang}/my-groups`}
+                  href={`/${lang}/my-groups?${searchParams.toString()}`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
@@ -600,7 +603,7 @@ export default function Sidebar({
                     },
                   }}
                   component={Link}
-                  href={`/${lang}/institutions`}
+                  href={`/${lang}/institutions?${searchParams.toString()}`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
@@ -650,7 +653,7 @@ export default function Sidebar({
                     },
                   }}
                   component={Link}
-                  href={`/${lang}/laboratories`}
+                  href={`/${lang}/laboratories?${searchParams.toString()}`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
@@ -690,7 +693,7 @@ export default function Sidebar({
                     id='Theme'
                     label='Theme'
                     value={currentTheme}
-                    onChange={handleChangeTheme}
+                    onChange={handleThemeChange}
                     variant='outlined'
                     fullWidth
                     renderValue={renderThemeValue}
@@ -848,7 +851,7 @@ export default function Sidebar({
                     }}
                     value={lang}
                     onChange={(event) =>
-                      handleChange(event as SelectChangeEvent)
+                      handleLangChange(event as SelectChangeEvent)
                     }
                     renderValue={(value) => (
                       <Box

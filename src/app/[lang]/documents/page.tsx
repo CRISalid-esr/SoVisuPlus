@@ -12,7 +12,7 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
-import { t } from '@lingui/macro'
+import { t, Trans } from '@lingui/macro'
 
 import { LanguageChips } from '@/components/LanguageChips'
 import { DocumentSync } from '@/types/DocumentSync'
@@ -20,7 +20,7 @@ import { DocumentSyncStatus } from '@/types/DocumentSyncStatus'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import { Localization } from '@/types/Localization'
 import InfoIcon from '@mui/icons-material/Info'
-import { Box, IconButton, Tooltip, Typography } from '@mui/material'
+import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -39,6 +39,7 @@ import Highlighter from 'react-highlight-words'
 import DocumentHeader from './components/DocumentHeader'
 import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
+import SyncIcon from '@mui/icons-material/Sync'
 
 dayjs.extend(utc)
 
@@ -482,8 +483,16 @@ export default function DocumentsPage() {
         perspective={
           currentPerspective?.getDisplayName(lang as ExtendedLanguageCode) || ''
         }
-        onSyncClick={() => setOpenSynchronizeModal(true)}
-      />
+        pageName={t`documents_page_main_title`}
+      >
+        <Button
+          startIcon={<SyncIcon />}
+          variant='outlined'
+          onClick={() => setOpenSynchronizeModal(true)}
+        >
+          <Trans>documents_page_synchronize_button</Trans>
+        </Button>
+      </DocumentHeader>
       <TabFilter
         tabsData={tabs}
         selectedValue={selectedTab}

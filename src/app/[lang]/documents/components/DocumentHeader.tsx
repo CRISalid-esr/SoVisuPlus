@@ -1,17 +1,17 @@
-import { Trans } from '@lingui/macro'
-import SyncIcon from '@mui/icons-material/Sync'
-import { Button, Typography } from '@mui/material'
+import { FC, ReactNode } from 'react'
+import { Typography } from '@mui/material'
 import { Box } from '@mui/system'
-import { FC } from 'react'
 
 interface DocumentHeaderProps {
   perspective: string
-  onSyncClick: () => void
+  pageName: string
+  children?: ReactNode
 }
 
 const DocumentHeader: FC<DocumentHeaderProps> = ({
   perspective,
-  onSyncClick,
+  pageName,
+  children,
 }) => {
   return (
     <Box
@@ -23,11 +23,9 @@ const DocumentHeader: FC<DocumentHeaderProps> = ({
       }}
     >
       <Typography variant='h4' gutterBottom>
-        <Trans>documents_page_main_title</Trans> : {perspective}
+        {pageName} : {perspective}
       </Typography>
-      <Button startIcon={<SyncIcon />} variant='outlined' onClick={onSyncClick}>
-        <Trans>documents_page_synchronize_button</Trans>
-      </Button>
+      {children}
     </Box>
   )
 }
