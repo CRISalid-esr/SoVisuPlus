@@ -1,5 +1,3 @@
-import { messages as enMessages } from '@/locales/en/messages'
-import { messages as frMessages } from '@/locales/fr/messages'
 import useStore from '@/stores/global_store'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
@@ -13,17 +11,11 @@ import { Document, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 import { LocRelator } from '@/types/LocRelator'
 import { Person } from '@/types/Person'
-import '@testing-library/jest-dom'
 
 // Mock Zustand store
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
   default: jest.fn(),
-}))
-
-// Mock Lingui `t` function
-jest.mock('@lingui/macro', () => ({
-  t: (key: string) => key, // Return key directly for testing
 }))
 
 // Mock MUI Theme
@@ -45,10 +37,6 @@ jest.mock('../../../../components/LanguageChips', () => ({
     onLanguageSelect: (lang: string) => void
   }) => <button onClick={() => onLanguageSelect('fr')}>French</button>,
 }))
-
-// Initialize Lingui i18n
-i18n.load({ en: enMessages, fr: frMessages })
-i18n.activate('en')
 
 const document: Document = new Document(
   'doc-123',
@@ -137,7 +125,7 @@ describe('Titles Component', () => {
     renderComponent()
 
     expect(
-      screen.getByText('document_details_page_no_title_available'),
+      screen.getByText(i18n.t('document_details_page_no_title_available')),
     ).toBeInTheDocument()
   })
 })

@@ -4,8 +4,6 @@ import '@testing-library/jest-dom'
 import useStore from '@/stores/global_store'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { I18nProvider } from '@lingui/react'
-import { messages as enMessages } from '@/locales/en/messages'
-import { messages as frMessages } from '@/locales/fr/messages'
 import { i18n } from '@lingui/core'
 import dayjs from 'dayjs'
 import PublicationDate from './PublicationDate'
@@ -15,11 +13,6 @@ import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
   default: jest.fn(),
-}))
-
-// Mock Lingui `t` function
-jest.mock('@lingui/macro', () => ({
-  t: (key: string) => key, // Return key directly for testing
 }))
 
 // Mock MUI Theme
@@ -32,10 +25,6 @@ jest.mock('@mui/material/styles', () => ({
     typography: { fontWeightRegular: 400, fontWeightMedium: 500 },
   }),
 }))
-
-// Initialize Lingui i18n
-i18n.load({ en: enMessages, fr: frMessages })
-i18n.activate('en')
 
 // Mock document data
 const mockState = {
@@ -83,7 +72,7 @@ describe('PublicationDate Component', () => {
     renderComponent()
     expect(
       screen.getByText(
-        'documents_page_publication_date_column_no_date_available',
+        i18n.t('documents_page_publication_date_column_no_date_available'),
       ),
     ).toBeInTheDocument()
   })

@@ -1,6 +1,4 @@
 import DateProvider from '@/components/DateProvider'
-import { messages as enMessages } from '@/locales/en/messages'
-import { messages as frMessages } from '@/locales/fr/messages'
 import useStore from '@/stores/global_store'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
@@ -25,13 +23,6 @@ jest.mock('next/navigation', () => ({
     back: jest.fn(),
   })),
 }))
-
-// Mock Lingui internationalization
-i18n.load({
-  en: enMessages,
-  fr: frMessages,
-})
-i18n.activate('en')
 
 const mockFetchDocuments = jest.fn()
 const mockState = {
@@ -120,11 +111,11 @@ describe('DocumentsPage Component', () => {
 
     expect(
       screen.getByText((content) =>
-        content.startsWith('documents_page_main_title'),
+        content.startsWith(i18n.t('documents_page_main_title')),
       ),
     ).toBeInTheDocument()
     expect(
-      screen.getByText('documents_page_synchronize_button'),
+      screen.getByText(i18n.t('documents_page_synchronize_button')),
     ).toBeInTheDocument()
   })
 
@@ -154,7 +145,7 @@ describe('DocumentsPage Component', () => {
     renderComponent()
 
     const tab = screen.getByText(
-      'documents_page_incomplete_hal_repository_filter',
+      i18n.t('documents_page_incomplete_hal_repository_filter'),
     )
     fireEvent.click(tab)
 

@@ -1,5 +1,3 @@
-import { messages as enMessages } from '@/locales/en/messages'
-import { messages as frMessages } from '@/locales/fr/messages'
 import useStore from '@/stores/global_store'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform' // Ensure import
 import { i18n } from '@lingui/core'
@@ -13,11 +11,6 @@ import Sources from './Sources'
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
   default: jest.fn(),
-}))
-
-// Mock Lingui `t` function
-jest.mock('@lingui/macro', () => ({
-  t: (key: string) => key, // Return key directly for testing
 }))
 
 // Mock MUI Theme
@@ -41,10 +34,6 @@ jest.mock('@mui/material/styles', () => ({
 
 // Mock window.open to test external link clicks
 global.open = jest.fn()
-
-// Initialize Lingui i18n
-i18n.load({ en: enMessages, fr: frMessages })
-i18n.activate('en')
 
 // Mock bibliographic metadata inside jest.mock()
 jest.mock('@/types/BibliographicPlatform', () => {
@@ -173,7 +162,7 @@ describe('Sources Component', () => {
     renderComponent()
 
     const editButton = screen.getByText(
-      'document_details_page_sources_row_update_source',
+      i18n.t('document_details_page_sources_row_update_source'),
     )
     expect(editButton).toBeInTheDocument()
 

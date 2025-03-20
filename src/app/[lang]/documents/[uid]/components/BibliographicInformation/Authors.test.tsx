@@ -1,5 +1,3 @@
-import { messages as enMessages } from '@/locales/en/messages'
-import { messages as frMessages } from '@/locales/fr/messages'
 import useStore from '@/stores/global_store'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
@@ -12,11 +10,6 @@ import Authors from './Authors'
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
   default: jest.fn(),
-}))
-
-// Mock Lingui `t` function
-jest.mock('@lingui/macro', () => ({
-  t: (key: string) => key, // Return key directly for testing
 }))
 
 // Mock MUI Theme
@@ -36,10 +29,6 @@ jest.mock('@mui/material/styles', () => ({
     },
   }),
 }))
-
-// Initialize Lingui i18n
-i18n.load({ en: enMessages, fr: frMessages })
-i18n.activate('en')
 
 // Mock document data
 const mockState = {
@@ -101,7 +90,7 @@ describe('Authors Component', () => {
     renderComponent()
 
     const editButton = screen.getByText(
-      'document_details_page_authors_row_update_author',
+      i18n.t('document_details_page_authors_row_update_author'),
     )
     expect(editButton).toBeInTheDocument()
 
