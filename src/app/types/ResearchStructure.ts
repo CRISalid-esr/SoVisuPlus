@@ -28,6 +28,7 @@ class ResearchStructure implements IAgent {
     }[] = [],
     public type: 'research_structure' = 'research_structure',
     public slug: string | null = null,
+    public external: boolean = false,
   ) {
     this.identifiers = _identifiers
   }

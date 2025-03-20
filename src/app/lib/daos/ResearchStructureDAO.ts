@@ -1,10 +1,14 @@
 import { ResearchStructureWithRelations as DbResearchStructure } from '@/prisma-schema/extended-client'
-import { ResearchStructureIdentifierType as DbResearchStructureIdentifierType } from '@prisma/client'
+import {
+  Prisma,
+  ResearchStructureIdentifierType as DbResearchStructureIdentifierType,
+} from '@prisma/client'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { ResearchStructureIdentifier } from '@/types/ResearchStructureIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import slugify from 'slugify'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import QueryMode = Prisma.QueryMode
 
 /** ResearchStructureDAO: Handles operations related to ResearchStructure and ResearchStructureIdentifiers */
 export class ResearchStructureDAO extends AbstractDAO {
@@ -232,5 +236,74 @@ export class ResearchStructureDAO extends AbstractDAO {
     return dbResearchStructure
       ? ResearchStructure.fromDbResearchStructure(dbResearchStructure)
       : null
+  }
+
+  /**
+   * Get a list of ResearchStructure records based on a search term
+   * @param searchTerm
+   * @param pageNumber
+   * @param itemsPerPage
+   */
+  async getResearchStructures(
+    searchTerm: string,
+    pageNumber: number,
+    itemsPerPage: number,
+  ): Promise<ResearchStructure[]> {
+    const whereClause = {
+      names: {
+        some: {
+          value: {
+            contains: searchTerm,
+            mode: QueryMode.insensitive,
+          },
+        },
+      },
+    }
+    const researchStructures =
+      (await this.prismaClient.researchStructure.findMany({
+        where: whereClause,
+        skip: (pageNumber - 1) * itemsPerPage,
+        take: itemsPerPage,
+        select: {
+          id: true,
+          uid: true,
+          acronym: true,
+          external: true,
+          names: {
+            select: {
+              value: true,
+              language: true,
+            },
+          },
+          descriptions: {
+            select: {
+              value: true,
+              language: true,
+            },
+          },
+          slug: true,
+        },
+        orderBy: {
+          names: {
+            _count: 'asc',
+          },
+        },
+      })) as DbResearchStructure[]
+    return researchStructures.map(ResearchStructure.fromDbResearchStructure)
+  }
+
+  async countResearchStructures(searchTerm: string) {
+    return this.prismaClient.researchStructure.count({
+      where: {
+        names: {
+          some: {
+            value: {
+              contains: searchTerm,
+              mode: QueryMode.insensitive,
+            },
+          },
+        },
+      },
+    })
   }
 }
