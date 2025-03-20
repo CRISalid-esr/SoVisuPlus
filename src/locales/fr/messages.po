@@ -14,9 +14,32 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/components/ErrorFallback.tsx:38
+msgid "internal_server_page_back_home"
+msgstr "Retour à la page d'accueil"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/ErrorFallback.tsx:103
+msgid "internal_server_page_description"
+msgstr "Le serveur a détecté une erreur interne et n'a  pas pu traiter votre demande. Réessayez un peu plus tard !"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:93
 msgid "document_details_page_authors_row_update_author"
 msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:95
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:90
+msgid "document_details_page_card_title"
+msgstr "Informations bibliographiques"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:98
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:123
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:93
+msgid "document_details_page_card_validate_button"
+msgstr "Valider"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:106
@@ -59,54 +82,6 @@ msgid "document_details_page_main_title"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.test.tsx:145
-msgid "document_details_bibliographic_information_tab"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.test.tsx:149
-msgid "document_details_keywords_tab"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:114
-msgid "documents_page_main_title"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:118
-msgid "documents_page_synchronize_button"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:148
-msgid "documents_page_incomplete_hal_repository_filter"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/components/ErrorFallback.tsx:38
-msgid "internal_server_page_back_home"
-msgstr "Retour à la page d'accueil"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/components/ErrorFallback.tsx:103
-msgid "internal_server_page_description"
-msgstr "Le serveur a détecté une erreur interne et n'a  pas pu traiter votre demande. Réessayez un peu plus tard !"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:95
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:90
-msgid "document_details_page_card_title"
-msgstr "Informations bibliographiques"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:98
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:123
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:93
-msgid "document_details_page_card_validate_button"
-msgstr "Valider"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:283
 #: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:292
 msgid "document_details_page_source_tab_select_action_label"
@@ -130,6 +105,31 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:344
 msgid "document_details_page_source_tab_card_validate_button"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.test.tsx:145
+msgid "document_details_bibliographic_information_tab"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.test.tsx:149
+msgid "document_details_keywords_tab"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:114
+msgid "documents_page_main_title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:118
+msgid "documents_page_synchronize_button"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:148
+msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -512,35 +512,35 @@ msgstr "Activités de recherche"
 #~ msgid "side_bar_publications"
 #~ msgstr "Publications"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:409
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:408
 msgid "sidebar_back_to_my_perspective"
 msgstr "Retour à mon profil"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:111
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:187
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:205
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:185
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:203
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:44
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:138
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:248
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:329
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:137
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:247
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:328
 msgid "sidebar_search_people"
 msgstr "Chercheurs"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:121
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:358
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:357
 msgid "sidebar_search_placeholder"
 msgstr "Chercher"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:113
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:153
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:208
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:152
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:206
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:46
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:148
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:331
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:147
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:330
 msgid "sidebar_search_research_structures"
 msgstr "Unités de recherche"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:205
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:204
 msgid "sidebar_search_unknown_label"
 msgstr "label inconnu"
 
