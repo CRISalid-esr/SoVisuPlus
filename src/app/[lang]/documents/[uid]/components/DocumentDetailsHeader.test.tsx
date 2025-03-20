@@ -1,7 +1,3 @@
-import {
-  messages as enMessages,
-  messages as frMessages,
-} from '@/locales/en/messages'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
@@ -18,11 +14,6 @@ jest.mock('next/navigation', () => ({
   useRouter: () => mockRouter,
 }))
 
-// Mock Lingui `t` function
-jest.mock('@lingui/macro', () => ({
-  t: (key: string) => key, // Return key directly for testing
-}))
-
 // Mock MUI Theme
 jest.mock('@mui/material/styles', () => ({
   ...jest.requireActual('@mui/material/styles'),
@@ -33,10 +24,6 @@ jest.mock('@mui/material/styles', () => ({
     typography: { fontWeightRegular: 400, fontWeightMedium: 500 },
   }),
 }))
-
-// Initialize Lingui i18n
-i18n.load({ en: enMessages, fr: frMessages })
-i18n.activate('en')
 
 describe('DocumentDetailsHeader Component', () => {
   beforeEach(() => {
@@ -63,7 +50,7 @@ describe('DocumentDetailsHeader Component', () => {
 
     expect(screen.getByRole('button')).toBeInTheDocument() // Ensures the button exists
     expect(
-      screen.getByText('document_details_page_main_title'),
+      screen.getByText(i18n.t('document_details_page_main_title')),
     ).toBeInTheDocument()
   })
 

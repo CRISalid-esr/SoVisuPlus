@@ -40,6 +40,7 @@ import DocumentHeader from './components/DocumentHeader'
 import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
 import SyncIcon from '@mui/icons-material/Sync'
+import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
 
 dayjs.extend(utc)
 
@@ -248,11 +249,9 @@ export default function DocumentsPage() {
           const filterValue = column.getFilterValue()
 
           return (
-            <Highlighter
-              highlightClassName='highlight'
+            <HighlighterWithEllipsis
               searchWords={[globalFilter, filterValue as string]}
-              autoEscape
-              textToHighlight={contributors}
+              text={contributors}
             />
           )
         },

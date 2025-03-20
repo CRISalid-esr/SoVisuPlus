@@ -1,6 +1,4 @@
 import DateProvider from '@/components/DateProvider'
-import { messages as enMessages } from '@/locales/en/messages'
-import { messages as frMessages } from '@/locales/fr/messages'
 import useStore from '@/stores/global_store'
 import { Contribution } from '@/types/Contribution'
 import { Document, DocumentType } from '@/types/Document'
@@ -19,11 +17,6 @@ jest.mock('@/stores/global_store', () => ({
   default: jest.fn(),
 }))
 
-// Mock Lingui `t` function
-jest.mock('@lingui/macro', () => ({
-  t: (key: string) => key, // Return key directly for testing
-}))
-
 // Mock MUI Theme
 jest.mock('@mui/material/styles', () => ({
   ...jest.requireActual('@mui/material/styles'),
@@ -39,12 +32,6 @@ jest.mock('@mui/material/styles', () => ({
     },
   }),
 }))
-
-i18n.load({
-  en: enMessages,
-  fr: frMessages,
-})
-i18n.activate('en')
 
 const document: Document = new Document(
   'doc-123',
@@ -105,10 +92,10 @@ describe('BibliographicInformation Component', () => {
     renderComponent()
 
     expect(
-      screen.getByText('document_details_page_card_title'),
+      screen.getByText(i18n.t('document_details_page_card_title')),
     ).toBeInTheDocument()
     expect(
-      screen.getByText('document_details_page_card_validate_button'),
+      screen.getByText(i18n.t('document_details_page_card_validate_button')),
     ).toBeInTheDocument()
   })
 
@@ -116,16 +103,16 @@ describe('BibliographicInformation Component', () => {
     renderComponent()
 
     expect(
-      screen.getByText('document_details_page_titles_row_label'),
+      screen.getByText(i18n.t('document_details_page_titles_row_label')),
     ).toBeInTheDocument()
     expect(
-      screen.getByText('document_details_page_authors_row_label'),
+      screen.getByText(i18n.t('document_details_page_authors_row_label')),
     ).toBeInTheDocument()
     expect(
-      screen.getByText('document_details_page_date_row_label'),
+      screen.getByText(i18n.t('document_details_page_date_row_label')),
     ).toBeInTheDocument()
     expect(
-      screen.getByText('document_details_page_sources_row_label'),
+      screen.getByText(i18n.t('document_details_page_sources_row_label')),
     ).toBeInTheDocument()
   })
 
@@ -133,7 +120,7 @@ describe('BibliographicInformation Component', () => {
     renderComponent()
 
     const validateButton = screen.getByText(
-      'document_details_page_card_validate_button',
+      i18n.t('document_details_page_card_validate_button'),
     )
     fireEvent.click(validateButton)
 

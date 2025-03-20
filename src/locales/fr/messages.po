@@ -14,6 +14,26 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/components/ErrorFallback.tsx:38
+msgid "internal_server_page_back_home"
+msgstr "Retour à la page d'accueil"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/ErrorFallback.tsx:103
+msgid "internal_server_page_description"
+msgstr "Le serveur a détecté une erreur interne et n'a  pas pu traiter votre demande. Réessayez un peu plus tard !"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:90
+msgid "document_details_page_card_title"
+msgstr "Informations bibliographiques"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:93
+msgid "document_details_page_card_validate_button"
+msgstr "Valider"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:283
 #: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:292
 msgid "document_details_page_source_tab_select_action_label"
@@ -40,16 +60,6 @@ msgid "document_details_page_source_tab_card_validate_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/components/ErrorFallback.tsx:38
-msgid "internal_server_page_back_home"
-msgstr "Retour à la page d'accueil"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/components/ErrorFallback.tsx:103
-msgid "internal_server_page_description"
-msgstr "Le serveur a détecté une erreur interne et n'a  pas pu traiter votre demande. Réessayez un peu plus tard !"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/forbidden.tsx:43
 msgid "forbidden_page_back_home"
 msgstr ""
@@ -58,16 +68,6 @@ msgstr ""
 #: src/app/[lang]/forbidden.tsx:108
 msgid "forbidden_page_description"
 msgstr "Vous n'êtes pas autorisé à accéder à cette ressource. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:43
-msgid "notfound_page_back_home"
-msgstr "Retour à la page d'accueil"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:108
-msgid "notfound_page_description"
-msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/myAccount/components/authorizations/index.tsx:28
@@ -110,14 +110,14 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "Une nouvelle expertise est en attente de validation"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:90
-msgid "document_details_page_card_title"
-msgstr "Informations bibliographiques"
+#: src/app/[lang]/not-found.tsx:43
+msgid "notfound_page_back_home"
+msgstr "Retour à la page d'accueil"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:93
-msgid "document_details_page_card_validate_button"
-msgstr "Valider"
+#: src/app/[lang]/not-found.tsx:108
+msgid "notfound_page_description"
+msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:85

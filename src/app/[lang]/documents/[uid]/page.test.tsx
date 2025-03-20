@@ -1,5 +1,3 @@
-import { messages as enMessages } from '@/locales/en/messages'
-import { messages as frMessages } from '@/locales/fr/messages'
 import useStore from '@/stores/global_store'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
@@ -18,11 +16,6 @@ import { LocRelator } from '@/types/LocRelator'
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
   default: jest.fn(),
-}))
-
-// Mock Lingui `t` function
-jest.mock('@lingui/macro', () => ({
-  t: (key: string) => key, // Return key directly for testing
 }))
 
 // Mock MUI Theme
@@ -56,10 +49,6 @@ jest.mock('next/navigation', () => ({
   })),
   notFound: jest.fn(),
 }))
-
-// Initialize Lingui i18n
-i18n.load({ en: enMessages, fr: frMessages })
-i18n.activate('en')
 
 const document: Document = new Document(
   'doc-123',
@@ -152,11 +141,12 @@ describe('DocumentDetailsPage Component', () => {
     )
     renderComponent()
 
+    const elements = screen.getAllByText(
+      i18n.t('document_details_bibliographic_information_tab'),
+    )
+    expect(elements).toHaveLength(1)
     expect(
-      screen.getByText('document_details_bibliographic_information_tab'),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText('document_details_keywords_tab'),
+      screen.getByText(i18n.t('document_details_keywords_tab')),
     ).toBeInTheDocument()
     expect(screen.getByText('document_details_domains_tab')).toBeInTheDocument()
     expect(screen.getByText('document_details_authors_tab')).toBeInTheDocument()

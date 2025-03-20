@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { UserService } from '@/lib/services/UserService'
 import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 import { UserDAO } from '@/lib/daos/UserDAO'
