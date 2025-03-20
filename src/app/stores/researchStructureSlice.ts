@@ -9,13 +9,11 @@ import { toQueryString } from '@/utils/query'
 
 export interface ResearchStructuresByNameQuery extends BaseQuery {
   searchTerm: string
-  searchLang: string
   includeExternal?: boolean
 }
 
 const defaultResearchStructuresByNameQuery: ResearchStructuresByNameQuery = {
   searchTerm: '',
-  searchLang: 'en',
   page: 1,
   includeExternal: false,
 }

@@ -105,7 +105,6 @@ const SearchInput: React.FC = () => {
             try {
               await fetchResearchStructuresByName({
                 searchTerm,
-                searchLang: lang,
                 page: researchStructuresPage,
               })
             } catch (error) {
@@ -198,9 +197,9 @@ const SearchInput: React.FC = () => {
                 return null
               }
               const label: string =
-                researchStructure.names.filter(
-                  (name) => name.language === lang,
-                )[0]?.value ||
+                researchStructure.names.find((name) => name.language === lang)
+                  ?.value ||
+                researchStructure.names[0]?.value ||
                 researchStructure.acronym ||
                 t`sidebar_search_unknown_label`
               return {

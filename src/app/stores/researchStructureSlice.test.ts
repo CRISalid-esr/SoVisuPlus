@@ -11,7 +11,7 @@ import { ResearchStructure } from '@/types/ResearchStructure'
 const mockFetchResponse = (
   data: {
     hasMore: boolean
-    researchStructures:ResearchStructure[]
+    researchStructures: ResearchStructure[]
     total: number
   },
   ok = true,
@@ -40,29 +40,27 @@ describe('addResearchStructureSlice', () => {
   })
 
   it('should fetch and store research structures successfully', async () => {
-
     const researchStructuresData = [
       new ResearchStructure(
-      'RS123',
-      'ABC',
-      [new Literal('Valid Research Structure', 'en')],
-      [new Literal('Valid Description', 'en')],
-      [
-        { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
-        { type: ResearchStructureIdentifierType.ROR, value: '67890' },
-      ],
-    ),
-    new ResearchStructure(
-      'RS124',
-      'ADF',
-      [new Literal('Valid Research Structure', 'en')],
-      [new Literal('Valid Description', 'en')],
-      [
-        { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
-        { type: ResearchStructureIdentifierType.ROR, value: '67890' },
-      ],
-    )
-     
+        'RS123',
+        'ABC',
+        [new Literal('Valid Research Structure', 'en')],
+        [new Literal('Valid Description', 'en')],
+        [
+          { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
+          { type: ResearchStructureIdentifierType.ROR, value: '67890' },
+        ],
+      ),
+      new ResearchStructure(
+        'RS124',
+        'ADF',
+        [new Literal('Valid Research Structure', 'en')],
+        [new Literal('Valid Description', 'en')],
+        [
+          { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
+          { type: ResearchStructureIdentifierType.ROR, value: '67890' },
+        ],
+      ),
     ]
     const response = {
       hasMore: true,
@@ -74,7 +72,6 @@ describe('addResearchStructureSlice', () => {
     await store.getState().researchStructure.fetchResearchStructuresByName({
       page: 1,
       searchTerm: 'test',
-      searchLang: 'en',
     })
 
     const state = store.getState().researchStructure
@@ -84,7 +81,7 @@ describe('addResearchStructureSlice', () => {
     expect(state.total).toBe(2)
     expect(state.error).toBe(null)
     expect(fetch).toHaveBeenCalledWith(
-      '/api/researchStructures?searchTerm=test&searchLang=en&page=1&includeExternal=',
+      '/api/researchStructures?searchTerm=test&page=1&includeExternal=',
       expect.objectContaining({
         headers: { 'accept-language': i18n.locale },
       }),
@@ -98,7 +95,6 @@ describe('addResearchStructureSlice', () => {
     await store.getState().researchStructure.fetchResearchStructuresByName({
       page: 1,
       searchTerm: 'test',
-      searchLang: 'en',
     })
 
     const state = store.getState().researchStructure
@@ -108,25 +104,30 @@ describe('addResearchStructureSlice', () => {
   })
 
   it('should append research structures data on subsequent pages', async () => {
-    const initialResearchStructures = [  new ResearchStructure(
-      'RS123',
-      'ABC',
-      [new Literal('Valid Research Structure', 'en')],
-      [new Literal('Valid Description', 'en')],
-      [
-        { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
-        { type: ResearchStructureIdentifierType.ROR, value: '67890' },
-      ])]
-    const newResearchStructures = [ new ResearchStructure(
-      'RS124',
-      'ADF',
-      [new Literal('Valid Research Structure', 'en')],
-      [new Literal('Valid Description', 'en')],
-      [
-        { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
-        { type: ResearchStructureIdentifierType.ROR, value: '67890' },
-      ],
-    )]
+    const initialResearchStructures = [
+      new ResearchStructure(
+        'RS123',
+        'ABC',
+        [new Literal('Valid Research Structure', 'en')],
+        [new Literal('Valid Description', 'en')],
+        [
+          { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
+          { type: ResearchStructureIdentifierType.ROR, value: '67890' },
+        ],
+      ),
+    ]
+    const newResearchStructures = [
+      new ResearchStructure(
+        'RS124',
+        'ADF',
+        [new Literal('Valid Research Structure', 'en')],
+        [new Literal('Valid Description', 'en')],
+        [
+          { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
+          { type: ResearchStructureIdentifierType.ROR, value: '67890' },
+        ],
+      ),
+    ]
     const responsePage1 = {
       hasMore: true,
       researchStructures: initialResearchStructures,
@@ -142,14 +143,12 @@ describe('addResearchStructureSlice', () => {
     await store.getState().researchStructure.fetchResearchStructuresByName({
       page: 1,
       searchTerm: '',
-      searchLang: 'en',
     })
 
     mockFetchResponse(responsePage2)
     await store.getState().researchStructure.fetchResearchStructuresByName({
       page: 2,
       searchTerm: '',
-      searchLang: 'en',
     })
 
     const state = store.getState().researchStructure

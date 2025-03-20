@@ -124,7 +124,6 @@ describe('SearchInput Component', () => {
       () =>
         expect(mockFetchResearchStructuresByName).toHaveBeenCalledWith({
           searchTerm: '',
-          searchLang: 'en',
           page: 1,
         }),
       { timeout: 4000 }, // Extend timeout to wait for useEffect
@@ -169,7 +168,6 @@ describe('SearchInput Component', () => {
       () =>
         expect(mockFetchResearchStructuresByName).toHaveBeenCalledWith({
           searchTerm: 'Lab X',
-          searchLang: 'en',
           page: 1,
         }),
       { timeout: 4000 },
