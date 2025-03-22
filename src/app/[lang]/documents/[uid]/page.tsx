@@ -56,22 +56,27 @@ export default function DocumentDetailsPage() {
     },
   ]
 
-  const initialTab = searchParams.get('tab') || ''
-  const [selectedTab, setSelectedTab] = useState(initialTab)
+  const [selectedTab, setSelectedTab] = useState('')
 
   const { fetchDocumentById, loading, selectedDocument, hasFetched } = useStore(
     (state) => state.document,
   )
 
   useEffect(() => {
-    if (uid && !hasFetched) {
+    if (selectedDocument?.uid == uid && hasFetched) {
+      return
+    }
+    if (uid) {
       fetchDocumentById(uid)
     }
   }, [uid, fetchDocumentById, hasFetched])
 
   useEffect(() => {
-    setSelectedTab(initialTab)
-  }, [initialTab])
+    const tab = searchParams.get('tab')
+    if (tab) {
+      setSelectedTab(tab)
+    }
+  }, [searchParams])
 
   if (!hasFetched || loading) {
     return (
@@ -92,8 +97,6 @@ export default function DocumentDetailsPage() {
   }
 
   const handleTabChange = (newValue: string) => {
-    console.log('newValue', newValue)
-    setSelectedTab(newValue)
     router.push(`?tab=${newValue}`, { scroll: false })
   }
 
@@ -110,7 +113,7 @@ export default function DocumentDetailsPage() {
       case 'domains':
         return <Domains />
       default:
-        return notFound()
+        return <BibliographicInformation />
     }
   }
 

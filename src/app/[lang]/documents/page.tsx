@@ -197,12 +197,30 @@ export default function DocumentsPage() {
 
           return (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Highlighter
-                highlightClassName='highlight'
-                searchWords={[globalFilter, column.getFilterValue() as string]}
-                autoEscape
-                textToHighlight={localizedTitle.value}
-              />
+              <Box
+                onClick={() => {
+                  const documentUid = row.original.uid
+                  navigateToDetailsPage(documentUid)
+                }}
+                sx={{
+                  cursor: 'pointer',
+                  color: 'primary.main',
+                  textDecoration: 'none',
+                  '&:hover': {
+                    color: 'primary.dark',
+                  },
+                }}
+              >
+                <Highlighter
+                  highlightClassName='highlight'
+                  searchWords={[
+                    globalFilter,
+                    column.getFilterValue() as string,
+                  ]}
+                  autoEscape
+                  textToHighlight={localizedTitle.value}
+                />
+              </Box>
               <LanguageChips
                 texts={titles}
                 selectedLang={effectiveRowLang}
@@ -476,6 +494,10 @@ export default function DocumentsPage() {
     setSelectedTab(newValue)
   }
 
+  function navigateToDetailsPage(documentUid: string) {
+    router.push(`/documents/${documentUid}?tab=bibliographic_information`)
+  }
+
   return (
     <Box>
       <DocumentHeader
@@ -528,18 +550,16 @@ export default function DocumentsPage() {
         }}
         localization={Localization[lang]}
         enableRowActions
-        positionActionsColumn='last' // Ensures actions column is at the right end
+        positionActionsColumn='last'
         renderRowActionMenuItems={({ row, table }) => [
           <Box sx={{ display: 'flex' }} key={row.original.uid}>
-            <MRT_ActionMenuItem //or just use a normal MUI MenuItem component
+            <MRT_ActionMenuItem
               icon={<InfoIcon />}
               key='edit'
               label={t`documents_page_action_column_details`}
               onClick={() => {
-                const documentUid = row.original.uid // Assuming 'uid' is the unique identifier
-                router.push(
-                  `/documents/${documentUid}?tab=bibliographic_information`,
-                ) // Navigate to the details page
+                const documentUid = row.original.uid
+                navigateToDetailsPage(documentUid)
               }}
               table={table}
             />
