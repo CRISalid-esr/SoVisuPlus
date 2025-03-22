@@ -5,7 +5,14 @@ import { I18nProvider } from '@lingui/react'
 import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles'
 import '@testing-library/jest-dom'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { Document, DocumentType } from '@/types/Document'
 import DocumentsPage from './page'
+import { Literal } from '@/types/Literal'
+import { InternalPerson } from '@/types/InternalPerson'
+import { DocumentRecord } from '@/types/DocumentRecord'
+import { BibliographicPlatform } from '@/types/BibliographicPlatform'
+import { Contribution } from '@/types/Contribution'
+import { LocRelator } from '@/types/LocRelator'
 
 // Mock Zustand store
 jest.mock('@/stores/global_store', () => ({
@@ -13,11 +20,13 @@ jest.mock('@/stores/global_store', () => ({
   default: jest.fn(),
 }))
 
+const pushMock = jest.fn()
+
 jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(),
   usePathname: jest.fn(),
   useRouter: jest.fn(() => ({
-    push: jest.fn(),
+    push: pushMock,
     replace: jest.fn(),
     prefetch: jest.fn(),
     back: jest.fn(),
@@ -25,38 +34,43 @@ jest.mock('next/navigation', () => ({
 }))
 
 const mockFetchDocuments = jest.fn()
+const mockFetchDocumentById = jest.fn()
 const mockState = {
   document: {
     fetchDocuments: mockFetchDocuments,
+    fetchDocumentById: mockFetchDocumentById,
     loading: false,
     documents: [
-      {
-        id: 'doc1',
-        type: 'Article',
-        titles: [{ value: 'Test Title', lang: 'en' }],
-        contributions: [
-          {
-            person: {
-              firstName: 'John',
-              lastName: 'Doe',
-              displayName: 'John Doe',
-            },
-          },
+      new Document(
+        'doc1',
+        DocumentType.JournalArticle,
+        '2024-01-01',
+        new Date('2024-01-01'),
+        new Date('2024-01-01'),
+        [new Literal('Test Title', 'en')],
+        [new Literal('Test Abstract', 'en')],
+        [],
+        [
+          new Contribution(
+            new InternalPerson('person-1', null, 'John Doe', 'John', 'Doe', []),
+            [LocRelator.AUTHOR],
+          ),
         ],
-        date: '2024-01-01',
-        records: [
-          {
-            uid: 'rec1',
-            platform: 'Platform A',
-            titles: [{ value: 'Record Title 1', lang: 'en' }],
-          },
-          {
-            uid: 'rec2',
-            platform: 'Platform B',
-            titles: [{ value: 'Record Title 2', lang: 'fr' }],
-          },
+        [
+          new DocumentRecord(
+            'rec1',
+            BibliographicPlatform.HAL,
+            [new Literal('Record Title 1', 'en')],
+            'https://url-to-record-1',
+          ),
+          new DocumentRecord(
+            'rec2',
+            BibliographicPlatform.OPENALEX,
+            [new Literal('Record Title 2', 'fr')],
+            'https://url-to-record-2',
+          ),
         ],
-      },
+      ),
     ],
     totalItems: 1,
   },
@@ -151,5 +165,35 @@ describe('DocumentsPage Component', () => {
 
     // Check that the tab gets selected
     expect(tab).toHaveClass('MuiTypography-root')
+  })
+
+  it('renders the document list', async () => {
+    renderComponent()
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Title')).toBeInTheDocument()
+      expect(screen.getByText('John Doe')).toBeInTheDocument()
+      expect(screen.getByText('01-01-2024')).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'Hal' })).toHaveAttribute(
+        'href',
+        'https://url-to-record-1/',
+      )
+      expect(screen.getByRole('link', { name: 'OpenAlex' })).toHaveAttribute(
+        'href',
+        'https://url-to-record-2/',
+      )
+    })
+  })
+
+  it('navigate to the document page if the user clicks on the title', async () => {
+    renderComponent()
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByText('Test Title'))
+    })
+    expect(pushMock).toHaveBeenCalledTimes(1)
+    expect(pushMock).toHaveBeenCalledWith(
+      expect.stringContaining('/documents/doc1?tab=bibliographic_information'),
+    )
   })
 })
