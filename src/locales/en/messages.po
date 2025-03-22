@@ -14,6 +14,26 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:28
+msgid "document_details_page_domains_tab_card_title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:31
+msgid "document_details_page_domains_tab_card_validate_button"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:28
+msgid "document_details_page_keywords_tab_card_title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:31
+msgid "document_details_page_keywords_tab_card_validate_button"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Back to home page"
@@ -82,28 +102,28 @@ msgid "document_details_page_main_title"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:283
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:292
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:283
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:292
 msgid "document_details_page_source_tab_select_action_label"
 msgstr "action"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:298
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:298
 msgid "document_details_page_source_tab_select_action_delete_label"
 msgstr "delete source"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:305
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:305
 msgid "document_details_page_source_tab_select_action_merge_label"
 msgstr "merge sources"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:341
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:341
 msgid "document_details_page_source_tab_card_title"
 msgstr "Sources"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:344
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:344
 msgid "document_details_page_source_tab_card_validate_button"
 msgstr "Confirm"
 
@@ -143,6 +163,46 @@ msgid "forbidden_page_description"
 msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:28
+msgid "authorizations_page_authorizations_title"
+msgstr "Authorizations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:50
+msgid "authorizations_page_description"
+msgstr "Lorem ipsum"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:54
+msgid "authorizations_page_list_publications"
+msgstr "Publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/authorizations/index.tsx:58
+msgid "authorizations_page_my_expertise"
+msgstr "My expertise"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/notification/index.tsx:27
+msgid "notification_page_notification_title"
+msgstr "Nofications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/notification/index.tsx:49
+msgid "notification_page_description"
+msgstr "Select the activities for which you wish to receive e-mail or push notifications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/notification/index.tsx:53
+msgid "notification_page_new_publication_referenced"
+msgstr "A new publication has been referenced"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/notification/index.tsx:58
+msgid "notification_page_new_expertise_awaiting_validation"
+msgstr "A new expertise is awaiting validation"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/not-found.tsx:43
 msgid "notfound_page_back_home"
 msgstr "Back to home page"
@@ -151,85 +211,6 @@ msgstr "Back to home page"
 #: src/app/[lang]/not-found.tsx:108
 msgid "notfound_page_description"
 msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1>community</1> might be able to help."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/Sources.tsx:28
-msgid "authorizations_page_authorizations_title"
-msgstr "Authorizations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/Sources.tsx:50
-msgid "authorizations_page_description"
-msgstr "Lorem ipsum"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/Sources.tsx:54
-msgid "authorizations_page_list_publications"
-msgstr "Publications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/Sources.tsx:58
-msgid "authorizations_page_my_expertise"
-msgstr "My expertise"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/notification/Sources.tsx:27
-msgid "notification_page_notification_title"
-msgstr "Nofications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/notification/Sources.tsx:49
-msgid "notification_page_description"
-msgstr "Select the activities for which you wish to receive e-mail or push notifications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/notification/Sources.tsx:53
-msgid "notification_page_new_publication_referenced"
-msgstr "A new publication has been referenced"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/notification/Sources.tsx:58
-msgid "notification_page_new_expertise_awaiting_validation"
-msgstr "A new expertise is awaiting validation"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:95
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:90
-msgid "document_details_page_card_title"
-msgstr "Bibliographic information"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:98
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:123
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:93
-msgid "document_details_page_card_validate_button"
-msgstr "Approve"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:283
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:292
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "action"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:298
-msgid "document_details_page_source_tab_select_action_delete_label"
-msgstr "delete source"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:305
-msgid "document_details_page_source_tab_select_action_merge_label"
-msgstr "merge sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:341
-msgid "document_details_page_source_tab_card_title"
-msgstr "Sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:344
-msgid "document_details_page_source_tab_card_validate_button"
-msgstr "Confirm"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:88
@@ -253,15 +234,15 @@ msgstr "Confirm"
 msgid "dashboard_page_main_title"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/page.tsx:47
+#: src/app/[lang]/documents/[uid]/page.tsx:53
 msgid "document_details_authors_tab"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/page.tsx:27
+#: src/app/[lang]/documents/[uid]/page.tsx:33
 msgid "document_details_bibliographic_information_tab"
 msgstr "Bibliographic information"
 
-#: src/app/[lang]/documents/[uid]/page.tsx:37
+#: src/app/[lang]/documents/[uid]/page.tsx:43
 msgid "document_details_domains_tab"
 msgstr "Disciplines"
 
@@ -269,7 +250,7 @@ msgstr "Disciplines"
 #~ msgid "document_details_HAL_referencing_tab"
 #~ msgstr "HAL details"
 
-#: src/app/[lang]/documents/[uid]/page.tsx:32
+#: src/app/[lang]/documents/[uid]/page.tsx:38
 msgid "document_details_keywords_tab"
 msgstr "Keywords"
 
@@ -305,7 +286,7 @@ msgstr "Compare sources"
 msgid "document_details_page_titles_row_label"
 msgstr "Title"
 
-#: src/app/[lang]/documents/[uid]/page.tsx:42
+#: src/app/[lang]/documents/[uid]/page.tsx:48
 msgid "document_details_sources_tab"
 msgstr "Sources"
 
