@@ -14,9 +14,32 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/components/ErrorFallback.tsx:38
+msgid "internal_server_page_back_home"
+msgstr "Back to home page"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/ErrorFallback.tsx:103
+msgid "internal_server_page_description"
+msgstr "The server detected an internal error and was unable to process your request. Please try again later!"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:93
 msgid "document_details_page_authors_row_update_author"
 msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:95
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:90
+msgid "document_details_page_card_title"
+msgstr "Bibliographic information"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:98
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:123
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:93
+msgid "document_details_page_card_validate_button"
+msgstr "Approve"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:106
@@ -59,6 +82,32 @@ msgid "document_details_page_main_title"
 msgstr ""
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:283
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:292
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "action"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:298
+msgid "document_details_page_source_tab_select_action_delete_label"
+msgstr "delete source"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:305
+msgid "document_details_page_source_tab_select_action_merge_label"
+msgstr "merge sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:341
+msgid "document_details_page_source_tab_card_title"
+msgstr "Sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:344
+msgid "document_details_page_source_tab_card_validate_button"
+msgstr "Confirm"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:145
 msgid "document_details_bibliographic_information_tab"
 msgstr ""
@@ -84,16 +133,6 @@ msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/components/ErrorFallback.tsx:38
-msgid "internal_server_page_back_home"
-msgstr "Back to home page"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/components/ErrorFallback.tsx:103
-msgid "internal_server_page_description"
-msgstr "The server detected an internal error and was unable to process your request. Please try again later!"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/forbidden.tsx:43
 msgid "forbidden_page_back_home"
 msgstr "Back to home page"
@@ -102,16 +141,6 @@ msgstr "Back to home page"
 #: src/app/[lang]/forbidden.tsx:108
 msgid "forbidden_page_description"
 msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:43
-msgid "notfound_page_back_home"
-msgstr "Back to home page"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:108
-msgid "notfound_page_description"
-msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1>community</1> might be able to help."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/myAccount/components/authorizations/index.tsx:28
@@ -154,43 +183,14 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "A new expertise is awaiting validation"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:95
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:90
-msgid "document_details_page_card_title"
-msgstr "Bibliographic information"
+#: src/app/[lang]/not-found.tsx:43
+msgid "notfound_page_back_home"
+msgstr "Back to home page"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:98
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:123
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:93
-msgid "document_details_page_card_validate_button"
-msgstr "Approve"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:283
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:292
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "action"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:298
-msgid "document_details_page_source_tab_select_action_delete_label"
-msgstr "delete source"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:305
-msgid "document_details_page_source_tab_select_action_merge_label"
-msgstr "merge sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:341
-msgid "document_details_page_source_tab_card_title"
-msgstr "Sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:344
-msgid "document_details_page_source_tab_card_validate_button"
-msgstr "Confirm"
+#: src/app/[lang]/not-found.tsx:108
+msgid "notfound_page_description"
+msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1>community</1> might be able to help."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:88
