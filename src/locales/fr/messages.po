@@ -14,26 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:28
-msgid "document_details_page_domains_tab_card_title"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:31
-msgid "document_details_page_domains_tab_card_validate_button"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:28
-msgid "document_details_page_keywords_tab_card_title"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:31
-msgid "document_details_page_keywords_tab_card_validate_button"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Retour à la page d'accueil"
@@ -102,6 +82,26 @@ msgid "document_details_page_main_title"
 msgstr ""
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:28
+msgid "document_details_page_domains_tab_card_title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:31
+msgid "document_details_page_domains_tab_card_validate_button"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:28
+msgid "document_details_page_keywords_tab_card_title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:31
+msgid "document_details_page_keywords_tab_card_validate_button"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:283
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:292
 msgid "document_details_page_source_tab_select_action_label"
@@ -138,17 +138,17 @@ msgid "document_details_keywords_tab"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:114
+#: src/app/[lang]/documents/page.test.tsx:128
 msgid "documents_page_main_title"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:118
+#: src/app/[lang]/documents/page.test.tsx:132
 msgid "documents_page_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:148
+#: src/app/[lang]/documents/page.test.tsx:162
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
@@ -310,7 +310,7 @@ msgstr ""
 msgid "documents_details_page_type_column_tab_author"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:537
+#: src/app/[lang]/documents/page.tsx:559
 msgid "documents_page_action_column_details"
 msgstr "Détails"
 
@@ -334,7 +334,7 @@ msgid "documents_page_conference_article_icon_label"
 msgstr "Article de conférence"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:161
-#: src/app/[lang]/documents/page.tsx:222
+#: src/app/[lang]/documents/page.tsx:240
 msgid "documents_page_contributors_column"
 msgstr "auteurs"
 
@@ -347,7 +347,7 @@ msgstr "auteurs"
 msgid "documents_page_document_icon_label"
 msgstr "Article"
 
-#: src/app/[lang]/documents/page.tsx:301
+#: src/app/[lang]/documents/page.tsx:319
 msgid "documents_page_halStatus_column"
 msgstr "Statut hal"
 
@@ -364,7 +364,7 @@ msgstr "Article de journal"
 msgid "documents_page_keywords_to_validate"
 msgstr "Mots-clés à valider"
 
-#: src/app/[lang]/documents/page.tsx:485
+#: src/app/[lang]/documents/page.tsx:507
 msgid "documents_page_main_title"
 msgstr "Publications"
 
@@ -379,17 +379,17 @@ msgid "documents_page_proceedings_icon_label"
 msgstr "Procédure"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:166
-#: src/app/[lang]/documents/page.tsx:262
+#: src/app/[lang]/documents/page.tsx:280
 msgid "documents_page_publication_date_column"
 msgstr "Date de publication"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:28
-#: src/app/[lang]/documents/page.tsx:266
+#: src/app/[lang]/documents/page.tsx:284
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "Aucune date"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:171
-#: src/app/[lang]/documents/page.tsx:294
+#: src/app/[lang]/documents/page.tsx:312
 msgid "documents_page_publishedIn_column"
 msgstr "paru dans"
 
@@ -399,11 +399,11 @@ msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Publication scientifique"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:179
-#: src/app/[lang]/documents/page.tsx:309
+#: src/app/[lang]/documents/page.tsx:327
 msgid "documents_page_source_column"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/page.tsx:492
+#: src/app/[lang]/documents/page.tsx:514
 msgid "documents_page_synchronize_button"
 msgstr "Synchroniser"
 
