@@ -1,4 +1,7 @@
 export { default as BibliographicInformation } from './BibliographicInformation/BibliographicInformation'
-export { default as Sources } from './Sources/'
+export { default as Authors } from './Authors/Authors'
+export { default as Domains } from './Domains/Domains'
+export { default as Keywords } from './Keywords/Keywords'
+export { default as Sources } from './Sources/Sources'
 export { default as DocumentDetailsHeader } from './DocumentDetailsHeader'
 export { default as DocumentDetailsTitle } from './DocumentDetailsTitle'
