@@ -33,8 +33,18 @@ class ResearchStructure implements IAgent {
     this.identifiers = _identifiers
   }
 
+  /**
+   * Get the display name of the research structure
+   * @param language
+   * @returns The name in the specified language, or the name in english, or the first name, or an empty string
+   */
   getDisplayName(language?: ExtendedLanguageCode): string {
-    return this.names.find((name) => name.language === language)?.value || ''
+    return (
+      this.names.find((name) => name.language === language)?.value ||
+      this.names.find((name) => name.language === 'en')?.value ||
+      this.names[0].value ||
+      ''
+    )
   }
 
   set identifiers(value: ResearchStructureIdentifier[]) {
