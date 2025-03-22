@@ -5,17 +5,23 @@ import useStore from '@/stores/global_store'
 import { t } from '@lingui/macro'
 import { Box, CircularProgress } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import {
+  notFound,
+  useParams,
+  useRouter,
+  useSearchParams,
+} from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
+  Authors,
+  BibliographicInformation,
   DocumentDetailsHeader,
   DocumentDetailsTitle,
-  BibliographicInformation,
+  Domains,
+  Keywords,
   Sources,
 } from './components/'
-import { notFound } from 'next/navigation'
 
-import Authors from './components/Authors/Authors'
 export default function DocumentDetailsPage() {
   const theme = useTheme()
   const router = useRouter()
@@ -86,6 +92,7 @@ export default function DocumentDetailsPage() {
   }
 
   const handleTabChange = (newValue: string) => {
+    console.log('newValue', newValue)
     setSelectedTab(newValue)
     router.push(`?tab=${newValue}`, { scroll: false })
   }
@@ -98,6 +105,10 @@ export default function DocumentDetailsPage() {
         return <Sources />
       case 'authors':
         return <Authors />
+      case 'keywords':
+        return <Keywords />
+      case 'domains':
+        return <Domains />
       default:
         return notFound()
     }

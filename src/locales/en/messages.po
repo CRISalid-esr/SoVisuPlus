@@ -114,42 +114,42 @@ msgid "notfound_page_description"
 msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1>community</1> might be able to help."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:28
+#: src/app/[lang]/myAccount/components/authorizations/Sources.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Authorizations"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:50
+#: src/app/[lang]/myAccount/components/authorizations/Sources.tsx:50
 msgid "authorizations_page_description"
 msgstr "Lorem ipsum"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:54
+#: src/app/[lang]/myAccount/components/authorizations/Sources.tsx:54
 msgid "authorizations_page_list_publications"
 msgstr "Publications"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:58
+#: src/app/[lang]/myAccount/components/authorizations/Sources.tsx:58
 msgid "authorizations_page_my_expertise"
 msgstr "My expertise"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/notification/index.tsx:27
+#: src/app/[lang]/myAccount/components/notification/Sources.tsx:27
 msgid "notification_page_notification_title"
 msgstr "Nofications"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/notification/index.tsx:49
+#: src/app/[lang]/myAccount/components/notification/Sources.tsx:49
 msgid "notification_page_description"
 msgstr "Select the activities for which you wish to receive e-mail or push notifications"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/notification/index.tsx:53
+#: src/app/[lang]/myAccount/components/notification/Sources.tsx:53
 msgid "notification_page_new_publication_referenced"
 msgstr "A new publication has been referenced"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/notification/index.tsx:58
+#: src/app/[lang]/myAccount/components/notification/Sources.tsx:58
 msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "A new expertise is awaiting validation"
 
@@ -167,28 +167,28 @@ msgid "document_details_page_card_validate_button"
 msgstr "Approve"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:283
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:292
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:283
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:292
 msgid "document_details_page_source_tab_select_action_label"
 msgstr "action"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:298
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:298
 msgid "document_details_page_source_tab_select_action_delete_label"
 msgstr "delete source"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:305
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:305
 msgid "document_details_page_source_tab_select_action_merge_label"
 msgstr "merge sources"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:341
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:341
 msgid "document_details_page_source_tab_card_title"
 msgstr "Sources"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:344
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:344
 msgid "document_details_page_source_tab_card_validate_button"
 msgstr "Confirm"
 
@@ -298,22 +298,22 @@ msgstr "Details"
 msgid "documents_page_all_documents_filter"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:67
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:67
 #: src/app/[lang]/documents/page.tsx:123
 msgid "documents_page_book_chapter_icon_label"
 msgstr "Book chapter"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:61
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:61
 #: src/app/[lang]/documents/page.tsx:117
 msgid "documents_page_book_icon_label"
 msgstr "Book"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:70
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:70
 #: src/app/[lang]/documents/page.tsx:126
 msgid "documents_page_conference_article_icon_label"
 msgstr "Conference article"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:161
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:161
 #: src/app/[lang]/documents/page.tsx:222
 msgid "documents_page_contributors_column"
 msgstr "authors"
@@ -322,7 +322,7 @@ msgstr "authors"
 #~ msgid "documents_page_date_column"
 #~ msgstr "date"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:52
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:52
 #: src/app/[lang]/documents/page.tsx:108
 msgid "documents_page_document_icon_label"
 msgstr "Document"
@@ -335,7 +335,7 @@ msgstr "status in Hal"
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "HAL incomplete filing"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:58
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:58
 #: src/app/[lang]/documents/page.tsx:114
 msgid "documents_page_journal_article_icon_label"
 msgstr "Journal article"
@@ -348,17 +348,17 @@ msgstr "keywords to be validated"
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:64
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:64
 #: src/app/[lang]/documents/page.tsx:120
 msgid "documents_page_monograph_icon_label"
 msgstr "Monography"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:73
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:73
 #: src/app/[lang]/documents/page.tsx:129
 msgid "documents_page_proceedings_icon_label"
 msgstr "Proceedings"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:166
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:166
 #: src/app/[lang]/documents/page.tsx:262
 msgid "documents_page_publication_date_column"
 msgstr "Date"
@@ -368,17 +368,17 @@ msgstr "Date"
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "No date available"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:171
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:171
 #: src/app/[lang]/documents/page.tsx:294
 msgid "documents_page_publishedIn_column"
 msgstr "published in"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:55
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:55
 #: src/app/[lang]/documents/page.tsx:111
 msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Scientific publication"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:179
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:179
 #: src/app/[lang]/documents/page.tsx:309
 msgid "documents_page_source_column"
 msgstr "Sources"
@@ -411,12 +411,12 @@ msgstr "N/C"
 msgid "documents_page_synchronize_modal_title"
 msgstr "Sources to be syncronized"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:128
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:128
 #: src/app/[lang]/documents/page.tsx:180
 msgid "documents_page_title_column"
 msgstr "title"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:86
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:86
 #: src/app/[lang]/documents/page.tsx:140
 msgid "documents_page_type_column"
 msgstr "type"
@@ -464,8 +464,8 @@ msgid "my_account_page_notification_tab"
 msgstr "Notifications"
 
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:16
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:123
-#: src/app/[lang]/documents/[uid]/components/Sources/index.tsx:142
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:123
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:142
 #: src/app/[lang]/documents/page.tsx:194
 msgid "no_title_available"
 msgstr "no title available"

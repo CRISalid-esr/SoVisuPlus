@@ -262,7 +262,7 @@ function Sources() {
     columns,
     data: selectedDocument?.records || [],
     enableRowSelection: true,
-    localization:Localization[lang],
+    localization: Localization[lang],
     positionToolbarAlertBanner: 'bottom', //show selected rows count on bottom toolbar
     renderTopToolbarCustomActions: () => (
       <Box
