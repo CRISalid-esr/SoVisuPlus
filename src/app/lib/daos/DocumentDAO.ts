@@ -304,7 +304,7 @@ export class DocumentDAO extends AbstractDAO {
     const sortingTitleFieldName = `title_locale_${searchLangIndex}`
 
     let where: Prisma.DocumentWhereInput = {}
-    let contributionsFilter: Prisma.ContributionWhereInput = {}
+    const contributionFilters: Prisma.DocumentWhereInput[] = []
 
     if (publicationListRolesFilter.length > 0) {
       where = {
@@ -393,15 +393,19 @@ export class DocumentDAO extends AbstractDAO {
       }
 
       if (filter.id === 'contributions') {
-        contributionsFilter = {
-          ...contributionsFilter,
-          person: {
-            displayName: {
-              contains: filter.value,
-              mode: QueryMode.insensitive,
+        const nameFilter: Prisma.DocumentWhereInput = {
+          contributions: {
+            some: {
+              person: {
+                displayName: {
+                  contains: filter.value,
+                  mode: QueryMode.insensitive,
+                },
+              },
             },
           },
         }
+        contributionFilters.push(nameFilter)
       }
       if (filter.id === 'date' && Array.isArray(filter.value)) {
         const startDate = filter.value[0] || null // Full ISO string date
@@ -457,20 +461,19 @@ export class DocumentDAO extends AbstractDAO {
     })
 
     if (contributorUids && contributorUids.length > 0) {
-      if (perspectiveRolesFilter.length > 0) {
-        contributionsFilter = {
-          ...contributionsFilter,
-          roles: {
-            hasSome: perspectiveRolesFilter,
+      const rolesAndUidFilter: Prisma.DocumentWhereInput = {
+        contributions: {
+          some: {
+            person: {
+              uid: { in: contributorUids },
+            },
+            ...(perspectiveRolesFilter.length > 0 && {
+              roles: { hasSome: perspectiveRolesFilter },
+            }),
           },
-        }
-      }
-      contributionsFilter = {
-        ...contributionsFilter,
-        person: {
-          uid: { in: contributorUids },
         },
       }
+      contributionFilters.push(rolesAndUidFilter)
     }
 
     const orderBy: Prisma.DocumentOrderByWithRelationInput[] = sorting.map(
@@ -502,12 +505,16 @@ export class DocumentDAO extends AbstractDAO {
       },
     )
 
-    if (Object.keys(contributionsFilter).length > 0) {
+    if (contributionFilters.length > 0) {
+      const existingAnd = where.AND
+        ? Array.isArray(where.AND)
+          ? where.AND
+          : [where.AND]
+        : []
+
       where = {
         ...where,
-        contributions: {
-          some: contributionsFilter,
-        },
+        AND: [...existingAnd, ...contributionFilters],
       }
     }
 

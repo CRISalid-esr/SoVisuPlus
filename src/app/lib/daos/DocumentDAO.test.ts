@@ -297,18 +297,22 @@ describe('DocumentDAO', () => {
             },
           },
         ],
-        contributions: {
-          some: {
-            person: {
-              uid: {
-                in: fetchParams.contributorUids,
+        AND: [
+          {
+            contributions: {
+              some: {
+                person: {
+                  uid: {
+                    in: ['local-123'],
+                  },
+                },
+                roles: {
+                  hasSome: ['author', 'co-author'],
+                },
               },
             },
-            roles: {
-              hasSome: ['author', 'co-author'],
-            },
           },
-        },
+        ],
         titles: {
           some: {
             value: {
@@ -322,7 +326,7 @@ describe('DocumentDAO', () => {
       take: 10,
       orderBy: [
         {
-          title_locale_0: 'asc', // Since 'en' is the first in NEXT_PUBLIC_SUPPORTED_LOCALES
+          title_locale_0: 'asc',
         },
       ],
       include: {
