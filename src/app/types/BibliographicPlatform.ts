@@ -38,3 +38,9 @@ export function getBibliographicPlatformDbValue(
 ): keyof typeof DbBibliographicPlatform {
   return platform as keyof typeof DbBibliographicPlatform
 }
+
+export function getBibliographicPlatformFromDbValue(
+  value: keyof typeof DbBibliographicPlatform,
+): BibliographicPlatform {
+  return value as BibliographicPlatform
+}

@@ -1,9 +1,12 @@
 import {
   Concept,
+  ConceptLabel,
   Contribution,
   Document,
   DocumentAbstract,
+  DocumentRecord,
   DocumentTitle,
+  LabelType,
   Person,
   PrismaClient,
   ResearchStructure,
@@ -18,15 +21,24 @@ export type ResearchStructureWithRelations = ResearchStructure & {
   descriptions: ResearchStructureDescription[]
 }
 
-type ContributionWithRelations = Contribution & {
+export type ContributionWithRelations = Contribution & {
   person: Person
 }
 
 export type DocumentWithRelations = Document & {
   titles: DocumentTitle[]
   abstracts: DocumentAbstract[]
-  subjects: Concept[]
+  subjects: ConceptWithRelations[]
   contributions: ContributionWithRelations[]
+  records: DocumentRecord[]
+}
+
+export type ConceptWithRelations = Concept & {
+  labels: ConceptLabelWithRelations[]
+}
+
+export type ConceptLabelWithRelations = ConceptLabel & {
+  type: LabelType
 }
 
 export default prisma

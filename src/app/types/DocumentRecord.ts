@@ -1,9 +1,11 @@
 import {
   BibliographicPlatform,
   BibliographicPlatformMetadata,
+  getBibliographicPlatformFromDbValue,
 } from '@/types/BibliographicPlatform'
 import { Literal } from '@/types/Literal'
 import { getStringInLocale } from '@/utils/getStringInLocale'
+import { DocumentRecord as DbDocumentRecord } from '@prisma/client'
 
 interface DocumentRecordJson {
   uid: string
@@ -65,6 +67,18 @@ class DocumentRecord {
       record.uid,
       record.platform,
       record.titles.map((title) => Literal.fromObject(title)),
+      record.url,
+    )
+  }
+
+  static fromDbDocumentRecord(record: DbDocumentRecord) {
+    return new DocumentRecord(
+      record.uid,
+      getBibliographicPlatformFromDbValue(record.platform),
+      (record.titles as { value: string; language: string }[]).map(
+        (title: { value: string; language: string }) =>
+          Literal.fromObject(title),
+      ),
       record.url,
     )
   }
