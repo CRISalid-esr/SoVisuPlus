@@ -1,4 +1,8 @@
 import { Literal } from '@/types/Literal'
+import {
+  ConceptLabelWithRelations as DbConceptLabel,
+  ConceptWithRelations as DbConcept,
+} from '@/prisma-schema/extended-client'
 
 interface ConceptJson {
   uid: string
@@ -20,6 +24,19 @@ class Concept {
       concept.uid,
       concept.altLabels?.map((label) => Literal.fromObject(label)),
       concept.prefLabels?.map((label) => Literal.fromObject(label)),
+      concept.uri,
+    )
+  }
+
+  static fromDbConcept(concept: DbConcept): Concept {
+    return new Concept(
+      concept.uid,
+      concept.labels
+        .filter((label: DbConceptLabel) => label.type === 'ALT')
+        .map((label: DbConceptLabel) => Literal.fromDbLiteral(label)),
+      concept.labels
+        .filter((label: DbConceptLabel) => label.type === 'PREF')
+        .map((label: DbConceptLabel) => Literal.fromDbLiteral(label)),
       concept.uri,
     )
   }

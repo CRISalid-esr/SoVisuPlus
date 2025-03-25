@@ -143,7 +143,12 @@ describe('DocumentDAO', () => {
       include: {
         titles: true,
         abstracts: true,
-        subjects: true,
+        records: true,
+        subjects: {
+          include: {
+            labels: true,
+          },
+        },
         contributions: { include: { person: true } },
       },
     })
@@ -207,14 +212,26 @@ describe('DocumentDAO', () => {
         subjects: [
           {
             uid: 'concept-123',
-            prefLabels: [{ language: 'en', value: 'Concept preferred label' }],
-            altLabels: [{ language: 'en', value: 'Concept alt label' }],
+            labels: [
+              {
+                language: 'en',
+                value: 'Concept preferred label',
+                type: 'PREF',
+              },
+              {
+                language: 'en',
+                value: 'Concept alt label',
+                type: 'ALT',
+              },
+            ],
             url: 'http://example.com/concept/123',
           },
         ],
         publicationDate: '2022',
         publicationDateStart: new Date('2022-01-01T00:00:00.000Z'),
         publicationDateEnd: new Date('2022-12-31T23:59:59.000Z'),
+        contributions: [],
+        records: [],
       },
     ] as unknown as DbDocument[]
 
@@ -280,18 +297,22 @@ describe('DocumentDAO', () => {
             },
           },
         ],
-        contributions: {
-          some: {
-            person: {
-              uid: {
-                in: fetchParams.contributorUids,
+        AND: [
+          {
+            contributions: {
+              some: {
+                person: {
+                  uid: {
+                    in: ['local-123'],
+                  },
+                },
+                roles: {
+                  hasSome: ['author', 'co-author'],
+                },
               },
             },
-            roles: {
-              hasSome: ['author', 'co-author'],
-            },
           },
-        },
+        ],
         titles: {
           some: {
             value: {
@@ -305,13 +326,17 @@ describe('DocumentDAO', () => {
       take: 10,
       orderBy: [
         {
-          title_locale_0: 'asc', // Since 'en' is the first in NEXT_PUBLIC_SUPPORTED_LOCALES
+          title_locale_0: 'asc',
         },
       ],
       include: {
         titles: true,
         abstracts: true,
-        subjects: true,
+        subjects: {
+          include: {
+            labels: true,
+          },
+        },
         contributions: {
           include: {
             person: true,
@@ -344,7 +369,11 @@ describe('DocumentDAO', () => {
           },
         },
         records: true,
-        subjects: true,
+        subjects: {
+          include: {
+            labels: true,
+          },
+        },
       },
     })
   })

@@ -1,6 +1,7 @@
 import { Person } from '@/types/Person'
 import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
 import { Person as DbPerson } from '@prisma/client'
+import { ContributionWithRelations as DbContribution } from '@/prisma-schema/extended-client'
 
 interface ContributionJson {
   person: DbPerson
@@ -24,6 +25,15 @@ class Contribution {
       Person.fromDbPerson(contribution.person),
       contribution.roles,
       contribution.rank,
+    )
+  }
+
+  static fromDbContribution(contribution: DbContribution) {
+    return new Contribution(
+      Person.fromDbPerson(contribution.person),
+      contribution.roles
+        .map((role) => LocRelatorHelper.fromLabel(role))
+        .filter((role) => role !== null) as LocRelator[],
     )
   }
 }

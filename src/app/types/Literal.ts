@@ -32,6 +32,13 @@ class Literal {
     return new Literal(object.value, language as ExtendedLanguageCode)
   }
 
+  static fromDbLiteral(literal: {
+    language: string | null
+    value: string
+  }): Literal {
+    return new Literal(literal.value, literal.language as ExtendedLanguageCode)
+  }
+
   toJson(): { language: string; value: string } {
     return {
       language: this.language,

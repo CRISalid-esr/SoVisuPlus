@@ -38,8 +38,9 @@ export class DocumentDAO extends AbstractDAO {
           include: {
             titles: true,
             abstracts: true,
-            subjects: true,
+            subjects: { include: { labels: true } },
             contributions: { include: { person: true } },
+            records: true,
           },
         })
 
@@ -62,8 +63,9 @@ export class DocumentDAO extends AbstractDAO {
           include: {
             titles: true,
             abstracts: true,
-            subjects: true,
+            subjects: { include: { labels: true } },
             contributions: { include: { person: true } },
+            records: true,
           },
         })
       } else {
@@ -283,7 +285,7 @@ export class DocumentDAO extends AbstractDAO {
     sorting,
     contributorUids,
   }: FetchDocumentsFromDBParams): Promise<{
-    documents: DbDocument[]
+    documents: Document[]
     totalItems: number
   }> {
     const skip = (page - 1) * pageSize
@@ -302,6 +304,7 @@ export class DocumentDAO extends AbstractDAO {
     const sortingTitleFieldName = `title_locale_${searchLangIndex}`
 
     let where: Prisma.DocumentWhereInput = {}
+    const contributionFilters: Prisma.DocumentWhereInput[] = []
 
     if (publicationListRolesFilter.length > 0) {
       where = {
@@ -390,8 +393,7 @@ export class DocumentDAO extends AbstractDAO {
       }
 
       if (filter.id === 'contributions') {
-        where = {
-          ...where,
+        const nameFilter: Prisma.DocumentWhereInput = {
           contributions: {
             some: {
               person: {
@@ -403,6 +405,7 @@ export class DocumentDAO extends AbstractDAO {
             },
           },
         }
+        contributionFilters.push(nameFilter)
       }
       if (filter.id === 'date' && Array.isArray(filter.value)) {
         const startDate = filter.value[0] || null // Full ISO string date
@@ -458,28 +461,19 @@ export class DocumentDAO extends AbstractDAO {
     })
 
     if (contributorUids && contributorUids.length > 0) {
-      if (perspectiveRolesFilter.length > 0) {
-        where = {
-          ...where,
-          contributions: {
-            some: {
-              roles: {
-                hasSome: perspectiveRolesFilter,
-              },
-              person: { uid: { in: contributorUids } },
+      const rolesAndUidFilter: Prisma.DocumentWhereInput = {
+        contributions: {
+          some: {
+            person: {
+              uid: { in: contributorUids },
             },
+            ...(perspectiveRolesFilter.length > 0 && {
+              roles: { hasSome: perspectiveRolesFilter },
+            }),
           },
-        }
-      } else {
-        where = {
-          ...where,
-          contributions: {
-            some: {
-              person: { uid: { in: contributorUids } },
-            },
-          },
-        }
+        },
       }
+      contributionFilters.push(rolesAndUidFilter)
     }
 
     const orderBy: Prisma.DocumentOrderByWithRelationInput[] = sorting.map(
@@ -511,7 +505,20 @@ export class DocumentDAO extends AbstractDAO {
       },
     )
 
-    const documents = await this.prismaClient.document.findMany({
+    if (contributionFilters.length > 0) {
+      const existingAnd = where.AND
+        ? Array.isArray(where.AND)
+          ? where.AND
+          : [where.AND]
+        : []
+
+      where = {
+        ...where,
+        AND: [...existingAnd, ...contributionFilters],
+      }
+    }
+
+    const dbDocuments = await this.prismaClient.document.findMany({
       where,
       skip,
       take: pageSize,
@@ -519,7 +526,11 @@ export class DocumentDAO extends AbstractDAO {
       include: {
         titles: true,
         abstracts: true,
-        subjects: true,
+        subjects: {
+          include: {
+            labels: true,
+          },
+        },
         contributions: {
           include: {
             person: true,
@@ -532,7 +543,9 @@ export class DocumentDAO extends AbstractDAO {
     const totalItems = await this.prismaClient.document.count({ where })
 
     return {
-      documents,
+      documents: dbDocuments.map((dbDocument) => {
+        return Document.fromDbDocument(dbDocument)
+      }),
       totalItems,
     }
   }
@@ -553,7 +566,11 @@ export class DocumentDAO extends AbstractDAO {
           },
         },
         records: true,
-        subjects: true,
+        subjects: {
+          include: {
+            labels: true,
+          },
+        },
       },
     })
   }

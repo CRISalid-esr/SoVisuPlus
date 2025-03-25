@@ -1,3 +1,4 @@
+import { DocumentWithRelations as DbDocument } from '@/prisma-schema/extended-client'
 import { Concept, ConceptJson } from '@/types/Concept'
 import { Contribution, ContributionJson } from '@/types/Contribution'
 import { DocumentRecord } from '@/types/DocumentRecord'
@@ -74,6 +75,25 @@ class Document {
       ),
       document.records.map((record: DocumentRecord) =>
         DocumentRecord.fromObject(record),
+      ),
+    )
+  }
+
+  static fromDbDocument(document: DbDocument): Document {
+    return new Document(
+      document.uid,
+      Document.documentTypeFromString(document.documentType),
+      document.publicationDate,
+      document.publicationDateStart,
+      document.publicationDateEnd,
+      document.titles.map((title) => Literal.fromObject(title)),
+      document.abstracts.map((abstract) => Literal.fromObject(abstract)),
+      document.subjects.map((subject) => Concept.fromDbConcept(subject)),
+      document.contributions.map((contribution) =>
+        Contribution.fromDbContribution(contribution),
+      ),
+      document.records.map((record) =>
+        DocumentRecord.fromDbDocumentRecord(record),
       ),
     )
   }
