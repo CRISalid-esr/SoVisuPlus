@@ -88,7 +88,7 @@ export default function DocumentsPage() {
   const navigateToDetailsPage = (documentUid: string) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('tab', 'bibliographic_information')
-    router.push(`/documents/${documentUid}?${params.toString()}`)
+    router.push(`/${lang}/documents/${documentUid}?${params.toString()}`)
   }
 
   const tabs = [

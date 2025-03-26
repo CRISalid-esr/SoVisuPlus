@@ -318,7 +318,7 @@ const SearchInput: React.FC = () => {
     params.delete('perspective')
     let targetPath = pathname
     // if we're on a details page, remove the UUID from the path
-    const detailPattern = /^\/fr\/(documents)\/[0-9a-fA-F-]+$/
+    const detailPattern = /^\/([a-z]{2}\/documents)\/[0-9a-fA-F-]+$/
     const match = pathname.match(detailPattern)
     if (match) {
       // If it's a detail page, cut off the UUID

@@ -21,12 +21,15 @@ import {
   Keywords,
   Sources,
 } from './components/'
+import * as Lingui from '@lingui/core'
+import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 
 export default function DocumentDetailsPage() {
   const theme = useTheme()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { uid } = useParams<{ uid: string }>()
+  const lang = Lingui.i18n.locale as ExtendedLanguageCode
 
   const tabs = [
     {
@@ -99,7 +102,7 @@ export default function DocumentDetailsPage() {
   const handleTabChange = (newValue: string) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('tab', newValue)
-    router.push(`/documents/${uid}?${params.toString()}`)
+    router.push(`/${lang}/documents/${uid}?${params.toString()}`)
   }
 
   const renderTabContent = () => {
