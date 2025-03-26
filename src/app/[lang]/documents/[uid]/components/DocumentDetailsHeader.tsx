@@ -16,7 +16,7 @@ const DocumentDetailsHeader = () => {
   const backToPublicationList = () => {
     const params = new URLSearchParams(searchParams.toString())
     params.delete('tab')
-    router.push(`/documents?${params.toString()}`)
+    router.push(`/${lang}/documents?${params.toString()}`)
   }
 
   return (

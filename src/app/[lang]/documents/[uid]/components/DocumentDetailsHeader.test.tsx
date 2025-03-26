@@ -62,6 +62,6 @@ describe('DocumentDetailsHeader Component', () => {
     fireEvent.click(backButton)
 
     expect(mockRouter.push).toHaveBeenCalledTimes(1)
-    expect(mockRouter.push).toHaveBeenCalledWith('/documents?')
+    expect(mockRouter.push).toHaveBeenCalledWith('/en/documents?')
   })
 })
