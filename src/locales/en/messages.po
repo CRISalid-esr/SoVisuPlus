@@ -77,7 +77,7 @@ msgid "document_details_page_no_title_available"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:53
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
 msgid "document_details_page_back_to_my_publications"
 msgstr ""
 
@@ -128,27 +128,27 @@ msgid "document_details_page_source_tab_card_validate_button"
 msgstr "Confirm"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.test.tsx:145
+#: src/app/[lang]/documents/[uid]/page.test.tsx:165
 msgid "document_details_bibliographic_information_tab"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.test.tsx:149
+#: src/app/[lang]/documents/[uid]/page.test.tsx:169
 msgid "document_details_keywords_tab"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:128
+#: src/app/[lang]/documents/page.test.tsx:130
 msgid "documents_page_main_title"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:132
+#: src/app/[lang]/documents/page.test.tsx:134
 msgid "documents_page_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:162
+#: src/app/[lang]/documents/page.test.tsx:165
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
@@ -314,7 +314,7 @@ msgstr "Scopus"
 msgid "documents_details_page_type_column_tab_author"
 msgstr "Authors"
 
-#: src/app/[lang]/documents/page.tsx:561
+#: src/app/[lang]/documents/page.tsx:565
 msgid "documents_page_action_column_details"
 msgstr "Details"
 
@@ -368,7 +368,7 @@ msgstr "Journal article"
 msgid "documents_page_keywords_to_validate"
 msgstr "keywords to be validated"
 
-#: src/app/[lang]/documents/page.tsx:509
+#: src/app/[lang]/documents/page.tsx:513
 msgid "documents_page_main_title"
 msgstr "Publications"
 
@@ -407,7 +407,7 @@ msgstr "Scientific publication"
 msgid "documents_page_source_column"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/page.tsx:516
+#: src/app/[lang]/documents/page.tsx:520
 msgid "documents_page_synchronize_button"
 msgstr "Syncronization"
 
@@ -543,7 +543,7 @@ msgstr "Research activities"
 #~ msgid "side_bar_publications"
 #~ msgstr "Publications"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:418
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:429
 msgid "sidebar_back_to_my_perspective"
 msgstr "Back to my page"
 
@@ -553,12 +553,12 @@ msgstr "Back to my page"
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:44
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:137
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:247
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:338
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:349
 msgid "sidebar_search_people"
 msgstr "researchers"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:121
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:367
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:378
 msgid "sidebar_search_placeholder"
 msgstr "Search"
 
@@ -567,7 +567,7 @@ msgstr "Search"
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:206
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:46
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:147
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:340
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:351
 msgid "sidebar_search_research_structures"
 msgstr "Research structures"
 
