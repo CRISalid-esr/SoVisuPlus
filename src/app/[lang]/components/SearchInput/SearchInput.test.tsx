@@ -1,4 +1,5 @@
 import React from 'react'
+import { usePathname } from 'next/navigation'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import SearchInput from './SearchInput'
@@ -21,7 +22,7 @@ const pushMock = jest.fn()
 
 jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(() => new URLSearchParams()),
-  usePathname: jest.fn().mockReturnValue('/fr/documents'),
+  usePathname: jest.fn(),
   useRouter: jest.fn(() => ({
     push: pushMock,
     replace: jest.fn(),
@@ -33,6 +34,7 @@ jest.mock('next/navigation', () => ({
 describe('SearchInput Component', () => {
   const mockFetchPeopleByName = jest.fn()
   const mockFetchResearchStructuresByName = jest.fn()
+  ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
 
   const mockState = {
     person: {
@@ -98,6 +100,7 @@ describe('SearchInput Component', () => {
     )
 
   it('renders SearchInput with initial chips and input box', async () => {
+    ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
     renderComponent()
 
     const searchInput = screen.getByPlaceholderText(
@@ -115,6 +118,7 @@ describe('SearchInput Component', () => {
   })
 
   it('fetches people on typing', async () => {
+    ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
     renderComponent()
 
     const searchInput = screen.getByPlaceholderText(
@@ -141,6 +145,7 @@ describe('SearchInput Component', () => {
   }, 10000)
 
   it('fetches research structures when scrolled to bottom', async () => {
+    ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
     renderComponent()
     const searchInput = screen.getByPlaceholderText(
       'sidebar_search_placeholder',
@@ -175,6 +180,7 @@ describe('SearchInput Component', () => {
   })
 
   it('toggles chip selection on click', () => {
+    ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
     renderComponent()
     const searchInput = screen.getByPlaceholderText(
       'sidebar_search_placeholder',
@@ -192,6 +198,7 @@ describe('SearchInput Component', () => {
   })
 
   it('renders grouped options correctly', () => {
+    ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
     renderComponent()
     const searchInput = screen.getByPlaceholderText(
       'sidebar_search_placeholder',
@@ -212,6 +219,7 @@ describe('SearchInput Component', () => {
   })
 
   it('sets perspective to person on selecting a person menu item', () => {
+    ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
     renderComponent()
     const searchInput = screen.getByPlaceholderText(
       'sidebar_search_placeholder',
@@ -230,6 +238,7 @@ describe('SearchInput Component', () => {
   })
 
   it('sets perspective to research structure on selecting a research structure menu item', () => {
+    ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
     renderComponent()
     const searchInput = screen.getByPlaceholderText(
       'sidebar_search_placeholder',
@@ -245,5 +254,15 @@ describe('SearchInput Component', () => {
       expect.stringContaining('perspective=research-structure%3Alab-x'),
       { scroll: false },
     )
+  })
+
+  it('disables the autocomplete when path name is /groups', () => {
+    ;(usePathname as jest.Mock).mockReturnValue('/fr/my-groups')
+    renderComponent()
+    const searchInput = screen.getByPlaceholderText(
+      'sidebar_search_placeholder',
+    )
+    expect(searchInput).toBeInTheDocument()
+    expect(searchInput).toBeDisabled()
   })
 })

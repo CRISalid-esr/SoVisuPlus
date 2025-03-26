@@ -55,8 +55,8 @@ export default function Sidebar({
   handleToggleDrawerAction,
   user,
 }: SidebarProps) {
-  const pathname = usePathname() // Get the current path
-  const lang = pathname.split('/')[1] // Extract the `lang` dynamic segment
+  const pathname = usePathname()
+  const lang = pathname.split('/')[1]
   const theme = useTheme()
   const { setTheme, currentTheme } = useThemeContext()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
