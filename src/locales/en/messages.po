@@ -234,15 +234,15 @@ msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1
 msgid "dashboard_page_main_title"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/page.tsx:53
+#: src/app/[lang]/documents/[uid]/page.tsx:56
 msgid "document_details_authors_tab"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/page.tsx:33
+#: src/app/[lang]/documents/[uid]/page.tsx:36
 msgid "document_details_bibliographic_information_tab"
 msgstr "Bibliographic information"
 
-#: src/app/[lang]/documents/[uid]/page.tsx:43
+#: src/app/[lang]/documents/[uid]/page.tsx:46
 msgid "document_details_domains_tab"
 msgstr "Disciplines"
 
@@ -250,7 +250,7 @@ msgstr "Disciplines"
 #~ msgid "document_details_HAL_referencing_tab"
 #~ msgstr "HAL details"
 
-#: src/app/[lang]/documents/[uid]/page.tsx:38
+#: src/app/[lang]/documents/[uid]/page.tsx:41
 msgid "document_details_keywords_tab"
 msgstr "Keywords"
 
@@ -290,7 +290,7 @@ msgstr "Compare sources"
 msgid "document_details_page_titles_row_label"
 msgstr "Title"
 
-#: src/app/[lang]/documents/[uid]/page.tsx:48
+#: src/app/[lang]/documents/[uid]/page.tsx:51
 msgid "document_details_sources_tab"
 msgstr "Sources"
 
