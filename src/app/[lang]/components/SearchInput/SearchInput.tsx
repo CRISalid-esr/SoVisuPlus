@@ -53,6 +53,10 @@ const SearchInput: React.FC = () => {
   const searchParams = useSearchParams()
   const theme = useTheme()
 
+  const searchInputIsDisabled: boolean = useMemo<boolean>(() => {
+    return !pathname.match(/^\/[a-z]{2}\/(documents|dashboard|expertise)/)
+  }, [pathname])
+
   const {
     fetchPeopleByName,
     loading: peopleLoading,
@@ -287,7 +291,7 @@ const SearchInput: React.FC = () => {
   }, [searchTags])
 
   const handlePerspectiveSelection = (
-    event: React.SyntheticEvent,
+    _: React.SyntheticEvent,
     value: IAutoCompleteOption<Person | ResearchStructure> | null,
   ) => {
     if (value) {
@@ -336,6 +340,7 @@ const SearchInput: React.FC = () => {
         onClose={() => {
           setSearchTerm(searchTerm)
         }}
+        disabled={searchInputIsDisabled}
         onChange={handlePerspectiveSelection}
         renderGroup={renderGroup}
         disableCloseOnSelect={true}
