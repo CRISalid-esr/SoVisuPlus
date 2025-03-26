@@ -137,6 +137,26 @@ describe('DocumentDetailsPage Component', () => {
     ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
       selector({
         document: { ...mockState.document, loading: false, hasFetched: true },
+        user: {
+          currentPerspective: {
+            person: {
+              id: '1',
+              firstName: 'John',
+              lastName: 'Doe',
+              type: 'people',
+              slug: 'person:john-doe',
+            },
+          },
+          connectedUser: {
+            person: {
+              id: '1',
+              firstName: 'John',
+              lastName: 'Doe',
+              type: 'people',
+              slug: 'person:john-doe',
+            },
+          },
+        },
       }),
     )
     renderComponent()

@@ -52,6 +52,7 @@ describe('addDocumentSlice', () => {
       sorting: '',
       contributorUid: null,
       contributorType: 'person',
+      requestId: 1,
     }
 
     // Call the fetchDocuments method
@@ -63,7 +64,10 @@ describe('addDocumentSlice', () => {
     expect(state.documents).toEqual(mockDocuments)
     expect(state.totalItems).toBe(mockTotalItems)
     expect(state.error).toBeNull()
-    expect(toQueryString).toHaveBeenCalledWith(queryObject) // Ensure toQueryString was called with the right arguments
+    const queryObjectWithoutRequestId = Object.fromEntries(
+      Object.entries(queryObject).filter(([key]) => key !== 'requestId'),
+    )
+    expect(toQueryString).toHaveBeenCalledWith(queryObjectWithoutRequestId)
     expect(fetch).toHaveBeenCalledWith('/api/documents?mockQueryString') // Ensure fetch was called with the right URL
   })
 
@@ -82,6 +86,7 @@ describe('addDocumentSlice', () => {
       sorting: '',
       contributorUid: null,
       contributorType: 'person',
+      requestId: 1,
     }
 
     // Call the fetchDocuments method

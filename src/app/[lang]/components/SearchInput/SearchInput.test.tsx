@@ -21,7 +21,7 @@ const pushMock = jest.fn()
 
 jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(() => new URLSearchParams()),
-  usePathname: jest.fn(),
+  usePathname: jest.fn().mockReturnValue('/fr/documents'),
   useRouter: jest.fn(() => ({
     push: pushMock,
     replace: jest.fn(),

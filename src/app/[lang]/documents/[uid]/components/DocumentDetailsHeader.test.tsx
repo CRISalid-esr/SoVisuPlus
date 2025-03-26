@@ -7,11 +7,12 @@ import DocumentDetailsHeader from './DocumentDetailsHeader'
 
 // Mock `useRouter`
 const mockRouter = {
-  back: jest.fn(),
+  push: jest.fn(),
 }
 
 jest.mock('next/navigation', () => ({
   useRouter: () => mockRouter,
+  useSearchParams: jest.fn(() => new URLSearchParams()),
 }))
 
 // Mock MUI Theme
@@ -50,7 +51,7 @@ describe('DocumentDetailsHeader Component', () => {
 
     expect(screen.getByRole('button')).toBeInTheDocument() // Ensures the button exists
     expect(
-      screen.getByText(i18n.t('document_details_page_main_title')),
+      screen.getByText(i18n.t('document_details_page_back_to_my_publications')),
     ).toBeInTheDocument()
   })
 
@@ -60,6 +61,7 @@ describe('DocumentDetailsHeader Component', () => {
     const backButton = screen.getByRole('button')
     fireEvent.click(backButton)
 
-    expect(mockRouter.back).toHaveBeenCalledTimes(1)
+    expect(mockRouter.push).toHaveBeenCalledTimes(1)
+    expect(mockRouter.push).toHaveBeenCalledWith('/documents?')
   })
 })

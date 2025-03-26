@@ -13,10 +13,12 @@ export interface DocumentQuery extends BaseQuery {
   sorting: string
   contributorUid: string | null
   contributorType: AgentType
+  requestId: number
 }
 
 export interface DocumentSlice {
   document: {
+    latestDocumentRequestId?: number
     documents: Array<Document>
     selectedDocument: Document | null
     totalItems?: number
@@ -42,8 +44,17 @@ export const addDocumentSlice: StateCreator<
     totalItems: 0,
     hasFetched: false,
     fetchDocuments: async (queryObject: DocumentQuery) => {
-      const queryString = toQueryString(queryObject)
-      set((state) => ({ document: { ...state.document, loading: true } }))
+      const { requestId, ...rest } = queryObject
+      const queryString = toQueryString(rest)
+
+      // Mark the request as the latest before the async call
+      set((state) => ({
+        document: {
+          ...state.document,
+          loading: true,
+          latestDocumentRequestId: requestId,
+        },
+      }))
 
       try {
         const response = await fetch(`/api/documents?${queryString}`)
@@ -51,20 +62,34 @@ export const addDocumentSlice: StateCreator<
         const documents: Document[] = jsonData.documents
         const totalItems = jsonData.totalItems
 
-        set((state) => ({
-          document: {
-            ...state.document,
-            documents,
-            totalItems,
-            error: null,
-            loading: false, // ✅ Ensure loading is false here
-          },
-        }))
+        set((state) => {
+          // Ignore if a newer request was made since this one started
+          if (state.document.latestDocumentRequestId !== requestId) return state
+
+          return {
+            document: {
+              ...state.document,
+              documents,
+              totalItems,
+              error: null,
+              loading: false,
+            },
+          }
+        })
       } catch (error) {
         console.error('Failed to fetch documents', error)
-        set((state) => ({
-          document: { ...state.document, error, documents: [], loading: false },
-        }))
+        set((state) => {
+          if (state.document.latestDocumentRequestId !== requestId) return state
+
+          return {
+            document: {
+              ...state.document,
+              error,
+              documents: [],
+              loading: false,
+            },
+          }
+        })
       }
     },
 

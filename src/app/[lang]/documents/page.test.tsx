@@ -23,7 +23,9 @@ jest.mock('@/stores/global_store', () => ({
 const pushMock = jest.fn()
 
 jest.mock('next/navigation', () => ({
-  useSearchParams: jest.fn(),
+  useSearchParams: jest.fn(
+    () => new URLSearchParams('?perspective=person:john-doe'),
+  ),
   usePathname: jest.fn(),
   useRouter: jest.fn(() => ({
     push: pushMock,
@@ -151,6 +153,7 @@ describe('DocumentsPage Component', () => {
         searchLang: 'en',
         contributorType: 'person',
         contributorUid: '',
+        requestId: 1,
       })
     })
   })
@@ -189,11 +192,14 @@ describe('DocumentsPage Component', () => {
     renderComponent()
 
     await waitFor(() => {
+      expect(screen.getByText('Test Title')).toBeInTheDocument()
       fireEvent.click(screen.getByText('Test Title'))
     })
     expect(pushMock).toHaveBeenCalledTimes(1)
     expect(pushMock).toHaveBeenCalledWith(
-      expect.stringContaining('/documents/doc1?tab=bibliographic_information'),
+      expect.stringContaining(
+        '/documents/doc1?perspective=person%3Ajohn-doe&tab=bibliographic_information',
+      ),
     )
   })
 })
