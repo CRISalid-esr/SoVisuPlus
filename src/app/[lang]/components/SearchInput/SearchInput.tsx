@@ -297,16 +297,37 @@ const SearchInput: React.FC = () => {
       } else {
         params.delete('perspective')
       }
+      let targetPath = pathname
+
+      // if we're on a details page, remove the UUID from the path
+      const detailPattern = /^\/fr\/(documents)\/[0-9a-fA-F-]+$/
+      const match = pathname.match(detailPattern)
+      if (match) {
+        // If it's a detail page, cut off the UUID
+        targetPath = `/${match[1]}`
+        params.delete('tab')
+      }
 
       // Push updated query parameters without full page reload
-      router.push(`${pathname}?${params.toString()}`, { scroll: false })
+      router.push(`${targetPath}?${params.toString()}`, { scroll: false })
     }
   }
 
   const backToMyPerspective = () => {
     const params = new URLSearchParams(searchParams.toString())
     params.delete('perspective')
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    let targetPath = pathname
+    // if we're on a details page, remove the UUID from the path
+    const detailPattern = /^\/fr\/(documents)\/[0-9a-fA-F-]+$/
+    const match = pathname.match(detailPattern)
+    if (match) {
+      // If it's a detail page, cut off the UUID
+      targetPath = `/${match[1]}`
+      params.delete('tab')
+    }
+
+    // Push updated query parameters without full page reload
+    router.push(`${targetPath}?${params.toString()}`, { scroll: false })
   }
 
   return (

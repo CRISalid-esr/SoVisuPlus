@@ -97,7 +97,9 @@ export default function DocumentDetailsPage() {
   }
 
   const handleTabChange = (newValue: string) => {
-    router.push(`?tab=${newValue}`, { scroll: false })
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', newValue)
+    router.push(`/documents/${uid}?${params.toString()}`)
   }
 
   const renderTabContent = () => {

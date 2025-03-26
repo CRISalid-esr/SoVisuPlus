@@ -13,9 +13,7 @@ export default function DashboardPage() {
   return (
     <Box>
       <DocumentHeader
-        perspective={
-          currentPerspective?.getDisplayName(lang as ExtendedLanguageCode) || ''
-        }
+        perspective={currentPerspective?.getDisplayName(lang) || ''}
         pageName={t`dashboard_page_main_title`}
       />
     </Box>

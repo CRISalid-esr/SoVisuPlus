@@ -33,8 +33,8 @@ import {
   MRT_SortingState,
 } from 'material-react-table'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation' // Import useRouter
-import { useEffect, useMemo, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation' // Import useRouter
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Highlighter from 'react-highlight-words'
 import DocumentHeader from './components/DocumentHeader'
 import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
@@ -82,7 +82,15 @@ export default function DocumentsPage() {
   >({})
 
   const theme = useTheme()
-  const router = useRouter() // Initialize the router
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const navigateToDetailsPage = (documentUid: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', 'bibliographic_information')
+    router.push(`/documents/${documentUid}?${params.toString()}`)
+  }
+
   const tabs = [
     {
       label: t`documents_page_all_documents_filter`,
@@ -193,8 +201,6 @@ export default function DocumentsPage() {
             supportedLocales,
             t`no_title_available`,
           )
-          const effectiveRowLang = localizedTitle.language
-
           return (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Box
@@ -223,7 +229,7 @@ export default function DocumentsPage() {
               </Box>
               <LanguageChips
                 texts={titles}
-                selectedLang={effectiveRowLang}
+                selectedLang={localizedTitle.language}
                 onLanguageSelect={(newLang) =>
                   setSelectedTitleLangs((prev) => ({ ...prev, [uid]: newLang }))
                 }
@@ -408,8 +414,10 @@ export default function DocumentsPage() {
         ),
       },
     ],
-    [lang, globalFilter, selectedTitleLangs],
+    [lang, globalFilter, selectedTitleLangs, currentPerspective],
   )
+
+  const requestIdRef = useRef(0)
 
   const {
     fetchDocuments,
@@ -467,6 +475,7 @@ export default function DocumentsPage() {
 
     const contributorType = currentPerspective?.type
     if (!contributorType) return
+    const nextRequestId = ++requestIdRef.current
     fetchDocuments({
       page: pagination.pageIndex + 1,
       pageSize: pagination.pageSize,
@@ -476,6 +485,7 @@ export default function DocumentsPage() {
       sorting: JSON.stringify(sorting),
       contributorUid: currentPerspective?.uid || '',
       contributorType: contributorType,
+      requestId: nextRequestId,
     }).catch((error) => {
       console.error('Error fetching documents:', error)
     })
@@ -492,10 +502,6 @@ export default function DocumentsPage() {
 
   const handleTabChange = (newValue: string) => {
     setSelectedTab(newValue)
-  }
-
-  function navigateToDetailsPage(documentUid: string) {
-    router.push(`/documents/${documentUid}?tab=bibliographic_information`)
   }
 
   return (
