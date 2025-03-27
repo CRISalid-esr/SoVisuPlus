@@ -257,7 +257,7 @@ export default function DocumentsPage() {
               const { firstName, lastName } = person
               let name = [firstName, lastName].filter(Boolean).join(' ')
               if (name.match(/^\s*$/)) {
-                name = person.displayName
+                name = person.getDisplayName()
               }
               if (name) {
                 if (acc) {

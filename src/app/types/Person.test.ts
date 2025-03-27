@@ -1,6 +1,6 @@
 import { Person } from '@/types/Person'
 import { PersonIdentifierType } from '@prisma/client'
-import { describe, it, expect } from '@jest/globals'
+import { describe, expect, it } from '@jest/globals'
 
 describe('Person', () => {
   it('should create a valid Person object', () => {
@@ -47,6 +47,7 @@ describe('Person', () => {
       email: 'example@example.com',
       displayName: 'John Doe',
       firstName: 'John',
+      normalizedName: 'john doe',
       lastName: 'Doe',
       identifiers: [
         { type: PersonIdentifierType.ORCID, value: '0000-0002-1825-0097' },
@@ -65,6 +66,7 @@ describe('Person', () => {
     expect(result.displayName).toBe('John Doe')
     expect(result.firstName).toBe('John')
     expect(result.lastName).toBe('Doe')
+    expect(result.normalizedName).toBe('john doe')
     expect(result.getIdentifiers()).toEqual([
       { type: PersonIdentifierType.ORCID, value: '0000-0002-1825-0097' },
       { type: PersonIdentifierType.LOCAL, value: '12345' },
@@ -81,6 +83,7 @@ describe('Person', () => {
       displayName: 'Alice Smith',
       firstName: 'Alice',
       lastName: 'Smith',
+      normalizedName: 'alice smith',
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -94,6 +97,34 @@ describe('Person', () => {
     expect(result.displayName).toBe('Alice Smith')
     expect(result.firstName).toBe('Alice')
     expect(result.lastName).toBe('Smith')
+    expect(result.normalizedName).toBe('alice smith')
     expect(result.getIdentifiers()).toEqual([])
+  })
+
+  it('should compute the display name if an empty one is provided', () => {
+    const personWithNullDisplayName = new Person(
+      'P123',
+      true,
+      'jdoe@example.com',
+      null,
+      'John',
+      'Doe',
+      [{ type: PersonIdentifierType.ORCID, value: '0000-0002-1825-0097' }],
+    )
+    expect(personWithNullDisplayName.displayName).toBe('John Doe')
+    expect(personWithNullDisplayName.normalizedName).toBe('john doe')
+  })
+  it('should compute the normalized name from the provided display name', () => {
+    const personWithDisplayName = new Person(
+      'P123',
+      true,
+      'jdoe@example.com',
+      'John Doe Jr',
+      'John',
+      'Doe',
+      [{ type: PersonIdentifierType.ORCID, value: '0000-0002-1825-0097' }],
+    )
+    expect(personWithDisplayName.displayName).toBe('John Doe Jr')
+    expect(personWithDisplayName.normalizedName).toBe('john doe jr')
   })
 })

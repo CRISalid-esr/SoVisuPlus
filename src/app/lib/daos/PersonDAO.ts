@@ -10,13 +10,7 @@ import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
 import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
-
-interface FetchPeopleParams {
-  searchTerm: string
-  page: number
-  includeExternal: boolean
-  itemsPerPage: number
-}
+import removeAccents from 'remove-accents'
 
 /** PersonDAO: Handles operations related to Person and PersonIdentifiers */
 export class PersonDAO extends AbstractDAO {
@@ -60,6 +54,7 @@ export class PersonDAO extends AbstractDAO {
               lastName: person.lastName,
               external: person.external,
               slug: uniqueSlug,
+              normalizedName: person.normalizedName,
             },
             create: {
               uid: person.uid,
@@ -69,6 +64,7 @@ export class PersonDAO extends AbstractDAO {
               lastName: person.lastName,
               external: person.external,
               slug: uniqueSlug,
+              normalizedName: person.normalizedName,
             },
           })
           await this.handleIdentifierConflicts(
@@ -248,26 +244,24 @@ export class PersonDAO extends AbstractDAO {
     }
   }
 
-  public fetchPeople = async ({
-    searchTerm,
-    page,
-    includeExternal,
-    itemsPerPage,
-  }: FetchPeopleParams): Promise<{
+  public fetchPeople = async (
+    searchTerm: string,
+    page: number,
+    includeExternal: boolean,
+    itemsPerPage: number,
+  ): Promise<{
     people: Person[]
     total: number
     hasMore: boolean
   }> => {
-    const searchTerms = searchTerm.trim().split(/\s+/)
-    const searchCriteria = searchTerms.map((term) => ({
-      OR: [
-        { firstName: { contains: term, mode: Prisma.QueryMode.insensitive } },
-        { lastName: { contains: term, mode: Prisma.QueryMode.insensitive } },
-      ],
-    }))
-
+    const searchTerms = searchTerm.trim().split(/\s+/).map(removeAccents)
     const whereClause: Prisma.PersonWhereInput = {
-      AND: searchCriteria,
+      OR: searchTerms.map((term) => ({
+        normalizedName: {
+          contains: term,
+          mode: Prisma.QueryMode.insensitive,
+        },
+      })),
     }
 
     if (!includeExternal) {

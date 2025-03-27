@@ -14,7 +14,7 @@ describe('PersonDAO Integration Tests', () => {
     personDAO = new PersonDAO()
   })
 
-  const personData: Person = new Person(
+  const person: Person = new Person(
     'local-johndoe',
     false,
     'johndoe@example.com',
@@ -39,11 +39,11 @@ describe('PersonDAO Integration Tests', () => {
   )
 
   test('should create a new person with identifiers', async () => {
-    const dbPerson = await personDAO.createOrUpdatePerson(personData)
+    const dbPerson = await personDAO.createOrUpdatePerson(person)
 
     expect(dbPerson).toHaveProperty('id')
-    expect(dbPerson.uid).toBe(personData.uid)
-    expect(dbPerson.email).toBe(personData.email)
+    expect(dbPerson.uid).toBe(person.uid)
+    expect(dbPerson.email).toBe(person.email)
 
     const savedIdentifiers = await prisma.personIdentifier.findMany({
       where: { personId: dbPerson.id },
@@ -69,11 +69,11 @@ describe('PersonDAO Integration Tests', () => {
           [],
         ),
       )
-    const dbPerson = await personDAO.createOrUpdatePerson(personData)
+    const dbPerson = await personDAO.createOrUpdatePerson(person)
 
     expect(dbPerson).toHaveProperty('id')
-    expect(dbPerson.uid).toBe(personData.uid)
-    expect(dbPerson.email).toBe(personData.email)
+    expect(dbPerson.uid).toBe(person.uid)
+    expect(dbPerson.email).toBe(person.email)
 
     const savedMemberships = await prisma.membership.findMany({
       where: { personId: dbPerson.id },
@@ -91,7 +91,7 @@ describe('PersonDAO Integration Tests', () => {
   test('should update an existing person and replace identifiers', async () => {
     const initialPerson = await prisma.person.create({
       data: {
-        uid: personData.uid,
+        uid: person.uid,
         email: 'old-email@example.com',
         firstName: 'Old',
         lastName: 'Name',
@@ -108,11 +108,11 @@ describe('PersonDAO Integration Tests', () => {
       ],
     })
 
-    const updatedPerson = await personDAO.createOrUpdatePerson(personData)
+    const updatedPerson = await personDAO.createOrUpdatePerson(person)
 
-    expect(updatedPerson.email).toBe(personData.email)
-    expect(updatedPerson.firstName).toBe(personData.firstName)
-    expect(updatedPerson.lastName).toBe(personData.lastName)
+    expect(updatedPerson.email).toBe(person.email)
+    expect(updatedPerson.firstName).toBe(person.firstName)
+    expect(updatedPerson.lastName).toBe(person.lastName)
 
     const updatedIdentifiers = await prisma.personIdentifier.findMany({
       where: { personId: updatedPerson.id },
@@ -143,7 +143,7 @@ describe('PersonDAO Integration Tests', () => {
       },
     })
 
-    await expect(personDAO.createOrUpdatePerson(personData)).rejects.toThrow(
+    await expect(personDAO.createOrUpdatePerson(person)).rejects.toThrow(
       'Failed to upsert person: Conflicting identifiers found: ORCID:0000-0001-2345-6789',
     )
   })
@@ -151,10 +151,10 @@ describe('PersonDAO Integration Tests', () => {
   test('should remove old identifiers and add new ones for the same person', async () => {
     const initialPerson = await prisma.person.create({
       data: {
-        uid: personData.uid,
-        email: personData.email,
-        firstName: personData.firstName,
-        lastName: personData.lastName,
+        uid: person.uid,
+        email: person.email,
+        firstName: person.firstName,
+        lastName: person.lastName,
       },
     })
 
@@ -168,7 +168,7 @@ describe('PersonDAO Integration Tests', () => {
       ],
     })
 
-    const newPersonData = personData
+    const newPersonData = person
     newPersonData.setIdentifiers([
       { type: PersonIdentifierType.SCOPUS_EID, value: '1234-5678-9012' },
       { type: PersonIdentifierType.IDREF, value: 'AB-1234-5678' },

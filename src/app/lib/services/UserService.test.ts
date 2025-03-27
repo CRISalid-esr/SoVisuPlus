@@ -60,6 +60,7 @@ describe('UserService', () => {
       displayName: 'John Doe',
       firstName: 'John',
       lastName: 'Doe',
+      normalizedName: 'john doe',
       createdAt: new Date(),
       updatedAt: new Date(),
     })

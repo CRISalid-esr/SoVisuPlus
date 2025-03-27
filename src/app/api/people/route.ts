@@ -11,12 +11,12 @@ export const GET = async (req: NextRequest) => {
   const personService = new PersonService()
 
   try {
-    const { people, total, hasMore } = await personService.fetchPeople({
+    const { people, total, hasMore } = await personService.fetchPeople(
       searchTerm,
       page,
       includeExternal,
       itemsPerPage,
-    })
+    )
 
     return NextResponse.json({
       people,
