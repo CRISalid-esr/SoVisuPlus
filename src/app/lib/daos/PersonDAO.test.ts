@@ -54,9 +54,9 @@ describe('PersonDAO', () => {
     'local-johndoe',
     false,
     'johndoe@myuniversity.com',
+    'John Doe',
     'John',
     'Doe',
-    'John Doe',
     [{ type: 'ORCID', value: '0000-0001-2345-6789' }],
     [
       new PersonMembership(
@@ -88,7 +88,8 @@ describe('PersonDAO', () => {
         displayName: person.displayName,
         firstName: person.firstName,
         lastName: person.lastName,
-        slug: 'person:doe-john-doe',
+        normalizedName: 'john doe',
+        slug: 'person:john-doe',
         external: person.external,
       },
       create: {
@@ -97,7 +98,8 @@ describe('PersonDAO', () => {
         displayName: person.displayName,
         firstName: person.firstName,
         lastName: person.lastName,
-        slug: 'person:doe-john-doe',
+        normalizedName: 'john doe',
+        slug: 'person:john-doe',
         external: person.external,
       },
     })

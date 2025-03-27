@@ -1,13 +1,6 @@
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 
-interface FetchPeopleParams {
-  searchTerm: string
-  page: number
-  includeExternal: boolean
-  itemsPerPage: number
-}
-
 export class PersonService {
   private personDAO: PersonDAO
 
@@ -15,23 +8,23 @@ export class PersonService {
     this.personDAO = new PersonDAO()
   }
 
-  async fetchPeople({
-    searchTerm,
-    page,
-    includeExternal,
-    itemsPerPage,
-  }: FetchPeopleParams): Promise<{
+  async fetchPeople(
+    searchTerm: string,
+    page: number,
+    includeExternal: boolean,
+    itemsPerPage: number,
+  ): Promise<{
     hasMore: boolean
     people: Person[]
     total: number
   }> {
     try {
-      const { hasMore, people, total } = await this.personDAO.fetchPeople({
+      const { hasMore, people, total } = await this.personDAO.fetchPeople(
         searchTerm,
         page,
         includeExternal,
         itemsPerPage,
-      })
+      )
       return { hasMore, people, total }
     } catch (error) {
       console.error('Error in service layer:', error)
@@ -48,7 +41,7 @@ export class PersonService {
       return person
     } catch (error) {
       console.error('Error fetching person by UID:', error)
-      throw new Error('Error fetching person from service')
+      throw new Error('Error fetching person from service by slug')
     }
   }
 }

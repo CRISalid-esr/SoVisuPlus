@@ -59,6 +59,7 @@ describe('GET /api/route', () => {
         displayName: 'Test User',
         firstName: 'Test',
         lastName: 'User',
+        normalizedName: 'test user',
         id: 0,
         createdAt: new Date(),
         updatedAt: new Date(),

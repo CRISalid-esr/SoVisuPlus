@@ -36,34 +36,20 @@ describe('PersonService', () => {
 
     mockFetchPeople.mockResolvedValue(mockResponse)
 
-    const params = {
-      searchTerm: 'John',
-      page: 1,
-      includeExternal: false,
-      itemsPerPage: 10,
-    }
+    await expect(
+      personService.fetchPeople('John', 1, false, 10),
+    ).resolves.toEqual(mockResponse)
 
-    await expect(personService.fetchPeople(params)).resolves.toEqual(
-      mockResponse,
-    )
-
-    expect(mockFetchPeople).toHaveBeenCalledWith(params)
+    expect(mockFetchPeople).toHaveBeenCalledWith('John', 1, false, 10)
   })
 
   it('should throw an error when fetchPeople fails', async () => {
     mockFetchPeople.mockRejectedValue(new Error('DB error'))
 
-    const params = {
-      searchTerm: 'John',
-      page: 1,
-      includeExternal: false,
-      itemsPerPage: 10,
-    }
+    await expect(
+      personService.fetchPeople('John', 1, false, 10),
+    ).rejects.toThrow('Error fetching people from service')
 
-    await expect(personService.fetchPeople(params)).rejects.toThrow(
-      'Error fetching people from service',
-    )
-
-    expect(mockFetchPeople).toHaveBeenCalledWith(params)
+    expect(mockFetchPeople).toHaveBeenCalledWith('John', 1, false, 10)
   })
 })

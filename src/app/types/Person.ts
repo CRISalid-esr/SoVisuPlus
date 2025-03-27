@@ -6,6 +6,7 @@ import { IAgent, IAgentJson } from '@/types/IAgent'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Person as DbPerson } from '@prisma/client'
 import { PersonMembership } from '@/types/PersonMembership'
+import removeAccents from 'remove-accents'
 
 interface PersonJson extends IAgentJson {
   uid: string
@@ -19,11 +20,13 @@ interface PersonJson extends IAgentJson {
 }
 
 class Person implements IAgent {
+  public normalizedName: string
+
   constructor(
     public uid: string,
     public external: boolean,
     public email: string | null,
-    public displayName: string,
+    public displayName: string | null | undefined,
     public firstName: string,
     public lastName: string,
     private identifiers: PersonIdentifier[] = [],
@@ -32,10 +35,17 @@ class Person implements IAgent {
     public slug: string | null = null,
   ) {
     this.validateIdentifiers(identifiers)
+    this.normalizedName = removeAccents(this.displayNameGuard().toLowerCase())
   }
 
   getDisplayName(language?: ExtendedLanguageCode): string {
     void language
+    return this.displayNameGuard()
+  }
+
+  private displayNameGuard(): string {
+    this.displayName = (this.displayName?.trim() ||
+      Person.computeDisplayName(this.firstName, this.lastName)) as string
     return this.displayName
   }
 
@@ -64,12 +74,26 @@ class Person implements IAgent {
     })
   }
 
+  private static computeDisplayName(
+    firstName?: string | null,
+    lastName?: string | null,
+    fallback?: string | null,
+  ): string {
+    if (fallback) return fallback
+    return `${firstName ?? ''} ${lastName ?? ''}`.trim()
+  }
+
   static fromDbPerson(person: DbPerson): Person {
+    const displayName = Person.computeDisplayName(
+      person.firstName,
+      person.lastName,
+      person.displayName,
+    )
     return new Person(
       person.uid,
       person.external,
       person.email,
-      person.displayName || `${person.firstName} ${person.lastName}`,
+      displayName,
       person.firstName || '',
       person.lastName || '',
       'identifiers' in person ? (person.identifiers as PersonIdentifier[]) : [],
@@ -80,12 +104,16 @@ class Person implements IAgent {
   }
 
   static fromJson(json: PersonJson): Person {
+    const displayName = Person.computeDisplayName(
+      json.firstName,
+      json.lastName,
+      json.displayName ?? null,
+    )
     return new Person(
       json.uid,
       json.external,
       json.email ?? null,
-      json.displayName ||
-        `${json.firstName ?? ''} ${json.lastName ?? ''}`.trim(),
+      displayName,
       json.firstName ?? '',
       json.lastName ?? '',
       json.identifiers ?? [],

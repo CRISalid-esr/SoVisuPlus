@@ -18,20 +18,21 @@ model User {
 }
 
 model Person {
-  id            Int                @id @default(autoincrement())
-  uid           String             @unique
-  slug          String?            @unique
-  email         String?            @unique
-  displayName   String?
-  firstName     String?
-  lastName      String?
-  identifiers   PersonIdentifier[]
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-  external      Boolean            @default(false)
-  user          User?
-  contributions Contribution[]
-  memberships   Membership[]
+  id             Int                @id @default(autoincrement())
+  uid            String             @unique
+  slug           String?            @unique
+  email          String?            @unique
+  displayName    String?
+  firstName      String?
+  lastName       String?
+  normalizedName String?
+  identifiers    PersonIdentifier[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  external       Boolean            @default(false)
+  user           User?
+  contributions  Contribution[]
+  memberships    Membership[]
 }
 
 model Membership {
