@@ -59,7 +59,7 @@ export const addDocumentSlice: StateCreator<
       try {
         const response = await fetch(`/api/documents?${queryString}`)
         const jsonData = await response.json()
-        const documents: Document[] = jsonData.documents
+        const documents = jsonData.documents.map(Document.fromJson)
         const totalItems = jsonData.totalItems
 
         set((state) => {
@@ -102,7 +102,7 @@ export const addDocumentSlice: StateCreator<
           throw new Error('Failed to fetch document')
         }
 
-        const document: Document = await Document.fromJsonDocument(
+        const document: Document = await Document.fromJson(
           await response.json(),
         )
 
