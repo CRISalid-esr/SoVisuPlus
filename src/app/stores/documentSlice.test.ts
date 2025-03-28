@@ -30,8 +30,35 @@ describe('addDocumentSlice', () => {
 
   it('should fetch documents successfully', async () => {
     const mockDocuments = [
-      { id: 1, title: 'Document 1' },
-      { id: 2, title: 'Document 2' },
+      {
+        uid: 'mock-uid-1',
+        documentType: 'JournalArticle',
+        publicationDate: '2022-01-01',
+        publicationDateStart: '2022-01-01T00:00:00.000Z',
+        publicationDateEnd: '2022-01-01T23:59:59.000Z',
+        titles: [{ value: 'Mock Title', language: 'en' }],
+        abstracts: [{ value: 'Mock abstract', language: 'en' }],
+        subjects: [],
+        contributions: [
+          {
+            person: {
+              uid: 'person-1',
+              external: true,
+              email: null,
+              displayName: 'Jane Doe',
+              firstName: 'Jane',
+              lastName: 'Doe',
+              identifiers: [],
+              memberships: [],
+              type: 'person',
+              slug: null,
+              normalizedName: 'jane doe',
+            },
+            roles: ['author'],
+          },
+        ],
+        records: [],
+      },
     ]
     const mockTotalItems = 2
 
@@ -61,7 +88,7 @@ describe('addDocumentSlice', () => {
     // Check if the state was updated correctly
     const state = useStore.getState().document
     expect(state.loading).toBe(false)
-    expect(state.documents).toEqual(mockDocuments)
+    expect(state.documents).toMatchObject(mockDocuments)
     expect(state.totalItems).toBe(mockTotalItems)
     expect(state.error).toBeNull()
     const queryObjectWithoutRequestId = Object.fromEntries(

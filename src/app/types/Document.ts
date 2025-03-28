@@ -58,7 +58,7 @@ class Document {
       : DocumentType.Document
   }
 
-  static fromJsonDocument(document: DocumentJson): Document {
+  static fromJson(document: DocumentJson): Document {
     return new Document(
       document.uid,
       Document.documentTypeFromString(document.documentType),
