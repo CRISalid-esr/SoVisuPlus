@@ -29,15 +29,6 @@ jest.mock('@mui/material/styles', () => ({
   }),
 }))
 
-// Mock LanguageChips component
-jest.mock('../../../../components/LanguageChips', () => ({
-  LanguageChips: ({
-    onLanguageSelect,
-  }: {
-    onLanguageSelect: (lang: string) => void
-  }) => <button onClick={() => onLanguageSelect('fr')}>French</button>,
-}))
-
 const document: Document = new Document(
   'doc-123',
   DocumentType.Document,
@@ -111,7 +102,7 @@ describe('Titles Component', () => {
     expect(screen.getByText('Sample Document Title')).toBeInTheDocument()
 
     // Simulate language selection
-    fireEvent.click(screen.getByText('French'))
+    fireEvent.click(screen.getByText('fr'))
 
     // Updated title should be in French
     expect(screen.getByText('Sample Abstract')).toBeInTheDocument()
@@ -127,5 +118,82 @@ describe('Titles Component', () => {
     expect(
       screen.getByText(i18n.t('document_details_page_no_title_available')),
     ).toBeInTheDocument()
+  })
+
+  it('displays the french title if no english title is available', () => {
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({
+        document: {
+          selectedDocument: {
+            titles: [
+              // title in spanish
+              new Literal('Título de ejemplo', 'es'),
+              new Literal('Exemple de titre', 'fr'),
+            ],
+          },
+        },
+      }),
+    )
+
+    renderComponent()
+
+    expect(screen.getByText('Exemple de titre')).toBeInTheDocument()
+    expect(screen.getByText('fr')).toBeInTheDocument()
+    expect(screen.getByText('es')).toBeInTheDocument()
+    expect(screen.getByText('fr').parentElement).toHaveClass(
+      'MuiChip-colorPrimary',
+    )
+    expect(screen.getByText('es').parentElement).toHaveClass(
+      'MuiChip-colorDefault',
+    )
+  })
+  // if 'en' and 'ul' (undetermined language) are available, 'en' should be displayed and the 'ul' chip should be selected, bu a 'n/a' chip should be displayed
+  it('displays the english title if no undetermined title is available', () => {
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({
+        document: {
+          selectedDocument: {
+            titles: [
+              // title in english
+              new Literal('Sample Document Title', 'en'),
+              // title in undetermined language, cyrillic
+              new Literal('Пример заголовка документа', 'ul'),
+            ],
+          },
+        },
+      }),
+    )
+
+    renderComponent()
+
+    expect(screen.getByText('Sample Document Title')).toBeInTheDocument()
+    expect(screen.getByText('n/a')).toBeInTheDocument()
+    expect(screen.getByText('en')).toBeInTheDocument()
+    expect(screen.getByText('en').parentElement).toHaveClass(
+      'MuiChip-colorPrimary',
+    )
+    expect(screen.getByText('n/a').parentElement).toHaveClass(
+      'MuiChip-colorDefault',
+    )
+  })
+  // if there only an ul title, it should be displayed and but the 'n/a' chip should not appear
+  it('displays the undetermined title if no other title is available', () => {
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({
+        document: {
+          selectedDocument: {
+            titles: [
+              // title in undetermined language, cyrillic
+              new Literal('Пример заголовка документа', 'ul'),
+            ],
+          },
+        },
+      }),
+    )
+
+    renderComponent()
+
+    expect(screen.getByText('Пример заголовка документа')).toBeInTheDocument()
+    expect(screen.queryByText('n/a')).toBeNull()
   })
 })
