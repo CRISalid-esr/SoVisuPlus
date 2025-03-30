@@ -2,10 +2,10 @@ import { LanguageChips } from '@/components/LanguageChips'
 import useStore from '@/stores/global_store'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import * as Lingui from '@lingui/core'
-import { Trans, t } from '@lingui/macro'
+import { t, Trans } from '@lingui/macro'
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const Titles = () => {
   const theme = useTheme()
@@ -13,14 +13,33 @@ const Titles = () => {
   const [selectedLang, setSelectedLang] = useState<string>(lang)
   const { selectedDocument } = useStore((state) => state.document)
 
+  const title: string =
+    selectedDocument?.titles?.find((title) => title.language === selectedLang)
+      ?.value || t`document_details_page_no_title_available`
+
+  useEffect(() => {
+    if (
+      selectedDocument?.titles?.some((title) => title.language === selectedLang)
+    ) {
+      return
+    }
+    const supportedLocales =
+      process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',') || []
+    const titlesInSupportedLocales = selectedDocument?.titles?.filter((title) =>
+      supportedLocales.includes(title.language),
+    )
+    if (titlesInSupportedLocales && titlesInSupportedLocales.length > 0) {
+      setSelectedLang(titlesInSupportedLocales[0].language)
+      return
+    }
+    if (selectedDocument?.titles && selectedDocument.titles.length > 0) {
+      setSelectedLang(selectedDocument.titles[0].language)
+    }
+  }, [selectedLang, selectedDocument])
+
   const handleLanguageChange = (lang: string) => {
     setSelectedLang(lang)
   }
-
-  // Find the selected title, fallback to a default message
-  const selectedTitle =
-    selectedDocument?.titles.find((title) => title.language === selectedLang)
-      ?.value ?? t`document_details_page_no_title_available`
 
   return (
     <>
@@ -41,7 +60,7 @@ const Titles = () => {
         onLanguageSelect={handleLanguageChange}
       />
 
-      <Typography>{selectedTitle}</Typography>
+      <Typography>{title}</Typography>
     </>
   )
 }

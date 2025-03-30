@@ -17,18 +17,18 @@ export default function LanguageChips({
   onLanguageSelect,
 }: LanguageChipsProps) {
   const theme = useTheme()
-
+  const hideUndeterminedLanguage = texts.length < 2
   return (
     <Box>
       {texts
-        .filter((text) => text.language !== 'ul') // Ignore undetermined language
+        .filter((text) => !(text.language == 'ul' && hideUndeterminedLanguage))
         .map((text, index) => (
           <Chip
             key={index}
             size='small'
             sx={{ marginRight: theme.spacing(1) }}
             clickable={text.language !== selectedLang}
-            label={text.language}
+            label={text.language == 'ul' ? 'n/a' : text.language}
             onClick={(e) => {
               if (text.language === selectedLang) {
                 e.preventDefault()

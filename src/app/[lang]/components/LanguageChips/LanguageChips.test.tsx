@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import LanguageChips from './LanguageChips'
