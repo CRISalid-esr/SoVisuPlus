@@ -1,7 +1,7 @@
 import { DocumentWithRelations as DbDocument } from '@/prisma-schema/extended-client'
 import { Concept, ConceptJson } from '@/types/Concept'
 import { Contribution, ContributionJson } from '@/types/Contribution'
-import { DocumentRecord } from '@/types/DocumentRecord'
+import { DocumentRecord, DocumentRecordJson } from '@/types/DocumentRecord'
 import { Literal } from '@/types/Literal'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 
@@ -15,7 +15,7 @@ interface DocumentJson {
   abstracts: Array<Literal>
   subjects: Array<Concept>
   contributions: Array<ContributionJson>
-  records: Array<DocumentRecord>
+  records: Array<DocumentRecordJson>
 }
 
 enum DocumentType {
@@ -73,7 +73,7 @@ class Document {
       document.contributions.map((contribution: ContributionJson) =>
         Contribution.fromObject(contribution),
       ),
-      document.records.map((record: DocumentRecord) =>
+      document.records.map((record: DocumentRecordJson) =>
         DocumentRecord.fromObject(record),
       ),
     )
