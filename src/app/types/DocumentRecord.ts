@@ -7,14 +7,14 @@ import { Literal } from '@/types/Literal'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 import { DocumentRecord as DbDocumentRecord } from '@prisma/client'
 
-interface DocumentRecordJson {
+export interface DocumentRecordJson {
   uid: string
   platform: BibliographicPlatform
   titles: Array<Literal>
-  url: string | null
+  _url: string | null
 }
 
-class DocumentRecord {
+export class DocumentRecord {
   private _url: URL | null = null
 
   constructor(
@@ -67,7 +67,7 @@ class DocumentRecord {
       record.uid,
       record.platform,
       record.titles.map((title) => Literal.fromObject(title)),
-      record.url,
+      record._url,
     )
   }
 
@@ -83,5 +83,3 @@ class DocumentRecord {
     )
   }
 }
-
-export { DocumentRecord }
