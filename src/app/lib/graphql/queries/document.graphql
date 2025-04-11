@@ -52,7 +52,7 @@ query Documents($where: DocumentWhere) {
             language
             value
           }
-          type
+          types
         }
       }
     }
