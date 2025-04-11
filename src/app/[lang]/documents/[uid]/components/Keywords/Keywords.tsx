@@ -1,10 +1,26 @@
 import { CustomCard } from '@/components/Card'
 import { Trans } from '@lingui/react'
-import { Box, Button, CardContent, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  CardContent,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import useStore from '@/stores/global_store'
+import { useEffect } from 'react'
 
 function Keywords() {
   const theme = useTheme()
+  const { selectedDocument = null } = useStore((state) => state.document)
+  useEffect(() => {
+    console.log(selectedDocument?.subjects)
+  }, [selectedDocument])
 
   return (
     <CustomCard
@@ -33,7 +49,42 @@ function Keywords() {
         </Box>
       }
     >
-      <CardContent>Work in progress</CardContent>
+      <CardContent>
+        <Box sx={{ overflowX: 'auto' }}>
+          <Table size='small'>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <strong>Preferred Labels</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Alternative Labels</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>UID</strong>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {selectedDocument?.subjects.map((subject, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    {subject.altLabels
+                      ?.map((label) => `${label.value} (${label.language})`)
+                      .join(', ')}
+                  </TableCell>
+                  <TableCell>
+                    {subject.prefLabels
+                      ?.map((label) => `${label.value} (${label.language})`)
+                      .join(', ')}
+                  </TableCell>
+                  <TableCell>{subject.uid}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Box>
+      </CardContent>
     </CustomCard>
   )
 }
