@@ -69,12 +69,12 @@ function Keywords() {
               {selectedDocument?.subjects.map((subject, index) => (
                 <TableRow key={index}>
                   <TableCell>
-                    {subject.altLabels
+                    {subject.prefLabels
                       ?.map((label) => `${label.value} (${label.language})`)
                       .join(', ')}
                   </TableCell>
                   <TableCell>
-                    {subject.prefLabels
+                    {subject.altLabels
                       ?.map((label) => `${label.value} (${label.language})`)
                       .join(', ')}
                   </TableCell>

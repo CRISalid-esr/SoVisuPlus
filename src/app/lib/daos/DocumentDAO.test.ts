@@ -21,6 +21,7 @@ jest.mock('@prisma/client', () => {
     document: {
       findUnique: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
       findMany: jest.fn(),
       count: jest.fn(),
     },
@@ -172,6 +173,54 @@ describe('DocumentDAO', () => {
         personId_documentId: {
           documentId: 1,
           personId: 1,
+        },
+      },
+    })
+  })
+
+  it('should remove a concept from a document if missing in the updated data', async () => {
+    const mockDbDocument = {
+      id: 1,
+      uid: 'doc-123',
+      subjects: [{ uid: 'concept-abc' }, { uid: 'concept-def' }],
+      contributions: [],
+    } as unknown as DbDocument
+
+    const updatedDocument = new Document(
+      'doc-123',
+      DocumentType.Document,
+      '2022',
+      new Date('2022-01-01T00:00:00.000Z'),
+      new Date('2022-12-31T23:59:59.000Z'),
+      [new Literal('Sample Title', 'en')],
+      [],
+      [
+        new Concept(
+          'concept-abc',
+          [new Literal('Preferred', 'en')],
+          [],
+          'http://example.com/concept/abc',
+        ), // only concept-abc remains
+      ],
+      [],
+    )
+
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(
+      mockDbDocument,
+    )
+    ;(mockPrisma.document.update as jest.Mock).mockResolvedValue({
+      ...mockDbDocument,
+      subjects: [{ uid: 'concept-abc' }],
+    })
+
+    const dao = new DocumentDAO()
+    await dao.createOrUpdateDocument(updatedDocument)
+
+    expect(mockPrisma.document.update).toHaveBeenCalledWith({
+      where: { id: 1 },
+      data: {
+        subjects: {
+          disconnect: [{ uid: 'concept-def' }], // <-- we expect disconnect of removed concept
         },
       },
     })
