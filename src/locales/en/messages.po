@@ -14,6 +14,21 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:146
+msgid "concept_chips_free_keyword"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:258
+msgid "concept_chip_action_edit"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:261
+msgid "concept_chip_action_delete"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Back to home page"
@@ -92,12 +107,22 @@ msgid "document_details_page_domains_tab_card_validate_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:28
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:154
+msgid "concept_chips_pref_label"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:194
+msgid "concept_chips_alt_label"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:38
 msgid "document_details_page_keywords_tab_card_title"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:31
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:41
 msgid "document_details_page_keywords_tab_card_validate_button"
 msgstr ""
 

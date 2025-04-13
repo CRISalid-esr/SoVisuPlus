@@ -92,8 +92,8 @@ describe('DocumentDAO Integration Tests', () => {
     // Step 1: Create a subject concept
     const subject1 = new Concept(
       'concept-1',
-      [new Literal('Alt Label', 'en')],
       [new Literal('Pref Label', 'en')],
+      [new Literal('Alt Label', 'en')],
       'http://example.com/concept-1',
     )
 
@@ -132,8 +132,8 @@ describe('DocumentDAO Integration Tests', () => {
     // Step 3: Update the document by adding a second subject
     const subject2 = new Concept(
       'concept-2',
-      [new Literal('Alt Label 2', 'en')],
       [new Literal('Pref Label 2', 'en')],
+      [new Literal('Alt Label 2', 'en')],
       'http://example.com/concept-2',
     )
 

@@ -43,7 +43,6 @@ export class DocumentWorker extends MessageProcessingWorker<AMQPDocumentMessage>
         console.warn(`No document data found for UID: ${uid}`)
         return
       }
-      //const titles = Array.isArray(document.titles) ? document.titles : []
       await this.documentDAO.createOrUpdateDocument(document)
       return
     } catch (error) {

@@ -2,9 +2,23 @@ import { CustomCard } from '@/components/Card'
 import { Trans } from '@lingui/react'
 import { Box, Button, CardContent, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import useStore from '@/stores/global_store'
+import { useMemo } from 'react'
+import { ConceptGroup } from '@/types/ConceptGroup'
+import ConceptChip from '@/app/[lang]/documents/[uid]/components/Keywords/ConceptChip'
+import * as Lingui from '@lingui/core'
+import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 
 function Keywords() {
   const theme = useTheme()
+  const { selectedDocument = null } = useStore((state) => state.document)
+
+  const lang = Lingui.i18n.locale
+
+  const groups = useMemo(
+    () => ConceptGroup.fromConcepts(selectedDocument?.subjects ?? []),
+    [selectedDocument?.subjects],
+  )
 
   return (
     <CustomCard
@@ -33,7 +47,17 @@ function Keywords() {
         </Box>
       }
     >
-      <CardContent>Work in progress</CardContent>
+      <CardContent>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          {groups.map((group, i) => (
+            <ConceptChip
+              key={i}
+              group={group}
+              language={lang as ExtendedLanguageCode}
+            />
+          ))}
+        </Box>
+      </CardContent>
     </CustomCard>
   )
 }

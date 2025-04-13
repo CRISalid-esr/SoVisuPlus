@@ -129,14 +129,11 @@ model Contribution {
 }
 
 model Concept {
-  id         Int            @id @default(autoincrement())
-  uid        String         @unique
-  uri        String?
-  labels     ConceptLabel[]
-  Document   Document?      @relation(fields: [documentId], references: [id])
-  documentId Int?
-
-  @@index([documentId])
+  id        Int            @id @default(autoincrement())
+  uid       String         @unique
+  uri       String?
+  labels    ConceptLabel[]
+  documents Document[]
 }
 
 model ConceptLabel {

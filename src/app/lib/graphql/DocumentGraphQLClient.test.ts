@@ -54,7 +54,7 @@ describe('DocumentGraphQLClient', () => {
           has_subjects: [
             {
               uid: 'concept-1234',
-              url: 'http://example.com/concept/1234',
+              uri: 'http://example.com/concept/1234',
               pref_labels: [
                 { language: 'en', value: 'Concept preferred label' },
               ],
