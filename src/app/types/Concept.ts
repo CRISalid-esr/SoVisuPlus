@@ -18,6 +18,21 @@ interface ConceptJson {
   labels?: Array<ConceptLabelRaw>
 }
 
+enum ConceptVocabulary {
+  WIKIDATA = 'WIKIDATA',
+  IDREF = 'IDREF',
+  JEL = 'JEL',
+  ABES = 'ABES',
+  UNKNOWN = 'UNKNOWN',
+}
+
+const VOCAB_PREFIX_MAP: Record<string, ConceptVocabulary> = {
+  'http://www.wikidata.org': ConceptVocabulary.WIKIDATA,
+  'http://www.idref.fr': ConceptVocabulary.IDREF,
+  'http://zbw.eu': ConceptVocabulary.JEL,
+  'http://hub.abes.fr': ConceptVocabulary.ABES,
+}
+
 class Concept {
   constructor(
     public uid: string,
@@ -50,7 +65,52 @@ class Concept {
       concept.uri,
     )
   }
+
+  getVocabulary(): ConceptVocabulary | null {
+    if (!this.uri) {
+      return null
+    }
+
+    for (const prefix in VOCAB_PREFIX_MAP) {
+      if (this.uri.startsWith(prefix)) {
+        return VOCAB_PREFIX_MAP[prefix]
+      }
+    }
+
+    return ConceptVocabulary.UNKNOWN
+  }
+
+  getIdentifier(): string {
+    if (!this.uri) return ''
+
+    const vocab = this.getVocabulary()
+    if (!vocab) return ''
+
+    switch (vocab) {
+      case ConceptVocabulary.WIKIDATA: {
+        const match = this.uri.match(/\/entity\/(Q\d+)/)
+        return match ? match[1] : ''
+      }
+      case ConceptVocabulary.IDREF: {
+        const match = this.uri.match(/idref\.fr\/(\d+)/)
+        return match ? match[1] : ''
+      }
+      case ConceptVocabulary.JEL: {
+        const match = this.uri.match(
+          /zbw\.eu\/beta\/external_identifiers\/jel#(J\d+)/,
+        )
+        return match ? match[1] : ''
+      }
+      case ConceptVocabulary.ABES: {
+        const match = this.uri.match(/\/subject\/([^/]+)/)
+        return match ? match[1] : ''
+      }
+      default:
+        return ''
+    }
+  }
 }
 
 export { Concept }
 export type { ConceptJson }
+export type { ConceptVocabulary }

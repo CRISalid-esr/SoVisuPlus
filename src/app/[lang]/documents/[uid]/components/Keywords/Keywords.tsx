@@ -1,26 +1,20 @@
 import { CustomCard } from '@/components/Card'
 import { Trans } from '@lingui/react'
-import {
-  Box,
-  Button,
-  CardContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography,
-} from '@mui/material'
+import { Box, Button, CardContent, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useStore from '@/stores/global_store'
-import { useEffect } from 'react'
+import { useMemo } from 'react'
+import { ConceptGroup } from '@/types/ConceptGroup'
+import ConceptChip from '@/app/[lang]/documents/[uid]/components/Keywords/ConceptChip'
 
 function Keywords() {
   const theme = useTheme()
   const { selectedDocument = null } = useStore((state) => state.document)
-  useEffect(() => {
-    console.log(selectedDocument?.subjects)
-  }, [selectedDocument])
+
+  const groups = useMemo(
+    () => ConceptGroup.fromConcepts(selectedDocument?.subjects ?? []),
+    [selectedDocument?.subjects],
+  )
 
   return (
     <CustomCard
@@ -50,39 +44,10 @@ function Keywords() {
       }
     >
       <CardContent>
-        <Box sx={{ overflowX: 'auto' }}>
-          <Table size='small'>
-            <TableHead>
-              <TableRow>
-                <TableCell>
-                  <strong>Preferred Labels</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Alternative Labels</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>UID</strong>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {selectedDocument?.subjects.map((subject, index) => (
-                <TableRow key={index}>
-                  <TableCell>
-                    {subject.prefLabels
-                      ?.map((label) => `${label.value} (${label.language})`)
-                      .join(', ')}
-                  </TableCell>
-                  <TableCell>
-                    {subject.altLabels
-                      ?.map((label) => `${label.value} (${label.language})`)
-                      .join(', ')}
-                  </TableCell>
-                  <TableCell>{subject.uid}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          {groups.map((group, i) => (
+            <ConceptChip key={i} group={group} language='fr' />
+          ))}
         </Box>
       </CardContent>
     </CustomCard>

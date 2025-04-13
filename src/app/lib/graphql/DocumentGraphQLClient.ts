@@ -31,7 +31,7 @@ interface GraphDocumentResponse {
   abstracts: { language: string; value: string }[]
   has_subjects: {
     uid: string
-    url: string | null
+    uri: string | null
     pref_labels: [{ language: string; value: string }]
     alt_labels: { language: string; value: string }[]
   }[]
@@ -102,7 +102,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
           subject.uid,
           subject.pref_labels.map(Literal.fromObject),
           subject.alt_labels.map(Literal.fromObject),
-          subject.url,
+          subject.uri,
         )
       }),
       documentData.has_contributions.reduce<Contribution[]>(
