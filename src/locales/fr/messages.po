@@ -14,21 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:146
-msgid "concept_chips_free_keyword"
-msgstr "Mot-clé libre"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:258
-msgid "concept_chip_action_edit"
-msgstr "Modifier"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:261
-msgid "concept_chip_action_delete"
-msgstr "Supprimer"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Retour à la page d'accueil"
@@ -107,22 +92,40 @@ msgid "document_details_page_domains_tab_card_validate_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:154
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:55
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:199
+msgid "concept_chips_free_keyword"
+msgstr "Mot-clé libre"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:63
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:216
 msgid "concept_chips_pref_label"
 msgstr "Formes principales"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:194
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:66
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:247
 msgid "concept_chips_alt_label"
 msgstr "Formes alternatives"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:38
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:311
+msgid "concept_chip_action_edit"
+msgstr "Modifier"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:314
+msgid "concept_chip_action_delete"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:42
 msgid "document_details_page_keywords_tab_card_title"
 msgstr "Mots-clés"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:41
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:45
 msgid "document_details_page_keywords_tab_card_validate_button"
 msgstr ""
 
