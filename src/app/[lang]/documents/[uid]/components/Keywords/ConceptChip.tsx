@@ -153,6 +153,7 @@ export default function ConceptChip({ group }: Props) {
                                   href={concept.uid}
                                   target='_blank'
                                   rel='noopener noreferrer'
+                                  role={'link'}
                                   sx={{
                                     display: 'flex',
                                     alignItems: 'center',

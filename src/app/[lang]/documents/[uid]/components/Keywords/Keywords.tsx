@@ -6,10 +6,14 @@ import useStore from '@/stores/global_store'
 import { useMemo } from 'react'
 import { ConceptGroup } from '@/types/ConceptGroup'
 import ConceptChip from '@/app/[lang]/documents/[uid]/components/Keywords/ConceptChip'
+import * as Lingui from '@lingui/core'
+import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 
 function Keywords() {
   const theme = useTheme()
   const { selectedDocument = null } = useStore((state) => state.document)
+
+  const lang = Lingui.i18n.locale
 
   const groups = useMemo(
     () => ConceptGroup.fromConcepts(selectedDocument?.subjects ?? []),
@@ -46,7 +50,11 @@ function Keywords() {
       <CardContent>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           {groups.map((group, i) => (
-            <ConceptChip key={i} group={group} language='fr' />
+            <ConceptChip
+              key={i}
+              group={group}
+              language={lang as ExtendedLanguageCode}
+            />
           ))}
         </Box>
       </CardContent>
