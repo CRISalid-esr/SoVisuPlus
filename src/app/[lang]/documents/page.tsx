@@ -251,25 +251,18 @@ export default function DocumentsPage() {
           row: { original: { contributions: Array<Contribution> } }
           column: MRT_Column<Document>
         }) {
-          const contributors = row.original.contributions.reduce(
-            (acc: string, contribution: Contribution) => {
+          const contributors = row.original.contributions
+            .map((contribution: Contribution) => {
               const person = contribution.person
               const { firstName, lastName } = person
               let name = [firstName, lastName].filter(Boolean).join(' ')
               if (name.match(/^\s*$/)) {
                 name = person.getDisplayName()
               }
-              if (name) {
-                if (acc) {
-                  return `${acc}, ${name}`
-                }
-                return name
-              }
-
-              return acc
-            },
-            '',
-          )
+              return name
+            })
+            .filter(Boolean)
+            .join(', ')
           const filterValue = column.getFilterValue()
 
           return (
