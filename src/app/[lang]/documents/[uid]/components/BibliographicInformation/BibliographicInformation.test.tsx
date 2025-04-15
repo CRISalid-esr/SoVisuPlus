@@ -17,6 +17,15 @@ jest.mock('@/stores/global_store', () => ({
   default: jest.fn(),
 }))
 
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => mockRouter,
+  useSearchParams: jest.fn(() => new URLSearchParams()),
+}))
+
 // Mock MUI Theme
 jest.mock('@mui/material/styles', () => ({
   ...jest.requireActual('@mui/material/styles'),

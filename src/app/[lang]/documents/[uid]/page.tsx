@@ -59,7 +59,7 @@ export default function DocumentDetailsPage() {
     },
   ]
 
-  const [selectedTab, setSelectedTab] = useState('')
+  const [selectedTab, setSelectedTab] = useState('bibliographic_information')
 
   const { fetchDocumentById, loading, selectedDocument, hasFetched } = useStore(
     (state) => state.document,

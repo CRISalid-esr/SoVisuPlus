@@ -12,14 +12,26 @@ jest.mock('@/stores/global_store', () => ({
   default: jest.fn(),
 }))
 
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => mockRouter,
+  useSearchParams: jest.fn(() => new URLSearchParams()),
+}))
+
 // Mock MUI Theme
 jest.mock('@mui/material/styles', () => ({
   ...jest.requireActual('@mui/material/styles'),
   useTheme: () => ({
     palette: {
       primary: { main: '#1976d2' },
+      secondary: { main: '#dc004e', dark: '#9a0036' },
       lightSecondaryContainer: '#f0f0f0',
       onSecondaryContainer: '#000',
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      getContrastText: (_: string) => '#fff',
     },
     spacing: (factor: number) => `${factor * 8}px`,
     utils: { pxToRem: (value: number) => `${value / 16}rem` },
@@ -35,8 +47,20 @@ const mockState = {
   document: {
     selectedDocument: {
       contributions: [
-        { person: { displayName: 'John Doe' } },
-        { person: { displayName: 'Jane Smith' } },
+        {
+          person: {
+            displayName: 'John Doe',
+            external: false,
+            slug: 'john-doe',
+          },
+        },
+        {
+          person: {
+            displayName: 'Jane Smith',
+            external: true,
+            slug: 'jane-smith',
+          },
+        },
       ],
     },
   },
@@ -53,6 +77,7 @@ describe('Authors Component', () => {
     typography: { fontWeightRegular: 400 },
     palette: {
       primary: { main: '#1976d2' },
+      secondary: { main: '#dc004e', dark: '#9a0036' },
       lightSecondaryContainer: '#f0f0f0',
       onSecondaryContainer: '#000',
     },
@@ -98,5 +123,15 @@ describe('Authors Component', () => {
 
     // No specific action expected, but ensures the button is clickable
     expect(editButton).toBeInTheDocument()
+  })
+  it('should navigate to the correct URL when an internal author is clicked', () => {
+    renderComponent()
+
+    const internalAuthorChip = screen.getByText('John Doe')
+    fireEvent.click(internalAuthorChip)
+
+    expect(mockRouter.push).toHaveBeenCalledWith(
+      '/en/documents?perspective=john-doe',
+    )
   })
 })
