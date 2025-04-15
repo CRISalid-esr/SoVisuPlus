@@ -24,40 +24,40 @@ msgid "internal_server_page_description"
 msgstr "Le serveur a détecté une erreur interne et n'a  pas pu traiter votre demande. Réessayez un peu plus tard !"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:93
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:118
 msgid "document_details_page_authors_row_update_author"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:95
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:104
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:90
 msgid "document_details_page_card_title"
 msgstr "Informations bibliographiques"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:98
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:123
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:107
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:132
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:93
 msgid "document_details_page_card_validate_button"
 msgstr "Valider"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:106
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:115
 msgid "document_details_page_titles_row_label"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:109
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:118
 msgid "document_details_page_authors_row_label"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:112
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:121
 msgid "document_details_page_date_row_label"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:115
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:124
 msgid "document_details_page_sources_row_label"
 msgstr ""
 
@@ -282,11 +282,11 @@ msgstr "Domaines"
 msgid "document_details_keywords_tab"
 msgstr "Mots-clés"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:23
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:37
 msgid "document_details_page_authors_row_label"
 msgstr "Auteurs"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:63
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:90
 msgid "document_details_page_authors_row_update_author"
 msgstr "Modifier les auteurs"
 
@@ -346,7 +346,7 @@ msgstr ""
 msgid "documents_details_page_type_column_tab_author"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:565
+#: src/app/[lang]/documents/page.tsx:558
 msgid "documents_page_action_column_details"
 msgstr "Détails"
 
@@ -383,7 +383,7 @@ msgstr "auteurs"
 msgid "documents_page_document_icon_label"
 msgstr "Article"
 
-#: src/app/[lang]/documents/page.tsx:325
+#: src/app/[lang]/documents/page.tsx:318
 msgid "documents_page_halStatus_column"
 msgstr "Statut hal"
 
@@ -400,7 +400,7 @@ msgstr "Article de journal"
 msgid "documents_page_keywords_to_validate"
 msgstr "Mots-clés à valider"
 
-#: src/app/[lang]/documents/page.tsx:513
+#: src/app/[lang]/documents/page.tsx:506
 msgid "documents_page_main_title"
 msgstr "Publications"
 
@@ -415,17 +415,17 @@ msgid "documents_page_proceedings_icon_label"
 msgstr "Procédure"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:166
-#: src/app/[lang]/documents/page.tsx:286
+#: src/app/[lang]/documents/page.tsx:279
 msgid "documents_page_publication_date_column"
 msgstr "Date de publication"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:28
-#: src/app/[lang]/documents/page.tsx:290
+#: src/app/[lang]/documents/page.tsx:283
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "Aucune date"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:171
-#: src/app/[lang]/documents/page.tsx:318
+#: src/app/[lang]/documents/page.tsx:311
 msgid "documents_page_publishedIn_column"
 msgstr "paru dans"
 
@@ -435,11 +435,11 @@ msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Publication scientifique"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:179
-#: src/app/[lang]/documents/page.tsx:333
+#: src/app/[lang]/documents/page.tsx:326
 msgid "documents_page_source_column"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/page.tsx:520
+#: src/app/[lang]/documents/page.tsx:513
 msgid "documents_page_synchronize_button"
 msgstr "Synchroniser"
 
