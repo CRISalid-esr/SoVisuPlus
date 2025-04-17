@@ -2,13 +2,15 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getServerSession, Session } from 'next-auth' // Assuming you are using NextAuth
 import authOptions from '@/app/auth/auth_options'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import {
+  PersonIdentifierType as DbPersonIdentifierType,
+  User as DbUser,
+} from '@prisma/client'
 import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { User } from '@/types/User'
-import { User as DbUser } from '@prisma/client'
 
 export const GET = async () => {
   try {
@@ -56,7 +58,7 @@ export const GET = async () => {
           },
         },
       },
-      include: { person: true }, // Include associated Person if needed
+      include: { person: { include: { identifiers: true } } },
     })
 
     if (!user) {

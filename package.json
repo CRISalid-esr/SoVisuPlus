@@ -34,6 +34,7 @@
     "@emotion/styled": "^11.14.0",
     "@fontsource/material-icons": "^5.1.0",
     "@fontsource/roboto": "^5.1.0",
+    "@kit-data-manager/react-pid-component": "^0.1.6",
     "@lingui/cli": "^4.14.0",
     "@lingui/loader": "^4.14.0",
     "@lingui/macro": "^4.14.0",
