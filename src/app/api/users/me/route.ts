@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { getServerSession, Session } from 'next-auth' // Assuming you are using NextAuth
+import { getServerSession, Session } from 'next-auth'
 import authOptions from '@/app/auth/auth_options'
 import {
   PersonIdentifierType as DbPersonIdentifierType,
