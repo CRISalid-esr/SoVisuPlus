@@ -32,7 +32,7 @@ export default function OrcidControl() {
       </Typography>
       <PidComponent
         value={orcid}
-        emphasizeComponent={false}
+        emphasizeComponent={true}
         className={styles['pid-components']}
       />
     </Paper>
