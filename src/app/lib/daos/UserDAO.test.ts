@@ -1,6 +1,7 @@
-import { User as DbUser, PrismaClient } from '@prisma/client'
+import { PrismaClient, User as DbUser } from '@prisma/client'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { UserDAO } from '@/lib/daos/UserDAO'
+import { User } from '@/types/User'
 
 jest.mock('@prisma/client', () => {
   const mockPrismaClient = {
@@ -55,10 +56,9 @@ describe('UserDAO', () => {
       },
     })
 
-    const dbUser: DbUser | null = await userDAO.getUserByIdentifier(identifier)
-    expect(dbUser).not.toBeNull()
-    expect(dbUser?.id).toEqual(2)
-    expect(dbUser?.personId).toEqual(123)
+    const user: User | null = await userDAO.getUserByIdentifier(identifier)
+    expect(user).not.toBeNull()
+    expect(user?.person?.uid).toEqual('local-johndoe')
     expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
       where: {
         person: {
@@ -70,15 +70,15 @@ describe('UserDAO', () => {
           },
         },
       },
-      include: { person: true },
+      include: { person: { include: { identifiers: true } } },
     })
   })
 
   it('should return null if user not found by identifier', async () => {
     ;(mockPrisma.user.findFirst as jest.Mock).mockResolvedValue(null)
 
-    const dbUser: DbUser | null = await userDAO.getUserByIdentifier(identifier)
-    expect(dbUser).toBeNull()
+    const user: User | null = await userDAO.getUserByIdentifier(identifier)
+    expect(user).toBeNull()
     expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
       where: {
         person: {
@@ -90,7 +90,7 @@ describe('UserDAO', () => {
           },
         },
       },
-      include: { person: true },
+      include: { person: { include: { identifiers: true } } },
     })
   })
 
@@ -108,9 +108,7 @@ describe('UserDAO', () => {
     ;(mockPrisma.user.findFirst as jest.Mock).mockRejectedValue(
       new Error('Database error'),
     )
-
-    await expect(userDAO.getUserByIdentifier(identifier)).rejects.toThrow(
-      'Failed to fetch user by identifier: Database error',
-    )
+    // getUserByIdentifier will return null in case of an error
+    await expect(userDAO.getUserByIdentifier(identifier)).resolves.toBeNull()
   })
 })

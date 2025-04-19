@@ -1,5 +1,9 @@
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
+import {
+  convertStringPersonIdentifierType,
+  PersonIdentifier,
+} from '@/types/PersonIdentifier'
 
 export class PersonService {
   private personDAO: PersonDAO
@@ -29,6 +33,23 @@ export class PersonService {
     } catch (error) {
       console.error('Error in service layer:', error)
       throw new Error('Error fetching people from service')
+    }
+  }
+
+  async addOrUpdateidentifier(
+    personUid: string,
+    identifierTypeStr: string,
+    identifierValue: string,
+  ): Promise<void> {
+    try {
+      const identifier: PersonIdentifier = {
+        type: convertStringPersonIdentifierType(identifierTypeStr),
+        value: identifierValue,
+      }
+      await this.personDAO.upsertIdentifier(identifier, personUid)
+    } catch (error) {
+      console.error('Error adding/updating identifier:', error)
+      throw new Error('Error adding/updating identifier in service')
     }
   }
 

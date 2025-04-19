@@ -4,6 +4,7 @@ import {
 } from '@prisma/client'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
+import { User } from '@/types/User'
 
 /** UserDAO: Handles operations related to User records */
 export class UserDAO extends AbstractDAO {
@@ -32,10 +33,9 @@ export class UserDAO extends AbstractDAO {
    */
   public async getUserByIdentifier(
     identifier: PersonIdentifier,
-  ): Promise<DbUser | null> {
-    console.log('identifier', identifier)
+  ): Promise<User | null> {
     try {
-      return await this.prismaClient.user.findFirst({
+      const dbUser = await this.prismaClient.user.findFirst({
         where: {
           person: {
             identifiers: {
@@ -46,13 +46,15 @@ export class UserDAO extends AbstractDAO {
             },
           },
         },
-        include: { person: true }, // Include associated Person if needed
+        include: { person: { include: { identifiers: true } } },
       })
+      if (!dbUser || !dbUser.person) {
+        return null
+      }
+      return User.fromDbUser(dbUser)
     } catch (error) {
       console.error('Error fetching user by identifier:', error as Error)
-      throw new Error(
-        `Failed to fetch user by identifier: ${(error as Error).message}`,
-      )
+      return null
     }
   }
 }

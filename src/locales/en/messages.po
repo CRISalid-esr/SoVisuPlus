@@ -14,8 +14,33 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/myProfile/components/Identifiers.tsx:26
-msgid "profile_identifiers_card_title"
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrcidControl.tsx:52
+msgid "orcid-authentication-success"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrcidControl.tsx:54
+msgid "orcid-authentication-failure"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrcidControl.tsx:56
+msgid "orcid-authentication-failure-no-code"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrcidControl.tsx:58
+msgid "orcid-authentication-failure-no-session"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrcidControl.tsx:60
+msgid "orcid-authentication-failure-user-not-found"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrcidControl.tsx:62
+msgid "orcid-insert-failure"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -214,6 +239,26 @@ msgstr "Publications"
 #: src/app/[lang]/myAccount/components/authorizations/index.tsx:58
 msgid "authorizations_page_my_expertise"
 msgstr "My expertise"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/Identifiers.tsx:31
+msgid "profile_identifiers_card_title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrcidControl.tsx:101
+msgid "orcid_identifier_no_orcid_provided"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
+msgid "orcid_button_update_identifier"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrciLoginButton.tsx:52
+msgid "orcid_button_provide_identifier"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/myAccount/components/notification/index.tsx:27

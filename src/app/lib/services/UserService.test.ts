@@ -66,9 +66,9 @@ describe('UserService', () => {
     })
 
     userService = new UserService(
-      personGraphQLClientMock,
       userDAOMock,
       personDAOMock,
+      personGraphQLClientMock,
     )
   })
 

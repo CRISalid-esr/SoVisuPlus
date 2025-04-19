@@ -14,9 +14,34 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/myProfile/components/Identifiers.tsx:26
-msgid "profile_identifiers_card_title"
-msgstr "Mes identifiants chercheurs"
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrcidControl.tsx:52
+msgid "orcid-authentication-success"
+msgstr "La validation de votre ORCID a réussi"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrcidControl.tsx:54
+msgid "orcid-authentication-failure"
+msgstr "La validation de votre ORCID a échoué. Veuillez réessayer ou contacter le support."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrcidControl.tsx:56
+msgid "orcid-authentication-failure-no-code"
+msgstr "ORCID n'a pas délivré de code d'authentification. Veuillez réessayer ou contacter le support."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrcidControl.tsx:58
+msgid "orcid-authentication-failure-no-session"
+msgstr "Échec de la validation de l'ORCID : pas de session. Veuillez réessayer ou contacter le support."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrcidControl.tsx:60
+msgid "orcid-authentication-failure-user-not-found"
+msgstr "Échec de la validation de l'ORCID : utilisateur non trouvé. Veuillez réessayer ou contacter le support."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrcidControl.tsx:62
+msgid "orcid-insert-failure"
+msgstr "Échec de l'insertion de l'ORCID en base de données. Veuillez réessayer ou contacter le support."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
@@ -214,6 +239,26 @@ msgstr "Liste de mes publications"
 #: src/app/[lang]/myAccount/components/authorizations/index.tsx:58
 msgid "authorizations_page_my_expertise"
 msgstr "Mes expertises"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/Identifiers.tsx:31
+msgid "profile_identifiers_card_title"
+msgstr "Mes identifiants chercheurs"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrcidControl.tsx:101
+msgid "orcid_identifier_no_orcid_provided"
+msgstr "Identifiant ORCID non fourni"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
+msgid "orcid_button_update_identifier"
+msgstr "Modifier mon identifiant ORCID"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/myAccount/components/myProfile/components/identifiers/OrciLoginButton.tsx:52
+msgid "orcid_button_provide_identifier"
+msgstr "Fournir mon identifiant ORCID"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/myAccount/components/notification/index.tsx:27

@@ -244,6 +244,61 @@ export class PersonDAO extends AbstractDAO {
     }
   }
 
+  /**
+   * Upsert a single PersonIdentifier for a given person
+   * @param identifier - The identifier to upsert
+   * @param personUid - The UID of the person
+   * @param retries - The number of retries (to handle conflicts on upsert)
+   * @returns The created or updated PersonIdentifier record
+   * */
+  public async upsertIdentifier(
+    identifier: PersonIdentifier,
+    personUid: string,
+    retries = 0,
+  ): Promise<void> {
+    const person = await this.prismaClient.person.findUnique({
+      where: { uid: personUid },
+    })
+    if (!person) {
+      throw new Error(`Person with UID ${personUid} not found`)
+    }
+    const personId: number = person.id
+    try {
+      await this.prismaClient.personIdentifier.upsert({
+        where: {
+          personId_type: {
+            personId,
+            type: identifier.type.toUpperCase() as DbPersonIdentifierType,
+          },
+        },
+        update: {
+          value: identifier.value,
+        },
+        create: {
+          personId,
+          type: identifier.type.toUpperCase() as DbPersonIdentifierType,
+          value: identifier.value,
+        },
+      })
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        if (retries < 3) {
+          console.warn('Retrying identifier upsert...')
+          await this.upsertIdentifier(identifier, personUid, retries + 1)
+        } else {
+          console.error('Failed to upsert identifiers after 3 retries')
+        }
+      } else {
+        throw new Error(
+          `Failed to upsert identifiers: ${(error as Error).message}`,
+        )
+      }
+    }
+  }
+
   public fetchPeople = async (
     searchTerm: string,
     page: number,

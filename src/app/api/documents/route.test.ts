@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server'
-import { GET } from './route' // Adjust the path to the actual file
+import { GET } from './route'
 
-// Mocking the DocumentService class
 jest.mock('../../lib/services/DocumentService', () => ({
   DocumentService: jest.fn().mockImplementation(() => ({
     fetchDocuments: jest.fn().mockResolvedValue({

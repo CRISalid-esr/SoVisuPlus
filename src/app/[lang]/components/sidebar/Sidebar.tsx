@@ -951,6 +951,14 @@ export default function Sidebar({
                 <IconButton
                   title='account'
                   onClick={() => router.push(`/${lang}/myAccount`)}
+                  sx={{
+                    cursor: 'pointer',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                      backgroundColor: theme.palette.action.hover,
+                    },
+                    transition: 'transform 0.2s ease-in-out',
+                  }}
                 >
                   <Image
                     src='/icons/avatar.png'
@@ -962,9 +970,15 @@ export default function Sidebar({
                 </IconButton>
 
                 <Box
+                  onClick={() => router.push(`/${lang}/myAccount`)}
                   sx={{
                     display: 'flex',
                     flexDirection: 'column',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                      color: theme.palette.grey[200], // or whatever hover color you want
+                    },
                   }}
                 >
                   <Box
@@ -985,6 +999,7 @@ export default function Sidebar({
                     >
                       {user?.person?.firstName} {user?.person?.lastName}
                     </Typography>
+                    {/* Logout icon stays separate */}
                     <IconButton
                       title='Logout'
                       sx={{

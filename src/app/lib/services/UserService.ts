@@ -1,20 +1,21 @@
 import { PersonIdentifier } from '@/app/types/PersonIdentifier'
-import { Person as DbPerson, User } from '@prisma/client'
+import { Person as DbPerson } from '@prisma/client'
 import { Person } from '@/app/types/Person'
 import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { User } from '@/types/User'
 
 /**
  * Service for handling person-related operations
  */
 export class UserService {
   constructor(
-    private personGraphQLClient: PersonGraphQLClient,
     private userDAO: UserDAO,
     private personDAO: PersonDAO,
+    private personGraphQLClient: PersonGraphQLClient | null = null,
   ) {}
 
   /**
@@ -40,7 +41,7 @@ export class UserService {
       return false
     }
     // refresh the user data from the graph API if enabled
-    if (this.personGraphQLClient.isEnabled()) {
+    if (this.personGraphQLClient?.isEnabled()) {
       const person: Person | null =
         await this.personGraphQLClient.getPersonByIdentifier(electedIdentifier)
       if (!person) {
@@ -65,9 +66,19 @@ export class UserService {
         return false
       }
     }
-    // Anyway, look up the user in the database
-    const user: User | null =
-      await this.userDAO.getUserByIdentifier(electedIdentifier)
+
+    const user = await this.userDAO.getUserByIdentifier(electedIdentifier)
     return !!user
+  }
+
+  /**
+   * Get user by Identifier
+   * @param id Database id of the user
+   * @returns User if found, null otherwise
+   * */
+  public async getUserByPersonIdentifier(
+    identifier: PersonIdentifier,
+  ): Promise<User | null> {
+    return await this.userDAO.getUserByIdentifier(identifier)
   }
 }

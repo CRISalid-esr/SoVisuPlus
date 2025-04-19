@@ -38,9 +38,9 @@ const authOptions: AuthOptions = {
     }) {
       console.info('signIn callback', user, account, profile)
       const userService = new UserService(
-        new PersonGraphQLClient(),
         new UserDAO(),
         new PersonDAO(),
+        new PersonGraphQLClient(),
       )
       const authenticationProfile: AuthenticationProfile = {
         username: (profile as KeycloakProfile)?.preferred_username,
