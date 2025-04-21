@@ -14,6 +14,36 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:52
+msgid "orcid-authentication-success"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:54
+msgid "orcid-authentication-failure"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:56
+msgid "orcid-authentication-failure-no-code"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:58
+msgid "orcid-authentication-failure-no-session"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:60
+msgid "orcid-authentication-failure-user-not-found"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:62
+msgid "orcid-insert-failure"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Back to home page"
@@ -191,42 +221,62 @@ msgid "forbidden_page_description"
 msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:28
+#: src/app/[lang]/account/components/authorizations/index.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Authorizations"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:50
+#: src/app/[lang]/account/components/authorizations/index.tsx:50
 msgid "authorizations_page_description"
 msgstr "Lorem ipsum"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:54
+#: src/app/[lang]/account/components/authorizations/index.tsx:54
 msgid "authorizations_page_list_publications"
 msgstr "Publications"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/authorizations/index.tsx:58
+#: src/app/[lang]/account/components/authorizations/index.tsx:58
 msgid "authorizations_page_my_expertise"
 msgstr "My expertise"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/notification/index.tsx:27
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
+msgid "profile_identifiers_card_title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:101
+msgid "orcid_identifier_no_orcid_provided"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
+msgid "orcid_button_update_identifier"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:52
+msgid "orcid_button_provide_identifier"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/notification/index.tsx:27
 msgid "notification_page_notification_title"
 msgstr "Nofications"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/notification/index.tsx:49
+#: src/app/[lang]/account/components/notification/index.tsx:49
 msgid "notification_page_description"
 msgstr "Select the activities for which you wish to receive e-mail or push notifications"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/notification/index.tsx:53
+#: src/app/[lang]/account/components/notification/index.tsx:53
 msgid "notification_page_new_publication_referenced"
 msgstr "A new publication has been referenced"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/myAccount/components/notification/index.tsx:58
+#: src/app/[lang]/account/components/notification/index.tsx:58
 msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "A new expertise is awaiting validation"
 
@@ -507,15 +557,15 @@ msgstr ""
 #~ msgid "Login Page work"
 #~ msgstr ""
 
-#: src/app/[lang]/myAccount/page.tsx:24
+#: src/app/[lang]/account/page.tsx:24
 msgid "my_account_page_authorizations_tab"
 msgstr "Authorization"
 
-#: src/app/[lang]/myAccount/page.tsx:20
+#: src/app/[lang]/account/page.tsx:20
 msgid "my_account_page_my_profile_tab"
 msgstr "My account"
 
-#: src/app/[lang]/myAccount/page.tsx:28
+#: src/app/[lang]/account/page.tsx:28
 msgid "my_account_page_notification_tab"
 msgstr "Notifications"
 
@@ -556,12 +606,12 @@ msgstr "Institutions"
 msgid "side_bar_laboratories"
 msgstr "Laboratories"
 
-#: src/app/[lang]/myAccount/page.tsx:79
+#: src/app/[lang]/account/page.tsx:79
 msgid "side_bar_my_account"
 msgstr "Account manager"
 
 #: src/app/[lang]/components/sidebar/Sidebar.tsx:581
-#: src/app/[lang]/my-groups/page.tsx:10
+#: src/app/[lang]/groups/page.tsx:10
 msgid "side_bar_my_groups"
 msgstr "Groups"
 

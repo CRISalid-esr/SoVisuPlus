@@ -539,7 +539,7 @@ export default function Sidebar({
                     justifyContent: 'center',
                     alignItems: 'center',
                     color: theme.palette.primaryContainer,
-                    ...(pathname === `/${lang}/my-groups`
+                    ...(pathname === `/${lang}/groups`
                       ? {
                           backgroundColor: theme.palette.primaryContainer,
                           borderRadius: theme.utils.pxToRem(8),
@@ -553,7 +553,7 @@ export default function Sidebar({
                     },
                   }}
                   component={Link}
-                  href={`/${lang}/my-groups?${searchParams.toString()}`}
+                  href={`/${lang}/groups?${searchParams.toString()}`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
@@ -950,7 +950,15 @@ export default function Sidebar({
               >
                 <IconButton
                   title='account'
-                  onClick={() => router.push(`/${lang}/myAccount`)}
+                  onClick={() => router.push(`/${lang}/account`)}
+                  sx={{
+                    cursor: 'pointer',
+                    '&:hover': {
+                      transform: 'scale(1.05)',
+                      backgroundColor: theme.palette.action.hover,
+                    },
+                    transition: 'transform 0.2s ease-in-out',
+                  }}
                 >
                   <Image
                     src='/icons/avatar.png'
@@ -962,9 +970,15 @@ export default function Sidebar({
                 </IconButton>
 
                 <Box
+                  onClick={() => router.push(`/${lang}/account`)}
                   sx={{
                     display: 'flex',
                     flexDirection: 'column',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                      color: theme.palette.grey[200], // or whatever hover color you want
+                    },
                   }}
                 >
                   <Box
@@ -985,6 +999,7 @@ export default function Sidebar({
                     >
                       {user?.person?.firstName} {user?.person?.lastName}
                     </Typography>
+                    {/* Logout icon stays separate */}
                     <IconButton
                       title='Logout'
                       sx={{
@@ -1020,7 +1035,7 @@ export default function Sidebar({
               <ListItem>
                 <ListItemIcon
                   onClick={() => {
-                    router.push(`/${lang}/myAccount`)
+                    router.push(`/${lang}/account`)
                     handleToggleDrawerAction()
                   }}
                   sx={{

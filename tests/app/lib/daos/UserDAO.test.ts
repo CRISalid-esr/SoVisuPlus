@@ -60,7 +60,7 @@ describe('UserDAO Integration Tests', () => {
     })
 
     expect(dbUser).not.toBeNull()
-    expect(dbUser?.personId).toBe(person.id)
+    expect(dbUser?.person?.uid).toBe(person.uid)
   })
 
   test('should return null if no user matches the identifier', async () => {

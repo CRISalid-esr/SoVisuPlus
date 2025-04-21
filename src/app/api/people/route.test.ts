@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { GET } from './route' // Adjust path if necessary
+import { GET } from './route'
 
 // Mock PersonService
 jest.mock('@/lib/services/PersonService', () => ({

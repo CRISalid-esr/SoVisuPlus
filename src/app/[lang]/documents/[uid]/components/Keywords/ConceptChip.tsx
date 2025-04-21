@@ -1,5 +1,3 @@
-// file: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx
-// file: src/components/ConceptChip.tsx
 import { useState } from 'react'
 import {
   Box,

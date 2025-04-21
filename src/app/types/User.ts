@@ -26,7 +26,7 @@ class User {
     return this.person?.displayName || 'n/c'
   }
 
-  static fromDbUser(user: DbUser & { person?: DbPerson }): User {
+  static fromDbUser(user: DbUser & { person?: DbPerson | null }): User {
     const person = user.person ? Person.fromDbPerson(user.person) : undefined
     return new User(user.id, person)
   }

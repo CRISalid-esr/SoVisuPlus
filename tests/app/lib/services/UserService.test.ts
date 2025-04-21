@@ -19,7 +19,7 @@ describe('UserService Integration Tests', () => {
 
     const userDAO = new UserDAO()
     const personDAO = new PersonDAO()
-    userService = new UserService(personGraphQLClientMock, userDAO, personDAO)
+    userService = new UserService(userDAO, personDAO, personGraphQLClientMock)
   })
 
   afterEach(async () => {

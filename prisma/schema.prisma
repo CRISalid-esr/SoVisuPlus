@@ -169,7 +169,8 @@ model PersonIdentifier {
   person   Person               @relation(fields: [personId], references: [id], onDelete: Cascade)
   personId Int
 
-  @@unique([type, value])
+  @@unique([type, value]) // The same identifer should not be used twice
+  @@unique([personId, type]) // A person should not have more than one identifier of the same type
   @@index([personId])
 }
 

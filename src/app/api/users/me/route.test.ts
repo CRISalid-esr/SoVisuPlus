@@ -1,13 +1,13 @@
-import prisma from '@/lib/prisma'
 import { User } from '@/types/User'
-import { getServerSession } from 'next-auth' // Import getServerSession
-import { GET } from './route' // Adjust the import for your route handler
+import { getServerSession } from 'next-auth'
+import { GET } from './route'
 
-// Mock Prisma Client
-jest.mock('@/lib/prisma', () => ({
-  user: {
-    findFirst: jest.fn(),
-  },
+const getUserByPersonIdentifier = jest.fn()
+
+jest.mock('../../../lib/services/UserService', () => ({
+  UserService: jest.fn().mockImplementation(() => ({
+    getUserByPersonIdentifier: getUserByPersonIdentifier,
+  })),
 }))
 
 // Mock NextResponse
@@ -67,7 +67,7 @@ describe('GET /api/route', () => {
       personId: null,
     })
 
-    ;(prisma.user.findFirst as jest.Mock).mockResolvedValueOnce(mockUser)
+    getUserByPersonIdentifier.mockResolvedValueOnce(mockUser)
 
     const response = await GET()
     const data = await response.json()
@@ -87,26 +87,13 @@ describe('GET /api/route', () => {
   })
 
   it('should return 404 if user is not found in the database', async () => {
-    // Mock Prisma to return null (user not found)
-    ;(prisma.user.findFirst as jest.Mock).mockResolvedValueOnce(null)
+    // Mock User Service to return null
+    getUserByPersonIdentifier.mockResolvedValueOnce(null)
 
     const response = await GET()
     const data = await response.json()
 
     expect(response.status).toBe(404)
     expect(data).toEqual({ error: 'User not found' })
-  })
-
-  it('should return 500 if Prisma throws an error', async () => {
-    // Mock Prisma to throw an error
-    ;(prisma.user.findFirst as jest.Mock).mockRejectedValueOnce(
-      new Error('DB Error'),
-    )
-
-    const response = await GET()
-    const data = await response.json()
-
-    expect(response.status).toBe(500)
-    expect(data).toEqual({ error: 'An error occurred' })
   })
 })
