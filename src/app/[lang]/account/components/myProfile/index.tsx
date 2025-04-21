@@ -1,4 +1,4 @@
-import Identifiers from '@/app/[lang]/myAccount/components/myProfile/components/Identifiers'
+import Identifiers from '@/app/[lang]/account/components/myProfile/components/Identifiers'
 
 export default function MyProfilePage() {
   return (

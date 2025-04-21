@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const lang =
     req.nextUrl.searchParams.get('lang') ??
     process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0]
-  const userRedirectionUrl = `${sovisuplusHost}/${lang}/myAccount`
+  const userRedirectionUrl = `${sovisuplusHost}/${lang}/account`
   const code = req.nextUrl.searchParams.get('code')
   if (!code) {
     return NextResponse.redirect(

@@ -5,7 +5,7 @@ import { Alert, Paper, Snackbar, Typography } from '@mui/material'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { PidComponent } from '@kit-data-manager/react-pid-component'
 import styles from './OrcidControl.module.css'
-import { OrcidLoginButton } from '@/app/[lang]/myAccount/components/myProfile/components/identifiers/OrciLoginButton'
+import { OrcidLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton'
 import { Trans } from '@lingui/react'
 
 export default function OrcidControl() {

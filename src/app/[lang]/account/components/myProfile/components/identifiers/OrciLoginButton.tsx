@@ -6,7 +6,6 @@ import * as Lingui from '@lingui/core'
 import { Trans } from '@lingui/react'
 import React from 'react'
 
-// <OrcidLoginButton orcidProvided={!!orcid} />
 export function OrcidLoginButton({
   orcidProvided,
 }: {

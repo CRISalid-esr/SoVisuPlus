@@ -257,7 +257,7 @@ describe('SearchInput Component', () => {
   })
 
   it('disables the autocomplete when path name is /groups', () => {
-    ;(usePathname as jest.Mock).mockReturnValue('/fr/my-groups')
+    ;(usePathname as jest.Mock).mockReturnValue('/fr/groups')
     renderComponent()
     const searchInput = screen.getByPlaceholderText(
       'sidebar_search_placeholder',

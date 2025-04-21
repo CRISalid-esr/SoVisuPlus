@@ -539,7 +539,7 @@ export default function Sidebar({
                     justifyContent: 'center',
                     alignItems: 'center',
                     color: theme.palette.primaryContainer,
-                    ...(pathname === `/${lang}/my-groups`
+                    ...(pathname === `/${lang}/groups`
                       ? {
                           backgroundColor: theme.palette.primaryContainer,
                           borderRadius: theme.utils.pxToRem(8),
@@ -553,7 +553,7 @@ export default function Sidebar({
                     },
                   }}
                   component={Link}
-                  href={`/${lang}/my-groups?${searchParams.toString()}`}
+                  href={`/${lang}/groups?${searchParams.toString()}`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
@@ -950,7 +950,7 @@ export default function Sidebar({
               >
                 <IconButton
                   title='account'
-                  onClick={() => router.push(`/${lang}/myAccount`)}
+                  onClick={() => router.push(`/${lang}/account`)}
                   sx={{
                     cursor: 'pointer',
                     '&:hover': {
@@ -970,7 +970,7 @@ export default function Sidebar({
                 </IconButton>
 
                 <Box
-                  onClick={() => router.push(`/${lang}/myAccount`)}
+                  onClick={() => router.push(`/${lang}/account`)}
                   sx={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -1035,7 +1035,7 @@ export default function Sidebar({
               <ListItem>
                 <ListItemIcon
                   onClick={() => {
-                    router.push(`/${lang}/myAccount`)
+                    router.push(`/${lang}/account`)
                     handleToggleDrawerAction()
                   }}
                   sx={{
