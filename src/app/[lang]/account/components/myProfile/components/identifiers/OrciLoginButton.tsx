@@ -5,16 +5,17 @@ import Image from 'next/image'
 import * as Lingui from '@lingui/core'
 import { Trans } from '@lingui/react'
 import React from 'react'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
 
 export function OrcidLoginButton({
   orcidProvided,
 }: {
   orcidProvided: boolean
 }) {
-  const clientId = process.env.NEXT_PUBLIC_ORCID_CLIENT_ID
-  const orcidURL = process.env.NEXT_PUBLIC_ORCID_URL
-  const orcidScopes = process.env.NEXT_PUBLIC_ORCID_SCOPES
-  const sovisuplusHost = process.env.NEXT_PUBLIC_SOVISUPLUS_HOST
+  const clientId = getRuntimeEnv().ORCID_CLIENT_ID
+  const orcidURL = getRuntimeEnv().ORCID_URL
+  const orcidScopes = getRuntimeEnv().ORCID_SCOPES
+  const sovisuplusHost = getRuntimeEnv().SOVISUPLUS_HOST
   const lang = Lingui.i18n.locale
   const redirectUri = encodeURIComponent(
     `${sovisuplusHost}/api/orcid/callback?lang=${lang}`,

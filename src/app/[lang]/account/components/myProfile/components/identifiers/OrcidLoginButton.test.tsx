@@ -3,10 +3,14 @@ import { I18nProvider } from '@lingui/react'
 import { i18n } from '@lingui/core'
 import { OrcidLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton'
 
-process.env.NEXT_PUBLIC_ORCID_CLIENT_ID = 'client-id'
-process.env.NEXT_PUBLIC_ORCID_URL = 'https://orcid.org'
-process.env.NEXT_PUBLIC_ORCID_SCOPES = '/authenticate'
-process.env.NEXT_PUBLIC_SOVISUPLUS_HOST = 'https://example.com'
+jest.mock('@/utils/runtimeEnv', () => ({
+  getRuntimeEnv: () => ({
+    ORCID_CLIENT_ID: 'client-id',
+    ORCID_URL: 'https://orcid.org',
+    ORCID_SCOPES: '/authenticate',
+    SOVISUPLUS_HOST: 'https://example.com',
+  }),
+}))
 
 i18n.load({
   en: {

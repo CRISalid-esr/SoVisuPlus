@@ -71,7 +71,7 @@ describe('GET /api/orcid/callback and add ORCID to DB', () => {
     const response = await GET(req)
 
     const redirectUrl = response.headers.get('location')
-    const expectedUrl = `${process.env.NEXT_PUBLIC_SOVISUPLUS_HOST}/fr/account?success=orcid-authentication-success`
+    const expectedUrl = `${process.env.SOVISUPLUS_HOST}/fr/account?success=orcid-authentication-success`
     expect(redirectUrl).toBe(expectedUrl)
 
     const body = (fetch as jest.Mock).mock.calls[0][1].body

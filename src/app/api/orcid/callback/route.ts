@@ -9,7 +9,7 @@ import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { PersonService } from '@/lib/services/PersonService'
 
 export async function GET(req: NextRequest) {
-  const sovisuplusHost = process.env.NEXT_PUBLIC_SOVISUPLUS_HOST
+  const sovisuplusHost = process.env.SOVISUPLUS_HOST
   const lang =
     req.nextUrl.searchParams.get('lang') ??
     process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0]
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  const clientId = process.env.NEXT_PUBLIC_ORCID_CLIENT_ID!
+  const clientId = process.env.ORCID_CLIENT_ID!
   const clientSecret = process.env.ORCID_CLIENT_SECRET!
   const redirectUri = `${sovisuplusHost}/api/orcid/callback?lang=${lang}`
 
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
     code,
     redirect_uri: redirectUri,
   })
-  const orcidUrl = process.env.NEXT_PUBLIC_ORCID_URL!
+  const orcidUrl = process.env.ORCID_URL!
   const response = await fetch(`${orcidUrl}/oauth/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
