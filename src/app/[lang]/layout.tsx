@@ -10,6 +10,7 @@ import ErrorBoundary from '../[lang]/components/ErrorBoundary'
 import DateProvider from './components/DateProvider' // Import the new client component
 import ErrorFallback from './components/ErrorFallback'
 import { LanguageProvider } from './LanguageProvider'
+import { EnvInjector } from '@/components/EnvInjector'
 
 type Props = {
   children: React.ReactNode
@@ -33,6 +34,14 @@ export default async function RootLayout({ params, children }: Props) {
         <title>sovisuplus</title>
       </head>
       <body>
+        <EnvInjector
+          env={{
+            ORCID_URL: process.env.ORCID_URL,
+            SOVISUPLUS_HOST: process.env.SOVISUPLUS_HOST,
+            ORCID_SCOPES: process.env.ORCID_SCOPES,
+            ORCID_CLIENT_ID: process.env.ORCID_CLIENT_ID,
+          }}
+        />
         <ThemeProvider>
           <CssBaseline />
           <LanguageProvider locale={lang} messages={selectedMessages}>

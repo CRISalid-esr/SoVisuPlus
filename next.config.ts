@@ -4,10 +4,10 @@ import * as path from 'node:path'
 const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_SUPPORTED_LOCALES: process.env.NEXT_PUBLIC_SUPPORTED_LOCALES,
-    NEXT_PUBLIC_ORCID_URL: process.env.NEXT_PUBLIC_ORCID_URL,
-    NEXT_PUBLIC_SOVISUPLUS_HOST: process.env.NEXT_PUBLIC_SOVISUPLUS_HOST,
-    NEXT_PUBLIC_ORCID_SCOPES: process.env.NEXT_PUBLIC_ORCID_SCOPES,
-    NEXT_PUBLIC_ORCID_CLIENT_ID: process.env.NEXT_PUBLIC_ORCID_CLIENT_ID,
+    ORCID_URL: process.env.ORCID_URL,
+    SOVISUPLUS_HOST: process.env.SOVISUPLUS_HOST,
+    ORCID_SCOPES: process.env.ORCID_SCOPES,
+    ORCID_CLIENT_ID: process.env.ORCID_CLIENT_ID,
   },
   // for docker https://github.com/vercel/next.js/tree/canary/examples/with-docker
   output: 'standalone',
