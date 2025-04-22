@@ -17,5 +17,10 @@ declare namespace NodeJS {
     GRAPHQL_ENDPOINT_URL: string
     GRAPHQL_API_KEY_ENABLED: string
     GRAPHQL_API_KEY: string
+    NEXT_PUBLIC_ORCID_URL: string
+    NEXT_PUBLIC_SOVISUPLUS_HOST: string
+    NEXT_PUBLIC_ORCID_SCOPES: string
+    NEXT_PUBLIC_ORCID_CLIENT_ID: string
+    ORCID_CLIENT_SECRET: string
   }
 }
