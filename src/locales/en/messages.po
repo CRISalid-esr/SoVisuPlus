@@ -74,14 +74,14 @@ msgid "orcid_identifier_no_orcid_provided"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:32
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:49
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:36
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
 msgid "orcid_button_update_identifier"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:42
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:51
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:46
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:52
 msgid "orcid_button_provide_identifier"
 msgstr ""
 
