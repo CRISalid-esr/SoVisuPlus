@@ -550,8 +550,8 @@ export class DocumentDAO extends AbstractDAO {
     }
   }
 
-  fetchDocumentById(uid: string): Promise<DbDocument | null> {
-    return this.prismaClient.document.findUnique({
+  async fetchDocumentById(uid: string): Promise<Document | null> {
+    const dbDocument = await this.prismaClient.document.findUnique({
       where: { uid },
       include: {
         titles: true,
@@ -573,5 +573,7 @@ export class DocumentDAO extends AbstractDAO {
         },
       },
     })
+
+    return dbDocument ? Document.fromDbDocument(dbDocument) : null
   }
 }
