@@ -11,7 +11,7 @@ export interface DocumentRecordJson {
   uid: string
   platform: BibliographicPlatform
   titles: Array<Literal>
-  url: string | null
+  _url: string | null
 }
 
 export class DocumentRecord {
@@ -67,7 +67,7 @@ export class DocumentRecord {
       record.uid,
       record.platform,
       record.titles.map((title) => Literal.fromObject(title)),
-      record.url,
+      record._url,
     )
   }
 
