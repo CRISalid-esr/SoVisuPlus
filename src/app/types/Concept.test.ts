@@ -2,6 +2,7 @@
 
 import type { ConceptJson } from '@/types/Concept'
 import { Concept } from '@/types/Concept'
+import { Literal } from '@/types/Literal'
 import { describe, expect, it } from '@jest/globals'
 
 describe('Concept.fromObject', () => {
@@ -9,29 +10,8 @@ describe('Concept.fromObject', () => {
     const input: ConceptJson = {
       uid: 'http://www.wikidata.org/entity/Q3054749',
       uri: null,
-      labels: [
-        {
-          id: 12028,
-          conceptId: 3094,
-          language: 'fr',
-          value: 'Question du Sens',
-          type: 'PREF',
-        },
-        {
-          id: 12029,
-          conceptId: 3094,
-          language: 'en',
-          value: 'meaning',
-          type: 'ALT',
-        },
-        {
-          id: 12030,
-          conceptId: 3094,
-          language: 'fr',
-          value: 'Sens',
-          type: 'ALT',
-        },
-      ],
+      prefLabels: [new Literal('Question du Sens', 'fr')],
+      altLabels: [new Literal('meaning', 'en'), new Literal('Sens', 'en')],
     }
 
     const concept = Concept.fromObject(input)
