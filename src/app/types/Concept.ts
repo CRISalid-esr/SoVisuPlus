@@ -4,18 +4,11 @@ import {
   ConceptWithRelations as DbConcept,
 } from '@/prisma-schema/extended-client'
 
-interface ConceptLabelRaw {
-  id: number
-  conceptId: number
-  language: string
-  value: string
-  type: 'PREF' | 'ALT'
-}
-
 interface ConceptJson {
   uid: string
   uri: string | null
-  labels?: Array<ConceptLabelRaw>
+  prefLabels: Array<Literal>
+  altLabels: Array<Literal>
 }
 
 enum ConceptVocabulary {
@@ -42,13 +35,8 @@ class Concept {
   ) {}
 
   static fromObject(concept: ConceptJson): Concept {
-    const altLabels = concept.labels
-      ?.filter((label) => label.type === 'ALT')
-      .map(Literal.fromObject)
-
-    const prefLabels = concept.labels
-      ?.filter((label) => label.type === 'PREF')
-      .map(Literal.fromObject)
+    const altLabels = concept.altLabels.map(Literal.fromObject)
+    const prefLabels = concept.prefLabels.map(Literal.fromObject)
 
     return new Concept(concept.uid, prefLabels, altLabels, concept.uri)
   }
