@@ -311,7 +311,7 @@ export class PersonDAO extends AbstractDAO {
   }> => {
     const searchTerms = searchTerm.trim().split(/\s+/).map(removeAccents)
     const whereClause: Prisma.PersonWhereInput = {
-      OR: searchTerms.map((term) => ({
+      AND: searchTerms.map((term) => ({
         normalizedName: {
           contains: term,
           mode: Prisma.QueryMode.insensitive,
