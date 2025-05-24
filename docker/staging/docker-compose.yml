@@ -60,6 +60,7 @@ services:
       - AMQP_USER=guest
       - AMQP_PASSWORD=guest
       - AMQP_QUEUE_NAME=sovisuplus
+      - AMQP_EXCHANGE_NAME=graph
       - GRAPHQL_ENDPOINT_ENABLED=false
     depends_on:
       svp-db:
