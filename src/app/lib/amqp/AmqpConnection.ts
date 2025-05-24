@@ -8,7 +8,7 @@ class AmqpConnection {
   private channel!: Channel
   private connected: boolean
   private readonly DEFAULT_QUEUE_NAME = 'sovisuplus'
-  private readonly EXCHANGE_NAME = 'amqp.topic'
+  private readonly DEFAULT_EXCHANGE_NAME = 'graph'
   private readonly BINDING_KEYS = [
     'event.people.person.*',
     'event.structures.structure.*',
@@ -30,7 +30,7 @@ class AmqpConnection {
 
       await this.channel.prefetch(10)
 
-      await this.channel.assertExchange(this.EXCHANGE_NAME, 'topic', {
+      await this.channel.assertExchange(this.DEFAULT_EXCHANGE_NAME, 'topic', {
         durable: true,
       })
       this.connected = true
@@ -42,13 +42,15 @@ class AmqpConnection {
 
   async consume(handleIncomingNotification: AMQPMessageHandler) {
     const queueName = process.env.AMQP_QUEUE_NAME || this.DEFAULT_QUEUE_NAME
+    const exchangeName =
+      process.env.AMQP_EXCHANGE_NAME || this.DEFAULT_EXCHANGE_NAME
 
     await this.channel.assertQueue(queueName, {
       durable: true,
     })
 
     for (const bindingKey of this.BINDING_KEYS) {
-      await this.channel.bindQueue(queueName, this.EXCHANGE_NAME, bindingKey)
+      await this.channel.bindQueue(queueName, exchangeName, bindingKey)
     }
 
     await this.channel.consume(
