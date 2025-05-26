@@ -89,8 +89,7 @@ describe('AMQPConnection', () => {
 
     await amqpConnection.connect()
 
-    expect(console.error).toHaveBeenCalledWith(expect.any(Error))
-    expect(console.error).toHaveBeenCalledWith(`Not connected to AMQP Server`)
+    expect(console.error).toHaveBeenCalledWith(`AMQP connection failed`)
     expect(amqpConnection['connected']).toBe(false)
   })
 })
