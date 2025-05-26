@@ -29,7 +29,10 @@ describe('ResearchStructureWorker', () => {
       event: 'updated',
       fields: {
         uid: 'rs-123',
-        identifiers: [{ type: 'RNSR', value: '12345' }],
+        identifiers: [
+          { type: 'NNS', value: '12345' },
+          { type: 'ROR', value: 'https://ror.org/01' },
+        ],
         names: [{ value: 'Research Structure', language: 'en' }],
         acronym: 'RS',
         descriptions: [{ value: 'A description', language: 'en' }],
@@ -45,7 +48,10 @@ describe('ResearchStructureWorker', () => {
       'RS',
       [new Literal('Research Structure', 'en')],
       [new Literal('A description', 'en')],
-      [{ type: 'RNSR', value: '12345' }],
+      [
+        { type: 'NNS', value: '12345' },
+        { type: 'ROR', value: 'https://ror.org/01' },
+      ],
     )
 
     expect(mockDAO.createOrUpdateResearchStructure).toHaveBeenCalledWith(
@@ -59,7 +65,7 @@ describe('ResearchStructureWorker', () => {
       event: 'updated',
       fields: {
         uid: 'rs-123',
-        identifiers: [{ type: 'RNSR', value: '12345' }],
+        identifiers: [{ type: 'NNS', value: '12345' }],
         names: [{ value: 'Research Structure', language: 'en' }],
         acronym: 'RS',
         descriptions: [{ value: 'A description', language: 'en' }],
@@ -78,7 +84,7 @@ describe('ResearchStructureWorker', () => {
       'RS',
       [new Literal('Research Structure', 'en')],
       [new Literal('A description', 'en')],
-      [{ type: 'RNSR', value: '12345' }],
+      [{ type: 'NNS', value: '12345' }],
     )
 
     expect(mockDAO.createOrUpdateResearchStructure).toHaveBeenCalledWith(

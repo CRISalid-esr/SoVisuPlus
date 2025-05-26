@@ -40,7 +40,7 @@ describe('MessageProcessingWorkerFactory', () => {
         acronym: 'RS',
         names: [{ value: 'Research Structure', language: 'en' }],
         descriptions: [{ value: 'A description', language: 'en' }],
-        identifiers: [{ type: 'RNSR', value: '12345' }],
+        identifiers: [{ type: 'NNS', value: '12345' }],
       },
     }
 
