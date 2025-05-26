@@ -23,20 +23,34 @@ class AmqpConnection {
     if (this.connected && this.channel) return
 
     try {
-      this.connection = await client.connect(
-        `amqp://${process.env.AMQP_USER}:${process.env.AMQP_PASSWORD}@${process.env.AMQP_HOST}:${process.env.AMQP_PORT}`,
-      )
+      const user = encodeURIComponent(process.env.AMQP_USER || '')
+      const pass = encodeURIComponent(process.env.AMQP_PASSWORD || '')
+      const host = process.env.AMQP_HOST
+      const port = process.env.AMQP_PORT
+      const exchangeName =
+        process.env.AMQP_EXCHANGE_NAME || this.DEFAULT_EXCHANGE_NAME
+
+      const amqpUrl = `amqp://${user}:${pass}@${host}:${port}`
+
+      this.connection = await client.connect(amqpUrl)
+
       this.channel = await this.connection.createChannel()
 
       await this.channel.prefetch(10)
 
-      await this.channel.assertExchange(this.DEFAULT_EXCHANGE_NAME, 'topic', {
+      await this.channel.assertExchange(exchangeName, 'topic', {
         durable: true,
       })
+
       this.connected = true
+      console.log(`✅ Connected to RabbitMQ at ${host}:${port}`)
     } catch (error) {
-      console.error(error)
-      console.error(`Not connected to AMQP Server`)
+      console.error(`AMQP connection failed`)
+      console.error(
+        `Host: ${process.env.AMQP_HOST}, Port: ${process.env.AMQP_PORT}`,
+      )
+      console.error(`User: ${process.env.AMQP_USER}`)
+      console.error(`Error: ${(error as Error).message || error}`)
     }
   }
 
