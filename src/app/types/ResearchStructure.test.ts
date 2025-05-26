@@ -96,7 +96,7 @@ describe('ResearchStructure', () => {
       ],
       identifiers: [
         { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
-        { type: ResearchStructureIdentifierType.RNSR, value: '67890' },
+        { type: ResearchStructureIdentifierType.NNS, value: '67890' },
       ],
     }
 
@@ -132,7 +132,7 @@ describe('ResearchStructure', () => {
     )
     expect(result.identifiers).toEqual([
       { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
-      { type: ResearchStructureIdentifierType.RNSR, value: '67890' },
+      { type: ResearchStructureIdentifierType.NNS, value: '67890' },
     ])
   })
 

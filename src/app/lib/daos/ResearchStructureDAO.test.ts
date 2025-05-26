@@ -47,7 +47,13 @@ describe('ResearchStructureDAO', () => {
     'RS001',
     [new Literal('Research Structure 001', 'en')],
     [new Literal('A description for Research Structure 001', 'en')],
-    [{ type: ResearchStructureIdentifierType.RNSR, value: '001234567Z' }],
+    [
+      { type: ResearchStructureIdentifierType.NNS, value: '001234567Z' },
+      {
+        type: ResearchStructureIdentifierType.ROR,
+        value: 'https://ror.org/01',
+      },
+    ],
   )
 
   it('should upsert a research structure', async () => {
@@ -114,12 +120,19 @@ describe('ResearchStructureDAO', () => {
     ).toHaveBeenCalledWith({
       where: { researchStructureId: 1 },
     })
+    expect(mockPrisma.researchStructureIdentifier.create).toHaveBeenCalledWith({
+      data: {
+        researchStructureId: 1,
+        type: ResearchStructureIdentifierType.NNS,
+        value: '001234567Z',
+      },
+    })
 
     expect(mockPrisma.researchStructureIdentifier.create).toHaveBeenCalledWith({
       data: {
         researchStructureId: 1,
-        type: 'RNSR',
-        value: '001234567Z',
+        type: ResearchStructureIdentifierType.ROR,
+        value: 'https://ror.org/01',
       },
     })
   })

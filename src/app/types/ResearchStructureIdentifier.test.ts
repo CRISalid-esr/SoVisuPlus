@@ -6,8 +6,8 @@ import { describe, expect, it } from '@jest/globals'
 
 describe('ResearchStructureIdentifier', () => {
   it('should correctly map string values to ResearchStructureIdentifierType', () => {
-    expect(convertStringResearchStructureIdentifierType('rnsr')).toBe(
-      ResearchStructureIdentifierType.RNSR,
+    expect(convertStringResearchStructureIdentifierType('nns')).toBe(
+      ResearchStructureIdentifierType.NNS,
     )
     expect(convertStringResearchStructureIdentifierType('idref')).toBe(
       ResearchStructureIdentifierType.IDREF,
@@ -15,17 +15,29 @@ describe('ResearchStructureIdentifier', () => {
     expect(convertStringResearchStructureIdentifierType('local')).toBe(
       ResearchStructureIdentifierType.LOCAL,
     )
+    expect(convertStringResearchStructureIdentifierType('hal')).toBe(
+      ResearchStructureIdentifierType.HAL,
+    )
+    expect(convertStringResearchStructureIdentifierType('ror')).toBe(
+      ResearchStructureIdentifierType.ROR,
+    )
   })
 
   it('should be case insensitive when mapping string values', () => {
-    expect(convertStringResearchStructureIdentifierType('RNSR')).toBe(
-      ResearchStructureIdentifierType.RNSR,
+    expect(convertStringResearchStructureIdentifierType('NNS')).toBe(
+      ResearchStructureIdentifierType.NNS,
     )
     expect(convertStringResearchStructureIdentifierType('IDREF')).toBe(
       ResearchStructureIdentifierType.IDREF,
     )
     expect(convertStringResearchStructureIdentifierType('LOCAL')).toBe(
       ResearchStructureIdentifierType.LOCAL,
+    )
+    expect(convertStringResearchStructureIdentifierType('Hal')).toBe(
+      ResearchStructureIdentifierType.HAL,
+    )
+    expect(convertStringResearchStructureIdentifierType('ROR')).toBe(
+      ResearchStructureIdentifierType.ROR,
     )
   })
 

@@ -218,8 +218,10 @@ model ResearchStructureIdentifier {
 }
 
 enum ResearchStructureIdentifierType {
-  LOCAL @map("local")
-  RNSR  @map("rnsr")
-  IDREF @map("idref")
-  ROR   @map("ror")
+  LOCAL     @map("local")
+  NNS       @map("nns")
+  IDREF     @map("idref")
+  ROR       @map("ror")
+  HAL       @map("hal")
+  SCOPUS_ID @map("scopus_id")
 }
