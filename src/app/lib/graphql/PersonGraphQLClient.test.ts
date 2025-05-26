@@ -59,6 +59,7 @@ describe('PersonGraphQLClient', () => {
           identifiers: [
             { type: 'orcid', value: '12345' },
             { type: 'scopus_eid', value: '67890' },
+            { type: 'eppn', value: 'jdoe@univ.edu' },
           ],
           names: [
             {
@@ -85,6 +86,7 @@ describe('PersonGraphQLClient', () => {
       [
         { type: PersonIdentifierType.ORCID, value: '12345' },
         { type: PersonIdentifierType.SCOPUS_EID, value: '67890' },
+        { type: PersonIdentifierType.EPPN, value: 'jdoe@univ.edu' },
       ],
     )
     expect(person).toEqual(expectedPerson)

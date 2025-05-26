@@ -13,4 +13,5 @@ export const identifierComponentMap: Record<
   [PersonIdentifierType.ID_HAL_S]: null,
   [PersonIdentifierType.ID_HAL_I]: null,
   [PersonIdentifierType.SCOPUS_EID]: null,
+  [PersonIdentifierType.EPPN]: null,
 }

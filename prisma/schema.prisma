@@ -160,6 +160,7 @@ enum PersonIdentifierType {
   ID_HAL_I   @map("id_hal_i")
   SCOPUS_EID @map("scopus_eid")
   LOCAL      @map("local")
+  EPPN       @map("eppn")
 }
 
 model PersonIdentifier {
