@@ -29,7 +29,6 @@ jest.mock('@mui/material/styles', () => ({
       primary: { main: '#1976d2' },
       secondary: { main: '#dc004e', dark: '#9a0036' },
       lightSecondaryContainer: '#f0f0f0',
-      onSecondaryContainer: '#000',
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       getContrastText: (_: string) => '#fff',
     },
@@ -79,7 +78,6 @@ describe('Authors Component', () => {
       primary: { main: '#1976d2' },
       secondary: { main: '#dc004e', dark: '#9a0036' },
       lightSecondaryContainer: '#f0f0f0',
-      onSecondaryContainer: '#000',
     },
     utils: { pxToRem: (value: number) => `${value / 16}rem` },
   })
