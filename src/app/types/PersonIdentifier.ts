@@ -21,6 +21,8 @@ const convertStringPersonIdentifierType = (
       return DbPersonIdentifierType.ID_HAL_S
     case 'id_hal_s':
       return DbPersonIdentifierType.ID_HAL_S
+    case 'eppn':
+      return DbPersonIdentifierType.EPPN
     default:
       throw new Error(`Unknown identifier type: ${type}`)
   }
