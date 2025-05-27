@@ -64,6 +64,9 @@ Access Keycloak at `http://localhost:8080` and create :
   - Valid post logout redirect URIs: `http://localhost:3000/api/auth/signout`
   - Web Origins: `http://localhost:3000`
   - Client authentication: `On`
+- Add a credential to the client with the following settings:
+  - Client Authenticator : `Client Id and Secret`
+  - Client Secret: `credential_generated_by_keycloak_here`
 
 5. Create a `.env` file in the root directory of the project and fill it with the following content:
 
@@ -71,7 +74,7 @@ Access Keycloak at `http://localhost:8080` and create :
 DATABASE_URL="postgresql://sovisuplus:**************@localhost:5432/sovisuplus"
 
 KEYCLOAK_CLIENT_ID="sovisuplus"
-KEYCLOAK_CLIENT_SECRET="credentials_from_keycloak_here"
+KEYCLOAK_CLIENT_SECRET="credential_generated_by_keycloak_here"
 KEYCLOAK_ISSUER="http://localhost:8080/realms/my-keycloak-realm-here" # e.g. myuniversity
 
 NEXTAUTH_URL="http://localhost:3000/api/auth"
