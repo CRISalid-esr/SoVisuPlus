@@ -19,8 +19,6 @@ jest.mock('@mui/material/styles', () => ({
   useTheme: () => ({
     palette: {
       primary: { main: '#1976d2' },
-      lightSecondaryContainer: '#f0f0f0',
-      onSecondaryContainer: '#000',
     },
     spacing: (factor: number) => `${factor * 8}px`,
     utils: { pxToRem: (value: number) => `${value / 16}rem` },
@@ -92,8 +90,6 @@ describe('Sources Component', () => {
     },
     palette: {
       primary: { main: '#1976d2' },
-      lightSecondaryContainer: '#f0f0f0',
-      onSecondaryContainer: '#000',
     },
     utils: { pxToRem: (value: number) => `${value / 16}rem` },
   })

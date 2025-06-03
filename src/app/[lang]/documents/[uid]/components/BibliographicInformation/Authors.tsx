@@ -73,20 +73,7 @@ const Authors = () => {
             label={contribution.person.displayName}
           />
         ))}
-        <Button
-          variant='contained'
-          sx={{
-            color: theme.palette.onSecondaryContainer,
-            boxShadow: 'none',
-            backgroundColor: theme.palette.lightSecondaryContainer,
-            fontSize: theme.utils.pxToRem(14),
-            fontStyle: 'normal',
-            fontWeight: theme.typography[500],
-            lineHeight: theme.typography.lineHeight.lineHeight20px,
-            letterSpacing: '0.1px',
-          }}
-          startIcon={<EditIcon />}
-        >
+        <Button variant='outlined' startIcon={<EditIcon />}>
           <Trans>document_details_page_authors_row_update_author</Trans>
         </Button>
       </Box>
