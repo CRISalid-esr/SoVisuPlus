@@ -1050,7 +1050,7 @@ export default function Sidebar({
                   }}
                 >
                   <Image
-                    src='/avatar.png'
+                    src='/icons/avatar.png'
                     alt='avatar'
                     width={24}
                     height={24}
