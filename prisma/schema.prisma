@@ -78,14 +78,22 @@ enum DocumentType {
   Proceedings
 }
 
+enum HalSubmitType {
+  file
+  notice
+  annex
+}
+
 model DocumentRecord {
-  id         Int                   @id @default(autoincrement())
-  uid        String                @unique
-  url        String?
-  platform   BibliographicPlatform
-  titles     Json
-  documentId Int
-  document   Document              @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  id                 Int                   @id @default(autoincrement())
+  uid                String                @unique
+  url                String?
+  platform           BibliographicPlatform
+  titles             Json
+  halCollectionCodes String[]
+  halSubmitType      HalSubmitType?
+  documentId         Int
+  document           Document              @relation(fields: [documentId], references: [id], onDelete: Cascade)
 }
 
 enum BibliographicPlatform {

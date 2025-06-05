@@ -250,12 +250,16 @@ export class DocumentDAO extends AbstractDAO {
               },
               titles: record.titles.map((title) => title.toJson()),
               url: record.url,
+              halCollectionCodes: record.halCollectionCodes || [],
+              halSubmitType: record.halSubmitType,
             },
             create: {
               uid: record.uid,
               platform: getBibliographicPlatformDbValue(record.platform),
               titles: record.titles.map((title) => title.toJson()),
               url: record.url,
+              halCollectionCodes: record.halCollectionCodes || [],
+              halSubmitType: record.halSubmitType,
               documentId: dbDocument.id, // Link to document
             },
           })

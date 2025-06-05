@@ -73,6 +73,8 @@ describe('DocumentGraphQLClient', () => {
               url: 'http://platform.com/record/record-001',
               harvester: 'idref',
               titles: [{ language: 'en', value: 'Record Title' }],
+              hal_collection_codes: null,
+              hal_submit_type: null,
             },
           ],
         },
@@ -194,5 +196,108 @@ describe('DocumentGraphQLClient', () => {
         uid_EQ: 'doc-789',
       },
     })
+  })
+
+  test('should return a document with hal custom fields', async () => {
+    const mockResponse = {
+      documents: [
+        {
+          uid: '28c1e1da-83ce-4bdb-b2ea-f3ab78076d99',
+          document_type: 'BookChapter',
+          publication_date: '2017',
+          publication_date_start: '2017-01-01T00:00:00.000Z',
+          publication_date_end: '2017-12-31T23:59:59.000Z',
+          titles: [
+            {
+              value:
+                'La tentation du risque : analyse du comportement des étudiants de l’Université d’Angers. Addictions : déterminants et complémentarités',
+              language: 'fr',
+            },
+          ],
+          abstracts: [],
+          has_subjects: [
+            {
+              uid: 'http://www.wikidata.org/entity/Q42745330',
+              uri: 'http://www.wikidata.org/entity/Q42745330',
+              pref_labels: [
+                { value: 'Addictions', language: 'en' },
+                { value: 'Addictions', language: 'fr' },
+              ],
+              alt_labels: [],
+            },
+          ],
+          has_contributions: [],
+          recorded_by: [
+            {
+              uid: 'scanr-halhal-02538579',
+              harvester: 'scanr',
+              titles: [
+                {
+                  value:
+                    'La tentation du risque : analyse du comportement des étudiants de l’Université d’Angers. Addictions : déterminants et complémentarités',
+                  language: 'fr',
+                },
+              ],
+              hal_collection_codes: [],
+              hal_submit_type: null,
+              url: 'https://scanr.enseignementsup-recherche.gouv.fr/publications/halhal-02538579',
+            },
+            {
+              uid: 'hal-hal-02538579',
+              harvester: 'hal',
+              titles: [
+                {
+                  value:
+                    'La tentation du risque : analyse du comportement des étudiants de l’Université d’Angers. Addictions : déterminants et complémentarités',
+                  language: 'fr',
+                },
+              ],
+              hal_collection_codes: [
+                'SHS',
+                'UNIV-NANTES',
+                'UR2-HB',
+                'CNRS',
+                'UNIV-ANGERS',
+                'UNIV-LEMANS',
+                'LEMNA',
+                'UNAM',
+                'GRANEM',
+                'COMUE-NORMANDIE',
+                'ESO',
+                'AGREENIUM',
+                'UNIV-RENNES2',
+                'ESO-ANGERS',
+                'UNIV-RENNES',
+                'UNICAEN',
+                'LPPL',
+                'IGARUN',
+                'TEST-HALCNRS',
+                'NANTES-UNIVERSITE',
+                'UNIV-NANTES-AV2022',
+                'INSTITUT-AGRO',
+              ],
+              hal_submit_type: 'notice',
+              url: 'https://hal.science/hal-02538579',
+            },
+          ],
+        },
+      ],
+    }
+
+    mockQuery.mockResolvedValue(mockResponse)
+
+    const document = await client.getDocumentByUid(
+      '28c1e1da-83ce-4bdb-b2ea-f3ab78076d99',
+    )
+
+    const halRecord = document?.records.find((r) => r.platform === 'hal')
+    expect(halRecord).toBeDefined()
+    expect(halRecord?.halCollectionCodes).toContain('UNIV-NANTES')
+    expect(halRecord?.halSubmitType).toBe('notice')
+
+    const scanrRecord = document?.records.find((r) => r.platform === 'scanr')
+    expect(scanrRecord).toBeDefined()
+    expect(scanrRecord?.halCollectionCodes).toEqual([])
+    expect(scanrRecord?.halSubmitType).toBeNull()
   })
 })

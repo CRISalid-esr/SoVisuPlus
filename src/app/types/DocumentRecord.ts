@@ -5,7 +5,10 @@ import {
 } from '@/types/BibliographicPlatform'
 import { Literal } from '@/types/Literal'
 import { getStringInLocale } from '@/utils/getStringInLocale'
-import { DocumentRecord as DbDocumentRecord } from '@prisma/client'
+import {
+  DocumentRecord as DbDocumentRecord,
+  HalSubmitType as DbHalSubmitType,
+} from '@prisma/client'
 
 export interface DocumentRecordJson {
   uid: string
@@ -22,6 +25,8 @@ export class DocumentRecord {
     public platform: BibliographicPlatform,
     public titles: Array<Literal>,
     url?: string | null,
+    public halCollectionCodes: string[] = [],
+    public halSubmitType: DbHalSubmitType | null = null,
   ) {
     if (url) this.setUrl(url)
   }
