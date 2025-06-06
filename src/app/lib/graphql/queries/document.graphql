@@ -60,6 +60,8 @@ query Documents($where: DocumentWhere) {
       uid
       url
       harvester
+      hal_collection_codes
+      hal_submit_type
       titles {
         language
         value

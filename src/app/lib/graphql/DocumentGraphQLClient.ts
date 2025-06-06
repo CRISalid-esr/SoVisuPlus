@@ -19,6 +19,8 @@ interface GraphDocumentRecordResponse {
   url: string | null
   harvester: string
   titles: { language: string; value: string }[]
+  hal_collection_codes?: string[] | null
+  hal_submit_type?: 'file' | 'notice' | 'annex' | null
 }
 
 interface GraphDocumentResponse {
@@ -139,6 +141,8 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
               platform,
               recordData.titles.map(Literal.fromObject),
               recordData.url,
+              recordData.hal_collection_codes ?? [],
+              recordData.hal_submit_type,
             ),
           )
 

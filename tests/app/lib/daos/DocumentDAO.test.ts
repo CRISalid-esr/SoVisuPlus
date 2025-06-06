@@ -7,6 +7,8 @@ import { Literal } from '@/types/Literal'
 import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
 import { Contribution } from '@/types/Contribution'
 import { Concept } from '@/types/Concept'
+import { DocumentRecord } from '@/types/DocumentRecord'
+import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 
 describe('DocumentDAO Integration Tests', () => {
   let documentDAO: DocumentDAO
@@ -190,5 +192,48 @@ describe('DocumentDAO Integration Tests', () => {
     expect(updatedDbDocument2).toBeDefined()
     expect(updatedDbDocument2?.subjects).toHaveLength(1)
     expect(updatedDbDocument2?.subjects[0].uid).toBe(subject2.uid)
+  })
+  test('should persist document with HAL source record and custom fields', async () => {
+    const halRecord = new DocumentRecord(
+      'hal-doc-001',
+      BibliographicPlatform.HAL,
+      [new Literal('HAL Document Title', 'fr')],
+      'https://hal.science/hal-doc-001',
+      ['CNRS', 'UNIV-NANTES'],
+      'notice',
+    )
+
+    const doc = new Document(
+      'doc-hal-int',
+      Document.documentTypeFromString('Book'),
+      '2019',
+      new Date('2019-01-01T00:00:00.000Z'),
+      new Date('2019-12-31T23:59:59.000Z'),
+      [new Literal('HAL Document Title', 'fr')],
+      [],
+      [],
+      [],
+      [halRecord],
+    )
+
+    await documentDAO.createOrUpdateDocument(doc)
+
+    const documentFromDB = await prisma.document.findUnique({
+      where: { uid: 'doc-hal-int' },
+      include: {
+        records: true,
+      },
+    })
+
+    expect(documentFromDB).toBeDefined()
+    expect(documentFromDB?.records).toHaveLength(1)
+    const record = documentFromDB!.records[0]
+    expect(record.uid).toBe('hal-doc-001')
+    expect(record.platform).toBe('hal')
+    expect(record.url).toBe('https://hal.science/hal-doc-001')
+    expect(record.halSubmitType).toBe('notice')
+    expect(record.halCollectionCodes).toEqual(
+      expect.arrayContaining(['CNRS', 'UNIV-NANTES']),
+    )
   })
 })

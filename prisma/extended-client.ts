@@ -6,6 +6,7 @@ import {
   DocumentAbstract,
   DocumentRecord,
   DocumentTitle,
+  HalSubmitType,
   LabelType,
   Person,
   PrismaClient,
@@ -25,12 +26,16 @@ export type ContributionWithRelations = Contribution & {
   person: Person
 }
 
+export type DocumentRecordWithRelations = DocumentRecord & {
+  halSubmitType: HalSubmitType | null
+}
+
 export type DocumentWithRelations = Document & {
   titles: DocumentTitle[]
   abstracts: DocumentAbstract[]
   subjects: ConceptWithRelations[]
   contributions: ContributionWithRelations[]
-  records: DocumentRecord[]
+  records: DocumentRecordWithRelations[]
 }
 
 export type ConceptWithRelations = Concept & {

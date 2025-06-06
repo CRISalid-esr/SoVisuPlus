@@ -13,6 +13,11 @@ import { LocRelator } from '@/types/LocRelator'
 import { Contribution } from '@/types/Contribution'
 import { Concept } from '@/types/Concept'
 import { AgentType } from '@/types/IAgent'
+import { DocumentRecord } from '@/types/DocumentRecord'
+import {
+  BibliographicPlatform,
+  getBibliographicPlatformByNameIgnoreCase,
+} from '@/types/BibliographicPlatform'
 
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
@@ -32,6 +37,9 @@ jest.mock('@prisma/client', () => {
       upsert: jest.fn(),
     },
     contribution: {
+      upsert: jest.fn(),
+    },
+    documentRecord: {
       upsert: jest.fn(),
     },
   }
@@ -224,6 +232,65 @@ describe('DocumentDAO', () => {
         },
       },
     })
+  })
+
+  it('should create or update a document with HAL custom fields', async () => {
+    const documentWithHal = new Document(
+      'doc-hal',
+      DocumentType.Document,
+      '2022',
+      new Date('2022-01-01T00:00:00.000Z'),
+      new Date('2022-12-31T23:59:59.000Z'),
+      [new Literal('HAL Record Title', 'fr')],
+      [],
+      [],
+      [],
+      [
+        new DocumentRecord(
+          'hal-123',
+          getBibliographicPlatformByNameIgnoreCase(
+            'hal',
+          ) as BibliographicPlatform,
+          [new Literal('HAL Record Title', 'fr')],
+          'https://hal.science/hal-123',
+          ['UNIV-NANTES', 'CNRS'],
+          'notice',
+        ),
+      ],
+    )
+
+    const mockDbDocument = {
+      id: 42,
+      uid: 'doc-hal',
+    } as DbDocument
+
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
+    ;(mockPrisma.document.create as jest.Mock).mockResolvedValue(mockDbDocument)
+    ;(mockPrisma.documentTitle.upsert as jest.Mock).mockResolvedValue(null)
+    ;(mockPrisma.documentAbstract.upsert as jest.Mock).mockResolvedValue(null)
+
+    const dbDocument = await documentDAO.createOrUpdateDocument(documentWithHal)
+    expect(mockPrisma.documentRecord.upsert).toHaveBeenCalledWith({
+      where: { uid: 'hal-123' },
+      update: {
+        platform: { set: 'hal' },
+        titles: [{ value: 'HAL Record Title', language: 'fr' }],
+        url: 'https://hal.science/hal-123',
+        halCollectionCodes: ['UNIV-NANTES', 'CNRS'],
+        halSubmitType: 'notice',
+      },
+      create: {
+        uid: 'hal-123',
+        platform: 'hal',
+        titles: [{ value: 'HAL Record Title', language: 'fr' }],
+        url: 'https://hal.science/hal-123',
+        halCollectionCodes: ['UNIV-NANTES', 'CNRS'],
+        halSubmitType: 'notice',
+        documentId: 42,
+      },
+    })
+
+    expect(dbDocument.uid).toBe('doc-hal')
   })
 
   it('should handle missing document gracefully and create a new one', async () => {
