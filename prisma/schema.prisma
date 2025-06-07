@@ -65,6 +65,30 @@ model Document {
   title_locale_1       String?
   title_locale_2       String?
   records              DocumentRecord[]
+
+  journalId Int?     @unique
+  journal   Journal? @relation(fields: [journalId], references: [id], onDelete: SetNull)
+  volume    String?
+  issue     String?
+  pages     String?
+}
+
+model Journal {
+  id          Int                 @id @default(autoincrement())
+  issnL       String              @unique
+  publisher   String
+  titles      String[]
+  identifiers JournalIdentifier[]
+  documents   Document[]
+}
+
+model JournalIdentifier {
+  id        Int     @id @default(autoincrement())
+  type      String
+  value     String
+  format    String?
+  journalId Int
+  journal   Journal @relation(fields: [journalId], references: [id], onDelete: Cascade)
 }
 
 enum DocumentType {
