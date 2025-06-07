@@ -8,6 +8,8 @@ import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
 import { getBibliographicPlatformByNameIgnoreCase } from '@/types/BibliographicPlatform'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import { Concept } from '@/types/Concept'
+import { Journal } from '@/types/Journal'
+import { JournalIdentifier } from '@/types/JournalIdentifier'
 
 interface GraphContributionResponse {
   roles: string[]
@@ -39,6 +41,22 @@ interface GraphDocumentResponse {
   }[]
   has_contributions: Array<GraphContributionResponse>
   recorded_by: Array<GraphDocumentRecordResponse> // Add record information
+  publishedInConnection: {
+    edges: Array<{
+      properties: {
+        volume: string
+        issue: string
+        pages: string
+      }
+      node: {
+        uid: string
+        issn_l: string
+        publisher: string
+        titles: string[]
+        identifiers: { type: string; value: string; format?: string | null }[]
+      }
+    }>
+  }
 }
 
 export interface GraphDocumentsResponse {
@@ -89,7 +107,20 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
       publication_date_start,
       publication_date_end,
       recorded_by,
+      publishedInConnection,
     } = documentData
+
+    const journalEdge = publishedInConnection?.edges?.[0]
+    const journal = journalEdge
+      ? new Journal(
+          journalEdge.node.titles,
+          journalEdge.node.issn_l,
+          journalEdge.node.publisher,
+          journalEdge.node.identifiers.map(
+            (id) => new JournalIdentifier(id.type, id.value, id.format),
+          ),
+        )
+      : undefined
 
     return new Document(
       uid,
@@ -150,6 +181,10 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
         },
         [],
       ),
+      journal,
+      journalEdge?.properties.volume,
+      journalEdge?.properties.issue,
+      journalEdge?.properties.pages,
     )
   }
 }

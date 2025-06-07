@@ -4,6 +4,7 @@ import { Contribution, ContributionJson } from '@/types/Contribution'
 import { DocumentRecord, DocumentRecordJson } from '@/types/DocumentRecord'
 import { Literal } from '@/types/Literal'
 import { getStringInLocale } from '@/utils/getStringInLocale'
+import { Journal } from '@/types/Journal'
 
 interface DocumentJson {
   uid: string
@@ -41,6 +42,10 @@ class Document {
     public subjects: Array<Concept>,
     public contributions: Array<Contribution> = [],
     public records: Array<DocumentRecord> = [],
+    public journal?: Journal,
+    public volume?: string,
+    public issue?: string,
+    public pages?: string,
   ) {}
 
   getTitleInLocale(localeNumber: number): string {

@@ -300,4 +300,73 @@ describe('DocumentGraphQLClient', () => {
     expect(scanrRecord?.halCollectionCodes).toEqual([])
     expect(scanrRecord?.halSubmitType).toBeNull()
   })
+  test('should return a document with journal metadata and publication details', async () => {
+    const mockResponse = {
+      documents: [
+        {
+          uid: '6b3355cd-35b2-40ae-bfbe-5e8a60deb47f',
+          document_type: 'JournalArticle',
+          publication_date: '2012-06-07',
+          publication_date_start: '2012-06-07T00:00:00.000Z',
+          publication_date_end: '2012-06-07T23:59:59.000Z',
+          titles: [
+            {
+              language: 'en',
+              value:
+                'Amino acid substitutions in the Candida albicans sterol 5,6-desaturase (Erg3p) confer azole resistance: characterization of two novel mutants with impaired virulence',
+            },
+          ],
+          abstracts: [],
+          has_subjects: [],
+          has_contributions: [],
+          publishedInConnection: {
+            edges: [
+              {
+                properties: {
+                  volume: '67',
+                  issue: '9',
+                  pages: '',
+                },
+                node: {
+                  issn_l: '0305-7453',
+                  publisher: 'Oxford University Press (OUP)',
+                  titles: ['The journal of antimicrobial chemotherapy.'],
+                  identifiers: [
+                    {
+                      type: 'issn',
+                      value: '1460-2091',
+                      format: 'Online',
+                    },
+                    {
+                      type: 'issn',
+                      value: '0305-7453',
+                      format: 'Print',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+          recorded_by: [],
+        },
+      ],
+    }
+
+    mockQuery.mockResolvedValue(mockResponse)
+
+    const document = await client.getDocumentByUid(
+      '6b3355cd-35b2-40ae-bfbe-5e8a60deb47f',
+    )
+
+    expect(document?.journal).toBeDefined()
+    expect(document?.journal?.issnL).toBe('0305-7453')
+    expect(document?.journal?.publisher).toBe('Oxford University Press (OUP)')
+    expect(document?.journal?.identifiers).toHaveLength(2)
+    expect(document?.journal?.titles).toContain(
+      'The journal of antimicrobial chemotherapy.',
+    )
+    expect(document?.volume).toBe('67')
+    expect(document?.issue).toBe('9')
+    expect(document?.pages).toBe('')
+  })
 })
