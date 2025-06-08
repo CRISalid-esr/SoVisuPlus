@@ -56,6 +56,25 @@ query Documents($where: DocumentWhere) {
         }
       }
     }
+    publishedInConnection {
+      edges {
+        properties {
+          volume
+          issue
+          pages
+        }
+        node {
+          issn_l
+          publisher
+          titles
+          identifiers {
+            type
+            value
+            format
+          }
+        }
+      }
+    }
     recorded_by {
       uid
       url

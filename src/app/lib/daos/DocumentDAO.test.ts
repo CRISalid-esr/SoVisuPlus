@@ -1,5 +1,6 @@
 import {
   Document as DbDocument,
+  Journal as DbJournal,
   Person as DbPerson,
   Prisma,
   PrismaClient,
@@ -18,6 +19,8 @@ import {
   BibliographicPlatform,
   getBibliographicPlatformByNameIgnoreCase,
 } from '@/types/BibliographicPlatform'
+import { Journal } from '@/types/Journal'
+import { JournalIdentifier } from '@/types/JournalIdentifier'
 
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
@@ -41,6 +44,15 @@ jest.mock('@prisma/client', () => {
     },
     documentRecord: {
       upsert: jest.fn(),
+    },
+    journal: {
+      upsert: jest.fn(),
+      create: jest.fn(),
+    },
+    journalIdentifier: {
+      upsert: jest.fn(),
+      deleteMany: jest.fn(),
+      create: jest.fn(),
     },
   }
 
@@ -119,6 +131,12 @@ describe('DocumentDAO', () => {
       publicationDate: '2022',
       publicationDateStart: new Date('2022-01-01T00:00:00.000Z'),
       publicationDateEnd: new Date('2022-12-31T23:59:59.000Z'),
+      contributions: [],
+      records: [],
+      journalId: null,
+      volume: null,
+      issue: null,
+      pages: null,
     } as DbDocument
 
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
@@ -159,6 +177,11 @@ describe('DocumentDAO', () => {
           },
         },
         contributions: { include: { person: true } },
+        journal: {
+          include: {
+            identifiers: true,
+          },
+        },
       },
     })
 
@@ -307,6 +330,12 @@ describe('DocumentDAO', () => {
       publicationDate: '2022',
       publicationDateStart: new Date('2022-01-01T00:00:00.000Z'),
       publicationDateEnd: new Date('2022-12-31T23:59:59.000Z'),
+      contributions: [],
+      records: [],
+      journalId: null,
+      volume: null,
+      issue: null,
+      pages: null,
     } as DbDocument
 
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
@@ -459,6 +488,11 @@ describe('DocumentDAO', () => {
           },
         },
         records: true,
+        journal: {
+          include: {
+            identifiers: true,
+          },
+        },
       },
     })
   })
@@ -478,6 +512,10 @@ describe('DocumentDAO', () => {
       publicationDate: '2022',
       publicationDateStart: new Date('2022-01-01T00:00:00.000Z'),
       publicationDateEnd: new Date('2022-12-31T23:59:59.000Z'),
+      journalId: null,
+      volume: null,
+      issue: null,
+      pages: null,
     } as DbDocument
 
     // Mock Prisma response
@@ -509,7 +547,101 @@ describe('DocumentDAO', () => {
             labels: true,
           },
         },
+        journal: {
+          include: {
+            identifiers: true,
+          },
+        },
       },
     })
+  })
+
+  it('should create or update a document with journal', async () => {
+    ;(mockPrisma.document.create as jest.Mock).mockResolvedValue({
+      uid: 'doc-uid-001',
+      documentType: DocumentType.JournalArticle,
+      publicationDate: null,
+      publicationDateStart: null,
+      publicationDateEnd: null,
+      titles: [],
+      abstracts: [],
+      subjects: [],
+      contributions: [],
+      records: [],
+      journalUid: 'journal-uid-001',
+      volume: '42',
+      issue: '3',
+      pages: '55-67',
+    } as unknown as DbDocument)
+    ;(mockPrisma.journal.upsert as jest.Mock).mockResolvedValue({
+      id: 1,
+      uid: 'journal-uid-001',
+      issnL: '1234-5678',
+      publisher: 'Test Publisher',
+      titles: ['Journal of Testing'],
+      identifiers: [
+        { type: 'issn', value: '1234-5678', format: 'Print' },
+        { type: 'issn', value: '8765-4321', format: 'Online' },
+      ],
+    } as unknown as DbJournal)
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
+
+    document.journal = new Journal(
+      ['Journal of Testing'],
+      '1234-5678',
+      'Test Publisher',
+      [
+        new JournalIdentifier('issn', '1234-5678', 'Print'),
+        new JournalIdentifier('issn', '8765-4321', 'Online'),
+      ],
+    )
+    document.volume = '42'
+    document.issue = '3'
+    document.pages = '55-67'
+
+    // Act
+    await documentDAO.createOrUpdateDocument(document)
+
+    // Assert: check document creation with journal connection
+    expect(mockPrisma.document.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          issue: '3',
+          pages: '55-67',
+          volume: '42',
+          journal: { connect: { id: 1 } },
+        }),
+        include: {
+          titles: true,
+          abstracts: true,
+          subjects: { include: { labels: true } },
+          contributions: { include: { person: true } },
+          records: true,
+          journal: {
+            include: {
+              identifiers: true,
+            },
+          },
+        },
+      }),
+    )
+
+    // Assert: check Prisma was called to upsert journal
+    expect(mockPrisma.journal.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        create: expect.objectContaining({
+          issnL: '1234-5678',
+          publisher: 'Test Publisher',
+          titles: ['Journal of Testing'],
+        }),
+        update: expect.objectContaining({
+          publisher: 'Test Publisher',
+          titles: { set: ['Journal of Testing'] },
+        }),
+        where: expect.objectContaining({ issnL: '1234-5678' }),
+      }),
+    )
+    // Assert: check journal identifiers were handled
+    expect(mockPrisma.journalIdentifier.create).toHaveBeenCalledTimes(2)
   })
 })

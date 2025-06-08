@@ -28,8 +28,18 @@ export class DocumentDAO extends AbstractDAO {
    * @returns The created or updated Document record
    */
   public async createOrUpdateDocument(document: Document): Promise<DbDocument> {
-    const { uid, titles, abstracts, subjects, contributions, records } =
-      document
+    const {
+      uid,
+      titles,
+      abstracts,
+      subjects,
+      contributions,
+      records,
+      journal,
+      volume,
+      issue,
+      pages,
+    } = document
 
     try {
       let dbDocument: DbDocument | null =
@@ -41,8 +51,50 @@ export class DocumentDAO extends AbstractDAO {
             subjects: { include: { labels: true } },
             contributions: { include: { person: true } },
             records: true,
+            journal: {
+              include: {
+                identifiers: true,
+              },
+            },
           },
         })
+
+      let journalId: number | null = null
+
+      if (journal) {
+        if (!journal.issnL) {
+          throw new Error('Journal is missing issnL')
+        }
+        const dbJournal = await this.prismaClient.journal.upsert({
+          where: { issnL: journal.issnL },
+          update: {
+            publisher: journal.publisher,
+            titles: { set: journal.titles },
+          },
+          create: {
+            issnL: journal.issnL,
+            publisher: journal.publisher,
+            titles: journal.titles,
+          },
+        })
+
+        journalId = dbJournal.id
+
+        await this.prismaClient.journalIdentifier.deleteMany({
+          where: { journalId: journalId },
+        })
+
+        for (const identifier of journal.identifiers) {
+          await this.prismaClient.journalIdentifier.create({
+            data: {
+              type: identifier.type,
+              value: identifier.value,
+              format: identifier.format,
+              journalId: journalId,
+            },
+          })
+        }
+      }
 
       if (!dbDocument) {
         dbDocument = await this.prismaClient.document.create({
@@ -59,6 +111,10 @@ export class DocumentDAO extends AbstractDAO {
             publicationDateEnd: document.publicationDateEnd
               ? document.publicationDateEnd.toISOString()
               : null,
+            journal: journalId ? { connect: { id: journalId } } : undefined,
+            volume,
+            issue,
+            pages,
           },
           include: {
             titles: true,
@@ -66,6 +122,11 @@ export class DocumentDAO extends AbstractDAO {
             subjects: { include: { labels: true } },
             contributions: { include: { person: true } },
             records: true,
+            journal: {
+              include: {
+                identifiers: true,
+              },
+            },
           },
         })
       } else {
@@ -121,6 +182,10 @@ export class DocumentDAO extends AbstractDAO {
             publicationDateEnd: document.publicationDateEnd
               ? document.publicationDateEnd.toISOString()
               : null,
+            journal: journalId ? { connect: { id: journalId } } : undefined,
+            volume,
+            issue,
+            pages,
           },
           include: {
             titles: true, // Include related titles
@@ -541,6 +606,11 @@ export class DocumentDAO extends AbstractDAO {
           },
         },
         records: true,
+        journal: {
+          include: {
+            identifiers: true,
+          },
+        },
       },
     })
 
@@ -573,6 +643,11 @@ export class DocumentDAO extends AbstractDAO {
         subjects: {
           include: {
             labels: true,
+          },
+        },
+        journal: {
+          include: {
+            identifiers: true,
           },
         },
       },

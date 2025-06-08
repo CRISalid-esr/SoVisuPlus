@@ -4,6 +4,7 @@ import { Contribution, ContributionJson } from '@/types/Contribution'
 import { DocumentRecord, DocumentRecordJson } from '@/types/DocumentRecord'
 import { Literal } from '@/types/Literal'
 import { getStringInLocale } from '@/utils/getStringInLocale'
+import { Journal, JournalJson } from '@/types/Journal'
 
 interface DocumentJson {
   uid: string
@@ -16,6 +17,10 @@ interface DocumentJson {
   subjects: Array<Concept>
   contributions: Array<ContributionJson>
   records: Array<DocumentRecordJson>
+  journal?: JournalJson
+  volume?: string
+  issue?: string
+  pages?: string
 }
 
 enum DocumentType {
@@ -41,6 +46,10 @@ class Document {
     public subjects: Array<Concept>,
     public contributions: Array<Contribution> = [],
     public records: Array<DocumentRecord> = [],
+    public journal?: Journal,
+    public volume?: string,
+    public issue?: string,
+    public pages?: string,
   ) {}
 
   getTitleInLocale(localeNumber: number): string {
@@ -76,6 +85,10 @@ class Document {
       document.records.map((record: DocumentRecordJson) =>
         DocumentRecord.fromObject(record),
       ),
+      document.journal ? Journal.fromJson(document.journal) : undefined,
+      document.volume || undefined,
+      document.issue || undefined,
+      document.pages || undefined,
     )
   }
 
@@ -95,6 +108,10 @@ class Document {
       document.records.map((record) =>
         DocumentRecord.fromDbDocumentRecord(record),
       ),
+      document.journal ? Journal.fromDbJournal(document.journal) : undefined,
+      document.volume || undefined,
+      document.issue || undefined,
+      document.pages || undefined,
     )
   }
 }
