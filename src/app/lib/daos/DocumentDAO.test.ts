@@ -177,6 +177,11 @@ describe('DocumentDAO', () => {
           },
         },
         contributions: { include: { person: true } },
+        journal: {
+          include: {
+            identifiers: true,
+          },
+        },
       },
     })
 
@@ -612,6 +617,11 @@ describe('DocumentDAO', () => {
           subjects: { include: { labels: true } },
           contributions: { include: { person: true } },
           records: true,
+          journal: {
+            include: {
+              identifiers: true,
+            },
+          },
         },
       }),
     )

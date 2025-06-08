@@ -51,6 +51,11 @@ export class DocumentDAO extends AbstractDAO {
             subjects: { include: { labels: true } },
             contributions: { include: { person: true } },
             records: true,
+            journal: {
+              include: {
+                identifiers: true,
+              },
+            },
           },
         })
 
@@ -117,6 +122,11 @@ export class DocumentDAO extends AbstractDAO {
             subjects: { include: { labels: true } },
             contributions: { include: { person: true } },
             records: true,
+            journal: {
+              include: {
+                identifiers: true,
+              },
+            },
           },
         })
       } else {
