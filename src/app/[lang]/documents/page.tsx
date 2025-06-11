@@ -20,7 +20,15 @@ import { DocumentSyncStatus } from '@/types/DocumentSyncStatus'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import { Localization } from '@/types/Localization'
 import InfoIcon from '@mui/icons-material/Info'
-import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material'
+import AttachFileIcon from '@mui/icons-material/AttachFile'
+import {
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -316,8 +324,50 @@ export default function DocumentsPage() {
       {
         accessorKey: 'halStatus',
         header: t`documents_page_halStatus_column`,
-        Cell() {
-          return ''
+        Cell({ row }: { row: { original: Document } }) {
+          const halRecord = row.original.records.find(
+            (record) => record.platform === BibliographicPlatform.HAL,
+          )
+
+          if (!halRecord) {
+            return
+          }
+
+          const { halSubmitType, halCollectionCodes } = halRecord
+
+          const halSubmitTypeToHalSubmitTypeIcon = (
+            halSubmitType: string | null,
+          ) => {
+            switch (halSubmitType) {
+              case 'annex':
+              case 'file':
+                return <AttachFileIcon />
+              case 'notice':
+                // TODO: Change this to a strikethrough AttachFileIcon
+                return <AttachFileIcon />
+              default:
+                return null
+            }
+          }
+
+          const halSubmitTypeIcon =
+            halSubmitTypeToHalSubmitTypeIcon(halSubmitType)
+
+          // TODO: Implement collection logic
+          const isInCollection = halCollectionCodes.includes('test')
+
+          const halCollectionStatus = isInCollection
+            ? t`documents_page_in_collection`
+            : t`documents_page_outside_hal`
+
+          return (
+            <Chip
+              {...(halSubmitTypeIcon && { icon: halSubmitTypeIcon })}
+              label={halCollectionStatus}
+              size='small'
+              color={isInCollection ? 'success' : 'error'}
+            />
+          )
         },
       },
       {
