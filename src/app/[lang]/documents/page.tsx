@@ -330,7 +330,13 @@ export default function DocumentsPage() {
           )
 
           if (!halRecord) {
-            return
+            return (
+              <Chip
+                label={t`documents_page_outside_hal`}
+                size='small'
+                color='error'
+              />
+            )
           }
 
           const { halSubmitType, halCollectionCodes } = halRecord
@@ -356,16 +362,16 @@ export default function DocumentsPage() {
           // TODO: Implement collection logic
           const isInCollection = halCollectionCodes.includes('test')
 
-          const halCollectionStatus = isInCollection
-            ? t`documents_page_in_collection`
-            : t`documents_page_outside_hal`
-
           return (
             <Chip
               {...(halSubmitTypeIcon && { icon: halSubmitTypeIcon })}
-              label={halCollectionStatus}
+              label={
+                isInCollection
+                  ? t`documents_page_in_collection`
+                  : t`documents_page_out_of_collection`
+              }
               size='small'
-              color={isInCollection ? 'success' : 'error'}
+              color={isInCollection ? 'success' : 'warning'}
             />
           )
         },
