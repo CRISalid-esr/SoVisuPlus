@@ -15,6 +15,8 @@ export interface DocumentRecordJson {
   platform: BibliographicPlatform
   titles: Array<Literal>
   _url: string | null
+  halCollectionCodes: string[]
+  halSubmitType: DbHalSubmitType | null
 }
 
 export class DocumentRecord {
@@ -73,6 +75,8 @@ export class DocumentRecord {
       record.platform,
       record.titles.map((title) => Literal.fromObject(title)),
       record._url,
+      record.halCollectionCodes,
+      record.halSubmitType,
     )
   }
 
@@ -85,6 +89,8 @@ export class DocumentRecord {
           Literal.fromObject(title),
       ),
       record.url,
+      record.halCollectionCodes,
+      record.halSubmitType,
     )
   }
 }
