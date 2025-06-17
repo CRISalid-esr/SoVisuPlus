@@ -9,6 +9,9 @@ import {
 import { Contribution } from '@/types/Contribution'
 import { Document, DocumentType } from '@/types/Document'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
+import { IAgent } from '@/types/IAgent'
+import { Person } from '@/types/Person'
+import { ResearchStructure } from '@/types/ResearchStructure'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
@@ -359,8 +362,39 @@ export default function DocumentsPage() {
           const halSubmitTypeIcon =
             halSubmitTypeToHalSubmitTypeIcon(halSubmitType)
 
-          // TODO: Implement collection logic
-          const isInCollection = halCollectionCodes.includes('test')
+          const isResearchStructureInCollectionCodes = (
+            collectionCodes: string[],
+            perspective: IAgent | null,
+          ) => {
+            if (!perspective) {
+              return false
+            }
+
+            switch (perspective.type) {
+              case 'person': {
+                const { memberships } = perspective as Person
+
+                return memberships
+                  .map(({ researchStructure: { acronym } }) => acronym)
+                  .some((acronym) =>
+                    acronym ? collectionCodes.includes(acronym) : false,
+                  )
+              }
+              case 'research_structure': {
+                const { acronym } = perspective as ResearchStructure
+
+                return acronym ? collectionCodes.includes(acronym) : false
+              }
+              case 'institution':
+              default:
+                return false
+            }
+          }
+
+          const isInCollection = isResearchStructureInCollectionCodes(
+            halCollectionCodes,
+            currentPerspective,
+          )
 
           return (
             <Chip

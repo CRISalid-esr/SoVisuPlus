@@ -80,6 +80,7 @@ const mockState = {
     currentPerspective: {
       type: 'person',
       getDisplayName: () => 'John Doe',
+      memberships: [],
     },
   },
 }
