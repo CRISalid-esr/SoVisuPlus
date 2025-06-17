@@ -70,7 +70,18 @@ describe('UserDAO', () => {
           },
         },
       },
-      include: { person: { include: { identifiers: true } } },
+      include: {
+        person: {
+          include: {
+            identifiers: true,
+            memberships: {
+              include: {
+                researchStructure: true,
+              },
+            },
+          },
+        },
+      },
     })
   })
 
@@ -90,7 +101,18 @@ describe('UserDAO', () => {
           },
         },
       },
-      include: { person: { include: { identifiers: true } } },
+      include: {
+        person: {
+          include: {
+            identifiers: true,
+            memberships: {
+              include: {
+                researchStructure: true,
+              },
+            },
+          },
+        },
+      },
     })
   })
 

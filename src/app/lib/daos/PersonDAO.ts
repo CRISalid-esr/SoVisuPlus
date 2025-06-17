@@ -333,6 +333,11 @@ export class PersonDAO extends AbstractDAO {
             roles: true,
           },
         },
+        memberships: {
+          include: {
+            researchStructure: true,
+          },
+        },
       },
       orderBy: {
         lastName: 'asc',
@@ -355,6 +360,13 @@ export class PersonDAO extends AbstractDAO {
     try {
       const dbPerson = await this.prismaClient.person.findUnique({
         where: { slug },
+        include: {
+          memberships: {
+            include: {
+              researchStructure: true,
+            },
+          },
+        },
       })
 
       if (!dbPerson) {
@@ -378,6 +390,13 @@ export class PersonDAO extends AbstractDAO {
             researchStructure: {
               uid: researchStructureUid,
             },
+          },
+        },
+      },
+      include: {
+        memberships: {
+          include: {
+            researchStructure: true,
           },
         },
       },
