@@ -52,6 +52,7 @@ import BibliographicSyncDataModal from './components/documentsSyncModal/Document
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
 import SyncIcon from '@mui/icons-material/Sync'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
+import AttachFileOffIcon from '@/app/theme/icons/AttachFileOffIcon'
 
 dayjs.extend(utc)
 
@@ -352,8 +353,7 @@ export default function DocumentsPage() {
               case 'file':
                 return <AttachFileIcon />
               case 'notice':
-                // TODO: Change this to a strikethrough AttachFileIcon
-                return <AttachFileIcon />
+                return <AttachFileOffIcon />
               default:
                 return null
             }
