@@ -4,6 +4,9 @@ import {
   getBibliographicPlatformFromDbValue,
 } from '@/types/BibliographicPlatform'
 import { Literal } from '@/types/Literal'
+import { IAgent } from '@/types/IAgent'
+import { Person } from '@/types/Person'
+import { ResearchStructure } from '@/types/ResearchStructure'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 import {
   DocumentRecord as DbDocumentRecord,
@@ -57,6 +60,32 @@ export class DocumentRecord {
       return
     }
     this.setUrl(value)
+  }
+
+  isResearchStructureInCollectionCodes(perspective: IAgent | null): boolean {
+    if (!perspective) {
+      return false
+    }
+
+    switch (perspective.type) {
+      case 'person': {
+        const { memberships } = perspective as Person
+
+        return memberships
+          .map(({ researchStructure: { acronym } }) => acronym)
+          .some((acronym) =>
+            acronym ? this.halCollectionCodes.includes(acronym) : false,
+          )
+      }
+      case 'research_structure': {
+        const { acronym } = perspective as ResearchStructure
+
+        return acronym ? this.halCollectionCodes.includes(acronym) : false
+      }
+      case 'institution':
+      default:
+        return false
+    }
   }
 
   private setUrl(value: string) {

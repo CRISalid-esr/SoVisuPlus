@@ -5,10 +5,20 @@ import { t } from '@lingui/macro'
 import useStore from '@/stores/global_store'
 import { Document } from '@/types/Document'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
-import { IAgent } from '@/types/IAgent'
-import { Person } from '@/types/Person'
-import { ResearchStructure } from '@/types/ResearchStructure'
+
 import AttachFileOffIcon from '@/app/theme/icons/AttachFileOffIcon'
+
+const halSubmitTypeToHalSubmitTypeIcon = (halSubmitType: string | null) => {
+  switch (halSubmitType) {
+    case 'annex':
+    case 'file':
+      return <AttachFileIcon />
+    case 'notice':
+      return <AttachFileOffIcon />
+    default:
+      return null
+  }
+}
 
 export default function HalStatusCell({
   row,
@@ -27,55 +37,11 @@ export default function HalStatusCell({
     )
   }
 
-  const { halSubmitType, halCollectionCodes } = halRecord
-
-  const halSubmitTypeToHalSubmitTypeIcon = (halSubmitType: string | null) => {
-    switch (halSubmitType) {
-      case 'annex':
-      case 'file':
-        return <AttachFileIcon />
-      case 'notice':
-        return <AttachFileOffIcon />
-      default:
-        return null
-    }
-  }
-
+  const { halSubmitType } = halRecord
   const halSubmitTypeIcon = halSubmitTypeToHalSubmitTypeIcon(halSubmitType)
 
-  const isResearchStructureInCollectionCodes = (
-    collectionCodes: string[],
-    perspective: IAgent | null,
-  ) => {
-    if (!perspective) {
-      return false
-    }
-
-    switch (perspective.type) {
-      case 'person': {
-        const { memberships } = perspective as Person
-
-        return memberships
-          .map(({ researchStructure: { acronym } }) => acronym)
-          .some((acronym) =>
-            acronym ? collectionCodes.includes(acronym) : false,
-          )
-      }
-      case 'research_structure': {
-        const { acronym } = perspective as ResearchStructure
-
-        return acronym ? collectionCodes.includes(acronym) : false
-      }
-      case 'institution':
-      default:
-        return false
-    }
-  }
-
-  const isInCollection = isResearchStructureInCollectionCodes(
-    halCollectionCodes,
-    currentPerspective,
-  )
+  const isInCollection =
+    halRecord.isResearchStructureInCollectionCodes(currentPerspective)
 
   return (
     <Chip
