@@ -5,7 +5,6 @@ import { t } from '@lingui/macro'
 import useStore from '@/stores/global_store'
 import { Document } from '@/types/Document'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
-
 import AttachFileOffIcon from '@/app/theme/icons/AttachFileOffIcon'
 
 const halSubmitTypeToHalSubmitTypeIcon = (halSubmitType: string | null) => {
