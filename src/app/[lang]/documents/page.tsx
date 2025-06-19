@@ -9,9 +9,6 @@ import {
 import { Contribution } from '@/types/Contribution'
 import { Document, DocumentType } from '@/types/Document'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import { IAgent } from '@/types/IAgent'
-import { Person } from '@/types/Person'
-import { ResearchStructure } from '@/types/ResearchStructure'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
@@ -23,15 +20,7 @@ import { DocumentSyncStatus } from '@/types/DocumentSyncStatus'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import { Localization } from '@/types/Localization'
 import InfoIcon from '@mui/icons-material/Info'
-import AttachFileIcon from '@mui/icons-material/AttachFile'
-import {
-  Box,
-  Button,
-  Chip,
-  IconButton,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -48,11 +37,11 @@ import { useRouter, useSearchParams } from 'next/navigation' // Import useRouter
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Highlighter from 'react-highlight-words'
 import DocumentHeader from './components/DocumentHeader'
+import HalStatusCell from './components/HalStatusCell'
 import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
 import SyncIcon from '@mui/icons-material/Sync'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
-import AttachFileOffIcon from '@/app/theme/icons/AttachFileOffIcon'
 
 dayjs.extend(utc)
 
@@ -329,85 +318,7 @@ export default function DocumentsPage() {
         accessorKey: 'halStatus',
         header: t`documents_page_halStatus_column`,
         Cell({ row }: { row: { original: Document } }) {
-          const halRecord = row.original.records.find(
-            (record) => record.platform === BibliographicPlatform.HAL,
-          )
-
-          if (!halRecord) {
-            return (
-              <Chip
-                label={t`documents_page_outside_hal`}
-                size='small'
-                color='error'
-              />
-            )
-          }
-
-          const { halSubmitType, halCollectionCodes } = halRecord
-
-          const halSubmitTypeToHalSubmitTypeIcon = (
-            halSubmitType: string | null,
-          ) => {
-            switch (halSubmitType) {
-              case 'annex':
-              case 'file':
-                return <AttachFileIcon />
-              case 'notice':
-                return <AttachFileOffIcon />
-              default:
-                return null
-            }
-          }
-
-          const halSubmitTypeIcon =
-            halSubmitTypeToHalSubmitTypeIcon(halSubmitType)
-
-          const isResearchStructureInCollectionCodes = (
-            collectionCodes: string[],
-            perspective: IAgent | null,
-          ) => {
-            if (!perspective) {
-              return false
-            }
-
-            switch (perspective.type) {
-              case 'person': {
-                const { memberships } = perspective as Person
-
-                return memberships
-                  .map(({ researchStructure: { acronym } }) => acronym)
-                  .some((acronym) =>
-                    acronym ? collectionCodes.includes(acronym) : false,
-                  )
-              }
-              case 'research_structure': {
-                const { acronym } = perspective as ResearchStructure
-
-                return acronym ? collectionCodes.includes(acronym) : false
-              }
-              case 'institution':
-              default:
-                return false
-            }
-          }
-
-          const isInCollection = isResearchStructureInCollectionCodes(
-            halCollectionCodes,
-            currentPerspective,
-          )
-
-          return (
-            <Chip
-              {...(halSubmitTypeIcon && { icon: halSubmitTypeIcon })}
-              label={
-                isInCollection
-                  ? t`documents_page_in_collection`
-                  : t`documents_page_out_of_collection`
-              }
-              size='small'
-              color={isInCollection ? 'success' : 'warning'}
-            />
-          )
+          return <HalStatusCell row={row} />
         },
       },
       {
