@@ -317,7 +317,7 @@ export default function DocumentsPage() {
       {
         accessorKey: 'halStatus',
         header: t`documents_page_halStatus_column`,
-        Cell({ row }: { row: { original: Document } }) {
+        Cell({ row }) {
           return <HalStatusCell row={row} />
         },
       },
