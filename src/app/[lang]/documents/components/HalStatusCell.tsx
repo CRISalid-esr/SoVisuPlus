@@ -19,6 +19,15 @@ const halSubmitTypeToHalSubmitTypeIcon = (halSubmitType: string | null) => {
   }
 }
 
+const multilineChipSx = {
+  height: 'auto',
+  padding: '.1875rem 0',
+  '& .MuiChip-label': {
+    display: 'block',
+    whiteSpace: 'normal',
+  },
+}
+
 export default function HalStatusCell({
   row,
 }: {
@@ -33,6 +42,7 @@ export default function HalStatusCell({
   if (!halRecord) {
     return (
       <Chip
+        sx={multilineChipSx}
         label={t`documents_page_hal_status_outside_hal`}
         size='small'
         color='error'
@@ -48,6 +58,7 @@ export default function HalStatusCell({
 
   return (
     <Chip
+      sx={multilineChipSx}
       {...(halSubmitTypeIcon && { icon: halSubmitTypeIcon })}
       label={
         isInCollection
