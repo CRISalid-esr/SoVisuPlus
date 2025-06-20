@@ -75,8 +75,16 @@ describe('UserDAO', () => {
           include: {
             identifiers: true,
             memberships: {
-              include: {
-                researchStructure: true,
+              select: {
+                startDate: true,
+                endDate: true,
+                researchStructure: {
+                  select: {
+                    uid: true,
+                    acronym: true,
+                    slug: true,
+                  },
+                },
               },
             },
           },
@@ -106,8 +114,16 @@ describe('UserDAO', () => {
           include: {
             identifiers: true,
             memberships: {
-              include: {
-                researchStructure: true,
+              select: {
+                startDate: true,
+                endDate: true,
+                researchStructure: {
+                  select: {
+                    uid: true,
+                    acronym: true,
+                    slug: true,
+                  },
+                },
               },
             },
           },

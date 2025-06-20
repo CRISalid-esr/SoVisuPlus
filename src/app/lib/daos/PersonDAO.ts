@@ -334,8 +334,16 @@ export class PersonDAO extends AbstractDAO {
           },
         },
         memberships: {
-          include: {
-            researchStructure: true,
+          select: {
+            startDate: true,
+            endDate: true,
+            researchStructure: {
+              select: {
+                uid: true,
+                acronym: true,
+                slug: true,
+              },
+            },
           },
         },
       },
@@ -362,8 +370,16 @@ export class PersonDAO extends AbstractDAO {
         where: { slug },
         include: {
           memberships: {
-            include: {
-              researchStructure: true,
+            select: {
+              startDate: true,
+              endDate: true,
+              researchStructure: {
+                select: {
+                  uid: true,
+                  acronym: true,
+                  slug: true,
+                },
+              },
             },
           },
         },
@@ -395,8 +411,16 @@ export class PersonDAO extends AbstractDAO {
       },
       include: {
         memberships: {
-          include: {
-            researchStructure: true,
+          select: {
+            startDate: true,
+            endDate: true,
+            researchStructure: {
+              select: {
+                uid: true,
+                acronym: true,
+                slug: true,
+              },
+            },
           },
         },
       },
