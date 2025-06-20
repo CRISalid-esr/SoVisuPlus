@@ -4,6 +4,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile'
 const AttachFileOffIcon = (props: SvgIconOwnProps) => (
   <span
     {...props}
+    data-testid='AttachFileOffIcon'
     style={{
       display: 'inline-flex',
       position: 'relative',
