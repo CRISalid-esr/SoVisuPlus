@@ -32,7 +32,11 @@ export default function HalStatusCell({
 
   if (!halRecord) {
     return (
-      <Chip label={t`documents_page_outside_hal`} size='small' color='error' />
+      <Chip
+        label={t`documents_page_hal_status_outside_hal`}
+        size='small'
+        color='error'
+      />
     )
   }
 
@@ -47,8 +51,8 @@ export default function HalStatusCell({
       {...(halSubmitTypeIcon && { icon: halSubmitTypeIcon })}
       label={
         isInCollection
-          ? t`documents_page_in_collection`
-          : t`documents_page_out_of_collection`
+          ? t`documents_page_hal_status_in_collection`
+          : t`documents_page_hal_status_out_of_collection`
       }
       size='small'
       color={isInCollection ? 'success' : 'warning'}

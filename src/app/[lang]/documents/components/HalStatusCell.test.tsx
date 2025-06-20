@@ -1,6 +1,6 @@
 import useStore from '@/stores/global_store'
 import { render, screen } from '@testing-library/react'
-import { i18n } from '@lingui/core'
+import { t } from '@lingui/macro'
 import { HalSubmitType as DbHalSubmitType } from '@prisma/client'
 
 import { Document, DocumentType } from '@/types/Document'
@@ -94,7 +94,9 @@ describe('HalStatusCell Component', () => {
 
     expect(screen.getByTestId('AttachFileIcon')).toBeInTheDocument()
     expect(screen.queryByTestId('AttachFileOffIcon')).not.toBeInTheDocument()
-    expect(screen.getByText('documents_page_in_collection')).toBeInTheDocument()
+    expect(
+      screen.getByText(t`documents_page_hal_status_in_collection`),
+    ).toBeInTheDocument()
   })
 
   it('displays the out of collection status', async () => {
@@ -105,7 +107,7 @@ describe('HalStatusCell Component', () => {
     expect(screen.getByTestId('AttachFileIcon')).toBeInTheDocument()
     expect(screen.queryByTestId('AttachFileOffIcon')).not.toBeInTheDocument()
     expect(
-      screen.getByText('documents_page_out_of_collection'),
+      screen.getByText(t`documents_page_hal_status_out_of_collection`),
     ).toBeInTheDocument()
   })
 
@@ -115,7 +117,9 @@ describe('HalStatusCell Component', () => {
     render(<HalStatusCell row={{ original: document }} />)
 
     expect(screen.queryByTestId('AttachFileIcon')).not.toBeInTheDocument()
-    expect(screen.getByText('documents_page_outside_hal')).toBeInTheDocument()
+    expect(
+      screen.getByText(t`documents_page_hal_status_outside_hal`),
+    ).toBeInTheDocument()
   })
 
   it('displays the alternate icon', async () => {
@@ -124,6 +128,8 @@ describe('HalStatusCell Component', () => {
     render(<HalStatusCell row={{ original: document }} />)
 
     expect(screen.getByTestId('AttachFileOffIcon')).toBeInTheDocument()
-    expect(screen.getByText('documents_page_in_collection')).toBeInTheDocument()
+    expect(
+      screen.getByText(t`documents_page_hal_status_in_collection`),
+    ).toBeInTheDocument()
   })
 })
