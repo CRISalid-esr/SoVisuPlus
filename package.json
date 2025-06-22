@@ -18,8 +18,8 @@
     "test:integration": "jest --runInBand --config jest.integration.config.ts",
     "test:all": "npm run test && npm run test:integration",
     "type-check": "tsc --noEmit",
-    "lingui:extract": "lingui extract",
-    "lingui:compile": "lingui compile",
+    "i18n:extract": "lingui extract --clean",
+    "i18n:compile": "lingui compile",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "prepare": "husky"

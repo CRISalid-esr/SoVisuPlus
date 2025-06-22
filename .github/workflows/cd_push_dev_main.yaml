@@ -23,8 +23,8 @@ jobs:
 
       - name: Generate translations files
         run: |
-          npm run lingui:extract
-          npm run lingui:compile
+          npm run i18n:extract
+          npm run i18n:compile
 
       - name: Commit files
         run: |
@@ -38,6 +38,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branches: poeditor-translations
+          soft_fail: 'true'
 
       - name: Create branch poeditor-translations
         uses: peterjgrainger/action-create-branch@v2.2.0
