@@ -17,6 +17,7 @@ interface PersonJson extends IAgentJson {
   firstName?: string
   lastName?: string
   identifiers?: Array<{ type: PersonIdentifierType; value: string }>
+  memberships?: PersonMembership[]
 }
 
 class Person implements IAgent {
@@ -97,7 +98,7 @@ class Person implements IAgent {
       person.firstName || '',
       person.lastName || '',
       'identifiers' in person ? (person.identifiers as PersonIdentifier[]) : [],
-      [],
+      'memberships' in person ? (person.memberships as PersonMembership[]) : [],
       'person',
       person.slug,
     )
@@ -117,7 +118,7 @@ class Person implements IAgent {
       json.firstName ?? '',
       json.lastName ?? '',
       json.identifiers ?? [],
-      [],
+      json.memberships ?? [],
       'person',
       json.slug ?? null,
     )

@@ -37,6 +37,7 @@ import { useRouter, useSearchParams } from 'next/navigation' // Import useRouter
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Highlighter from 'react-highlight-words'
 import DocumentHeader from './components/DocumentHeader'
+import HalStatusCell from './components/HalStatusCell'
 import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
 import SyncIcon from '@mui/icons-material/Sync'
@@ -316,8 +317,8 @@ export default function DocumentsPage() {
       {
         accessorKey: 'halStatus',
         header: t`documents_page_halStatus_column`,
-        Cell() {
-          return ''
+        Cell({ row }) {
+          return <HalStatusCell row={row} />
         },
       },
       {

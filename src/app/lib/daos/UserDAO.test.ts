@@ -70,7 +70,26 @@ describe('UserDAO', () => {
           },
         },
       },
-      include: { person: { include: { identifiers: true } } },
+      include: {
+        person: {
+          include: {
+            identifiers: true,
+            memberships: {
+              select: {
+                startDate: true,
+                endDate: true,
+                researchStructure: {
+                  select: {
+                    uid: true,
+                    acronym: true,
+                    slug: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     })
   })
 
@@ -90,7 +109,26 @@ describe('UserDAO', () => {
           },
         },
       },
-      include: { person: { include: { identifiers: true } } },
+      include: {
+        person: {
+          include: {
+            identifiers: true,
+            memberships: {
+              select: {
+                startDate: true,
+                endDate: true,
+                researchStructure: {
+                  select: {
+                    uid: true,
+                    acronym: true,
+                    slug: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     })
   })
 
