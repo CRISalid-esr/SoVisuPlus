@@ -92,26 +92,6 @@ export default function DocumentsPage() {
     router.push(`/${lang}/documents/${documentUid}?${params.toString()}`)
   }
 
-  const tabs = [
-    {
-      label: t`documents_page_all_documents_filter`,
-      value: 'all_documents',
-      color: theme.palette.primary.main,
-    },
-    {
-      label: t`documents_page_incomplete_hal_repository_filter`,
-      value: 'incomplete_hal_repository',
-      numberOfItems: 2,
-      color: theme.palette.primary.main,
-    },
-    {
-      label: t`documents_page_keywords_to_validate`,
-      value: 'keywords_to_validate',
-      numberOfItems: 1,
-      color: theme.palette.primary.main,
-    },
-  ]
-
   const documentTypeLabels: Record<DocumentType, JSX.Element> = {
     [DocumentType.Document]: (
       <Typography>{t`documents_page_document_icon_label`}</Typography>
@@ -138,8 +118,6 @@ export default function DocumentsPage() {
       <Typography>{t`documents_page_proceedings_icon_label`}</Typography>
     ),
   }
-
-  const [selectedTab, setSelectedTab] = useState(tabs[0].value)
 
   const columns = useMemo<MRT_ColumnDef<Document>[]>(
     () => [
@@ -419,6 +397,23 @@ export default function DocumentsPage() {
     documents = [],
     totalItems,
   } = useStore((state) => state.document)
+
+  const tabs = [
+    {
+      label: t`documents_page_all_documents_filter`,
+      value: 'all_documents',
+      color: theme.palette.primary.main,
+    },
+    {
+      label: t`documents_page_incomplete_hal_repository_filter`,
+      value: 'incomplete_hal_repository',
+      numberOfItems: totalItems,
+      color: theme.palette.primary.main,
+    },
+  ]
+
+  const [selectedTab, setSelectedTab] = useState(tabs[0].value)
+
   useEffect(() => {
     const adjustedFilters = columnFilters.map((filter) => {
       if (filter.id === 'date' && Array.isArray(filter.value)) {
@@ -480,6 +475,12 @@ export default function DocumentsPage() {
       contributorUid: currentPerspective?.uid || '',
       contributorType: contributorType,
       requestId: nextRequestId,
+      omittedHalCollectionCodes:
+        selectedTab === 'incomplete_hal_repository'
+          ? currentPerspective?.memberships.map(
+              ({ researchStructure: { acronym } }) => acronym,
+            )
+          : [],
     }).catch((error) => {
       console.error('Error fetching documents:', error)
     })
@@ -492,10 +493,20 @@ export default function DocumentsPage() {
     lang,
     fetchDocuments,
     currentPerspective,
+    selectedTab,
   ])
 
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+
+    setSelectedTab(tab ?? 'all_documents')
+  }, [searchParams])
+
   const handleTabChange = (newValue: string) => {
-    setSelectedTab(newValue)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', newValue)
+
+    router.push(`/${lang}/documents?${params.toString()}`)
   }
 
   return (

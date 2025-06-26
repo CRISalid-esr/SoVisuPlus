@@ -19,6 +19,7 @@ interface FetchDocumentsFromDBParams {
   columnFilters: { id: string; value: string }[]
   sorting: { id: string; desc: boolean }[]
   contributorUids: string[]
+  omittedHalCollectionCodes: string[]
 }
 
 export class DocumentDAO extends AbstractDAO {
@@ -353,6 +354,7 @@ export class DocumentDAO extends AbstractDAO {
     columnFilters,
     sorting,
     contributorUids,
+    omittedHalCollectionCodes,
   }: FetchDocumentsFromDBParams): Promise<{
     documents: Document[]
     totalItems: number
@@ -476,6 +478,7 @@ export class DocumentDAO extends AbstractDAO {
         }
         contributionFilters.push(nameFilter)
       }
+
       if (filter.id === 'date' && Array.isArray(filter.value)) {
         const startDate = filter.value[0] || null // Full ISO string date
         const endDate = filter.value[1] || null // Full ISO string date
@@ -528,6 +531,27 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
     })
+
+    if (omittedHalCollectionCodes.length) {
+      where = {
+        ...where,
+        records: {
+          none: {
+            OR: [
+              {
+                halSubmitType: 'file',
+              },
+              {
+                halSubmitType: 'annex',
+              },
+            ],
+            halCollectionCodes: {
+              hasSome: omittedHalCollectionCodes,
+            },
+          },
+        },
+      }
+    }
 
     if (contributorUids && contributorUids.length > 0) {
       const rolesAndUidFilter: Prisma.DocumentWhereInput = {

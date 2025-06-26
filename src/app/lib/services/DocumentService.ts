@@ -11,6 +11,7 @@ interface FetchDocumentsParams {
   sorting: { id: string; desc: boolean }[]
   contributorUid: string | null
   contributorType: AgentType
+  omittedHalCollectionCodes: string[]
 }
 
 export class DocumentService {
@@ -31,6 +32,7 @@ export class DocumentService {
     sorting,
     contributorUid,
     contributorType,
+    omittedHalCollectionCodes,
   }: FetchDocumentsParams) {
     let contributorUids: string[] = []
     switch (contributorType) {
@@ -59,6 +61,7 @@ export class DocumentService {
         columnFilters,
         sorting,
         contributorUids,
+        omittedHalCollectionCodes,
       })
       return { documents, totalItems }
     } catch (error) {

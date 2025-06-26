@@ -14,6 +14,7 @@ export interface DocumentQuery extends BaseQuery {
   contributorUid: string | null
   contributorType: AgentType
   requestId: number
+  omittedHalCollectionCodes: string[]
 }
 
 export interface DocumentSlice {
