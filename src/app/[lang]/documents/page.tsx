@@ -10,8 +10,6 @@ import { Contribution } from '@/types/Contribution'
 import { Document, DocumentType } from '@/types/Document'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Literal } from '@/types/Literal'
-import { ResearchStructure } from '@/types/ResearchStructure'
-import { Person } from '@/types/Person'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
 import { t, Trans } from '@lingui/macro'
@@ -468,21 +466,9 @@ export default function DocumentsPage() {
     if (!contributorType) return
 
     const selectOmittedHalCollectionCodes = () => {
-      if (selectedTab !== 'incomplete_hal_repository') {
-        return []
-      }
-
-      if (contributorType === 'research_structure') {
-        const { acronym } = currentPerspective as ResearchStructure
-
-        return acronym ? [acronym] : []
-      }
-
-      if (contributorType === 'person') {
-        return (currentPerspective as Person).membershipAcronyms()
-      }
-
-      return []
+      return selectedTab === 'incomplete_hal_repository'
+        ? currentPerspective.membershipAcronyms
+        : []
     }
 
     const nextRequestId = ++requestIdRef.current

@@ -33,6 +33,10 @@ class ResearchStructure implements IAgent {
     this.identifiers = _identifiers
   }
 
+  get membershipAcronyms(): string[] {
+    return [this.acronym].filter((acronym) => acronym !== null)
+  }
+
   /**
    * Get the display name of the research structure
    * @param language
