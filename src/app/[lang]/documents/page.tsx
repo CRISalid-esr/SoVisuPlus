@@ -10,6 +10,8 @@ import { Contribution } from '@/types/Contribution'
 import { Document, DocumentType } from '@/types/Document'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Literal } from '@/types/Literal'
+import { ResearchStructure } from '@/types/ResearchStructure'
+import { Person } from '@/types/Person'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
 import { t, Trans } from '@lingui/macro'
@@ -464,6 +466,25 @@ export default function DocumentsPage() {
 
     const contributorType = currentPerspective?.type
     if (!contributorType) return
+
+    const selectOmittedHalCollectionCodes = () => {
+      if (selectedTab !== 'incomplete_hal_repository') {
+        return []
+      }
+
+      if (contributorType === 'research_structure') {
+        const { acronym } = currentPerspective as ResearchStructure
+
+        return acronym ? [acronym] : []
+      }
+
+      if (contributorType === 'person') {
+        return (currentPerspective as Person).membershipAcronyms()
+      }
+
+      return []
+    }
+
     const nextRequestId = ++requestIdRef.current
     fetchDocuments({
       page: pagination.pageIndex + 1,
@@ -475,12 +496,9 @@ export default function DocumentsPage() {
       contributorUid: currentPerspective?.uid || '',
       contributorType: contributorType,
       requestId: nextRequestId,
-      omittedHalCollectionCodes:
-        selectedTab === 'incomplete_hal_repository'
-          ? currentPerspective?.memberships.map(
-              ({ researchStructure: { acronym } }) => acronym,
-            )
-          : [],
+      omittedHalCollectionCodes: JSON.stringify(
+        selectOmittedHalCollectionCodes(),
+      ),
     }).catch((error) => {
       console.error('Error fetching documents:', error)
     })

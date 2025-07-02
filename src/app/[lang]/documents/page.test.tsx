@@ -155,6 +155,7 @@ describe('DocumentsPage Component', () => {
         contributorType: 'person',
         contributorUid: '',
         requestId: 1,
+        omittedHalCollectionCodes: JSON.stringify([]),
       })
     })
   })

@@ -57,6 +57,7 @@ describe('DocumentService', () => {
       sorting: [{ id: 'name', desc: false }],
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
+      omittedHalCollectionCodes: [],
     }
 
     await expect(documentService.fetchDocuments(params)).resolves.toEqual(
@@ -86,6 +87,7 @@ describe('DocumentService', () => {
       sorting: [],
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
+      omittedHalCollectionCodes: [],
     }
 
     await expect(documentService.fetchDocuments(params)).rejects.toThrow(

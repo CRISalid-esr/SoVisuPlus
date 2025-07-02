@@ -59,6 +59,12 @@ class Person implements IAgent {
     this.identifiers = value
   }
 
+  membershipAcronyms(): string[] {
+    return this.memberships
+      .map(({ researchStructure: { acronym } }) => acronym)
+      .filter((acronym) => acronym !== null)
+  }
+
   private validateIdentifiers(identifiers: PersonIdentifier[]) {
     identifiers.forEach((identifier) => {
       if (!identifier.type) {

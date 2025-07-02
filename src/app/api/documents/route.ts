@@ -18,8 +18,9 @@ export const GET = async (req: NextRequest) => {
     const contributorType: AgentType | null = agentTypeFromString(
       urlParams.get('contributorType'),
     )
-    const omittedHalCollectionCodes =
-      urlParams.get('omittedHalCollectionCodes')?.split(',') || []
+    const omittedHalCollectionCodes = JSON.parse(
+      urlParams.get('omittedHalCollectionCodes') || '[]',
+    )
     if (!contributorType) {
       return NextResponse.json(
         { error: 'Invalid contributorType' },
