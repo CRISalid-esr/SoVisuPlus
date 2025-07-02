@@ -34,7 +34,7 @@ class ResearchStructure implements IAgent {
   }
 
   get membershipAcronyms(): string[] {
-    return [this.acronym].filter((acronym) => acronym !== null)
+    return this.acronym ? [this.acronym] : []
   }
 
   /**
