@@ -84,6 +84,7 @@ const mockState = {
       type: 'person',
       getDisplayName: () => 'John Doe',
       memberships: [],
+      membershipAcronyms: ['ABC', 'DEF'],
     },
   },
 }
@@ -163,6 +164,30 @@ describe('DocumentsPage Component', () => {
         contributorUid: '',
         requestId: 1,
         omittedHalCollectionCodes: JSON.stringify([]),
+      })
+    })
+  })
+
+  it('fetches incomplete HAL repository document count on mount', async () => {
+    renderComponent()
+
+    await waitFor(() => {
+      expect(mockCountIncompleteHalRepositoryDocuments).toHaveBeenCalledWith({
+        page: 1,
+        pageSize: 10,
+        searchTerm: '',
+        columnFilters: JSON.stringify([]),
+        sorting: JSON.stringify([
+          {
+            id: 'date',
+            desc: true,
+          },
+        ]),
+        searchLang: 'en',
+        contributorType: 'person',
+        contributorUid: '',
+        requestId: 1,
+        omittedHalCollectionCodes: JSON.stringify(['ABC', 'DEF']),
       })
     })
   })
