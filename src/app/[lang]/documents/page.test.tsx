@@ -36,10 +36,13 @@ jest.mock('next/navigation', () => ({
 }))
 
 const mockFetchDocuments = jest.fn()
+const mockCountIncompleteHalRepositoryDocuments = jest.fn()
 const mockFetchDocumentById = jest.fn()
 const mockState = {
   document: {
     fetchDocuments: mockFetchDocuments,
+    countIncompleteHalRepositoryDocuments:
+      mockCountIncompleteHalRepositoryDocuments,
     fetchDocumentById: mockFetchDocumentById,
     loading: false,
     documents: [
@@ -81,6 +84,7 @@ const mockState = {
       type: 'person',
       getDisplayName: () => 'John Doe',
       memberships: [],
+      membershipAcronyms: [],
     },
   },
 }
@@ -92,6 +96,10 @@ beforeEach(() => {
   // Ensure the mock fetchDocuments returns a Promise (resolved or rejected)
   mockFetchDocuments.mockResolvedValue({
     data: [],
+    totalItems: 0,
+  })
+
+  mockCountIncompleteHalRepositoryDocuments.mockResolvedValue({
     totalItems: 0,
   })
 })

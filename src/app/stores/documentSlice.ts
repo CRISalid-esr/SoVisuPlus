@@ -20,13 +20,16 @@ export interface DocumentQuery extends BaseQuery {
 export interface DocumentSlice {
   document: {
     latestDocumentRequestId?: number
+    latestCountIncompleteHalRepositoryDocumentsRequestId?: number
     documents: Array<Document>
     selectedDocument: Document | null
     totalItems?: number
+    incompleteHalRepositoryTotalItems?: number
     loading: boolean
     hasFetched?: boolean
     error: string | null | unknown
     fetchDocuments: (obj: DocumentQuery) => Promise<void>
+    countIncompleteHalRepositoryDocuments: (obj: DocumentQuery) => Promise<void>
     fetchDocumentById: (uid: string) => Promise<void>
   }
 }
@@ -126,6 +129,68 @@ export const addDocumentSlice: StateCreator<
             hydrated: true,
           },
         }))
+      }
+    },
+
+    countIncompleteHalRepositoryDocuments: async (
+      queryObject: DocumentQuery,
+    ) => {
+      const { requestId, ...rest } = queryObject
+      const queryString = toQueryString(rest)
+
+      // Mark the request as the latest before the async call
+      set((state) => ({
+        document: {
+          ...state.document,
+          loading: true,
+          latestCountIncompleteHalRepositoryDocumentsRequestId: requestId,
+        },
+      }))
+
+      try {
+        const response = await fetch(`/api/documents?${queryString}`)
+        const jsonData = await response.json()
+        const incompleteHalRepositoryTotalItems = jsonData.totalItems
+
+        set((state) => {
+          // Ignore if a newer request was made since this one started
+          if (
+            state.document
+              .latestCountIncompleteHalRepositoryDocumentsRequestId !==
+            requestId
+          )
+            return state
+
+          return {
+            document: {
+              ...state.document,
+              incompleteHalRepositoryTotalItems,
+              error: null,
+              loading: false,
+            },
+          }
+        })
+      } catch (error) {
+        console.error(
+          'Failed to count incomplete HAL repository documents',
+          error,
+        )
+        set((state) => {
+          if (
+            state.document
+              .latestCountIncompleteHalRepositoryDocumentsRequestId !==
+            requestId
+          )
+            return state
+
+          return {
+            document: {
+              ...state.document,
+              error,
+              loading: false,
+            },
+          }
+        })
       }
     },
   },
