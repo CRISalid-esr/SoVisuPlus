@@ -12,6 +12,7 @@ interface FetchDocumentsParams {
   contributorUid: string | null
   contributorType: AgentType
   omittedHalCollectionCodes: string[]
+  isOnlyCounting: boolean
 }
 
 export class DocumentService {
@@ -33,6 +34,7 @@ export class DocumentService {
     contributorUid,
     contributorType,
     omittedHalCollectionCodes,
+    isOnlyCounting,
   }: FetchDocumentsParams) {
     let contributorUids: string[] = []
     switch (contributorType) {
@@ -62,6 +64,7 @@ export class DocumentService {
         sorting,
         contributorUids,
         omittedHalCollectionCodes,
+        isOnlyCounting,
       })
       return { documents, totalItems }
     } catch (error) {

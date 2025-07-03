@@ -136,7 +136,10 @@ export const addDocumentSlice: StateCreator<
       queryObject: DocumentQuery,
     ) => {
       const { requestId, ...rest } = queryObject
-      const queryString = toQueryString(rest)
+      const queryString = toQueryString({
+        ...rest,
+        isOnlyCounting: true,
+      })
 
       // Mark the request as the latest before the async call
       set((state) => ({

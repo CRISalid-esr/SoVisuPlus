@@ -21,6 +21,8 @@ export const GET = async (req: NextRequest) => {
     const omittedHalCollectionCodes = JSON.parse(
       urlParams.get('omittedHalCollectionCodes') || '[]',
     )
+    const isOnlyCounting = urlParams.get('isOnlyCounting') === 'true'
+
     if (!contributorType) {
       return NextResponse.json(
         { error: 'Invalid contributorType' },
@@ -38,6 +40,7 @@ export const GET = async (req: NextRequest) => {
       contributorUid,
       contributorType,
       omittedHalCollectionCodes,
+      isOnlyCounting,
     })
 
     return NextResponse.json({

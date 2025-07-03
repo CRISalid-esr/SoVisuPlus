@@ -20,6 +20,7 @@ interface FetchDocumentsFromDBParams {
   sorting: { id: string; desc: boolean }[]
   contributorUids: string[]
   omittedHalCollectionCodes: string[]
+  isOnlyCounting: boolean
 }
 
 export class DocumentDAO extends AbstractDAO {
@@ -355,6 +356,7 @@ export class DocumentDAO extends AbstractDAO {
     sorting,
     contributorUids,
     omittedHalCollectionCodes,
+    isOnlyCounting,
   }: FetchDocumentsFromDBParams): Promise<{
     documents: Document[]
     totalItems: number
@@ -611,32 +613,34 @@ export class DocumentDAO extends AbstractDAO {
       }
     }
 
-    const dbDocuments = await this.prismaClient.document.findMany({
-      where,
-      skip,
-      take: pageSize,
-      orderBy,
-      include: {
-        titles: true,
-        abstracts: true,
-        subjects: {
+    const dbDocuments = isOnlyCounting
+      ? []
+      : await this.prismaClient.document.findMany({
+          where,
+          skip,
+          take: pageSize,
+          orderBy,
           include: {
-            labels: true,
+            titles: true,
+            abstracts: true,
+            subjects: {
+              include: {
+                labels: true,
+              },
+            },
+            contributions: {
+              include: {
+                person: true,
+              },
+            },
+            records: true,
+            journal: {
+              include: {
+                identifiers: true,
+              },
+            },
           },
-        },
-        contributions: {
-          include: {
-            person: true,
-          },
-        },
-        records: true,
-        journal: {
-          include: {
-            identifiers: true,
-          },
-        },
-      },
-    })
+        })
 
     const totalItems = await this.prismaClient.document.count({ where })
 

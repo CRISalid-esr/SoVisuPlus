@@ -395,6 +395,7 @@ describe('DocumentDAO', () => {
       contributorUids: ['local-123'],
       contributorType: 'person' as AgentType,
       omittedHalCollectionCodes: [],
+      isOnlyCounting: false,
     }
 
     const result = await documentDAO.fetchDocuments(fetchParams)
