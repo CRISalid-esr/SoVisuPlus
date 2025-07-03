@@ -84,7 +84,6 @@ const mockState = {
       type: 'person',
       getDisplayName: () => 'John Doe',
       memberships: [],
-      membershipAcronyms: [],
     },
   },
 }
