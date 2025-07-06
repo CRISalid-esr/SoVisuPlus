@@ -386,7 +386,15 @@ export default function DocumentsPage() {
         ),
       },
     ],
-    [lang, globalFilter, selectedTitleLangs, currentPerspective],
+    [
+      lang,
+      globalFilter,
+      selectedTitleLangs,
+      currentPerspective,
+      supportedLocales,
+      documentTypeLabels,
+      navigateToDetailsPage,
+    ],
   )
 
   const requestIdRef = useRef(0)
@@ -596,8 +604,7 @@ export default function DocumentsPage() {
               key='edit'
               label={t`documents_page_action_column_details`}
               onClick={() => {
-                const documentUid = row.original.uid
-                navigateToDetailsPage(documentUid)
+                navigateToDetailsPage(row.original.uid)
               }}
               table={table}
             />
