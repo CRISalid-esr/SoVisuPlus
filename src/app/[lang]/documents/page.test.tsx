@@ -14,7 +14,6 @@ import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import { Contribution } from '@/types/Contribution'
 import { LocRelator } from '@/types/LocRelator'
 
-// Mock Zustand store
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -86,6 +85,7 @@ const mockState = {
       memberships: [],
       membershipAcronyms: ['ABC', 'DEF'],
     },
+    ownPerspective: true,
   },
 }
 beforeEach(() => {
@@ -136,12 +136,52 @@ describe('DocumentsPage Component', () => {
 
     expect(
       screen.getByText((content) =>
-        content.startsWith(i18n.t('documents_page_main_title')),
+        content.startsWith(i18n.t('documents_page_main_title_first_person')),
       ),
     ).toBeInTheDocument()
     expect(
       screen.getByText(i18n.t('documents_page_synchronize_button')),
     ).toBeInTheDocument()
+  })
+
+  describe('DocumentsPage Component', () => {
+    it('renders first-person title when ownPerspective is true', () => {
+      ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+        selector({
+          ...mockState,
+          user: {
+            ...mockState.user,
+            ownPerspective: true,
+          },
+        }),
+      )
+
+      renderComponent()
+      expect(
+        screen.getByText((content) =>
+          content.startsWith(i18n.t('documents_page_main_title_first_person')),
+        ),
+      ).toBeInTheDocument()
+    })
+
+    it('renders third-person title when ownPerspective is false', () => {
+      ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+        selector({
+          ...mockState,
+          user: {
+            ...mockState.user,
+            ownPerspective: false,
+          },
+        }),
+      )
+
+      renderComponent()
+      expect(
+        screen.getByText((content) =>
+          content.startsWith(i18n.t('documents_page_main_title')),
+        ),
+      ).toBeInTheDocument()
+    })
   })
 
   it('fetches documents on mount', async () => {

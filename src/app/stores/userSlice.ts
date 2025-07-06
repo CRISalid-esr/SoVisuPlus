@@ -8,6 +8,7 @@ export interface UserSlice {
   user: {
     connectedUser: User | null // The authenticated user
     currentPerspective: IAgent | null
+    ownPerspective: boolean // Whether the current perspective is the connected user
     loading: boolean
     error: string | null | unknown
     fetchConnectedUser: () => Promise<void>
@@ -24,6 +25,7 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
     loading: true,
     error: null,
     currentPerspective: null,
+    ownPerspective: false,
     fetchConnectedUser: async () => {
       set((state) => ({ user: { ...state.user, loading: true } }))
       try {
@@ -36,6 +38,8 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
           user: {
             ...state.user,
             connectedUser: user,
+            ownPerspective:
+              state.user.currentPerspective?.uid === user.person?.uid,
           },
         }))
       } catch (error) {
@@ -49,7 +53,12 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
     },
     setPerspective: (perspective: IAgent) => {
       set((state) => ({
-        user: { ...state.user, currentPerspective: perspective },
+        user: {
+          ...state.user,
+          currentPerspective: perspective,
+          ownPerspective:
+            state.user.connectedUser?.person?.uid === perspective.uid,
+        },
       }))
     },
     setPerspectiveBySlug: async (slug: string) => {
@@ -79,7 +88,12 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
         const entity = EntityClass.fromJson(entityJson)
 
         set((state) => ({
-          user: { ...state.user, currentPerspective: entity },
+          user: {
+            ...state.user,
+            currentPerspective: entity,
+            ownPerspective:
+              state.user.connectedUser?.person?.uid === entity.uid,
+          },
         }))
       } catch (error) {
         console.error('Failed to fetch entity by slug', error)

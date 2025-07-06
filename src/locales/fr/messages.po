@@ -258,17 +258,17 @@ msgid "document_details_keywords_tab"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:131
+#: src/app/[lang]/documents/page.test.tsx:139
 msgid "documents_page_main_title"
-msgstr ""
+msgstr "Publications"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:135
+#: src/app/[lang]/documents/page.test.tsx:143
 msgid "documents_page_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:166
+#: src/app/[lang]/documents/page.test.tsx:199
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
@@ -372,36 +372,36 @@ msgstr ""
 msgid "documents_details_page_type_column_tab_author"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:559
+#: src/app/[lang]/documents/page.tsx:597
 msgid "documents_page_action_column_details"
 msgstr "Détails"
 
-#: src/app/[lang]/documents/page.tsx:97
+#: src/app/[lang]/documents/page.tsx:406
 msgid "documents_page_all_documents_filter"
 msgstr "Tous les documents"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:67
-#: src/app/[lang]/documents/page.tsx:132
+#: src/app/[lang]/documents/page.tsx:112
 msgid "documents_page_book_chapter_icon_label"
 msgstr "Chapitre de livre"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:61
-#: src/app/[lang]/documents/page.tsx:126
+#: src/app/[lang]/documents/page.tsx:106
 msgid "documents_page_book_icon_label"
 msgstr "Livre"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:70
-#: src/app/[lang]/documents/page.tsx:135
+#: src/app/[lang]/documents/page.tsx:115
 msgid "documents_page_conference_article_icon_label"
 msgstr "Article de conférence"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:161
-#: src/app/[lang]/documents/page.tsx:247
+#: src/app/[lang]/documents/page.tsx:225
 msgid "documents_page_contributors_column"
 msgstr "auteurs"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:52
-#: src/app/[lang]/documents/page.tsx:117
+#: src/app/[lang]/documents/page.tsx:97
 msgid "documents_page_document_icon_label"
 msgstr "Article"
 
@@ -421,63 +421,63 @@ msgstr "Dans HAL mais hors de la collection"
 msgid "documents_page_hal_status_outside_hal"
 msgstr "Hors HAL"
 
-#: src/app/[lang]/documents/page.tsx:319
+#: src/app/[lang]/documents/page.tsx:297
 msgid "documents_page_halStatus_column"
 msgstr "Statut hal"
 
-#: src/app/[lang]/documents/page.tsx:102
+#: src/app/[lang]/documents/page.tsx:411
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "Dépôt HAL incomplet"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:58
-#: src/app/[lang]/documents/page.tsx:123
+#: src/app/[lang]/documents/page.tsx:103
 msgid "documents_page_journal_article_icon_label"
 msgstr "Article de journal"
 
-#: src/app/[lang]/documents/page.tsx:108
-msgid "documents_page_keywords_to_validate"
-msgstr "Mots-clés à valider"
-
-#: src/app/[lang]/documents/page.tsx:507
+#: src/app/[lang]/documents/page.tsx:544
 msgid "documents_page_main_title"
 msgstr "Publications"
 
+#: src/app/[lang]/documents/page.tsx:543
+msgid "documents_page_main_title_first_person"
+msgstr "Mes publications"
+
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:64
-#: src/app/[lang]/documents/page.tsx:129
+#: src/app/[lang]/documents/page.tsx:109
 msgid "documents_page_monograph_icon_label"
 msgstr "Monographie"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:73
-#: src/app/[lang]/documents/page.tsx:138
+#: src/app/[lang]/documents/page.tsx:118
 msgid "documents_page_proceedings_icon_label"
 msgstr "Procédure"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:166
-#: src/app/[lang]/documents/page.tsx:280
+#: src/app/[lang]/documents/page.tsx:258
 msgid "documents_page_publication_date_column"
 msgstr "Date de publication"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:28
-#: src/app/[lang]/documents/page.tsx:284
+#: src/app/[lang]/documents/page.tsx:262
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "Aucune date"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:171
-#: src/app/[lang]/documents/page.tsx:312
+#: src/app/[lang]/documents/page.tsx:290
 msgid "documents_page_publishedIn_column"
 msgstr "paru dans"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:55
-#: src/app/[lang]/documents/page.tsx:120
+#: src/app/[lang]/documents/page.tsx:100
 msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Publication scientifique"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:179
-#: src/app/[lang]/documents/page.tsx:327
+#: src/app/[lang]/documents/page.tsx:305
 msgid "documents_page_source_column"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/page.tsx:514
+#: src/app/[lang]/documents/page.tsx:552
 msgid "documents_page_synchronize_button"
 msgstr "Synchroniser"
 
@@ -506,12 +506,12 @@ msgid "documents_page_synchronize_modal_title"
 msgstr "Sources à synchroniser"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:128
-#: src/app/[lang]/documents/page.tsx:189
+#: src/app/[lang]/documents/page.tsx:167
 msgid "documents_page_title_column"
 msgstr "titre"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:86
-#: src/app/[lang]/documents/page.tsx:149
+#: src/app/[lang]/documents/page.tsx:127
 msgid "documents_page_type_column"
 msgstr "type"
 
@@ -548,7 +548,7 @@ msgstr "Notifications"
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:16
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:123
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:142
-#: src/app/[lang]/documents/page.tsx:203
+#: src/app/[lang]/documents/page.tsx:181
 msgid "no_title_available"
 msgstr "aucun titre disponible"
 
