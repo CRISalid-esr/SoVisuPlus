@@ -390,7 +390,6 @@ export default function DocumentsPage() {
       lang,
       globalFilter,
       selectedTitleLangs,
-      currentPerspective,
       supportedLocales,
       documentTypeLabels,
       navigateToDetailsPage,
