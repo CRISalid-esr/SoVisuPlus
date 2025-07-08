@@ -683,4 +683,27 @@ export class DocumentDAO extends AbstractDAO {
 
     return dbDocument ? Document.fromDbDocument(dbDocument) : null
   }
+
+  async deleteConceptsFromDocument(
+    documentUid: string,
+    conceptUids: string[],
+  ): Promise<void> {
+    const document = await this.prismaClient.document.findUnique({
+      where: { uid: documentUid },
+      select: { id: true },
+    })
+
+    if (!document) {
+      throw new Error(`Document with UID ${documentUid} not found`)
+    }
+
+    await this.prismaClient.document.update({
+      where: { id: document.id },
+      data: {
+        subjects: {
+          disconnect: conceptUids.map((uid) => ({ uid })),
+        },
+      },
+    })
+  }
 }

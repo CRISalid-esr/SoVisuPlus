@@ -3,7 +3,15 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import removeAccents from 'remove-accents'
 
 class ConceptGroup {
-  constructor(public concepts: Concept[] = []) {}
+  constructor(
+    public concepts: Concept[] = [],
+    public uid: string | null = null,
+  ) {
+    // if no uid, take the url of the first concept
+    if (!this.uid && this.concepts.length > 0) {
+      this.uid = this.concepts[0].uid
+    }
+  }
 
   getDisplayLabels(language: ExtendedLanguageCode): string[] {
     const labels = new Set<string>()

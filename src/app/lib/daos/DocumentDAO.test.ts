@@ -671,4 +671,45 @@ describe('DocumentDAO', () => {
     // Assert: check journal identifiers were handled
     expect(mockPrisma.journalIdentifier.create).toHaveBeenCalledTimes(2)
   })
+
+  it('should delete specified concepts from a document', async () => {
+    const mockDocId = 42
+
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue({
+      id: mockDocId,
+    })
+    ;(mockPrisma.document.update as jest.Mock).mockResolvedValue({})
+
+    const documentUid = 'doc-uid-to-delete'
+    const conceptUids = ['concept-1', 'concept-2']
+
+    await documentDAO.deleteConceptsFromDocument(documentUid, conceptUids)
+
+    expect(mockPrisma.document.findUnique).toHaveBeenCalledWith({
+      where: { uid: documentUid },
+      select: { id: true },
+    })
+
+    expect(mockPrisma.document.update).toHaveBeenCalledWith({
+      where: { id: mockDocId },
+      data: {
+        subjects: {
+          disconnect: [{ uid: 'concept-1' }, { uid: 'concept-2' }],
+        },
+      },
+    })
+  })
+
+  it('should throw an error if document is not found when deleting concepts', async () => {
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
+
+    const documentUid = 'missing-doc'
+    const conceptUids = ['concept-1', 'concept-2']
+
+    await expect(
+      documentDAO.deleteConceptsFromDocument(documentUid, conceptUids),
+    ).rejects.toThrow(`Document with UID ${documentUid} not found`)
+
+    expect(mockPrisma.document.update).not.toHaveBeenCalled()
+  })
 })

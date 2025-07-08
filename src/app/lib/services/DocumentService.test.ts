@@ -8,12 +8,15 @@ describe('DocumentService', () => {
   let documentService: DocumentService
   let mockFetchDocuments: jest.Mock
   let mockfetchDocumentById: jest.Mock
+  let mockDeleteConceptsFromDocument: jest.Mock
   beforeEach(() => {
     mockFetchDocuments = jest.fn()
     mockfetchDocumentById = jest.fn()
+    mockDeleteConceptsFromDocument = jest.fn()
     ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
       fetchDocuments: mockFetchDocuments,
       fetchDocumentById: mockfetchDocumentById,
+      deleteConceptsFromDocument: mockDeleteConceptsFromDocument,
     }))
 
     documentService = new DocumentService()
@@ -104,5 +107,30 @@ describe('DocumentService', () => {
     delete (dbParams as Partial<typeof dbParams>).contributorType
 
     expect(mockFetchDocuments).toHaveBeenCalledWith(dbParams)
+  })
+
+  it('should call deleteConceptsFromDocument with correct arguments', async () => {
+    mockDeleteConceptsFromDocument.mockResolvedValue(undefined)
+
+    await expect(
+      documentService.deleteConceptsFromDocument('doc-123', ['c1', 'c2']),
+    ).resolves.toBeUndefined()
+
+    expect(mockDeleteConceptsFromDocument).toHaveBeenCalledWith('doc-123', [
+      'c1',
+      'c2',
+    ])
+  })
+  it('should throw an error when deleteConceptsFromDocument fails', async () => {
+    mockDeleteConceptsFromDocument.mockRejectedValue(new Error('DB error'))
+
+    await expect(
+      documentService.deleteConceptsFromDocument('doc-123', ['c1', 'c2']),
+    ).rejects.toThrow('Error deleting concepts from document')
+
+    expect(mockDeleteConceptsFromDocument).toHaveBeenCalledWith('doc-123', [
+      'c1',
+      'c2',
+    ])
   })
 })

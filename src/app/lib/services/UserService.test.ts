@@ -17,7 +17,7 @@ const createMockPersonGraphQLClient = (
 
 const createMockUserDAO = (userData: DbUser): jest.Mocked<UserDAO> =>
   ({
-    createOrUpdateUser: jest.fn().mockResolvedValue(undefined), // Simulate a void return
+    createOrUpdateUser: jest.fn().mockResolvedValue(undefined),
     getUserByIdentifier: jest.fn().mockResolvedValue(userData),
   }) as unknown as jest.Mocked<UserDAO> // not to be forced to implement all methods
 

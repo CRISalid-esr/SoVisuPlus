@@ -31,6 +31,7 @@ export interface DocumentSlice {
     fetchDocuments: (obj: DocumentQuery) => Promise<void>
     countIncompleteHalRepositoryDocuments: (obj: DocumentQuery) => Promise<void>
     fetchDocumentById: (uid: string) => Promise<void>
+    removeConcepts: (conceptUids: string[]) => Promise<void>
   }
 }
 
@@ -39,7 +40,7 @@ export const addDocumentSlice: StateCreator<
   [],
   [],
   DocumentSlice
-> = (set) => ({
+> = (set, get): DocumentSlice => ({
   document: {
     documents: [],
     loading: true,
@@ -194,6 +195,49 @@ export const addDocumentSlice: StateCreator<
             },
           }
         })
+      }
+    },
+    removeConcepts: async (conceptUids: string[]) => {
+      const documentUid = get().document.selectedDocument?.uid
+      if (!documentUid) {
+        console.error('Cannot remove concepts: no selected document')
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/documents/${documentUid}/concepts`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conceptUids }),
+        })
+
+        if (!response.ok) throw new Error('Failed to delete concepts')
+
+        set((state) => {
+          const doc = state.document.selectedDocument
+          if (!doc) return state
+
+          const updatedSubjects = doc.subjects.filter(
+            (c) => !conceptUids.includes(c.uid),
+          )
+
+          return {
+            document: {
+              ...state.document,
+              selectedDocument: {
+                ...doc,
+                subjects: updatedSubjects,
+              } as Document,
+            },
+          }
+        })
+      } catch (error) {
+        set((state) => ({
+          document: {
+            ...state.document,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        }))
       }
     },
   },
