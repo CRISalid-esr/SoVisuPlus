@@ -19,8 +19,15 @@ interface FetchDocumentsFromDBParams {
   columnFilters: { id: string; value: string }[]
   sorting: { id: string; desc: boolean }[]
   contributorUids: string[]
-  omittedHalCollectionCodes: string[]
-  isOnlyCounting: boolean
+  omittedHalCollectionCodes?: string[]
+}
+
+interface CountDocumentsFromDBParams {
+  searchTerm: string
+  searchLang: string
+  columnFilters: { id: string; value: string }[]
+  contributorUids: string[]
+  omittedHalCollectionCodes?: string[]
 }
 
 export class DocumentDAO extends AbstractDAO {
@@ -347,34 +354,23 @@ export class DocumentDAO extends AbstractDAO {
     }
   }
 
-  public async fetchDocuments({
+  createFetchDocumentsWhere({
     searchTerm,
-    searchLang,
-    page,
-    pageSize,
     columnFilters,
-    sorting,
-    contributorUids,
     omittedHalCollectionCodes,
-    isOnlyCounting,
-  }: FetchDocumentsFromDBParams): Promise<{
-    documents: Document[]
-    totalItems: number
-  }> {
-    const skip = (page - 1) * pageSize
-
+    contributorUids,
+  }: {
+    searchTerm: string
+    searchLang: string
+    columnFilters: { id: string; value: string }[]
+    contributorUids: string[]
+    omittedHalCollectionCodes?: string[]
+  }): Prisma.DocumentWhereInput {
     const publicationListRolesFilter: string[] =
       process.env.PUBLICATION_LIST_ROLES_FILTER?.split(',') || []
 
     const perspectiveRolesFilter: string[] =
       process.env.PERSPECTIVES_ROLES_FILTER?.split(',') || []
-
-    // find the index of the search lang in the array of process.env.NEXT_PUBLIC_SUPPORTED_LOCALES
-    const searchLangIndex =
-      process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',').indexOf(
-        searchLang,
-      ) || 0
-    const sortingTitleFieldName = `title_locale_${searchLangIndex}`
 
     let where: Prisma.DocumentWhereInput = {}
     const contributionFilters: Prisma.DocumentWhereInput[] = []
@@ -534,7 +530,7 @@ export class DocumentDAO extends AbstractDAO {
       }
     })
 
-    if (omittedHalCollectionCodes.length) {
+    if (omittedHalCollectionCodes?.length) {
       where = {
         ...where,
         records: {
@@ -571,35 +567,6 @@ export class DocumentDAO extends AbstractDAO {
       contributionFilters.push(rolesAndUidFilter)
     }
 
-    const orderBy: Prisma.DocumentOrderByWithRelationInput[] = sorting.map(
-      (sort) => {
-        if (sort.id === 'contributions') {
-          return {
-            contributions: {
-              _count: sort.desc ? 'desc' : 'asc',
-            },
-          }
-        }
-
-        if (sort.id === 'titles') {
-          return {
-            [sortingTitleFieldName]: sort.desc ? 'desc' : 'asc',
-          }
-        }
-
-        if (sort.id === 'date') {
-          return {
-            publicationDateStart: {
-              sort: sort.desc ? 'desc' : 'asc',
-              nulls: 'last',
-            },
-          }
-        }
-
-        return { [sort.id]: sort.desc ? 'desc' : 'asc' }
-      },
-    )
-
     if (contributionFilters.length > 0) {
       const existingAnd = where.AND
         ? Array.isArray(where.AND)
@@ -613,34 +580,84 @@ export class DocumentDAO extends AbstractDAO {
       }
     }
 
-    const dbDocuments = isOnlyCounting
-      ? []
-      : await this.prismaClient.document.findMany({
-          where,
-          skip,
-          take: pageSize,
-          orderBy,
-          include: {
-            titles: true,
-            abstracts: true,
-            subjects: {
-              include: {
-                labels: true,
-              },
-            },
-            contributions: {
-              include: {
-                person: true,
-              },
-            },
-            records: true,
-            journal: {
-              include: {
-                identifiers: true,
-              },
-            },
+    return where
+  }
+
+  createFetchDocumentsOrderBy({
+    searchLang,
+    sorting,
+  }: FetchDocumentsFromDBParams): Prisma.DocumentOrderByWithRelationInput[] {
+    const searchLangIndex =
+      process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',').indexOf(
+        searchLang,
+      ) || 0
+    const sortingTitleFieldName = `title_locale_${searchLangIndex}`
+
+    return sorting.map((sort) => {
+      if (sort.id === 'contributions') {
+        return {
+          contributions: {
+            _count: sort.desc ? 'desc' : 'asc',
           },
-        })
+        }
+      }
+
+      if (sort.id === 'titles') {
+        return {
+          [sortingTitleFieldName]: sort.desc ? 'desc' : 'asc',
+        }
+      }
+
+      if (sort.id === 'date') {
+        return {
+          publicationDateStart: {
+            sort: sort.desc ? 'desc' : 'asc',
+            nulls: 'last',
+          },
+        }
+      }
+
+      return { [sort.id]: sort.desc ? 'desc' : 'asc' }
+    })
+  }
+
+  public async fetchDocuments(params: FetchDocumentsFromDBParams): Promise<{
+    documents: Document[]
+    totalItems: number
+  }> {
+    const { page, pageSize } = params
+
+    const skip = (page - 1) * pageSize
+
+    const where = this.createFetchDocumentsWhere(params)
+    const orderBy = this.createFetchDocumentsOrderBy(params)
+
+    const dbDocuments = await this.prismaClient.document.findMany({
+      where,
+      skip,
+      take: pageSize,
+      orderBy,
+      include: {
+        titles: true,
+        abstracts: true,
+        subjects: {
+          include: {
+            labels: true,
+          },
+        },
+        contributions: {
+          include: {
+            person: true,
+          },
+        },
+        records: true,
+        journal: {
+          include: {
+            identifiers: true,
+          },
+        },
+      },
+    })
 
     const totalItems = await this.prismaClient.document.count({ where })
 
@@ -649,6 +666,33 @@ export class DocumentDAO extends AbstractDAO {
         return Document.fromDbDocument(dbDocument)
       }),
       totalItems,
+    }
+  }
+
+  public async countDocuments(params: CountDocumentsFromDBParams): Promise<{
+    allItems: number
+    incompleteHalRepositoryItems: number
+  }> {
+    const { omittedHalCollectionCodes, ...rest } = params
+
+    const allWhere = this.createFetchDocumentsWhere(rest)
+    const incompleteHalRepositoryWhere = this.createFetchDocumentsWhere({
+      ...rest,
+      omittedHalCollectionCodes,
+    })
+
+    const allItems = await this.prismaClient.document.count({
+      where: allWhere,
+    })
+    const incompleteHalRepositoryItems = await this.prismaClient.document.count(
+      {
+        where: incompleteHalRepositoryWhere,
+      },
+    )
+
+    return {
+      allItems,
+      incompleteHalRepositoryItems,
     }
   }
 

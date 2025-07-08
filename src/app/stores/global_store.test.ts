@@ -7,10 +7,14 @@ describe('Zustand Global Store - useStore with DocumentSlice', () => {
       document: {
         selectedDocument: null,
         documents: [],
+        count: {
+          allItems: 0,
+          incompleteHalRepositoryItems: 0,
+        },
         loading: true,
         error: null,
         fetchDocuments: jest.fn(),
-        countIncompleteHalRepositoryDocuments: jest.fn(),
+        countDocuments: jest.fn(),
         fetchDocumentById: jest.fn(),
       },
     })

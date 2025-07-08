@@ -36,13 +36,12 @@ jest.mock('next/navigation', () => ({
 }))
 
 const mockFetchDocuments = jest.fn()
-const mockCountIncompleteHalRepositoryDocuments = jest.fn()
+const mockCountDocuments = jest.fn()
 const mockFetchDocumentById = jest.fn()
 const mockState = {
   document: {
     fetchDocuments: mockFetchDocuments,
-    countIncompleteHalRepositoryDocuments:
-      mockCountIncompleteHalRepositoryDocuments,
+    countDocuments: mockCountDocuments,
     fetchDocumentById: mockFetchDocumentById,
     loading: false,
     documents: [
@@ -78,6 +77,10 @@ const mockState = {
       ),
     ],
     totalItems: 1,
+    count: {
+      allItems: 0,
+      incompleteHalRepositoryItems: 0,
+    },
   },
   user: {
     currentPerspective: {
@@ -99,8 +102,9 @@ beforeEach(() => {
     totalItems: 0,
   })
 
-  mockCountIncompleteHalRepositoryDocuments.mockResolvedValue({
-    totalItems: 0,
+  mockCountDocuments.mockResolvedValue({
+    allItems: 0,
+    incompleteHalRepositoryItems: 0,
   })
 })
 
@@ -172,17 +176,10 @@ describe('DocumentsPage Component', () => {
     renderComponent()
 
     await waitFor(() => {
-      expect(mockCountIncompleteHalRepositoryDocuments).toHaveBeenCalledWith({
+      expect(mockCountDocuments).toHaveBeenCalledWith({
         page: 1,
-        pageSize: 10,
         searchTerm: '',
         columnFilters: JSON.stringify([]),
-        sorting: JSON.stringify([
-          {
-            id: 'date',
-            desc: true,
-          },
-        ]),
         searchLang: 'en',
         contributorType: 'person',
         contributorUid: '',
