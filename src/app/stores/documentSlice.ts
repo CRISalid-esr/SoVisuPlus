@@ -31,13 +31,15 @@ export interface CountDocumentQuery extends BaseQuery {
 export interface DocumentSlice {
   document: {
     latestDocumentRequestId?: number
-    latestCountDocumentsRequestId?: number
     documents: Array<Document>
     selectedDocument: Document | null
     totalItems?: number
     count: {
+      latestCountDocumentsRequestId?: number
       allItems?: number
       incompleteHalRepositoryItems?: number
+      loading: boolean
+      error: string | null | unknown
     }
     loading: boolean
     hasFetched?: boolean
@@ -61,6 +63,8 @@ export const addDocumentSlice: StateCreator<
     selectedDocument: null,
     totalItems: 0,
     count: {
+      loading: true,
+      error: null,
       allItems: 0,
       incompleteHalRepositoryItems: 0,
     },
@@ -158,8 +162,11 @@ export const addDocumentSlice: StateCreator<
       set((state) => ({
         document: {
           ...state.document,
-          loading: true,
-          latestCountDocumentsRequestId: requestId,
+          count: {
+            ...state.document.count,
+            loading: true,
+            latestCountDocumentsRequestId: requestId,
+          },
         },
       }))
 
@@ -170,7 +177,7 @@ export const addDocumentSlice: StateCreator<
 
         set((state) => {
           // Ignore if a newer request was made since this one started
-          if (state.document.latestCountDocumentsRequestId !== requestId)
+          if (state.document.count.latestCountDocumentsRequestId !== requestId)
             return state
 
           return {
@@ -180,23 +187,26 @@ export const addDocumentSlice: StateCreator<
                 ...state.document.count,
                 allItems,
                 incompleteHalRepositoryItems,
+                error: null,
+                loading: false,
               },
-              error: null,
-              loading: false,
             },
           }
         })
       } catch (error) {
         console.error('Failed to count documents', error)
         set((state) => {
-          if (state.document.latestCountDocumentsRequestId !== requestId)
+          if (state.document.count.latestCountDocumentsRequestId !== requestId)
             return state
 
           return {
             document: {
               ...state.document,
-              error,
-              loading: false,
+              count: {
+                ...state.document.count,
+                error,
+                loading: false,
+              },
             },
           }
         })

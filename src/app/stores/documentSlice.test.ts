@@ -161,12 +161,12 @@ describe('addDocumentSlice', () => {
 
     // Check if the state was updated correctly
     const state = useStore.getState().document
-    expect(state.loading).toBe(false)
+    expect(state.count.loading).toBe(false)
     expect(state.count.allItems).toBe(mockAllItems)
     expect(state.count.incompleteHalRepositoryItems).toBe(
       mockIncompleteHalRepositoryItems,
     )
-    expect(state.error).toBeNull()
+    expect(state.count.error).toBeNull()
     const queryObjectWithoutRequestId = Object.fromEntries(
       Object.entries(queryObject).filter(([key]) => key !== 'requestId'),
     )
@@ -196,7 +196,7 @@ describe('addDocumentSlice', () => {
 
     // Check if the state was updated correctly in case of error
     const state = useStore.getState().document
-    expect(state.loading).toBe(false)
-    expect(state.error).toBe(mockError)
+    expect(state.count.loading).toBe(false)
+    expect(state.count.error).toBe(mockError)
   })
 })

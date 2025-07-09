@@ -8,6 +8,8 @@ describe('Zustand Global Store - useStore with DocumentSlice', () => {
         selectedDocument: null,
         documents: [],
         count: {
+          loading: true,
+          error: null,
           allItems: 0,
           incompleteHalRepositoryItems: 0,
         },
