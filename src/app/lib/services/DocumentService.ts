@@ -117,7 +117,7 @@ export class DocumentService {
       return { allItems, incompleteHalRepositoryItems }
     } catch (error) {
       console.error('Error in service layer:', error)
-      throw new Error('Error fetching documents from service')
+      throw new Error('Error counting documents from service')
     }
   }
 

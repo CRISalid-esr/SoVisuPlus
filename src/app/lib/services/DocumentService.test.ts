@@ -8,12 +8,16 @@ describe('DocumentService', () => {
   let documentService: DocumentService
   let mockFetchDocuments: jest.Mock
   let mockfetchDocumentById: jest.Mock
+  let mockCountDocuments: jest.Mock
+
   beforeEach(() => {
     mockFetchDocuments = jest.fn()
     mockfetchDocumentById = jest.fn()
+    mockCountDocuments = jest.fn()
     ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
       fetchDocuments: mockFetchDocuments,
       fetchDocumentById: mockfetchDocumentById,
+      countDocuments: mockCountDocuments,
     }))
 
     documentService = new DocumentService()
@@ -38,6 +42,60 @@ describe('DocumentService', () => {
     )
 
     expect(mockfetchDocumentById).toHaveBeenCalledWith('123')
+  })
+
+  it('should return document count when countDocuments succeeds', async () => {
+    const mockCount = { allItems: 1, incompleteHalRepositoryItems: 1 }
+    mockCountDocuments.mockResolvedValue(mockCount)
+
+    const params = {
+      searchTerm: 'test',
+      searchLang: 'en',
+      columnFilters: [{ id: 'category', value: 'reports' }],
+      contributorUid: 'local-124',
+      contributorType: 'person' as AgentType,
+      omittedHalCollectionCodes: [],
+    }
+
+    await expect(documentService.countDocuments(params)).resolves.toEqual(
+      mockCount,
+    )
+
+    // Replace contributorUid with contributorUids
+    const dbParams = {
+      ...params,
+      contributorUids: [params.contributorUid],
+    }
+    delete (dbParams as Partial<typeof dbParams>).contributorUid
+    delete (dbParams as Partial<typeof dbParams>).contributorType
+
+    expect(mockCountDocuments).toHaveBeenCalledWith(dbParams)
+  })
+
+  it('should throw an error when countDocuments fails', async () => {
+    mockCountDocuments.mockRejectedValue(new Error('DB error'))
+
+    const params = {
+      searchTerm: 'test',
+      searchLang: 'en',
+      columnFilters: [{ id: 'category', value: 'reports' }],
+      contributorUid: 'local-124',
+      contributorType: 'person' as AgentType,
+      omittedHalCollectionCodes: [],
+    }
+
+    await expect(documentService.countDocuments(params)).rejects.toThrow(
+      'Error counting documents from service',
+    )
+
+    const dbParams = {
+      ...params,
+      contributorUids: [params.contributorUid],
+    }
+    delete (dbParams as Partial<typeof dbParams>).contributorUid
+    delete (dbParams as Partial<typeof dbParams>).contributorType
+
+    expect(mockCountDocuments).toHaveBeenCalledWith(dbParams)
   })
 
   it('should return documents and totalItems when fetchDocuments succeeds', async () => {
