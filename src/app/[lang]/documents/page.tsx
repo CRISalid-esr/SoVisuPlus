@@ -288,8 +288,20 @@ export default function DocumentsPage() {
       {
         accessorKey: 'publishedIn',
         header: t`documents_page_publishedIn_column`,
-        Cell() {
-          return ''
+        Cell({ row, column }) {
+          const { journal } = row.original
+          const title = journal?.titles[0]
+
+          return (
+            title && (
+              <Highlighter
+                highlightClassName='highlight'
+                searchWords={[globalFilter, column.getFilterValue() as string]}
+                autoEscape
+                textToHighlight={title}
+              />
+            )
+          )
         },
       },
       {
