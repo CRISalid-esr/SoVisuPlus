@@ -14,6 +14,12 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:143
+#: src/app/[lang]/documents/page.test.tsx:166
+msgid "documents_page_main_title_first_person"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Authorizations"
@@ -184,40 +190,36 @@ msgid "document_details_page_domains_tab_card_validate_button"
 msgstr "Confirm"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:55
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:197
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:237
 msgid "concept_chips_free_keyword"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:63
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:214
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:68
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:254
 msgid "concept_chips_pref_label"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:66
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:245
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:71
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:283
 msgid "concept_chips_alt_label"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:309
-msgid "concept_chip_action_edit"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:312
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:86
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:355
 msgid "concept_chip_action_delete"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:42
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:60
 msgid "document_details_page_keywords_tab_card_title"
 msgstr "Keywords"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:45
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:63
 msgid "document_details_page_keywords_tab_card_validate_button"
 msgstr "Confirm"
 
@@ -258,17 +260,17 @@ msgid "document_details_keywords_tab"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:143
-msgid "documents_page_main_title"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:147
 msgid "documents_page_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:196
+#: src/app/[lang]/documents/page.test.tsx:185
+msgid "documents_page_main_title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:236
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
@@ -372,11 +374,11 @@ msgstr "Scopus"
 msgid "documents_details_page_type_column_tab_author"
 msgstr "Authors"
 
-#: src/app/[lang]/documents/page.tsx:591
+#: src/app/[lang]/documents/page.tsx:602
 msgid "documents_page_action_column_details"
 msgstr "Details"
 
-#: src/app/[lang]/documents/page.tsx:406
+#: src/app/[lang]/documents/page.tsx:413
 msgid "documents_page_all_documents_filter"
 msgstr "All my documents"
 
@@ -425,7 +427,7 @@ msgstr ""
 msgid "documents_page_halStatus_column"
 msgstr "status in Hal"
 
-#: src/app/[lang]/documents/page.tsx:412
+#: src/app/[lang]/documents/page.tsx:419
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "HAL incomplete filing"
 
@@ -434,11 +436,11 @@ msgstr "HAL incomplete filing"
 msgid "documents_page_journal_article_icon_label"
 msgstr "Journal article"
 
-#: src/app/[lang]/documents/page.tsx:539
+#: src/app/[lang]/documents/page.tsx:549
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:543
+#: src/app/[lang]/documents/page.tsx:548
 msgid "documents_page_main_title_first_person"
 msgstr ""
 
@@ -477,7 +479,7 @@ msgstr "Scientific publication"
 msgid "documents_page_source_column"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/page.tsx:546
+#: src/app/[lang]/documents/page.tsx:557
 msgid "documents_page_synchronize_button"
 msgstr "Syncronization"
 
