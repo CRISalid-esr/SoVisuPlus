@@ -14,12 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:143
-#: src/app/[lang]/documents/page.test.tsx:166
-msgid "documents_page_main_title_first_person"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Mes autorisations"
@@ -257,6 +251,12 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:169
 msgid "document_details_keywords_tab"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:143
+#: src/app/[lang]/documents/page.test.tsx:166
+msgid "documents_page_main_title_first_person"
 msgstr ""
 
 #. js-lingui-explicit-id
