@@ -257,3 +257,28 @@ enum ResearchStructureIdentifierType {
   HAL       @map("hal")
   SCOPUS_ID @map("scopus_id")
 }
+
+enum ChangeAction {
+  ADD
+  REMOVE
+  UPDATE
+}
+
+enum ChangeTargetType {
+  DOCUMENT
+}
+
+model Change {
+  id         String           @id @default(uuid())
+  action     ChangeAction
+  targetType ChangeTargetType
+  targetUid  String
+  path       String?
+  parameters Json
+  timestamp  DateTime         @default(now())
+
+  @@index([action])
+  @@index([targetType])
+  @@index([targetUid])
+  @@index([timestamp])
+}
