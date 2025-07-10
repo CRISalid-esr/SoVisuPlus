@@ -397,28 +397,29 @@ export default function DocumentsPage() {
   )
 
   const requestIdRef = useRef(0)
-  const countIncompleteHalRepositoryDocumentsRequestIdRef = useRef(0)
+  const countDocumentsRequestIdRef = useRef(0)
 
   const {
     fetchDocuments,
-    countIncompleteHalRepositoryDocuments,
+    countDocuments,
     loading,
     documents = [],
     totalItems,
-    incompleteHalRepositoryTotalItems,
+    count: { allItems, incompleteHalRepositoryItems },
   } = useStore((state) => state.document)
 
   const tabs = [
     {
       label: t`documents_page_all_documents_filter`,
       value: 'all_documents',
+      numberOfItems: allItems,
       color: theme.palette.primary.main,
     },
     {
       label: t`documents_page_incomplete_hal_repository_filter`,
       value: 'incomplete_hal_repository',
-      numberOfItems: incompleteHalRepositoryTotalItems,
-      color: theme.palette.primary.main,
+      numberOfItems: incompleteHalRepositoryItems,
+      color: theme.palette.error.main,
     },
   ]
 
@@ -475,7 +476,8 @@ export default function DocumentsPage() {
     const contributorType = currentPerspective?.type
     if (!contributorType) return
 
-    const documentQueryParameters = {
+    const nextRequestId = ++requestIdRef.current
+    fetchDocuments({
       page: pagination.pageIndex + 1,
       pageSize: pagination.pageSize,
       searchTerm: globalFilter,
@@ -484,11 +486,6 @@ export default function DocumentsPage() {
       sorting: JSON.stringify(sorting),
       contributorUid: currentPerspective?.uid || '',
       contributorType: contributorType,
-    }
-
-    const nextRequestId = ++requestIdRef.current
-    fetchDocuments({
-      ...documentQueryParameters,
       requestId: nextRequestId,
       omittedHalCollectionCodes: JSON.stringify(
         selectedTab === 'incomplete_hal_repository'
@@ -499,19 +496,20 @@ export default function DocumentsPage() {
       console.error('Error fetching documents:', error)
     })
 
-    const nextCountIncompleteHalRepositoryDocumentsRequestId =
-      ++countIncompleteHalRepositoryDocumentsRequestIdRef.current
-    countIncompleteHalRepositoryDocuments({
-      ...documentQueryParameters,
-      requestId: nextCountIncompleteHalRepositoryDocumentsRequestId,
+    const nextCountDocumentsRequestId = ++countDocumentsRequestIdRef.current
+    countDocuments({
+      page: pagination.pageIndex + 1,
+      searchTerm: globalFilter,
+      searchLang: lang,
+      columnFilters: JSON.stringify(adjustedFilters), // Use adjusted date filter
+      contributorUid: currentPerspective?.uid || '',
+      contributorType: contributorType,
+      requestId: nextCountDocumentsRequestId,
       omittedHalCollectionCodes: JSON.stringify(
         currentPerspective.membershipAcronyms,
       ),
     }).catch((error) => {
-      console.error(
-        'Error counting incomplete HAL repository documents:',
-        error,
-      )
+      console.error('Error counting documents:', error)
     })
   }, [
     columnFilters,
@@ -521,7 +519,7 @@ export default function DocumentsPage() {
     sorting,
     lang,
     fetchDocuments,
-    countIncompleteHalRepositoryDocuments,
+    countDocuments,
     currentPerspective,
     selectedTab,
   ])

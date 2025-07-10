@@ -1,5 +1,10 @@
 import { create } from 'zustand'
-import { addDocumentSlice, DocumentQuery, DocumentSlice } from './documentSlice'
+import {
+  addDocumentSlice,
+  DocumentQuery,
+  CountDocumentQuery,
+  DocumentSlice,
+} from './documentSlice'
 import { toQueryString } from '@/utils/query'
 
 // Mock the toQueryString utility
@@ -126,5 +131,72 @@ describe('addDocumentSlice', () => {
     expect(state.loading).toBe(false)
     expect(state.documents).toEqual([])
     expect(state.error).toBe(mockError)
+  })
+
+  it('should count documents successfully', async () => {
+    const mockAllItems = 1
+    const mockIncompleteHalRepositoryItems = 1
+
+    // Mock the response of fetch
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      json: jest.fn().mockResolvedValueOnce({
+        allItems: mockAllItems,
+        incompleteHalRepositoryItems: mockIncompleteHalRepositoryItems,
+      }),
+    })
+
+    const queryObject: CountDocumentQuery = {
+      searchTerm: 'test',
+      page: 1,
+      columnFilters: '',
+      searchLang: 'en',
+      contributorUid: null,
+      contributorType: 'person',
+      requestId: 1,
+      omittedHalCollectionCodes: '',
+    }
+
+    // Call the countDocuments method
+    await useStore.getState().document.countDocuments(queryObject)
+
+    // Check if the state was updated correctly
+    const state = useStore.getState().document
+    expect(state.count.loading).toBe(false)
+    expect(state.count.allItems).toBe(mockAllItems)
+    expect(state.count.incompleteHalRepositoryItems).toBe(
+      mockIncompleteHalRepositoryItems,
+    )
+    expect(state.count.error).toBeNull()
+    const queryObjectWithoutRequestId = Object.fromEntries(
+      Object.entries(queryObject).filter(([key]) => key !== 'requestId'),
+    )
+    expect(toQueryString).toHaveBeenCalledWith(queryObjectWithoutRequestId)
+    expect(fetch).toHaveBeenCalledWith('/api/documents/count?mockQueryString') // Ensure fetch was called with the right URL
+  })
+
+  it('should handle error while counting documents', async () => {
+    const mockError = new Error('Failed to fetch')
+
+    // Mock the response of fetch to simulate an error
+    ;(fetch as jest.Mock).mockRejectedValueOnce(mockError)
+
+    const queryObject: CountDocumentQuery = {
+      searchTerm: 'test',
+      page: 1,
+      columnFilters: '',
+      searchLang: 'en',
+      contributorUid: null,
+      contributorType: 'person',
+      requestId: 1,
+      omittedHalCollectionCodes: '',
+    }
+
+    // Call the countDocuments method
+    await useStore.getState().document.countDocuments(queryObject)
+
+    // Check if the state was updated correctly in case of error
+    const state = useStore.getState().document
+    expect(state.count.loading).toBe(false)
+    expect(state.count.error).toBe(mockError)
   })
 })

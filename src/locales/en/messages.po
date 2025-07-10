@@ -258,17 +258,17 @@ msgid "document_details_keywords_tab"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:139
+#: src/app/[lang]/documents/page.test.tsx:143
 msgid "documents_page_main_title"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:143
+#: src/app/[lang]/documents/page.test.tsx:147
 msgid "documents_page_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:199
+#: src/app/[lang]/documents/page.test.tsx:196
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
@@ -372,7 +372,7 @@ msgstr "Scopus"
 msgid "documents_details_page_type_column_tab_author"
 msgstr "Authors"
 
-#: src/app/[lang]/documents/page.tsx:597
+#: src/app/[lang]/documents/page.tsx:591
 msgid "documents_page_action_column_details"
 msgstr "Details"
 
@@ -425,7 +425,7 @@ msgstr ""
 msgid "documents_page_halStatus_column"
 msgstr "status in Hal"
 
-#: src/app/[lang]/documents/page.tsx:411
+#: src/app/[lang]/documents/page.tsx:412
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "HAL incomplete filing"
 
@@ -434,7 +434,7 @@ msgstr "HAL incomplete filing"
 msgid "documents_page_journal_article_icon_label"
 msgstr "Journal article"
 
-#: src/app/[lang]/documents/page.tsx:544
+#: src/app/[lang]/documents/page.tsx:539
 msgid "documents_page_main_title"
 msgstr "Publications"
 
@@ -477,7 +477,7 @@ msgstr "Scientific publication"
 msgid "documents_page_source_column"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/page.tsx:552
+#: src/app/[lang]/documents/page.tsx:546
 msgid "documents_page_synchronize_button"
 msgstr "Syncronization"
 

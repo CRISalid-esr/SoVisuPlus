@@ -499,27 +499,22 @@ describe('DocumentDAO', () => {
     })
   })
 
-  it('should only count documents from DB with search and filters when isOnlyCounting parameter is true', async () => {
+  it('should count documents', async () => {
     ;(mockPrisma.document.count as jest.Mock).mockResolvedValue(1)
 
-    const fetchParams = {
+    const countParams = {
       searchTerm: 'Sample',
       searchLang: 'en',
-      page: 1,
-      pageSize: 10,
       columnFilters: [{ id: 'titles', value: 'Sample Document Title' }],
-      sorting: [{ id: 'titles', desc: false }],
       contributorUids: ['local-123'],
       contributorType: 'person' as AgentType,
       omittedHalCollectionCodes: [],
-      isOnlyCounting: true,
     }
 
-    const result = await documentDAO.fetchDocuments(fetchParams)
+    const result = await documentDAO.countDocuments(countParams)
 
-    expect(result.documents).toHaveLength(0)
-    expect(result.totalItems).toBe(1)
-    expect(mockPrisma.document.findMany).not.toHaveBeenCalled()
+    expect(result.allItems).toBe(1)
+    expect(result.incompleteHalRepositoryItems).toBe(1)
     expect(mockPrisma.document.count).toHaveBeenCalled()
   })
 

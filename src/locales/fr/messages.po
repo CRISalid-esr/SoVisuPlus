@@ -258,12 +258,12 @@ msgid "document_details_keywords_tab"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:139
+#: src/app/[lang]/documents/page.test.tsx:143
 msgid "documents_page_main_title"
 msgstr "Publications"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:143
+#: src/app/[lang]/documents/page.test.tsx:147
 msgid "documents_page_synchronize_button"
 msgstr ""
 
@@ -425,7 +425,7 @@ msgstr "Hors HAL"
 msgid "documents_page_halStatus_column"
 msgstr "Statut hal"
 
-#: src/app/[lang]/documents/page.tsx:411
+#: src/app/[lang]/documents/page.tsx:412
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "Dépôt HAL incomplet"
 
@@ -434,7 +434,7 @@ msgstr "Dépôt HAL incomplet"
 msgid "documents_page_journal_article_icon_label"
 msgstr "Article de journal"
 
-#: src/app/[lang]/documents/page.tsx:544
+#: src/app/[lang]/documents/page.tsx:539
 msgid "documents_page_main_title"
 msgstr "Publications"
 
@@ -477,7 +477,7 @@ msgstr "Publication scientifique"
 msgid "documents_page_source_column"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/page.tsx:552
+#: src/app/[lang]/documents/page.tsx:546
 msgid "documents_page_synchronize_button"
 msgstr "Synchroniser"
 
