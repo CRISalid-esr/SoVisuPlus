@@ -254,23 +254,23 @@ msgid "document_details_keywords_tab"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:143
-#: src/app/[lang]/documents/page.test.tsx:166
+#: src/app/[lang]/documents/page.test.tsx:148
+#: src/app/[lang]/documents/page.test.tsx:171
 msgid "documents_page_main_title_first_person"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:147
+#: src/app/[lang]/documents/page.test.tsx:152
 msgid "documents_page_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:185
+#: src/app/[lang]/documents/page.test.tsx:190
 msgid "documents_page_main_title"
 msgstr "Publications"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:236
+#: src/app/[lang]/documents/page.test.tsx:241
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
@@ -374,11 +374,11 @@ msgstr ""
 msgid "documents_details_page_type_column_tab_author"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:602
+#: src/app/[lang]/documents/page.tsx:614
 msgid "documents_page_action_column_details"
 msgstr "Détails"
 
-#: src/app/[lang]/documents/page.tsx:413
+#: src/app/[lang]/documents/page.tsx:425
 msgid "documents_page_all_documents_filter"
 msgstr "Tous les documents"
 
@@ -423,11 +423,11 @@ msgstr "Dans HAL mais hors de la collection"
 msgid "documents_page_hal_status_outside_hal"
 msgstr "Hors HAL"
 
-#: src/app/[lang]/documents/page.tsx:297
+#: src/app/[lang]/documents/page.tsx:309
 msgid "documents_page_halStatus_column"
 msgstr "Statut hal"
 
-#: src/app/[lang]/documents/page.tsx:419
+#: src/app/[lang]/documents/page.tsx:431
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "Dépôt HAL incomplet"
 
@@ -436,11 +436,11 @@ msgstr "Dépôt HAL incomplet"
 msgid "documents_page_journal_article_icon_label"
 msgstr "Article de journal"
 
-#: src/app/[lang]/documents/page.tsx:549
+#: src/app/[lang]/documents/page.tsx:561
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:548
+#: src/app/[lang]/documents/page.tsx:560
 msgid "documents_page_main_title_first_person"
 msgstr "Mes publications"
 
@@ -475,11 +475,11 @@ msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Publication scientifique"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:179
-#: src/app/[lang]/documents/page.tsx:305
+#: src/app/[lang]/documents/page.tsx:317
 msgid "documents_page_source_column"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/page.tsx:557
+#: src/app/[lang]/documents/page.tsx:569
 msgid "documents_page_synchronize_button"
 msgstr "Synchroniser"
 
