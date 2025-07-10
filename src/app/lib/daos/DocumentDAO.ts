@@ -534,6 +534,7 @@ export class DocumentDAO extends AbstractDAO {
       where = {
         ...where,
         records: {
+          ...where.records,
           none: {
             OR: [
               {
