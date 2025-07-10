@@ -14,6 +14,18 @@ export interface DocumentQuery extends BaseQuery {
   contributorUid: string | null
   contributorType: AgentType
   requestId: number
+  omittedHalCollectionCodes: string
+}
+
+export interface CountDocumentQuery extends BaseQuery {
+  searchTerm: string
+  page: number
+  columnFilters: string
+  searchLang: string
+  contributorUid: string | null
+  contributorType: AgentType
+  requestId: number
+  omittedHalCollectionCodes: string
 }
 
 export interface DocumentSlice {
@@ -22,10 +34,18 @@ export interface DocumentSlice {
     documents: Array<Document>
     selectedDocument: Document | null
     totalItems?: number
+    count: {
+      latestCountDocumentsRequestId?: number
+      allItems?: number
+      incompleteHalRepositoryItems?: number
+      loading: boolean
+      error: string | null | unknown
+    }
     loading: boolean
     hasFetched?: boolean
     error: string | null | unknown
     fetchDocuments: (obj: DocumentQuery) => Promise<void>
+    countDocuments: (obj: CountDocumentQuery) => Promise<void>
     fetchDocumentById: (uid: string) => Promise<void>
   }
 }
@@ -42,6 +62,12 @@ export const addDocumentSlice: StateCreator<
     error: null,
     selectedDocument: null,
     totalItems: 0,
+    count: {
+      loading: true,
+      error: null,
+      allItems: 0,
+      incompleteHalRepositoryItems: 0,
+    },
     hasFetched: false,
     fetchDocuments: async (queryObject: DocumentQuery) => {
       const { requestId, ...rest } = queryObject
@@ -125,6 +151,65 @@ export const addDocumentSlice: StateCreator<
             hydrated: true,
           },
         }))
+      }
+    },
+
+    countDocuments: async (queryObject: CountDocumentQuery) => {
+      const { requestId, ...rest } = queryObject
+      const queryString = toQueryString(rest)
+
+      // Mark the request as the latest before the async call
+      set((state) => ({
+        document: {
+          ...state.document,
+          count: {
+            ...state.document.count,
+            loading: true,
+            latestCountDocumentsRequestId: requestId,
+          },
+        },
+      }))
+
+      try {
+        const response = await fetch(`/api/documents/count?${queryString}`)
+        const jsonData = await response.json()
+        const { allItems, incompleteHalRepositoryItems } = jsonData
+
+        set((state) => {
+          // Ignore if a newer request was made since this one started
+          if (state.document.count.latestCountDocumentsRequestId !== requestId)
+            return state
+
+          return {
+            document: {
+              ...state.document,
+              count: {
+                ...state.document.count,
+                allItems,
+                incompleteHalRepositoryItems,
+                error: null,
+                loading: false,
+              },
+            },
+          }
+        })
+      } catch (error) {
+        console.error('Failed to count documents', error)
+        set((state) => {
+          if (state.document.count.latestCountDocumentsRequestId !== requestId)
+            return state
+
+          return {
+            document: {
+              ...state.document,
+              count: {
+                ...state.document.count,
+                error,
+                loading: false,
+              },
+            },
+          }
+        })
       }
     },
   },

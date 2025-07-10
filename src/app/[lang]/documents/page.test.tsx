@@ -36,10 +36,12 @@ jest.mock('next/navigation', () => ({
 }))
 
 const mockFetchDocuments = jest.fn()
+const mockCountDocuments = jest.fn()
 const mockFetchDocumentById = jest.fn()
 const mockState = {
   document: {
     fetchDocuments: mockFetchDocuments,
+    countDocuments: mockCountDocuments,
     fetchDocumentById: mockFetchDocumentById,
     loading: false,
     documents: [
@@ -75,12 +77,17 @@ const mockState = {
       ),
     ],
     totalItems: 1,
+    count: {
+      allItems: 0,
+      incompleteHalRepositoryItems: 0,
+    },
   },
   user: {
     currentPerspective: {
       type: 'person',
       getDisplayName: () => 'John Doe',
       memberships: [],
+      membershipAcronyms: ['ABC', 'DEF'],
     },
   },
 }
@@ -93,6 +100,11 @@ beforeEach(() => {
   mockFetchDocuments.mockResolvedValue({
     data: [],
     totalItems: 0,
+  })
+
+  mockCountDocuments.mockResolvedValue({
+    allItems: 0,
+    incompleteHalRepositoryItems: 0,
   })
 })
 
@@ -155,6 +167,24 @@ describe('DocumentsPage Component', () => {
         contributorType: 'person',
         contributorUid: '',
         requestId: 1,
+        omittedHalCollectionCodes: JSON.stringify([]),
+      })
+    })
+  })
+
+  it('fetches incomplete HAL repository document count on mount', async () => {
+    renderComponent()
+
+    await waitFor(() => {
+      expect(mockCountDocuments).toHaveBeenCalledWith({
+        page: 1,
+        searchTerm: '',
+        columnFilters: JSON.stringify([]),
+        searchLang: 'en',
+        contributorType: 'person',
+        contributorUid: '',
+        requestId: 1,
+        omittedHalCollectionCodes: JSON.stringify(['ABC', 'DEF']),
       })
     })
   })

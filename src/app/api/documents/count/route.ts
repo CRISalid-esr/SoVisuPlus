@@ -10,10 +10,7 @@ export const GET = async (req: NextRequest) => {
       urlParams.get('searchLang') ||
       process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0] ||
       ''
-    const page = parseInt(urlParams.get('page') || '1', 10)
-    const pageSize = parseInt(urlParams.get('pageSize') || '10', 10)
     const columnFilters = JSON.parse(urlParams.get('columnFilters') || '[]')
-    const sorting = JSON.parse(urlParams.get('sorting') || '[]')
     const contributorUid = urlParams.get('contributorUid') || ''
     const contributorType: AgentType | null = agentTypeFromString(
       urlParams.get('contributorType'),
@@ -28,29 +25,26 @@ export const GET = async (req: NextRequest) => {
         { status: 400 },
       )
     }
+
     const documentService = new DocumentService()
-    const { documents, totalItems } = await documentService.fetchDocuments({
-      searchTerm,
-      searchLang: searchlang,
-      page,
-      pageSize,
-      columnFilters,
-      sorting,
-      contributorUid,
-      contributorType,
-      omittedHalCollectionCodes,
-    })
+    const { allItems, incompleteHalRepositoryItems } =
+      await documentService.countDocuments({
+        searchTerm,
+        searchLang: searchlang,
+        columnFilters,
+        contributorUid,
+        contributorType,
+        omittedHalCollectionCodes,
+      })
 
     return NextResponse.json({
-      documents,
-      totalItems,
-      page,
-      limit: pageSize,
+      allItems,
+      incompleteHalRepositoryItems,
     })
   } catch (error) {
-    console.error('Error fetching documents:', error)
+    console.error('Error counting documents:', error)
     return NextResponse.json(
-      { error: 'Error fetching documents' },
+      { error: 'Error counting documents' },
       { status: 500 },
     )
   }

@@ -39,6 +39,12 @@ class Person implements IAgent {
     this.normalizedName = removeAccents(this.displayNameGuard().toLowerCase())
   }
 
+  get membershipAcronyms(): string[] {
+    return this.memberships
+      .map(({ researchStructure: { acronym } }) => acronym)
+      .filter((acronym) => acronym !== null)
+  }
+
   getDisplayName(language?: ExtendedLanguageCode): string {
     void language
     return this.displayNameGuard()

@@ -18,6 +18,7 @@ export default function StoreChecker() {
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,
+      omittedHalCollectionCodes: '',
     }).then(() => {
       setFailure(false)
     })

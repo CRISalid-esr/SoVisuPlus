@@ -394,6 +394,8 @@ describe('DocumentDAO', () => {
       sorting: [{ id: 'titles', desc: false }],
       contributorUids: ['local-123'],
       contributorType: 'person' as AgentType,
+      omittedHalCollectionCodes: [],
+      isOnlyCounting: false,
     }
 
     const result = await documentDAO.fetchDocuments(fetchParams)
@@ -496,6 +498,26 @@ describe('DocumentDAO', () => {
       },
     })
   })
+
+  it('should count documents', async () => {
+    ;(mockPrisma.document.count as jest.Mock).mockResolvedValue(1)
+
+    const countParams = {
+      searchTerm: 'Sample',
+      searchLang: 'en',
+      columnFilters: [{ id: 'titles', value: 'Sample Document Title' }],
+      contributorUids: ['local-123'],
+      contributorType: 'person' as AgentType,
+      omittedHalCollectionCodes: [],
+    }
+
+    const result = await documentDAO.countDocuments(countParams)
+
+    expect(result.allItems).toBe(1)
+    expect(result.incompleteHalRepositoryItems).toBe(1)
+    expect(mockPrisma.document.count).toHaveBeenCalled()
+  })
+
   it('should fetch a document by UID', async () => {
     const mockDbDocument = {
       id: 1,

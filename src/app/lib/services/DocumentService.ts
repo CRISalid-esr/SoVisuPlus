@@ -11,6 +11,16 @@ interface FetchDocumentsParams {
   sorting: { id: string; desc: boolean }[]
   contributorUid: string | null
   contributorType: AgentType
+  omittedHalCollectionCodes: string[]
+}
+
+interface CountDocumentsParams {
+  searchTerm: string
+  searchLang: string
+  columnFilters: { id: string; value: string }[]
+  contributorUid: string | null
+  contributorType: AgentType
+  omittedHalCollectionCodes: string[]
 }
 
 export class DocumentService {
@@ -22,16 +32,10 @@ export class DocumentService {
     this.personDAO = new PersonDAO()
   }
 
-  async fetchDocuments({
-    searchTerm,
-    searchLang,
-    page,
-    pageSize,
-    columnFilters,
-    sorting,
-    contributorUid,
-    contributorType,
-  }: FetchDocumentsParams) {
+  async selectContributorUids(
+    contributorUid: string | null,
+    contributorType: AgentType,
+  ) {
     let contributorUids: string[] = []
     switch (contributorType) {
       case 'person':
@@ -50,6 +54,26 @@ export class DocumentService {
         console.error('Institution filter not implemented yet')
         break
     }
+
+    return contributorUids
+  }
+
+  async fetchDocuments({
+    searchTerm,
+    searchLang,
+    page,
+    pageSize,
+    columnFilters,
+    sorting,
+    contributorUid,
+    contributorType,
+    omittedHalCollectionCodes,
+  }: FetchDocumentsParams) {
+    const contributorUids = await this.selectContributorUids(
+      contributorUid,
+      contributorType,
+    )
+
     try {
       const { documents, totalItems } = await this.documentDAO.fetchDocuments({
         searchTerm,
@@ -59,11 +83,41 @@ export class DocumentService {
         columnFilters,
         sorting,
         contributorUids,
+        omittedHalCollectionCodes,
       })
       return { documents, totalItems }
     } catch (error) {
       console.error('Error in service layer:', error)
       throw new Error('Error fetching documents from service')
+    }
+  }
+
+  async countDocuments({
+    searchTerm,
+    searchLang,
+    columnFilters,
+    contributorUid,
+    contributorType,
+    omittedHalCollectionCodes,
+  }: CountDocumentsParams) {
+    const contributorUids = await this.selectContributorUids(
+      contributorUid,
+      contributorType,
+    )
+
+    try {
+      const { allItems, incompleteHalRepositoryItems } =
+        await this.documentDAO.countDocuments({
+          searchTerm,
+          searchLang: searchLang,
+          columnFilters,
+          contributorUids,
+          omittedHalCollectionCodes,
+        })
+      return { allItems, incompleteHalRepositoryItems }
+    } catch (error) {
+      console.error('Error in service layer:', error)
+      throw new Error('Error counting documents from service')
     }
   }
 
