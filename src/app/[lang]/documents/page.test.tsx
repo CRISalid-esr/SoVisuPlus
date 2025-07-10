@@ -6,6 +6,8 @@ import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles'
 import '@testing-library/jest-dom'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { Document, DocumentType } from '@/types/Document'
+import { Journal } from '@/types/Journal'
+import { JournalIdentifier } from '@/types/JournalIdentifier'
 import DocumentsPage from './page'
 import { Literal } from '@/types/Literal'
 import { InternalPerson } from '@/types/InternalPerson'
@@ -73,6 +75,9 @@ const mockState = {
             'https://url-to-record-2',
           ),
         ],
+        new Journal(['Test journal'], '0123-4567', 'Test publisher', [
+          new JournalIdentifier('issn', '0123-4567', 'Online'),
+        ]),
       ),
     ],
     totalItems: 1,
@@ -248,6 +253,7 @@ describe('DocumentsPage Component', () => {
       expect(screen.getByText('Test Title')).toBeInTheDocument()
       expect(screen.getByText('John Doe')).toBeInTheDocument()
       expect(screen.getByText('01-01-2024')).toBeInTheDocument()
+      expect(screen.getByText('Test journal')).toBeInTheDocument()
       expect(screen.getByRole('link', { name: 'Hal' })).toHaveAttribute(
         'href',
         'https://url-to-record-1/',
