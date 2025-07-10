@@ -18,6 +18,7 @@ describe('Zustand Global Store - useStore with DocumentSlice', () => {
         fetchDocuments: jest.fn(),
         countDocuments: jest.fn(),
         fetchDocumentById: jest.fn(),
+        removeConcepts: jest.fn(),
       },
     })
   })

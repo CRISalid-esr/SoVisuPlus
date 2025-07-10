@@ -32,11 +32,16 @@ describe('ConceptChips Component', () => {
     ),
   ])
 
-  const renderComponent = () =>
+  const renderComponent = (onDeleteConcepts = jest.fn()) =>
     render(
       <ThemeProvider theme={theme}>
         <I18nProvider i18n={i18n}>
-          <ConceptChip group={group[0]} language='fr' />
+          <ConceptChip
+            group={group[0]}
+            language='fr'
+            removable={true}
+            onRemoveConcepts={onDeleteConcepts}
+          />
         </I18nProvider>
       </ThemeProvider>,
     )
@@ -66,5 +71,30 @@ describe('ConceptChips Component', () => {
       screen.getByText(i18n.t('concept_chips_alt_label')),
     ).toBeInTheDocument()
     expect(screen.getByText('Politique de neutralité')).toBeInTheDocument()
+  })
+
+  it('calls onDeleteConcepts when delete button is clicked', async () => {
+    const mockOnDelete = jest.fn().mockResolvedValue(undefined)
+    renderComponent(mockOnDelete)
+
+    // Open popper
+    const chip = screen.getByRole('button', { name: 'Neutralité' })
+    fireEvent.click(chip)
+
+    // Click the delete button for the second concept
+    const deleteButtons = await screen.findAllByRole('button', {
+      name: i18n.t('concept_chip_action_delete'),
+    })
+    expect(deleteButtons).toHaveLength(2)
+
+    fireEvent.click(deleteButtons[1]) // click on the second one
+
+    // Ensure onDeleteConcepts is called with that specific concept
+    expect(mockOnDelete).toHaveBeenCalledTimes(1)
+    expect(mockOnDelete).toHaveBeenCalledWith([
+      expect.objectContaining({
+        uri: 'http://www.idref.fr/027476502/id',
+      }),
+    ])
   })
 })

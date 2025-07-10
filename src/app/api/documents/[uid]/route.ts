@@ -3,7 +3,7 @@ import { DocumentService } from '@/lib/services/DocumentService'
 
 export async function GET(
   request: Request,
-  context: { params: Promise<{ uid: string }> }, // params is a Promise
+  context: { params: Promise<{ uid: string }> },
 ) {
   const { uid } = await context.params
 

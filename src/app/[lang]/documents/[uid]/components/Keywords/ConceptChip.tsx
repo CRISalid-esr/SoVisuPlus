@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import {
   Box,
   Button,
@@ -6,6 +6,7 @@ import {
   CardActionArea,
   CardActions,
   Chip,
+  CircularProgress,
   ClickAwayListener,
   Divider,
   Grow,
@@ -15,17 +16,16 @@ import {
 } from '@mui/material'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { ConceptGroup } from '@/types/ConceptGroup'
-import * as Lingui from '@lingui/core'
 import { Trans } from '@lingui/react'
-import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import Wikidata from '@/public/icons/wikidata-vocab.png'
 import Jel from '@/public/icons/jel-vocab.png'
 import Abes from '@/public/icons/abes-vocab.png'
 import { StaticImageData } from 'next/image'
-import { ConceptVocabulary } from '@/types/Concept'
+import { Concept, ConceptVocabulary } from '@/types/Concept'
 import Idref from '@/public/icons/idref-vocab.png'
 import UnknownVocab from '@/public/icons/unknown-vocab.png'
+import { CancelSharp } from '@mui/icons-material'
 
 const vocabularyIcons: Record<ConceptVocabulary, StaticImageData | null> = {
   WIKIDATA: Wikidata,
@@ -38,6 +38,8 @@ const vocabularyIcons: Record<ConceptVocabulary, StaticImageData | null> = {
 type Props = {
   group: ConceptGroup
   language: ExtendedLanguageCode
+  removable?: boolean
+  onRemoveConcepts: (concepts: Concept[]) => Promise<void>
 }
 
 const unknownVocabularyIcon = (
@@ -66,53 +68,91 @@ const getVocabularyIcon = (vocab: ConceptVocabulary) => {
   return unknownVocabularyIcon
 }
 
-export default function ConceptChip({ group }: Props) {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+export default function ConceptChip({
+  group,
+  removable,
+  language,
+  onRemoveConcepts,
+}: Props) {
+  const chipRef = useRef<HTMLDivElement>(null)
+  const [openPopper, setOpenPopper] = useState(false)
 
-  const labels = group.getDisplayLabels(
-    Lingui.i18n.locale as ExtendedLanguageCode,
-  )
+  const labels = group.getDisplayLabels(language)
 
   const hasOnlyWithUri = group.concepts.every((c) => !!c.uri)
   const hasAllWithoutUri = group.concepts.every((c) => !c.uri)
 
-  const handleToggle = (event: React.MouseEvent<HTMLElement>) => {
-    if (anchorEl) {
-      setAnchorEl(null)
-    } else {
-      setAnchorEl(event.currentTarget)
-    }
+  const handleToggle = () => {
+    setOpenPopper(!openPopper)
   }
 
   const handleClose = () => {
-    setAnchorEl(null)
+    setOpenPopper(false)
   }
 
-  const open = Boolean(anchorEl)
+  const [deletingGroup, setDeletingGroup] = useState(false)
+  type DeletingItemMap = Record<string, boolean>
+  const [deletingItem, setDeletingItem] = useState<DeletingItemMap>({})
+
+  const handleDelete = async (event: React.MouseEvent<HTMLElement>) => {
+    if (!removable) return
+    if (deletingGroup) return
+    event.stopPropagation()
+    setDeletingGroup(true)
+    setOpenPopper(false)
+    try {
+      await onRemoveConcepts(group.concepts)
+    } finally {
+      setDeletingGroup(false)
+      handleClose()
+    }
+  }
+
+  const handleDeleteConcept = async (concept: Concept) => {
+    if (!removable) return
+    if (deletingItem[concept.uid ?? '']) return
+
+    setDeletingItem((prev) => ({ ...prev, [concept.uid ?? '']: true }))
+    try {
+      await onRemoveConcepts([concept])
+    } finally {
+      setDeletingItem((prev) => ({ ...prev, [concept.uid ?? '']: false }))
+    }
+  }
 
   return (
     <ClickAwayListener onClickAway={handleClose}>
       <Box display='inline-block'>
-        <Chip
-          label={labels[0] ?? '—'}
-          variant='outlined'
-          onDelete={() => {}} // future: hook into delete handler
-          sx={{
-            cursor: 'pointer',
-            '&:hover': {
-              backgroundColor: 'rgba(25, 118, 210, 0.08)',
-            },
-            textDecorationLine: hasOnlyWithUri ? 'none' : 'underline',
-            textDecorationStyle: 'wavy',
-            textDecorationColor: hasAllWithoutUri ? 'red' : 'orange',
-            textDecorationThickness: '1px',
-          }}
-          onClick={handleToggle}
-        />
+        <Box onClick={handleToggle} role='button' ref={chipRef}>
+          <Chip
+            component='div'
+            role='none'
+            label={labels[0] ?? '—'}
+            variant='outlined'
+            onDelete={removable ? handleDelete : undefined}
+            deleteIcon={
+              deletingGroup ? (
+                <CircularProgress size={16} color='inherit' />
+              ) : (
+                <CancelSharp />
+              )
+            }
+            sx={{
+              cursor: 'pointer',
+              '&:hover': {
+                backgroundColor: 'rgba(25, 118, 210, 0.08)',
+              },
+              textDecorationLine: hasOnlyWithUri ? 'none' : 'underline',
+              textDecorationStyle: 'wavy',
+              textDecorationColor: hasAllWithoutUri ? 'red' : 'orange',
+              textDecorationThickness: '1px',
+            }}
+          />
+        </Box>
 
         <Popper
-          open={open}
-          anchorEl={anchorEl}
+          open={openPopper}
+          anchorEl={chipRef.current}
           placement='bottom-start'
           transition
           disablePortal
@@ -135,7 +175,7 @@ export default function ConceptChip({ group }: Props) {
 
                     return (
                       <Box key={index}>
-                        <Box sx={{ mb: 2 }}>
+                        <Box sx={{ mb: removable ? 0 : 2 }}>
                           <Box
                             sx={{
                               display: 'flex',
@@ -234,47 +274,45 @@ export default function ConceptChip({ group }: Props) {
                               ))}
                           </Box>
 
-                          {isKnownVocab &&
-                            concept.altLabels.length > 0 &&
-                            isKnownVocab && (
-                              <Box sx={{ ml: 4, mt: 1 }}>
-                                <Typography
-                                  variant='body2'
-                                  sx={{ fontWeight: 'bold' }}
-                                >
-                                  <Trans id='concept_chips_alt_label' />
-                                </Typography>
-                                <Box
-                                  sx={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: 0.5,
-                                    mt: 0.5,
-                                  }}
-                                >
-                                  {concept.altLabels.map((label, i) => (
-                                    <Box
-                                      key={i}
-                                      sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 1,
-                                      }}
-                                    >
-                                      {label.language !== 'ul' && (
-                                        <Chip
-                                          label={label.language}
-                                          size='small'
-                                        />
-                                      )}
-                                      <Typography variant='body2'>
-                                        {label.value}
-                                      </Typography>
-                                    </Box>
-                                  ))}
-                                </Box>
+                          {isKnownVocab && concept.altLabels.length > 0 && (
+                            <Box sx={{ ml: 4, mt: 1 }}>
+                              <Typography
+                                variant='body2'
+                                sx={{ fontWeight: 'bold' }}
+                              >
+                                <Trans id='concept_chips_alt_label' />
+                              </Typography>
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  gap: 0.5,
+                                  mt: 0.5,
+                                }}
+                              >
+                                {concept.altLabels.map((label, i) => (
+                                  <Box
+                                    key={i}
+                                    sx={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: 1,
+                                    }}
+                                  >
+                                    {label.language !== 'ul' && (
+                                      <Chip
+                                        label={label.language}
+                                        size='small'
+                                      />
+                                    )}
+                                    <Typography variant='body2'>
+                                      {label.value}
+                                    </Typography>
+                                  </Box>
+                                ))}
                               </Box>
-                            )}
+                            </Box>
+                          )}
 
                           {!isKnownVocab && concept.prefLabels.length === 1 && (
                             <Box
@@ -297,6 +335,27 @@ export default function ConceptChip({ group }: Props) {
                             </Box>
                           )}
                         </Box>
+                        {removable && (
+                          <CardActions>
+                            <Button
+                              size='small'
+                              onClick={() => {
+                                handleDeleteConcept(concept)
+                              }}
+                              sx={{ marginLeft: 'auto' }}
+                              color='error'
+                              startIcon={
+                                deletingItem[concept.uid ?? ''] ? (
+                                  <CircularProgress size={16} color='inherit' />
+                                ) : (
+                                  <DeleteIcon />
+                                )
+                              }
+                            >
+                              <Trans id='concept_chip_action_delete' />
+                            </Button>
+                          </CardActions>
+                        )}
                         {index < group.concepts.length - 1 && (
                           <Divider sx={{ my: 1 }} />
                         )}
@@ -304,14 +363,6 @@ export default function ConceptChip({ group }: Props) {
                     )
                   })}
                 </CardActionArea>
-                <CardActions>
-                  <Button size='small' color='primary' startIcon={<EditIcon />}>
-                    <Trans id='concept_chip_action_edit' />
-                  </Button>
-                  <Button size='small' color='error' startIcon={<DeleteIcon />}>
-                    <Trans id='concept_chip_action_delete' />
-                  </Button>
-                </CardActions>
               </Card>
             </Grow>
           )}

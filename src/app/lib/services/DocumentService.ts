@@ -129,4 +129,19 @@ export class DocumentService {
       throw new Error('Error fetching document from service')
     }
   }
+
+  async deleteConceptsFromDocument(
+    documentUid: string,
+    conceptUids: string[],
+  ): Promise<void> {
+    try {
+      await this.documentDAO.deleteConceptsFromDocument(
+        documentUid,
+        conceptUids,
+      )
+    } catch (error) {
+      console.error('Error in service layer:', error)
+      throw new Error('Error deleting concepts from document')
+    }
+  }
 }

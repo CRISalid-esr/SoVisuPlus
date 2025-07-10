@@ -438,6 +438,10 @@ msgstr "Journal article"
 msgid "documents_page_main_title"
 msgstr "Publications"
 
+#: src/app/[lang]/documents/page.tsx:543
+msgid "documents_page_main_title_first_person"
+msgstr ""
+
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:64
 #: src/app/[lang]/documents/page.tsx:109
 msgid "documents_page_monograph_icon_label"

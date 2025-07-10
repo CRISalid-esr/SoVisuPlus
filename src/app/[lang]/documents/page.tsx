@@ -74,7 +74,7 @@ export default function DocumentsPage() {
     })),
   )
 
-  const { currentPerspective } = useStore((state) => state.user)
+  const { currentPerspective, ownPerspective } = useStore((state) => state.user)
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
 
@@ -386,7 +386,14 @@ export default function DocumentsPage() {
         ),
       },
     ],
-    [lang, globalFilter, selectedTitleLangs, currentPerspective],
+    [
+      lang,
+      globalFilter,
+      selectedTitleLangs,
+      supportedLocales,
+      documentTypeLabels,
+      navigateToDetailsPage,
+    ],
   )
 
   const requestIdRef = useRef(0)
@@ -536,7 +543,11 @@ export default function DocumentsPage() {
         perspective={
           currentPerspective?.getDisplayName(lang as ExtendedLanguageCode) || ''
         }
-        pageName={t`documents_page_main_title`}
+        pageName={
+          ownPerspective
+            ? t`documents_page_main_title_first_person`
+            : t`documents_page_main_title`
+        }
       >
         <Button
           startIcon={<SyncIcon />}
@@ -590,8 +601,7 @@ export default function DocumentsPage() {
               key='edit'
               label={t`documents_page_action_column_details`}
               onClick={() => {
-                const documentUid = row.original.uid
-                navigateToDetailsPage(documentUid)
+                navigateToDetailsPage(row.original.uid)
               }}
               table={table}
             />
