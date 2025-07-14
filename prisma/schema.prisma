@@ -276,6 +276,8 @@ model Change {
   path       String?
   parameters Json
   timestamp  DateTime         @default(now())
+  dispatched Boolean          @default(false)
+  personUid  String
 
   @@index([action])
   @@index([targetType])

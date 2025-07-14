@@ -1,4 +1,3 @@
-// file: src/app/types/Change.ts
 import {
   Change as DbChange,
   ChangeAction as DbChangeAction,
@@ -16,6 +15,8 @@ class Change {
     public path: string | null,
     public parameters: ChangeParameters | null,
     public timestamp: Date,
+    public personUid?: string,
+    public dispatched: boolean = false,
   ) {}
 
   static fromDbChange(dbChange: DbChange): Change {
@@ -27,6 +28,8 @@ class Change {
       dbChange.path,
       dbChange.parameters as ChangeParameters | null,
       dbChange.timestamp,
+      dbChange.personUid,
+      dbChange.dispatched || false,
     )
   }
 }

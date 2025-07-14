@@ -19,6 +19,8 @@ describe('Change Model Tests', () => {
         targetUid: 'doc-123',
         path: 'titles',
         parameters: { language: 'fr', value: 'Titre mis à jour' },
+        personUid: 'person-456',
+        timestamp: new Date(),
       },
     })
 
@@ -45,6 +47,8 @@ describe('Change Model Tests', () => {
           before: 'Old abstract',
           after: 'New abstract',
         },
+        personUid: 'person-123',
+        timestamp: new Date(),
       },
     })
 
@@ -71,6 +75,8 @@ describe('Change Model Tests', () => {
           targetType: ChangeTargetType.DOCUMENT,
           targetUid: 'doc-001',
           parameters: {},
+          path: 'subjects',
+          personUid: 'person-001',
         },
         {
           id: 'change-2',
@@ -78,6 +84,8 @@ describe('Change Model Tests', () => {
           targetType: ChangeTargetType.DOCUMENT,
           targetUid: 'doc-002',
           parameters: {},
+          path: 'titles',
+          personUid: 'person-002',
         },
       ],
     })

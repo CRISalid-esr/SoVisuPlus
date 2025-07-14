@@ -4,6 +4,7 @@ import MessageProcessingService from '@/lib/amqp/services/MessageProcessingServi
 import { AMQPMessage } from '@/types/AMQPMessage'
 import { AMQPEntityData } from '@/types/AMQPEntityData'
 import { Sema } from 'async-sema'
+import { ChangeDispatchService } from '../app/lib/services/ChangeDispatchService'
 
 dotenv.config()
 ;(async () => {
@@ -16,6 +17,7 @@ dotenv.config()
     console.log('Connected to RabbitMQ')
     const processingService = MessageProcessingService.getInstance()
 
+    // External queue consumer
     await connection.consume(async (msg: string) => {
       try {
         const parsedMessage: AMQPMessage<AMQPEntityData> = JSON.parse(msg)
@@ -28,6 +30,23 @@ dotenv.config()
         semaphore.release()
       }
     })
+
+    // Internal change poller
+    const changeDispatcher = new ChangeDispatchService(connection)
+    const pollIntervalMs = 3000
+
+    const pollLoop = async () => {
+      try {
+        await changeDispatcher.dispatchChanges()
+      } catch (err) {
+        console.error('❌ Error dispatching changes from DB:', err)
+      } finally {
+        setTimeout(pollLoop, pollIntervalMs)
+      }
+    }
+
+    // Start the polling loop
+    pollLoop()
   } catch (error) {
     console.error('Error connecting to RabbitMQ:', error)
   }

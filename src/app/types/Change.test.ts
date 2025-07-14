@@ -1,5 +1,4 @@
-import { Change } from './Change'
-import { ChangeAction, ChangeTargetType } from './Change'
+import { Change, ChangeAction, ChangeTargetType } from './Change'
 import { describe, expect, it } from '@jest/globals'
 
 describe('Change', () => {
@@ -15,6 +14,8 @@ describe('Change', () => {
         value: [{ language: 'fr', value: 'Nouveau titre' }],
       },
       timestamp: new Date('2025-07-05T10:00:00.000Z'),
+      dispatched: false,
+      personUid: 'person-1234',
     }
 
     const change = Change.fromDbChange(dbChange)
@@ -40,6 +41,8 @@ describe('Change', () => {
       targetUid: 'doc-9999',
       path: null,
       parameters: null,
+      personUid: 'person-1234',
+      dispatched: false,
       timestamp: new Date(),
     }
 

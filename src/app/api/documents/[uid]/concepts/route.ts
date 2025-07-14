@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { DocumentService } from '@/lib/services/DocumentService'
+import { getServerSession, Session } from 'next-auth'
+import authOptions from '@/app/auth/auth_options'
 
 export async function DELETE(
   request: Request,
@@ -8,6 +10,16 @@ export async function DELETE(
   const { uid } = await context.params
 
   // TODO implement access control !
+  const session = (await getServerSession(authOptions)) as Session & {
+    user: { username?: string }
+  }
+  const userName = session?.user?.username
+  if (!userName) {
+    return NextResponse.json(
+      { error: 'User is not authenticated' },
+      { status: 401 },
+    )
+  }
 
   if (!uid) {
     return NextResponse.json(
@@ -28,7 +40,7 @@ export async function DELETE(
     }
 
     const documentService = new DocumentService()
-    await documentService.deleteConceptsFromDocument(uid, conceptUids)
+    await documentService.deleteConceptsFromDocument(uid, conceptUids, userName)
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -81,6 +81,18 @@ class AmqpConnection {
       },
     )
   }
+
+  async publish(exchange: string, routingKey: string, message: string) {
+    if (!this.connected) throw new Error('Not connected to AMQP')
+
+    this.channel.publish(exchange, routingKey, Buffer.from(message), {
+      persistent: true,
+      contentType: 'application/json',
+    })
+    console.log(
+      `✅ Message published to exchange "${exchange}" with routing key "${routingKey}"`,
+    )
+  }
 }
 
 export default AmqpConnection

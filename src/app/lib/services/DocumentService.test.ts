@@ -1,8 +1,12 @@
 import { DocumentService } from '@/lib/services/DocumentService'
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { AgentType } from '@/types/IAgent'
+import { UserDAO } from '@/lib/daos/UserDAO'
+import { ChangeDAO } from '@/lib/daos/ChangeDAO'
 
 jest.mock('@/lib/daos/DocumentDAO')
+jest.mock('@/lib/daos/UserDAO')
+jest.mock('@/lib/daos/ChangeDAO')
 
 describe('DocumentService', () => {
   let documentService: DocumentService
@@ -20,6 +24,14 @@ describe('DocumentService', () => {
       fetchDocumentById: mockfetchDocumentById,
       deleteConceptsFromDocument: mockDeleteConceptsFromDocument,
       countDocuments: mockCountDocuments,
+    }))
+    ;(UserDAO as jest.Mock).mockImplementation(() => ({
+      getUserByIdentifier: jest.fn().mockResolvedValue({
+        person: { uid: 'local-123' },
+      }),
+    }))
+    ;(ChangeDAO as jest.Mock).mockImplementation(() => ({
+      createChange: jest.fn().mockResolvedValue(undefined),
     }))
 
     documentService = new DocumentService()
@@ -168,7 +180,11 @@ describe('DocumentService', () => {
     mockDeleteConceptsFromDocument.mockResolvedValue(undefined)
 
     await expect(
-      documentService.deleteConceptsFromDocument('doc-123', ['c1', 'c2']),
+      documentService.deleteConceptsFromDocument(
+        'doc-123',
+        ['c1', 'c2'],
+        'user-1234',
+      ),
     ).resolves.toBeUndefined()
 
     expect(mockDeleteConceptsFromDocument).toHaveBeenCalledWith('doc-123', [
@@ -180,7 +196,11 @@ describe('DocumentService', () => {
     mockDeleteConceptsFromDocument.mockRejectedValue(new Error('DB error'))
 
     await expect(
-      documentService.deleteConceptsFromDocument('doc-123', ['c1', 'c2']),
+      documentService.deleteConceptsFromDocument(
+        'doc-123',
+        ['c1', 'c2'],
+        'user-1234',
+      ),
     ).rejects.toThrow('Error deleting concepts from document')
 
     expect(mockDeleteConceptsFromDocument).toHaveBeenCalledWith('doc-123', [

@@ -17,6 +17,12 @@ jest.mock('next/server', () => ({
   },
 }))
 
+jest.mock('next-auth', () => ({
+  getServerSession: jest.fn().mockResolvedValue({
+    user: { username: 'user-1234' },
+  }),
+}))
+
 describe('DELETE /api/documents/[uid]/concepts', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -59,10 +65,11 @@ describe('DELETE /api/documents/[uid]/concepts', () => {
     expect(response.status).toBe(200)
     expect(await response.json()).toEqual({ success: true })
 
-    expect(deleteConceptsFromDocument).toHaveBeenCalledWith('doc-1', [
-      'c1',
-      'c2',
-    ])
+    expect(deleteConceptsFromDocument).toHaveBeenCalledWith(
+      'doc-1',
+      ['c1', 'c2'],
+      'user-1234',
+    )
   })
 
   it('returns 500 on internal error', async () => {
