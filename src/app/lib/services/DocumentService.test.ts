@@ -14,11 +14,13 @@ describe('DocumentService', () => {
   let mockfetchDocumentById: jest.Mock
   let mockCountDocuments: jest.Mock
   let mockDeleteConceptsFromDocument: jest.Mock
+  let mockCreateChange: jest.Mock
   beforeEach(() => {
     mockFetchDocuments = jest.fn()
     mockfetchDocumentById = jest.fn()
     mockCountDocuments = jest.fn()
     mockDeleteConceptsFromDocument = jest.fn()
+    mockCreateChange = jest.fn()
     ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
       fetchDocuments: mockFetchDocuments,
       fetchDocumentById: mockfetchDocumentById,
@@ -31,7 +33,7 @@ describe('DocumentService', () => {
       }),
     }))
     ;(ChangeDAO as jest.Mock).mockImplementation(() => ({
-      createChange: jest.fn().mockResolvedValue(undefined),
+      createChange: mockCreateChange,
     }))
 
     documentService = new DocumentService()
@@ -207,5 +209,29 @@ describe('DocumentService', () => {
       'c1',
       'c2',
     ])
+  })
+  it('should call deleteConceptsFromDocument with correct arguments', async () => {
+    mockDeleteConceptsFromDocument.mockResolvedValue(undefined)
+
+    await expect(
+      documentService.deleteConceptsFromDocument(
+        'doc-123',
+        ['c1', 'c2'],
+        'user-1234',
+      ),
+    ).resolves.toBeUndefined()
+
+    expect(mockDeleteConceptsFromDocument).toHaveBeenCalledWith('doc-123', [
+      'c1',
+      'c2',
+    ])
+    expect(mockCreateChange).toHaveBeenCalledWith({
+      action: 'REMOVE',
+      targetType: 'DOCUMENT',
+      targetUid: 'doc-123',
+      path: 'subjects',
+      parameters: { conceptUids: ['c1', 'c2'] },
+      personUid: 'local-123',
+    })
   })
 })
