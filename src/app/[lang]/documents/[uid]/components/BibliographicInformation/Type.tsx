@@ -4,7 +4,7 @@ import { Trans } from '@lingui/macro'
 import { DocumentTypeLabels } from '../../../components/DocumentTypeLabels'
 import RowLabel from './RowLabel'
 
-const Type = () => {
+export default function Type() {
   const { selectedDocument = null } = useStore((state) => state.document)
 
   return (
@@ -16,5 +16,3 @@ const Type = () => {
     </>
   )
 }
-
-export default Type

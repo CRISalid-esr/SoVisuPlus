@@ -17,8 +17,15 @@ import PublicationDate from './PublicationDate'
 import Sources from './Sources'
 import Titles from './Titles'
 import Type from './Type'
+import Journal from './Journal'
 
-type DocumentFieldKey = 'titles' | 'type' | 'authors' | 'date' | 'sources'
+type DocumentFieldKey =
+  | 'titles'
+  | 'type'
+  | 'journal'
+  | 'authors'
+  | 'date'
+  | 'sources'
 
 interface DocumentField {
   value: DocumentFieldKey
@@ -38,6 +45,10 @@ const BibliographicInformation = () => {
       value: 'type',
       component: <Type />,
     },
+    journal: {
+      value: 'journal',
+      component: <Journal />,
+    },
     authors: {
       value: 'authors',
       component: <Authors />,
@@ -55,6 +66,7 @@ const BibliographicInformation = () => {
   const commonTypeFields: DocumentFieldKey[] = [
     'titles',
     'type',
+    'journal',
     'authors',
     'date',
     'sources',
