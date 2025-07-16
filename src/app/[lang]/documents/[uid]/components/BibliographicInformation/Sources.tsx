@@ -1,13 +1,15 @@
 import useStore from '@/stores/global_store'
 import { Trans } from '@lingui/macro'
 import EditIcon from '@mui/icons-material/Edit'
-import { Avatar, Box, Button, Chip, Typography } from '@mui/material'
+import { Avatar, Box, Button, Chip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 // Make sure to import your enums/metadata for bibliographic platforms
 import {
   BibliographicPlatform,
   BibliographicPlatformMetadata,
 } from '@/types/BibliographicPlatform'
+
+import RowLabel from './RowLabel'
 
 const Sources = () => {
   const theme = useTheme()
@@ -18,18 +20,9 @@ const Sources = () => {
 
   return (
     <>
-      <Typography
-        sx={{
-          color: theme.palette.primary.main,
-          fontSize: theme.utils.pxToRem(14),
-          fontStyle: 'normal',
-          fontWeight: theme.typography[500],
-          lineHeight: 'normal',
-          letterSpacing: '0.1px',
-        }}
-      >
+      <RowLabel>
         <Trans>document_details_page_sources_row_label</Trans>
-      </Typography>
+      </RowLabel>
       <Box />
       <Box
         sx={{

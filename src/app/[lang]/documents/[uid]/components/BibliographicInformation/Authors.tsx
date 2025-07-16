@@ -1,11 +1,13 @@
 import useStore from '@/stores/global_store'
 import { Trans } from '@lingui/macro'
 import EditIcon from '@mui/icons-material/Edit'
-import { Box, Button, Chip, Typography } from '@mui/material'
+import { Box, Button, Chip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Person } from '@/types/Person'
 import { useRouter, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
+
+import RowLabel from './RowLabel'
 
 const Authors = () => {
   const theme = useTheme()
@@ -24,18 +26,9 @@ const Authors = () => {
 
   return (
     <>
-      <Typography
-        sx={{
-          color: theme.palette.primary.main,
-          fontSize: theme.utils.pxToRem(14),
-          fontStyle: 'normal',
-          fontWeight: theme.typography[500],
-          lineHeight: 'normal',
-          letterSpacing: '0.1px',
-        }}
-      >
+      <RowLabel>
         <Trans>document_details_page_authors_row_label</Trans>
-      </Typography>
+      </RowLabel>
       <Box />
       <Box
         sx={{
