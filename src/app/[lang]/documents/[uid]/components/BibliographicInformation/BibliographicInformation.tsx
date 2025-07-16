@@ -13,11 +13,12 @@ import { useTheme } from '@mui/material/styles'
 
 import { DocumentType } from '@/types/Document'
 import Authors from './Authors'
-import PulicationDate from './PublicationDate'
+import PublicationDate from './PublicationDate'
 import Sources from './Sources'
 import Titles from './Titles'
+import Type from './Type'
 
-type DocumentFieldKey = 'titles' | 'authors' | 'date' | 'sources'
+type DocumentFieldKey = 'titles' | 'type' | 'authors' | 'date' | 'sources'
 
 interface DocumentField {
   value: DocumentFieldKey
@@ -33,33 +34,41 @@ const BibliographicInformation = () => {
       value: 'titles',
       component: selectedDocument?.titles ? <Titles /> : null,
     },
+    type: {
+      value: 'type',
+      component: <Type />,
+    },
     authors: {
       value: 'authors',
       component: <Authors />,
     },
     date: {
       value: 'date',
-      component: <PulicationDate />,
+      component: <PublicationDate />,
     },
     sources: {
       value: 'sources',
       component: <Sources />,
     },
   }
+
+  const commonTypeFields: DocumentFieldKey[] = [
+    'titles',
+    'type',
+    'authors',
+    'date',
+    'sources',
+  ]
+
   const documentTypeFields: Record<DocumentType, DocumentFieldKey[]> = {
-    [DocumentType.JournalArticle]: ['titles', 'authors', 'date', 'sources'],
-    [DocumentType.Document]: ['titles', 'authors', 'date', 'sources'],
-    [DocumentType.ScholarlyPublication]: [
-      'titles',
-      'authors',
-      'date',
-      'sources',
-    ],
-    [DocumentType.Book]: ['titles', 'authors', 'date', 'sources'],
-    [DocumentType.Monograph]: ['titles', 'authors', 'date', 'sources'],
-    [DocumentType.BookChapter]: ['titles', 'authors', 'date', 'sources'],
-    [DocumentType.ConferenceArticle]: ['titles', 'authors', 'date', 'sources'],
-    [DocumentType.Proceedings]: ['titles', 'authors', 'date', 'sources'],
+    [DocumentType.JournalArticle]: commonTypeFields,
+    [DocumentType.Document]: commonTypeFields,
+    [DocumentType.ScholarlyPublication]: commonTypeFields,
+    [DocumentType.Book]: commonTypeFields,
+    [DocumentType.Monograph]: commonTypeFields,
+    [DocumentType.BookChapter]: commonTypeFields,
+    [DocumentType.ConferenceArticle]: commonTypeFields,
+    [DocumentType.Proceedings]: commonTypeFields,
   }
 
   const fieldsToDisplay: DocumentFieldKey[] =

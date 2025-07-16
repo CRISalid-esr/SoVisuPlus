@@ -40,6 +40,7 @@ import DocumentHeader from './components/DocumentHeader'
 import HalStatusCell from './components/HalStatusCell'
 import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
+import { DocumentTypeLabels } from './components/DocumentTypeLabels'
 import SyncIcon from '@mui/icons-material/Sync'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
 
@@ -92,33 +93,6 @@ export default function DocumentsPage() {
     router.push(`/${lang}/documents/${documentUid}?${params.toString()}`)
   }
 
-  const documentTypeLabels: Record<DocumentType, JSX.Element> = {
-    [DocumentType.Document]: (
-      <Typography>{t`documents_page_document_icon_label`}</Typography>
-    ),
-    [DocumentType.ScholarlyPublication]: (
-      <Typography>{t`documents_page_scholarly_publication_icon_label`}</Typography>
-    ),
-    [DocumentType.JournalArticle]: (
-      <Typography>{t`documents_page_journal_article_icon_label`}</Typography>
-    ),
-    [DocumentType.Book]: (
-      <Typography>{t`documents_page_book_icon_label`}</Typography>
-    ),
-    [DocumentType.Monograph]: (
-      <Typography>{t`documents_page_monograph_icon_label`}</Typography>
-    ),
-    [DocumentType.BookChapter]: (
-      <Typography>{t`documents_page_book_chapter_icon_label`}</Typography>
-    ),
-    [DocumentType.ConferenceArticle]: (
-      <Typography>{t`documents_page_conference_article_icon_label`}</Typography>
-    ),
-    [DocumentType.Proceedings]: (
-      <Typography>{t`documents_page_proceedings_icon_label`}</Typography>
-    ),
-  }
-
   const columns = useMemo<MRT_ColumnDef<Document>[]>(
     () => [
       {
@@ -127,7 +101,7 @@ export default function DocumentsPage() {
         header: t`documents_page_type_column`,
         Cell({ row }: { row: { original: { documentType: DocumentType } } }) {
           return (
-            <Tooltip title={documentTypeLabels[row.original.documentType]}>
+            <Tooltip title={DocumentTypeLabels[row.original.documentType]}>
               {DocumentTypeIcons[row.original.documentType]}
             </Tooltip>
           )
@@ -146,7 +120,7 @@ export default function DocumentsPage() {
                 width: '100%',
               }}
             >
-              {documentTypeLabels[type]}
+              {DocumentTypeLabels[type]}
               <Box
                 sx={{
                   marginLeft: 'auto',
@@ -403,7 +377,6 @@ export default function DocumentsPage() {
       globalFilter,
       selectedTitleLangs,
       supportedLocales,
-      documentTypeLabels,
       navigateToDetailsPage,
     ],
   )
