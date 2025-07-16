@@ -122,14 +122,14 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:104
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:99
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:111
 msgid "document_details_page_card_title"
 msgstr "Informations bibliographiques"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:107
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:132
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:102
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:114
 msgid "document_details_page_card_validate_button"
 msgstr "Valider"
 
@@ -314,11 +314,11 @@ msgstr "Domaines"
 msgid "document_details_keywords_tab"
 msgstr "Mots-clés"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:37
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:30
 msgid "document_details_page_authors_row_label"
 msgstr "Auteurs"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:77
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:70
 msgid "document_details_page_authors_row_update_author"
 msgstr "Modifier les auteurs"
 
@@ -330,19 +330,23 @@ msgstr ""
 msgid "document_details_page_back_to_publications"
 msgstr "Retour aux publications"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:24
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:15
 msgid "document_details_page_date_row_label"
 msgstr "Année"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:15
+msgid "document_details_page_journal_row_label"
+msgstr "Publié dans"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Titles.tsx:18
 msgid "document_details_page_no_title_available"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.tsx:31
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.tsx:24
 msgid "document_details_page_sources_row_label"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.tsx:76
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.tsx:69
 msgid "document_details_page_sources_row_update_source"
 msgstr "Comparer les sources"
 
@@ -350,7 +354,7 @@ msgstr "Comparer les sources"
 msgid "document_details_page_titles_row_label"
 msgstr "Titre"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:24
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:13
 msgid "document_details_page_type_row_label"
 msgstr "Type de document"
 
@@ -463,7 +467,7 @@ msgstr "Procédure"
 msgid "documents_page_publication_date_column"
 msgstr "Date de publication"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:28
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:19
 #: src/app/[lang]/documents/page.tsx:236
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "Aucune date"
