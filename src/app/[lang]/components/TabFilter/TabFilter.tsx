@@ -59,16 +59,19 @@ const TabFilter = ({
                   alignItems: 'center',
                 }}
               >
-                <Typography mr={2}>{tab.label}</Typography>
+                <Typography sx={{ mr: 1 }}>{tab.label}</Typography>
                 {tab.numberOfItems && (
                   <Badge
                     sx={{
                       ' .MuiBadge-badge': {
                         color: theme.palette.white,
                         backgroundColor: tab.color,
+                        position: 'initial',
+                        transform: 'initial',
                       },
                     }}
                     badgeContent={tab.numberOfItems}
+                    max={999_999}
                   />
                 )}
               </Box>
