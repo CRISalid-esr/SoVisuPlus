@@ -66,7 +66,7 @@ model Document {
   title_locale_2       String?
   records              DocumentRecord[]
 
-  journalId Int?     @unique
+  journalId Int?
   journal   Journal? @relation(fields: [journalId], references: [id], onDelete: SetNull)
   volume    String?
   issue     String?
