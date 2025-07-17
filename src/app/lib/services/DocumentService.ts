@@ -1,6 +1,10 @@
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { AgentType } from '@/types/IAgent'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { ActionDAO } from '@/lib/daos/ActionDAO'
+import { ActionType, ActionTargetType } from '@/types/Action'
+import { UserDAO } from '@/lib/daos/UserDAO'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
 interface FetchDocumentsParams {
   searchTerm: string
@@ -26,10 +30,14 @@ interface CountDocumentsParams {
 export class DocumentService {
   private documentDAO: DocumentDAO
   private personDAO: PersonDAO
+  private actionDAO: ActionDAO
+  private userDAO: UserDAO
 
   constructor() {
     this.documentDAO = new DocumentDAO()
     this.personDAO = new PersonDAO()
+    this.actionDAO = new ActionDAO()
+    this.userDAO = new UserDAO()
   }
 
   async selectContributorUids(
@@ -133,15 +141,33 @@ export class DocumentService {
   async deleteConceptsFromDocument(
     documentUid: string,
     conceptUids: string[],
+    userName: string,
   ): Promise<void> {
     try {
+      const user = await this.userDAO.getUserByIdentifier({
+        type: PersonIdentifierType.LOCAL,
+        value: userName,
+      })
+      if (!user?.person) {
+        throw new Error(`User with username ${userName} not found`)
+      }
       await this.documentDAO.deleteConceptsFromDocument(
         documentUid,
         conceptUids,
       )
+
+      await this.actionDAO.createAction({
+        actionType: ActionType.REMOVE,
+        targetType: ActionTargetType.DOCUMENT,
+        targetUid: documentUid,
+        path: 'subjects',
+        parameters: { conceptUids },
+        personUid: user.person?.uid,
+      })
     } catch (error) {
-      console.error('Error in service layer:', error)
-      throw new Error('Error deleting concepts from document')
+      const message = 'Error deleting concepts from document'
+      console.error(message, error)
+      throw new Error(message)
     }
   }
 }

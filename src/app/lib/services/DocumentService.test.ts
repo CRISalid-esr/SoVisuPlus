@@ -1,8 +1,12 @@
 import { DocumentService } from '@/lib/services/DocumentService'
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { AgentType } from '@/types/IAgent'
+import { UserDAO } from '@/lib/daos/UserDAO'
+import { ActionDAO } from '@/lib/daos/ActionDAO'
 
 jest.mock('@/lib/daos/DocumentDAO')
+jest.mock('@/lib/daos/UserDAO')
+jest.mock('@/lib/daos/ActionDAO')
 
 describe('DocumentService', () => {
   let documentService: DocumentService
@@ -10,16 +14,26 @@ describe('DocumentService', () => {
   let mockfetchDocumentById: jest.Mock
   let mockCountDocuments: jest.Mock
   let mockDeleteConceptsFromDocument: jest.Mock
+  let mockCreateAction: jest.Mock
   beforeEach(() => {
     mockFetchDocuments = jest.fn()
     mockfetchDocumentById = jest.fn()
     mockCountDocuments = jest.fn()
     mockDeleteConceptsFromDocument = jest.fn()
+    mockCreateAction = jest.fn()
     ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
       fetchDocuments: mockFetchDocuments,
       fetchDocumentById: mockfetchDocumentById,
       deleteConceptsFromDocument: mockDeleteConceptsFromDocument,
       countDocuments: mockCountDocuments,
+    }))
+    ;(UserDAO as jest.Mock).mockImplementation(() => ({
+      getUserByIdentifier: jest.fn().mockResolvedValue({
+        person: { uid: 'local-123' },
+      }),
+    }))
+    ;(ActionDAO as jest.Mock).mockImplementation(() => ({
+      createAction: mockCreateAction,
     }))
 
     documentService = new DocumentService()
@@ -168,7 +182,11 @@ describe('DocumentService', () => {
     mockDeleteConceptsFromDocument.mockResolvedValue(undefined)
 
     await expect(
-      documentService.deleteConceptsFromDocument('doc-123', ['c1', 'c2']),
+      documentService.deleteConceptsFromDocument(
+        'doc-123',
+        ['c1', 'c2'],
+        'user-1234',
+      ),
     ).resolves.toBeUndefined()
 
     expect(mockDeleteConceptsFromDocument).toHaveBeenCalledWith('doc-123', [
@@ -180,12 +198,40 @@ describe('DocumentService', () => {
     mockDeleteConceptsFromDocument.mockRejectedValue(new Error('DB error'))
 
     await expect(
-      documentService.deleteConceptsFromDocument('doc-123', ['c1', 'c2']),
+      documentService.deleteConceptsFromDocument(
+        'doc-123',
+        ['c1', 'c2'],
+        'user-1234',
+      ),
     ).rejects.toThrow('Error deleting concepts from document')
 
     expect(mockDeleteConceptsFromDocument).toHaveBeenCalledWith('doc-123', [
       'c1',
       'c2',
     ])
+  })
+  it('should create an action corresponding to deleted concept', async () => {
+    mockDeleteConceptsFromDocument.mockResolvedValue(undefined)
+
+    await expect(
+      documentService.deleteConceptsFromDocument(
+        'doc-123',
+        ['c1', 'c2'],
+        'user-1234',
+      ),
+    ).resolves.toBeUndefined()
+
+    expect(mockDeleteConceptsFromDocument).toHaveBeenCalledWith('doc-123', [
+      'c1',
+      'c2',
+    ])
+    expect(mockCreateAction).toHaveBeenCalledWith({
+      actionType: 'REMOVE',
+      targetType: 'DOCUMENT',
+      targetUid: 'doc-123',
+      path: 'subjects',
+      parameters: { conceptUids: ['c1', 'c2'] },
+      personUid: 'local-123',
+    })
   })
 })

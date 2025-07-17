@@ -1,4 +1,3 @@
-// file: tests/prisma/ResearchStructure.test.ts
 import prisma from '@/lib/daos/prisma'
 
 describe('ResearchStructure Model Tests', () => {
