@@ -236,4 +236,55 @@ describe('DocumentDAO Integration Tests', () => {
       expect.arrayContaining(['CNRS', 'UNIV-NANTES']),
     )
   })
+
+  test('should delete specific concepts from a document', async () => {
+    // Create two concepts
+    const concept1 = await prisma.concept.create({
+      data: {
+        uid: 'concept-delete-1',
+        uri: 'http://example.com/concept-delete-1',
+      },
+    })
+    const concept2 = await prisma.concept.create({
+      data: {
+        uid: 'concept-delete-2',
+        uri: 'http://example.com/concept-delete-2',
+      },
+    })
+
+    // Create a document and link both concepts
+    await prisma.document.create({
+      data: {
+        uid: 'doc-with-concepts',
+        documentType: 'JournalArticle',
+        publicationDate: '2022',
+        publicationDateStart: new Date('2022-01-01'),
+        publicationDateEnd: new Date('2022-12-31'),
+        subjects: {
+          connect: [{ id: concept1.id }, { id: concept2.id }],
+        },
+      },
+    })
+
+    // Ensure both subjects are linked
+    let subjects = await prisma.document.findUnique({
+      where: { uid: 'doc-with-concepts' },
+      include: { subjects: true },
+    })
+    expect(subjects?.subjects).toHaveLength(2)
+
+    // Delete concept1 from the document
+    const dao = new DocumentDAO()
+    await dao.deleteConceptsFromDocument('doc-with-concepts', [
+      'concept-delete-1',
+    ])
+
+    // Verify only concept2 remains
+    subjects = await prisma.document.findUnique({
+      where: { uid: 'doc-with-concepts' },
+      include: { subjects: true },
+    })
+    expect(subjects?.subjects).toHaveLength(1)
+    expect(subjects?.subjects[0].uid).toBe('concept-delete-2')
+  })
 })
