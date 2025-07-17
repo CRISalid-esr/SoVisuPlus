@@ -2,11 +2,11 @@ import { DocumentService } from '@/lib/services/DocumentService'
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { AgentType } from '@/types/IAgent'
 import { UserDAO } from '@/lib/daos/UserDAO'
-import { ChangeDAO } from '@/lib/daos/ChangeDAO'
+import { ActionDAO } from '@/lib/daos/ActionDAO'
 
 jest.mock('@/lib/daos/DocumentDAO')
 jest.mock('@/lib/daos/UserDAO')
-jest.mock('@/lib/daos/ChangeDAO')
+jest.mock('@/lib/daos/ActionDAO')
 
 describe('DocumentService', () => {
   let documentService: DocumentService
@@ -14,13 +14,13 @@ describe('DocumentService', () => {
   let mockfetchDocumentById: jest.Mock
   let mockCountDocuments: jest.Mock
   let mockDeleteConceptsFromDocument: jest.Mock
-  let mockCreateChange: jest.Mock
+  let mockCreateAction: jest.Mock
   beforeEach(() => {
     mockFetchDocuments = jest.fn()
     mockfetchDocumentById = jest.fn()
     mockCountDocuments = jest.fn()
     mockDeleteConceptsFromDocument = jest.fn()
-    mockCreateChange = jest.fn()
+    mockCreateAction = jest.fn()
     ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
       fetchDocuments: mockFetchDocuments,
       fetchDocumentById: mockfetchDocumentById,
@@ -32,8 +32,8 @@ describe('DocumentService', () => {
         person: { uid: 'local-123' },
       }),
     }))
-    ;(ChangeDAO as jest.Mock).mockImplementation(() => ({
-      createChange: mockCreateChange,
+    ;(ActionDAO as jest.Mock).mockImplementation(() => ({
+      createAction: mockCreateAction,
     }))
 
     documentService = new DocumentService()
@@ -210,7 +210,7 @@ describe('DocumentService', () => {
       'c2',
     ])
   })
-  it('should call deleteConceptsFromDocument with correct arguments', async () => {
+  it('should create an action corresponding to deleted concept', async () => {
     mockDeleteConceptsFromDocument.mockResolvedValue(undefined)
 
     await expect(
@@ -225,8 +225,8 @@ describe('DocumentService', () => {
       'c1',
       'c2',
     ])
-    expect(mockCreateChange).toHaveBeenCalledWith({
-      action: 'REMOVE',
+    expect(mockCreateAction).toHaveBeenCalledWith({
+      actionType: 'REMOVE',
       targetType: 'DOCUMENT',
       targetUid: 'doc-123',
       path: 'subjects',

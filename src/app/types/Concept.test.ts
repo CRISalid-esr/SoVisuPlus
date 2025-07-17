@@ -1,5 +1,3 @@
-// file: src/app/types/Concept.test.ts
-
 import type { ConceptJson } from '@/types/Concept'
 import { Concept } from '@/types/Concept'
 import { Literal } from '@/types/Literal'

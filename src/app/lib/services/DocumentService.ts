@@ -1,8 +1,8 @@
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { AgentType } from '@/types/IAgent'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
-import { ChangeDAO } from '@/lib/daos/ChangeDAO'
-import { ChangeAction, ChangeTargetType } from '@/types/Change'
+import { ActionDAO } from '@/lib/daos/ActionDAO'
+import { ActionType, ActionTargetType } from '@/types/Action'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
@@ -30,13 +30,13 @@ interface CountDocumentsParams {
 export class DocumentService {
   private documentDAO: DocumentDAO
   private personDAO: PersonDAO
-  private changeDAO: ChangeDAO
+  private actionDAO: ActionDAO
   private userDAO: UserDAO
 
   constructor() {
     this.documentDAO = new DocumentDAO()
     this.personDAO = new PersonDAO()
-    this.changeDAO = new ChangeDAO()
+    this.actionDAO = new ActionDAO()
     this.userDAO = new UserDAO()
   }
 
@@ -156,9 +156,9 @@ export class DocumentService {
         conceptUids,
       )
 
-      await this.changeDAO.createChange({
-        action: ChangeAction.REMOVE,
-        targetType: ChangeTargetType.DOCUMENT,
+      await this.actionDAO.createAction({
+        actionType: ActionType.REMOVE,
+        targetType: ActionTargetType.DOCUMENT,
         targetUid: documentUid,
         path: 'subjects',
         parameters: { conceptUids },

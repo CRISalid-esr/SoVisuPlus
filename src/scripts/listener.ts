@@ -4,7 +4,7 @@ import MessageProcessingService from '@/lib/amqp/services/MessageProcessingServi
 import { AMQPMessage } from '@/types/AMQPMessage'
 import { AMQPEntityData } from '@/types/AMQPEntityData'
 import { Sema } from 'async-sema'
-import { ChangeDispatchService } from '../app/lib/services/ChangeDispatchService'
+import { ActionDispatchService } from '../app/lib/services/ActionDispatchService'
 
 dotenv.config()
 ;(async () => {
@@ -32,12 +32,12 @@ dotenv.config()
     })
 
     // Internal change poller
-    const changeDispatcher = new ChangeDispatchService(connection)
+    const changeDispatcher = new ActionDispatchService(connection)
     const pollIntervalMs = 3000
 
     const pollLoop = async () => {
       try {
-        await changeDispatcher.dispatchChanges()
+        await changeDispatcher.dispatchActions()
       } catch (err) {
         console.error('❌ Error dispatching changes from DB:', err)
       } finally {

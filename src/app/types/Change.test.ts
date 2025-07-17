@@ -1,12 +1,12 @@
-import { Change, ChangeAction, ChangeTargetType } from './Change'
+import { Action, ActionTargetType, ActionType } from './Action'
 import { describe, expect, it } from '@jest/globals'
 
 describe('Change', () => {
-  it('should correctly instantiate from DbChange using fromDbChange', () => {
-    const dbChange = {
+  it('should correctly instantiate from DbAction using fromDbAction', () => {
+    const dbAction = {
       id: 'uuid-1234',
-      action: ChangeAction.UPDATE,
-      targetType: ChangeTargetType.DOCUMENT,
+      actionType: ActionType.UPDATE,
+      targetType: ActionTargetType.DOCUMENT,
       targetUid: 'doc-5678',
       path: 'titles',
       parameters: {
@@ -18,26 +18,26 @@ describe('Change', () => {
       personUid: 'person-1234',
     }
 
-    const change = Change.fromDbChange(dbChange)
+    const action = Action.fromDbAction(dbAction)
 
-    expect(change).toBeInstanceOf(Change)
-    expect(change.id).toBe('uuid-1234')
-    expect(change.action).toBe(ChangeAction.UPDATE)
-    expect(change.targetType).toBe(ChangeTargetType.DOCUMENT)
-    expect(change.targetUid).toBe('doc-5678')
-    expect(change.path).toBe('titles')
-    expect(change.parameters).toEqual({
+    expect(action).toBeInstanceOf(Action)
+    expect(action.id).toBe('uuid-1234')
+    expect(action.actionType).toBe(ActionType.UPDATE)
+    expect(action.targetType).toBe(ActionTargetType.DOCUMENT)
+    expect(action.targetUid).toBe('doc-5678')
+    expect(action.path).toBe('titles')
+    expect(action.parameters).toEqual({
       field: 'titles',
       value: [{ language: 'fr', value: 'Nouveau titre' }],
     })
-    expect(change.timestamp.toISOString()).toBe('2025-07-05T10:00:00.000Z')
+    expect(action.timestamp.toISOString()).toBe('2025-07-05T10:00:00.000Z')
   })
 
   it('should handle null path and parameters', () => {
-    const dbChange = {
+    const dbAction = {
       id: 'uuid-5678',
-      action: ChangeAction.REMOVE,
-      targetType: ChangeTargetType.DOCUMENT,
+      actionType: ActionType.REMOVE,
+      targetType: ActionTargetType.DOCUMENT,
       targetUid: 'doc-9999',
       path: null,
       parameters: null,
@@ -46,7 +46,7 @@ describe('Change', () => {
       timestamp: new Date(),
     }
 
-    const change = Change.fromDbChange(dbChange)
+    const change = Action.fromDbAction(dbAction)
 
     expect(change.path).toBeNull()
     expect(change.parameters).toBeNull()

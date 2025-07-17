@@ -1,14 +1,13 @@
-// file: src/app/lib/daos/ChangeDAO.test.ts
-import { PrismaClient, ChangeAction, ChangeTargetType } from '@prisma/client'
-import { ChangeDAO } from './ChangeDAO'
-import { Change } from '@/types/Change'
+import { ActionTargetType, ActionType, PrismaClient } from '@prisma/client'
+import { ActionDAO } from './ActionDAO'
+import { Action } from '@/types/Action'
 
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
   return {
     ...actualPrismaClient,
     PrismaClient: jest.fn(() => ({
-      change: {
+      action: {
         create: jest.fn(),
         findMany: jest.fn(),
         update: jest.fn(),
@@ -20,19 +19,19 @@ jest.mock('@prisma/client', () => {
 
 const mockPrisma = new PrismaClient()
 
-describe('ChangeDAO', () => {
-  let dao: ChangeDAO
+describe('ActionDAO', () => {
+  let dao: ActionDAO
 
   beforeEach(() => {
     jest.clearAllMocks()
-    dao = new ChangeDAO()
+    dao = new ActionDAO()
     dao['prismaClient'] = mockPrisma
   })
 
-  const baseChangeData = {
-    id: 'change-uuid',
-    action: ChangeAction.ADD,
-    targetType: ChangeTargetType.DOCUMENT,
+  const baseActionData = {
+    id: 'action-uuid',
+    actionType: ActionType.ADD,
+    targetType: ActionTargetType.DOCUMENT,
     targetUid: 'doc-001',
     path: 'titles',
     parameters: { language: 'fr', value: 'Titre' },
@@ -41,24 +40,24 @@ describe('ChangeDAO', () => {
     dispatched: false,
   }
 
-  it('should create a change', async () => {
-    ;(mockPrisma.change.create as jest.Mock).mockResolvedValue(baseChangeData)
+  it('should create an action', async () => {
+    ;(mockPrisma.action.create as jest.Mock).mockResolvedValue(baseActionData)
 
-    const change = await dao.createChange({
-      action: ChangeAction.ADD,
-      targetType: ChangeTargetType.DOCUMENT,
+    const action = await dao.createAction({
+      actionType: ActionType.ADD,
+      targetType: ActionTargetType.DOCUMENT,
       targetUid: 'doc-001',
       path: 'titles',
       parameters: { language: 'fr', value: 'Titre' },
       personUid: 'person-001',
     })
 
-    expect(change).toBeInstanceOf(Change)
-    expect(change.id).toBe(baseChangeData.id)
-    expect(mockPrisma.change.create).toHaveBeenCalledWith({
+    expect(action).toBeInstanceOf(Action)
+    expect(action.id).toBe(baseActionData.id)
+    expect(mockPrisma.action.create).toHaveBeenCalledWith({
       data: {
-        action: ChangeAction.ADD,
-        targetType: ChangeTargetType.DOCUMENT,
+        actionType: ActionType.ADD,
+        targetType: ActionTargetType.DOCUMENT,
         targetUid: 'doc-001',
         path: 'titles',
         parameters: { language: 'fr', value: 'Titre' },
@@ -67,43 +66,43 @@ describe('ChangeDAO', () => {
     })
   })
 
-  it('should fetch undispatched changes', async () => {
-    ;(mockPrisma.change.findMany as jest.Mock).mockResolvedValue([
-      baseChangeData,
+  it('should fetch undispatched actions', async () => {
+    ;(mockPrisma.action.findMany as jest.Mock).mockResolvedValue([
+      baseActionData,
     ])
 
-    const changes = await dao.fetchUndispatchedChanges()
+    const actions = await dao.fetchUndispatchedActions()
 
-    expect(changes).toHaveLength(1)
-    expect(changes[0]).toBeInstanceOf(Change)
-    expect(mockPrisma.change.findMany).toHaveBeenCalledWith({
+    expect(actions).toHaveLength(1)
+    expect(actions[0]).toBeInstanceOf(Action)
+    expect(mockPrisma.action.findMany).toHaveBeenCalledWith({
       where: { dispatched: false },
       orderBy: { timestamp: 'asc' },
       take: 100,
     })
   })
 
-  it('should mark a change as dispatched', async () => {
-    ;(mockPrisma.change.update as jest.Mock).mockResolvedValue({
-      ...baseChangeData,
+  it('should mark an action as dispatched', async () => {
+    ;(mockPrisma.action.update as jest.Mock).mockResolvedValue({
+      ...baseActionData,
       dispatched: true,
     })
 
-    await dao.markChangeAsDispatched('change-uuid')
+    await dao.markActionAsDispatched('action-uuid')
 
-    expect(mockPrisma.change.update).toHaveBeenCalledWith({
-      where: { id: 'change-uuid' },
+    expect(mockPrisma.action.update).toHaveBeenCalledWith({
+      where: { id: 'action-uuid' },
       data: { dispatched: true },
     })
   })
 
-  it('should mark multiple changes as dispatched', async () => {
-    ;(mockPrisma.change.updateMany as jest.Mock).mockResolvedValue({ count: 2 })
+  it('should mark multiple actions as dispatched', async () => {
+    ;(mockPrisma.action.updateMany as jest.Mock).mockResolvedValue({ count: 2 })
 
-    await dao.markChangesAsDispatched(['change-1', 'change-2'])
+    await dao.markActionsAsDispatched(['action-1', 'action-2'])
 
-    expect(mockPrisma.change.updateMany).toHaveBeenCalledWith({
-      where: { id: { in: ['change-1', 'change-2'] } },
+    expect(mockPrisma.action.updateMany).toHaveBeenCalledWith({
+      where: { id: { in: ['action-1', 'action-2'] } },
       data: { dispatched: true },
     })
   })

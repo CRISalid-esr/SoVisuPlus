@@ -1,10 +1,9 @@
-// file: tests/prisma/Change.test.ts
 import prisma from '@/lib/daos/prisma'
-import { ChangeAction, ChangeTargetType } from '@prisma/client'
+import { ActionTargetType, ActionType } from '@prisma/client'
 
-describe('Change Model Tests', () => {
+describe('Action Model Tests', () => {
   beforeEach(async () => {
-    await prisma.change.deleteMany()
+    await prisma.action.deleteMany()
   })
 
   afterAll(async () => {
@@ -12,10 +11,10 @@ describe('Change Model Tests', () => {
   })
 
   test('should create a new change entry', async () => {
-    const change = await prisma.change.create({
+    const action = await prisma.action.create({
       data: {
-        action: ChangeAction.ADD,
-        targetType: ChangeTargetType.DOCUMENT,
+        actionType: ActionType.ADD,
+        targetType: ActionTargetType.DOCUMENT,
         targetUid: 'doc-123',
         path: 'titles',
         parameters: { language: 'fr', value: 'Titre mis à jour' },
@@ -24,23 +23,23 @@ describe('Change Model Tests', () => {
       },
     })
 
-    expect(change).toHaveProperty('id')
-    expect(change.action).toBe(ChangeAction.ADD)
-    expect(change.targetType).toBe(ChangeTargetType.DOCUMENT)
-    expect(change.targetUid).toBe('doc-123')
-    expect(change.path).toBe('titles')
-    expect(change.parameters).toMatchObject({
+    expect(action).toHaveProperty('id')
+    expect(action.actionType).toBe(ActionType.ADD)
+    expect(action.targetType).toBe(ActionTargetType.DOCUMENT)
+    expect(action.targetUid).toBe('doc-123')
+    expect(action.path).toBe('titles')
+    expect(action.parameters).toMatchObject({
       language: 'fr',
       value: 'Titre mis à jour',
     })
-    expect(change.timestamp).toBeInstanceOf(Date)
+    expect(action.timestamp).toBeInstanceOf(Date)
   })
 
   test('should retrieve a change by id', async () => {
-    const created = await prisma.change.create({
+    const created = await prisma.action.create({
       data: {
-        action: ChangeAction.UPDATE,
-        targetType: ChangeTargetType.DOCUMENT,
+        actionType: ActionType.UPDATE,
+        targetType: ActionTargetType.DOCUMENT,
         targetUid: 'doc-999',
         path: 'abstracts',
         parameters: {
@@ -52,13 +51,13 @@ describe('Change Model Tests', () => {
       },
     })
 
-    const found = await prisma.change.findUnique({
+    const found = await prisma.action.findUnique({
       where: { id: created.id },
     })
 
     expect(found).not.toBeNull()
     expect(found?.id).toBe(created.id)
-    expect(found?.action).toBe(ChangeAction.UPDATE)
+    expect(found?.actionType).toBe(ActionType.UPDATE)
     expect(found?.targetUid).toBe('doc-999')
     expect(found?.parameters).toMatchObject({
       before: 'Old abstract',
@@ -67,12 +66,12 @@ describe('Change Model Tests', () => {
   })
 
   test('should create multiple changes and filter by action', async () => {
-    await prisma.change.createMany({
+    await prisma.action.createMany({
       data: [
         {
           id: 'change-1',
-          action: ChangeAction.ADD,
-          targetType: ChangeTargetType.DOCUMENT,
+          actionType: ActionType.ADD,
+          targetType: ActionTargetType.DOCUMENT,
           targetUid: 'doc-001',
           parameters: {},
           path: 'subjects',
@@ -80,8 +79,8 @@ describe('Change Model Tests', () => {
         },
         {
           id: 'change-2',
-          action: ChangeAction.REMOVE,
-          targetType: ChangeTargetType.DOCUMENT,
+          actionType: ActionType.REMOVE,
+          targetType: ActionTargetType.DOCUMENT,
           targetUid: 'doc-002',
           parameters: {},
           path: 'titles',
@@ -90,11 +89,11 @@ describe('Change Model Tests', () => {
       ],
     })
 
-    const addedChanges = await prisma.change.findMany({
-      where: { action: ChangeAction.ADD },
+    const addActions = await prisma.action.findMany({
+      where: { actionType: ActionType.ADD },
     })
 
-    expect(addedChanges).toHaveLength(1)
-    expect(addedChanges[0].id).toBe('change-1')
+    expect(addActions).toHaveLength(1)
+    expect(addActions[0].id).toBe('change-1')
   })
 })

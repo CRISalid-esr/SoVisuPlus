@@ -258,20 +258,20 @@ enum ResearchStructureIdentifierType {
   SCOPUS_ID @map("scopus_id")
 }
 
-enum ChangeAction {
+enum ActionType {
   ADD
   REMOVE
   UPDATE
 }
 
-enum ChangeTargetType {
+enum ActionTargetType {
   DOCUMENT
 }
 
-model Change {
+model Action {
   id         String           @id @default(uuid())
-  action     ChangeAction
-  targetType ChangeTargetType
+  actionType ActionType
+  targetType ActionTargetType
   targetUid  String
   path       String?
   parameters Json
@@ -279,7 +279,7 @@ model Change {
   dispatched Boolean          @default(false)
   personUid  String
 
-  @@index([action])
+  @@index([actionType])
   @@index([targetType])
   @@index([targetUid])
   @@index([timestamp])
