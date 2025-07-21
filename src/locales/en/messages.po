@@ -294,6 +294,21 @@ msgstr "Back to home page"
 msgid "notfound_page_description"
 msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1>community</1> might be able to help."
 
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:93
+msgid "document_details_page_journal_publisher"
+msgstr "Publisher: {0}"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:86
+msgid "document_details_page_journal_source_type"
+msgstr "Source type: {0}"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:73
+msgid "document_details_page_journal_issn"
+msgstr "ISSN: <0>{0}</0>"
+
 #: src/app/[lang]/dashboard/page.tsx:17
 msgid "dashboard_page_main_title"
 msgstr ""
@@ -334,7 +349,11 @@ msgstr "Back to my publications"
 msgid "document_details_page_date_row_label"
 msgstr "Date"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:38
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:87
+msgid "document_details_page_journal_journal"
+msgstr "journal"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:39
 msgid "document_details_page_journal_row_label"
 msgstr "Published in"
 

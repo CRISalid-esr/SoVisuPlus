@@ -66,9 +66,9 @@ const BibliographicInformation = () => {
   const commonTypeFields: DocumentFieldKey[] = [
     'titles',
     'type',
+    'date',
     'journal',
     'authors',
-    'date',
     'sources',
   ]
 
