@@ -122,14 +122,14 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:104
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:111
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:118
 msgid "document_details_page_card_title"
 msgstr "Bibliographic information"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:107
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:132
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:114
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:121
 msgid "document_details_page_card_validate_button"
 msgstr "Confirm"
 
@@ -329,6 +329,10 @@ msgstr "Disciplines"
 msgid "document_details_keywords_tab"
 msgstr "Keywords"
 
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Abstracts.tsx:49
+msgid "document_details_page_abstracts_row_label"
+msgstr ""
+
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:30
 msgid "document_details_page_authors_row_label"
 msgstr "Authors"
@@ -356,6 +360,10 @@ msgstr "journal"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:39
 msgid "document_details_page_journal_row_label"
 msgstr "Published in"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Abstracts.tsx:18
+msgid "document_details_page_no_abstract_available"
+msgstr ""
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Titles.tsx:18
 msgid "document_details_page_no_title_available"

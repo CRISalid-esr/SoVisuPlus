@@ -18,6 +18,7 @@ import Sources from './Sources'
 import Titles from './Titles'
 import Type from './Type'
 import Journal from './Journal'
+import Abstracts from './Abstracts'
 
 type DocumentFieldKey =
   | 'titles'
@@ -25,6 +26,7 @@ type DocumentFieldKey =
   | 'journal'
   | 'authors'
   | 'date'
+  | 'abstracts'
   | 'sources'
 
 interface DocumentField {
@@ -57,6 +59,10 @@ const BibliographicInformation = () => {
       value: 'date',
       component: <PublicationDate />,
     },
+    abstracts: {
+      value: 'abstracts',
+      component: <Abstracts />,
+    },
     sources: {
       value: 'sources',
       component: <Sources />,
@@ -69,6 +75,7 @@ const BibliographicInformation = () => {
     'date',
     'journal',
     'authors',
+    'abstracts',
     'sources',
   ]
 
