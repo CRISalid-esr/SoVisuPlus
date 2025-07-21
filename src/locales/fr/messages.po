@@ -332,9 +332,9 @@ msgstr "Retour aux publications"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:15
 msgid "document_details_page_date_row_label"
-msgstr "Année"
+msgstr "Date de publication"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:15
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:38
 msgid "document_details_page_journal_row_label"
 msgstr "Paru dans"
 

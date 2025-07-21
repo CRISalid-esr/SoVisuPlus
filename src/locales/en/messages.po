@@ -334,7 +334,7 @@ msgstr "Back to my publications"
 msgid "document_details_page_date_row_label"
 msgstr "Date"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:15
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:38
 msgid "document_details_page_journal_row_label"
 msgstr "Published in"
 
