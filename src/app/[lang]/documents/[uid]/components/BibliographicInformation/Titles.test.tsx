@@ -81,7 +81,7 @@ describe('Titles Component', () => {
     render(
       <ThemeProvider theme={theme}>
         <I18nProvider i18n={i18n}>
-          <Titles />
+          <Titles content='test' />
         </I18nProvider>
       </ThemeProvider>,
     )

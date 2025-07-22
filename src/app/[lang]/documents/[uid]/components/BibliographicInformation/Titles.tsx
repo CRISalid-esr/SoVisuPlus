@@ -1,52 +1,5 @@
-import * as Lingui from '@lingui/core'
-import { t } from '@lingui/macro'
 import { Typography } from '@mui/material'
-import { useEffect, useState } from 'react'
 
-import { getLocalizedValue } from '@/utils/getLocalizedValue'
-import { LanguageChips } from '@/components/LanguageChips'
-import useStore from '@/stores/global_store'
-import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-
-const Titles = () => {
-  const lang = Lingui.i18n.locale as ExtendedLanguageCode
-  const [selectedLang, setSelectedLang] = useState<string>(lang)
-  const [title, setTitle] = useState('')
-  const { selectedDocument } = useStore((state) => state.document)
-
-  useEffect(() => {
-    const supportedLocales =
-      process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',') || []
-
-    const { language, value } = getLocalizedValue(
-      selectedDocument?.titles ?? [],
-      selectedLang,
-      supportedLocales,
-      t`document_details_page_no_title_available`,
-    )
-
-    if (language !== selectedLang) {
-      setSelectedLang(language)
-    }
-
-    setTitle(value)
-  }, [selectedLang, selectedDocument])
-
-  const handleLanguageChange = (lang: string) => {
-    setSelectedLang(lang)
-  }
-
-  return (
-    <>
-      <LanguageChips
-        texts={selectedDocument?.titles ?? []}
-        selectedLang={selectedLang}
-        onLanguageSelect={handleLanguageChange}
-      />
-
-      <Typography>{title}</Typography>
-    </>
-  )
+export default function Titles({ content }: { content: string }) {
+  return <Typography>{content}</Typography>
 }
-
-export default Titles
