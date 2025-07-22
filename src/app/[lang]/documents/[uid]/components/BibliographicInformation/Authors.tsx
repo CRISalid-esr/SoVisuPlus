@@ -7,8 +7,6 @@ import { Person } from '@/types/Person'
 import { useRouter, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
 
-import RowLabel from './RowLabel'
-
 const Authors = () => {
   const theme = useTheme()
   const { selectedDocument = null } = useStore((state) => state.document)
@@ -25,52 +23,46 @@ const Authors = () => {
   }
 
   return (
-    <>
-      <RowLabel>
-        <Trans>document_details_page_authors_row_label</Trans>
-      </RowLabel>
-      <Box />
-      <Box
-        sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: theme.spacing(1),
-          alignItems: 'center',
-        }}
-      >
-        {selectedDocument?.contributions.map((contribution, index) => (
-          <Chip
-            key={index}
-            onClick={() => {
-              if (!contribution.person.external) {
-                handleInternalAuthorClick(contribution.person)
-              }
-            }}
-            sx={{
-              borderRadius: theme.utils.pxToRem(4),
-              backgroundColor: contribution.person.external
-                ? theme.palette.lightSecondaryContainer
-                : theme.palette.primary.main,
-              letterSpacing: '0.1px',
-              lineHeight: theme.typography.lineHeight.lineHeight20px,
-              fontWeight: theme.typography.fontWeightRegular,
-              color: contribution.person.external
-                ? theme.palette.getContrastText(theme.palette.secondary.dark)
-                : theme.palette.primary.contrastText,
-              cursor: 'pointer',
-              '&:hover': {
-                opacity: 0.85,
-              },
-              fontSize: theme.utils.pxToRem(14),
-            }}
-            label={contribution.person.displayName}
-          />
-        ))}
-        <Button variant='outlined' startIcon={<EditIcon />}>
-          <Trans>document_details_page_authors_row_update_author</Trans>
-        </Button>
-      </Box>
-    </>
+    <Box
+      sx={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: theme.spacing(1),
+        alignItems: 'center',
+      }}
+    >
+      {selectedDocument?.contributions.map((contribution, index) => (
+        <Chip
+          key={index}
+          onClick={() => {
+            if (!contribution.person.external) {
+              handleInternalAuthorClick(contribution.person)
+            }
+          }}
+          sx={{
+            borderRadius: theme.utils.pxToRem(4),
+            backgroundColor: contribution.person.external
+              ? theme.palette.lightSecondaryContainer
+              : theme.palette.primary.main,
+            letterSpacing: '0.1px',
+            lineHeight: theme.typography.lineHeight.lineHeight20px,
+            fontWeight: theme.typography.fontWeightRegular,
+            color: contribution.person.external
+              ? theme.palette.getContrastText(theme.palette.secondary.dark)
+              : theme.palette.primary.contrastText,
+            cursor: 'pointer',
+            '&:hover': {
+              opacity: 0.85,
+            },
+            fontSize: theme.utils.pxToRem(14),
+          }}
+          label={contribution.person.displayName}
+        />
+      ))}
+      <Button variant='outlined' startIcon={<EditIcon />}>
+        <Trans>document_details_page_authors_row_update_author</Trans>
+      </Button>
+    </Box>
   )
 }
 

@@ -5,8 +5,11 @@ import {
   Box,
   Button,
   CardContent,
-  List,
-  ListItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -19,6 +22,7 @@ import Titles from './Titles'
 import Type from './Type'
 import Journal from './Journal'
 import Abstracts from './Abstracts'
+import RowLabel from './RowLabel'
 
 type DocumentFieldKey =
   | 'titles'
@@ -31,6 +35,7 @@ type DocumentFieldKey =
 
 interface DocumentField {
   value: DocumentFieldKey
+  titleComponent: JSX.Element
   component: JSX.Element | null
 }
 
@@ -41,30 +46,39 @@ const BibliographicInformation = () => {
   const documentFields: Record<DocumentFieldKey, DocumentField> = {
     titles: {
       value: 'titles',
+      titleComponent: <Trans id='document_details_page_titles_row_label' />,
       component: selectedDocument?.titles ? <Titles /> : null,
     },
     type: {
       value: 'type',
+      titleComponent: <Trans id='document_details_page_type_row_label' />,
       component: <Type />,
     },
     journal: {
       value: 'journal',
+      titleComponent: <Trans id='document_details_page_journal_row_label' />,
       component: <Journal />,
     },
     authors: {
       value: 'authors',
+      titleComponent: <Trans id='document_details_page_authors_row_label' />,
       component: <Authors />,
     },
     date: {
       value: 'date',
+      titleComponent: (
+        <Trans id='document_details_page_publication_date_row_label' />
+      ),
       component: <PublicationDate />,
     },
     abstracts: {
       value: 'abstracts',
+      titleComponent: <Trans id='document_details_page_abstracts_row_label' />,
       component: <Abstracts />,
     },
     sources: {
       value: 'sources',
+      titleComponent: <Trans id='document_details_page_sources_row_label' />,
       component: <Sources />,
     },
   }
@@ -131,29 +145,31 @@ const BibliographicInformation = () => {
           gap: theme.spacing(4),
         }}
       >
-        <List
-          sx={{
-            paddingLeft: theme.spacing(2),
-            width: '100%',
-          }}
-        >
-          {fieldsToDisplay.map((fieldKey) => {
-            const field = documentFields[fieldKey]
-            return field?.component ? (
-              <ListItem
-                key={fieldKey}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: theme.spacing(2),
-                  borderBottom: `1px solid ${theme.palette.grey[300]}`,
-                }}
-              >
-                {field.component}
-              </ListItem>
-            ) : null
-          })}
-        </List>
+        <TableContainer>
+          <Table sx={{ minWidth: 650 }} aria-label='simple table'>
+            <TableBody>
+              {fieldsToDisplay.map((fieldKey) => {
+                const field = documentFields[fieldKey]
+
+                if (!field.component) {
+                  return null
+                }
+
+                return (
+                  <TableRow
+                    key={fieldKey}
+                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
+                    <TableCell component='th' scope='row'>
+                      <RowLabel>{field.titleComponent}</RowLabel>
+                    </TableCell>
+                    <TableCell>{field.component}</TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </CardContent>
     </CustomCard>
   )

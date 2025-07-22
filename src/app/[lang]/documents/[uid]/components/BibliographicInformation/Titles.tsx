@@ -1,5 +1,5 @@
 import * as Lingui from '@lingui/core'
-import { t, Trans } from '@lingui/macro'
+import { t } from '@lingui/macro'
 import { Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 
@@ -7,7 +7,6 @@ import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import { LanguageChips } from '@/components/LanguageChips'
 import useStore from '@/stores/global_store'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import RowLabel from './RowLabel'
 
 const Titles = () => {
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
@@ -39,10 +38,6 @@ const Titles = () => {
 
   return (
     <>
-      <RowLabel isPrimary>
-        <Trans>document_details_page_titles_row_label</Trans>
-      </RowLabel>
-
       <LanguageChips
         texts={selectedDocument?.titles ?? []}
         selectedLang={selectedLang}
