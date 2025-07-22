@@ -1,7 +1,10 @@
-import { AMQPEntityData } from '@/types/AMQPEntityData'
-
-export interface AMQPMessage<T extends AMQPEntityData> {
-  type: 'person' | 'research_structure' | 'document'
+export interface AMQPMessage<T> {
+  type:
+    | 'person'
+    | 'research_structure'
+    | 'document'
+    | 'harvesting_state_event'
+    | 'harvesting_result_event'
   event: string
   fields: T
 }

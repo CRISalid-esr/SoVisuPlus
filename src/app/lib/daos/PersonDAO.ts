@@ -428,4 +428,35 @@ export class PersonDAO extends AbstractDAO {
 
     return people.map((person) => Person.fromDbPerson(person))
   }
+
+  public async fetchPersonByIdentifier(
+    identifier: PersonIdentifier,
+  ): Promise<Person | null> {
+    try {
+      const dbPerson = await this.prismaClient.person.findFirst({
+        where: {
+          identifiers: {
+            some: {
+              type: identifier.type.toUpperCase() as DbPersonIdentifierType,
+              value: identifier.value,
+            },
+          },
+        },
+      })
+
+      if (!dbPerson) {
+        return null
+      }
+
+      return Person.fromDbPerson(dbPerson)
+    } catch (error) {
+      console.error(
+        `Error fetching person with identifier ${identifier.type}:${identifier.value}:`,
+        error,
+      )
+      throw new Error(
+        `Failed to fetch person with identifier ${identifier.type}:${identifier.value}`,
+      )
+    }
+  }
 }

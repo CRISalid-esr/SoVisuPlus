@@ -1,5 +1,4 @@
 import { AMQPMessage } from '@/types/AMQPMessage'
-import { AMQPEntityData } from '@/types/AMQPEntityData'
 import { PersonWorker } from '@/lib/amqp/workers/PersonWorker'
 import { MessageProcessingWorker } from '@/lib/amqp/workers/MessageProcessingWorker'
 import { ResearchStructureWorker } from '@/lib/amqp/workers/ResearchStructureWorker'
@@ -13,11 +12,16 @@ import { UserDAO } from '@/lib/daos/UserDAO'
 import { DocumentGraphQLClient } from '@/lib/graphql/DocumentGraphQLClient'
 import { AMQPDocumentMessage } from '@/types/AMQPDocumentMessage'
 import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
+import { HarvestingStateEventWorker } from '@/lib/amqp/workers/HarvestingStateEventWorker'
+import { AMQPHarvestingStateEventMessage } from '@/types/AMQPHarvestingStateEventMessage'
+import { AMQPHarvestingResultEventMessage } from '@/types/AMQPHarvestingResultEventMessage'
+import { AMQPData } from '@/types/AMQPData'
+import { HarvestingResultEventWorker } from '@/lib/amqp/workers/HarvestingResultEventWorker'
 
 export class MessageProcessingWorkerFactory {
   createWorker(
-    message: AMQPMessage<AMQPEntityData>,
-  ): MessageProcessingWorker<AMQPMessage<AMQPEntityData>> {
+    message: AMQPMessage<AMQPData>,
+  ): MessageProcessingWorker<AMQPMessage<AMQPData>> {
     switch (message.type) {
       case 'person':
         return new PersonWorker(
@@ -36,6 +40,16 @@ export class MessageProcessingWorkerFactory {
           message as AMQPDocumentMessage,
           new DocumentDAO(),
           new DocumentGraphQLClient(),
+        )
+      case 'harvesting_state_event':
+        return new HarvestingStateEventWorker(
+          message as AMQPHarvestingStateEventMessage,
+          new PersonDAO(),
+        )
+      case 'harvesting_result_event':
+        return new HarvestingResultEventWorker(
+          message as AMQPHarvestingResultEventMessage,
+          new PersonDAO(),
         )
       default:
         throw new Error(`Unsupported message type: ${message.type}`)

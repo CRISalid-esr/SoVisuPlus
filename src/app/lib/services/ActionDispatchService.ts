@@ -62,6 +62,8 @@ export class ActionDispatchService {
     switch (targetType) {
       case ActionTargetType.DOCUMENT:
         return `task.documents.document.${action.toLowerCase()}`
+      case ActionTargetType.PERSON:
+        return `task.person.documents.${action.toLowerCase()}`
       default:
         throw new Error(`Unsupported target type: ${targetType}`)
     }

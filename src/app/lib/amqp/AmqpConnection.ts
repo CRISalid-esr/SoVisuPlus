@@ -13,6 +13,7 @@ class AmqpConnection {
     'event.people.person.*',
     'event.structures.structure.*',
     'event.documents.document.*',
+    'event.harvestings.*.*',
   ]
 
   constructor() {

@@ -5,12 +5,36 @@ import { AMQPMessage } from '@/types/AMQPMessage'
 import { AMQPEntityData } from '@/types/AMQPEntityData'
 import { Sema } from 'async-sema'
 import { ActionDispatchService } from '../app/lib/services/ActionDispatchService'
+import { WebSocketServer } from 'ws'
+import { WebSocketNotifier } from '../app/lib/websocket/WebSocketNotifier'
 
 dotenv.config()
 ;(async () => {
   // Migrate to application configuration
   const semaphore = new Sema(1)
   try {
+    const websocketPort = process.env.WS_PORT
+      ? parseInt(process.env.WS_PORT)
+      : 3001
+    const wss = new WebSocketServer({ port: websocketPort })
+
+    WebSocketNotifier.attach(wss)
+
+    setInterval(() => {
+      for (const client of wss.clients) {
+        if (client.readyState === client.OPEN) {
+          client.send(
+            JSON.stringify({
+              type: 'ping',
+              timestamp: new Date().toISOString(),
+            }),
+          )
+        }
+      }
+    }, 30000) // Send ping every 30 seconds
+
+    console.log(`WebSocket server listening on ws://localhost:${websocketPort}`)
+
     console.log('Connecting to RabbitMQ...')
     const connection = new AmqpConnection()
     await connection.connect()

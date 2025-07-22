@@ -1,6 +1,7 @@
 import { AMQPMessage } from '@/types/AMQPMessage'
 import { AMQPEntityData } from '@/types/AMQPEntityData'
 import { MessageProcessingWorkerFactory } from '@/lib/amqp/workers/MessageProcessingWorkerFactory'
+import { WebSocketNotifier } from '@/lib/websocket/WebSocketNotifier'
 
 export default class MessageProcessingService {
   private static instance: MessageProcessingService | null = null
@@ -21,6 +22,9 @@ export default class MessageProcessingService {
     message: T,
   ): Promise<void> {
     const worker = this.workerFactory.createWorker(message)
-    await worker.process()
+    const events = await worker.process()
+    for (const event of events) {
+      WebSocketNotifier.notifyClients(event)
+    }
   }
 }

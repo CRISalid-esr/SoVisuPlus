@@ -15,12 +15,17 @@ import * as Lingui from '@lingui/core'
 import { t, Trans } from '@lingui/macro'
 
 import { LanguageChips } from '@/components/LanguageChips'
-import { DocumentSync } from '@/types/DocumentSync'
-import { DocumentSyncStatus } from '@/types/DocumentSyncStatus'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import { Localization } from '@/types/Localization'
 import InfoIcon from '@mui/icons-material/Info'
-import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -38,10 +43,10 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Highlighter from 'react-highlight-words'
 import DocumentHeader from './components/DocumentHeader'
 import HalStatusCell from './components/HalStatusCell'
-import BibliographicSyncDataModal from './components/documentsSyncModal/DocumentSyncModal'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
 import SyncIcon from '@mui/icons-material/Sync'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
+import DocumentSyncDialog from '@/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog'
 
 dayjs.extend(utc)
 
@@ -61,19 +66,6 @@ export default function DocumentsPage() {
 
   const [openSynchronizeModal, setOpenSynchronizeModal] =
     useState<boolean>(false)
-  const [documentSync, setDocumentSync] = useState<DocumentSync[]>(
-    Object.values(BibliographicPlatform).map((platform) => ({
-      name: platform,
-      status: DocumentSyncStatus.success,
-      selected: false,
-      changes: {
-        added: 0,
-        updated: 0,
-        deleted: 0,
-      },
-    })),
-  )
-
   const { currentPerspective, ownPerspective } = useStore((state) => state.user)
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
@@ -81,6 +73,13 @@ export default function DocumentsPage() {
   const [selectedTitleLangs, setSelectedTitleLangs] = useState<
     Record<string, string>
   >({})
+
+  const harvestings = useStore((state) => state.harvesting.harvestings)
+  const currentPerspectiveHarvesting =
+    harvestings[currentPerspective?.uid || '']
+  const isAnyHarvestingRunning = Object.values(
+    currentPerspectiveHarvesting || {},
+  ).some((h) => h?.status === 'running')
 
   const theme = useTheme()
   const router = useRouter()
@@ -418,6 +417,7 @@ export default function DocumentsPage() {
     documents = [],
     totalItems,
     count: { allItems, incompleteHalRepositoryItems },
+    reloadListTrigger,
   } = useStore((state) => state.document)
 
   const tabs = [
@@ -534,6 +534,7 @@ export default function DocumentsPage() {
     countDocuments,
     currentPerspective,
     selectedTab,
+    reloadListTrigger,
   ])
 
   useEffect(() => {
@@ -562,7 +563,13 @@ export default function DocumentsPage() {
         }
       >
         <Button
-          startIcon={<SyncIcon />}
+          startIcon={
+            isAnyHarvestingRunning ? (
+              <CircularProgress size={18} thickness={4} />
+            ) : (
+              <SyncIcon />
+            )
+          }
           variant='outlined'
           onClick={() => setOpenSynchronizeModal(true)}
         >
@@ -575,11 +582,10 @@ export default function DocumentsPage() {
         onTabChange={handleTabChange}
       />
 
-      <BibliographicSyncDataModal
+      <DocumentSyncDialog
         openSynchronizeModal={openSynchronizeModal}
         setOpenSynchronizeModal={setOpenSynchronizeModal}
-        documentSync={documentSync}
-        setDocumentSync={setDocumentSync}
+        personUid={currentPerspective?.uid || ''}
       />
 
       <MaterialReactTable
