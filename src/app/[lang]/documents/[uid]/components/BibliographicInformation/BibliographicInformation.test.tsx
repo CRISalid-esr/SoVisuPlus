@@ -2,6 +2,8 @@ import DateProvider from '@/components/DateProvider'
 import useStore from '@/stores/global_store'
 import { Contribution } from '@/types/Contribution'
 import { Document, DocumentType } from '@/types/Document'
+import { Journal } from '@/types/Journal'
+import { JournalIdentifier } from '@/types/JournalIdentifier'
 import { Literal } from '@/types/Literal'
 import { LocRelator } from '@/types/LocRelator'
 import { Person } from '@/types/Person'
@@ -65,6 +67,10 @@ const document: Document = new Document(
       [LocRelator.AUTHOR_OF_INTRODUCTION__ETC_],
     ),
   ],
+  [],
+  new Journal(['Test journal'], '0123-4567', 'Test publisher', [
+    new JournalIdentifier('issn', '0123-4567', 'Online'),
+  ]),
 )
 
 describe('BibliographicInformation Component', () => {
@@ -115,12 +121,21 @@ describe('BibliographicInformation Component', () => {
       screen.getByText(i18n.t('document_details_page_titles_row_label')),
     ).toBeInTheDocument()
     expect(
+      screen.getByText(i18n.t('document_details_page_type_row_label')),
+    ).toBeInTheDocument()
+    expect(
       screen.getByText(i18n.t('document_details_page_authors_row_label')),
     ).toBeInTheDocument()
     expect(
       screen.getByText(
         i18n.t('document_details_page_publication_date_row_label'),
       ),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(i18n.t('document_details_page_journal_row_label')),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(i18n.t('document_details_page_abstracts_row_label')),
     ).toBeInTheDocument()
     expect(
       screen.getByText(i18n.t('document_details_page_sources_row_label')),
