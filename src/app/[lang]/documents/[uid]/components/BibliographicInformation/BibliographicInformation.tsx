@@ -149,7 +149,7 @@ const BibliographicInformation = () => {
         }}
       >
         <TableContainer>
-          <Table sx={{ minWidth: 650 }} aria-label='simple table'>
+          <Table sx={{ minWidth: 300 }}>
             <TableBody>
               {fieldsToDisplay.map((fieldKey) => {
                 const field = documentFields[fieldKey]
