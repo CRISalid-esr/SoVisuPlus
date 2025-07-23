@@ -7,9 +7,10 @@ import { LanguageChips } from '@/components/LanguageChips'
 import useStore from '@/stores/global_store'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import RowLabel from './RowLabel'
-import { DocumentField } from './BibliographicInformation'
-
-type LocalizableFieldValue = 'titles' | 'abstracts'
+import {
+  DocumentField,
+  DocumentLocalizableFieldKey,
+} from './BibliographicInformation'
 
 export default function Row({ field }: { field: DocumentField }) {
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
@@ -26,7 +27,7 @@ export default function Row({ field }: { field: DocumentField }) {
       process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',') || []
 
     const { language, value } = getLocalizedValue(
-      selectedDocument?.[field.value as LocalizableFieldValue] ?? [],
+      selectedDocument?.[field.value as DocumentLocalizableFieldKey] ?? [],
       selectedLang,
       supportedLocales,
       field.noContentAvailableMessage || '',
@@ -58,7 +59,9 @@ export default function Row({ field }: { field: DocumentField }) {
           {field.hasLanguageSelector && (
             <LanguageChips
               texts={
-                selectedDocument?.[field.value as LocalizableFieldValue] ?? []
+                selectedDocument?.[
+                  field.value as DocumentLocalizableFieldKey
+                ] ?? []
               }
               selectedLang={selectedLang}
               onLanguageSelect={handleLanguageChange}

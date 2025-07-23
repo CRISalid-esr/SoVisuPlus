@@ -32,6 +32,8 @@ export type DocumentFieldKey =
   | 'abstracts'
   | 'sources'
 
+export type DocumentLocalizableFieldKey = 'titles' | 'abstracts'
+
 export interface DocumentField {
   value: DocumentFieldKey
   title: string
