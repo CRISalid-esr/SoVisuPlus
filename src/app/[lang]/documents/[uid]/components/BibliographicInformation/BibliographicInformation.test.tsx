@@ -103,7 +103,7 @@ describe('BibliographicInformation Component', () => {
       </ThemeProvider>,
     )
 
-  it('renders the component with a title and button', async () => {
+  it('renders the component with a title and button', () => {
     renderComponent()
 
     expect(
@@ -114,7 +114,7 @@ describe('BibliographicInformation Component', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders document fields based on selected document', async () => {
+  it('renders document fields based on selected document', () => {
     renderComponent()
 
     expect(
@@ -142,7 +142,7 @@ describe('BibliographicInformation Component', () => {
     ).toBeInTheDocument()
   })
 
-  it('handles button click', async () => {
+  it('handles button click', () => {
     renderComponent()
 
     const validateButton = screen.getByText(
