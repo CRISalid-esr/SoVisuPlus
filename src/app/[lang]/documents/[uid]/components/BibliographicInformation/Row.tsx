@@ -1,4 +1,4 @@
-import { TableCell, TableRow } from '@mui/material'
+import { Box, TableCell, TableRow } from '@mui/material'
 import * as Lingui from '@lingui/core'
 import { useEffect, useState } from 'react'
 
@@ -50,17 +50,20 @@ export default function Row({ field }: { field: DocumentField }) {
   return (
     <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
       <TableCell component='th' scope='row'>
-        <RowLabel>{field.title}</RowLabel>
+        <Box sx={{ alignItems: 'center', display: 'flex', gap: '2rem' }}>
+          <RowLabel>{field.title}</RowLabel>
 
-        {field.hasLanguageSelector && (
-          <LanguageChips
-            texts={
-              selectedDocument?.[field.value as 'titles' | 'abstracts'] ?? []
-            }
-            selectedLang={selectedLang}
-            onLanguageSelect={handleLanguageChange}
-          />
-        )}
+          {field.hasLanguageSelector && (
+            <LanguageChips
+              texts={
+                selectedDocument?.[field.value as 'titles' | 'abstracts'] ?? []
+              }
+              selectedLang={selectedLang}
+              onLanguageSelect={handleLanguageChange}
+              isInline
+            />
+          )}
+        </Box>
       </TableCell>
 
       <TableCell>

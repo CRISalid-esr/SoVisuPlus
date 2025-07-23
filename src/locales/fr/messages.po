@@ -297,12 +297,12 @@ msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:79
 msgid "document_details_page_journal_source_type"
-msgstr ""
+msgstr "Type de source : {0}"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:86
 msgid "document_details_page_journal_publisher"
-msgstr ""
+msgstr "Éditeur : {0}"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:66
@@ -351,11 +351,11 @@ msgstr "Retour aux publications"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:80
 msgid "document_details_page_journal_journal"
-msgstr ""
+msgstr "journal"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:62
 msgid "document_details_page_journal_row_label"
-msgstr "Journal"
+msgstr "Publié dans"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:78
 msgid "document_details_page_no_abstract_available"

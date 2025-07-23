@@ -35,7 +35,17 @@ export default function Journal() {
     title && (
       <ClickAwayListener onClickAway={handleClickAway}>
         <Box>
-          <Button variant='text' ref={titleRef} onClick={handleClick}>
+          <Button
+            variant='text'
+            ref={titleRef}
+            onClick={handleClick}
+            sx={{
+              p: 0,
+              '&:active': { backgroundColor: 'initial' },
+              '&:focus': { backgroundColor: 'initial' },
+              '&:hover': { backgroundColor: 'initial' },
+            }}
+          >
             {title}
           </Button>
 
