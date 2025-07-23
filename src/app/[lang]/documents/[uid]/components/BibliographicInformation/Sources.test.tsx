@@ -103,12 +103,9 @@ describe('Sources Component', () => {
       </ThemeProvider>,
     )
 
-  it('renders sources label and edit button', () => {
+  it('renders sources edit button', () => {
     renderComponent()
 
-    expect(
-      screen.getByText('document_details_page_sources_row_label'),
-    ).toBeInTheDocument()
     expect(
       screen.getByText('document_details_page_sources_row_update_source'),
     ).toBeInTheDocument()

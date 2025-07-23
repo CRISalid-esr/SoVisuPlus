@@ -118,7 +118,9 @@ describe('BibliographicInformation Component', () => {
       screen.getByText(i18n.t('document_details_page_authors_row_label')),
     ).toBeInTheDocument()
     expect(
-      screen.getByText(i18n.t('document_details_page_date_row_label')),
+      screen.getByText(
+        i18n.t('document_details_page_publication_date_row_label'),
+      ),
     ).toBeInTheDocument()
     expect(
       screen.getByText(i18n.t('document_details_page_sources_row_label')),

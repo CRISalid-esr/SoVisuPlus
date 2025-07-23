@@ -23,7 +23,7 @@ import Journal from './Journal'
 import Abstracts from './Abstracts'
 import Row from './Row'
 
-type DocumentFieldKey =
+export type DocumentFieldKey =
   | 'titles'
   | 'type'
   | 'journal'

@@ -91,12 +91,9 @@ describe('Authors Component', () => {
       </ThemeProvider>,
     )
 
-  it('renders author label and button', () => {
+  it('renders author button', () => {
     renderComponent()
 
-    expect(
-      screen.getByText('document_details_page_authors_row_label'),
-    ).toBeInTheDocument()
     expect(
       screen.getByText('document_details_page_authors_row_update_author'),
     ).toBeInTheDocument()
