@@ -60,7 +60,7 @@ const BibliographicInformation = () => {
     journal: {
       value: 'journal',
       title: t`document_details_page_journal_row_label`,
-      component: Journal,
+      component: selectedDocument?.journal ? Journal : null,
     },
     authors: {
       value: 'authors',
