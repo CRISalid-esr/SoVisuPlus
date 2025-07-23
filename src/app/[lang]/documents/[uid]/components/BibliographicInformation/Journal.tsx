@@ -39,12 +39,7 @@ export default function Journal() {
             variant='text'
             ref={titleRef}
             onClick={handleClick}
-            sx={{
-              p: 0,
-              '&:active': { backgroundColor: 'initial' },
-              '&:focus': { backgroundColor: 'initial' },
-              '&:hover': { backgroundColor: 'initial' },
-            }}
+            sx={{ p: 0 }}
           >
             {title}
           </Button>
