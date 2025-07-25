@@ -122,14 +122,14 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:110
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:135
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:137
 msgid "document_details_page_card_title"
 msgstr "Bibliographic information"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:113
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:149
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:138
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:140
 msgid "document_details_page_card_validate_button"
 msgstr "Confirm"
 
@@ -349,11 +349,11 @@ msgstr "Disciplines"
 msgid "document_details_keywords_tab"
 msgstr "Keywords"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:77
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:79
 msgid "document_details_page_abstracts_row_label"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:67
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:69
 msgid "document_details_page_authors_row_label"
 msgstr ""
 
@@ -373,23 +373,23 @@ msgstr "Back to my publications"
 msgid "document_details_page_journal_journal"
 msgstr "journal"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:62
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:64
 msgid "document_details_page_journal_row_label"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:78
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:80
 msgid "document_details_page_no_abstract_available"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:51
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:53
 msgid "document_details_page_no_title_available"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:72
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:74
 msgid "document_details_page_publication_date_row_label"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:84
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:86
 msgid "document_details_page_sources_row_label"
 msgstr ""
 
@@ -397,11 +397,11 @@ msgstr ""
 msgid "document_details_page_sources_row_update_source"
 msgstr "Compare sources"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:50
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:52
 msgid "document_details_page_titles_row_label"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:57
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:59
 msgid "document_details_page_type_row_label"
 msgstr ""
 
