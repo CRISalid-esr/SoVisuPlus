@@ -138,7 +138,7 @@ msgstr "Confirm"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:53
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:97
 msgid "document_details_page_titles_row_label"
-msgstr ""
+msgstr "Title"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:124
@@ -149,12 +149,12 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:127
 msgid "document_details_page_authors_row_label"
-msgstr ""
+msgstr "Authors"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:131
 msgid "document_details_page_publication_date_row_label"
-msgstr ""
+msgstr "Publication date"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:135
@@ -169,7 +169,7 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:141
 msgid "document_details_page_sources_row_label"
-msgstr ""
+msgstr "Sources"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
@@ -355,7 +355,7 @@ msgstr ""
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:69
 msgid "document_details_page_authors_row_label"
-msgstr ""
+msgstr "Authors"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:63
 msgid "document_details_page_authors_row_update_author"
@@ -387,11 +387,11 @@ msgstr ""
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:74
 msgid "document_details_page_publication_date_row_label"
-msgstr ""
+msgstr "Publication date"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:86
 msgid "document_details_page_sources_row_label"
-msgstr ""
+msgstr "Sources"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.tsx:62
 msgid "document_details_page_sources_row_update_source"
@@ -399,7 +399,7 @@ msgstr "Compare sources"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:52
 msgid "document_details_page_titles_row_label"
-msgstr ""
+msgstr "Title"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:59
 msgid "document_details_page_type_row_label"
