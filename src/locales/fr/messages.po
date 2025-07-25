@@ -14,31 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:65
-msgid "snackbar_document_created"
-msgstr "Nouvelle publication : "
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:68
-msgid "snackbar_document_updated"
-msgstr "Publication mise à jour : "
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:71
-msgid "snackbar_document_deleted"
-msgstr "Publication supprimée : "
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:74
-msgid "snackbar_document_unchanged"
-msgstr "Publication inchangée : "
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:78
-msgid "snackbar_view_document"
-msgstr "Voir la publication"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Mes autorisations"
@@ -340,6 +315,31 @@ msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
 #. js-lingui-explicit-id
+#: src/app/lib/websocket/WebSocketListener.tsx:65
+msgid "snackbar_document_created"
+msgstr "Nouvelle publication : "
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/WebSocketListener.tsx:68
+msgid "snackbar_document_updated"
+msgstr "Publication mise à jour : "
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/WebSocketListener.tsx:71
+msgid "snackbar_document_deleted"
+msgstr "Publication supprimée : "
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/WebSocketListener.tsx:74
+msgid "snackbar_document_unchanged"
+msgstr "Publication inchangée : "
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/WebSocketListener.tsx:78
+msgid "snackbar_view_document"
+msgstr "Voir la publication"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:84
 msgid "document_details_page_journal_source_type"
 msgstr "Type de source : {0}"
@@ -475,7 +475,7 @@ msgid "documents_page_conference_article_icon_label"
 msgstr "Article de conférence"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:136
-#: src/app/[lang]/documents/page.tsx:199
+#: src/app/[lang]/documents/page.tsx:198
 msgid "documents_page_contributors_column"
 msgstr "auteurs"
 
@@ -528,7 +528,7 @@ msgid "documents_page_proceedings_icon_label"
 msgstr "Procédure"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:141
-#: src/app/[lang]/documents/page.tsx:232
+#: src/app/[lang]/documents/page.tsx:231
 msgid "documents_page_publication_date_column"
 msgstr "Date de publication"
 
@@ -538,7 +538,7 @@ msgid "documents_page_publication_date_column_no_date_available"
 msgstr "Aucune date"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:146
-#: src/app/[lang]/documents/page.tsx:264
+#: src/app/[lang]/documents/page.tsx:263
 msgid "documents_page_publishedIn_column"
 msgstr "paru dans"
 
@@ -547,7 +547,7 @@ msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Publication scientifique"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:154
-#: src/app/[lang]/documents/page.tsx:291
+#: src/app/[lang]/documents/page.tsx:290
 msgid "documents_page_source_column"
 msgstr "Sources"
 
@@ -595,12 +595,12 @@ msgid "documents_page_synchronize_modal_title"
 msgstr "Sources à synchroniser"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:103
-#: src/app/[lang]/documents/page.tsx:141
+#: src/app/[lang]/documents/page.tsx:140
 msgid "documents_page_title_column"
 msgstr "titre"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:61
-#: src/app/[lang]/documents/page.tsx:101
+#: src/app/[lang]/documents/page.tsx:100
 msgid "documents_page_type_column"
 msgstr "type"
 
@@ -637,7 +637,7 @@ msgstr "Notifications"
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:16
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:98
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:117
-#: src/app/[lang]/documents/page.tsx:155
+#: src/app/[lang]/documents/page.tsx:154
 msgid "no_title_available"
 msgstr "aucun titre disponible"
 
