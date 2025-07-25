@@ -1,5 +1,5 @@
 import { Typography } from '@mui/material'
 
-export default function Titles({ content }: { content: string }) {
+export default function Abstracts({ content }: { content: string }) {
   return <Typography>{content}</Typography>
 }

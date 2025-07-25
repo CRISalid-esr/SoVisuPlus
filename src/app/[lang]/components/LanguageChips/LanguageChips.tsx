@@ -6,6 +6,7 @@ interface LanguageChipsProps {
   texts: Literal[]
   selectedLang: string
   onLanguageSelect: (lang: string) => void
+  isInline?: boolean
 }
 
 /**
@@ -15,11 +16,12 @@ export default function LanguageChips({
   texts,
   selectedLang,
   onLanguageSelect,
+  isInline,
 }: LanguageChipsProps) {
   const theme = useTheme()
   const hideUndeterminedLanguage = texts.length < 2
   return (
-    <Box>
+    <Box sx={isInline ? { display: 'flex' } : {}}>
       {texts
         .filter((text) => !(text.language == 'ul' && hideUndeterminedLanguage))
         .map((text, index) => (
