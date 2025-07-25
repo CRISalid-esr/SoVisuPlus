@@ -6,6 +6,7 @@ export type HarvestingStatus =
   | 'completed'
   | 'failed'
   | 'pending'
+  | 'not_applicable'
 
 export interface HarvestingResult {
   created: number

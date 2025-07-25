@@ -1,7 +1,7 @@
 import { AMQPDocumentData } from '@/types/AMQPDocumentData'
-import { AMQPMessage } from '@/types/AMQPMessage'
 
-export interface AMQPDocumentMessage extends AMQPMessage<AMQPDocumentData> {
+export interface AMQPDocumentMessage {
   type: 'document'
   event: 'created' | 'updated' | 'deleted' | 'unchanged'
+  fields: AMQPDocumentData
 }

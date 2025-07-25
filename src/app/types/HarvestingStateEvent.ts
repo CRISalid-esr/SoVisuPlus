@@ -4,7 +4,7 @@ export const harvestingStates = [
   'running',
   'completed',
   'failed',
-  'stopped',
+  'not_applicable',
 ] as const
 
 export type HarvestingState = (typeof harvestingStates)[number]

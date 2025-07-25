@@ -12,11 +12,12 @@ import {
 } from '@mui/material'
 import { Trans } from '@lingui/macro'
 import Image from 'next/image'
-import { FC, useEffect, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import useStore from '@/app/stores/global_store'
 import HarvestingDetails from './HarvestingDetails'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
+import BlockIcon from '@mui/icons-material/Block'
 
 interface DocumentSyncDialogProps {
   openSynchronizeModal: boolean
@@ -153,6 +154,9 @@ const DocumentSyncDialog: FC<DocumentSyncDialogProps> = ({
                 )}
                 {data.status === 'pending' && (
                   <HourglassEmptyIcon sx={{ width: 40, height: 40 }} />
+                )}
+                {data.status === 'not_applicable' && (
+                  <BlockIcon sx={{ width: 40, height: 40 }} />
                 )}
 
                 {data.status === 'failed' && (

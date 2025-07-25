@@ -95,6 +95,10 @@ const mockState = {
     },
     ownPerspective: true,
   },
+  harvesting: {
+    harvestings: [],
+    initializeHarvesting: jest.fn(),
+  },
 }
 beforeEach(() => {
   ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>

@@ -1,7 +1,7 @@
 import { ActionDispatchService } from './ActionDispatchService'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
-import AmqpConnection from '@/lib/amqp/AmqpConnection'
+import { AmqpConnection } from '@/lib/amqp/AmqpConnection'
 
 // Mocks
 jest.mock('@/lib/daos/ActionDAO')

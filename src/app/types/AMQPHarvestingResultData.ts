@@ -1,6 +1,4 @@
-import { AMQPData } from '@/types/AMQPData'
-
-export interface AMQPHarvestingResultData extends AMQPData {
+export interface AMQPHarvestingResultData {
   reference_event: {
     type: 'created' | 'updated' | 'unchanged' | 'deleted'
     reference: {

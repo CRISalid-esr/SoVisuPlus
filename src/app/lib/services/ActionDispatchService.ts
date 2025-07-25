@@ -1,5 +1,5 @@
 import { Action, ActionTargetType, ActionType } from '@/types/Action'
-import AmqpConnection from '@/lib/amqp/AmqpConnection'
+import { AmqpConnection } from '@/lib/amqp/AmqpConnection'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
 
 export class ActionDispatchService {
@@ -28,17 +28,7 @@ export class ActionDispatchService {
 
     for (const action of undispatched) {
       try {
-        const message = JSON.stringify({
-          id: action.id,
-          actionType: action.actionType,
-          targetType: action.targetType,
-          targetUid: action.targetUid,
-          path: action.path,
-          parameters: action.parameters,
-          timestamp: action.timestamp.toISOString(),
-          personUid: action.personUid,
-          application: 'sovisuplus',
-        })
+        const message = this.buildJSONMessage(action)
 
         const routingKey = this.buildRoutingKey(
           action.targetType,
@@ -53,6 +43,20 @@ export class ActionDispatchService {
         console.error(`Failed to dispatch change ${action.id}:`, err)
       }
     }
+  }
+
+  private buildJSONMessage(action: Action): string {
+    return JSON.stringify({
+      id: action.id,
+      actionType: action.actionType,
+      targetType: action.targetType,
+      targetUid: action.targetUid,
+      path: action.path,
+      parameters: action.parameters,
+      timestamp: action.timestamp.toISOString(),
+      personUid: action.personUid,
+      application: 'sovisuplus',
+    })
   }
 
   private buildRoutingKey(

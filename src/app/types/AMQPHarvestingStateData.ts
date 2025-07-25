@@ -1,6 +1,4 @@
-import { AMQPData } from '@/types/AMQPData'
-
-export interface AMQPHarvestingStateData extends AMQPData {
+export interface AMQPHarvestingStateData {
   harvester: string
   state: 'running' | 'completed' | 'error'
   error: string[]

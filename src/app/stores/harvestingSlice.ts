@@ -1,6 +1,6 @@
 import { StateCreator } from 'zustand'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
-import { Harvesting } from '@/types/Harvesting'
+import { Harvesting, HarvestingStatus } from '@/types/Harvesting'
 
 export interface HarvestingSlice {
   harvesting: {
@@ -14,7 +14,11 @@ export interface HarvestingSlice {
       platform: BibliographicPlatform,
     ) => void
 
-    stopHarvesting: (personUid: string, platform: BibliographicPlatform) => void
+    updateHarvestingStatus: (
+      personUid: string,
+      platform: BibliographicPlatform,
+      status: HarvestingStatus,
+    ) => void
     incrementPlatformCount: (
       personUid: string,
       platform: BibliographicPlatform,
@@ -88,13 +92,18 @@ export const addHarvestingSlice: StateCreator<
         }
       })
     },
-    stopHarvesting: (personUid: string, platform: BibliographicPlatform) => {
+
+    updateHarvestingStatus: (
+      personUid: string,
+      platform: BibliographicPlatform,
+      status: HarvestingStatus,
+    ) => {
       set((state) => {
         const harvesting = state.harvesting.harvestings[personUid]?.[platform]
         if (!harvesting) return state
 
         const update: Partial<Harvesting> = {
-          status: 'completed',
+          status,
         }
 
         return {

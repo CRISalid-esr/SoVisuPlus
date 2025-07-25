@@ -1,6 +1,4 @@
-import { AMQPData } from '@/types/AMQPData'
-
-export interface AMQPEntityData extends AMQPData {
+export interface AMQPEntityData {
   uid: string
   identifiers: Array<{ type: string; value: string }>
 }

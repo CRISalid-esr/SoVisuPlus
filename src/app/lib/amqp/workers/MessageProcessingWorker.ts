@@ -5,9 +5,8 @@ import { HarvestingResultEvent } from '@/types/HarvestingResultEvent'
 
 /**
  * Abstract class for a message processing worker.
- * The message is passed via the constructor and stored as a property.
  */
-export abstract class MessageProcessingWorker<T extends AMQPMessage<unknown>> {
+export abstract class MessageProcessingWorker<T extends AMQPMessage> {
   constructor(protected message: T) {}
 
   /**

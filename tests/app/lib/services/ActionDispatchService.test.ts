@@ -1,7 +1,7 @@
 import prisma from '@/lib/daos/prisma'
 import { ActionDispatchService } from '@/lib/services/ActionDispatchService'
 import { ActionTargetType, ActionType } from '@prisma/client'
-import AmqpConnection from '@/lib/amqp/AmqpConnection'
+import { AmqpConnection } from '@/lib/amqp/AmqpConnection'
 
 // Mock AMQP connection
 const mockPublish = jest.fn()

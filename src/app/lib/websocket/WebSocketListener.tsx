@@ -7,9 +7,8 @@ import { Trans } from '@lingui/react'
 
 export default function WebSocketListener() {
   const { enqueueSnackbar } = useSnackbar()
-  const { startHarvesting, stopHarvesting, incrementPlatformCount } = useStore(
-    (state) => state.harvesting,
-  )
+  const { startHarvesting, updateHarvestingStatus, incrementPlatformCount } =
+    useStore((state) => state.harvesting)
   const { currentPerspective } = useStore((state) => state.user)
   const { triggerReloadList, triggerReloadSelected, selectedDocument } =
     useStore((state) => state.document)
@@ -90,7 +89,17 @@ export default function WebSocketListener() {
           startHarvesting(data.personUid, data.platform)
         }
         if (data.state && data.state === 'completed') {
-          stopHarvesting(data.personUid, data.platform)
+          updateHarvestingStatus(data.personUid, data.platform, 'completed')
+        }
+        if (data.state && data.state === 'not_applicable') {
+          updateHarvestingStatus(
+            data.personUid,
+            data.platform,
+            'not_applicable',
+          )
+        }
+        if (data.state && data.state === 'failed') {
+          updateHarvestingStatus(data.personUid, data.platform, 'failed')
         }
         if (data.status) {
           incrementPlatformCount(data.personUid, data.platform, data.status)
@@ -103,7 +112,7 @@ export default function WebSocketListener() {
     enqueueSnackbar,
     currentPerspective,
     startHarvesting,
-    stopHarvesting,
+    updateHarvestingStatus,
     incrementPlatformCount,
     triggerReloadList,
     triggerReloadSelected,
