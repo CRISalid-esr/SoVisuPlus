@@ -57,13 +57,6 @@ describe('PublicationDate Component', () => {
       </ThemeProvider>,
     )
 
-  it('renders publication date label', () => {
-    renderComponent()
-    expect(
-      screen.getByText('document_details_page_date_row_label'),
-    ).toBeInTheDocument()
-  })
-
   it('displays "no date available" when publication date is missing', () => {
     ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
       selector({ document: { selectedDocument: { publicationDate: null } } }),

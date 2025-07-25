@@ -1,27 +1,45 @@
 import { CustomCard } from '@/components/Card'
 import useStore from '@/stores/global_store'
 import { Trans } from '@lingui/react'
+import { t } from '@lingui/macro'
 import {
   Box,
   Button,
   CardContent,
-  List,
-  ListItem,
+  Table,
+  TableBody,
+  TableContainer,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
 import { DocumentType } from '@/types/Document'
 import Authors from './Authors'
-import PulicationDate from './PublicationDate'
+import PublicationDate from './PublicationDate'
 import Sources from './Sources'
 import Titles from './Titles'
+import Type from './Type'
+import Journal from './Journal'
+import Abstracts from './Abstracts'
+import Row from './Row'
 
-type DocumentFieldKey = 'titles' | 'authors' | 'date' | 'sources'
+export type DocumentFieldKey =
+  | 'titles'
+  | 'type'
+  | 'journal'
+  | 'authors'
+  | 'date'
+  | 'abstracts'
+  | 'sources'
 
-interface DocumentField {
+export type DocumentLocalizableFieldKey = 'titles' | 'abstracts'
+
+export interface DocumentField {
   value: DocumentFieldKey
-  component: JSX.Element | null
+  title: string
+  noContentAvailableMessage?: string
+  component: React.ComponentType<{ content: string }> | null
+  hasLanguageSelector?: boolean
 }
 
 const BibliographicInformation = () => {
@@ -31,35 +49,64 @@ const BibliographicInformation = () => {
   const documentFields: Record<DocumentFieldKey, DocumentField> = {
     titles: {
       value: 'titles',
-      component: selectedDocument?.titles ? <Titles /> : null,
+      title: t`document_details_page_titles_row_label`,
+      noContentAvailableMessage: t`document_details_page_no_title_available`,
+      component: selectedDocument?.titles ? Titles : null,
+      hasLanguageSelector: true,
+    },
+    type: {
+      value: 'type',
+      title: t`document_details_page_type_row_label`,
+      component: Type,
+    },
+    journal: {
+      value: 'journal',
+      title: t`document_details_page_journal_row_label`,
+      component: selectedDocument?.journal ? Journal : null,
     },
     authors: {
       value: 'authors',
-      component: <Authors />,
+      title: t`document_details_page_authors_row_label`,
+      component: Authors,
     },
     date: {
       value: 'date',
-      component: <PulicationDate />,
+      title: t`document_details_page_publication_date_row_label`,
+      component: PublicationDate,
+    },
+    abstracts: {
+      value: 'abstracts',
+      title: t`document_details_page_abstracts_row_label`,
+      noContentAvailableMessage: t`document_details_page_no_abstract_available`,
+      component: selectedDocument?.abstracts ? Abstracts : null,
+      hasLanguageSelector: true,
     },
     sources: {
       value: 'sources',
-      component: <Sources />,
+      title: t`document_details_page_sources_row_label`,
+      component: Sources,
     },
   }
+
+  const commonTypeFields: DocumentFieldKey[] = [
+    'titles',
+    'type',
+    'date',
+    'journal',
+    'authors',
+    'abstracts',
+    'sources',
+  ]
+
   const documentTypeFields: Record<DocumentType, DocumentFieldKey[]> = {
-    [DocumentType.JournalArticle]: ['titles', 'authors', 'date', 'sources'],
-    [DocumentType.Document]: ['titles', 'authors', 'date', 'sources'],
-    [DocumentType.ScholarlyPublication]: [
-      'titles',
-      'authors',
-      'date',
-      'sources',
-    ],
-    [DocumentType.Book]: ['titles', 'authors', 'date', 'sources'],
-    [DocumentType.Monograph]: ['titles', 'authors', 'date', 'sources'],
-    [DocumentType.BookChapter]: ['titles', 'authors', 'date', 'sources'],
-    [DocumentType.ConferenceArticle]: ['titles', 'authors', 'date', 'sources'],
-    [DocumentType.Proceedings]: ['titles', 'authors', 'date', 'sources'],
+    [DocumentType.JournalArticle]: commonTypeFields,
+    [DocumentType.Document]: commonTypeFields,
+    [DocumentType.ScholarlyPublication]: commonTypeFields,
+    [DocumentType.Book]: commonTypeFields,
+    [DocumentType.Monograph]: commonTypeFields,
+    [DocumentType.BookChapter]: commonTypeFields,
+    [DocumentType.ConferenceArticle]: commonTypeFields,
+    [DocumentType.Proceedings]: commonTypeFields,
   }
 
   const fieldsToDisplay: DocumentFieldKey[] =
@@ -103,29 +150,21 @@ const BibliographicInformation = () => {
           gap: theme.spacing(4),
         }}
       >
-        <List
-          sx={{
-            paddingLeft: theme.spacing(2),
-            width: '100%',
-          }}
-        >
-          {fieldsToDisplay.map((fieldKey) => {
-            const field = documentFields[fieldKey]
-            return field?.component ? (
-              <ListItem
-                key={fieldKey}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: theme.spacing(2),
-                  borderBottom: `1px solid ${theme.palette.grey[300]}`,
-                }}
-              >
-                {field.component}
-              </ListItem>
-            ) : null
-          })}
-        </List>
+        <TableContainer>
+          <Table sx={{ minWidth: 300 }}>
+            <TableBody>
+              {fieldsToDisplay.map((fieldKey) => {
+                const field = documentFields[fieldKey]
+
+                if (!field.component) {
+                  return null
+                }
+
+                return <Row key={fieldKey} field={field}></Row>
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </CardContent>
     </CustomCard>
   )
