@@ -379,11 +379,11 @@ msgstr ""
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:80
 msgid "document_details_page_no_abstract_available"
-msgstr ""
+msgstr "N/C"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:53
 msgid "document_details_page_no_title_available"
-msgstr ""
+msgstr "N/C"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:74
 msgid "document_details_page_publication_date_row_label"
