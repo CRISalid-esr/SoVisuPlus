@@ -1,7 +1,4 @@
-import { AMQPEntityData } from '@/types/AMQPEntityData'
+import { AMQPEntityMessage } from '@/types/AMQPEntityMessage'
+import { AMQPHarvestingMessage } from '@/types/AMQPHarvestingMessage'
 
-export interface AMQPMessage<T extends AMQPEntityData> {
-  type: 'person' | 'research_structure' | 'document'
-  event: string
-  fields: T
-}
+export type AMQPMessage = AMQPEntityMessage | AMQPHarvestingMessage

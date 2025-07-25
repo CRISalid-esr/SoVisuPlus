@@ -1,5 +1,5 @@
 import * as amqplib from 'amqplib'
-import AmqpConnection from '@/lib/amqp/AmqpConnection'
+import { AmqpConnection } from '@/lib/amqp/AmqpConnection'
 
 jest.mock('amqplib')
 

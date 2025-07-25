@@ -1,7 +1,7 @@
 import { AMQPResearchStructureData } from '@/types/AMQPResearchStructureData'
-import { AMQPMessage } from '@/types/AMQPMessage'
 
-export interface AMQPResearchStructureMessage
-  extends AMQPMessage<AMQPResearchStructureData> {
+export interface AMQPResearchStructureMessage {
   type: 'research_structure'
+  event: 'created' | 'updated' | 'deleted' | 'unchanged'
+  fields: AMQPResearchStructureData
 }

@@ -3,7 +3,7 @@ import { Channel, Connection } from 'amqplib'
 
 type AMQPMessageHandler = (message: string) => void
 
-class AmqpConnection {
+export class AmqpConnection {
   private connection!: Connection
   private channel!: Channel
   private connected: boolean
@@ -13,6 +13,7 @@ class AmqpConnection {
     'event.people.person.*',
     'event.structures.structure.*',
     'event.documents.document.*',
+    'event.harvestings.*.*',
   ]
 
   constructor() {
@@ -94,5 +95,3 @@ class AmqpConnection {
     )
   }
 }
-
-export default AmqpConnection

@@ -4,15 +4,18 @@ import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { FC } from 'react'
 
-type ChangeType = 'added' | 'updated' | 'deleted'
+type ChangeType = 'created' | 'updated' | 'deleted' | 'unchanged'
 
 const PlatformChangesList: FC<{ changes: Record<ChangeType, number> }> = ({
   changes,
 }) => {
   const theme = useTheme()
 
+  console.log('PlatformChangesList changes', changes)
+
   return (
     <List>
+      {/*list item for unchanged*/}
       <ListItem>
         <ListItemIcon
           sx={{
@@ -35,9 +38,34 @@ const PlatformChangesList: FC<{ changes: Record<ChangeType, number> }> = ({
             letterSpacing: '0.5px',
           }}
         >
-          {changes.added || 0}{' '}
+          {changes.unchanged || 0}{' '}
+        </ListItemText>
+      </ListItem>
+      <ListItem>
+        <ListItemIcon
+          sx={{
+            minWidth: theme.spacing(2),
+          }}
+        >
+          <FiberManualRecordIcon
+            sx={{
+              fontSize: theme.utils.pxToRem(8),
+              color: theme.palette.white,
+            }}
+          />
+        </ListItemIcon>
+        <ListItemText
+          sx={{
+            fontWeight: theme.typography[500],
+            fontSize: theme.utils.pxToRem(16),
+            lineHeight: theme.typography.lineHeight.lineHeight16px,
+            fontStyle: 'normal',
+            letterSpacing: '0.5px',
+          }}
+        >
+          {changes.created || 0}{' '}
           <Trans>
-            documents_page_synchronize_modal_synchronize_success_tooltip_added_message
+            documents_page_synchronize_modal_synchronize_details_created
           </Trans>
         </ListItemText>
       </ListItem>
@@ -65,7 +93,7 @@ const PlatformChangesList: FC<{ changes: Record<ChangeType, number> }> = ({
         >
           {changes.updated || 0}{' '}
           <Trans>
-            documents_page_synchronize_modal_synchronize_success_tooltip_updated_message
+            documents_page_synchronize_modal_synchronize_details_updated
           </Trans>
         </ListItemText>
       </ListItem>
@@ -93,7 +121,7 @@ const PlatformChangesList: FC<{ changes: Record<ChangeType, number> }> = ({
         >
           {changes.deleted || 0}{' '}
           <Trans>
-            documents_page_synchronize_modal_synchronize_success_tooltip_deleted_message
+            documents_page_synchronize_modal_synchronize_details_deleted
           </Trans>
         </ListItemText>
       </ListItem>

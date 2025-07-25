@@ -42,6 +42,10 @@ export interface DocumentSlice {
       error: string | null | unknown
     }
     loading: boolean
+    reloadListTrigger: number
+    reloadSelectedTrigger: number
+    triggerReloadList: () => void
+    triggerReloadSelected: () => void
     hasFetched?: boolean
     error: string | null | unknown
     fetchDocuments: (obj: DocumentQuery) => Promise<void>
@@ -119,6 +123,22 @@ export const addDocumentSlice: StateCreator<
         })
       }
     },
+    reloadListTrigger: 0,
+    triggerReloadList: () =>
+      set((state) => ({
+        document: {
+          ...state.document,
+          reloadListTrigger: state.document.reloadListTrigger + 1,
+        },
+      })),
+    reloadSelectedTrigger: 0,
+    triggerReloadSelected: () =>
+      set((state) => ({
+        document: {
+          ...state.document,
+          reloadSelectedTrigger: state.document.reloadSelectedTrigger + 1,
+        },
+      })),
 
     fetchDocumentById: async (uid: string) => {
       set((state) => ({ document: { ...state.document, loading: true } }))
