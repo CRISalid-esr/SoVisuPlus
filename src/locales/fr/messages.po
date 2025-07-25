@@ -16,7 +16,7 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/lib/websocket/WebSocketListener.tsx:65
 msgid "snackbar_document_created"
-msgstr ""
+msgstr "Nouvelle publication : "
 
 #. js-lingui-explicit-id
 #: src/app/lib/websocket/WebSocketListener.tsx:68
