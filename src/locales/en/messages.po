@@ -163,7 +163,7 @@ msgstr "Confirm"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:53
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:97
 msgid "document_details_page_titles_row_label"
-msgstr ""
+msgstr "Title"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:124
@@ -174,12 +174,12 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:127
 msgid "document_details_page_authors_row_label"
-msgstr ""
+msgstr "Authors"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:131
 msgid "document_details_page_publication_date_row_label"
-msgstr ""
+msgstr "Publication date"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:135
@@ -194,7 +194,7 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:141
 msgid "document_details_page_sources_row_label"
-msgstr ""
+msgstr "Sources"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
@@ -263,28 +263,28 @@ msgid "document_details_page_keywords_tab_card_validate_button"
 msgstr "Confirm"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:283
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:292
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:258
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:267
 msgid "document_details_page_source_tab_select_action_label"
 msgstr "action"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:298
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:273
 msgid "document_details_page_source_tab_select_action_delete_label"
 msgstr "delete source"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:305
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:280
 msgid "document_details_page_source_tab_select_action_merge_label"
 msgstr "merge sources"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:341
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:316
 msgid "document_details_page_source_tab_card_title"
 msgstr "Sources"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:344
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:319
 msgid "document_details_page_source_tab_card_validate_button"
 msgstr "Confirm"
 
@@ -380,7 +380,7 @@ msgstr ""
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:69
 msgid "document_details_page_authors_row_label"
-msgstr ""
+msgstr "Authors"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:63
 msgid "document_details_page_authors_row_update_author"
@@ -404,19 +404,19 @@ msgstr ""
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:80
 msgid "document_details_page_no_abstract_available"
-msgstr ""
+msgstr "N/C"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:53
 msgid "document_details_page_no_title_available"
-msgstr ""
+msgstr "N/C"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:74
 msgid "document_details_page_publication_date_row_label"
-msgstr ""
+msgstr "Publication date"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:86
 msgid "document_details_page_sources_row_label"
-msgstr ""
+msgstr "Sources"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.tsx:62
 msgid "document_details_page_sources_row_update_source"
@@ -424,7 +424,7 @@ msgstr "Compare sources"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:52
 msgid "document_details_page_titles_row_label"
-msgstr ""
+msgstr "Title"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:59
 msgid "document_details_page_type_row_label"
@@ -462,27 +462,23 @@ msgstr "Details"
 msgid "documents_page_all_documents_filter"
 msgstr "All my documents"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:67
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:23
 msgid "documents_page_book_chapter_icon_label"
 msgstr "Book chapter"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:61
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:17
 msgid "documents_page_book_icon_label"
 msgstr "Book"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:70
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:26
 msgid "documents_page_conference_article_icon_label"
 msgstr "Conference article"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:161
-#: src/app/[lang]/documents/page.tsx:198
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:136
+#: src/app/[lang]/documents/page.tsx:199
 msgid "documents_page_contributors_column"
 msgstr "authors"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:52
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:8
 msgid "documents_page_document_icon_label"
 msgstr "Document"
@@ -511,7 +507,6 @@ msgstr "status in Hal"
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "HAL incomplete filing"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:58
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:14
 msgid "documents_page_journal_article_icon_label"
 msgstr "Journal article"
@@ -524,18 +519,16 @@ msgstr "Publications"
 msgid "documents_page_main_title_first_person"
 msgstr ""
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:64
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:20
 msgid "documents_page_monograph_icon_label"
 msgstr "Monography"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:73
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:29
 msgid "documents_page_proceedings_icon_label"
 msgstr "Proceedings"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:166
-#: src/app/[lang]/documents/page.tsx:231
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:141
+#: src/app/[lang]/documents/page.tsx:232
 msgid "documents_page_publication_date_column"
 msgstr "Date"
 
@@ -544,18 +537,17 @@ msgstr "Date"
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "No date available"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:171
-#: src/app/[lang]/documents/page.tsx:263
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:146
+#: src/app/[lang]/documents/page.tsx:264
 msgid "documents_page_publishedIn_column"
 msgstr "published in"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:55
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:11
 msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Scientific publication"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:179
-#: src/app/[lang]/documents/page.tsx:290
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:154
+#: src/app/[lang]/documents/page.tsx:291
 msgid "documents_page_source_column"
 msgstr "Sources"
 
@@ -602,13 +594,13 @@ msgstr ""
 msgid "documents_page_synchronize_modal_title"
 msgstr "Sources to be syncronized"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:128
-#: src/app/[lang]/documents/page.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:103
+#: src/app/[lang]/documents/page.tsx:141
 msgid "documents_page_title_column"
 msgstr "title"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:86
-#: src/app/[lang]/documents/page.tsx:100
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:61
+#: src/app/[lang]/documents/page.tsx:101
 msgid "documents_page_type_column"
 msgstr "type"
 
@@ -643,9 +635,9 @@ msgid "my_account_page_notification_tab"
 msgstr "Notifications"
 
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:16
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:123
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:142
-#: src/app/[lang]/documents/page.tsx:154
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:98
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:117
+#: src/app/[lang]/documents/page.tsx:155
 msgid "no_title_available"
 msgstr "no title available"
 
