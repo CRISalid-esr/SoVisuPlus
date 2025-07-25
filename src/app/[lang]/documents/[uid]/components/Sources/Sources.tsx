@@ -38,6 +38,7 @@ import {
 import Image from 'next/image'
 import { ReactNode, useMemo, useState } from 'react'
 import { DocumentTypeIcons } from '../../../components/DocumentTypeIcons'
+import { DocumentTypeLabels } from '../../../components/DocumentTypeLabels'
 
 import CallMergeIcon from '@mui/icons-material/CallMerge'
 import { Localization } from '@/types/Localization'
@@ -47,32 +48,6 @@ function Sources() {
   const theme = useTheme()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
-  const documentTypeLabels: Record<DocumentType, JSX.Element> = {
-    [DocumentType.Document]: (
-      <Typography>{t`documents_page_document_icon_label`}</Typography>
-    ),
-    [DocumentType.ScholarlyPublication]: (
-      <Typography>{t`documents_page_scholarly_publication_icon_label`}</Typography>
-    ),
-    [DocumentType.JournalArticle]: (
-      <Typography>{t`documents_page_journal_article_icon_label`}</Typography>
-    ),
-    [DocumentType.Book]: (
-      <Typography>{t`documents_page_book_icon_label`}</Typography>
-    ),
-    [DocumentType.Monograph]: (
-      <Typography>{t`documents_page_monograph_icon_label`}</Typography>
-    ),
-    [DocumentType.BookChapter]: (
-      <Typography>{t`documents_page_book_chapter_icon_label`}</Typography>
-    ),
-    [DocumentType.ConferenceArticle]: (
-      <Typography>{t`documents_page_conference_article_icon_label`}</Typography>
-    ),
-    [DocumentType.Proceedings]: (
-      <Typography>{t`documents_page_proceedings_icon_label`}</Typography>
-    ),
-  }
   const [selectedTitleLangs, setSelectedTitleLangs] = useState<
     Record<string, string>
   >({})
@@ -98,7 +73,7 @@ function Sources() {
                 width: '100%',
               }}
             >
-              {documentTypeLabels[type]}
+              {DocumentTypeLabels[type]}
               <Box
                 sx={{
                   marginLeft: 'auto',
