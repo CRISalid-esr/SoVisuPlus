@@ -3,7 +3,7 @@
 import { TabFilter } from '@/components/TabFilter'
 import useStore from '@/stores/global_store'
 import { t } from '@lingui/macro'
-import { Box, CircularProgress } from '@mui/material'
+import { Alert, Box, CircularProgress, Link, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import {
   notFound,
@@ -23,6 +23,7 @@ import {
 } from './components/'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
+import { Trans } from '@lingui/react'
 
 export default function DocumentDetailsPage() {
   const theme = useTheme()
@@ -61,9 +62,13 @@ export default function DocumentDetailsPage() {
 
   const [selectedTab, setSelectedTab] = useState('bibliographic_information')
 
-  const { fetchDocumentById, loading, selectedDocument, hasFetched } = useStore(
-    (state) => state.document,
-  )
+  const {
+    fetchDocumentById,
+    loading,
+    selectedDocument,
+    hasFetched,
+    setHasFetched,
+  } = useStore((state) => state.document)
 
   useEffect(() => {
     if (selectedDocument?.uid == uid && hasFetched) {
@@ -80,6 +85,9 @@ export default function DocumentDetailsPage() {
       setSelectedTab(tab)
     }
   }, [searchParams])
+
+  const { selectedDocumentHasChanged, setSelectedDocumentHasChanged } =
+    useStore((state) => state.document)
 
   if (!hasFetched || loading) {
     return (
@@ -125,6 +133,30 @@ export default function DocumentDetailsPage() {
   return (
     <Box>
       <DocumentDetailsHeader />
+      {selectedDocumentHasChanged && (
+        <Alert
+          severity='info'
+          sx={{ mb: 2 }}
+          onClose={() => {
+            setSelectedDocumentHasChanged(false)
+          }}
+        >
+          <Typography component='span'>
+            <Trans id='documents_page_refresh_document_alert' />
+          </Typography>{' '}
+          <Link
+            component='button'
+            onClick={() => {
+              setHasFetched(false)
+              setSelectedDocumentHasChanged(false)
+            }}
+            underline='always'
+            sx={{ ml: 1 }}
+          >
+            {t`documents_page_refresh_document`}
+          </Link>
+        </Alert>
+      )}
       <DocumentDetailsTitle />
       <TabFilter
         tabsData={tabs}

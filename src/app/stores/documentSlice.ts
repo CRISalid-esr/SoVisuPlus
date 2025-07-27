@@ -42,11 +42,12 @@ export interface DocumentSlice {
       error: string | null | unknown
     }
     loading: boolean
-    reloadListTrigger: number
-    reloadSelectedTrigger: number
-    triggerReloadList: () => void
-    triggerReloadSelected: () => void
+    listHasChanged: boolean
+    selectedDocumentHasChanged: boolean
+    setListHasChanged: (flag: boolean) => void
+    setSelectedDocumentHasChanged: (flag: boolean) => void
     hasFetched?: boolean
+    setHasFetched: (flag: boolean) => void // To force a re-fetch
     error: string | null | unknown
     fetchDocuments: (obj: DocumentQuery) => Promise<void>
     countDocuments: (obj: CountDocumentQuery) => Promise<void>
@@ -74,6 +75,13 @@ export const addDocumentSlice: StateCreator<
       incompleteHalRepositoryItems: 0,
     },
     hasFetched: false,
+    setHasFetched: (flag: boolean) =>
+      set((state) => ({
+        document: {
+          ...state.document,
+          hasFetched: flag,
+        },
+      })),
     fetchDocuments: async (queryObject: DocumentQuery) => {
       const { requestId, ...rest } = queryObject
       const queryString = toQueryString(rest)
@@ -123,20 +131,20 @@ export const addDocumentSlice: StateCreator<
         })
       }
     },
-    reloadListTrigger: 0,
-    triggerReloadList: () =>
+    listHasChanged: false,
+    setListHasChanged: (flag: boolean) =>
       set((state) => ({
         document: {
           ...state.document,
-          reloadListTrigger: state.document.reloadListTrigger + 1,
+          listHasChanged: flag,
         },
       })),
-    reloadSelectedTrigger: 0,
-    triggerReloadSelected: () =>
+    selectedDocumentHasChanged: false,
+    setSelectedDocumentHasChanged: (flag: boolean) =>
       set((state) => ({
         document: {
           ...state.document,
-          reloadSelectedTrigger: state.document.reloadSelectedTrigger + 1,
+          selectedDocumentHasChanged: flag,
         },
       })),
 

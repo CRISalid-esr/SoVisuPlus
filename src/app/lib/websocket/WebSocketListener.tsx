@@ -10,10 +10,10 @@ export default function WebSocketListener() {
   const { startHarvesting, updateHarvestingStatus, incrementPlatformCount } =
     useStore((state) => state.harvesting)
   const { currentPerspective } = useStore((state) => state.user)
-  const { triggerReloadList, triggerReloadSelected, selectedDocument } =
+  const { setListHasChanged, setSelectedDocumentHasChanged, selectedDocument } =
     useStore((state) => state.document)
-  const currentPerspectiveRef = useRef(currentPerspective)
-  const selectedDocumentRef = useRef(selectedDocument)
+  const perspectiveRef = useRef(currentPerspective)
+  const documentRef = useRef(selectedDocument)
 
   const snackBarVariantByEventType = (
     eventType: string,
@@ -32,8 +32,8 @@ export default function WebSocketListener() {
     }
   }
   useEffect(() => {
-    currentPerspectiveRef.current = currentPerspective
-    selectedDocumentRef.current = selectedDocument
+    perspectiveRef.current = currentPerspective
+    documentRef.current = selectedDocument
   }, [currentPerspective, selectedDocument])
 
   useEffect(() => {
@@ -43,20 +43,18 @@ export default function WebSocketListener() {
       const data = JSON.parse(event.data)
       console.log('WebSocket message received:', data)
 
-      const perspective = currentPerspectiveRef.current
-      const selectedDoc = selectedDocumentRef.current
-      console.log('Current perspective:', perspective)
-      console.log('Selected document:', selectedDoc)
+      const currentPerspectiveRef = perspectiveRef.current
+      const selectedDocumentRef = documentRef.current
 
       if (data.objectType === 'Document') {
         const variant = snackBarVariantByEventType(data.eventType)
         const peopleUids = data.impliedPeopleUids || []
-        if (peopleUids.includes(currentPerspective?.uid)) {
-          triggerReloadList()
+        if (peopleUids.includes(currentPerspectiveRef?.uid)) {
+          setListHasChanged(true)
         }
 
-        if (data.objectUid === selectedDocument?.uid) {
-          triggerReloadSelected()
+        if (data.objectUid === selectedDocumentRef?.uid) {
+          setSelectedDocumentHasChanged(true)
         }
         enqueueSnackbar(
           <>
@@ -114,8 +112,8 @@ export default function WebSocketListener() {
     startHarvesting,
     updateHarvestingStatus,
     incrementPlatformCount,
-    triggerReloadList,
-    triggerReloadSelected,
+    setListHasChanged,
+    setSelectedDocumentHasChanged,
     selectedDocument,
   ])
 

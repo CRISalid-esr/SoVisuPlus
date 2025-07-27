@@ -12,17 +12,19 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
-import { t, Trans } from '@lingui/macro'
+import { t } from '@lingui/macro'
 
 import { LanguageChips } from '@/components/LanguageChips'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import { Localization } from '@/types/Localization'
 import InfoIcon from '@mui/icons-material/Info'
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
   IconButton,
+  Link,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -39,7 +41,7 @@ import {
 } from 'material-react-table'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation' // Import useRouter
-import { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Highlighter from 'react-highlight-words'
 import DocumentHeader from './components/DocumentHeader'
 import HalStatusCell from './components/HalStatusCell'
@@ -48,6 +50,7 @@ import { DocumentTypeLabels } from './components/DocumentTypeLabels'
 import SyncIcon from '@mui/icons-material/Sync'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
 import DocumentSyncDialog from '@/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog'
+import { Trans } from '@lingui/react'
 
 dayjs.extend(utc)
 
@@ -67,6 +70,7 @@ export default function DocumentsPage() {
 
   const [openSynchronizeModal, setOpenSynchronizeModal] =
     useState<boolean>(false)
+  const [triggerReloadList, setTriggerReloadList] = useState<boolean>(false)
   const { currentPerspective, ownPerspective } = useStore((state) => state.user)
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
@@ -390,7 +394,8 @@ export default function DocumentsPage() {
     documents = [],
     totalItems,
     count: { allItems, incompleteHalRepositoryItems },
-    reloadListTrigger,
+    listHasChanged,
+    setListHasChanged,
   } = useStore((state) => state.document)
 
   const tabs = [
@@ -507,7 +512,7 @@ export default function DocumentsPage() {
     countDocuments,
     currentPerspective,
     selectedTab,
-    reloadListTrigger,
+    triggerReloadList,
   ])
 
   useEffect(() => {
@@ -535,6 +540,44 @@ export default function DocumentsPage() {
             : t`documents_page_main_title`
         }
       >
+        {listHasChanged && (
+          <Alert
+            severity='info'
+            sx={{ mb: 2 }}
+            onClose={() => {
+              setListHasChanged(false)
+            }}
+          >
+            <Typography component='span'>
+              {ownPerspective && (
+                <Trans id='documents_page_refresh_list_alert_own_perspective' />
+              )}
+              {ownPerspective || (
+                <Trans
+                  id='documents_page_refresh_list_alert_other_perspective'
+                  values={{
+                    name:
+                      currentPerspective?.getDisplayName(
+                        lang as ExtendedLanguageCode,
+                      ) || '',
+                  }}
+                />
+              )}
+            </Typography>{' '}
+            <Link
+              component='button'
+              onClick={() => {
+                setTriggerReloadList((prev) => !prev)
+                setListHasChanged(false)
+              }}
+              underline='always'
+              sx={{ ml: 1 }}
+            >
+              {t`documents_page_refresh_list`}
+            </Link>
+          </Alert>
+        )}
+
         <Button
           startIcon={
             isAnyHarvestingRunning ? (
@@ -546,7 +589,7 @@ export default function DocumentsPage() {
           variant='outlined'
           onClick={() => setOpenSynchronizeModal(true)}
         >
-          <Trans>documents_page_synchronize_button</Trans>
+          <Trans id='documents_page_synchronize_button' />
         </Button>
       </DocumentHeader>
       <TabFilter
@@ -563,6 +606,7 @@ export default function DocumentsPage() {
 
       <MaterialReactTable
         initialState={{ showColumnFilters: true }}
+        getRowId={(row) => row.uid}
         manualFiltering
         manualPagination
         manualSorting
@@ -577,6 +621,7 @@ export default function DocumentsPage() {
         onSortingChange={setSorting}
         state={{
           isLoading: loading,
+          showLoadingOverlay: false,
           pagination,
           sorting,
           columnFilters,
