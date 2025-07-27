@@ -4,6 +4,12 @@ import { useEffect, useRef } from 'react'
 import { useSnackbar } from 'notistack'
 import useStore from '@/stores/global_store'
 import { Trans } from '@lingui/react'
+import {
+  GenericEvent,
+  isDataEvent,
+  isHarvestingResultEvent,
+  isHarvestingStateEvent,
+} from '@/types/GenericEvent'
 
 export default function WebSocketListener() {
   const { enqueueSnackbar } = useSnackbar()
@@ -40,68 +46,61 @@ export default function WebSocketListener() {
     const ws = new WebSocket('ws://localhost:3001')
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data)
+      const data = JSON.parse(event.data) as GenericEvent
       console.log('WebSocket message received:', data)
 
       const currentPerspectiveRef = perspectiveRef.current
       const selectedDocumentRef = documentRef.current
 
-      if (data.objectType === 'Document') {
+      if (isDataEvent(data)) {
         const variant = snackBarVariantByEventType(data.eventType)
         const peopleUids = data.impliedPeopleUids || []
-        if (peopleUids.includes(currentPerspectiveRef?.uid)) {
+
+        const currentUid = currentPerspectiveRef?.uid
+        if (currentUid && peopleUids.includes(currentUid)) {
           setListHasChanged(true)
         }
 
         if (data.objectUid === selectedDocumentRef?.uid) {
           setSelectedDocumentHasChanged(true)
         }
+
         enqueueSnackbar(
           <>
-            {/*switch with trans messages*/}
             {data.eventType === 'created' && (
-              <Trans id={'snackbar_document_created'} />
+              <Trans id='snackbar_document_created' />
             )}
             {data.eventType === 'updated' && (
-              <Trans id={'snackbar_document_updated'} />
+              <Trans id='snackbar_document_updated' />
             )}
             {data.eventType === 'deleted' && (
-              <Trans id={'snackbar_document_deleted'} />
+              <Trans id='snackbar_document_deleted' />
             )}
             {data.eventType === 'unchanged' && (
-              <Trans id={'snackbar_document_unchanged'} />
+              <Trans id='snackbar_document_unchanged' />
             )}
             <strong>{data.objectLabel}</strong>
             <a href={`/documents/${data.objectUid}`} style={{ marginLeft: 8 }}>
-              <Trans id={'snackbar_view_document'} />
+              <Trans id='snackbar_view_document' />
             </a>
           </>,
           {
             variant,
-            autoHideDuration: 3000,
+            autoHideDuration: 15000,
           },
         )
       }
-      if (data.platform) {
-        if (data.state && data.state === 'running') {
+
+      if (isHarvestingStateEvent(data)) {
+        if (data.state === 'running') {
           startHarvesting(data.personUid, data.platform)
+        } else {
+          updateHarvestingStatus(data.personUid, data.platform, data.state)
         }
-        if (data.state && data.state === 'completed') {
-          updateHarvestingStatus(data.personUid, data.platform, 'completed')
-        }
-        if (data.state && data.state === 'not_applicable') {
-          updateHarvestingStatus(
-            data.personUid,
-            data.platform,
-            'not_applicable',
-          )
-        }
-        if (data.state && data.state === 'failed') {
-          updateHarvestingStatus(data.personUid, data.platform, 'failed')
-        }
-        if (data.status) {
-          incrementPlatformCount(data.personUid, data.platform, data.status)
-        }
+      }
+
+      if (isHarvestingResultEvent(data)) {
+        incrementPlatformCount(data.personUid, data.platform, data.status)
       }
     }
 

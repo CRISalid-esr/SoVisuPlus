@@ -1,4 +1,5 @@
 import WebSocket, { WebSocketServer } from 'ws'
+import { GenericEvent } from '@/types/GenericEvent'
 
 export class WebSocketNotifier {
   private static wss: WebSocketServer | null = null
@@ -7,10 +8,10 @@ export class WebSocketNotifier {
     this.wss = wss
   }
 
-  static notifyClients(payload: object) {
+  static notifyClients(event: GenericEvent) {
     if (!this.wss) return
 
-    const message = JSON.stringify(payload)
+    const message = JSON.stringify(event)
     for (const client of this.wss.clients) {
       if (client.readyState === WebSocket.OPEN) {
         client.send(message)
