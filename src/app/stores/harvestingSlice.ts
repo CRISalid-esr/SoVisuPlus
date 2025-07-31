@@ -188,7 +188,6 @@ export const addHarvestingSlice: StateCreator<
         }
       })
 
-      // Send request to backend
       try {
         const response = await fetch('/api/documents/harvestings', {
           method: 'POST',

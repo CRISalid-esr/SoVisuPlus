@@ -15,7 +15,10 @@ import Image from 'next/image'
 import React, { FC, useEffect, useState } from 'react'
 import useStore from '@/app/stores/global_store'
 import HarvestingDetails from './HarvestingDetails'
-import { BibliographicPlatform } from '@/types/BibliographicPlatform'
+import {
+  BibliographicPlatform,
+  BibliographicPlatformMetadata,
+} from '@/types/BibliographicPlatform'
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
 import BlockIcon from '@mui/icons-material/Block'
 
@@ -128,7 +131,7 @@ const DocumentSyncDialog: FC<DocumentSyncDialogProps> = ({
                     }))
                   }
                 >
-                  {platform}
+                  {BibliographicPlatformMetadata[platform].name}
                 </Button>
 
                 {data.status === 'not_performed' && (
