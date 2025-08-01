@@ -103,4 +103,42 @@ describe('ActionDispatchService', () => {
     expect(mockPublish).toHaveBeenCalled()
     expect(mockMarkAsDispatched).not.toHaveBeenCalled()
   })
+
+  it('should dispatch a FETCH action for a PERSON target', async () => {
+    const action = {
+      id: 'fetch-action-1',
+      actionType: ActionType.FETCH,
+      targetType: ActionTargetType.PERSON,
+      targetUid: 'person-789',
+      path: null,
+      parameters: { platforms: ['HAL', 'OPENALEX'] },
+      timestamp: new Date('2025-07-31T08:00:00Z'),
+      dispatched: false,
+      personUid: 'user-fetcher',
+    }
+
+    mockFetchUndispatched.mockResolvedValue([action])
+    mockPublish.mockResolvedValue(undefined)
+    mockMarkAsDispatched.mockResolvedValue(undefined)
+
+    await service.dispatchActions()
+
+    expect(mockFetchUndispatched).toHaveBeenCalledWith(100)
+    expect(mockPublish).toHaveBeenCalledWith(
+      'graph',
+      'task.person.documents.fetch',
+      JSON.stringify({
+        id: action.id,
+        actionType: ActionType.FETCH,
+        targetType: ActionTargetType.PERSON,
+        targetUid: action.targetUid,
+        path: action.path,
+        parameters: action.parameters,
+        timestamp: action.timestamp.toISOString(),
+        personUid: action.personUid,
+        application: 'sovisuplus',
+      }),
+    )
+    expect(mockMarkAsDispatched).toHaveBeenCalledWith('fetch-action-1')
+  })
 })
