@@ -14,6 +14,11 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
+msgid "documents_page_synchronize_modal_synchronize_button"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.tsx:145
 msgid "documents_page_refresh_document_alert"
 msgstr ""
@@ -331,27 +336,27 @@ msgid "notfound_page_description"
 msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1>community</1> might be able to help."
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:63
+#: src/app/lib/websocket/WebSocketListener.tsx:71
 msgid "snackbar_document_created"
 msgstr "Nouvelle publication : "
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:66
+#: src/app/lib/websocket/WebSocketListener.tsx:74
 msgid "snackbar_document_updated"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:69
+#: src/app/lib/websocket/WebSocketListener.tsx:77
 msgid "snackbar_document_deleted"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:72
+#: src/app/lib/websocket/WebSocketListener.tsx:80
 msgid "snackbar_document_unchanged"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:76
+#: src/app/lib/websocket/WebSocketListener.tsx:84
 msgid "snackbar_view_document"
 msgstr ""
 
@@ -575,7 +580,7 @@ msgstr "Scientific publication"
 msgid "documents_page_source_column"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.tsx:188
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.tsx:191
 msgid "documents_page_synchronize_modal_cancel_button"
 msgstr "Undo"
 
@@ -583,11 +588,11 @@ msgstr "Undo"
 msgid "documents_page_synchronize_modal_details_total"
 msgstr ""
 
-#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.tsx:186
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.tsx:189
 msgid "documents_page_synchronize_modal_hide_button"
 msgstr ""
 
-#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.tsx:197
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.tsx:200
 msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr "Syncronize"
 
@@ -610,7 +615,7 @@ msgstr ""
 msgid "documents_page_synchronize_modal_synchronize_details_updated"
 msgstr ""
 
-#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.tsx:82
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.tsx:85
 msgid "documents_page_synchronize_modal_title"
 msgstr "Sources to be syncronized"
 
