@@ -40,7 +40,7 @@ describe('ActionDAO', () => {
     dispatched: false,
   }
 
-  it('should create an action', async () => {
+  it('should create an ADD action for a DOCUMENT target', async () => {
     ;(mockPrisma.action.create as jest.Mock).mockResolvedValue(baseActionData)
 
     const action = await dao.createAction({
@@ -104,6 +104,43 @@ describe('ActionDAO', () => {
     expect(mockPrisma.action.updateMany).toHaveBeenCalledWith({
       where: { id: { in: ['action-1', 'action-2'] } },
       data: { dispatched: true },
+    })
+  })
+
+  it('should create a FETCH action for a PERSON target', async () => {
+    const fetchActionData = {
+      ...baseActionData,
+      actionType: ActionType.FETCH,
+      targetType: ActionTargetType.PERSON,
+      targetUid: 'person-999',
+      parameters: { platforms: ['HAL', 'OPENALEX'] },
+    }
+
+    ;(mockPrisma.action.create as jest.Mock).mockResolvedValue(fetchActionData)
+
+    const action = await dao.createAction({
+      actionType: ActionType.FETCH,
+      targetType: ActionTargetType.PERSON,
+      targetUid: 'person-999',
+      parameters: { platforms: ['HAL', 'OPENALEX'] },
+      personUid: 'person-001',
+    })
+
+    expect(action).toBeInstanceOf(Action)
+    expect(action.actionType).toBe(ActionType.FETCH)
+    expect(action.targetType).toBe(ActionTargetType.PERSON)
+    expect(action.targetUid).toBe('person-999')
+    expect(action.parameters).toEqual({ platforms: ['HAL', 'OPENALEX'] })
+
+    expect(mockPrisma.action.create).toHaveBeenCalledWith({
+      data: {
+        actionType: ActionType.FETCH,
+        targetType: ActionTargetType.PERSON,
+        targetUid: 'person-999',
+        path: null,
+        parameters: { platforms: ['HAL', 'OPENALEX'] },
+        personUid: 'person-001',
+      },
     })
   })
 })

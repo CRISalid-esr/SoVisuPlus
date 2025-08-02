@@ -42,7 +42,12 @@ export interface DocumentSlice {
       error: string | null | unknown
     }
     loading: boolean
+    listHasChanged: boolean
+    selectedDocumentHasChanged: boolean
+    setListHasChanged: (flag: boolean) => void
+    setSelectedDocumentHasChanged: (flag: boolean) => void
     hasFetched?: boolean
+    setHasFetched: (flag: boolean) => void // To force a re-fetch
     error: string | null | unknown
     fetchDocuments: (obj: DocumentQuery) => Promise<void>
     countDocuments: (obj: CountDocumentQuery) => Promise<void>
@@ -70,6 +75,13 @@ export const addDocumentSlice: StateCreator<
       incompleteHalRepositoryItems: 0,
     },
     hasFetched: false,
+    setHasFetched: (flag: boolean) =>
+      set((state) => ({
+        document: {
+          ...state.document,
+          hasFetched: flag,
+        },
+      })),
     fetchDocuments: async (queryObject: DocumentQuery) => {
       const { requestId, ...rest } = queryObject
       const queryString = toQueryString(rest)
@@ -119,6 +131,22 @@ export const addDocumentSlice: StateCreator<
         })
       }
     },
+    listHasChanged: false,
+    setListHasChanged: (flag: boolean) =>
+      set((state) => ({
+        document: {
+          ...state.document,
+          listHasChanged: flag,
+        },
+      })),
+    selectedDocumentHasChanged: false,
+    setSelectedDocumentHasChanged: (flag: boolean) =>
+      set((state) => ({
+        document: {
+          ...state.document,
+          selectedDocumentHasChanged: flag,
+        },
+      })),
 
     fetchDocumentById: async (uid: string) => {
       set((state) => ({ document: { ...state.document, loading: true } }))

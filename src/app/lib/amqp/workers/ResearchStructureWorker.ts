@@ -7,6 +7,7 @@ import {
   ResearchStructureIdentifier,
 } from '@/types/ResearchStructureIdentifier'
 import { Literal } from '@/types/Literal'
+import { DataEvent } from '@/types/DataEvent'
 
 /**
  * Worker for processing research structure-related messages
@@ -26,7 +27,8 @@ export class ResearchStructureWorker extends MessageProcessingWorker<AMQPResearc
   /**
    * Process a research structure message by fetching data from the graph and updating the database
    */
-  public async process(): Promise<void> {
+  public async process(): Promise<DataEvent[]> {
+    const events: DataEvent[] = []
     const { uid, identifiers, names, acronym, descriptions } =
       this.message.fields
     console.log(`Processing research structure with UID: ${uid}`)
@@ -57,5 +59,6 @@ export class ResearchStructureWorker extends MessageProcessingWorker<AMQPResearc
       )
       throw error
     }
+    return events
   }
 }

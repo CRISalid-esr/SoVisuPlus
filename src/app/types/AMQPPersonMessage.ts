@@ -1,6 +1,7 @@
 import { AMQPPersonData } from '@/types/AMQPPersonData'
-import { AMQPMessage } from '@/types/AMQPMessage'
 
-export interface AMQPPersonMessage extends AMQPMessage<AMQPPersonData> {
+export interface AMQPPersonMessage {
   type: 'person'
+  event: 'created' | 'updated' | 'deleted' | 'unchanged'
+  fields: AMQPPersonData
 }
