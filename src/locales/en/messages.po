@@ -14,26 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
-msgid "documents_page_synchronize_modal_synchronize_button"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:145
-msgid "documents_page_refresh_document_alert"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:553
-msgid "documents_page_refresh_list_alert_own_perspective"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:556
-msgid "documents_page_refresh_list_alert_other_perspective"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Authorizations"
@@ -294,6 +274,16 @@ msgid "document_details_keywords_tab"
 msgstr ""
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:145
+msgid "documents_page_refresh_document_alert"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
+msgid "documents_page_synchronize_modal_synchronize_button"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:152
 #: src/app/[lang]/documents/page.test.tsx:175
 msgid "documents_page_main_title_first_person"
@@ -313,6 +303,16 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:245
 msgid "documents_page_incomplete_hal_repository_filter"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:553
+msgid "documents_page_refresh_list_alert_own_perspective"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:556
+msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr ""
 
 #. js-lingui-explicit-id
