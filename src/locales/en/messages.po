@@ -639,13 +639,13 @@ msgstr "Expertises"
 msgid "hello"
 msgstr "Hello"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:883
-msgid "language_{locale}"
-msgstr ""
+#: src/app/[lang]/components/LanguageSwitcher/LanguageSwitcher.tsx:32
+msgid "language_en"
+msgstr "English"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:876
-msgid "language_{value}"
-msgstr ""
+#: src/app/[lang]/components/LanguageSwitcher/LanguageSwitcher.tsx:33
+msgid "language_fr"
+msgstr "French"
 
 #: src/app/[lang]/account/page.tsx:24
 msgid "my_account_page_authorizations_tab"
@@ -674,24 +674,24 @@ msgstr "see less co-authors"
 msgid "see_more_contributors"
 msgstr "see more co-authors"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:422
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:415
 msgid "side_bar_dashboard"
 msgstr "Dashboard"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:471
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:464
 msgid "side_bar_documents"
 msgstr "Publications"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:520
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:513
 msgid "side_bar_expertise"
 msgstr "Expertise"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:631
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:624
 #: src/app/[lang]/institutions/page.tsx:10
 msgid "side_bar_institutions"
 msgstr "Institutions"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:681
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:674
 #: src/app/[lang]/laboratories/page.tsx:10
 msgid "side_bar_laboratories"
 msgstr "Laboratories"
@@ -700,7 +700,7 @@ msgstr "Laboratories"
 msgid "side_bar_my_account"
 msgstr "Account manager"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:581
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:574
 #: src/app/[lang]/groups/page.tsx:10
 msgid "side_bar_my_groups"
 msgstr "Groups"
@@ -741,18 +741,18 @@ msgstr "Research structures"
 msgid "sidebar_search_unknown_label"
 msgstr "N/C"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:121
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:144
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:758
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:114
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:137
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:751
 msgid "sidebar_theme_dark"
 msgstr "Dark theme"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:98
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:739
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:91
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:732
 msgid "sidebar_theme_light"
 msgstr "Light theme"
 
-#: src/app/[lang]/components/sidebar/Sidebar.tsx:777
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:770
 msgid "sidebar_theme_system"
 msgstr "Auto Theme"
 

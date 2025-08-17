@@ -1,7 +1,7 @@
 'use client'
 
 import { Appbar } from '@/components/appbar'
-import { Sidebar } from '@/components/sidebar'
+import { Sidebar } from 'src/app/[lang]/components/Sidebar'
 import { useTheme } from '@mui/material/styles'
 import { Box, useMediaQuery } from '@mui/system'
 import { useEffect, useState } from 'react'
