@@ -13,7 +13,7 @@ jest.mock('../components/appbar', () => ({
   Appbar: jest.fn(() => <div>Appbar</div>),
 }))
 
-jest.mock('../components/sidebar', () => ({
+jest.mock('../components/Sidebar', () => ({
   Sidebar: jest.fn(() => <div>Sidebar</div>),
 }))
 

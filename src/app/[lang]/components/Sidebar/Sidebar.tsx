@@ -6,7 +6,7 @@ import LightMode from '@/public/icons/light_mode.svg'
 import SystemMode from '@/public/icons/system_mode.svg'
 
 import { User } from '@/types/User'
-import { t, Trans } from '@lingui/macro'
+import { Trans } from '@lingui/macro'
 import {
   Backdrop,
   Drawer,
@@ -41,14 +41,14 @@ import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
 import { SearchInput } from '../SearchInput'
 import { signOut } from 'next-auth/react'
 import { institutionalConfig } from '@/configs/index'
+import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
+import LanguageSwitcher from '@/components/LanguageSwitcher/LanguageSwitcher'
 
 interface SidebarProps {
   handleToggleDrawerAction: () => void
   open: boolean
   user: User | null
 }
-
-const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
 
 export default function Sidebar({
   open,
@@ -62,13 +62,6 @@ export default function Sidebar({
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const router = useRouter()
   const searchParams = useSearchParams()
-
-  const handleLangChange = (event: SelectChangeEvent) => {
-    const pathWithoutLang = pathname.split('/').slice(2).join('/') // Remove the current lang segment
-    router.push(
-      `/${event.target.value}/${pathWithoutLang}?${searchParams.toString()}`,
-    )
-  }
 
   const handleThemeChange = (event: SelectChangeEvent) => {
     setTheme(event.target.value as 'light' | 'dark' | 'system')
@@ -817,73 +810,7 @@ export default function Sidebar({
               </Box>
               <Box>
                 {open ? (
-                  <Select
-                    aria-label='Language switcher'
-                    name='language switcher'
-                    variant='outlined'
-                    fullWidth
-                    inputProps={{
-                      'aria-label': 'Language switcher',
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        border: '1px solid transparent',
-                      },
-                      '& :focus-visible': {
-                        outline: '2px solid #fff',
-                        border: '2px solid #000',
-                      },
-                      '& .MuiSelect-icon': {
-                        color: theme.palette.white,
-                      },
-                      '& .MuiOutlinedInput-root': {
-                        fontSize: theme.utils.pxToRem(16),
-                        '& fieldset': {
-                          border: 0,
-                        },
-                      },
-                      '& .MuiInputBase-input': {
-                        fontWeight: theme.typography.fontWeightRegular,
-                        color: theme.palette.white,
-                        opacity: 1,
-                        lineHeight: theme.typography.lineHeight.lineHeight24px,
-                      },
-                    }}
-                    value={lang}
-                    onChange={(event) =>
-                      handleLangChange(event as SelectChangeEvent)
-                    }
-                    renderValue={(value) => (
-                      <Box
-                        sx={{
-                          display: 'flex',
-                        }}
-                      >
-                        <Image
-                          src='/icons/language.svg'
-                          alt='language'
-                          width={24}
-                          height={24}
-                          priority
-                        />
-                        <Typography
-                          variant='bodyLarge'
-                          sx={{
-                            color: theme.palette.primaryContainer,
-                          }}
-                          ml={1}
-                        >
-                          {t`language_${value}`}
-                        </Typography>
-                      </Box>
-                    )}
-                  >
-                    {supportedLocales?.map((locale) => (
-                      <MenuItem key={locale} value={locale}>
-                        {t`language_${locale}`}
-                      </MenuItem>
-                    ))}
-                  </Select>
+                  <LanguageSwitcher value={lang as ExtendedLanguageCode} />
                 ) : (
                   <ListItem
                     sx={{
