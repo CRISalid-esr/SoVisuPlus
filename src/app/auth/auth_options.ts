@@ -15,6 +15,16 @@ declare module '@auth/core/types' {
   }
 }
 
+function decodeJwtPayload(token: string | undefined): object | null {
+  if (!token) return null
+  try {
+    const payload = token.split('.')[1]
+    return JSON.parse(Buffer.from(payload, 'base64').toString('utf8'))
+  } catch {
+    return null
+  }
+}
+
 const authOptions: AuthOptions = {
   providers: [
     KeycloakProvider({
@@ -68,6 +78,17 @@ const authOptions: AuthOptions = {
       if (account && user) {
         token.accessToken = account.access_token
         token.id = user.id
+        const kc = decodeJwtPayload(account.access_token)
+        if (kc) {
+          const realmRoles: string[] = kc?.realm_access?.roles ?? []
+          const clientId = process.env.KEYCLOAK_CLIENT_ID!
+          const clientRoles: string[] =
+            kc?.resource_access?.[clientId]?.roles ?? []
+          const groups: string[] = kc?.groups ?? []
+
+          token.roles = Array.from(new Set([...realmRoles, ...clientRoles]))
+          token.groups = groups
+        }
       }
       return token
     },
