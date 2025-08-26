@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     const actionDAO = new ActionDAO()
     await actionDAO.createAction({
       actionType: ActionType.FETCH,
-      targetType: ActionTargetType.PERSON,
+      targetType: ActionTargetType.HARVESTING,
       targetUid: personUid,
       path: undefined,
       parameters: { platforms },
