@@ -111,7 +111,7 @@ describe('ActionDAO', () => {
     const fetchActionData = {
       ...baseActionData,
       actionType: ActionType.FETCH,
-      targetType: ActionTargetType.PERSON,
+      targetType: ActionTargetType.HARVESTING,
       targetUid: 'person-999',
       parameters: { platforms: ['HAL', 'OPENALEX'] },
     }
@@ -120,7 +120,7 @@ describe('ActionDAO', () => {
 
     const action = await dao.createAction({
       actionType: ActionType.FETCH,
-      targetType: ActionTargetType.PERSON,
+      targetType: ActionTargetType.HARVESTING,
       targetUid: 'person-999',
       parameters: { platforms: ['HAL', 'OPENALEX'] },
       personUid: 'person-001',
@@ -128,14 +128,14 @@ describe('ActionDAO', () => {
 
     expect(action).toBeInstanceOf(Action)
     expect(action.actionType).toBe(ActionType.FETCH)
-    expect(action.targetType).toBe(ActionTargetType.PERSON)
+    expect(action.targetType).toBe(ActionTargetType.HARVESTING)
     expect(action.targetUid).toBe('person-999')
     expect(action.parameters).toEqual({ platforms: ['HAL', 'OPENALEX'] })
 
     expect(mockPrisma.action.create).toHaveBeenCalledWith({
       data: {
         actionType: ActionType.FETCH,
-        targetType: ActionTargetType.PERSON,
+        targetType: ActionTargetType.HARVESTING,
         targetUid: 'person-999',
         path: null,
         parameters: { platforms: ['HAL', 'OPENALEX'] },

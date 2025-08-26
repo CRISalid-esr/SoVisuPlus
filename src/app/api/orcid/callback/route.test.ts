@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { GET } from './route'
 
-const mockAddOrUpdateIdentifier = jest.fn()
+const mockAddOrUpdateOrcidIdentifier = jest.fn()
 const mockGetUserByPersonIdentifier = jest.fn()
 
 jest.mock('@/lib/services/UserService', () => ({
@@ -12,7 +12,7 @@ jest.mock('@/lib/services/UserService', () => ({
 
 jest.mock('@/lib/services/PersonService', () => ({
   PersonService: jest.fn().mockImplementation(() => ({
-    addOrUpdateidentifier: mockAddOrUpdateIdentifier,
+    addOrUpdateOrcidIdentifier: mockAddOrUpdateOrcidIdentifier,
   })),
 }))
 
@@ -94,9 +94,8 @@ describe('GET /api/orcid/callback and add ORCID to DB', () => {
       'https://sovisuplus.example.com/api/orcid/callback?lang=fr',
     )
 
-    expect(mockAddOrUpdateIdentifier).toHaveBeenCalledWith(
+    expect(mockAddOrUpdateOrcidIdentifier).toHaveBeenCalledWith(
       'person-uid',
-      'orcid',
       '0000-0002-1825-0097',
     )
   })

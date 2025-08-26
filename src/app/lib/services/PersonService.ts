@@ -1,15 +1,17 @@
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
-import {
-  convertStringPersonIdentifierType,
-  PersonIdentifier,
-} from '@/types/PersonIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
+import { ActionDAO } from '@/lib/daos/ActionDAO'
+import { ActionTargetType, ActionType } from '@/types/Action'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 export class PersonService {
   private personDAO: PersonDAO
+  private actionDAO: ActionDAO
 
   constructor() {
     this.personDAO = new PersonDAO()
+    this.actionDAO = new ActionDAO()
   }
 
   async fetchPeople(
@@ -36,20 +38,29 @@ export class PersonService {
     }
   }
 
-  async addOrUpdateidentifier(
-    personUid: string,
-    identifierTypeStr: string,
+  async addOrUpdateOrcidIdentifier(
+    personUid: string, //uid of the person to update,
+    // necessarily the same as the user performing the action
     identifierValue: string,
   ): Promise<void> {
     try {
       const identifier: PersonIdentifier = {
-        type: convertStringPersonIdentifierType(identifierTypeStr),
+        type: DbPersonIdentifierType.ORCID,
         value: identifierValue,
       }
       await this.personDAO.upsertIdentifier(identifier, personUid)
+      await this.actionDAO.createAction({
+        actionType: ActionType.ADD,
+        targetType: ActionTargetType.PERSON,
+        targetUid: personUid,
+        path: 'identifiers',
+        parameters: { identifier },
+        personUid: personUid,
+      })
     } catch (error) {
-      console.error('Error adding/updating identifier:', error)
-      throw new Error('Error adding/updating identifier in service')
+      const message = `Error adding/updating identifier (type=${DbPersonIdentifierType.ORCID}, value=${identifierValue}, personUid=${personUid}) in service`
+      console.error(message, error)
+      throw new Error(message)
     }
   }
 

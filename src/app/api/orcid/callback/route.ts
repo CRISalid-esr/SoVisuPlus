@@ -20,7 +20,6 @@ export async function GET(req: NextRequest) {
       `${userRedirectionUrl}?error=orcid-authentication-failure-no-code`,
     )
   }
-  // Get the session to identify the connected user
   const session = (await getServerSession(authOptions)) as Session & {
     user: { username?: string; orcid?: string; id?: string }
   }
@@ -70,7 +69,7 @@ export async function GET(req: NextRequest) {
   const { orcid } = data
   const personService = new PersonService()
   try {
-    await personService.addOrUpdateidentifier(user.person.uid, 'orcid', orcid)
+    await personService.addOrUpdateOrcidIdentifier(user.person.uid, orcid)
   } catch (error) {
     console.error('Error adding orcid identifier', error)
     return NextResponse.redirect(

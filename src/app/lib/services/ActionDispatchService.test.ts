@@ -108,7 +108,7 @@ describe('ActionDispatchService', () => {
     const action = {
       id: 'fetch-action-1',
       actionType: ActionType.FETCH,
-      targetType: ActionTargetType.PERSON,
+      targetType: ActionTargetType.HARVESTING,
       targetUid: 'person-789',
       path: null,
       parameters: { platforms: ['HAL', 'OPENALEX'] },
@@ -126,11 +126,11 @@ describe('ActionDispatchService', () => {
     expect(mockFetchUndispatched).toHaveBeenCalledWith(100)
     expect(mockPublish).toHaveBeenCalledWith(
       'graph',
-      'task.person.documents.fetch',
+      'task.people.documents.fetch',
       JSON.stringify({
         id: action.id,
         actionType: ActionType.FETCH,
-        targetType: ActionTargetType.PERSON,
+        targetType: ActionTargetType.HARVESTING,
         targetUid: action.targetUid,
         path: action.path,
         parameters: action.parameters,
