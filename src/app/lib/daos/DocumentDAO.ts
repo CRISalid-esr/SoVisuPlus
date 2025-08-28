@@ -618,6 +618,14 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
 
+      if (sort.id === 'publishedIn') {
+        return {
+          journal: {
+            titles: sort.desc ? 'desc' : 'asc',
+          },
+        }
+      }
+
       return { [sort.id]: sort.desc ? 'desc' : 'asc' }
     })
   }
