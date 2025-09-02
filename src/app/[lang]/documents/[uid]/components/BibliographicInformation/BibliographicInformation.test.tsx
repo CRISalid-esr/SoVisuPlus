@@ -4,6 +4,7 @@ import { Contribution } from '@/types/Contribution'
 import { Document, DocumentType } from '@/types/Document'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
+import { JournalTitle } from '@/types/JournalTitle'
 import { Literal } from '@/types/Literal'
 import { LocRelator } from '@/types/LocRelator'
 import { Person } from '@/types/Person'
@@ -68,9 +69,12 @@ const document: Document = new Document(
     ),
   ],
   [],
-  new Journal(['Test journal'], '0123-4567', 'Test publisher', [
-    new JournalIdentifier('issn', '0123-4567', 'Online'),
-  ]),
+  new Journal(
+    [new JournalTitle('Test journal')],
+    '0123-4567',
+    'Test publisher',
+    [new JournalIdentifier('issn', '0123-4567', 'Online')],
+  ),
 )
 
 describe('BibliographicInformation Component', () => {

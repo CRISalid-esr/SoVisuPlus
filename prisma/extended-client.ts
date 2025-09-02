@@ -9,6 +9,7 @@ import {
   HalSubmitType,
   Journal,
   JournalIdentifier,
+  JournalTitle,
   LabelType,
   Person,
   PrismaClient,
@@ -34,6 +35,7 @@ export type DocumentRecordWithRelations = DocumentRecord & {
 
 export type JournalWithRelations = Journal & {
   identifiers: JournalIdentifier[]
+  titles: JournalTitle[]
 }
 
 export type DocumentWithRelations = Document & {

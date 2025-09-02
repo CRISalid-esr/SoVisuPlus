@@ -77,9 +77,16 @@ model Journal {
   id          Int                 @id @default(autoincrement())
   issnL       String              @unique
   publisher   String
-  titles      String[]
+  titles      JournalTitle[]
   identifiers JournalIdentifier[]
   documents   Document[]
+}
+
+model JournalTitle {
+  id        Int     @id @default(autoincrement())
+  value     String
+  journalId Int
+  journal   Journal @relation(fields: [journalId], references: [id], onDelete: Cascade)
 }
 
 model JournalIdentifier {

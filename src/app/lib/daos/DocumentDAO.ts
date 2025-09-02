@@ -63,6 +63,7 @@ export class DocumentDAO extends AbstractDAO {
             journal: {
               include: {
                 identifiers: true,
+                titles: true,
               },
             },
           },
@@ -134,6 +135,7 @@ export class DocumentDAO extends AbstractDAO {
             journal: {
               include: {
                 identifiers: true,
+                titles: true,
               },
             },
           },
@@ -528,6 +530,22 @@ export class DocumentDAO extends AbstractDAO {
           },
         }
       }
+
+      if (filter.id === 'publishedIn') {
+        where = {
+          ...where,
+          journal: {
+            titles: {
+              some: {
+                value: {
+                  contains: filter.value,
+                  mode: QueryMode.insensitive,
+                },
+              },
+            },
+          },
+        }
+      }
     })
 
     if (omittedHalCollectionCodes?.length) {
@@ -663,6 +681,7 @@ export class DocumentDAO extends AbstractDAO {
         journal: {
           include: {
             identifiers: true,
+            titles: true,
           },
         },
       },
@@ -729,6 +748,7 @@ export class DocumentDAO extends AbstractDAO {
         journal: {
           include: {
             identifiers: true,
+            titles: true,
           },
         },
       },

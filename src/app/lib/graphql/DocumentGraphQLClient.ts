@@ -10,6 +10,7 @@ import { DocumentRecord } from '@/types/DocumentRecord'
 import { Concept } from '@/types/Concept'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
+import { JournalTitle } from '@/types/JournalTitle'
 
 interface GraphContributionResponse {
   roles: string[]
@@ -52,7 +53,7 @@ interface GraphDocumentResponse {
         uid: string
         issn_l: string
         publisher: string
-        titles: string[]
+        titles: { value: string }[]
         identifiers: { type: string; value: string; format?: string | null }[]
       }
     }>
@@ -113,7 +114,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
     const journalEdge = publishedInConnection?.edges?.[0]
     const journal = journalEdge
       ? new Journal(
-          journalEdge.node.titles,
+          journalEdge.node.titles.map((title) => new JournalTitle(title.value)),
           journalEdge.node.issn_l,
           journalEdge.node.publisher,
           journalEdge.node.identifiers.map(

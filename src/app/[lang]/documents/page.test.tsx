@@ -8,6 +8,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { Document, DocumentType } from '@/types/Document'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
+import { JournalTitle } from '@/types/JournalTitle'
 import DocumentsPage from './page'
 import { Literal } from '@/types/Literal'
 import { InternalPerson } from '@/types/InternalPerson'
@@ -75,9 +76,12 @@ const mockState = {
             'https://url-to-record-2',
           ),
         ],
-        new Journal(['Test journal'], '0123-4567', 'Test publisher', [
-          new JournalIdentifier('issn', '0123-4567', 'Online'),
-        ]),
+        new Journal(
+          [new JournalTitle('Test journal')],
+          '0123-4567',
+          'Test publisher',
+          [new JournalIdentifier('issn', '0123-4567', 'Online')],
+        ),
       ),
     ],
     totalItems: 1,

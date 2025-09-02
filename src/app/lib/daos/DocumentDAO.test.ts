@@ -21,6 +21,7 @@ import {
 } from '@/types/BibliographicPlatform'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
+import { JournalTitle } from '@/types/JournalTitle'
 
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
@@ -180,6 +181,7 @@ describe('DocumentDAO', () => {
         journal: {
           include: {
             identifiers: true,
+            titles: true,
           },
         },
       },
@@ -493,6 +495,7 @@ describe('DocumentDAO', () => {
         journal: {
           include: {
             identifiers: true,
+            titles: true,
           },
         },
       },
@@ -572,6 +575,7 @@ describe('DocumentDAO', () => {
         journal: {
           include: {
             identifiers: true,
+            titles: true,
           },
         },
       },
@@ -609,7 +613,7 @@ describe('DocumentDAO', () => {
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
 
     document.journal = new Journal(
-      ['Journal of Testing'],
+      [new JournalTitle('Journal of Testing')],
       '1234-5678',
       'Test Publisher',
       [
@@ -642,6 +646,7 @@ describe('DocumentDAO', () => {
           journal: {
             include: {
               identifiers: true,
+              titles: true,
             },
           },
         },
