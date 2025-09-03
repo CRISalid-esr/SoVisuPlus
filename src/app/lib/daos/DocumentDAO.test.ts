@@ -55,6 +55,10 @@ jest.mock('@prisma/client', () => {
       deleteMany: jest.fn(),
       create: jest.fn(),
     },
+    journalTitle: {
+      deleteMany: jest.fn(),
+      create: jest.fn(),
+    },
   }
 
   return {
@@ -604,7 +608,7 @@ describe('DocumentDAO', () => {
       uid: 'journal-uid-001',
       issnL: '1234-5678',
       publisher: 'Test Publisher',
-      titles: ['Journal of Testing'],
+      titles: [{ value: 'Journal of Testing' }],
       identifiers: [
         { type: 'issn', value: '1234-5678', format: 'Print' },
         { type: 'issn', value: '8765-4321', format: 'Online' },
@@ -659,11 +663,9 @@ describe('DocumentDAO', () => {
         create: expect.objectContaining({
           issnL: '1234-5678',
           publisher: 'Test Publisher',
-          titles: ['Journal of Testing'],
         }),
         update: expect.objectContaining({
           publisher: 'Test Publisher',
-          titles: { set: ['Journal of Testing'] },
         }),
         where: expect.objectContaining({ issnL: '1234-5678' }),
       }),
