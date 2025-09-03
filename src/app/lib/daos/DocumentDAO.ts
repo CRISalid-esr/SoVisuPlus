@@ -79,12 +79,10 @@ export class DocumentDAO extends AbstractDAO {
           where: { issnL: journal.issnL },
           update: {
             publisher: journal.publisher,
-            titles: { set: journal.titles },
           },
           create: {
             issnL: journal.issnL,
             publisher: journal.publisher,
-            titles: journal.titles,
           },
         })
 
@@ -100,6 +98,19 @@ export class DocumentDAO extends AbstractDAO {
               type: identifier.type,
               value: identifier.value,
               format: identifier.format,
+              journalId: journalId,
+            },
+          })
+        }
+
+        await this.prismaClient.journalTitle.deleteMany({
+          where: { journalId: journalId },
+        })
+
+        for (const title of journal.titles) {
+          await this.prismaClient.journalTitle.create({
+            data: {
+              value: title.value,
               journalId: journalId,
             },
           })
