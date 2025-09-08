@@ -428,6 +428,14 @@ export class DocumentDAO extends AbstractDAO {
               mode: QueryMode.insensitive,
             },
           },
+          {
+            journal: {
+              title: {
+                contains: searchTerm,
+                mode: QueryMode.insensitive,
+              },
+            },
+          },
         ],
       }
     }

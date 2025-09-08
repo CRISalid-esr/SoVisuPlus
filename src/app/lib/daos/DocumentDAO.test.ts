@@ -443,6 +443,14 @@ describe('DocumentDAO', () => {
               mode: Prisma.QueryMode.insensitive,
             },
           },
+          {
+            journal: {
+              title: {
+                contains: 'Sample',
+                mode: Prisma.QueryMode.insensitive,
+              },
+            },
+          },
         ],
         AND: [
           {
