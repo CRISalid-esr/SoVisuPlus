@@ -267,7 +267,7 @@ export default function DocumentsPage() {
         header: t`documents_page_publishedIn_column`,
         Cell({ row, column }) {
           const { journal } = row.original
-          const title = journal?.titles?.[0]?.value
+          const title = journal?.title
 
           return (
             title && (

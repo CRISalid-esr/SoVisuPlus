@@ -6,7 +6,6 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import useStore from '@/stores/global_store'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
-import { JournalTitle } from '@/types/JournalTitle'
 import { Document, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 import JournalComponent from './Journal'
@@ -27,12 +26,9 @@ const document: Document = new Document(
   [],
   [],
   [],
-  new Journal(
-    [new JournalTitle('Test journal')],
-    '0123-4567',
-    'Test publisher',
-    [new JournalIdentifier('issn', '0123-4567', 'Online')],
-  ),
+  new Journal('Test journal', '0123-4567', 'Test publisher', [
+    new JournalIdentifier('issn', '0123-4567', 'Online'),
+  ]),
 )
 
 describe('Journal Component', () => {
