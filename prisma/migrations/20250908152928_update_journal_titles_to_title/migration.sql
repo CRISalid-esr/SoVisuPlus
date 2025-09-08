@@ -8,7 +8,7 @@
 -- AlterTable
 ALTER TABLE "Journal" ADD "title" TEXT;
 
-UPDATE "Journal" SET "title" = (SELECT "titles"[1] FROM "Journal");
+UPDATE "Journal" SET "title" = "titles"[1];
 
 ALTER TABLE "Journal" ALTER COLUMN "title" SET NOT NULL;
 
