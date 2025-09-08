@@ -6,5 +6,10 @@
 
 */
 -- AlterTable
-ALTER TABLE "Journal" DROP COLUMN "titles",
-ADD COLUMN     "title" TEXT NOT NULL;
+ALTER TABLE "Journal" ADD "title" TEXT;
+
+UPDATE "Journal" SET "title" = (SELECT "titles"[1] FROM "Journal");
+
+ALTER TABLE "Journal" ALTER COLUMN "title" SET NOT NULL;
+
+ALTER TABLE "Journal" DROP COLUMN "titles";
