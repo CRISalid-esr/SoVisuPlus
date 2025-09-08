@@ -21,7 +21,6 @@ import {
 } from '@/types/BibliographicPlatform'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
-import { JournalTitle } from '@/types/JournalTitle'
 
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
@@ -52,10 +51,6 @@ jest.mock('@prisma/client', () => {
     },
     journalIdentifier: {
       upsert: jest.fn(),
-      deleteMany: jest.fn(),
-      create: jest.fn(),
-    },
-    journalTitle: {
       deleteMany: jest.fn(),
       create: jest.fn(),
     },
@@ -185,7 +180,6 @@ describe('DocumentDAO', () => {
         journal: {
           include: {
             identifiers: true,
-            titles: true,
           },
         },
       },
@@ -499,7 +493,6 @@ describe('DocumentDAO', () => {
         journal: {
           include: {
             identifiers: true,
-            titles: true,
           },
         },
       },
@@ -579,7 +572,6 @@ describe('DocumentDAO', () => {
         journal: {
           include: {
             identifiers: true,
-            titles: true,
           },
         },
       },
@@ -608,7 +600,7 @@ describe('DocumentDAO', () => {
       uid: 'journal-uid-001',
       issnL: '1234-5678',
       publisher: 'Test Publisher',
-      titles: [{ value: 'Journal of Testing' }],
+      title: 'Journal of Testing',
       identifiers: [
         { type: 'issn', value: '1234-5678', format: 'Print' },
         { type: 'issn', value: '8765-4321', format: 'Online' },
@@ -617,7 +609,7 @@ describe('DocumentDAO', () => {
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
 
     document.journal = new Journal(
-      [new JournalTitle('Journal of Testing')],
+      'Journal of Testing',
       '1234-5678',
       'Test Publisher',
       [
@@ -650,7 +642,6 @@ describe('DocumentDAO', () => {
           journal: {
             include: {
               identifiers: true,
-              titles: true,
             },
           },
         },
@@ -663,9 +654,11 @@ describe('DocumentDAO', () => {
         create: expect.objectContaining({
           issnL: '1234-5678',
           publisher: 'Test Publisher',
+          title: 'Journal of Testing',
         }),
         update: expect.objectContaining({
           publisher: 'Test Publisher',
+          title: 'Journal of Testing',
         }),
         where: expect.objectContaining({ issnL: '1234-5678' }),
       }),

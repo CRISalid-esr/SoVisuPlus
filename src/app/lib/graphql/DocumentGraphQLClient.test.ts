@@ -330,11 +330,7 @@ describe('DocumentGraphQLClient', () => {
                 node: {
                   issn_l: '0305-7453',
                   publisher: 'Oxford University Press (OUP)',
-                  titles: [
-                    {
-                      value: 'The journal of antimicrobial chemotherapy.',
-                    },
-                  ],
+                  title: 'The journal of antimicrobial chemotherapy.',
                   identifiers: [
                     {
                       type: 'issn',
@@ -366,7 +362,9 @@ describe('DocumentGraphQLClient', () => {
     expect(document?.journal?.issnL).toBe('0305-7453')
     expect(document?.journal?.publisher).toBe('Oxford University Press (OUP)')
     expect(document?.journal?.identifiers).toHaveLength(2)
-    expect(document?.journal?.titles).toHaveLength(1)
+    expect(document?.journal?.title).toBe(
+      'The journal of antimicrobial chemotherapy.',
+    )
     expect(document?.volume).toBe('67')
     expect(document?.issue).toBe('9')
     expect(document?.pages).toBe('')
