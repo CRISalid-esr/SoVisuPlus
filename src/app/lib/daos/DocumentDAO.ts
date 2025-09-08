@@ -63,7 +63,6 @@ export class DocumentDAO extends AbstractDAO {
             journal: {
               include: {
                 identifiers: true,
-                titles: true,
               },
             },
           },
@@ -79,10 +78,12 @@ export class DocumentDAO extends AbstractDAO {
           where: { issnL: journal.issnL },
           update: {
             publisher: journal.publisher,
+            title: journal.title,
           },
           create: {
             issnL: journal.issnL,
             publisher: journal.publisher,
+            title: journal.title,
           },
         })
 
@@ -98,19 +99,6 @@ export class DocumentDAO extends AbstractDAO {
               type: identifier.type,
               value: identifier.value,
               format: identifier.format,
-              journalId: journalId,
-            },
-          })
-        }
-
-        await this.prismaClient.journalTitle.deleteMany({
-          where: { journalId: journalId },
-        })
-
-        for (const title of journal.titles) {
-          await this.prismaClient.journalTitle.create({
-            data: {
-              value: title.value,
               journalId: journalId,
             },
           })
@@ -146,7 +134,6 @@ export class DocumentDAO extends AbstractDAO {
             journal: {
               include: {
                 identifiers: true,
-                titles: true,
               },
             },
           },
@@ -546,13 +533,9 @@ export class DocumentDAO extends AbstractDAO {
         where = {
           ...where,
           journal: {
-            titles: {
-              some: {
-                value: {
-                  contains: filter.value,
-                  mode: QueryMode.insensitive,
-                },
-              },
+            title: {
+              contains: filter.value,
+              mode: QueryMode.insensitive,
             },
           },
         }
@@ -650,7 +633,7 @@ export class DocumentDAO extends AbstractDAO {
       if (sort.id === 'publishedIn') {
         return {
           journal: {
-            titles: sort.desc ? 'desc' : 'asc',
+            title: sort.desc ? 'desc' : 'asc',
           },
         }
       }
@@ -692,7 +675,6 @@ export class DocumentDAO extends AbstractDAO {
         journal: {
           include: {
             identifiers: true,
-            titles: true,
           },
         },
       },
@@ -759,7 +741,6 @@ export class DocumentDAO extends AbstractDAO {
         journal: {
           include: {
             identifiers: true,
-            titles: true,
           },
         },
       },
