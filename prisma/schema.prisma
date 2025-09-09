@@ -77,7 +77,7 @@ model Journal {
   id          Int                 @id @default(autoincrement())
   issnL       String              @unique
   publisher   String
-  titles      String[]
+  title       String
   identifiers JournalIdentifier[]
   documents   Document[]
 }

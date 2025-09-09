@@ -443,6 +443,14 @@ describe('DocumentDAO', () => {
               mode: Prisma.QueryMode.insensitive,
             },
           },
+          {
+            journal: {
+              title: {
+                contains: 'Sample',
+                mode: Prisma.QueryMode.insensitive,
+              },
+            },
+          },
         ],
         AND: [
           {
@@ -600,7 +608,7 @@ describe('DocumentDAO', () => {
       uid: 'journal-uid-001',
       issnL: '1234-5678',
       publisher: 'Test Publisher',
-      titles: ['Journal of Testing'],
+      title: 'Journal of Testing',
       identifiers: [
         { type: 'issn', value: '1234-5678', format: 'Print' },
         { type: 'issn', value: '8765-4321', format: 'Online' },
@@ -609,7 +617,7 @@ describe('DocumentDAO', () => {
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
 
     document.journal = new Journal(
-      ['Journal of Testing'],
+      'Journal of Testing',
       '1234-5678',
       'Test Publisher',
       [
@@ -654,11 +662,11 @@ describe('DocumentDAO', () => {
         create: expect.objectContaining({
           issnL: '1234-5678',
           publisher: 'Test Publisher',
-          titles: ['Journal of Testing'],
+          title: 'Journal of Testing',
         }),
         update: expect.objectContaining({
           publisher: 'Test Publisher',
-          titles: { set: ['Journal of Testing'] },
+          title: 'Journal of Testing',
         }),
         where: expect.objectContaining({ issnL: '1234-5678' }),
       }),

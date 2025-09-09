@@ -21,7 +21,7 @@ export default function Journal() {
 
   const { selectedDocument = null } = useStore((state) => state.document)
   const journal = selectedDocument?.journal
-  const title = journal?.titles[0]
+  const title = journal?.title
 
   const handleClick = () => {
     setIsPopperOpen(!isPopperOpen)

@@ -75,7 +75,7 @@ const mockState = {
             'https://url-to-record-2',
           ),
         ],
-        new Journal(['Test journal'], '0123-4567', 'Test publisher', [
+        new Journal('Test journal', '0123-4567', 'Test publisher', [
           new JournalIdentifier('issn', '0123-4567', 'Online'),
         ]),
       ),

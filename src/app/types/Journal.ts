@@ -5,7 +5,7 @@ import {
 } from '@/types/JournalIdentifier'
 
 interface JournalJson {
-  titles: string[]
+  title: string
   issnL: string
   publisher: string
   identifiers: JournalIdentifierJson[] // Adjust type as needed, e.g., JournalIdentifierJson[]
@@ -13,7 +13,7 @@ interface JournalJson {
 
 class Journal {
   constructor(
-    public titles: string[],
+    public title: string,
     public issnL: string,
     public publisher: string,
     public identifiers: JournalIdentifier[],
@@ -21,7 +21,7 @@ class Journal {
 
   static fromDbJournal(dbJournal: DbJournal): Journal {
     return new Journal(
-      dbJournal.titles,
+      dbJournal.title,
       dbJournal.issnL,
       dbJournal.publisher,
       dbJournal.identifiers.map((id) => JournalIdentifier.fromDbIdentifier(id)),
@@ -30,7 +30,7 @@ class Journal {
 
   static fromJson(json: JournalJson): Journal {
     return new Journal(
-      json.titles,
+      json.title,
       json.issnL,
       json.publisher,
       json.identifiers.map((id) => JournalIdentifier.fromJson(id)),

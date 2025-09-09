@@ -78,12 +78,12 @@ export class DocumentDAO extends AbstractDAO {
           where: { issnL: journal.issnL },
           update: {
             publisher: journal.publisher,
-            titles: { set: journal.titles },
+            title: journal.title,
           },
           create: {
             issnL: journal.issnL,
             publisher: journal.publisher,
-            titles: journal.titles,
+            title: journal.title,
           },
         })
 
@@ -428,6 +428,14 @@ export class DocumentDAO extends AbstractDAO {
               mode: QueryMode.insensitive,
             },
           },
+          {
+            journal: {
+              title: {
+                contains: searchTerm,
+                mode: QueryMode.insensitive,
+              },
+            },
+          },
         ],
       }
     }
@@ -528,6 +536,18 @@ export class DocumentDAO extends AbstractDAO {
           },
         }
       }
+
+      if (filter.id === 'publishedIn') {
+        where = {
+          ...where,
+          journal: {
+            title: {
+              contains: filter.value,
+              mode: QueryMode.insensitive,
+            },
+          },
+        }
+      }
     })
 
     if (omittedHalCollectionCodes?.length) {
@@ -614,6 +634,14 @@ export class DocumentDAO extends AbstractDAO {
           publicationDateStart: {
             sort: sort.desc ? 'desc' : 'asc',
             nulls: 'last',
+          },
+        }
+      }
+
+      if (sort.id === 'publishedIn') {
+        return {
+          journal: {
+            title: sort.desc ? 'desc' : 'asc',
           },
         }
       }
