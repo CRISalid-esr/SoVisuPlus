@@ -33,12 +33,28 @@ const mockState = {
           researchStructure: {
             id: 1,
             uid: '12345',
-            acronym: 'CODE',
+            acronym: 'ABC',
             external: false,
-            slug: 'research-structure:code',
+            slug: 'research-structure:abc',
+          },
+        },
+        {
+          id: 2,
+          personId: 1,
+          researchStructureId: 2,
+          startDate: null,
+          endDate: null,
+          positionCode: null,
+          researchStructure: {
+            id: 2,
+            uid: '67890',
+            acronym: 'DEF',
+            external: false,
+            slug: 'research-structure:def',
           },
         },
       ],
+      membershipAcronyms: ['ABC', 'DEF'],
     },
   },
 }
@@ -88,7 +104,14 @@ beforeEach(() => {
 
 describe('HalStatusCell Component', () => {
   it('displays the in collection status', async () => {
-    const document = createDocument(true, ['CODE'], 'file')
+    const document = createDocument(
+      true,
+      [
+        mockState.user.currentPerspective.memberships[0].researchStructure
+          .acronym,
+      ],
+      'file',
+    )
 
     render(<HalStatusCell row={{ original: document }} />)
 
@@ -111,6 +134,14 @@ describe('HalStatusCell Component', () => {
         exact: false,
       }),
     ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        mockState.user.currentPerspective.membershipAcronyms.join(', '),
+        {
+          exact: false,
+        },
+      ),
+    ).toBeInTheDocument()
   })
 
   it('displays the outside Hal status', async () => {
@@ -125,7 +156,14 @@ describe('HalStatusCell Component', () => {
   })
 
   it('displays the alternate icon', async () => {
-    const document = createDocument(true, ['CODE'], 'notice')
+    const document = createDocument(
+      true,
+      [
+        mockState.user.currentPerspective.memberships[0].researchStructure
+          .acronym,
+      ],
+      'notice',
+    )
 
     render(<HalStatusCell row={{ original: document }} />)
 
