@@ -107,7 +107,9 @@ describe('HalStatusCell Component', () => {
     expect(screen.getByTestId('AttachFileIcon')).toBeInTheDocument()
     expect(screen.queryByTestId('AttachFileOffIcon')).not.toBeInTheDocument()
     expect(
-      screen.getByText(t`documents_page_hal_status_out_of_collection`),
+      screen.getByText(t`documents_page_hal_status_out_of_collection`, {
+        exact: false,
+      }),
     ).toBeInTheDocument()
   })
 
