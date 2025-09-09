@@ -550,10 +550,18 @@ msgstr "authors"
 msgid "documents_page_document_icon_label"
 msgstr "Document"
 
-#: src/app/[lang]/documents/components/HalStatusCell.tsx:69
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:98
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:134
+#: src/app/[lang]/documents/components/HalStatusCell.tsx:65
 msgid "documents_page_hal_status_in_collection"
 msgstr ""
 
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:110
+#: src/app/[lang]/documents/components/HalStatusCell.tsx:66
+msgid "documents_page_hal_status_out_of_collection"
+msgstr ""
+
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:123
 #: src/app/[lang]/documents/components/HalStatusCell.tsx:46
 msgid "documents_page_hal_status_outside_hal"
 msgstr ""

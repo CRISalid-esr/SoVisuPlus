@@ -65,15 +65,9 @@ export default function HalStatusCell({
       sx={multilineChipSx}
       {...(halSubmitTypeIcon && { icon: halSubmitTypeIcon })}
       label={
-        isInCollection ? (
-          t`documents_page_hal_status_in_collection`
-        ) : (
-          <Plural
-            value={numberOfAcronyms}
-            one={`documents_page_hal_status_out_of_collection ${formattedAcronyms}`}
-            other={`documents_page_hal_status_out_of_collections ${formattedAcronyms}`}
-          />
-        )
+        isInCollection
+          ? t`documents_page_hal_status_in_collection`
+          : `${t`documents_page_hal_status_out_of_collection`} ${currentPerspective?.membershipAcronyms?.join(', ')}`
       }
       size='small'
       color={isInCollection ? 'success' : 'warning'}
