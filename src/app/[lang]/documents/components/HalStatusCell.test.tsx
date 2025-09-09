@@ -147,6 +147,14 @@ describe('HalStatusCell Component', () => {
         exact: false,
       }),
     ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        mockState.user.currentPerspective.membershipAcronyms.join(', '),
+        {
+          exact: false,
+        },
+      ),
+    ).toBeInTheDocument()
   })
 
   it('displays the outside Hal status', async () => {
