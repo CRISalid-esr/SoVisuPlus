@@ -132,6 +132,10 @@ describe('HalStatusCell Component', () => {
   })
 
   it('displays the out of collection status', async () => {
+    act(() => {
+      i18n.activate('en')
+    })
+
     const document = createDocument(true, ['SOME_OTHER_CODE'], 'file')
 
     render(
@@ -143,7 +147,7 @@ describe('HalStatusCell Component', () => {
     expect(screen.getByTestId('AttachFileIcon')).toBeInTheDocument()
     expect(screen.queryByTestId('AttachFileOffIcon')).not.toBeInTheDocument()
     expect(
-      screen.getByText(t`documents_page_hal_status_out_of_collection`, {
+      screen.getByText(i18n.t('documents_page_hal_status_out_of_collection'), {
         exact: false,
       }),
     ).toBeInTheDocument()
