@@ -38,7 +38,7 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:200
 msgid "documents_page_main_title"
-msgstr ""
+msgstr "Publications"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:251
