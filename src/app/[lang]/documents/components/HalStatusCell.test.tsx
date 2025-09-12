@@ -101,6 +101,10 @@ beforeEach(() => {
   ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
     selector(mockState),
   )
+
+  act(() => {
+    i18n.activate('en')
+  })
 })
 
 describe('HalStatusCell Component', () => {
@@ -128,10 +132,6 @@ describe('HalStatusCell Component', () => {
   })
 
   it('displays the out of collection status', async () => {
-    act(() => {
-      i18n.activate('en')
-    })
-
     const document = createDocument(true, ['SOME_OTHER_CODE'], 'file')
 
     render(
