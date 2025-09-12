@@ -1,6 +1,7 @@
 import useStore from '@/stores/global_store'
-import { render, screen } from '@testing-library/react'
-import { t } from '@lingui/macro'
+import { render, screen, act } from '@testing-library/react'
+import { i18n } from '@lingui/core'
+import { I18nProvider } from '@lingui/react'
 import { HalSubmitType as DbHalSubmitType } from '@prisma/client'
 
 import { Document, DocumentType } from '@/types/Document'
@@ -113,24 +114,36 @@ describe('HalStatusCell Component', () => {
       'file',
     )
 
-    render(<HalStatusCell row={{ original: document }} />)
+    render(
+      <I18nProvider i18n={i18n}>
+        <HalStatusCell row={{ original: document }} />
+      </I18nProvider>,
+    )
 
     expect(screen.getByTestId('AttachFileIcon')).toBeInTheDocument()
     expect(screen.queryByTestId('AttachFileOffIcon')).not.toBeInTheDocument()
     expect(
-      screen.getByText(t`documents_page_hal_status_in_collection`),
+      screen.getByText(i18n.t('documents_page_hal_status_in_collection')),
     ).toBeInTheDocument()
   })
 
   it('displays the out of collection status', async () => {
+    act(() => {
+      i18n.activate('en')
+    })
+
     const document = createDocument(true, ['SOME_OTHER_CODE'], 'file')
 
-    render(<HalStatusCell row={{ original: document }} />)
+    render(
+      <I18nProvider i18n={i18n}>
+        <HalStatusCell row={{ original: document }} />
+      </I18nProvider>,
+    )
 
     expect(screen.getByTestId('AttachFileIcon')).toBeInTheDocument()
     expect(screen.queryByTestId('AttachFileOffIcon')).not.toBeInTheDocument()
     expect(
-      screen.getByText(t`documents_page_hal_status_out_of_collection`, {
+      screen.getByText(i18n.t('documents_page_hal_status_out_of_collection'), {
         exact: false,
       }),
     ).toBeInTheDocument()
@@ -147,11 +160,15 @@ describe('HalStatusCell Component', () => {
   it('displays the outside Hal status', async () => {
     const document = createDocument(false)
 
-    render(<HalStatusCell row={{ original: document }} />)
+    render(
+      <I18nProvider i18n={i18n}>
+        <HalStatusCell row={{ original: document }} />
+      </I18nProvider>,
+    )
 
     expect(screen.queryByTestId('AttachFileIcon')).not.toBeInTheDocument()
     expect(
-      screen.getByText(t`documents_page_hal_status_outside_hal`),
+      screen.getByText(i18n.t('documents_page_hal_status_outside_hal')),
     ).toBeInTheDocument()
   })
 
@@ -165,11 +182,15 @@ describe('HalStatusCell Component', () => {
       'notice',
     )
 
-    render(<HalStatusCell row={{ original: document }} />)
+    render(
+      <I18nProvider i18n={i18n}>
+        <HalStatusCell row={{ original: document }} />
+      </I18nProvider>,
+    )
 
     expect(screen.getByTestId('AttachFileOffIcon')).toBeInTheDocument()
     expect(
-      screen.getByText(t`documents_page_hal_status_in_collection`),
+      screen.getByText(i18n.t('documents_page_hal_status_in_collection')),
     ).toBeInTheDocument()
   })
 })
