@@ -1,6 +1,6 @@
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import { Chip } from '@mui/material'
-import { t } from '@lingui/macro'
+import { t, Plural } from '@lingui/macro'
 
 import useStore from '@/stores/global_store'
 import { Document } from '@/types/Document'
@@ -56,14 +56,24 @@ export default function HalStatusCell({
   const isInCollection =
     halRecord.isResearchStructureInCollectionCodes(currentPerspective)
 
+  const acronyms = currentPerspective?.membershipAcronyms || []
+  const numberOfAcronyms = acronyms.length
+  const formattedAcronyms = acronyms.join(', ')
+
   return (
     <Chip
       sx={multilineChipSx}
       {...(halSubmitTypeIcon && { icon: halSubmitTypeIcon })}
       label={
-        isInCollection
-          ? t`documents_page_hal_status_in_collection`
-          : `${t`documents_page_hal_status_out_of_collection`} ${currentPerspective?.membershipAcronyms?.join(', ')}`
+        isInCollection ? (
+          t`documents_page_hal_status_in_collection`
+        ) : (
+          <Plural
+            value={numberOfAcronyms}
+            one={`documents_page_hal_status_out_of_collection ${formattedAcronyms}`}
+            other={`documents_page_hal_status_out_of_collections ${formattedAcronyms}`}
+          />
+        )
       }
       size='small'
       color={isInCollection ? 'success' : 'warning'}
