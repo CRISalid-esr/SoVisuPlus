@@ -41,7 +41,7 @@ import {
 } from 'material-react-table'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation' // Import useRouter
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Highlighter from 'react-highlight-words'
 import DocumentHeader from './components/DocumentHeader'
 import HalStatusCell from './components/HalStatusCell'
@@ -90,11 +90,14 @@ export default function DocumentsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const navigateToDetailsPage = (documentUid: string) => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('tab', 'bibliographic_information')
-    router.push(`/${lang}/documents/${documentUid}?${params.toString()}`)
-  }
+  const navigateToDetailsPage = useCallback(
+    (documentUid: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set('tab', 'bibliographic_information')
+      router.push(`/${lang}/documents/${documentUid}?${params.toString()}`)
+    },
+    [lang, router, searchParams],
+  )
 
   const columns = useMemo<MRT_ColumnDef<Document>[]>(
     () => [
