@@ -285,6 +285,7 @@ export default function DocumentsPage() {
         },
       },
       {
+        enableSorting: false,
         accessorKey: 'halStatus',
         header: t`documents_page_halStatus_column`,
         Cell({ row }) {
