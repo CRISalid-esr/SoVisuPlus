@@ -4,7 +4,7 @@ import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles'
 import '@testing-library/jest-dom'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, act } from '@testing-library/react'
 import { Document, DocumentType } from '@/types/Document'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
@@ -142,6 +142,12 @@ const renderComponent = () =>
       </I18nProvider>
     </ThemeProvider>,
   )
+
+beforeEach(() => {
+  act(() => {
+    i18n.activate('en')
+  })
+})
 
 describe('DocumentsPage Component', () => {
   it('renders DocumentsPage correctly', async () => {

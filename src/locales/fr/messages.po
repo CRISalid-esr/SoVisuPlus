@@ -14,6 +14,38 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:130
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:193
+msgid "documents_page_hal_status_in_collection"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:146
+msgid "documents_page_hal_status_out_of_collection"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:171
+msgid "documents_page_hal_status_outside_hal"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:158
+#: src/app/[lang]/documents/page.test.tsx:181
+msgid "documents_page_main_title_first_person"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:200
+msgid "documents_page_main_title"
+msgstr "Publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:251
+msgid "documents_page_incomplete_hal_repository_filter"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Mes autorisations"
@@ -284,28 +316,6 @@ msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:152
-#: src/app/[lang]/documents/page.test.tsx:175
-msgid "documents_page_main_title_first_person"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:156
-#: src/app/[lang]/documents/page.tsx:592
-msgid "documents_page_synchronize_button"
-msgstr "Mettre à jour les publications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:194
-msgid "documents_page_main_title"
-msgstr "Publications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:245
-msgid "documents_page_incomplete_hal_repository_filter"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:553
 msgid "documents_page_refresh_list_alert_own_perspective"
 msgstr "La liste de vos publications a changé"
@@ -314,6 +324,12 @@ msgstr "La liste de vos publications a changé"
 #: src/app/[lang]/documents/page.tsx:556
 msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr "La liste des publications de {name} a changé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:162
+#: src/app/[lang]/documents/page.tsx:592
+msgid "documents_page_synchronize_button"
+msgstr "Mettre à jour les publications"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/forbidden.tsx:43
@@ -369,6 +385,10 @@ msgstr "Type de source : {0}"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:91
 msgid "document_details_page_journal_publisher"
 msgstr "Éditeur : {0}"
+
+#: src/app/[lang]/documents/components/HalStatusCell.tsx:71
+msgid "{numberOfAcronyms, plural, one {documents_page_hal_status_out_of_collection {formattedAcronyms}} other {documents_page_hal_status_out_of_collections {formattedAcronyms}}}"
+msgstr "{numberOfAcronyms, plural, one {Dans HAL mais hors de la collection {formattedAcronyms}} other {Dans HAL mais hors des collections {formattedAcronyms}}}"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:71
@@ -504,18 +524,10 @@ msgstr "auteurs"
 msgid "documents_page_document_icon_label"
 msgstr "Article"
 
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:98
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:132
-#: src/app/[lang]/documents/components/HalStatusCell.tsx:65
+#: src/app/[lang]/documents/components/HalStatusCell.tsx:69
 msgid "documents_page_hal_status_in_collection"
 msgstr "Dans la collection"
 
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:110
-#: src/app/[lang]/documents/components/HalStatusCell.tsx:66
-msgid "documents_page_hal_status_out_of_collection"
-msgstr "Dans HAL mais hors de la collection"
-
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:121
 #: src/app/[lang]/documents/components/HalStatusCell.tsx:46
 msgid "documents_page_hal_status_outside_hal"
 msgstr "Hors HAL"

@@ -1,6 +1,7 @@
 import useStore from '@/stores/global_store'
-import { render, screen } from '@testing-library/react'
-import { t } from '@lingui/macro'
+import { render, screen, act } from '@testing-library/react'
+import { i18n } from '@lingui/core'
+import { I18nProvider } from '@lingui/react'
 import { HalSubmitType as DbHalSubmitType } from '@prisma/client'
 
 import { Document, DocumentType } from '@/types/Document'
@@ -33,12 +34,28 @@ const mockState = {
           researchStructure: {
             id: 1,
             uid: '12345',
-            acronym: 'CODE',
+            acronym: 'ABC',
             external: false,
-            slug: 'research-structure:code',
+            slug: 'research-structure:abc',
+          },
+        },
+        {
+          id: 2,
+          personId: 1,
+          researchStructureId: 2,
+          startDate: null,
+          endDate: null,
+          positionCode: null,
+          researchStructure: {
+            id: 2,
+            uid: '67890',
+            acronym: 'DEF',
+            external: false,
+            slug: 'research-structure:def',
           },
         },
       ],
+      membershipAcronyms: ['ABC', 'DEF'],
     },
   },
 }
@@ -84,52 +101,96 @@ beforeEach(() => {
   ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
     selector(mockState),
   )
+
+  act(() => {
+    i18n.activate('en')
+  })
 })
 
 describe('HalStatusCell Component', () => {
   it('displays the in collection status', async () => {
-    const document = createDocument(true, ['CODE'], 'file')
+    const document = createDocument(
+      true,
+      [
+        mockState.user.currentPerspective.memberships[0].researchStructure
+          .acronym,
+      ],
+      'file',
+    )
 
-    render(<HalStatusCell row={{ original: document }} />)
+    render(
+      <I18nProvider i18n={i18n}>
+        <HalStatusCell row={{ original: document }} />
+      </I18nProvider>,
+    )
 
     expect(screen.getByTestId('AttachFileIcon')).toBeInTheDocument()
     expect(screen.queryByTestId('AttachFileOffIcon')).not.toBeInTheDocument()
     expect(
-      screen.getByText(t`documents_page_hal_status_in_collection`),
+      screen.getByText(i18n.t('documents_page_hal_status_in_collection')),
     ).toBeInTheDocument()
   })
 
   it('displays the out of collection status', async () => {
     const document = createDocument(true, ['SOME_OTHER_CODE'], 'file')
 
-    render(<HalStatusCell row={{ original: document }} />)
+    render(
+      <I18nProvider i18n={i18n}>
+        <HalStatusCell row={{ original: document }} />
+      </I18nProvider>,
+    )
 
     expect(screen.getByTestId('AttachFileIcon')).toBeInTheDocument()
     expect(screen.queryByTestId('AttachFileOffIcon')).not.toBeInTheDocument()
     expect(
-      screen.getByText(t`documents_page_hal_status_out_of_collection`),
+      screen.getByText(i18n.t('documents_page_hal_status_out_of_collection'), {
+        exact: false,
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        mockState.user.currentPerspective.membershipAcronyms.join(', '),
+        {
+          exact: false,
+        },
+      ),
     ).toBeInTheDocument()
   })
 
   it('displays the outside Hal status', async () => {
     const document = createDocument(false)
 
-    render(<HalStatusCell row={{ original: document }} />)
+    render(
+      <I18nProvider i18n={i18n}>
+        <HalStatusCell row={{ original: document }} />
+      </I18nProvider>,
+    )
 
     expect(screen.queryByTestId('AttachFileIcon')).not.toBeInTheDocument()
     expect(
-      screen.getByText(t`documents_page_hal_status_outside_hal`),
+      screen.getByText(i18n.t('documents_page_hal_status_outside_hal')),
     ).toBeInTheDocument()
   })
 
   it('displays the alternate icon', async () => {
-    const document = createDocument(true, ['CODE'], 'notice')
+    const document = createDocument(
+      true,
+      [
+        mockState.user.currentPerspective.memberships[0].researchStructure
+          .acronym,
+      ],
+      'notice',
+    )
 
-    render(<HalStatusCell row={{ original: document }} />)
+    render(
+      <I18nProvider i18n={i18n}>
+        <HalStatusCell row={{ original: document }} />
+      </I18nProvider>,
+    )
 
     expect(screen.getByTestId('AttachFileOffIcon')).toBeInTheDocument()
     expect(
-      screen.getByText(t`documents_page_hal_status_in_collection`),
+      screen.getByText(i18n.t('documents_page_hal_status_in_collection')),
     ).toBeInTheDocument()
   })
 })
