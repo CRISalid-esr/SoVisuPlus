@@ -19,7 +19,7 @@ declare namespace NodeJS {
     GRAPHQL_API_KEY_ENABLED: string
     GRAPHQL_API_KEY: string
     ORCID_URL: string
-    SOVISUPLUS_HOST: string
+    APP_URL: string
     ORCID_SCOPES: string
     ORCID_CLIENT_ID: string
     ORCID_CLIENT_SECRET: string

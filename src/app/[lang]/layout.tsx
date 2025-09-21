@@ -37,7 +37,7 @@ export default async function RootLayout({ params, children }: Props) {
         <EnvInjector
           env={{
             ORCID_URL: process.env.ORCID_URL,
-            SOVISUPLUS_HOST: process.env.SOVISUPLUS_HOST,
+            APP_URL: process.env.APP_URL,
             ORCID_SCOPES: process.env.ORCID_SCOPES,
             ORCID_CLIENT_ID: process.env.ORCID_CLIENT_ID,
           }}

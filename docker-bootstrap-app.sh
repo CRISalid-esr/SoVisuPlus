@@ -1,34 +1,50 @@
 #!/bin/sh
-export DATABASE_URL=postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME?schema=public
+set -eu
 
-cat <<EOF >> .env
+# --- helpers ---------------------------------------------------------------
+log() { printf '%s %s\n' "[$(date +'%Y-%m-%dT%H:%M:%S%z')]" "$*"; }
 
-DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME
-DOCKER_TAG=$DOCKER_TAG
-DOCKER_DIGEST=$DOCKER_DIGEST
-GIT_COMMIT=${GIT_COMMIT:-$(git rev-parse HEAD)}
-GIT_BRANCH=${GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD)}
-DATABASE_URL=$DATABASE_URL
-KEYCLOAK_CLIENT_ID=$KEYCLOAK_CLIENT_ID
-KEYCLOAK_CLIENT_SECRET="$KEYCLOAK_CLIENT_SECRET"
-KEYCLOAK_ISSUER=$KEYCLOAK_ADDR/realms/$KEYCLOAK_REALM
-NEXTAUTH_URL=$APP_URL/api/auth
-NEXTAUTH_SECRET="$NEXTAUTH_SECRET"
-GRAPHQL_ENDPOINT_ENABLED="true"
-GRAPHQL_ENDPOINT_URL="$GRAPHQL_ENDPOINT_URL"
-GRAPHQL_API_KEY_ENABLED="true"
-GRAPHQL_API_KEY="$GRAPHQL_API_KEY"
-ORCID_URL="$ORCID_URL"
-SOVISUPLUS_HOST="$SOVISUPLUS_HOST"
-ORCID_SCOPES="$ORCID_SCOPES"
-ORCID_CLIENT_ID="$ORCID_CLIENT_ID"
-ORCID_CLIENT_SECRET="$ORCID_CLIENT_SECRET"
+# --- build DATABASE_URL ----------------------------------------------------
+DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public"
+export DATABASE_URL
+
+# --- safe git (no warnings on failure) -------------------------------------
+GIT_COMMIT_VAL="${GIT_COMMIT:-$(git rev-parse HEAD 2>/dev/null || true)}"
+[ -n "${GIT_COMMIT_VAL}" ] || GIT_COMMIT_VAL="unknown"
+
+GIT_BRANCH_VAL="${GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)}"
+[ -n "${GIT_BRANCH_VAL}" ] || GIT_BRANCH_VAL="unknown"
+
+# --- write .env (overwrite, not append) ------------------------------------
+# Quote values that may contain special chars/spaces
+cat > .env <<EOF
+DOCKER_IMAGE_NAME=${DOCKER_IMAGE_NAME:-unknown}
+DOCKER_TAG=${DOCKER_TAG:-unknown}
+DOCKER_DIGEST=${DOCKER_DIGEST:-unknown}
+GIT_COMMIT=${GIT_COMMIT_VAL}
+GIT_BRANCH=${GIT_BRANCH_VAL}
+DATABASE_URL=${DATABASE_URL}
+KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-}
+KEYCLOAK_CLIENT_SECRET="${KEYCLOAK_CLIENT_SECRET:-}"
+KEYCLOAK_ISSUER=${KEYCLOAK_ADDR:-}/realms/${KEYCLOAK_REALM:-}
+NEXTAUTH_URL=${APP_URL:-http://sovisuplus.local;3000}/api/auth
+NEXTAUTH_SECRET="${NEXTAUTH_SECRET:-}"
+GRAPHQL_ENDPOINT_ENABLED="${GRAPHQL_ENDPOINT_ENABLED:-false}"
+GRAPHQL_ENDPOINT_URL="${GRAPHQL_ENDPOINT_URL:-}
+GRAPHQL_API_KEY_ENABLED=${GRAPHQL_API_KEY_ENABLED:-false}
+GRAPHQL_API_KEY="${GRAPHQL_API_KEY:-}"
+ORCID_URL="${ORCID_URL:-https://orcid.org}"
+ORCID_SCOPES="${ORCID_SCOPES:-/authenticate}"
+ORCID_CLIENT_ID="${ORCID_CLIENT_ID:-}"
+ORCID_CLIENT_SECRET="${ORCID_CLIENT_SECRET:-}"
 EOF
 
-npx prisma migrate deploy
-
-# npm warn exec The following package was not found and will be installed: prisma@5.22.0
-rm -rf node_modules/prisma
+log "Running Prisma migrations…"
+if ! ./node_modules/.bin/prisma migrate deploy; then
+  log "Prisma migrations FAILED. Exiting."
+  exit 1
+fi
+log "Prisma migrations complete."
 
 export NODE_PATH=/app/node_modules # for the listener to find shared modules
 HOSTNAME="0.0.0.0" npm run start:web & npm run start:listener

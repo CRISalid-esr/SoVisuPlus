@@ -17,7 +17,6 @@ RUN npm ci  --legacy-peer-deps --ignore-scripts --omit=dev
 
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 COPY .env.docker .env
 
@@ -30,7 +29,9 @@ FROM base AS runner
 RUN set -ex; \
     apk update; \
     apk add --no-cache \
-    openssl
+    openssl; \
+    apk add --no-cache  \
+    git
 
 WORKDIR /app
 
@@ -48,15 +49,14 @@ RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
 
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/prisma ./prisma
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
 COPY --from=builder --chown=nextjs:nodejs /app/dist-listener ./dist-listener
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
 RUN touch .env && chown nextjs:nodejs .env
 

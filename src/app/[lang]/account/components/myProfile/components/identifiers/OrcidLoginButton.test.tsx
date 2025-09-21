@@ -8,7 +8,7 @@ jest.mock('@/utils/runtimeEnv', () => ({
     ORCID_CLIENT_ID: 'client-id',
     ORCID_URL: 'https://orcid.org',
     ORCID_SCOPES: '/authenticate',
-    SOVISUPLUS_HOST: 'https://example.com',
+    APP_URL: 'https://example.com',
   }),
 }))
 

@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_SUPPORTED_LOCALES: process.env.NEXT_PUBLIC_SUPPORTED_LOCALES,
     ORCID_URL: process.env.ORCID_URL,
-    SOVISUPLUS_HOST: process.env.SOVISUPLUS_HOST,
+    APP_URL: process.env.APP_URL,
     ORCID_SCOPES: process.env.ORCID_SCOPES,
     ORCID_CLIENT_ID: process.env.ORCID_CLIENT_ID,
   },

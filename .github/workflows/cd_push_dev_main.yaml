@@ -78,7 +78,7 @@ jobs:
           push: true
           tags: |
             crisalidesr/sovisuplus:latest
-            crisalidesr/sovisuplus:v0.41-dev
+            crisalidesr/sovisuplus:v0.42-dev
           context: .
           file: ./docker/staging/Dockerfile
           build-args: |
