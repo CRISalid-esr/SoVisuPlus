@@ -76,6 +76,7 @@ DATABASE_URL="postgresql://sovisuplus:**************@localhost:5432/sovisuplus"
 KEYCLOAK_CLIENT_ID="sovisuplus"
 KEYCLOAK_CLIENT_SECRET="credential_generated_by_keycloak_here"
 KEYCLOAK_ISSUER="http://localhost:8080/realms/my-keycloak-realm-here" # e.g. myuniversity
+KEYCLOAK_PUBLIC_URL="http://localhost:8080/realms/my-keycloak-realm-here"
 
 NEXTAUTH_URL="http://localhost:3000/api/auth"
 NEXTAUTH_SECRET="[generate a secret with : openssl rand -base64 32]"

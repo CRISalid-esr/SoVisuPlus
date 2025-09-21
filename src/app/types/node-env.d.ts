@@ -8,6 +8,7 @@ declare namespace NodeJS {
     KEYCLOAK_CLIENT_ID: string
     KEYCLOAK_CLIENT_SECRET: string
     KEYCLOAK_ISSUER: string
+    KEYCLOAK_PUBLIC_URL: string
     AMQP_USER: string
     AMQP_PASSWORD: string
     AMQP_HOST: string
