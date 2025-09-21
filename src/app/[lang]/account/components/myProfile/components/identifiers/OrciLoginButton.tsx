@@ -15,7 +15,7 @@ export function OrcidLoginButton({
   const clientId = getRuntimeEnv().ORCID_CLIENT_ID
   const orcidURL = getRuntimeEnv().ORCID_URL
   const orcidScopes = getRuntimeEnv().ORCID_SCOPES
-  const sovisuplusHost = getRuntimeEnv().SOVISUPLUS_HOST
+  const sovisuplusHost = getRuntimeEnv().APP_URL
   const lang = Lingui.i18n.locale
   const redirectUri = encodeURIComponent(
     `${sovisuplusHost}/api/orcid/callback?lang=${lang}`,

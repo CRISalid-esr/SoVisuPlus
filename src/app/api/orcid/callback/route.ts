@@ -9,7 +9,7 @@ import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { PersonService } from '@/lib/services/PersonService'
 
 export async function GET(req: NextRequest) {
-  const sovisuplusHost = process.env.SOVISUPLUS_HOST
+  const sovisuplusHost = process.env.APP_URL
   const lang =
     req.nextUrl.searchParams.get('lang') ??
     process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0]
