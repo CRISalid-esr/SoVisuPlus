@@ -13,6 +13,7 @@ interface ResearchStructureJson {
   acronym: string | null
   names: Array<Literal>
   descriptions: Array<Literal>
+  signature: string | null
   identifiers: ResearchStructureIdentifier[]
 }
 
@@ -22,6 +23,7 @@ class ResearchStructure implements IAgent {
     public acronym: string | null,
     public names: Array<Literal>,
     public descriptions: Array<Literal>,
+    public signature: string | null,
     private _identifiers: {
       type: ResearchStructureIdentifierType
       value: string
@@ -83,6 +85,7 @@ class ResearchStructure implements IAgent {
       researchStructure.acronym,
       researchStructure.names.map(Literal.fromObject),
       researchStructure.descriptions.map(Literal.fromObject),
+      researchStructure.signature,
       'identifiers' in researchStructure
         ? (researchStructure.identifiers as ResearchStructureIdentifier[])
         : [],
@@ -97,6 +100,7 @@ class ResearchStructure implements IAgent {
       researchStructure.acronym || null,
       researchStructure.names?.map(Literal.fromObject),
       researchStructure.descriptions?.map(Literal.fromObject),
+      researchStructure.signature || null,
       'identifiers' in researchStructure ? researchStructure.identifiers : [],
       'research_structure',
       researchStructure.slug,

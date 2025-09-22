@@ -6,4 +6,5 @@ export interface AMQPResearchStructureData extends AMQPEntityData {
   names: { value: string; language: string }[]
   acronym: string | null
   descriptions: { value: string; language: string }[]
+  signature: string | null
 }

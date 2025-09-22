@@ -46,6 +46,7 @@ describe('MessageProcessingWorkerFactory', () => {
       fields: {
         uid: 'rs-123',
         acronym: 'RS',
+        signature: 'RS_Signature',
         names: [{ value: 'Research Structure', language: 'en' }],
         descriptions: [{ value: 'A description', language: 'en' }],
         identifiers: [{ type: 'NNS', value: '12345' }],
