@@ -36,6 +36,7 @@ describe('ResearchStructureWorker', () => {
         names: [{ value: 'Research Structure', language: 'en' }],
         acronym: 'RS',
         descriptions: [{ value: 'A description', language: 'en' }],
+        signature: 'RS_signature',
       },
     }
 
@@ -48,6 +49,7 @@ describe('ResearchStructureWorker', () => {
       'RS',
       [new Literal('Research Structure', 'en')],
       [new Literal('A description', 'en')],
+      'RS_signature',
       [
         { type: 'NNS', value: '12345' },
         { type: 'ROR', value: 'https://ror.org/01' },
@@ -69,6 +71,7 @@ describe('ResearchStructureWorker', () => {
         names: [{ value: 'Research Structure', language: 'en' }],
         acronym: 'RS',
         descriptions: [{ value: 'A description', language: 'en' }],
+        signature: 'RS_signature',
       },
     }
 
@@ -84,6 +87,7 @@ describe('ResearchStructureWorker', () => {
       'RS',
       [new Literal('Research Structure', 'en')],
       [new Literal('A description', 'en')],
+      'RS_signature',
       [{ type: 'NNS', value: '12345' }],
     )
 
@@ -102,6 +106,7 @@ describe('ResearchStructureWorker', () => {
         names: [{ value: 'Research Structure', language: 'en' }],
         acronym: 'RS',
         descriptions: [{ value: 'A description', language: 'en' }],
+        signature: 'RS_signature',
       },
     }
 

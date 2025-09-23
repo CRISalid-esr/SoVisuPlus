@@ -47,6 +47,7 @@ describe('ResearchStructureDAO', () => {
     'RS001',
     [new Literal('Research Structure 001', 'en')],
     [new Literal('A description for Research Structure 001', 'en')],
+    'RS001_signature',
     [
       { type: ResearchStructureIdentifierType.NNS, value: '001234567Z' },
       {
@@ -79,6 +80,7 @@ describe('ResearchStructureDAO', () => {
 
     expect(dbResearchStructure.uid).toEqual('local-rs001')
     expect(dbResearchStructure.acronym).toEqual('RS001')
+    expect(dbResearchStructure.signature).toEqual('RS001_signature')
 
     expect(mockPrisma.researchStructure.findFirst).toHaveBeenCalledWith({
       where: { NOT: { uid: 'local-rs001' }, slug: 'research-structure:rs001' },
@@ -88,11 +90,13 @@ describe('ResearchStructureDAO', () => {
       where: { uid: researchStructure.uid },
       update: {
         acronym: researchStructure.acronym,
+        signature: researchStructure.signature,
         slug: 'research-structure:rs001',
       },
       create: {
         uid: researchStructure.uid,
         acronym: researchStructure.acronym,
+        signature: researchStructure.signature,
         slug: 'research-structure:rs001',
       },
       include: { names: true, descriptions: true, identifiers: true },

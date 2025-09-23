@@ -46,6 +46,7 @@ describe('addResearchStructureSlice', () => {
         'ABC',
         [new Literal('Valid Research Structure', 'en')],
         [new Literal('Valid Description', 'en')],
+        'ABCD_signature',
         [
           { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
           { type: ResearchStructureIdentifierType.ROR, value: '67890' },
@@ -56,6 +57,7 @@ describe('addResearchStructureSlice', () => {
         'ADF',
         [new Literal('Valid Research Structure', 'en')],
         [new Literal('Valid Description', 'en')],
+        'ADF_signature',
         [
           { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
           { type: ResearchStructureIdentifierType.ROR, value: '67890' },
@@ -110,6 +112,7 @@ describe('addResearchStructureSlice', () => {
         'ABC',
         [new Literal('Valid Research Structure', 'en')],
         [new Literal('Valid Description', 'en')],
+        'ABC_signature',
         [
           { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
           { type: ResearchStructureIdentifierType.ROR, value: '67890' },
@@ -122,6 +125,7 @@ describe('addResearchStructureSlice', () => {
         'ADF',
         [new Literal('Valid Research Structure', 'en')],
         [new Literal('Valid Description', 'en')],
+        'ADF_signature',
         [
           { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
           { type: ResearchStructureIdentifierType.ROR, value: '67890' },

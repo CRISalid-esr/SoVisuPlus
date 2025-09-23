@@ -65,6 +65,7 @@ describe('PersonDAO', () => {
           'ACR',
           [new Literal('JD Laboratory', 'en')],
           [new Literal('Laboratory of John Doe', 'en')],
+          'ACR_signature',
           [],
         ),
       ),

@@ -39,6 +39,7 @@ interface GraphOrganizationName {
 
 interface GraphOrganization {
   acronym?: string
+  signature?: string
   identifiers: GraphOrganizationIdentifier[]
   names: GraphOrganizationName[]
   type: string
@@ -168,6 +169,7 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
             }),
           ),
           [],
+          edge.node.signature ?? null,
           edge.node.identifiers.map((identifier) => ({
             type: convertStringResearchStructureIdentifierType(identifier.type),
             value: identifier.value,

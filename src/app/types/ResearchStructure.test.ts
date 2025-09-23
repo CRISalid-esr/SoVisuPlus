@@ -10,6 +10,7 @@ describe('ResearchStructure', () => {
       'ABC',
       [new Literal('Valid Research Structure', 'en')],
       [new Literal('Valid Description', 'en')],
+      'ABC_signature',
       [
         { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
         { type: ResearchStructureIdentifierType.ROR, value: '67890' },
@@ -46,6 +47,7 @@ describe('ResearchStructure', () => {
         'DEF',
         [new Literal('Invalid Research Structure', 'en')],
         [new Literal('Invalid Description', 'en')],
+        'DEF_signature',
         [
           {
             type: 'INVALID_TYPE' as ResearchStructureIdentifierType,
@@ -64,6 +66,7 @@ describe('ResearchStructure', () => {
       id: 1,
       uid: 'RS123',
       acronym: 'ABC',
+      signature: 'ABC_signature',
       slug: 'abc',
       external: false,
       names: [
@@ -106,6 +109,7 @@ describe('ResearchStructure', () => {
     expect(result).toBeInstanceOf(ResearchStructure)
     expect(result.uid).toBe('RS123')
     expect(result.acronym).toBe('ABC')
+    expect(result.signature).toBe('ABC_signature')
     expect(result.names).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -142,6 +146,7 @@ describe('ResearchStructure', () => {
       id: 2,
       uid: 'RS456',
       acronym: null,
+      signature: null,
       slug: 'another-research-structure',
       external: false,
       names: [
@@ -168,6 +173,7 @@ describe('ResearchStructure', () => {
     expect(result).toBeInstanceOf(ResearchStructure)
     expect(result.uid).toBe('RS456')
     expect(result.acronym).toBeNull()
+    expect(result.signature).toBeNull()
     expect(result.names).toEqual([
       { value: 'Another Research Structure', language: 'en' },
     ])

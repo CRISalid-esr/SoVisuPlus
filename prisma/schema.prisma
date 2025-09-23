@@ -213,6 +213,7 @@ model ResearchStructure {
   acronym      String?
   names        ResearchStructureName[]
   descriptions ResearchStructureDescription[]
+  signature    String?
   identifiers  ResearchStructureIdentifier[]
   external     Boolean                        @default(false)
   slug         String?                        @unique

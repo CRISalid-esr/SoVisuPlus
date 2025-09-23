@@ -29,6 +29,7 @@ describe('PersonDAO Integration Tests', () => {
           'ACR',
           [new Literal('JD Laboratory', 'en')],
           [new Literal('Laboratory of John Doe', 'en')],
+          'ACR_signature',
           [],
         ),
         null,
@@ -66,6 +67,7 @@ describe('PersonDAO Integration Tests', () => {
           'ACR',
           [new Literal('JD Laboratory', 'en')],
           [new Literal('Laboratory of John Doe', 'en')],
+          'ACR_signature',
           [],
         ),
       )

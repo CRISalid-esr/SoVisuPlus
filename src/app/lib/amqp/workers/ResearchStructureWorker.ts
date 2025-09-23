@@ -29,7 +29,7 @@ export class ResearchStructureWorker extends MessageProcessingWorker<AMQPResearc
    */
   public async process(): Promise<DataEvent[]> {
     const events: DataEvent[] = []
-    const { uid, identifiers, names, acronym, descriptions } =
+    const { uid, identifiers, names, acronym, descriptions, signature } =
       this.message.fields
     console.log(`Processing research structure with UID: ${uid}`)
 
@@ -48,6 +48,7 @@ export class ResearchStructureWorker extends MessageProcessingWorker<AMQPResearc
           acronym,
           names as Literal[],
           descriptions as Literal[],
+          signature,
           transformedIdentifiers,
         ),
       )

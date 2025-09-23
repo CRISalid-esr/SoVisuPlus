@@ -41,11 +41,13 @@ export class ResearchStructureDAO extends AbstractDAO {
               where: { uid: researchStructure.uid },
               update: {
                 acronym: researchStructure.acronym,
+                signature: researchStructure.signature,
                 slug: uniqueSlug,
               },
               create: {
                 uid: researchStructure.uid,
                 acronym: researchStructure.acronym,
+                signature: researchStructure.signature,
                 slug: uniqueSlug,
               },
               include: {
@@ -281,6 +283,7 @@ export class ResearchStructureDAO extends AbstractDAO {
               language: true,
             },
           },
+          signature: true,
           slug: true,
         },
         orderBy: {
