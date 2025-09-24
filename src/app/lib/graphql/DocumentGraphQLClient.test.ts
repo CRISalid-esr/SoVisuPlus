@@ -330,7 +330,7 @@ describe('DocumentGraphQLClient', () => {
                 node: {
                   issn_l: '0305-7453',
                   publisher: 'Oxford University Press (OUP)',
-                  title: 'The journal of antimicrobial chemotherapy.',
+                  titles: ['The journal of antimicrobial chemotherapy.'],
                   identifiers: [
                     {
                       type: 'issn',

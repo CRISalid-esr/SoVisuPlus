@@ -52,7 +52,7 @@ interface GraphDocumentResponse {
         uid: string
         issn_l: string
         publisher: string
-        title: string
+        titles: string[]
         identifiers: { type: string; value: string; format?: string | null }[]
       }
     }>
@@ -113,7 +113,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
     const journalEdge = publishedInConnection?.edges?.[0]
     const journal = journalEdge
       ? new Journal(
-          journalEdge.node.title,
+          journalEdge.node.titles?.[0] ?? 'Unknown title',
           journalEdge.node.issn_l,
           journalEdge.node.publisher,
           journalEdge.node.identifiers.map(
