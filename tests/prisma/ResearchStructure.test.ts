@@ -18,6 +18,7 @@ describe('ResearchStructure Model Tests', () => {
       data: {
         uid: 'rs-123',
         acronym: 'ABC',
+        signature: 'ABC_signature',
         names: {
           create: [
             { value: 'International Research Center', language: 'en' },
@@ -37,6 +38,7 @@ describe('ResearchStructure Model Tests', () => {
     expect(researchStructure).toHaveProperty('id')
     expect(researchStructure.uid).toBe('rs-123')
     expect(researchStructure.acronym).toBe('ABC')
+    expect(researchStructure.signature).toBe('ABC_signature')
     expect(researchStructure.names).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -68,6 +70,7 @@ describe('ResearchStructure Model Tests', () => {
       data: {
         uid: 'rs-456',
         acronym: 'XYZ',
+        signature: 'XYZ_signature',
         names: {
           create: [
             { value: 'Space Research Lab', language: 'en' },
@@ -97,6 +100,7 @@ describe('ResearchStructure Model Tests', () => {
     expect(foundStructure).not.toBeNull()
     expect(foundStructure?.uid).toBe('rs-456')
     expect(foundStructure?.acronym).toBe('XYZ')
+    expect(foundStructure?.signature).toBe('XYZ_signature')
     expect(foundStructure?.names).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
