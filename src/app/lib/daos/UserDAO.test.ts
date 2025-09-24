@@ -82,6 +82,7 @@ describe('UserDAO', () => {
                   select: {
                     uid: true,
                     acronym: true,
+                    signature: true,
                     slug: true,
                   },
                 },
@@ -121,6 +122,7 @@ describe('UserDAO', () => {
                   select: {
                     uid: true,
                     acronym: true,
+                    signature: true,
                     slug: true,
                   },
                 },

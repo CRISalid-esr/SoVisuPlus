@@ -45,6 +45,12 @@ class Person implements IAgent {
       .filter((acronym) => acronym !== null)
   }
 
+  get membershipSignatures(): string[] {
+    return this.memberships
+      .map(({ researchStructure: { signature } }) => signature)
+      .filter((signature) => signature !== null)
+  }
+
   getDisplayName(language?: ExtendedLanguageCode): string {
     void language
     return this.displayNameGuard()
