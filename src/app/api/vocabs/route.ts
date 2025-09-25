@@ -3,22 +3,65 @@ import { NextRequest } from 'next/server'
 export const GET = async (req: NextRequest) => {
   const urlParams = req.nextUrl.searchParams
   const q = urlParams.get('q') || ''
-  const vocabs = urlParams.get('vocabs') || ''
-  const lang = urlParams.get('lang') || ''
-  const fields = urlParams.get('fields') || ''
-  const display_langs = urlParams.get('display_langs') || ''
-  const display_fields = urlParams.get('display_fields') || ''
-  const limit = urlParams.get('limit') || '20'
-  //const limitNumber = parseInt(limit, 10) || 20
-  const offset = urlParams.get('offset') || '0'
-  //const offsetNumber = parseInt(offset, 10) || 0
+  const vocabs = urlParams.get('vocabs') || '' //enum type ?
+  const lang = urlParams.get('lang') || '' //enum type ?
+  const fields = urlParams.get('fields') || '' //enum type ?
+  const display_langs = urlParams.get('display_langs') || '' //enum type ?
+  const display_fields = urlParams.get('display_fields') || '' //enum type ?
+  const limitNumber = Number(urlParams.get('limit') || '20')
+  if (!Number.isInteger(limitNumber)) {
+    throw new Error("Invalid parameter 'limit' : must be an integer")
+  }
+  const limit = (() => {
+    if (limitNumber < 1) {
+      return '1'
+    } else if (limitNumber > 100) {
+      return '100'
+    } else {
+      return limitNumber.toString()
+    }
+  })()
+
+  const offsetNumber = Number(urlParams.get('offset') || '0')
+  if (!Number.isInteger(offsetNumber)) {
+    throw new Error("Invalid parameter 'offset' : must be an integer")
+  }
+  const offset = offsetNumber < 0 ? '0' : offsetNumber.toString()
+
   const highlight = urlParams.get('highlight') || 'false'
-  const broader = urlParams.get('broader') || 'ids'
-  const narrower = urlParams.get('narrower') || 'ids'
-  const broader_depth = urlParams.get('broader_depth') || '1'
-  //const broader_depthNumber = parseInt(broader_depth, 10) || 1
-  const narrower_depth = urlParams.get('narrower_depth') || '1'
-  //const narrower_depthNumber = parseInt(narrower_depth, 10) || 1
+  if (!(highlight === 'true' || highlight === 'false')) {
+    throw new Error("Invalid parameter 'highlight' : must be a boolean")
+  }
+
+  const broader = urlParams.get('broader') || 'ids' //enum type ?
+  if (!(broader === 'ids' || broader === 'full')) {
+    throw new Error(
+      "Invalid parameter 'broader' : only values 'ids' and 'full' accepted",
+    )
+  }
+
+  const narrower = urlParams.get('narrower') || 'ids' //enum type ?
+  if (!(narrower === 'ids' || narrower === 'full')) {
+    throw new Error(
+      "Invalid parameter 'narrower' : only values 'ids' and 'full' accepted",
+    )
+  }
+
+  const broader_depthNumber = Number(urlParams.get('broader_depth') || '1')
+  if (!Number.isInteger(broader_depthNumber)) {
+    throw new Error(
+      "Invalid parameter 'broader_depthNumber' : must be an integer",
+    )
+  }
+  const broader_depth = broader_depthNumber == 1 ? '1' : '-1' //depends on broader ?
+
+  const narrower_depthNumber = Number(urlParams.get('narrower_depth') || '1')
+  if (!Number.isInteger(broader_depthNumber)) {
+    throw new Error(
+      "Invalid parameter 'broader_depthNumber' : must be an integer",
+    )
+  }
+  const narrower_depth = narrower_depthNumber == 1 ? '1' : '-1' //depends on narrower ?
 
   const vocabsUrl = process.env.VOCABS_URL!
   const params = new URLSearchParams({
@@ -36,8 +79,9 @@ export const GET = async (req: NextRequest) => {
     broader_depth: broader_depth,
     narrower_depth: narrower_depth,
   })
-  return await fetch(vocabsUrl + params, {
+
+  return await fetch(vocabsUrl + '?' + params, {
     method: 'GET',
-    headers: { 'Content-Type': 'x-www-form-urlencoded' },
+    headers: { 'Content-Type': 'application/json' },
   })
 }
