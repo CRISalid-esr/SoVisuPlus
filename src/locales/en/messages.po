@@ -352,27 +352,27 @@ msgid "notfound_page_description"
 msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1>community</1> might be able to help."
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:71
+#: src/app/lib/websocket/WebSocketListener.tsx:72
 msgid "snackbar_document_created"
 msgstr "Nouvelle publication : "
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:74
+#: src/app/lib/websocket/WebSocketListener.tsx:75
 msgid "snackbar_document_updated"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:77
+#: src/app/lib/websocket/WebSocketListener.tsx:78
 msgid "snackbar_document_deleted"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:80
+#: src/app/lib/websocket/WebSocketListener.tsx:81
 msgid "snackbar_document_unchanged"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:84
+#: src/app/lib/websocket/WebSocketListener.tsx:85
 msgid "snackbar_view_document"
 msgstr ""
 
