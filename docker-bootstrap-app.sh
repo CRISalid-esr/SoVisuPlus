@@ -18,6 +18,10 @@ GIT_BRANCH_VAL="${GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || t
 # --- write .env (overwrite, not append) ------------------------------------
 # Quote values that may contain special chars/spaces
 cat > .env <<EOF
+WS_SCHEME=${WS_SCHEME:-ws}
+WS_HOST=${WS_HOST:-localhost}
+WS_PORT=${WS_PORT:-3001}
+WS_PATH=${WS_PATH:-/}
 DOCKER_IMAGE_NAME=${DOCKER_IMAGE_NAME:-unknown}
 DOCKER_TAG=${DOCKER_TAG:-unknown}
 DOCKER_DIGEST=${DOCKER_DIGEST:-unknown}

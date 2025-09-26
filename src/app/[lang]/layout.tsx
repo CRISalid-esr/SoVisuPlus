@@ -40,6 +40,10 @@ export default async function RootLayout({ params, children }: Props) {
             APP_URL: process.env.APP_URL,
             ORCID_SCOPES: process.env.ORCID_SCOPES,
             ORCID_CLIENT_ID: process.env.ORCID_CLIENT_ID,
+            WS_SCHEME: process.env.WS_SCHEME,
+            WS_HOST: process.env.WS_HOST,
+            WS_PORT: process.env.WS_PORT,
+            WS_PATH: process.env.WS_PATH ?? '/',
           }}
         />
         <ThemeProvider>
