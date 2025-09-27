@@ -289,4 +289,112 @@ describe('DocumentsPage Component', () => {
       ),
     )
   })
+
+  it('enables the "Merge selected publications" button only when 2 or more rows are selected', async () => {
+    const doc1 = mockState.document.documents[0]
+    const doc2 = new Document(
+      'doc2',
+      DocumentType.JournalArticle,
+      '2023-12-31',
+      new Date('2023-12-31'),
+      new Date('2023-12-31'),
+      [new Literal('Another Title', 'en')],
+      [],
+      [],
+      [
+        new Contribution(
+          new InternalPerson('person-2', null, 'Jane Roe', 'Jane', 'Roe', []),
+          [LocRelator.AUTHOR],
+        ),
+      ],
+      [],
+    )
+
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({
+        ...mockState,
+        document: {
+          ...mockState.document,
+          documents: [doc1, doc2],
+          totalItems: 2,
+        },
+      }),
+    )
+
+    renderComponent()
+
+    await screen.findByText('Test Title')
+    await screen.findByText('Another Title')
+
+    const mergeBtn = screen.getByRole('button', {
+      name: i18n.t('documents_page_merge_selected_publications_button'),
+    })
+
+    expect(mergeBtn).toBeDisabled()
+
+    const checkboxes = screen.getAllByRole('checkbox')
+
+    fireEvent.click(checkboxes[1])
+    await waitFor(() => expect(mergeBtn).toBeDisabled())
+
+    fireEvent.click(checkboxes[2])
+    await waitFor(() => expect(mergeBtn).toBeEnabled())
+  })
+
+  it('calls mergeDocuments with selected document UIDs when clicking the merge button', async () => {
+    const mockMergeDocuments = jest.fn().mockResolvedValue(undefined)
+
+    const doc1 = mockState.document.documents[0]
+    const doc2 = new Document(
+      'doc2',
+      DocumentType.JournalArticle,
+      '2023-12-31',
+      new Date('2023-12-31'),
+      new Date('2023-12-31'),
+      [new Literal('Another Title', 'en')],
+      [],
+      [],
+      [
+        new Contribution(
+          new InternalPerson('person-2', null, 'Jane Roe', 'Jane', 'Roe', []),
+          [LocRelator.AUTHOR],
+        ),
+      ],
+      [],
+    )
+
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({
+        ...mockState,
+        document: {
+          ...mockState.document,
+          documents: [doc1, doc2],
+          totalItems: 2,
+          mergeDocuments: mockMergeDocuments,
+        },
+      }),
+    )
+
+    renderComponent()
+
+    await screen.findByText('Test Title')
+    await screen.findByText('Another Title')
+
+    const checkboxes = screen.getAllByRole('checkbox')
+    fireEvent.click(checkboxes[1])
+    fireEvent.click(checkboxes[2])
+
+    const mergeBtn = screen.getByRole('button', {
+      name: i18n.t('documents_page_merge_selected_publications_button'),
+    })
+    expect(mergeBtn).toBeEnabled()
+
+    fireEvent.click(mergeBtn)
+
+    await waitFor(() => {
+      expect(mockMergeDocuments).toHaveBeenCalledTimes(1)
+      // order should follow the current table order (date desc): doc1 then doc2
+      expect(mockMergeDocuments).toHaveBeenCalledWith(['doc1', 'doc2'])
+    })
+  })
 })

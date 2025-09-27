@@ -396,6 +396,7 @@ export default function DocumentsPage() {
     count: { allItems, incompleteHalRepositoryItems },
     listHasChanged,
     setListHasChanged,
+    mergeDocuments,
   } = useStore((state) => state.document)
 
   const tabs = [
@@ -528,6 +529,15 @@ export default function DocumentsPage() {
     router.push(`/${lang}/documents?${params.toString()}`)
   }
 
+  const onMergeDocuments = async (documentUids: string[]) => {
+    if (documentUids.length < 2) return
+    try {
+      await mergeDocuments(documentUids)
+    } catch (error) {
+      console.error('Error merging documents:', error)
+    }
+  }
+
   return (
     <Box>
       <DocumentHeader
@@ -611,6 +621,7 @@ export default function DocumentsPage() {
         manualPagination
         manualSorting
         enableColumnResizing
+        enableRowSelection
         columns={columns}
         rowCount={totalItems}
         data={documents}
@@ -630,6 +641,30 @@ export default function DocumentsPage() {
         localization={Localization[lang]}
         enableRowActions
         positionActionsColumn='last'
+        renderTopToolbarCustomActions={({ table }) => (
+          <Box sx={{ display: 'flex', gap: '1rem', p: '4px' }}>
+            <Button
+              color='secondary'
+              disabled={table.getSelectedRowModel().rows.length < 2}
+              onClick={() => {
+                console.log(
+                  `Merge selected publications : ${table
+                    .getSelectedRowModel()
+                    .rows.map((row) => row.original.uid)
+                    .join(', ')}`,
+                )
+                onMergeDocuments(
+                  table
+                    .getSelectedRowModel()
+                    .rows.map((row) => row.original.uid),
+                )
+              }}
+              variant='contained'
+            >
+              {t`documents_page_merge_selected_publications_button`}
+            </Button>
+          </Box>
+        )}
         renderRowActionMenuItems={({ row, table }) => [
           <Box sx={{ display: 'flex' }} key={row.original.uid}>
             <MRT_ActionMenuItem
