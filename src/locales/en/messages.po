@@ -14,6 +14,12 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:330
+#: src/app/[lang]/documents/page.test.tsx:388
+msgid "documents_page_merge_selected_publications_button"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Authorizations"
@@ -307,7 +313,7 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:162
-#: src/app/[lang]/documents/page.tsx:592
+#: src/app/[lang]/documents/page.tsx:602
 msgid "documents_page_synchronize_button"
 msgstr ""
 
@@ -322,12 +328,12 @@ msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:553
+#: src/app/[lang]/documents/page.tsx:563
 msgid "documents_page_refresh_list_alert_own_perspective"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:556
+#: src/app/[lang]/documents/page.tsx:566
 msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr ""
 
@@ -495,11 +501,11 @@ msgstr "Scopus"
 msgid "documents_details_page_type_column_tab_author"
 msgstr "Authors"
 
-#: src/app/[lang]/documents/page.tsx:638
+#: src/app/[lang]/documents/page.tsx:673
 msgid "documents_page_action_column_details"
 msgstr "Details"
 
-#: src/app/[lang]/documents/page.tsx:403
+#: src/app/[lang]/documents/page.tsx:404
 msgid "documents_page_all_documents_filter"
 msgstr "All my documents"
 
@@ -536,7 +542,7 @@ msgstr ""
 msgid "documents_page_halStatus_column"
 msgstr "status in Hal"
 
-#: src/app/[lang]/documents/page.tsx:409
+#: src/app/[lang]/documents/page.tsx:410
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "HAL incomplete filing"
 
@@ -544,12 +550,16 @@ msgstr "HAL incomplete filing"
 msgid "documents_page_journal_article_icon_label"
 msgstr "Journal article"
 
-#: src/app/[lang]/documents/page.tsx:540
+#: src/app/[lang]/documents/page.tsx:550
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:539
+#: src/app/[lang]/documents/page.tsx:549
 msgid "documents_page_main_title_first_person"
+msgstr ""
+
+#: src/app/[lang]/documents/page.tsx:664
+msgid "documents_page_merge_selected_publications_button"
 msgstr ""
 
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:20
@@ -579,7 +589,7 @@ msgstr "published in"
 msgid "documents_page_refresh_document"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:576
+#: src/app/[lang]/documents/page.tsx:586
 msgid "documents_page_refresh_list"
 msgstr ""
 
