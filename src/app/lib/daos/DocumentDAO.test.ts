@@ -44,6 +44,7 @@ jest.mock('@prisma/client', () => {
     },
     documentRecord: {
       upsert: jest.fn(),
+      deleteMany: jest.fn(),
     },
     journal: {
       upsert: jest.fn(),
@@ -296,6 +297,7 @@ describe('DocumentDAO', () => {
     expect(mockPrisma.documentRecord.upsert).toHaveBeenCalledWith({
       where: { uid: 'hal-123' },
       update: {
+        document: { connect: { id: 42 } },
         platform: { set: 'hal' },
         titles: [{ value: 'HAL Record Title', language: 'fr' }],
         url: 'https://hal.science/hal-123',
