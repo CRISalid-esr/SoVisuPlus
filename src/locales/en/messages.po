@@ -16,7 +16,7 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:330
 #: src/app/[lang]/documents/page.test.tsx:388
-msgid "documents_page_merge_selected_publications_button"
+msgid "documents_page_merge_selected_documents_button"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -559,8 +559,8 @@ msgid "documents_page_main_title_first_person"
 msgstr ""
 
 #: src/app/[lang]/documents/page.tsx:664
-msgid "documents_page_merge_selected_publications_button"
-msgstr ""
+msgid "documents_page_merge_selected_documents_button"
+msgstr "Merge selected documents"
 
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:20
 msgid "documents_page_monograph_icon_label"

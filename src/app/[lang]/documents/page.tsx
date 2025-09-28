@@ -641,30 +641,27 @@ export default function DocumentsPage() {
         localization={Localization[lang]}
         enableRowActions
         positionActionsColumn='last'
-        renderTopToolbarCustomActions={({ table }) => (
-          <Box sx={{ display: 'flex', gap: '1rem', p: '4px' }}>
-            <Button
-              color='secondary'
-              disabled={table.getSelectedRowModel().rows.length < 2}
-              onClick={() => {
-                console.log(
-                  `Merge selected publications : ${table
-                    .getSelectedRowModel()
-                    .rows.map((row) => row.original.uid)
-                    .join(', ')}`,
-                )
-                onMergeDocuments(
-                  table
-                    .getSelectedRowModel()
-                    .rows.map((row) => row.original.uid),
-                )
-              }}
-              variant='contained'
-            >
-              {t`documents_page_merge_selected_publications_button`}
-            </Button>
-          </Box>
-        )}
+        renderTopToolbarCustomActions={({ table }) =>
+          table.getSelectedRowModel().rows.length > 0 && (
+            <Box sx={{ display: 'flex', gap: '1rem', p: '4px' }}>
+              <Button
+                color='secondary'
+                disabled={table.getSelectedRowModel().rows.length < 2}
+                onClick={async () => {
+                  await onMergeDocuments(
+                    table
+                      .getSelectedRowModel()
+                      .rows.map((row) => row.original.uid),
+                  )
+                  table.resetRowSelection()
+                }}
+                variant='contained'
+              >
+                {t`documents_page_merge_selected_documents_button`}
+              </Button>
+            </Box>
+          )
+        }
         renderRowActionMenuItems={({ row, table }) => [
           <Box sx={{ display: 'flex' }} key={row.original.uid}>
             <MRT_ActionMenuItem
