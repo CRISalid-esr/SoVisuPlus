@@ -81,9 +81,14 @@ export default function WebSocketListener() {
               <Trans id='snackbar_document_unchanged' />
             )}
             <strong>{data.objectLabel}</strong>
-            <a href={`/documents/${data.objectUid}`} style={{ marginLeft: 8 }}>
-              <Trans id='snackbar_view_document' />
-            </a>
+            {data.eventType !== 'deleted' && (
+              <a
+                href={`/documents/${data.objectUid}`}
+                style={{ marginLeft: 8 }}
+              >
+                <Trans id='snackbar_view_document' />
+              </a>
+            )}
           </>,
           {
             variant,
