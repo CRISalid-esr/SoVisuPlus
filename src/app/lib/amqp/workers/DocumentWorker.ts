@@ -9,10 +9,6 @@ import { DataEvent } from '@/types/DataEvent'
  * Worker for processing document messages
  */
 export class DocumentWorker extends MessageProcessingWorker<AMQPDocumentMessage> {
-  /**
-   * Constructor
-   * @param message - The document message to process
-   */
   constructor(
     message: AMQPDocumentMessage,
     private documentDAO: DocumentDAO,
@@ -22,30 +18,58 @@ export class DocumentWorker extends MessageProcessingWorker<AMQPDocumentMessage>
   }
 
   /**
-   * Process a document message by fetching data from the graph and updating the database
+   * Process a document message by fetching data from the graph and updating the database.
+   * If event === "deleted", delete the document directly (no GraphQL fetch).
    */
   public async process(): Promise<DataEvent[]> {
     const events: DataEvent[] = []
-    if (!this.message.fields) {
+
+    const { fields, event } = this.message
+    if (!fields) {
       console.warn('No fields found in document message')
       return events
     }
-    const { uid } = this.message.fields
-
+    const uid = fields.uid
     if (!uid) {
       console.warn('No UID found in document message')
       return events
     }
-    console.log(`Processing document with UID: ${uid}`)
-
-    const document: Document | null =
-      await this.documentGraphQLClient.getDocumentByUid(uid)
 
     try {
+      if (event === 'deleted') {
+        const contributorUidsFromDb =
+          await this.documentDAO.getContributorUidsByDocumentUid(uid)
+
+        await this.documentDAO.deleteDocumentByUid(uid)
+
+        // Build a label & contributor list from the message payload (no DB/GraphQL call)
+        const labelFromMessage =
+          (Array.isArray(fields.titles) && fields.titles[0]?.value) || uid
+
+        console.log(`Deleted document with UID: ${uid}`)
+
+        events.push(
+          new DataEvent(
+            'Document',
+            uid,
+            event,
+            labelFromMessage,
+            contributorUidsFromDb,
+          ),
+        )
+        return events
+      }
+
+      // Default path: (create|update|…): fetch from GraphQL then upsert
+      console.log(`Processing document with UID: ${uid}`)
+      const document: Document | null =
+        await this.documentGraphQLClient.getDocumentByUid(uid)
+
       if (!document) {
         console.warn(`No document data found for UID: ${uid}`)
         return events
       }
+
       const dbDocument = await this.documentDAO.createOrUpdateDocument(document)
       if (!dbDocument) {
         console.warn(
@@ -53,20 +77,18 @@ export class DocumentWorker extends MessageProcessingWorker<AMQPDocumentMessage>
         )
         return events
       }
+
       const contributorUids = document.contributions.map(
         (contribution) => contribution.person.uid,
       )
-      console.log(`Successfully processed document: ${uid}`)
       const label = document.getTitleInLocale(0)
-      events.push(
-        new DataEvent(
-          'Document',
-          uid,
-          this.message.event,
-          label,
-          contributorUids,
-        ),
-      )
+
+      console.log(`Successfully processed document: ${uid}`)
+      if (event !== 'unchanged') {
+        events.push(
+          new DataEvent('Document', uid, event, label, contributorUids),
+        )
+      }
 
       return events
     } catch (error) {
