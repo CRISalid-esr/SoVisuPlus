@@ -243,6 +243,10 @@ export const addDocumentSlice: StateCreator<
       }
     },
     mergeDocuments: async (documentUids: string[]) => {
+      if (documentUids.length < 2) {
+        console.error('At least two documents are required to merge')
+        return
+      }
       try {
         const response = await fetch('/api/documents/merge', {
           method: 'POST',
