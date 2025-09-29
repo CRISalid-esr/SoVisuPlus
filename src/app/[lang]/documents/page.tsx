@@ -291,6 +291,21 @@ export default function DocumentsPage() {
         Cell({ row }) {
           return <HalStatusCell row={row} />
         },
+        filterVariant: 'multi-select',
+        filterSelectOptions: [
+          {
+            label: 'Dans la collection',
+            value: 'in_collection',
+          },
+          {
+            label: 'Dans HAL mais hors de la collection',
+            value: 'out_of_collection',
+          },
+          {
+            label: 'Hors HAL',
+            value: 'outside_hal',
+          },
+        ],
       },
       {
         enableSorting: false,
@@ -482,11 +497,8 @@ export default function DocumentsPage() {
       contributorUid: currentPerspective?.uid || '',
       contributorType: contributorType,
       requestId: nextRequestId,
-      omittedHalCollectionCodes: JSON.stringify(
-        selectedTab === 'incomplete_hal_repository'
-          ? currentPerspective.membershipAcronyms
-          : [],
-      ),
+      halCollectionCodes: JSON.stringify(currentPerspective.membershipAcronyms),
+      areHalCollectionCodesOmitted: selectedTab === 'incomplete_hal_repository',
     }).catch((error) => {
       console.error('Error fetching documents:', error)
     })
@@ -500,9 +512,7 @@ export default function DocumentsPage() {
       contributorUid: currentPerspective?.uid || '',
       contributorType: contributorType,
       requestId: nextCountDocumentsRequestId,
-      omittedHalCollectionCodes: JSON.stringify(
-        currentPerspective.membershipAcronyms,
-      ),
+      halCollectionCodes: JSON.stringify(currentPerspective.membershipAcronyms),
     }).catch((error) => {
       console.error('Error counting documents:', error)
     })

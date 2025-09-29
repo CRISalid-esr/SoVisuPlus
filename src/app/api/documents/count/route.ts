@@ -15,8 +15,8 @@ export const GET = async (req: NextRequest) => {
     const contributorType: AgentType | null = agentTypeFromString(
       urlParams.get('contributorType'),
     )
-    const omittedHalCollectionCodes = JSON.parse(
-      urlParams.get('omittedHalCollectionCodes') || '[]',
+    const halCollectionCodes = JSON.parse(
+      urlParams.get('halCollectionCodes') || '[]',
     )
 
     if (!contributorType) {
@@ -34,7 +34,7 @@ export const GET = async (req: NextRequest) => {
         columnFilters,
         contributorUid,
         contributorType,
-        omittedHalCollectionCodes,
+        halCollectionCodes,
       })
 
     return NextResponse.json({

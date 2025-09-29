@@ -19,7 +19,8 @@ interface FetchDocumentsFromDBParams {
   columnFilters: { id: string; value: string }[]
   sorting: { id: string; desc: boolean }[]
   contributorUids: string[]
-  omittedHalCollectionCodes?: string[]
+  halCollectionCodes: string[]
+  areHalCollectionCodesOmitted: boolean
 }
 
 interface CountDocumentsFromDBParams {
@@ -27,7 +28,7 @@ interface CountDocumentsFromDBParams {
   searchLang: string
   columnFilters: { id: string; value: string }[]
   contributorUids: string[]
-  omittedHalCollectionCodes?: string[]
+  halCollectionCodes: string[]
 }
 
 export class DocumentDAO extends AbstractDAO {
@@ -368,17 +369,23 @@ export class DocumentDAO extends AbstractDAO {
     }
   }
 
+  computeExistingAnd(where: Prisma.DocumentWhereInput) {
+    return where.AND ? (Array.isArray(where.AND) ? where.AND : [where.AND]) : []
+  }
+
   createFetchDocumentsWhere({
     searchTerm,
     columnFilters,
-    omittedHalCollectionCodes,
+    halCollectionCodes,
+    areHalCollectionCodesOmitted,
     contributorUids,
   }: {
     searchTerm: string
     searchLang: string
     columnFilters: { id: string; value: string }[]
     contributorUids: string[]
-    omittedHalCollectionCodes?: string[]
+    halCollectionCodes: string[]
+    areHalCollectionCodesOmitted: boolean
   }): Prisma.DocumentWhereInput {
     const publicationListRolesFilter: string[] =
       process.env.PUBLICATION_LIST_ROLES_FILTER?.split(',') || []
@@ -403,52 +410,57 @@ export class DocumentDAO extends AbstractDAO {
 
     if (searchTerm) {
       where = {
-        OR: [
+        AND: [
+          ...this.computeExistingAnd(where),
           {
-            titles: {
-              some: {
-                value: {
+            OR: [
+              {
+                titles: {
+                  some: {
+                    value: {
+                      contains: searchTerm,
+                      mode: QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                abstracts: {
+                  some: {
+                    value: {
+                      contains: searchTerm,
+                      mode: QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                contributions: {
+                  some: {
+                    person: {
+                      displayName: {
+                        contains: searchTerm,
+                        mode: QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
+              {
+                publicationDate: {
                   contains: searchTerm,
                   mode: QueryMode.insensitive,
                 },
               },
-            },
-          },
-          {
-            abstracts: {
-              some: {
-                value: {
-                  contains: searchTerm,
-                  mode: QueryMode.insensitive,
-                },
-              },
-            },
-          },
-          {
-            contributions: {
-              some: {
-                person: {
-                  displayName: {
+              {
+                journal: {
+                  title: {
                     contains: searchTerm,
                     mode: QueryMode.insensitive,
                   },
                 },
               },
-            },
-          },
-          {
-            publicationDate: {
-              contains: searchTerm,
-              mode: QueryMode.insensitive,
-            },
-          },
-          {
-            journal: {
-              title: {
-                contains: searchTerm,
-                mode: QueryMode.insensitive,
-              },
-            },
+            ],
           },
         ],
       }
@@ -525,7 +537,7 @@ export class DocumentDAO extends AbstractDAO {
         if (dateConditions.length > 0) {
           where = {
             ...where,
-            AND: dateConditions,
+            AND: [...this.computeExistingAnd(where), ...dateConditions],
           }
         }
       }
@@ -562,9 +574,62 @@ export class DocumentDAO extends AbstractDAO {
           },
         }
       }
+
+      if (filter.id === 'halStatus' && Array.isArray(filter.value)) {
+        const halStatusOr: Prisma.DocumentWhereInput[] = []
+
+        filter.value.forEach((type) => {
+          if (type === 'in_collection') {
+            halStatusOr.push({
+              records: {
+                some: {
+                  platform: 'hal',
+                  halCollectionCodes: {
+                    hasSome: halCollectionCodes,
+                  },
+                },
+              },
+            })
+          }
+
+          if (type === 'out_of_collection') {
+            halStatusOr.push({
+              records: {
+                some: {
+                  platform: 'hal',
+                },
+                none: {
+                  halCollectionCodes: {
+                    hasSome: halCollectionCodes,
+                  },
+                },
+              },
+            })
+          }
+
+          if (type === 'outside_hal') {
+            halStatusOr.push({
+              records: {
+                none: {
+                  platform: 'hal',
+                },
+              },
+            })
+          }
+        })
+
+        where = {
+          AND: [
+            ...this.computeExistingAnd(where),
+            {
+              OR: halStatusOr,
+            },
+          ],
+        }
+      }
     })
 
-    if (omittedHalCollectionCodes?.length) {
+    if (areHalCollectionCodesOmitted) {
       where = {
         ...where,
         records: {
@@ -579,7 +644,7 @@ export class DocumentDAO extends AbstractDAO {
               },
             ],
             halCollectionCodes: {
-              hasSome: omittedHalCollectionCodes,
+              hasSome: halCollectionCodes,
             },
           },
         },
@@ -603,15 +668,9 @@ export class DocumentDAO extends AbstractDAO {
     }
 
     if (contributionFilters.length > 0) {
-      const existingAnd = where.AND
-        ? Array.isArray(where.AND)
-          ? where.AND
-          : [where.AND]
-        : []
-
       where = {
         ...where,
-        AND: [...existingAnd, ...contributionFilters],
+        AND: [...this.computeExistingAnd(where), ...contributionFilters],
       }
     }
 
@@ -716,12 +775,13 @@ export class DocumentDAO extends AbstractDAO {
     allItems: number
     incompleteHalRepositoryItems: number
   }> {
-    const { omittedHalCollectionCodes, ...rest } = params
-
-    const allWhere = this.createFetchDocumentsWhere(rest)
+    const allWhere = this.createFetchDocumentsWhere({
+      ...params,
+      areHalCollectionCodesOmitted: false,
+    })
     const incompleteHalRepositoryWhere = this.createFetchDocumentsWhere({
-      ...rest,
-      omittedHalCollectionCodes,
+      ...params,
+      areHalCollectionCodesOmitted: true,
     })
 
     const allItems = await this.prismaClient.document.count({
