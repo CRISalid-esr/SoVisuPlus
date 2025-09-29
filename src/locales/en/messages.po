@@ -14,12 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:330
-#: src/app/[lang]/documents/page.test.tsx:388
-msgid "documents_page_merge_selected_publications_button"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Authorizations"
@@ -40,16 +34,19 @@ msgid "authorizations_page_my_expertise"
 msgstr "My expertise"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:101
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:31
 msgid "profile_affiliations_card_title"
 msgstr "My affiliations"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
 #: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
 msgid "profile_affiliations_laboratories_label"
 msgstr "Laboratory/ies"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:82
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:23
 msgid "profile_affiliations_signature_label"
 msgstr "My signature"
@@ -340,6 +337,12 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:251
 msgid "documents_page_incomplete_hal_repository_filter"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:330
+#: src/app/[lang]/documents/page.test.tsx:388
+msgid "documents_page_merge_selected_publications_button"
 msgstr ""
 
 #. js-lingui-explicit-id
