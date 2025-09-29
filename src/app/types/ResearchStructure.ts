@@ -39,6 +39,10 @@ class ResearchStructure implements IAgent {
     return this.acronym ? [this.acronym] : []
   }
 
+  get membershipSignatures(): string[] {
+    return this.signature ? [this.signature] : []
+  }
+
   /**
    * Get the display name of the research structure
    * @param language

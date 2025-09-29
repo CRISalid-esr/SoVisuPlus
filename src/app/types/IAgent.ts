@@ -25,6 +25,7 @@ export interface IAgent extends IEntity {
   slug: string | null //TODO make non-nullable
 
   get membershipAcronyms(): string[]
+  get membershipSignatures(): string[]
 
   getDisplayName(language?: ExtendedLanguageCode): string
 }
