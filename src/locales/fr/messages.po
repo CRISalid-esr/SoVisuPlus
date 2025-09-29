@@ -14,6 +14,12 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:330
+#: src/app/[lang]/documents/page.test.tsx:388
+msgid "documents_page_merge_selected_publications_button"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Mes autorisations"
@@ -322,7 +328,7 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:162
-#: src/app/[lang]/documents/page.tsx:592
+#: src/app/[lang]/documents/page.tsx:602
 msgid "documents_page_synchronize_button"
 msgstr "Mettre à jour les publications"
 
@@ -337,12 +343,12 @@ msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:553
+#: src/app/[lang]/documents/page.tsx:563
 msgid "documents_page_refresh_list_alert_own_perspective"
 msgstr "La liste de vos publications a changé"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:556
+#: src/app/[lang]/documents/page.tsx:566
 msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr "La liste des publications de {name} a changé"
 
@@ -367,27 +373,27 @@ msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:71
+#: src/app/lib/websocket/WebSocketListener.tsx:72
 msgid "snackbar_document_created"
 msgstr "Nouvelle publication : "
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:74
+#: src/app/lib/websocket/WebSocketListener.tsx:75
 msgid "snackbar_document_updated"
 msgstr "Publication mise à jour : "
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:77
+#: src/app/lib/websocket/WebSocketListener.tsx:78
 msgid "snackbar_document_deleted"
 msgstr "Publication supprimée : "
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:80
+#: src/app/lib/websocket/WebSocketListener.tsx:81
 msgid "snackbar_document_unchanged"
 msgstr "Publication inchangée : "
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:84
+#: src/app/lib/websocket/WebSocketListener.tsx:85
 msgid "snackbar_view_document"
 msgstr "Voir la publication"
 
@@ -510,11 +516,11 @@ msgstr ""
 msgid "documents_details_page_type_column_tab_author"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:638
+#: src/app/[lang]/documents/page.tsx:673
 msgid "documents_page_action_column_details"
 msgstr "Détails"
 
-#: src/app/[lang]/documents/page.tsx:403
+#: src/app/[lang]/documents/page.tsx:404
 msgid "documents_page_all_documents_filter"
 msgstr "Tous les documents"
 
@@ -551,7 +557,7 @@ msgstr "Hors HAL"
 msgid "documents_page_halStatus_column"
 msgstr "Statut hal"
 
-#: src/app/[lang]/documents/page.tsx:409
+#: src/app/[lang]/documents/page.tsx:410
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "Dépôt HAL incomplet"
 
@@ -559,13 +565,17 @@ msgstr "Dépôt HAL incomplet"
 msgid "documents_page_journal_article_icon_label"
 msgstr "Article de journal"
 
-#: src/app/[lang]/documents/page.tsx:540
+#: src/app/[lang]/documents/page.tsx:550
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:539
+#: src/app/[lang]/documents/page.tsx:549
 msgid "documents_page_main_title_first_person"
 msgstr "Mes publications"
+
+#: src/app/[lang]/documents/page.tsx:664
+msgid "documents_page_merge_selected_publications_button"
+msgstr ""
 
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:20
 msgid "documents_page_monograph_icon_label"
@@ -594,7 +604,7 @@ msgstr "paru dans"
 msgid "documents_page_refresh_document"
 msgstr "Mettre à jour l'affichage"
 
-#: src/app/[lang]/documents/page.tsx:576
+#: src/app/[lang]/documents/page.tsx:586
 msgid "documents_page_refresh_list"
 msgstr "Mettre à jour l'affichage"
 

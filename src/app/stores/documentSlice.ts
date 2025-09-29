@@ -52,6 +52,7 @@ export interface DocumentSlice {
     fetchDocuments: (obj: DocumentQuery) => Promise<void>
     countDocuments: (obj: CountDocumentQuery) => Promise<void>
     fetchDocumentById: (uid: string) => Promise<void>
+    mergeDocuments: (documentUids: string[]) => Promise<void>
     removeConcepts: (conceptUids: string[]) => Promise<void>
   }
 }
@@ -239,6 +240,24 @@ export const addDocumentSlice: StateCreator<
             },
           }
         })
+      }
+    },
+    mergeDocuments: async (documentUids: string[]) => {
+      try {
+        const response = await fetch('/api/documents/merge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ documentUids }),
+        })
+
+        if (!response.ok) throw new Error('Failed to merge documents')
+      } catch (error) {
+        set((state) => ({
+          document: {
+            ...state.document,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        }))
       }
     },
     removeConcepts: async (conceptUids: string[]) => {

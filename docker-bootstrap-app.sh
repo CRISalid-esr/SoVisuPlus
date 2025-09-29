@@ -18,6 +18,11 @@ GIT_BRANCH_VAL="${GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || t
 # --- write .env (overwrite, not append) ------------------------------------
 # Quote values that may contain special chars/spaces
 cat > .env <<EOF
+WS_SCHEME=${WS_SCHEME:-ws}
+WS_HOST=${WS_HOST:-localhost}
+WS_PORT=${WS_PORT:-3001}
+WS_INTERNAL_PORT=${WS_INTERNAL_PORT:-3001}
+WS_PATH=${WS_PATH:-/}
 DOCKER_IMAGE_NAME=${DOCKER_IMAGE_NAME:-unknown}
 DOCKER_TAG=${DOCKER_TAG:-unknown}
 DOCKER_DIGEST=${DOCKER_DIGEST:-unknown}
@@ -27,7 +32,7 @@ DATABASE_URL=${DATABASE_URL}
 KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-}
 KEYCLOAK_CLIENT_SECRET="${KEYCLOAK_CLIENT_SECRET:-}"
 KEYCLOAK_ISSUER=${KEYCLOAK_INTERNAL_ADDR:-}/realms/${KEYCLOAK_REALM:-}
-KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_ADDR:-http://keycloak.local:8080}:-}/realms/${KEYCLOAK_REALM:-}
+KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_ADDR:-http://keycloak.local:8080}/realms/${KEYCLOAK_REALM:-}
 NEXTAUTH_URL=${APP_URL:-http://sovisuplus.local:3000}/api/auth
 NEXTAUTH_SECRET="${NEXTAUTH_SECRET:-}"
 GRAPHQL_ENDPOINT_ENABLED="${GRAPHQL_ENDPOINT_ENABLED:-false}"

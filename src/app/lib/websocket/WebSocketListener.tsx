@@ -10,6 +10,7 @@ import {
   isHarvestingResultEvent,
   isHarvestingStateEvent,
 } from '@/types/GenericEvent'
+import { buildWebSocketURL } from '@/lib/websocket/ws-url'
 
 export default function WebSocketListener() {
   const { enqueueSnackbar } = useSnackbar()
@@ -43,7 +44,7 @@ export default function WebSocketListener() {
   }, [currentPerspective, selectedDocument])
 
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:3001')
+    const ws = new WebSocket(buildWebSocketURL())
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data) as GenericEvent
