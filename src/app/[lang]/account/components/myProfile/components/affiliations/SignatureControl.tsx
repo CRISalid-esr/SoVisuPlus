@@ -22,17 +22,9 @@ export default function SignatureControl() {
       <Typography variant='subtitle1' fontWeight='bold'>
         <Trans id='profile_affiliations_signature_label' />
       </Typography>
-      {signatures.map((signature, index) => {
-        return (
-          <Typography
-            key={signature ? signature : 'no_signature'}
-            variant='body2'
-            color='text.secondary'
-          >
-            {index === signatures.length - 1 ? signature : signature + ','}
-          </Typography>
-        )
-      })}
+      <Typography key='signatures' variant='body2' color='text.secondary'>
+        {signatures.join()}
+      </Typography>
     </Paper>
   )
 }

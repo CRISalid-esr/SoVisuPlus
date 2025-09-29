@@ -22,17 +22,9 @@ export default function LaboratoriesControl() {
       <Typography variant='subtitle1' fontWeight='bold'>
         <Trans id='profile_affiliations_laboratories_label' />
       </Typography>
-      {laboratories.map((laboratory, index) => {
-        return (
-          <Typography
-            key={laboratory ? laboratory : 'no_laboratory'}
-            variant='body2'
-            color='text.secondary'
-          >
-            {index === laboratories.length - 1 ? laboratory : laboratory + ','}
-          </Typography>
-        )
-      })}
+      <Typography key='laboratories' variant='body2' color='text.secondary'>
+        {laboratories.join()}
+      </Typography>
     </Paper>
   )
 }
