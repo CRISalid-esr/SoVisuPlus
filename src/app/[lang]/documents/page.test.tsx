@@ -222,7 +222,8 @@ describe('DocumentsPage Component', () => {
         contributorType: 'person',
         contributorUid: '',
         requestId: 1,
-        omittedHalCollectionCodes: JSON.stringify([]),
+        halCollectionCodes: JSON.stringify(['ABC', 'DEF']),
+        areHalCollectionCodesOmitted: false,
       })
     })
   })
@@ -239,7 +240,7 @@ describe('DocumentsPage Component', () => {
         contributorType: 'person',
         contributorUid: '',
         requestId: 1,
-        omittedHalCollectionCodes: JSON.stringify(['ABC', 'DEF']),
+        halCollectionCodes: JSON.stringify(['ABC', 'DEF']),
       })
     })
   })

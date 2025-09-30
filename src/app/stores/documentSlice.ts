@@ -88,6 +88,9 @@ export const addDocumentSlice: StateCreator<
       const { requestId, ...rest } = queryObject
       const queryString = toQueryString(rest)
 
+      console.log('=====')
+      console.log(queryObject.halCollectionCodes)
+
       // Mark the request as the latest before the async call
       set((state) => ({
         document: {

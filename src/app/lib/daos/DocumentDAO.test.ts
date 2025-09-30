@@ -396,8 +396,8 @@ describe('DocumentDAO', () => {
       sorting: [{ id: 'titles', desc: false }],
       contributorUids: ['local-123'],
       contributorType: 'person' as AgentType,
-      omittedHalCollectionCodes: [],
-      isOnlyCounting: false,
+      halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
     }
 
     const result = await documentDAO.fetchDocuments(fetchParams)
@@ -406,55 +406,57 @@ describe('DocumentDAO', () => {
     expect(result.totalItems).toBe(1)
     expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
       where: {
-        OR: [
+        AND: [
           {
-            titles: {
-              some: {
-                value: {
+            OR: [
+              {
+                titles: {
+                  some: {
+                    value: {
+                      contains: 'Sample',
+                      mode: Prisma.QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                abstracts: {
+                  some: {
+                    value: {
+                      contains: 'Sample',
+                      mode: Prisma.QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                contributions: {
+                  some: {
+                    person: {
+                      displayName: {
+                        contains: 'Sample',
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
+              {
+                publicationDate: {
                   contains: 'Sample',
                   mode: Prisma.QueryMode.insensitive,
                 },
               },
-            },
-          },
-          {
-            abstracts: {
-              some: {
-                value: {
-                  contains: 'Sample',
-                  mode: Prisma.QueryMode.insensitive,
-                },
-              },
-            },
-          },
-          {
-            contributions: {
-              some: {
-                person: {
-                  displayName: {
+              {
+                journal: {
+                  title: {
                     contains: 'Sample',
                     mode: Prisma.QueryMode.insensitive,
                   },
                 },
               },
-            },
+            ],
           },
-          {
-            publicationDate: {
-              contains: 'Sample',
-              mode: Prisma.QueryMode.insensitive,
-            },
-          },
-          {
-            journal: {
-              title: {
-                contains: 'Sample',
-                mode: Prisma.QueryMode.insensitive,
-              },
-            },
-          },
-        ],
-        AND: [
           {
             contributions: {
               some: {
@@ -518,7 +520,7 @@ describe('DocumentDAO', () => {
       columnFilters: [{ id: 'titles', value: 'Sample Document Title' }],
       contributorUids: ['local-123'],
       contributorType: 'person' as AgentType,
-      omittedHalCollectionCodes: [],
+      halCollectionCodes: ['ABC', 'DEF'],
     }
 
     const result = await documentDAO.countDocuments(countParams)
