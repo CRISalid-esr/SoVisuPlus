@@ -178,7 +178,7 @@ export class DocumentDAO extends AbstractDAO {
         }
 
         dbDocument = (await this.prismaClient.document.update({
-          where: { uid: uid },
+          where: { uid },
           data: {
             documentType: document.documentType,
             title_locale_0: document.getTitleInLocale(0),
@@ -197,8 +197,12 @@ export class DocumentDAO extends AbstractDAO {
             pages,
           },
           include: {
-            titles: true, // Include related titles
-            abstracts: true, // Include related abstracts
+            titles: true,
+            abstracts: true,
+            subjects: { include: { labels: true } },
+            contributions: { include: { person: true } },
+            records: true,
+            journal: { include: { identifiers: true } },
           },
         })) as DbDocument
       }
@@ -312,12 +316,20 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
 
+      const incomingUids = new Set(records.map((r) => r.uid))
+
+      // Remove records no longer present
+      await this.prismaClient.documentRecord.deleteMany({
+        where: {
+          documentId: dbDocument.id,
+          uid: { notIn: Array.from(incomingUids) },
+        },
+      })
+
       for (const record of records) {
         try {
           await this.prismaClient.documentRecord.upsert({
-            where: {
-              uid: record.uid,
-            },
+            where: { uid: record.uid },
             update: {
               platform: {
                 set: getBibliographicPlatformDbValue(record.platform),
@@ -326,6 +338,8 @@ export class DocumentDAO extends AbstractDAO {
               url: record.url,
               halCollectionCodes: record.halCollectionCodes || [],
               halSubmitType: record.halSubmitType,
+              // in case the record was not previously linked to this document :
+              document: { connect: { id: dbDocument.id } },
             },
             create: {
               uid: record.uid,
@@ -334,7 +348,7 @@ export class DocumentDAO extends AbstractDAO {
               url: record.url,
               halCollectionCodes: record.halCollectionCodes || [],
               halSubmitType: record.halSubmitType,
-              documentId: dbDocument.id, // Link to document
+              documentId: dbDocument.id,
             },
           })
         } catch (error) {
@@ -778,5 +792,50 @@ export class DocumentDAO extends AbstractDAO {
         },
       },
     })
+  }
+
+  public async deleteDocumentByUid(uid: string): Promise<void> {
+    await this.prismaClient.$transaction(async (tx) => {
+      const doc = await tx.document.findUnique({
+        where: { uid },
+        select: { id: true },
+      })
+      if (!doc) return
+
+      await tx.document.update({
+        where: { id: doc.id },
+        data: { subjects: { set: [] } },
+      })
+
+      await Promise.all([
+        tx.documentRecord.deleteMany({ where: { documentId: doc.id } }),
+        tx.contribution.deleteMany({ where: { documentId: doc.id } }),
+        tx.documentTitle.deleteMany({ where: { documentId: doc.id } }),
+        tx.documentAbstract.deleteMany({ where: { documentId: doc.id } }),
+      ])
+
+      await tx.document.delete({ where: { id: doc.id } })
+    })
+  }
+
+  public async getContributorUidsByDocumentUid(uid: string): Promise<string[]> {
+    const document = await this.prismaClient.document.findUnique({
+      where: { uid },
+      include: {
+        contributions: {
+          include: {
+            person: {
+              select: { uid: true },
+            },
+          },
+        },
+      },
+    })
+
+    if (!document) {
+      return []
+    }
+
+    return document.contributions.map((contribution) => contribution.person.uid)
   }
 }

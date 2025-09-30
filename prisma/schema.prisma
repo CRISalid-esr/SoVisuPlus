@@ -264,6 +264,7 @@ enum ActionType {
   REMOVE
   UPDATE
   FETCH
+  MERGE
 }
 
 enum ActionTargetType {

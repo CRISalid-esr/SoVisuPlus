@@ -234,4 +234,49 @@ describe('DocumentService', () => {
       personUid: 'local-123',
     })
   })
+  it('creates a MERGE action with correct parameters when mergeDocuments is called', async () => {
+    await expect(
+      documentService.mergeDocuments(['d1', 'd2', 'd3'], 'user-1234'),
+    ).resolves.toBeUndefined()
+
+    expect(mockCreateAction).toHaveBeenCalledTimes(1)
+    expect(mockCreateAction).toHaveBeenCalledWith({
+      actionType: 'MERGE',
+      targetType: 'DOCUMENT',
+      targetUid: 'd1',
+      path: null,
+      parameters: { mergedDocumentUids: ['d2', 'd3'] },
+      personUid: 'local-123',
+    })
+  })
+
+  it('throws if fewer than 2 documents are provided to mergeDocuments', async () => {
+    await expect(
+      documentService.mergeDocuments(['only-one'], 'user-1234'),
+    ).rejects.toThrow('At least two documents are required to merge')
+
+    expect(mockCreateAction).not.toHaveBeenCalled()
+  })
+
+  it('throws when user submitting merge has no associated person', async () => {
+    ;(UserDAO as jest.Mock).mockImplementationOnce(() => ({
+      getUserByIdentifier: jest.fn().mockResolvedValue({ person: null }),
+    }))
+    const svc = new DocumentService()
+
+    await expect(svc.mergeDocuments(['d1', 'd2'], 'user-1234')).rejects.toThrow(
+      'Error merging documents',
+    )
+
+    // ensure no action is created when user not found
+    expect(mockCreateAction).not.toHaveBeenCalled()
+  })
+
+  it('throws when action creation fails during mergeDocuments', async () => {
+    mockCreateAction.mockRejectedValueOnce(new Error('DAO level error'))
+
+    await expect(
+      documentService.mergeDocuments(['d1', 'd2'], 'user-1234'),
+    ).rejects.toThrow('Error merging documents')
+  })
 })

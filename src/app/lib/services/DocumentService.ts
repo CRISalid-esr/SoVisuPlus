@@ -2,7 +2,7 @@ import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { AgentType } from '@/types/IAgent'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
-import { ActionType, ActionTargetType } from '@/types/Action'
+import { ActionTargetType, ActionType } from '@/types/Action'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
@@ -166,6 +166,37 @@ export class DocumentService {
       })
     } catch (error) {
       const message = 'Error deleting concepts from document'
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
+
+  async mergeDocuments(documentUids: string[], userName: string) {
+    if (documentUids.length < 2) {
+      throw new Error('At least two documents are required to merge')
+    }
+    try {
+      const user = await this.userDAO.getUserByIdentifier({
+        type: PersonIdentifierType.LOCAL,
+        value: userName,
+      })
+      if (!user?.person) {
+        throw new Error(`User with username ${userName} not found`)
+      }
+
+      await this.actionDAO.createAction({
+        actionType: ActionType.MERGE,
+        targetType: ActionTargetType.DOCUMENT,
+        // for now, the primary document is elected by graph algorithm,
+        // not by user choice, thus the targetUid is simply the first in the list
+        // without any special meaning. The other merged documents are in parameters.
+        targetUid: documentUids[0],
+        path: null,
+        parameters: { mergedDocumentUids: documentUids.slice(1) },
+        personUid: user.person?.uid,
+      })
+    } catch (error) {
+      const message = 'Error merging documents'
       console.error(message, error)
       throw new Error(message)
     }

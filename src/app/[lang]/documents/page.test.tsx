@@ -326,19 +326,30 @@ describe('DocumentsPage Component', () => {
     await screen.findByText('Test Title')
     await screen.findByText('Another Title')
 
-    const mergeBtn = screen.getByRole('button', {
-      name: i18n.t('documents_page_merge_selected_publications_button'),
+    let mergeBtn = screen.queryByRole('button', {
+      name: i18n.t('documents_page_merge_selected_documents_button'),
     })
-
-    expect(mergeBtn).toBeDisabled()
+    expect(mergeBtn).not.toBeInTheDocument()
 
     const checkboxes = screen.getAllByRole('checkbox')
 
+    // Select first row -> button appears but is disabled
     fireEvent.click(checkboxes[1])
-    await waitFor(() => expect(mergeBtn).toBeDisabled())
+    await waitFor(() => {
+      mergeBtn = screen.getByRole('button', {
+        name: i18n.t('documents_page_merge_selected_documents_button'),
+      })
+      expect(mergeBtn).toBeDisabled()
+    })
 
+    // Select second row -> button enabled
     fireEvent.click(checkboxes[2])
-    await waitFor(() => expect(mergeBtn).toBeEnabled())
+    await waitFor(() => {
+      mergeBtn = screen.getByRole('button', {
+        name: i18n.t('documents_page_merge_selected_documents_button'),
+      })
+      expect(mergeBtn).toBeEnabled()
+    })
   })
 
   it('calls mergeDocuments with selected document UIDs when clicking the merge button', async () => {
@@ -385,7 +396,7 @@ describe('DocumentsPage Component', () => {
     fireEvent.click(checkboxes[2])
 
     const mergeBtn = screen.getByRole('button', {
-      name: i18n.t('documents_page_merge_selected_publications_button'),
+      name: i18n.t('documents_page_merge_selected_documents_button'),
     })
     expect(mergeBtn).toBeEnabled()
 
