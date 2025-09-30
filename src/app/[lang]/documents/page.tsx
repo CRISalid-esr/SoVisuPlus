@@ -12,7 +12,7 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
-import { t } from '@lingui/macro'
+import { t, plural } from '@lingui/macro'
 
 import { LanguageChips } from '@/components/LanguageChips'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
@@ -74,6 +74,10 @@ export default function DocumentsPage() {
   const { currentPerspective, ownPerspective } = useStore((state) => state.user)
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
+
+  const acronyms = currentPerspective?.membershipAcronyms || []
+  const numberOfAcronyms = acronyms.length
+  const formattedAcronyms = acronyms.join(', ')
 
   const [selectedTitleLangs, setSelectedTitleLangs] = useState<
     Record<string, string>
@@ -294,15 +298,18 @@ export default function DocumentsPage() {
         filterVariant: 'multi-select',
         filterSelectOptions: [
           {
-            label: 'Dans la collection',
+            label: t`documents_page_hal_status_in_collection`,
             value: 'in_collection',
           },
           {
-            label: 'Dans HAL mais hors de la collection',
+            label: plural(numberOfAcronyms, {
+              one: `documents_page_hal_status_out_of_collection ${formattedAcronyms}`,
+              other: `documents_page_hal_status_out_of_collections ${formattedAcronyms}`,
+            }),
             value: 'out_of_collection',
           },
           {
-            label: 'Hors HAL',
+            label: t`documents_page_hal_status_outside_hal`,
             value: 'outside_hal',
           },
         ],
