@@ -14,12 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:330
-#: src/app/[lang]/documents/page.test.tsx:388
-msgid "documents_page_merge_selected_documents_button"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Authorizations"
@@ -347,8 +341,10 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:330
-#: src/app/[lang]/documents/page.test.tsx:388
-msgid "documents_page_merge_selected_publications_button"
+#: src/app/[lang]/documents/page.test.tsx:340
+#: src/app/[lang]/documents/page.test.tsx:349
+#: src/app/[lang]/documents/page.test.tsx:399
+msgid "documents_page_merge_selected_documents_button"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -402,7 +398,7 @@ msgid "snackbar_document_unchanged"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:85
+#: src/app/lib/websocket/WebSocketListener.tsx:89
 msgid "snackbar_view_document"
 msgstr ""
 
@@ -525,7 +521,7 @@ msgstr "Scopus"
 msgid "documents_details_page_type_column_tab_author"
 msgstr "Authors"
 
-#: src/app/[lang]/documents/page.tsx:673
+#: src/app/[lang]/documents/page.tsx:670
 msgid "documents_page_action_column_details"
 msgstr "Details"
 
@@ -582,7 +578,7 @@ msgstr "Publications"
 msgid "documents_page_main_title_first_person"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:664
+#: src/app/[lang]/documents/page.tsx:660
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
 
