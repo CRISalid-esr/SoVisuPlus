@@ -21,6 +21,7 @@ describe('ResearchStructure', () => {
     expect(validResearchStructure).toBeInstanceOf(ResearchStructure)
     expect(validResearchStructure.uid).toBe('RS123')
     expect(validResearchStructure.acronym).toBe('ABC')
+    expect(validResearchStructure.signature).toBe('ABC_signature')
     expect(validResearchStructure.names).toEqual([
       {
         value: 'Valid Research Structure',

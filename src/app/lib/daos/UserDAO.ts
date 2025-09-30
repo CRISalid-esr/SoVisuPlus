@@ -58,6 +58,7 @@ export class UserDAO extends AbstractDAO {
                     select: {
                       uid: true,
                       acronym: true,
+                      signature: true,
                       slug: true,
                     },
                   },
