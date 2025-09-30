@@ -398,6 +398,7 @@ export class DocumentDAO extends AbstractDAO {
 
     if (publicationListRolesFilter.length > 0) {
       where = {
+        ...where,
         contributions: {
           every: {
             roles: {
@@ -410,6 +411,7 @@ export class DocumentDAO extends AbstractDAO {
 
     if (searchTerm) {
       where = {
+        ...where,
         AND: [
           ...this.computeExistingAnd(where),
           {
@@ -619,6 +621,7 @@ export class DocumentDAO extends AbstractDAO {
         })
 
         where = {
+          ...where,
           AND: [
             ...this.computeExistingAnd(where),
             {
