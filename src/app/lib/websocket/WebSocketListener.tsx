@@ -11,6 +11,7 @@ import {
   isHarvestingStateEvent,
 } from '@/types/GenericEvent'
 import { buildWebSocketURL } from '@/lib/websocket/ws-url'
+import * as Lingui from '@lingui/core'
 
 export default function WebSocketListener() {
   const { enqueueSnackbar } = useSnackbar()
@@ -19,6 +20,8 @@ export default function WebSocketListener() {
   const { currentPerspective, connectedUser } = useStore((state) => state.user)
   const { setListHasChanged, setSelectedDocumentHasChanged, selectedDocument } =
     useStore((state) => state.document)
+
+  // keep fresh values available inside the ws callback
   const perspectiveRef = useRef(currentPerspective)
   const documentRef = useRef(selectedDocument)
   const userRef = useRef(connectedUser)
@@ -39,6 +42,7 @@ export default function WebSocketListener() {
         return 'default'
     }
   }
+
   useEffect(() => {
     perspectiveRef.current = currentPerspective
     documentRef.current = selectedDocument
@@ -66,6 +70,7 @@ export default function WebSocketListener() {
         const userImplied =
           connectedUserRef?.person?.uid &&
           peopleUids.includes(connectedUserRef.person.uid)
+
         if (currentPerspectiveImplied) {
           setListHasChanged(true)
         }
@@ -73,12 +78,20 @@ export default function WebSocketListener() {
         if (data.objectUid === selectedDocumentRef?.uid) {
           setSelectedDocumentHasChanged(true)
         }
+
         if (!currentPerspectiveImplied && !userImplied) {
           console.log(
             'WebSocket event not relevant to current perspective or user, ignoring.',
           )
           return
         }
+
+        const labels = data.objectLabels || {}
+
+        const currentLang = Lingui.i18n.locale as string
+        const selectedLabel =
+          (currentLang && labels[currentLang]) || Object.values(labels)[0] || ''
+
         enqueueSnackbar(
           <>
             {data.eventType === 'created' && (
@@ -93,7 +106,9 @@ export default function WebSocketListener() {
             {data.eventType === 'unchanged' && (
               <Trans id='snackbar_document_unchanged' />
             )}
-            <strong>{data.objectLabel}</strong>
+            {selectedLabel && (
+              <strong style={{ marginLeft: 6 }}>{selectedLabel}</strong>
+            )}
             {data.eventType !== 'deleted' && (
               <a
                 href={`/documents/${data.objectUid}`}

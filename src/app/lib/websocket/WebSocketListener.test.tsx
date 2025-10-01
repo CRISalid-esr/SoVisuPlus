@@ -253,7 +253,7 @@ describe('WebSocketListener', () => {
       objectType: 'Document',
       objectUid: 'doc-123',
       eventType: 'created',
-      objectLabel: 'Test document',
+      objectLabels: { en: 'Test document', fr: 'Document de test' },
       impliedPeopleUids: ['person-1'],
     })
 
@@ -285,7 +285,7 @@ describe('WebSocketListener', () => {
       objectType: 'Document',
       objectUid: 'doc-123',
       eventType: 'created',
-      objectLabel: 'Test document',
+      objectLabels: { en: 'Test document', fr: 'Document de test' },
       impliedPeopleUids: ['person-2'], // different person
     })
 
