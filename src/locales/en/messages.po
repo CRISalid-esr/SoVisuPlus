@@ -325,7 +325,7 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:162
-#: src/app/[lang]/documents/page.tsx:640
+#: src/app/[lang]/documents/page.tsx:645
 msgid "documents_page_synchronize_button"
 msgstr ""
 
@@ -348,12 +348,12 @@ msgid "documents_page_merge_selected_documents_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:601
+#: src/app/[lang]/documents/page.tsx:606
 msgid "documents_page_refresh_list_alert_own_perspective"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:604
+#: src/app/[lang]/documents/page.tsx:609
 msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr ""
 
@@ -521,11 +521,11 @@ msgstr "Scopus"
 msgid "documents_details_page_type_column_tab_author"
 msgstr "Authors"
 
-#: src/app/[lang]/documents/page.tsx:708
+#: src/app/[lang]/documents/page.tsx:713
 msgid "documents_page_action_column_details"
 msgstr "Details"
 
-#: src/app/[lang]/documents/page.tsx:447
+#: src/app/[lang]/documents/page.tsx:452
 msgid "documents_page_all_documents_filter"
 msgstr "All my documents"
 
@@ -542,7 +542,7 @@ msgid "documents_page_conference_article_icon_label"
 msgstr "Conference article"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:136
-#: src/app/[lang]/documents/page.tsx:210
+#: src/app/[lang]/documents/page.tsx:215
 msgid "documents_page_contributors_column"
 msgstr "authors"
 
@@ -558,11 +558,11 @@ msgstr ""
 msgid "documents_page_hal_status_outside_hal"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:295
+#: src/app/[lang]/documents/page.tsx:300
 msgid "documents_page_halStatus_column"
 msgstr "status in Hal"
 
-#: src/app/[lang]/documents/page.tsx:453
+#: src/app/[lang]/documents/page.tsx:458
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "HAL incomplete filing"
 
@@ -570,15 +570,15 @@ msgstr "HAL incomplete filing"
 msgid "documents_page_journal_article_icon_label"
 msgstr "Journal article"
 
-#: src/app/[lang]/documents/page.tsx:588
+#: src/app/[lang]/documents/page.tsx:593
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:587
+#: src/app/[lang]/documents/page.tsx:592
 msgid "documents_page_main_title_first_person"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:698
+#: src/app/[lang]/documents/page.tsx:703
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
 
@@ -591,17 +591,17 @@ msgid "documents_page_proceedings_icon_label"
 msgstr "Proceedings"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:141
-#: src/app/[lang]/documents/page.tsx:243
+#: src/app/[lang]/documents/page.tsx:248
 msgid "documents_page_publication_date_column"
 msgstr "Date"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:13
-#: src/app/[lang]/documents/page.tsx:247
+#: src/app/[lang]/documents/page.tsx:252
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "No date available"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:146
-#: src/app/[lang]/documents/page.tsx:275
+#: src/app/[lang]/documents/page.tsx:280
 msgid "documents_page_publishedIn_column"
 msgstr "published in"
 
@@ -609,7 +609,7 @@ msgstr "published in"
 msgid "documents_page_refresh_document"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:624
+#: src/app/[lang]/documents/page.tsx:629
 msgid "documents_page_refresh_list"
 msgstr ""
 
@@ -618,7 +618,7 @@ msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Scientific publication"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:154
-#: src/app/[lang]/documents/page.tsx:337
+#: src/app/[lang]/documents/page.tsx:342
 msgid "documents_page_source_column"
 msgstr "Sources"
 
@@ -662,12 +662,12 @@ msgid "documents_page_synchronize_modal_title"
 msgstr "Sources to be syncronized"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:103
-#: src/app/[lang]/documents/page.tsx:152
+#: src/app/[lang]/documents/page.tsx:154
 msgid "documents_page_title_column"
 msgstr "title"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:61
-#: src/app/[lang]/documents/page.tsx:112
+#: src/app/[lang]/documents/page.tsx:114
 msgid "documents_page_type_column"
 msgstr "type"
 
@@ -704,7 +704,7 @@ msgstr "Notifications"
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:16
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:98
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:117
-#: src/app/[lang]/documents/page.tsx:166
+#: src/app/[lang]/documents/page.tsx:168
 msgid "no_title_available"
 msgstr "no title available"
 
