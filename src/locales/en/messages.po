@@ -325,7 +325,7 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:162
-#: src/app/[lang]/documents/page.tsx:623
+#: src/app/[lang]/documents/page.tsx:640
 msgid "documents_page_synchronize_button"
 msgstr ""
 
@@ -340,20 +340,20 @@ msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:330
-#: src/app/[lang]/documents/page.test.tsx:340
-#: src/app/[lang]/documents/page.test.tsx:349
-#: src/app/[lang]/documents/page.test.tsx:399
+#: src/app/[lang]/documents/page.test.tsx:331
+#: src/app/[lang]/documents/page.test.tsx:341
+#: src/app/[lang]/documents/page.test.tsx:350
+#: src/app/[lang]/documents/page.test.tsx:400
 msgid "documents_page_merge_selected_documents_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:584
+#: src/app/[lang]/documents/page.tsx:601
 msgid "documents_page_refresh_list_alert_own_perspective"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:587
+#: src/app/[lang]/documents/page.tsx:604
 msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr ""
 
@@ -412,8 +412,7 @@ msgstr "Source type: {0}"
 msgid "document_details_page_journal_publisher"
 msgstr "Publisher: {0}"
 
-#: src/app/[lang]/documents/components/HalStatusCell.tsx:71
-#: src/app/[lang]/documents/page.tsx:305
+#: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:58
 msgid "{numberOfAcronyms, plural, one {documents_page_hal_status_out_of_collection {formattedAcronyms}} other {documents_page_hal_status_out_of_collections {formattedAcronyms}}}"
 msgstr ""
 
@@ -522,11 +521,11 @@ msgstr "Scopus"
 msgid "documents_details_page_type_column_tab_author"
 msgstr "Authors"
 
-#: src/app/[lang]/documents/page.tsx:670
+#: src/app/[lang]/documents/page.tsx:708
 msgid "documents_page_action_column_details"
 msgstr "Details"
 
-#: src/app/[lang]/documents/page.tsx:430
+#: src/app/[lang]/documents/page.tsx:447
 msgid "documents_page_all_documents_filter"
 msgstr "All my documents"
 
@@ -543,7 +542,7 @@ msgid "documents_page_conference_article_icon_label"
 msgstr "Conference article"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:136
-#: src/app/[lang]/documents/page.tsx:209
+#: src/app/[lang]/documents/page.tsx:210
 msgid "documents_page_contributors_column"
 msgstr "authors"
 
@@ -551,21 +550,19 @@ msgstr "authors"
 msgid "documents_page_document_icon_label"
 msgstr "Document"
 
-#: src/app/[lang]/documents/components/HalStatusCell.tsx:69
-#: src/app/[lang]/documents/page.tsx:301
+#: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:75
 msgid "documents_page_hal_status_in_collection"
 msgstr ""
 
-#: src/app/[lang]/documents/components/HalStatusCell.tsx:46
-#: src/app/[lang]/documents/page.tsx:312
+#: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:43
 msgid "documents_page_hal_status_outside_hal"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:294
+#: src/app/[lang]/documents/page.tsx:295
 msgid "documents_page_halStatus_column"
 msgstr "status in Hal"
 
-#: src/app/[lang]/documents/page.tsx:436
+#: src/app/[lang]/documents/page.tsx:453
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "HAL incomplete filing"
 
@@ -573,15 +570,15 @@ msgstr "HAL incomplete filing"
 msgid "documents_page_journal_article_icon_label"
 msgstr "Journal article"
 
-#: src/app/[lang]/documents/page.tsx:571
+#: src/app/[lang]/documents/page.tsx:588
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:570
+#: src/app/[lang]/documents/page.tsx:587
 msgid "documents_page_main_title_first_person"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:660
+#: src/app/[lang]/documents/page.tsx:698
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
 
@@ -594,17 +591,17 @@ msgid "documents_page_proceedings_icon_label"
 msgstr "Proceedings"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:141
-#: src/app/[lang]/documents/page.tsx:242
+#: src/app/[lang]/documents/page.tsx:243
 msgid "documents_page_publication_date_column"
 msgstr "Date"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:13
-#: src/app/[lang]/documents/page.tsx:246
+#: src/app/[lang]/documents/page.tsx:247
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "No date available"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:146
-#: src/app/[lang]/documents/page.tsx:274
+#: src/app/[lang]/documents/page.tsx:275
 msgid "documents_page_publishedIn_column"
 msgstr "published in"
 
@@ -612,7 +609,7 @@ msgstr "published in"
 msgid "documents_page_refresh_document"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:607
+#: src/app/[lang]/documents/page.tsx:624
 msgid "documents_page_refresh_list"
 msgstr ""
 
@@ -621,7 +618,7 @@ msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Scientific publication"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:154
-#: src/app/[lang]/documents/page.tsx:320
+#: src/app/[lang]/documents/page.tsx:337
 msgid "documents_page_source_column"
 msgstr "Sources"
 
@@ -665,12 +662,12 @@ msgid "documents_page_synchronize_modal_title"
 msgstr "Sources to be syncronized"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:103
-#: src/app/[lang]/documents/page.tsx:151
+#: src/app/[lang]/documents/page.tsx:152
 msgid "documents_page_title_column"
 msgstr "title"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:61
-#: src/app/[lang]/documents/page.tsx:111
+#: src/app/[lang]/documents/page.tsx:112
 msgid "documents_page_type_column"
 msgstr "type"
 
@@ -707,7 +704,7 @@ msgstr "Notifications"
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:16
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:98
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:117
-#: src/app/[lang]/documents/page.tsx:165
+#: src/app/[lang]/documents/page.tsx:166
 msgid "no_title_available"
 msgstr "no title available"
 

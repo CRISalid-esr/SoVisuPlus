@@ -45,6 +45,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Highlighter from 'react-highlight-words'
 import DocumentHeader from './components/DocumentHeader'
 import HalStatusCell from './components/HalStatusCell'
+import HalStatusCellBadge, {
+  HalStatusCellType,
+} from './components/HalStatusCellBadge'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
 import { DocumentTypeLabels } from './components/DocumentTypeLabels'
 import SyncIcon from '@mui/icons-material/Sync'
@@ -76,8 +79,6 @@ export default function DocumentsPage() {
   const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
 
   const acronyms = currentPerspective?.membershipAcronyms || []
-  const numberOfAcronyms = acronyms.length
-  const formattedAcronyms = acronyms.join(', ')
 
   const [selectedTitleLangs, setSelectedTitleLangs] = useState<
     Record<string, string>
@@ -298,18 +299,34 @@ export default function DocumentsPage() {
         filterVariant: 'multi-select',
         filterSelectOptions: [
           {
-            label: t`documents_page_hal_status_in_collection`,
+            // @ts-expect-error: so that label accepts an Element
+            label: (
+              <HalStatusCellBadge
+                type={HalStatusCellType.InCollection}
+                isSingleLine
+              />
+            ),
             value: 'in_collection',
           },
           {
-            label: plural(numberOfAcronyms, {
-              one: `documents_page_hal_status_out_of_collection ${formattedAcronyms}`,
-              other: `documents_page_hal_status_out_of_collections ${formattedAcronyms}`,
-            }),
+            // @ts-expect-error: so that label accepts an Element
+            label: (
+              <HalStatusCellBadge
+                type={HalStatusCellType.OutOfCollection}
+                acronyms={acronyms}
+                isSingleLine
+              />
+            ),
             value: 'out_of_collection',
           },
           {
-            label: t`documents_page_hal_status_outside_hal`,
+            // @ts-expect-error: so that label accepts an Element
+            label: (
+              <HalStatusCellBadge
+                type={HalStatusCellType.OutsideHal}
+                isSingleLine
+              />
+            ),
             value: 'outside_hal',
           },
         ],
