@@ -16,11 +16,12 @@ export default function WebSocketListener() {
   const { enqueueSnackbar } = useSnackbar()
   const { startHarvesting, updateHarvestingStatus, incrementPlatformCount } =
     useStore((state) => state.harvesting)
-  const { currentPerspective } = useStore((state) => state.user)
+  const { currentPerspective, connectedUser } = useStore((state) => state.user)
   const { setListHasChanged, setSelectedDocumentHasChanged, selectedDocument } =
     useStore((state) => state.document)
   const perspectiveRef = useRef(currentPerspective)
   const documentRef = useRef(selectedDocument)
+  const userRef = useRef(connectedUser)
 
   const snackBarVariantByEventType = (
     eventType: string,
@@ -41,7 +42,8 @@ export default function WebSocketListener() {
   useEffect(() => {
     perspectiveRef.current = currentPerspective
     documentRef.current = selectedDocument
-  }, [currentPerspective, selectedDocument])
+    userRef.current = connectedUser
+  }, [currentPerspective, selectedDocument, connectedUser])
 
   useEffect(() => {
     const ws = new WebSocket(buildWebSocketURL())
@@ -52,20 +54,31 @@ export default function WebSocketListener() {
 
       const currentPerspectiveRef = perspectiveRef.current
       const selectedDocumentRef = documentRef.current
+      const connectedUserRef = userRef.current
 
       if (isDataEvent(data)) {
         const variant = snackBarVariantByEventType(data.eventType)
         const peopleUids = data.impliedPeopleUids || []
 
         const currentUid = currentPerspectiveRef?.uid
-        if (currentUid && peopleUids.includes(currentUid)) {
+        const currentPerspectiveImplied =
+          currentUid && peopleUids.includes(currentUid)
+        const userImplied =
+          connectedUserRef?.person?.uid &&
+          peopleUids.includes(connectedUserRef.person.uid)
+        if (currentPerspectiveImplied) {
           setListHasChanged(true)
         }
 
         if (data.objectUid === selectedDocumentRef?.uid) {
           setSelectedDocumentHasChanged(true)
         }
-
+        if (!currentPerspectiveImplied && !userImplied) {
+          console.log(
+            'WebSocket event not relevant to current perspective or user, ignoring.',
+          )
+          return
+        }
         enqueueSnackbar(
           <>
             {data.eventType === 'created' && (
