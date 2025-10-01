@@ -78,8 +78,6 @@ export default function DocumentsPage() {
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
 
-  const acronyms = currentPerspective?.membershipAcronyms || []
-
   const [selectedTitleLangs, setSelectedTitleLangs] = useState<
     Record<string, string>
   >({})
@@ -104,8 +102,12 @@ export default function DocumentsPage() {
     [lang, router, searchParams],
   )
 
-  const columns = useMemo<MRT_ColumnDef<Document>[]>(
-    () => [
+  const columns = useMemo<
+    MRT_ColumnDef<Document>[]
+  >((): MRT_ColumnDef<Document>[] => {
+    const acronyms = currentPerspective?.membershipAcronyms || []
+
+    return [
       {
         enableSorting: false,
         accessorKey: 'type',
@@ -195,7 +197,10 @@ export default function DocumentsPage() {
                 texts={titles}
                 selectedLang={localizedTitle.language}
                 onLanguageSelect={(newLang) =>
-                  setSelectedTitleLangs((prev) => ({ ...prev, [uid]: newLang }))
+                  setSelectedTitleLangs((prev) => ({
+                    ...prev,
+                    [uid]: newLang,
+                  }))
                 }
               />
             </Box>
@@ -417,15 +422,15 @@ export default function DocumentsPage() {
           },
         ),
       },
-    ],
-    [
-      lang,
-      globalFilter,
-      selectedTitleLangs,
-      supportedLocales,
-      navigateToDetailsPage,
-    ],
-  )
+    ]
+  }, [
+    lang,
+    globalFilter,
+    selectedTitleLangs,
+    supportedLocales,
+    navigateToDetailsPage,
+    currentPerspective?.membershipAcronyms,
+  ])
 
   const requestIdRef = useRef(0)
   const countDocumentsRequestIdRef = useRef(0)
