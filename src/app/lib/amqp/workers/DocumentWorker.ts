@@ -4,6 +4,7 @@ import { DocumentGraphQLClient } from '@/lib/graphql/DocumentGraphQLClient'
 import { AMQPDocumentMessage } from '@/types/AMQPDocumentMessage'
 import { Document } from '@/types/Document'
 import { DataEvent } from '@/types/DataEvent'
+import { Literal } from '@/types/Literal'
 
 /**
  * Worker for processing document messages
@@ -15,6 +16,31 @@ export class DocumentWorker extends MessageProcessingWorker<AMQPDocumentMessage>
     private documentGraphQLClient: DocumentGraphQLClient,
   ) {
     super(message)
+  }
+
+  /**
+   * Convert an array of Literals to objectLabels.
+   * - Uses the literal's language as the key and its value as the label.
+   * - If empty, fallback to `{ ul: fallback }`.
+   */
+  private buildObjectLabelsFromLiterals(
+    titles: Literal[] | undefined,
+    fallback: string,
+  ): Record<string, string> {
+    const labels: Record<string, string> = {}
+
+    if (Array.isArray(titles)) {
+      for (const t of titles) {
+        if (t && t.value && t.language) {
+          labels[t.language] = t.value
+        }
+      }
+    }
+
+    if (Object.keys(labels).length === 0) {
+      labels.ul = fallback
+    }
+    return labels
   }
 
   /**
@@ -34,17 +60,21 @@ export class DocumentWorker extends MessageProcessingWorker<AMQPDocumentMessage>
       console.warn('No UID found in document message')
       return events
     }
-
+    console.log(`Processing document with UID: ${uid}`)
     try {
+      // If the document was deleted, we won't find it in the GraphQL API.
+      // Instead, delete it directly from the DB and build objectLabels from the message payload.
       if (event === 'deleted') {
         const contributorUidsFromDb =
           await this.documentDAO.getContributorUidsByDocumentUid(uid)
 
         await this.documentDAO.deleteDocumentByUid(uid)
 
-        // Build a label & contributor list from the message payload (no DB/GraphQL call)
-        const labelFromMessage =
-          (Array.isArray(fields.titles) && fields.titles[0]?.value) || uid
+        // Send all languages to the client to allow it to show the label in the current UI language.
+        const objectLabels = this.buildObjectLabelsFromLiterals(
+          fields.titles as Literal[] | undefined,
+          uid,
+        )
 
         console.log(`Deleted document with UID: ${uid}`)
 
@@ -53,15 +83,15 @@ export class DocumentWorker extends MessageProcessingWorker<AMQPDocumentMessage>
             'Document',
             uid,
             event,
-            labelFromMessage,
+            objectLabels,
             contributorUidsFromDb,
           ),
         )
         return events
       }
 
-      // Default path: (create|update|…): fetch from GraphQL then upsert
-      console.log(`Processing document with UID: ${uid}`)
+      // For created/updated/unchanged events, fetch the latest document data from the GraphQL API
+
       const document: Document | null =
         await this.documentGraphQLClient.getDocumentByUid(uid)
 
@@ -81,12 +111,17 @@ export class DocumentWorker extends MessageProcessingWorker<AMQPDocumentMessage>
       const contributorUids = document.contributions.map(
         (contribution) => contribution.person.uid,
       )
-      const label = document.getTitleInLocale(0)
+
+      // Send all languages to the client to allow it to show the label in the current UI language.
+      const objectLabels = this.buildObjectLabelsFromLiterals(
+        document.titles as Literal[] | undefined,
+        uid,
+      )
 
       console.log(`Successfully processed document: ${uid}`)
       if (event !== 'unchanged') {
         events.push(
-          new DataEvent('Document', uid, event, label, contributorUids),
+          new DataEvent('Document', uid, event, objectLabels, contributorUids),
         )
       }
 
