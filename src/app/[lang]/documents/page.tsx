@@ -12,7 +12,7 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
-import { t, plural } from '@lingui/macro'
+import { t } from '@lingui/macro'
 
 import { LanguageChips } from '@/components/LanguageChips'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'

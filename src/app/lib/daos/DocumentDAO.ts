@@ -4,10 +4,13 @@ import {
   Person as DbPerson,
   Prisma,
 } from '@prisma/client'
-import { Document } from '@/types/Document'
+import { Document, DocumentType } from '@/types/Document'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PersonDAO } from './PersonDAO'
-import { getBibliographicPlatformDbValue } from '@/types/BibliographicPlatform'
+import {
+  getBibliographicPlatformDbValue,
+  BibliographicPlatform,
+} from '@/types/BibliographicPlatform'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import QueryMode = Prisma.QueryMode
 
@@ -16,7 +19,7 @@ interface FetchDocumentsFromDBParams {
   searchLang: string
   page: number
   pageSize: number
-  columnFilters: { id: string; value: string }[]
+  columnFilters: { id: string; value: string | string[] }[]
   sorting: { id: string; desc: boolean }[]
   contributorUids: string[]
   halCollectionCodes: string[]
@@ -26,7 +29,7 @@ interface FetchDocumentsFromDBParams {
 interface CountDocumentsFromDBParams {
   searchTerm: string
   searchLang: string
-  columnFilters: { id: string; value: string }[]
+  columnFilters: { id: string; value: string | string[] }[]
   contributorUids: string[]
   halCollectionCodes: string[]
 }
@@ -382,7 +385,7 @@ export class DocumentDAO extends AbstractDAO {
   }: {
     searchTerm: string
     searchLang: string
-    columnFilters: { id: string; value: string }[]
+    columnFilters: { id: string; value: string | string[] }[]
     contributorUids: string[]
     halCollectionCodes: string[]
     areHalCollectionCodesOmitted: boolean
@@ -469,7 +472,7 @@ export class DocumentDAO extends AbstractDAO {
     }
 
     columnFilters.forEach((filter) => {
-      if (filter.id === 'titles') {
+      if (filter.id === 'titles' && typeof filter.value === 'string') {
         where = {
           ...where,
           titles: {
@@ -483,7 +486,7 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
 
-      if (filter.id === 'abstracts') {
+      if (filter.id === 'abstracts' && typeof filter.value === 'string') {
         where = {
           ...where,
           abstracts: {
@@ -497,7 +500,7 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
 
-      if (filter.id === 'contributions') {
+      if (filter.id === 'contributions' && typeof filter.value === 'string') {
         const nameFilter: Prisma.DocumentWhereInput = {
           contributions: {
             some: {
@@ -547,7 +550,7 @@ export class DocumentDAO extends AbstractDAO {
         where = {
           ...where,
           documentType: {
-            in: filter.value,
+            in: filter.value as DocumentType[],
           },
         }
       }
@@ -558,14 +561,14 @@ export class DocumentDAO extends AbstractDAO {
           records: {
             some: {
               platform: {
-                in: filter.value,
+                in: filter.value as BibliographicPlatform[],
               },
             },
           },
         }
       }
 
-      if (filter.id === 'publishedIn') {
+      if (filter.id === 'publishedIn' && typeof filter.value === 'string') {
         where = {
           ...where,
           journal: {

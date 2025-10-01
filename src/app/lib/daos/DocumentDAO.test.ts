@@ -378,7 +378,20 @@ describe('DocumentDAO', () => {
         publicationDateStart: new Date('2022-01-01T00:00:00.000Z'),
         publicationDateEnd: new Date('2022-12-31T23:59:59.000Z'),
         contributions: [],
-        records: [],
+        records: [
+          {
+            uid: '123456',
+            platform: 'hal',
+            titles: [
+              {
+                value: 'Test',
+                language: 'en',
+              },
+            ],
+            halCollectionCodes: ['ABC'],
+            halSubmitType: 'file',
+          },
+        ],
       },
     ] as unknown as DbDocument[]
 
@@ -392,7 +405,10 @@ describe('DocumentDAO', () => {
       searchLang: 'en',
       page: 1,
       pageSize: 10,
-      columnFilters: [{ id: 'titles', value: 'Sample Document Title' }],
+      columnFilters: [
+        { id: 'titles', value: 'Sample Document Title' },
+        { id: 'halStatus', value: ['in_collection'] },
+      ],
       sorting: [{ id: 'titles', desc: false }],
       contributorUids: ['local-123'],
       contributorType: 'person' as AgentType,
@@ -406,6 +422,13 @@ describe('DocumentDAO', () => {
     expect(result.totalItems).toBe(1)
     expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
       where: {
+        contributions: {
+          every: {
+            roles: {
+              hasSome: ['editor', 'reviewer'],
+            },
+          },
+        },
         AND: [
           {
             OR: [
@@ -452,6 +475,20 @@ describe('DocumentDAO', () => {
                   title: {
                     contains: 'Sample',
                     mode: Prisma.QueryMode.insensitive,
+                  },
+                },
+              },
+            ],
+          },
+          {
+            OR: [
+              {
+                records: {
+                  some: {
+                    platform: 'hal',
+                    halCollectionCodes: {
+                      hasSome: ['ABC', 'DEF'],
+                    },
                   },
                 },
               },
