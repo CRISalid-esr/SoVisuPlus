@@ -378,27 +378,27 @@ msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:72
+#: src/app/lib/websocket/WebSocketListener.tsx:98
 msgid "snackbar_document_created"
 msgstr "Nouvelle publication : "
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:75
+#: src/app/lib/websocket/WebSocketListener.tsx:101
 msgid "snackbar_document_updated"
 msgstr "Publication mise à jour : "
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:78
+#: src/app/lib/websocket/WebSocketListener.tsx:104
 msgid "snackbar_document_deleted"
 msgstr "Publication supprimée : "
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:81
+#: src/app/lib/websocket/WebSocketListener.tsx:107
 msgid "snackbar_document_unchanged"
 msgstr "Publication inchangée : "
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/WebSocketListener.tsx:89
+#: src/app/lib/websocket/WebSocketListener.tsx:117
 msgid "snackbar_view_document"
 msgstr "Voir la publication"
 
