@@ -1,50 +1,52 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { GET } from '@/app/api/vocabs/route'
 
 jest.mock('../../lib/services/VocabsSearchService', () => ({
   VocabsSearchService: jest.fn().mockImplementation(() => ({
-    suggest: jest.fn().mockResolvedValue({
-      total: 1,
-      items: [
-        {
-          iri: 'http://vocab.getty.edu/jel#3552',
-          scheme: 'JEL',
-          vocab: null,
-          identifier: null,
-          top_concept: false,
-          lang_set: ['en', 'es'],
-          score: 4,
-          best_label: {
-            text: 'surface strikes',
-            lang: 'en',
-            highlight: null,
-            source_field: 'pref',
-          },
-          pref: [
-            {
+    suggest: jest.fn().mockResolvedValue(
+      NextResponse.json({
+        total: 1,
+        items: [
+          {
+            iri: 'http://vocab.getty.edu/jel#3552',
+            scheme: 'JEL',
+            vocab: null,
+            identifier: null,
+            top_concept: false,
+            lang_set: ['en', 'es'],
+            score: 4,
+            best_label: {
               text: 'surface strikes',
               lang: 'en',
               highlight: null,
+              source_field: 'pref',
             },
-          ],
-          alt: [
-            {
-              text: 'surface strike',
-              lang: 'en',
-              highlight: null,
-            },
-            {
-              text: 'strikes, surface',
-              lang: 'en',
-              highlight: null,
-            },
-          ],
-          description: null,
-          broader: ['http://vocab.getty.edu/aat/300033549'],
-          narrower: [],
-        },
-      ],
-    }),
+            pref: [
+              {
+                text: 'surface strikes',
+                lang: 'en',
+                highlight: null,
+              },
+            ],
+            alt: [
+              {
+                text: 'surface strike',
+                lang: 'en',
+                highlight: null,
+              },
+              {
+                text: 'strikes, surface',
+                lang: 'en',
+                highlight: null,
+              },
+            ],
+            description: null,
+            broader: ['http://vocab.getty.edu/aat/300033549'],
+            narrower: [],
+          },
+        ],
+      }),
+    ),
   })),
 }))
 
@@ -76,8 +78,8 @@ describe('GET handler', () => {
 
     expect(response.status).toBe(200)
     const jsonResponse = await response.json()
-    expect(jsonResponse.keywords.total).toBe(1)
-    expect(jsonResponse.keywords.items).toEqual([
+    expect(jsonResponse.total).toBe(1)
+    expect(jsonResponse.items).toEqual([
       {
         iri: 'http://vocab.getty.edu/jel#3552',
         scheme: 'JEL',

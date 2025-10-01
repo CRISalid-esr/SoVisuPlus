@@ -17,8 +17,7 @@ export const GET = async (req: NextRequest) => {
   const vocabsSearchService = new VocabsSearchService()
 
   try {
-    const keywords = await vocabsSearchService.suggest(q, vocabs, display_langs)
-    return NextResponse.json({ keywords })
+    return await vocabsSearchService.suggest(q, vocabs, display_langs)
   } catch (error) {
     console.error('Error fetching keywords:', error)
     return NextResponse.json(
