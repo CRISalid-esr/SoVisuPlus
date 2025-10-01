@@ -719,6 +719,93 @@ describe('DocumentDAO', () => {
     })
   })
 
+  it('should filter valid HAL records in incomplete HAL deposit tab', async () => {
+    const fetchParams = {
+      searchTerm: '',
+      searchLang: 'en',
+      page: 1,
+      pageSize: 10,
+      columnFilters: [],
+      sorting: [{ id: 'titles', desc: false }],
+      contributorUids: ['local-123'],
+      contributorType: 'person' as AgentType,
+      halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: true,
+    }
+
+    await documentDAO.fetchDocuments(fetchParams)
+
+    expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
+      where: {
+        contributions: {
+          every: {
+            roles: {
+              hasSome: ['editor', 'reviewer'],
+            },
+          },
+        },
+        AND: [
+          {
+            contributions: {
+              some: {
+                person: {
+                  uid: {
+                    in: ['local-123'],
+                  },
+                },
+                roles: {
+                  hasSome: ['author', 'co-author'],
+                },
+              },
+            },
+          },
+        ],
+        records: {
+          none: {
+            OR: [
+              {
+                halSubmitType: 'file',
+              },
+              {
+                halSubmitType: 'annex',
+              },
+            ],
+            halCollectionCodes: {
+              hasSome: ['ABC', 'DEF'],
+            },
+          },
+        },
+      },
+      skip: 0,
+      take: 10,
+      orderBy: [
+        {
+          title_locale_0: 'asc',
+        },
+      ],
+      include: {
+        titles: true,
+        abstracts: true,
+        subjects: {
+          include: {
+            labels: true,
+          },
+        },
+        contributions: {
+          include: {
+            person: true,
+          },
+        },
+        records: true,
+        journal: {
+          include: {
+            identifiers: true,
+          },
+        },
+      },
+    })
+  })
+
   it('should count documents', async () => {
     ;(mockPrisma.document.count as jest.Mock).mockResolvedValue(1)
 
