@@ -548,6 +548,177 @@ describe('DocumentDAO', () => {
     })
   })
 
+  it('should filter by out_of_collection HAL status type', async () => {
+    const fetchParams = {
+      searchTerm: '',
+      searchLang: 'en',
+      page: 1,
+      pageSize: 10,
+      columnFilters: [{ id: 'halStatus', value: ['out_of_collection'] }],
+      sorting: [{ id: 'titles', desc: false }],
+      contributorUids: ['local-123'],
+      contributorType: 'person' as AgentType,
+      halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
+    }
+
+    await documentDAO.fetchDocuments(fetchParams)
+
+    expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
+      where: {
+        contributions: {
+          every: {
+            roles: {
+              hasSome: ['editor', 'reviewer'],
+            },
+          },
+        },
+        AND: [
+          {
+            OR: [
+              {
+                records: {
+                  some: {
+                    platform: 'hal',
+                  },
+                  none: {
+                    halCollectionCodes: {
+                      hasSome: ['ABC', 'DEF'],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            contributions: {
+              some: {
+                person: {
+                  uid: {
+                    in: ['local-123'],
+                  },
+                },
+                roles: {
+                  hasSome: ['author', 'co-author'],
+                },
+              },
+            },
+          },
+        ],
+      },
+      skip: 0,
+      take: 10,
+      orderBy: [
+        {
+          title_locale_0: 'asc',
+        },
+      ],
+      include: {
+        titles: true,
+        abstracts: true,
+        subjects: {
+          include: {
+            labels: true,
+          },
+        },
+        contributions: {
+          include: {
+            person: true,
+          },
+        },
+        records: true,
+        journal: {
+          include: {
+            identifiers: true,
+          },
+        },
+      },
+    })
+  })
+
+  it('should filter by outside_hal HAL status type', async () => {
+    const fetchParams = {
+      searchTerm: '',
+      searchLang: 'en',
+      page: 1,
+      pageSize: 10,
+      columnFilters: [{ id: 'halStatus', value: ['outside_hal'] }],
+      sorting: [{ id: 'titles', desc: false }],
+      contributorUids: ['local-123'],
+      contributorType: 'person' as AgentType,
+      halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
+    }
+
+    await documentDAO.fetchDocuments(fetchParams)
+
+    expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
+      where: {
+        contributions: {
+          every: {
+            roles: {
+              hasSome: ['editor', 'reviewer'],
+            },
+          },
+        },
+        AND: [
+          {
+            OR: [
+              {
+                records: {
+                  none: {
+                    platform: 'hal',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            contributions: {
+              some: {
+                person: {
+                  uid: {
+                    in: ['local-123'],
+                  },
+                },
+                roles: {
+                  hasSome: ['author', 'co-author'],
+                },
+              },
+            },
+          },
+        ],
+      },
+      skip: 0,
+      take: 10,
+      orderBy: [
+        {
+          title_locale_0: 'asc',
+        },
+      ],
+      include: {
+        titles: true,
+        abstracts: true,
+        subjects: {
+          include: {
+            labels: true,
+          },
+        },
+        contributions: {
+          include: {
+            person: true,
+          },
+        },
+        records: true,
+        journal: {
+          include: {
+            identifiers: true,
+          },
+        },
+      },
+    })
+  })
+
   it('should count documents', async () => {
     ;(mockPrisma.document.count as jest.Mock).mockResolvedValue(1)
 
