@@ -1,6 +1,14 @@
 import { CustomCard } from '@/components/Card'
 import { Trans } from '@lingui/react'
-import { Box, Button, CardContent, Typography } from '@mui/material'
+import {
+  Autocomplete,
+  Box,
+  Button,
+  CardContent,
+  InputAdornment,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useStore from '@/stores/global_store'
 import { useEffect, useMemo } from 'react'
@@ -9,6 +17,7 @@ import ConceptChip from '@/app/[lang]/documents/[uid]/components/Keywords/Concep
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Concept } from '@/types/Concept'
+import { Add } from '@mui/icons-material'
 
 function Keywords() {
   const theme = useTheme()
@@ -76,6 +85,27 @@ function Keywords() {
               onRemoveConcepts={onRemoveConcepts}
             />
           ))}
+        </Box>
+        <Box>
+          <Autocomplete
+            filterOptions={(x) => x}
+            freeSolo
+            options={[]}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position='start'>
+                        <Add />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
+            )}
+          />
         </Box>
       </CardContent>
     </CustomCard>

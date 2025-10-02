@@ -235,7 +235,7 @@ msgstr "Mots-clés"
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:63
 msgid "document_details_page_keywords_tab_card_validate_button"
-msgstr ""
+msgstr "Valider"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:258
