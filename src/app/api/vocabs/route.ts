@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { VocabsSearchService } from '@/lib/services/VocabsSearchService'
+import { VocabSearchService } from '@/lib/services/VocabSearchService'
 
 export const GET = async (req: NextRequest) => {
   const urlParams = req.nextUrl.searchParams
@@ -14,7 +14,7 @@ export const GET = async (req: NextRequest) => {
     )
   }
 
-  const vocabsSearchService = new VocabsSearchService()
+  const vocabsSearchService = new VocabSearchService()
 
   try {
     return await vocabsSearchService.suggest(q, vocabs, display_langs)

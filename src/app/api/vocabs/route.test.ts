@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GET } from '@/app/api/vocabs/route'
 
-jest.mock('../../lib/services/VocabsSearchService', () => ({
-  VocabsSearchService: jest.fn().mockImplementation(() => ({
+jest.mock('@/lib/services/VocabSearchService', () => ({
+  VocabSearchService: jest.fn().mockImplementation(() => ({
     suggest: jest.fn().mockResolvedValue(
       NextResponse.json({
         total: 1,
