@@ -378,7 +378,20 @@ describe('DocumentDAO', () => {
         publicationDateStart: new Date('2022-01-01T00:00:00.000Z'),
         publicationDateEnd: new Date('2022-12-31T23:59:59.000Z'),
         contributions: [],
-        records: [],
+        records: [
+          {
+            uid: '123456',
+            platform: 'hal',
+            titles: [
+              {
+                value: 'Test',
+                language: 'en',
+              },
+            ],
+            halCollectionCodes: ['ABC'],
+            halSubmitType: 'file',
+          },
+        ],
       },
     ] as unknown as DbDocument[]
 
@@ -392,12 +405,15 @@ describe('DocumentDAO', () => {
       searchLang: 'en',
       page: 1,
       pageSize: 10,
-      columnFilters: [{ id: 'titles', value: 'Sample Document Title' }],
+      columnFilters: [
+        { id: 'titles', value: 'Sample Document Title' },
+        { id: 'halStatus', value: ['in_collection'] },
+      ],
       sorting: [{ id: 'titles', desc: false }],
       contributorUids: ['local-123'],
       contributorType: 'person' as AgentType,
-      omittedHalCollectionCodes: [],
-      isOnlyCounting: false,
+      halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
     }
 
     const result = await documentDAO.fetchDocuments(fetchParams)
@@ -406,55 +422,78 @@ describe('DocumentDAO', () => {
     expect(result.totalItems).toBe(1)
     expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
       where: {
-        OR: [
+        contributions: {
+          every: {
+            roles: {
+              hasSome: ['editor', 'reviewer'],
+            },
+          },
+        },
+        AND: [
           {
-            titles: {
-              some: {
-                value: {
+            OR: [
+              {
+                titles: {
+                  some: {
+                    value: {
+                      contains: 'Sample',
+                      mode: Prisma.QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                abstracts: {
+                  some: {
+                    value: {
+                      contains: 'Sample',
+                      mode: Prisma.QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                contributions: {
+                  some: {
+                    person: {
+                      displayName: {
+                        contains: 'Sample',
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
+              {
+                publicationDate: {
                   contains: 'Sample',
                   mode: Prisma.QueryMode.insensitive,
                 },
               },
-            },
-          },
-          {
-            abstracts: {
-              some: {
-                value: {
-                  contains: 'Sample',
-                  mode: Prisma.QueryMode.insensitive,
-                },
-              },
-            },
-          },
-          {
-            contributions: {
-              some: {
-                person: {
-                  displayName: {
+              {
+                journal: {
+                  title: {
                     contains: 'Sample',
                     mode: Prisma.QueryMode.insensitive,
                   },
                 },
               },
-            },
+            ],
           },
           {
-            publicationDate: {
-              contains: 'Sample',
-              mode: Prisma.QueryMode.insensitive,
-            },
-          },
-          {
-            journal: {
-              title: {
-                contains: 'Sample',
-                mode: Prisma.QueryMode.insensitive,
+            OR: [
+              {
+                records: {
+                  some: {
+                    platform: 'hal',
+                    halCollectionCodes: {
+                      hasSome: ['ABC', 'DEF'],
+                    },
+                  },
+                },
               },
-            },
+            ],
           },
-        ],
-        AND: [
           {
             contributions: {
               some: {
@@ -509,6 +548,264 @@ describe('DocumentDAO', () => {
     })
   })
 
+  it('should filter by out_of_collection HAL status type', async () => {
+    const fetchParams = {
+      searchTerm: '',
+      searchLang: 'en',
+      page: 1,
+      pageSize: 10,
+      columnFilters: [{ id: 'halStatus', value: ['out_of_collection'] }],
+      sorting: [{ id: 'titles', desc: false }],
+      contributorUids: ['local-123'],
+      contributorType: 'person' as AgentType,
+      halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
+    }
+
+    await documentDAO.fetchDocuments(fetchParams)
+
+    expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
+      where: {
+        contributions: {
+          every: {
+            roles: {
+              hasSome: ['editor', 'reviewer'],
+            },
+          },
+        },
+        AND: [
+          {
+            OR: [
+              {
+                records: {
+                  some: {
+                    platform: 'hal',
+                  },
+                  none: {
+                    halCollectionCodes: {
+                      hasSome: ['ABC', 'DEF'],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            contributions: {
+              some: {
+                person: {
+                  uid: {
+                    in: ['local-123'],
+                  },
+                },
+                roles: {
+                  hasSome: ['author', 'co-author'],
+                },
+              },
+            },
+          },
+        ],
+      },
+      skip: 0,
+      take: 10,
+      orderBy: [
+        {
+          title_locale_0: 'asc',
+        },
+      ],
+      include: {
+        titles: true,
+        abstracts: true,
+        subjects: {
+          include: {
+            labels: true,
+          },
+        },
+        contributions: {
+          include: {
+            person: true,
+          },
+        },
+        records: true,
+        journal: {
+          include: {
+            identifiers: true,
+          },
+        },
+      },
+    })
+  })
+
+  it('should filter by outside_hal HAL status type', async () => {
+    const fetchParams = {
+      searchTerm: '',
+      searchLang: 'en',
+      page: 1,
+      pageSize: 10,
+      columnFilters: [{ id: 'halStatus', value: ['outside_hal'] }],
+      sorting: [{ id: 'titles', desc: false }],
+      contributorUids: ['local-123'],
+      contributorType: 'person' as AgentType,
+      halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
+    }
+
+    await documentDAO.fetchDocuments(fetchParams)
+
+    expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
+      where: {
+        contributions: {
+          every: {
+            roles: {
+              hasSome: ['editor', 'reviewer'],
+            },
+          },
+        },
+        AND: [
+          {
+            OR: [
+              {
+                records: {
+                  none: {
+                    platform: 'hal',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            contributions: {
+              some: {
+                person: {
+                  uid: {
+                    in: ['local-123'],
+                  },
+                },
+                roles: {
+                  hasSome: ['author', 'co-author'],
+                },
+              },
+            },
+          },
+        ],
+      },
+      skip: 0,
+      take: 10,
+      orderBy: [
+        {
+          title_locale_0: 'asc',
+        },
+      ],
+      include: {
+        titles: true,
+        abstracts: true,
+        subjects: {
+          include: {
+            labels: true,
+          },
+        },
+        contributions: {
+          include: {
+            person: true,
+          },
+        },
+        records: true,
+        journal: {
+          include: {
+            identifiers: true,
+          },
+        },
+      },
+    })
+  })
+
+  it('should filter valid HAL records in incomplete HAL deposit tab', async () => {
+    const fetchParams = {
+      searchTerm: '',
+      searchLang: 'en',
+      page: 1,
+      pageSize: 10,
+      columnFilters: [],
+      sorting: [{ id: 'titles', desc: false }],
+      contributorUids: ['local-123'],
+      contributorType: 'person' as AgentType,
+      halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: true,
+    }
+
+    await documentDAO.fetchDocuments(fetchParams)
+
+    expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
+      where: {
+        contributions: {
+          every: {
+            roles: {
+              hasSome: ['editor', 'reviewer'],
+            },
+          },
+        },
+        AND: [
+          {
+            contributions: {
+              some: {
+                person: {
+                  uid: {
+                    in: ['local-123'],
+                  },
+                },
+                roles: {
+                  hasSome: ['author', 'co-author'],
+                },
+              },
+            },
+          },
+        ],
+        records: {
+          none: {
+            OR: [
+              {
+                halSubmitType: 'file',
+              },
+              {
+                halSubmitType: 'annex',
+              },
+            ],
+            halCollectionCodes: {
+              hasSome: ['ABC', 'DEF'],
+            },
+          },
+        },
+      },
+      skip: 0,
+      take: 10,
+      orderBy: [
+        {
+          title_locale_0: 'asc',
+        },
+      ],
+      include: {
+        titles: true,
+        abstracts: true,
+        subjects: {
+          include: {
+            labels: true,
+          },
+        },
+        contributions: {
+          include: {
+            person: true,
+          },
+        },
+        records: true,
+        journal: {
+          include: {
+            identifiers: true,
+          },
+        },
+      },
+    })
+  })
+
   it('should count documents', async () => {
     ;(mockPrisma.document.count as jest.Mock).mockResolvedValue(1)
 
@@ -518,7 +815,7 @@ describe('DocumentDAO', () => {
       columnFilters: [{ id: 'titles', value: 'Sample Document Title' }],
       contributorUids: ['local-123'],
       contributorType: 'person' as AgentType,
-      omittedHalCollectionCodes: [],
+      halCollectionCodes: ['ABC', 'DEF'],
     }
 
     const result = await documentDAO.countDocuments(countParams)

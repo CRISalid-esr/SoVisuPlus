@@ -41,10 +41,13 @@ import {
 } from 'material-react-table'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation' // Import useRouter
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Highlighter from 'react-highlight-words'
 import DocumentHeader from './components/DocumentHeader'
 import HalStatusCell from './components/HalStatusCell'
+import HalStatusCellBadge, {
+  HalStatusCellType,
+} from './components/HalStatusCellBadge'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
 import { DocumentTypeLabels } from './components/DocumentTypeLabels'
 import SyncIcon from '@mui/icons-material/Sync'
@@ -90,14 +93,21 @@ export default function DocumentsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const navigateToDetailsPage = (documentUid: string) => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('tab', 'bibliographic_information')
-    router.push(`/${lang}/documents/${documentUid}?${params.toString()}`)
-  }
+  const navigateToDetailsPage = useCallback(
+    (documentUid: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set('tab', 'bibliographic_information')
+      router.push(`/${lang}/documents/${documentUid}?${params.toString()}`)
+    },
+    [lang, router, searchParams],
+  )
 
-  const columns = useMemo<MRT_ColumnDef<Document>[]>(
-    () => [
+  const columns = useMemo<
+    MRT_ColumnDef<Document>[]
+  >((): MRT_ColumnDef<Document>[] => {
+    const acronyms = currentPerspective?.membershipAcronyms || []
+
+    return [
       {
         enableSorting: false,
         accessorKey: 'type',
@@ -187,7 +197,10 @@ export default function DocumentsPage() {
                 texts={titles}
                 selectedLang={localizedTitle.language}
                 onLanguageSelect={(newLang) =>
-                  setSelectedTitleLangs((prev) => ({ ...prev, [uid]: newLang }))
+                  setSelectedTitleLangs((prev) => ({
+                    ...prev,
+                    [uid]: newLang,
+                  }))
                 }
               />
             </Box>
@@ -282,11 +295,46 @@ export default function DocumentsPage() {
         },
       },
       {
+        enableSorting: false,
         accessorKey: 'halStatus',
         header: t`documents_page_halStatus_column`,
         Cell({ row }) {
           return <HalStatusCell row={row} />
         },
+        filterVariant: 'multi-select',
+        filterSelectOptions: [
+          {
+            // @ts-expect-error: so that label accepts an Element
+            label: (
+              <HalStatusCellBadge
+                type={HalStatusCellType.InCollection}
+                isSingleLine
+              />
+            ),
+            value: 'in_collection',
+          },
+          {
+            // @ts-expect-error: so that label accepts an Element
+            label: (
+              <HalStatusCellBadge
+                type={HalStatusCellType.OutOfCollection}
+                acronyms={acronyms}
+                isSingleLine
+              />
+            ),
+            value: 'out_of_collection',
+          },
+          {
+            // @ts-expect-error: so that label accepts an Element
+            label: (
+              <HalStatusCellBadge
+                type={HalStatusCellType.OutsideHal}
+                isSingleLine
+              />
+            ),
+            value: 'outside_hal',
+          },
+        ],
       },
       {
         enableSorting: false,
@@ -374,15 +422,15 @@ export default function DocumentsPage() {
           },
         ),
       },
-    ],
-    [
-      lang,
-      globalFilter,
-      selectedTitleLangs,
-      supportedLocales,
-      navigateToDetailsPage,
-    ],
-  )
+    ]
+  }, [
+    lang,
+    globalFilter,
+    selectedTitleLangs,
+    supportedLocales,
+    navigateToDetailsPage,
+    currentPerspective?.membershipAcronyms,
+  ])
 
   const requestIdRef = useRef(0)
   const countDocumentsRequestIdRef = useRef(0)
@@ -478,11 +526,8 @@ export default function DocumentsPage() {
       contributorUid: currentPerspective?.uid || '',
       contributorType: contributorType,
       requestId: nextRequestId,
-      omittedHalCollectionCodes: JSON.stringify(
-        selectedTab === 'incomplete_hal_repository'
-          ? currentPerspective.membershipAcronyms
-          : [],
-      ),
+      halCollectionCodes: JSON.stringify(currentPerspective.membershipAcronyms),
+      areHalCollectionCodesOmitted: selectedTab === 'incomplete_hal_repository',
     }).catch((error) => {
       console.error('Error fetching documents:', error)
     })
@@ -496,9 +541,7 @@ export default function DocumentsPage() {
       contributorUid: currentPerspective?.uid || '',
       contributorType: contributorType,
       requestId: nextCountDocumentsRequestId,
-      omittedHalCollectionCodes: JSON.stringify(
-        currentPerspective.membershipAcronyms,
-      ),
+      halCollectionCodes: JSON.stringify(currentPerspective.membershipAcronyms),
     }).catch((error) => {
       console.error('Error counting documents:', error)
     })

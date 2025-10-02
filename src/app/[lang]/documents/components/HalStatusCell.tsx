@@ -1,10 +1,9 @@
 import AttachFileIcon from '@mui/icons-material/AttachFile'
-import { Chip } from '@mui/material'
-import { t, Plural } from '@lingui/macro'
 
 import useStore from '@/stores/global_store'
 import { Document } from '@/types/Document'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
+import HalStatusCellBadge, { HalStatusCellType } from './HalStatusCellBadge'
 import AttachFileOffIcon from '@/app/theme/icons/AttachFileOffIcon'
 
 const halSubmitTypeToHalSubmitTypeIcon = (halSubmitType: string | null) => {
@@ -19,15 +18,6 @@ const halSubmitTypeToHalSubmitTypeIcon = (halSubmitType: string | null) => {
   }
 }
 
-const multilineChipSx = {
-  height: 'auto',
-  padding: '.1875rem 0',
-  '& .MuiChip-label': {
-    display: 'block',
-    whiteSpace: 'normal',
-  },
-}
-
 export default function HalStatusCell({
   row,
 }: {
@@ -40,14 +30,7 @@ export default function HalStatusCell({
   )
 
   if (!halRecord) {
-    return (
-      <Chip
-        sx={multilineChipSx}
-        label={t`documents_page_hal_status_outside_hal`}
-        size='small'
-        color='error'
-      />
-    )
+    return <HalStatusCellBadge type={HalStatusCellType.OutsideHal} />
   }
 
   const { halSubmitType } = halRecord
@@ -56,27 +39,22 @@ export default function HalStatusCell({
   const isInCollection =
     halRecord.isResearchStructureInCollectionCodes(currentPerspective)
 
+  if (isInCollection) {
+    return (
+      <HalStatusCellBadge
+        type={HalStatusCellType.InCollection}
+        icon={halSubmitTypeIcon}
+      />
+    )
+  }
+
   const acronyms = currentPerspective?.membershipAcronyms || []
-  const numberOfAcronyms = acronyms.length
-  const formattedAcronyms = acronyms.join(', ')
 
   return (
-    <Chip
-      sx={multilineChipSx}
-      {...(halSubmitTypeIcon && { icon: halSubmitTypeIcon })}
-      label={
-        isInCollection ? (
-          t`documents_page_hal_status_in_collection`
-        ) : (
-          <Plural
-            value={numberOfAcronyms}
-            one={`documents_page_hal_status_out_of_collection ${formattedAcronyms}`}
-            other={`documents_page_hal_status_out_of_collections ${formattedAcronyms}`}
-          />
-        )
-      }
-      size='small'
-      color={isInCollection ? 'success' : 'warning'}
+    <HalStatusCellBadge
+      type={HalStatusCellType.OutOfCollection}
+      icon={halSubmitTypeIcon}
+      acronyms={acronyms}
     />
   )
 }

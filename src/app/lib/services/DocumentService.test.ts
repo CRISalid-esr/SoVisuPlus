@@ -70,7 +70,7 @@ describe('DocumentService', () => {
       columnFilters: [{ id: 'category', value: 'reports' }],
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
-      omittedHalCollectionCodes: [],
+      halCollectionCodes: ['ABC', 'DEF'],
     }
 
     await expect(documentService.countDocuments(params)).resolves.toEqual(
@@ -97,7 +97,7 @@ describe('DocumentService', () => {
       columnFilters: [{ id: 'category', value: 'reports' }],
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
-      omittedHalCollectionCodes: [],
+      halCollectionCodes: ['ABC', 'DEF'],
     }
 
     await expect(documentService.countDocuments(params)).rejects.toThrow(
@@ -131,7 +131,8 @@ describe('DocumentService', () => {
       sorting: [{ id: 'name', desc: false }],
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
-      omittedHalCollectionCodes: [],
+      halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
     }
 
     await expect(documentService.fetchDocuments(params)).resolves.toEqual(
@@ -161,7 +162,8 @@ describe('DocumentService', () => {
       sorting: [],
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
-      omittedHalCollectionCodes: [],
+      halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
     }
 
     await expect(documentService.fetchDocuments(params)).rejects.toThrow(

@@ -14,7 +14,8 @@ export interface DocumentQuery extends BaseQuery {
   contributorUid: string | null
   contributorType: AgentType
   requestId: number
-  omittedHalCollectionCodes: string
+  halCollectionCodes: string
+  areHalCollectionCodesOmitted: boolean
 }
 
 export interface CountDocumentQuery extends BaseQuery {
@@ -25,7 +26,7 @@ export interface CountDocumentQuery extends BaseQuery {
   contributorUid: string | null
   contributorType: AgentType
   requestId: number
-  omittedHalCollectionCodes: string
+  halCollectionCodes: string
 }
 
 export interface DocumentSlice {

@@ -85,7 +85,8 @@ describe('addDocumentSlice', () => {
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,
-      omittedHalCollectionCodes: '',
+      halCollectionCodes: '["ABC","DEF"]',
+      areHalCollectionCodesOmitted: false,
     }
 
     // Call the fetchDocuments method
@@ -120,7 +121,8 @@ describe('addDocumentSlice', () => {
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,
-      omittedHalCollectionCodes: '',
+      halCollectionCodes: '["ABC","DEF"]',
+      areHalCollectionCodesOmitted: false,
     }
 
     // Call the fetchDocuments method
@@ -153,7 +155,7 @@ describe('addDocumentSlice', () => {
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,
-      omittedHalCollectionCodes: '',
+      halCollectionCodes: '["ABC","DEF"]',
     }
 
     // Call the countDocuments method
@@ -188,7 +190,7 @@ describe('addDocumentSlice', () => {
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,
-      omittedHalCollectionCodes: '',
+      halCollectionCodes: '["ABC","DEF"]',
     }
 
     // Call the countDocuments method

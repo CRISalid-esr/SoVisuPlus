@@ -18,7 +18,8 @@ export default function StoreChecker() {
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,
-      omittedHalCollectionCodes: '',
+      halCollectionCodes: '["ABC","DEF"]',
+      areHalCollectionCodesOmitted: false,
     }).then(() => {
       setFailure(false)
     })

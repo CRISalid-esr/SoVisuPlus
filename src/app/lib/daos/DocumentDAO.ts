@@ -4,10 +4,13 @@ import {
   Person as DbPerson,
   Prisma,
 } from '@prisma/client'
-import { Document } from '@/types/Document'
+import { Document, DocumentType } from '@/types/Document'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PersonDAO } from './PersonDAO'
-import { getBibliographicPlatformDbValue } from '@/types/BibliographicPlatform'
+import {
+  getBibliographicPlatformDbValue,
+  BibliographicPlatform,
+} from '@/types/BibliographicPlatform'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import QueryMode = Prisma.QueryMode
 
@@ -16,18 +19,19 @@ interface FetchDocumentsFromDBParams {
   searchLang: string
   page: number
   pageSize: number
-  columnFilters: { id: string; value: string }[]
+  columnFilters: { id: string; value: string | string[] }[]
   sorting: { id: string; desc: boolean }[]
   contributorUids: string[]
-  omittedHalCollectionCodes?: string[]
+  halCollectionCodes: string[]
+  areHalCollectionCodesOmitted: boolean
 }
 
 interface CountDocumentsFromDBParams {
   searchTerm: string
   searchLang: string
-  columnFilters: { id: string; value: string }[]
+  columnFilters: { id: string; value: string | string[] }[]
   contributorUids: string[]
-  omittedHalCollectionCodes?: string[]
+  halCollectionCodes: string[]
 }
 
 export class DocumentDAO extends AbstractDAO {
@@ -368,17 +372,23 @@ export class DocumentDAO extends AbstractDAO {
     }
   }
 
+  computeExistingAnd(where: Prisma.DocumentWhereInput) {
+    return where.AND ? (Array.isArray(where.AND) ? where.AND : [where.AND]) : []
+  }
+
   createFetchDocumentsWhere({
     searchTerm,
     columnFilters,
-    omittedHalCollectionCodes,
+    halCollectionCodes,
+    areHalCollectionCodesOmitted,
     contributorUids,
   }: {
     searchTerm: string
     searchLang: string
-    columnFilters: { id: string; value: string }[]
+    columnFilters: { id: string; value: string | string[] }[]
     contributorUids: string[]
-    omittedHalCollectionCodes?: string[]
+    halCollectionCodes: string[]
+    areHalCollectionCodesOmitted: boolean
   }): Prisma.DocumentWhereInput {
     const publicationListRolesFilter: string[] =
       process.env.PUBLICATION_LIST_ROLES_FILTER?.split(',') || []
@@ -391,6 +401,7 @@ export class DocumentDAO extends AbstractDAO {
 
     if (publicationListRolesFilter.length > 0) {
       where = {
+        ...where,
         contributions: {
           every: {
             roles: {
@@ -403,59 +414,65 @@ export class DocumentDAO extends AbstractDAO {
 
     if (searchTerm) {
       where = {
-        OR: [
+        ...where,
+        AND: [
+          ...this.computeExistingAnd(where),
           {
-            titles: {
-              some: {
-                value: {
+            OR: [
+              {
+                titles: {
+                  some: {
+                    value: {
+                      contains: searchTerm,
+                      mode: QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                abstracts: {
+                  some: {
+                    value: {
+                      contains: searchTerm,
+                      mode: QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                contributions: {
+                  some: {
+                    person: {
+                      displayName: {
+                        contains: searchTerm,
+                        mode: QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
+              {
+                publicationDate: {
                   contains: searchTerm,
                   mode: QueryMode.insensitive,
                 },
               },
-            },
-          },
-          {
-            abstracts: {
-              some: {
-                value: {
-                  contains: searchTerm,
-                  mode: QueryMode.insensitive,
-                },
-              },
-            },
-          },
-          {
-            contributions: {
-              some: {
-                person: {
-                  displayName: {
+              {
+                journal: {
+                  title: {
                     contains: searchTerm,
                     mode: QueryMode.insensitive,
                   },
                 },
               },
-            },
-          },
-          {
-            publicationDate: {
-              contains: searchTerm,
-              mode: QueryMode.insensitive,
-            },
-          },
-          {
-            journal: {
-              title: {
-                contains: searchTerm,
-                mode: QueryMode.insensitive,
-              },
-            },
+            ],
           },
         ],
       }
     }
 
     columnFilters.forEach((filter) => {
-      if (filter.id === 'titles') {
+      if (filter.id === 'titles' && typeof filter.value === 'string') {
         where = {
           ...where,
           titles: {
@@ -469,7 +486,7 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
 
-      if (filter.id === 'abstracts') {
+      if (filter.id === 'abstracts' && typeof filter.value === 'string') {
         where = {
           ...where,
           abstracts: {
@@ -483,7 +500,7 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
 
-      if (filter.id === 'contributions') {
+      if (filter.id === 'contributions' && typeof filter.value === 'string') {
         const nameFilter: Prisma.DocumentWhereInput = {
           contributions: {
             some: {
@@ -525,7 +542,7 @@ export class DocumentDAO extends AbstractDAO {
         if (dateConditions.length > 0) {
           where = {
             ...where,
-            AND: dateConditions,
+            AND: [...this.computeExistingAnd(where), ...dateConditions],
           }
         }
       }
@@ -533,7 +550,7 @@ export class DocumentDAO extends AbstractDAO {
         where = {
           ...where,
           documentType: {
-            in: filter.value,
+            in: filter.value as DocumentType[],
           },
         }
       }
@@ -544,14 +561,14 @@ export class DocumentDAO extends AbstractDAO {
           records: {
             some: {
               platform: {
-                in: filter.value,
+                in: filter.value as BibliographicPlatform[],
               },
             },
           },
         }
       }
 
-      if (filter.id === 'publishedIn') {
+      if (filter.id === 'publishedIn' && typeof filter.value === 'string') {
         where = {
           ...where,
           journal: {
@@ -562,9 +579,63 @@ export class DocumentDAO extends AbstractDAO {
           },
         }
       }
+
+      if (filter.id === 'halStatus' && Array.isArray(filter.value)) {
+        const halStatusOr: Prisma.DocumentWhereInput[] = []
+
+        filter.value.forEach((type) => {
+          if (type === 'in_collection') {
+            halStatusOr.push({
+              records: {
+                some: {
+                  platform: 'hal',
+                  halCollectionCodes: {
+                    hasSome: halCollectionCodes,
+                  },
+                },
+              },
+            })
+          }
+
+          if (type === 'out_of_collection') {
+            halStatusOr.push({
+              records: {
+                some: {
+                  platform: 'hal',
+                },
+                none: {
+                  halCollectionCodes: {
+                    hasSome: halCollectionCodes,
+                  },
+                },
+              },
+            })
+          }
+
+          if (type === 'outside_hal') {
+            halStatusOr.push({
+              records: {
+                none: {
+                  platform: 'hal',
+                },
+              },
+            })
+          }
+        })
+
+        where = {
+          ...where,
+          AND: [
+            ...this.computeExistingAnd(where),
+            {
+              OR: halStatusOr,
+            },
+          ],
+        }
+      }
     })
 
-    if (omittedHalCollectionCodes?.length) {
+    if (areHalCollectionCodesOmitted) {
       where = {
         ...where,
         records: {
@@ -579,7 +650,7 @@ export class DocumentDAO extends AbstractDAO {
               },
             ],
             halCollectionCodes: {
-              hasSome: omittedHalCollectionCodes,
+              hasSome: halCollectionCodes,
             },
           },
         },
@@ -603,15 +674,9 @@ export class DocumentDAO extends AbstractDAO {
     }
 
     if (contributionFilters.length > 0) {
-      const existingAnd = where.AND
-        ? Array.isArray(where.AND)
-          ? where.AND
-          : [where.AND]
-        : []
-
       where = {
         ...where,
-        AND: [...existingAnd, ...contributionFilters],
+        AND: [...this.computeExistingAnd(where), ...contributionFilters],
       }
     }
 
@@ -716,12 +781,13 @@ export class DocumentDAO extends AbstractDAO {
     allItems: number
     incompleteHalRepositoryItems: number
   }> {
-    const { omittedHalCollectionCodes, ...rest } = params
-
-    const allWhere = this.createFetchDocumentsWhere(rest)
+    const allWhere = this.createFetchDocumentsWhere({
+      ...params,
+      areHalCollectionCodesOmitted: false,
+    })
     const incompleteHalRepositoryWhere = this.createFetchDocumentsWhere({
-      ...rest,
-      omittedHalCollectionCodes,
+      ...params,
+      areHalCollectionCodesOmitted: true,
     })
 
     const allItems = await this.prismaClient.document.count({

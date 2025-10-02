@@ -15,7 +15,8 @@ interface FetchDocumentsParams {
   sorting: { id: string; desc: boolean }[]
   contributorUid: string | null
   contributorType: AgentType
-  omittedHalCollectionCodes: string[]
+  halCollectionCodes: string[]
+  areHalCollectionCodesOmitted: boolean
 }
 
 interface CountDocumentsParams {
@@ -24,7 +25,7 @@ interface CountDocumentsParams {
   columnFilters: { id: string; value: string }[]
   contributorUid: string | null
   contributorType: AgentType
-  omittedHalCollectionCodes: string[]
+  halCollectionCodes: string[]
 }
 
 export class DocumentService {
@@ -75,7 +76,8 @@ export class DocumentService {
     sorting,
     contributorUid,
     contributorType,
-    omittedHalCollectionCodes,
+    halCollectionCodes,
+    areHalCollectionCodesOmitted,
   }: FetchDocumentsParams) {
     const contributorUids = await this.selectContributorUids(
       contributorUid,
@@ -91,7 +93,8 @@ export class DocumentService {
         columnFilters,
         sorting,
         contributorUids,
-        omittedHalCollectionCodes,
+        halCollectionCodes,
+        areHalCollectionCodesOmitted,
       })
       return { documents, totalItems }
     } catch (error) {
@@ -106,7 +109,7 @@ export class DocumentService {
     columnFilters,
     contributorUid,
     contributorType,
-    omittedHalCollectionCodes,
+    halCollectionCodes,
   }: CountDocumentsParams) {
     const contributorUids = await this.selectContributorUids(
       contributorUid,
@@ -120,7 +123,7 @@ export class DocumentService {
           searchLang: searchLang,
           columnFilters,
           contributorUids,
-          omittedHalCollectionCodes,
+          halCollectionCodes,
         })
       return { allItems, incompleteHalRepositoryItems }
     } catch (error) {
