@@ -208,6 +208,7 @@ export default function DocumentsPage() {
         },
       },
       {
+        enableSorting: false,
         accessorFn: (row) => {
           return row.contributions
         },

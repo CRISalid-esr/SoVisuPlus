@@ -694,14 +694,6 @@ export class DocumentDAO extends AbstractDAO {
     const sortingTitleFieldName = `title_locale_${searchLangIndex}`
 
     return sorting.map((sort) => {
-      if (sort.id === 'contributions') {
-        return {
-          contributions: {
-            _count: sort.desc ? 'desc' : 'asc',
-          },
-        }
-      }
-
       if (sort.id === 'titles') {
         return {
           [sortingTitleFieldName]: sort.desc ? 'desc' : 'asc',
