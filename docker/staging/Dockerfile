@@ -22,6 +22,7 @@ COPY . .
 COPY .env.docker .env
 
 RUN npx prisma generate
+RUN npx lingui extract-template
 RUN npm run build
 RUN npm run build:listener
 
