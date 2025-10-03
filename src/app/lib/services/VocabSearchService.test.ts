@@ -16,7 +16,7 @@ describe('VocabSearchService class test', () => {
     service = new VocabSearchService()
   })
 
-  it('VocabSearchService call suggest function from VocalSearchClient with parameters converted in right types', () => {
+  it('VocabSearchService call suggest function from VocabSearchClient with parameters converted in right types', () => {
     service.suggest('strike', ['aat', '???', 'jel'], 'fr,en')
     expect(clientSuggest).toHaveBeenCalledWith(
       'strike',

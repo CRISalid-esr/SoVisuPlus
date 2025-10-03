@@ -5,7 +5,7 @@ export const GET = async (req: NextRequest) => {
   const urlParams = req.nextUrl.searchParams
   const q = urlParams.get('q') || ''
   const vocabs = urlParams.get('vocabs')?.split(',') || []
-  const display_langs = 'fr,en' //navigator.languages.join()
+  const display_langs = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES
 
   if (!q) {
     return NextResponse.json(
@@ -17,7 +17,8 @@ export const GET = async (req: NextRequest) => {
   const vocabsSearchService = new VocabSearchService()
 
   try {
-    return await vocabsSearchService.suggest(q, vocabs, display_langs)
+    const response = await vocabsSearchService.suggest(q, vocabs, display_langs)
+    return NextResponse.json(response)
   } catch (error) {
     console.error('Error fetching keywords:', error)
     return NextResponse.json(

@@ -1,52 +1,50 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { GET } from '@/app/api/vocabs/route'
 
 jest.mock('@/lib/services/VocabSearchService', () => ({
   VocabSearchService: jest.fn().mockImplementation(() => ({
-    suggest: jest.fn().mockResolvedValue(
-      NextResponse.json({
-        total: 1,
-        items: [
-          {
-            iri: 'http://vocab.getty.edu/jel#3552',
-            scheme: 'JEL',
-            vocab: null,
-            identifier: null,
-            top_concept: false,
-            lang_set: ['en', 'es'],
-            score: 4,
-            best_label: {
+    suggest: jest.fn().mockResolvedValue({
+      total: 1,
+      items: [
+        {
+          iri: 'http://vocab.getty.edu/jel#3552',
+          scheme: 'JEL',
+          vocab: null,
+          identifier: null,
+          top_concept: false,
+          lang_set: ['en', 'es'],
+          score: 4,
+          best_label: {
+            text: 'surface strikes',
+            lang: 'en',
+            highlight: null,
+            source_field: 'pref',
+          },
+          pref: [
+            {
               text: 'surface strikes',
               lang: 'en',
               highlight: null,
-              source_field: 'pref',
             },
-            pref: [
-              {
-                text: 'surface strikes',
-                lang: 'en',
-                highlight: null,
-              },
-            ],
-            alt: [
-              {
-                text: 'surface strike',
-                lang: 'en',
-                highlight: null,
-              },
-              {
-                text: 'strikes, surface',
-                lang: 'en',
-                highlight: null,
-              },
-            ],
-            description: null,
-            broader: ['http://vocab.getty.edu/aat/300033549'],
-            narrower: [],
-          },
-        ],
-      }),
-    ),
+          ],
+          alt: [
+            {
+              text: 'surface strike',
+              lang: 'en',
+              highlight: null,
+            },
+            {
+              text: 'strikes, surface',
+              lang: 'en',
+              highlight: null,
+            },
+          ],
+          description: null,
+          broader: ['http://vocab.getty.edu/aat/300033549'],
+          narrower: [],
+        },
+      ],
+    }),
   })),
 }))
 
