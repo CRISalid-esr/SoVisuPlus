@@ -1,7 +1,7 @@
 import DateProvider from '@/components/DateProvider'
 import useStore from '@/stores/global_store'
 import { Contribution } from '@/types/Contribution'
-import { Document, DocumentType } from '@/types/Document'
+import { Document, DocumentState, DocumentType } from '@/types/Document'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
 import { Literal } from '@/types/Literal'
@@ -68,6 +68,7 @@ const document: Document = new Document(
     ),
   ],
   [],
+  DocumentState.default,
   new Journal('Test journal', '0123-4567', 'Test publisher', [
     new JournalIdentifier('issn', '0123-4567', 'Online'),
   ]),

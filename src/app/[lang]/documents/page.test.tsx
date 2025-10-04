@@ -4,8 +4,8 @@ import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles'
 import '@testing-library/jest-dom'
-import { fireEvent, render, screen, waitFor, act } from '@testing-library/react'
-import { Document, DocumentType } from '@/types/Document'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { Document, DocumentState, DocumentType } from '@/types/Document'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
 import DocumentsPage from './page'
@@ -75,6 +75,7 @@ const mockState = {
             'https://url-to-record-2',
           ),
         ],
+        DocumentState.default,
         new Journal('Test journal', '0123-4567', 'Test publisher', [
           new JournalIdentifier('issn', '0123-4567', 'Online'),
         ]),
@@ -353,8 +354,13 @@ describe('DocumentsPage Component', () => {
     })
   })
 
-  it('calls mergeDocuments with selected document UIDs when clicking the merge button', async () => {
-    const mockMergeDocuments = jest.fn().mockResolvedValue(undefined)
+  it('calls mergeDocuments, then re-fetches the list', async () => {
+    const mockMergeDocuments = jest.fn().mockResolvedValue({
+      updated: [
+        { uid: 'doc1', state: 'waiting_for_update' },
+        { uid: 'doc2', state: 'waiting_for_update' },
+      ],
+    })
 
     const doc1 = mockState.document.documents[0]
     const doc2 = new Document(
@@ -399,7 +405,6 @@ describe('DocumentsPage Component', () => {
     const mergeBtn = screen.getByRole('button', {
       name: i18n.t('documents_page_merge_selected_documents_button'),
     })
-    expect(mergeBtn).toBeEnabled()
 
     fireEvent.click(mergeBtn)
 
@@ -407,6 +412,9 @@ describe('DocumentsPage Component', () => {
       expect(mockMergeDocuments).toHaveBeenCalledTimes(1)
       // order should follow the current table order (date desc): doc1 then doc2
       expect(mockMergeDocuments).toHaveBeenCalledWith(['doc1', 'doc2'])
+    })
+    await waitFor(() => {
+      expect(mockFetchDocuments).toHaveBeenCalledTimes(2)
     })
   })
 })

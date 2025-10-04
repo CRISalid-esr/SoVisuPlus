@@ -5,6 +5,7 @@ import {
   Document,
   DocumentAbstract,
   DocumentRecord,
+  DocumentState,
   DocumentTitle,
   HalSubmitType,
   Journal,
@@ -43,6 +44,7 @@ export type DocumentWithRelations = Document & {
   contributions: ContributionWithRelations[]
   records: DocumentRecordWithRelations[]
   journal: JournalWithRelations | null
+  state: DocumentState
 }
 
 export type ConceptWithRelations = Concept & {

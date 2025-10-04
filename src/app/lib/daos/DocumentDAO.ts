@@ -1,6 +1,7 @@
 import { DocumentWithRelations as DbDocument } from '@/prisma-schema/extended-client'
 import {
   Concept as DbConcept,
+  DocumentState,
   Person as DbPerson,
   Prisma,
 } from '@prisma/client'
@@ -8,8 +9,8 @@ import { Document, DocumentType } from '@/types/Document'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PersonDAO } from './PersonDAO'
 import {
-  getBibliographicPlatformDbValue,
   BibliographicPlatform,
+  getBibliographicPlatformDbValue,
 } from '@/types/BibliographicPlatform'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import QueryMode = Prisma.QueryMode
@@ -196,6 +197,7 @@ export class DocumentDAO extends AbstractDAO {
               ? document.publicationDateEnd.toISOString()
               : null,
             journal: journalId ? { connect: { id: journalId } } : undefined,
+            state: DocumentState.default, // reset state to default on update
             volume,
             issue,
             pages,
@@ -895,5 +897,17 @@ export class DocumentDAO extends AbstractDAO {
     }
 
     return document.contributions.map((contribution) => contribution.person.uid)
+  }
+
+  public async markDocumentsWaitingForUpdate(uids: string[]) {
+    await this.prismaClient.document.updateMany({
+      where: { uid: { in: uids } },
+      data: { state: DocumentState.waiting_for_update },
+    })
+
+    return this.prismaClient.document.findMany({
+      where: { uid: { in: uids } },
+      select: { uid: true, state: true },
+    })
   }
 }

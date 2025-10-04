@@ -50,6 +50,11 @@ model Membership {
   @@index([personId])
 }
 
+enum DocumentState {
+  default
+  waiting_for_update
+}
+
 model Document {
   id                   Int                @id @default(autoincrement())
   uid                  String             @unique
@@ -65,6 +70,7 @@ model Document {
   title_locale_1       String?
   title_locale_2       String?
   records              DocumentRecord[]
+  state                DocumentState      @default(default)
 
   journalId Int?
   journal   Journal? @relation(fields: [journalId], references: [id], onDelete: SetNull)

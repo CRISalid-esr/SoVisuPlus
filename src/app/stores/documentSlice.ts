@@ -3,6 +3,7 @@ import { Document } from '@/types/Document'
 import { toQueryString } from '@/utils/query'
 import { BaseQuery } from '@/types/BaseQuery'
 import { AgentType } from '@/types/IAgent'
+import { DocumentState } from '@prisma/client'
 
 export interface DocumentQuery extends BaseQuery {
   searchTerm: string
@@ -249,17 +250,56 @@ export const addDocumentSlice: StateCreator<
         return
       }
       try {
-        const response = await fetch('/api/documents/merge', {
+        const res = await fetch('/api/documents/merge', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ documentUids }),
         })
+        if (!res.ok) throw new Error('Failed to merge documents')
 
-        if (!response.ok) throw new Error('Failed to merge documents')
+        const data: { updated: Array<{ uid: string; state: string }> } =
+          await res.json()
+        set((state) => {
+          const updatedDocuments = state.document.documents.map((doc) => {
+            const updatedDoc = data.updated.find((d) => d.uid === doc.uid)
+            if (updatedDoc) {
+              return {
+                ...doc,
+                state: updatedDoc.state as DocumentState,
+              } as Document
+            }
+            return doc
+          })
+          // Also update selectedDocument if it's among the merged ones
+          let updatedSelectedDocument = state.document.selectedDocument
+          if (
+            state.document.selectedDocument &&
+            documentUids.includes(state.document.selectedDocument.uid)
+          ) {
+            const updatedDoc = data.updated.find(
+              (d) => d.uid === state.document.selectedDocument?.uid,
+            )
+            if (updatedDoc) {
+              updatedSelectedDocument = {
+                ...state.document.selectedDocument,
+                state: updatedDoc.state as DocumentState,
+              } as Document
+            }
+          }
+          return {
+            document: {
+              ...state.document,
+              documents: updatedDocuments,
+              selectedDocument: updatedSelectedDocument,
+            },
+          }
+        })
+
+        // optional: setListHasChanged(true) or keep UI as-is until WS refresh
       } catch (error) {
-        set((state) => ({
+        set((s) => ({
           document: {
-            ...state.document,
+            ...s.document,
             error: error instanceof Error ? error.message : 'Unknown error',
           },
         }))

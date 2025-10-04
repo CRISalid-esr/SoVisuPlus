@@ -187,6 +187,9 @@ export class DocumentService {
         throw new Error(`User with username ${userName} not found`)
       }
 
+      const updated =
+        await this.documentDAO.markDocumentsWaitingForUpdate(documentUids)
+
       await this.actionDAO.createAction({
         actionType: ActionType.MERGE,
         targetType: ActionTargetType.DOCUMENT,
@@ -198,6 +201,8 @@ export class DocumentService {
         parameters: { mergedDocumentUids: documentUids.slice(1) },
         personUid: user.person?.uid,
       })
+
+      return { updated }
     } catch (error) {
       const message = 'Error merging documents'
       console.error(message, error)
