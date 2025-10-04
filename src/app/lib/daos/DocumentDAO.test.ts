@@ -1,5 +1,6 @@
 import {
   Document as DbDocument,
+  DocumentState,
   Journal as DbJournal,
   Person as DbPerson,
   Prisma,
@@ -32,6 +33,7 @@ jest.mock('@prisma/client', () => {
       update: jest.fn(),
       findMany: jest.fn(),
       count: jest.fn(),
+      updateMany: jest.fn(),
     },
     documentTitle: {
       upsert: jest.fn(),
@@ -1016,5 +1018,53 @@ describe('DocumentDAO', () => {
     ).rejects.toThrow(`Document with UID ${documentUid} not found`)
 
     expect(mockPrisma.document.update).not.toHaveBeenCalled()
+  })
+
+  it('updates the state to waiting_for_update and returns updated rows', async () => {
+    const uids = ['doc-1', 'doc-2']
+    ;(mockPrisma.document.updateMany as jest.Mock).mockResolvedValue({
+      count: 2,
+    })
+    ;(mockPrisma.document.findMany as jest.Mock).mockResolvedValue([
+      { uid: 'doc-1', state: DocumentState.waiting_for_update },
+      { uid: 'doc-2', state: DocumentState.waiting_for_update },
+    ])
+
+    const dao = new DocumentDAO()
+    const result = await dao.markDocumentsWaitingForUpdate(uids)
+
+    expect(mockPrisma.document.updateMany).toHaveBeenCalledWith({
+      where: { uid: { in: uids } },
+      data: { state: DocumentState.waiting_for_update },
+    })
+    expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
+      where: { uid: { in: uids } },
+      select: { uid: true, state: true },
+    })
+    expect(result).toEqual([
+      { uid: 'doc-1', state: DocumentState.waiting_for_update },
+      { uid: 'doc-2', state: DocumentState.waiting_for_update },
+    ])
+  })
+
+  it('handles empty input by no-op update and returning an empty list', async () => {
+    const uids: string[] = []
+    ;(mockPrisma.document.updateMany as jest.Mock).mockResolvedValue({
+      count: 0,
+    })
+    ;(mockPrisma.document.findMany as jest.Mock).mockResolvedValue([])
+
+    const dao = new DocumentDAO()
+    const result = await dao.markDocumentsWaitingForUpdate(uids)
+
+    expect(mockPrisma.document.updateMany).toHaveBeenCalledWith({
+      where: { uid: { in: [] } },
+      data: { state: DocumentState.waiting_for_update },
+    })
+    expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
+      where: { uid: { in: [] } },
+      select: { uid: true, state: true },
+    })
+    expect(result).toEqual([])
   })
 })

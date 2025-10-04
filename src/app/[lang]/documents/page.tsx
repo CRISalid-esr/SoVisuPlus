@@ -1,5 +1,5 @@
 'use client'
-
+import './page.css'
 import { TabFilter } from '@/components/TabFilter'
 import useStore from '@/stores/global_store'
 import {
@@ -7,7 +7,7 @@ import {
   BibliographicPlatformMetadata,
 } from '@/types/BibliographicPlatform'
 import { Contribution } from '@/types/Contribution'
-import { Document, DocumentType } from '@/types/Document'
+import { Document, DocumentState, DocumentType } from '@/types/Document'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
@@ -156,10 +156,17 @@ export default function DocumentsPage() {
           row,
           column,
         }: {
-          row: { original: { titles: Array<Literal>; uid: string } }
+          row: {
+            original: {
+              titles: Array<Literal>
+              uid: string
+              state: DocumentState
+            }
+          }
           column: MRT_Column<Document>
         }) {
-          const { titles, uid } = row.original
+          const { titles, uid, state } = row.original
+          const isWaiting = state == DocumentState.waiting_for_update
           const preferredRowLang = selectedTitleLangs[uid] || lang
           const localizedTitle = getLocalizedValue(
             titles,
@@ -171,11 +178,12 @@ export default function DocumentsPage() {
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Box
                 onClick={() => {
+                  if (isWaiting) return
                   const documentUid = row.original.uid
                   navigateToDetailsPage(documentUid)
                 }}
                 sx={{
-                  cursor: 'pointer',
+                  cursor: isWaiting ? 'progress' : 'pointer',
                   color: 'primary.main',
                   textDecoration: 'none',
                   '&:hover': {
@@ -577,6 +585,7 @@ export default function DocumentsPage() {
     if (documentUids.length < 2) return
     try {
       await mergeDocuments(documentUids)
+      setTriggerReloadList((prev) => !prev)
     } catch (error) {
       console.error('Error merging documents:', error)
     }
@@ -597,10 +606,9 @@ export default function DocumentsPage() {
         {listHasChanged && (
           <Alert
             severity='info'
-            sx={{ mb: 2 }}
-            onClose={() => {
-              setListHasChanged(false)
-            }}
+            variant='filled'
+            className='refresh-alert'
+            onClose={() => setListHasChanged(false)}
           >
             <Typography component='span'>
               {ownPerspective && (
@@ -665,7 +673,17 @@ export default function DocumentsPage() {
         manualPagination
         manualSorting
         enableColumnResizing
-        enableRowSelection
+        enableRowSelection={(row) =>
+          row.original.state == DocumentState.default
+        }
+        muiTableBodyRowProps={({ row }) => {
+          const isWaiting = row.original.state === 'waiting_for_update'
+
+          return {
+            className: isWaiting ? 'mrt-row-waiting' : '',
+          }
+        }}
+        muiSelectCheckboxProps={{ color: 'secondary' }}
         columns={columns}
         rowCount={totalItems}
         data={documents}
@@ -706,19 +724,24 @@ export default function DocumentsPage() {
             </Box>
           )
         }
-        renderRowActionMenuItems={({ row, table }) => [
-          <Box sx={{ display: 'flex' }} key={row.original.uid}>
-            <MRT_ActionMenuItem
-              icon={<InfoIcon />}
-              key='edit'
-              label={t`documents_page_action_column_details`}
-              onClick={() => {
-                navigateToDetailsPage(row.original.uid)
-              }}
-              table={table}
-            />
-          </Box>,
-        ]}
+        renderRowActionMenuItems={({ row, table }) => {
+          const isWaiting =
+            row.original.state === DocumentState.waiting_for_update
+          if (isWaiting) return []
+          return [
+            <Box sx={{ display: 'flex' }} key={row.original.uid}>
+              <MRT_ActionMenuItem
+                icon={<InfoIcon />}
+                key='edit'
+                label={t`documents_page_action_column_details`}
+                onClick={() => {
+                  navigateToDetailsPage(row.original.uid)
+                }}
+                table={table}
+              />
+            </Box>,
+          ]
+        }}
       />
     </Box>
   )

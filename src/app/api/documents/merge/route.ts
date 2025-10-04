@@ -37,12 +37,15 @@ export async function POST(request: Request) {
     }
 
     // Fire-and-forget: enqueue merge in the graph;
-    // the actual DB and UI update will arrive via RabbitMQ later.
+    // the actual DB and UI update will arrive via RabbitMQ later
+    // for now, the document are just marked as "waiting for update"
     const service = new DocumentService()
-    await service.mergeDocuments(uniqueUids, userName)
+    const { updated } = await service.mergeDocuments(uniqueUids, userName)
 
-    // 202 Accepted since the merge will be processed asynchronously.
-    return NextResponse.json({ success: true, queued: true }, { status: 202 })
+    return NextResponse.json(
+      { success: true, queued: true, updated }, // [{ uid, state }]
+      { status: 200 },
+    )
   } catch (error) {
     console.error('❌ Error merging documents:', error)
     return NextResponse.json(

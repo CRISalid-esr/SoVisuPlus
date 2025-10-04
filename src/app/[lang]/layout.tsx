@@ -7,7 +7,7 @@ import { CssBaseline } from '@mui/material'
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter'
 import React from 'react'
 import ErrorBoundary from '../[lang]/components/ErrorBoundary'
-import DateProvider from './components/DateProvider' // Import the new client component
+import DateProvider from './components/DateProvider'
 import ErrorFallback from './components/ErrorFallback'
 import { LanguageProvider } from './LanguageProvider'
 import { EnvInjector } from '@/components/EnvInjector'

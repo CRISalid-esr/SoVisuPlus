@@ -1,5 +1,6 @@
 import { POST } from './route'
 import { AuthOptions } from 'next-auth'
+import authOptions from '@/app/auth/auth_options'
 
 const mergeDocuments = jest.fn()
 
@@ -27,6 +28,40 @@ describe('POST /api/documents/merge', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     getServerSessionMock.mockResolvedValue({ user: { username: 'user-1234' } })
+    mergeDocuments.mockResolvedValue({
+      updated: [
+        { uid: 'doc1', state: 'waiting_for_update' },
+        { uid: 'doc2', state: 'waiting_for_update' },
+        { uid: 'doc3', state: 'waiting_for_update' },
+      ],
+    })
+  })
+
+  it('calls getServerSession with authOptions', async () => {
+    const request = {
+      json: async () => ({ documentUids: ['x', 'y'] }),
+    } as unknown as Request
+
+    await POST(request)
+    expect(getServerSessionMock).toHaveBeenCalledTimes(1)
+    expect(getServerSessionMock).toHaveBeenCalledWith(authOptions)
+  })
+
+  it('returns the updated list from the service in the response body', async () => {
+    const updated = [
+      { uid: 'A', state: 'waiting_for_update' },
+      { uid: 'B', state: 'waiting_for_update' },
+    ]
+    mergeDocuments.mockResolvedValueOnce({ updated })
+
+    const request = {
+      json: async () => ({ documentUids: ['A', 'B'] }),
+    } as unknown as Request
+
+    const res = await POST(request)
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.updated).toEqual(updated)
   })
 
   it('returns 401 if user is not authenticated', async () => {
@@ -68,7 +103,7 @@ describe('POST /api/documents/merge', () => {
     expect(mergeDocuments).not.toHaveBeenCalled()
   })
 
-  it('deduplicates and filters empty UIDs, calls service, and returns 202', async () => {
+  it('deduplicates and filters empty UIDs, calls service, and returns 200 with updated list', async () => {
     const request = {
       json: async () => ({
         documentUids: ['doc1', 'doc2', 'doc1', '', null, 'doc3'],
@@ -76,10 +111,19 @@ describe('POST /api/documents/merge', () => {
     } as unknown as Request
 
     const res = await POST(request)
-    expect(res.status).toBe(202)
-    expect(await res.json()).toEqual({ success: true, queued: true })
+    expect(res.status).toBe(200)
 
-    // Should have called once with deduplicated, non-empty UIDs
+    const body = await res.json()
+    expect(body).toEqual({
+      success: true,
+      queued: true,
+      updated: [
+        { uid: 'doc1', state: 'waiting_for_update' },
+        { uid: 'doc2', state: 'waiting_for_update' },
+        { uid: 'doc3', state: 'waiting_for_update' },
+      ],
+    })
+
     expect(mergeDocuments).toHaveBeenCalledTimes(1)
     expect(mergeDocuments).toHaveBeenCalledWith(
       ['doc1', 'doc2', 'doc3'],

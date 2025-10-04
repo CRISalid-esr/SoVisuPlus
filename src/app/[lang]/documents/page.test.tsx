@@ -354,8 +354,13 @@ describe('DocumentsPage Component', () => {
     })
   })
 
-  it('calls mergeDocuments with selected document UIDs when clicking the merge button', async () => {
-    const mockMergeDocuments = jest.fn().mockResolvedValue(undefined)
+  it('calls mergeDocuments, then re-fetches the list', async () => {
+    const mockMergeDocuments = jest.fn().mockResolvedValue({
+      updated: [
+        { uid: 'doc1', state: 'waiting_for_update' },
+        { uid: 'doc2', state: 'waiting_for_update' },
+      ],
+    })
 
     const doc1 = mockState.document.documents[0]
     const doc2 = new Document(
@@ -400,7 +405,6 @@ describe('DocumentsPage Component', () => {
     const mergeBtn = screen.getByRole('button', {
       name: i18n.t('documents_page_merge_selected_documents_button'),
     })
-    expect(mergeBtn).toBeEnabled()
 
     fireEvent.click(mergeBtn)
 
@@ -408,6 +412,9 @@ describe('DocumentsPage Component', () => {
       expect(mockMergeDocuments).toHaveBeenCalledTimes(1)
       // order should follow the current table order (date desc): doc1 then doc2
       expect(mockMergeDocuments).toHaveBeenCalledWith(['doc1', 'doc2'])
+    })
+    await waitFor(() => {
+      expect(mockFetchDocuments).toHaveBeenCalledTimes(2)
     })
   })
 })

@@ -15,17 +15,20 @@ describe('DocumentService', () => {
   let mockCountDocuments: jest.Mock
   let mockDeleteConceptsFromDocument: jest.Mock
   let mockCreateAction: jest.Mock
+  let mockMarkDocumentsWaitingForUpdate: jest.Mock
   beforeEach(() => {
     mockFetchDocuments = jest.fn()
     mockfetchDocumentById = jest.fn()
     mockCountDocuments = jest.fn()
     mockDeleteConceptsFromDocument = jest.fn()
     mockCreateAction = jest.fn()
+    mockMarkDocumentsWaitingForUpdate = jest.fn()
     ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
       fetchDocuments: mockFetchDocuments,
       fetchDocumentById: mockfetchDocumentById,
       deleteConceptsFromDocument: mockDeleteConceptsFromDocument,
       countDocuments: mockCountDocuments,
+      markDocumentsWaitingForUpdate: mockMarkDocumentsWaitingForUpdate,
     }))
     ;(UserDAO as jest.Mock).mockImplementation(() => ({
       getUserByIdentifier: jest.fn().mockResolvedValue({
@@ -236,10 +239,25 @@ describe('DocumentService', () => {
       personUid: 'local-123',
     })
   })
-  it('creates a MERGE action with correct parameters when mergeDocuments is called', async () => {
-    await expect(
-      documentService.mergeDocuments(['d1', 'd2', 'd3'], 'user-1234'),
-    ).resolves.toBeUndefined()
+  it('marks docs waiting, then creates MERGE action, and returns {updated}', async () => {
+    const updated = [
+      { uid: 'd1', state: 'waiting_for_update' },
+      { uid: 'd2', state: 'waiting_for_update' },
+      { uid: 'd3', state: 'waiting_for_update' },
+    ]
+    mockMarkDocumentsWaitingForUpdate.mockResolvedValue(updated)
+
+    const result = await documentService.mergeDocuments(
+      ['d1', 'd2', 'd3'],
+      'user-1234',
+    )
+
+    expect(mockMarkDocumentsWaitingForUpdate).toHaveBeenCalledTimes(1)
+    expect(mockMarkDocumentsWaitingForUpdate).toHaveBeenCalledWith([
+      'd1',
+      'd2',
+      'd3',
+    ])
 
     expect(mockCreateAction).toHaveBeenCalledTimes(1)
     expect(mockCreateAction).toHaveBeenCalledWith({
@@ -250,6 +268,20 @@ describe('DocumentService', () => {
       parameters: { mergedDocumentUids: ['d2', 'd3'] },
       personUid: 'local-123',
     })
+
+    expect(result).toEqual({ updated })
+  })
+
+  it('throws and does not create action if marking waiting state fails', async () => {
+    mockMarkDocumentsWaitingForUpdate.mockRejectedValue(
+      new Error('DAO mark error'),
+    )
+
+    await expect(
+      documentService.mergeDocuments(['d1', 'd2'], 'user-1234'),
+    ).rejects.toThrow('Error merging documents')
+
+    expect(mockCreateAction).not.toHaveBeenCalled()
   })
 
   it('throws if fewer than 2 documents are provided to mergeDocuments', async () => {
