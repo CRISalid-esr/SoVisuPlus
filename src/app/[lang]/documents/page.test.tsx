@@ -4,8 +4,8 @@ import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles'
 import '@testing-library/jest-dom'
-import { fireEvent, render, screen, waitFor, act } from '@testing-library/react'
-import { Document, DocumentType } from '@/types/Document'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { Document, DocumentState, DocumentType } from '@/types/Document'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
 import DocumentsPage from './page'
@@ -75,6 +75,7 @@ const mockState = {
             'https://url-to-record-2',
           ),
         ],
+        DocumentState.default,
         new Journal('Test journal', '0123-4567', 'Test publisher', [
           new JournalIdentifier('issn', '0123-4567', 'Online'),
         ]),

@@ -5,6 +5,7 @@ import { DocumentRecord, DocumentRecordJson } from '@/types/DocumentRecord'
 import { Literal } from '@/types/Literal'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 import { Journal, JournalJson } from '@/types/Journal'
+import { DocumentState } from '@prisma/client'
 
 interface DocumentJson {
   uid: string
@@ -17,6 +18,7 @@ interface DocumentJson {
   subjects: Array<Concept>
   contributions: Array<ContributionJson>
   records: Array<DocumentRecordJson>
+  state: DocumentState
   journal?: JournalJson
   volume?: string
   issue?: string
@@ -46,6 +48,7 @@ class Document {
     public subjects: Array<Concept>,
     public contributions: Array<Contribution> = [],
     public records: Array<DocumentRecord> = [],
+    public state: DocumentState = DocumentState.default,
     public journal?: Journal,
     public volume?: string,
     public issue?: string,
@@ -85,6 +88,7 @@ class Document {
       document.records.map((record: DocumentRecordJson) =>
         DocumentRecord.fromObject(record),
       ),
+      document.state,
       document.journal ? Journal.fromJson(document.journal) : undefined,
       document.volume || undefined,
       document.issue || undefined,
@@ -108,6 +112,7 @@ class Document {
       document.records.map((record) =>
         DocumentRecord.fromDbDocumentRecord(record),
       ),
+      document.state,
       document.journal ? Journal.fromDbJournal(document.journal) : undefined,
       document.volume || undefined,
       document.issue || undefined,
@@ -116,4 +121,4 @@ class Document {
   }
 }
 
-export { Document, DocumentType }
+export { Document, DocumentType, DocumentState }

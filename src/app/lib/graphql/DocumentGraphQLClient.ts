@@ -1,5 +1,5 @@
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
-import { Document } from '@/types/Document'
+import { Document, DocumentState } from '@/types/Document'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
 import { GraphPersonResponse, PersonGraphQLClient } from './PersonGraphQLClient'
 import { Literal } from '@/types/Literal'
@@ -181,6 +181,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
         },
         [],
       ),
+      DocumentState.default,
       journal,
       journalEdge?.properties.volume,
       journalEdge?.properties.issue,
