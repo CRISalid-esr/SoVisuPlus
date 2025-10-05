@@ -75,8 +75,8 @@ export class UserDAO extends AbstractDAO {
               },
               scopes: {
                 select: {
-                  organizationType: true,
-                  organizationUid: true,
+                  entityType: true,
+                  entityUid: true,
                 },
               },
             },

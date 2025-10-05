@@ -317,7 +317,8 @@ enum PermissionSubject {
   InstitutionDivision
 }
 
-enum OrganizationType {
+enum EntityType {
+  Person
   ResearchStructure
   Institution
   InstitutionDivision
@@ -372,14 +373,14 @@ model UserRole {
 }
 
 model UserRoleScope {
-  id               Int              @id @default(autoincrement())
-  userId           Int
-  roleId           Int
-  organizationType OrganizationType
-  organizationUid  String
+  id         Int        @id @default(autoincrement())
+  userId     Int
+  roleId     Int
+  entityType EntityType
+  entityUid  String
 
   userRole UserRole @relation(fields: [userId, roleId], references: [userId, roleId], onDelete: Cascade)
 
-  @@unique([userId, roleId, organizationType, organizationUid])
-  @@index([organizationType, organizationUid])
+  @@unique([userId, roleId, entityType, entityUid])
+  @@index([entityType, entityUid])
 }

@@ -66,10 +66,10 @@ describe('UserDAO', () => {
           },
           scopes: [
             {
-              organizationType: 'ResearchStructure',
-              organizationUid: 'rs-uid-1',
+              entityType: 'ResearchStructure',
+              entityUid: 'rs-uid-1',
             },
-            { organizationType: 'Institution', organizationUid: 'inst-uid-42' },
+            { entityType: 'Institution', entityUid: 'inst-uid-42' },
           ],
         },
       ],
@@ -117,8 +117,8 @@ describe('UserDAO', () => {
             },
             scopes: {
               select: {
-                organizationType: true,
-                organizationUid: true,
+                entityType: true,
+                entityUid: true,
               },
             },
           },
@@ -171,8 +171,8 @@ describe('UserDAO', () => {
             },
             scopes: {
               select: {
-                organizationType: true,
-                organizationUid: true,
+                entityType: true,
+                entityUid: true,
               },
             },
           },
