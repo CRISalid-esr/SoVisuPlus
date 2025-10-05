@@ -65,7 +65,12 @@ export type RolePermissionWithPermission = RolePermission & {
 }
 
 export type RoleWithRelations = Role & {
-  permissions: RolePermissionWithPermission[]
+  permissions: RolePermissionWithPermission[] // include: { permissions: { include: { permission: true } } }
+}
+
+/** IDs-only shape — efficient when you just need to sync the join table */
+export type RoleWithPermissionIds = Role & {
+  permissions: Array<Pick<RolePermission, 'permissionId'>> // include: { permissions: { select: { permissionId: true } } }
 }
 
 export type UserRoleWithRelations = UserRole & {
