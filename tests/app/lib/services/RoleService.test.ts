@@ -11,6 +11,9 @@ describe('RoleService Integration', () => {
     await prisma.userRole.deleteMany()
     await prisma.role.deleteMany()
     await prisma.permission.deleteMany()
+    await prisma.user.deleteMany()
+    await prisma.personIdentifier.deleteMany()
+    await prisma.person.deleteMany()
   })
 
   afterAll(async () => {
@@ -206,5 +209,143 @@ describe('RoleService Integration', () => {
     expect(permIds).toEqual(
       expect.arrayContaining([mergePerm!.id, deletePerm!.id]),
     )
+  })
+
+  test('assignRoleToUser: scoped assignment is idempotent and accumulates scopes', async () => {
+    await svc.reset({
+      roles: [
+        {
+          name: 'document_editor',
+          system: false,
+          description: 'Edit metadata',
+          permissions: [
+            { action: 'update', subject: 'Document', fields: ['titles'] },
+          ],
+        },
+      ],
+    })
+
+    const person = await prisma.person.create({
+      data: {
+        uid: 'local-alice',
+        firstName: 'Alice',
+        lastName: 'Doe',
+        displayName: 'Alice Doe',
+        external: false,
+        normalizedName: 'alice doe',
+      },
+    })
+    await prisma.personIdentifier.create({
+      data: { personId: person.id, type: 'LOCAL', value: 'local-alice' },
+    })
+    const user = await prisma.user.create({ data: { personId: person.id } })
+
+    await svc.assignRoleToUser({
+      roleName: 'document_editor',
+      scope: { entityType: 'ResearchStructure', entityUid: 'rs-uid-1' },
+      user: { personUid: 'local-alice' },
+    })
+
+    const userRoles = await prisma.userRole.findMany({
+      where: { userId: user.id },
+    })
+    expect(userRoles).toHaveLength(1)
+
+    let scopes = await prisma.userRoleScope.findMany({
+      where: { userId: user.id, roleId: userRoles[0].roleId },
+    })
+    expect(scopes).toHaveLength(1)
+    expect(scopes[0]).toMatchObject({
+      entityType: 'ResearchStructure',
+      entityUid: 'rs-uid-1',
+    })
+
+    // run again with the SAME scope (idempotent)
+    await svc.assignRoleToUser({
+      roleName: 'document_editor',
+      scope: { entityType: 'ResearchStructure', entityUid: 'rs-uid-1' },
+      user: { personUid: 'local-alice' },
+    })
+    scopes = await prisma.userRoleScope.findMany({
+      where: { userId: user.id, roleId: userRoles[0].roleId },
+    })
+    expect(scopes).toHaveLength(1)
+
+    await svc.assignRoleToUser({
+      roleName: 'document_editor',
+      scope: { entityType: 'Institution', entityUid: 'inst-42' },
+      user: { personUid: 'local-alice' },
+    })
+    scopes = await prisma.userRoleScope.findMany({
+      where: { userId: user.id, roleId: userRoles[0].roleId },
+      orderBy: { id: 'asc' },
+    })
+    expect(scopes).toHaveLength(2)
+    const scopeSet = new Set(
+      scopes.map((s) => `${s.entityType}:${s.entityUid}`),
+    )
+    expect(scopeSet).toEqual(
+      new Set(['ResearchStructure:rs-uid-1', 'Institution:inst-42']),
+    )
+  })
+
+  test('assignRoleToUser: unscoped (global) assignment creates link and clears any existing scopes', async () => {
+    await svc.reset({
+      roles: [
+        {
+          name: 'admin',
+          system: true,
+          description: 'Full access',
+          permissions: [{ action: 'manage', subject: 'all', fields: [] }],
+        },
+      ],
+    })
+
+    const person = await prisma.person.create({
+      data: {
+        uid: 'local-bob',
+        firstName: 'Bob',
+        lastName: 'Smith',
+        displayName: 'Bob Smith',
+        external: false,
+        normalizedName: 'bob smith',
+      },
+    })
+    await prisma.personIdentifier.create({
+      data: {
+        personId: person.id,
+        type: 'ORCID',
+        value: '0000-0001-2345-6789',
+      },
+    })
+    const user = await prisma.user.create({ data: { personId: person.id } })
+
+    // seed a scoped link first (to verify later it gets cleared)
+    await svc.assignRoleToUser({
+      roleName: 'admin',
+      scope: { entityType: 'Institution', entityUid: 'inst-1' },
+      user: { idType: 'ORCID', idValue: '0000-0001-2345-6789' },
+    })
+    let userRoles = await prisma.userRole.findMany({
+      where: { userId: user.id },
+    })
+    expect(userRoles).toHaveLength(1)
+    let scopes = await prisma.userRoleScope.findMany({
+      where: { userId: user.id, roleId: userRoles[0].roleId },
+    })
+    expect(scopes).toHaveLength(1)
+
+    // now assign admin WITHOUT scope (global) -> should keep link & clear scopes
+    await svc.assignRoleToUser({
+      roleName: 'admin',
+      user: { idType: 'ORCID', idValue: '0000-0001-2345-6789' },
+    })
+
+    userRoles = await prisma.userRole.findMany({ where: { userId: user.id } })
+    expect(userRoles).toHaveLength(1)
+    scopes = await prisma.userRoleScope.findMany({
+      where: { userId: user.id, roleId: userRoles[0].roleId },
+    })
+    expect(scopes).toHaveLength(0)
   })
 })

@@ -70,14 +70,9 @@ describe('RoleDAO', () => {
 
     expect(result).not.toBeNull()
     expect(result?.name).toBe('document_merger')
-    expect(result?.permissions).toEqual([
-      { permissionId: 1 },
-      { permissionId: 2 },
-    ])
 
     expect(mockPrisma.role.findUnique).toHaveBeenCalledWith({
       where: { name: 'document_merger' },
-      include: { permissions: { select: { permissionId: true } } },
     })
   })
 

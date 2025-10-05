@@ -23,7 +23,15 @@ export class RoleDAO extends AbstractDAO {
     })
   }
 
-  async getRoleByName(name: string): Promise<RoleWithPermissionIds | null> {
+  async getRoleByName(name: string): Promise<Role | null> {
+    return this.prismaClient.role.findUnique({
+      where: { name },
+    })
+  }
+
+  async getRoleWithPermissionIdsByName(
+    name: string,
+  ): Promise<RoleWithPermissionIds | null> {
     return this.prismaClient.role.findUnique({
       where: { name },
       include: {
