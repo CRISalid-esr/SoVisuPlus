@@ -16,6 +16,11 @@ import {
   ResearchStructure,
   ResearchStructureDescription,
   ResearchStructureName,
+  Role,
+  Permission,
+  RolePermission,
+  UserRole,
+  UserRoleScope,
 } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -37,6 +42,14 @@ export type JournalWithRelations = Journal & {
   identifiers: JournalIdentifier[]
 }
 
+export type ConceptLabelWithRelations = ConceptLabel & {
+  type: LabelType
+}
+
+export type ConceptWithRelations = Concept & {
+  labels: ConceptLabelWithRelations[]
+}
+
 export type DocumentWithRelations = Document & {
   titles: DocumentTitle[]
   abstracts: DocumentAbstract[]
@@ -47,12 +60,17 @@ export type DocumentWithRelations = Document & {
   state: DocumentState
 }
 
-export type ConceptWithRelations = Concept & {
-  labels: ConceptLabelWithRelations[]
+export type RolePermissionWithPermission = RolePermission & {
+  permission: Permission
 }
 
-export type ConceptLabelWithRelations = ConceptLabel & {
-  type: LabelType
+export type RoleWithRelations = Role & {
+  permissions: RolePermissionWithPermission[]
+}
+
+export type UserRoleWithRelations = UserRole & {
+  role: RoleWithRelations
+  scopes: UserRoleScope[]
 }
 
 export default prisma

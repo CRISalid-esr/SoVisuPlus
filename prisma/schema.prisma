@@ -305,11 +305,13 @@ enum PermissionAction {
   update
   delete
   merge
+  unmerge
 }
 
 enum PermissionSubject {
   all
   Document
+  DocumentRecord
   Person
   ResearchStructure
   Membership

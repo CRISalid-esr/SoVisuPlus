@@ -22,7 +22,8 @@
     "i18n:compile": "lingui compile",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "init_roles": "ts-node --project tsconfig.listener.json src/scripts/init_roles.ts"
   },
   "dependencies": {
     "@apollo/client": "^3.12.3",
