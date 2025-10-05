@@ -45,7 +45,7 @@ describe('UserDAO', () => {
     })
   })
 
-  it('should fetch a user by identifier', async () => {
+  it('should fetch a user by identifier (including roles & scopes)', async () => {
     ;(mockPrisma.user.findFirst as jest.Mock).mockResolvedValue({
       id: 2,
       personId: 123,
@@ -53,12 +53,32 @@ describe('UserDAO', () => {
         id: 123,
         uid: 'local-johndoe',
         email: 'johndoe@myuniversity.com',
+        identifiers: [],
+        memberships: [],
       },
+      roles: [
+        {
+          role: {
+            id: 10,
+            name: 'restricted_editor',
+            description: null,
+            system: false,
+          },
+          scopes: [
+            {
+              organizationType: 'ResearchStructure',
+              organizationUid: 'rs-uid-1',
+            },
+            { organizationType: 'Institution', organizationUid: 'inst-uid-42' },
+          ],
+        },
+      ],
     })
 
     const user: User | null = await userDAO.getUserByIdentifier(identifier)
     expect(user).not.toBeNull()
     expect(user?.person?.uid).toEqual('local-johndoe')
+
     expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
       where: {
         person: {
@@ -90,6 +110,19 @@ describe('UserDAO', () => {
             },
           },
         },
+        roles: {
+          include: {
+            role: {
+              select: { id: true, name: true, description: true, system: true },
+            },
+            scopes: {
+              select: {
+                organizationType: true,
+                organizationUid: true,
+              },
+            },
+          },
+        },
       },
     })
   })
@@ -99,6 +132,7 @@ describe('UserDAO', () => {
 
     const user: User | null = await userDAO.getUserByIdentifier(identifier)
     expect(user).toBeNull()
+
     expect(mockPrisma.user.findFirst).toHaveBeenCalledWith({
       where: {
         person: {
@@ -126,6 +160,19 @@ describe('UserDAO', () => {
                     slug: true,
                   },
                 },
+              },
+            },
+          },
+        },
+        roles: {
+          include: {
+            role: {
+              select: { id: true, name: true, description: true, system: true },
+            },
+            scopes: {
+              select: {
+                organizationType: true,
+                organizationUid: true,
               },
             },
           },
@@ -144,11 +191,11 @@ describe('UserDAO', () => {
     )
   })
 
-  it('should throw an error if fetching user by identifier fails', async () => {
+  it('should handle error and return null when fetching user by identifier fails', async () => {
     ;(mockPrisma.user.findFirst as jest.Mock).mockRejectedValue(
       new Error('Database error'),
     )
-    // getUserByIdentifier will return null in case of an error
+
     await expect(userDAO.getUserByIdentifier(identifier)).resolves.toBeNull()
   })
 })

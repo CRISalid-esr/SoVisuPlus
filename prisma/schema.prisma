@@ -15,6 +15,8 @@ model User {
   id       Int     @id @default(autoincrement())
   personId Int?    @unique
   person   Person? @relation(fields: [personId], references: [id], onDelete: SetNull)
+
+  roles UserRole[]
 }
 
 model Person {
@@ -294,4 +296,90 @@ model Action {
   @@index([targetType])
   @@index([targetUid])
   @@index([timestamp])
+}
+
+enum PermissionAction {
+  manage
+  read
+  create
+  update
+  delete
+  merge
+}
+
+enum PermissionSubject {
+  all
+  Document
+  Person
+  ResearchStructure
+  Membership
+  Institution
+  InstitutionDivision
+}
+
+enum OrganizationType {
+  ResearchStructure
+  Institution
+  InstitutionDivision
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  system      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          Int               @id @default(autoincrement())
+  action      PermissionAction
+  subject     PermissionSubject
+  fields      String[]          @default([])
+  inverted    Boolean           @default(false)
+  conditions  Json?
+  description String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model UserRole {
+  userId Int
+  roleId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  scopes UserRoleScope[]
+
+  @@id([userId, roleId])
+  @@index([roleId])
+}
+
+model UserRoleScope {
+  id               Int              @id @default(autoincrement())
+  userId           Int
+  roleId           Int
+  organizationType OrganizationType
+  organizationUid  String
+
+  userRole UserRole @relation(fields: [userId, roleId], references: [userId, roleId], onDelete: Cascade)
+
+  @@unique([userId, roleId, organizationType, organizationUid])
+  @@index([organizationType, organizationUid])
 }

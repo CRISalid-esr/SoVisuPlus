@@ -1,7 +1,4 @@
-import {
-  PersonIdentifierType as DbPersonIdentifierType,
-  User as DbUser,
-} from '@prisma/client'
+import { User as DbUser } from '@prisma/client'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { User } from '@/types/User'
@@ -40,7 +37,7 @@ export class UserDAO extends AbstractDAO {
           person: {
             identifiers: {
               some: {
-                type: identifier.type.toUpperCase() as DbPersonIdentifierType,
+                type: identifier.type,
                 value: identifier.value,
               },
             },
@@ -66,11 +63,29 @@ export class UserDAO extends AbstractDAO {
               },
             },
           },
+          roles: {
+            include: {
+              role: {
+                select: {
+                  id: true,
+                  name: true,
+                  description: true,
+                  system: true,
+                },
+              },
+              scopes: {
+                select: {
+                  organizationType: true,
+                  organizationUid: true,
+                },
+              },
+            },
+          },
         },
       })
-      if (!dbUser || !dbUser.person) {
-        return null
-      }
+
+      if (!dbUser || !dbUser.person) return null
+
       return User.fromDbUser(dbUser)
     } catch (error) {
       console.error('Error fetching user by identifier:', error as Error)
