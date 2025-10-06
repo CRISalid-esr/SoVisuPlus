@@ -1,4 +1,10 @@
-import { Account, AuthOptions, Profile, User as NextAuthUser } from 'next-auth'
+import {
+  Account,
+  AuthOptions,
+  DefaultSession,
+  Profile,
+  User as NextAuthUser,
+} from 'next-auth'
 import KeycloakProvider, { KeycloakProfile } from 'next-auth/providers/keycloak'
 import { UserService } from '@/lib/services/UserService'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
@@ -7,11 +13,40 @@ import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { JWT } from 'next-auth/jwt'
 import { Session } from '@auth/core/types'
+import { userToAuthzContext } from '@/app/auth/ability'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { AuthzContext } from '@/types/authz'
 
 declare module '@auth/core/types' {
   interface User {
     username?: string
     orcid?: string
+    userId?: number
+    personUid?: string | null
+    authz?: AuthzContext
+  }
+}
+
+declare module 'next-auth' {
+  interface Session {
+    user: DefaultSession['user'] & {
+      id?: string
+      username?: string
+      orcid?: string
+      userId?: number
+      personUid?: string | null
+      authz?: AuthzContext
+    }
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    username?: string
+    orcid?: string
+    userId?: number
+    personUid?: string | null
+    authz?: AuthzContext
   }
 }
 
@@ -69,6 +104,24 @@ const authOptions: AuthOptions = {
         token.accessToken = account.access_token
         token.id = user.id
       }
+      const userDAO = new UserDAO()
+
+      const identifier = token.username
+        ? { type: PersonIdentifierType.LOCAL, value: String(token.username) }
+        : token.orcid
+          ? { type: PersonIdentifierType.ORCID, value: String(token.orcid) }
+          : null
+
+      if (identifier) {
+        try {
+          const domainUser = await userDAO.getUserByIdentifier(identifier)
+          if (domainUser) {
+            token.authz = userToAuthzContext(domainUser, String(token.id ?? ''))
+          }
+        } catch (e) {
+          console.warn('[auth/jwt] failed to enrich token with authz:', e)
+        }
+      }
       return token
     },
     async session({ session, token }: { session: Session; token: JWT }) {
@@ -76,6 +129,9 @@ const authOptions: AuthOptions = {
         session.user.id = token.id as string
         session.user.username = token.username as string
         session.user.orcid = token.orcid as string
+        session.user.userId = token.userId
+        session.user.personUid = token.personUid ?? null
+        session.user.authz = token.authz
       }
       return session
     },

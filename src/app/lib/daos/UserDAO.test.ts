@@ -149,10 +149,7 @@ describe('UserDAO', () => {
       where: {
         person: {
           identifiers: {
-            some: {
-              type: 'ORCID',
-              value: '0000-0001-2345-6789',
-            },
+            some: { type: 'ORCID', value: '0000-0001-2345-6789' },
           },
         },
       },
@@ -164,12 +161,15 @@ describe('UserDAO', () => {
               select: {
                 startDate: true,
                 endDate: true,
+                positionCode: true,
                 researchStructure: {
                   select: {
                     uid: true,
+                    id: true,
                     acronym: true,
                     signature: true,
                     slug: true,
+                    external: true,
                   },
                 },
               },
@@ -179,7 +179,21 @@ describe('UserDAO', () => {
         roles: {
           include: {
             role: {
-              select: { id: true, name: true, description: true, system: true },
+              include: {
+                permissions: {
+                  include: {
+                    permission: {
+                      select: {
+                        id: true,
+                        action: true,
+                        subject: true,
+                        fields: true,
+                        inverted: true,
+                      },
+                    },
+                  },
+                },
+              },
             },
             scopes: {
               select: {

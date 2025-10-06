@@ -7,6 +7,7 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Person as DbPerson } from '@prisma/client'
 import { PersonMembership } from '@/types/PersonMembership'
 import removeAccents from 'remove-accents'
+import { Authorizable, AuthorizationSubject } from '@/types/authorizable'
 
 interface PersonJson extends IAgentJson {
   uid: string
@@ -20,7 +21,7 @@ interface PersonJson extends IAgentJson {
   memberships?: PersonMembership[]
 }
 
-class Person implements IAgent {
+class Person implements IAgent, Authorizable {
   public normalizedName: string
 
   constructor(
@@ -134,6 +135,20 @@ class Person implements IAgent {
       'person',
       json.slug ?? null,
     )
+  }
+
+  toAuthz(): AuthorizationSubject {
+    const rs =
+      this.memberships
+        ?.map((m) => m.researchStructure?.uid)
+        .filter((x): x is string => !!x) ?? []
+    return {
+      __type: 'Person',
+      perimeter: {
+        Person: [this.uid],
+        ResearchStructure: Array.from(new Set(rs)),
+      },
+    }
   }
 }
 

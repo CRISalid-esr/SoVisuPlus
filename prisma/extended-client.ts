@@ -11,14 +11,17 @@ import {
   Journal,
   JournalIdentifier,
   LabelType,
+  Membership,
+  Permission,
   Person,
+  PersonIdentifier,
   PrismaClient,
   ResearchStructure,
   ResearchStructureDescription,
   ResearchStructureName,
   Role,
-  Permission,
   RolePermission,
+  User,
   UserRole,
   UserRoleScope,
 } from '@prisma/client'
@@ -68,7 +71,6 @@ export type RoleWithRelations = Role & {
   permissions: RolePermissionWithPermission[] // include: { permissions: { include: { permission: true } } }
 }
 
-/** IDs-only shape — efficient when you just need to sync the join table */
 export type RoleWithPermissionIds = Role & {
   permissions: Array<Pick<RolePermission, 'permissionId'>> // include: { permissions: { select: { permissionId: true } } }
 }
@@ -76,6 +78,20 @@ export type RoleWithPermissionIds = Role & {
 export type UserRoleWithRelations = UserRole & {
   role: RoleWithRelations
   scopes: UserRoleScope[]
+}
+
+export type MembershipWithRelations = Membership & {
+  researchStructure: ResearchStructureWithRelations
+}
+
+export type PersonWithRelations = Person & {
+  identifiers: PersonIdentifier[]
+  memberships: MembershipWithRelations[]
+}
+
+export type UserWithRelations = User & {
+  person: PersonWithRelations | null
+  roles: UserRoleWithRelations[]
 }
 
 export default prisma

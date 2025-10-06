@@ -53,14 +53,22 @@ export class UserDAO extends AbstractDAO {
               identifiers: true,
               memberships: {
                 select: {
+                  id: true,
+                  researchStructureId: true,
+                  personId: true,
                   startDate: true,
                   endDate: true,
+                  positionCode: true,
                   researchStructure: {
                     select: {
+                      id: true,
                       uid: true,
                       acronym: true,
                       signature: true,
                       slug: true,
+                      names: true,
+                      descriptions: true,
+                      external: true,
                     },
                   },
                 },
@@ -70,11 +78,20 @@ export class UserDAO extends AbstractDAO {
           roles: {
             include: {
               role: {
-                select: {
-                  id: true,
-                  name: true,
-                  description: true,
-                  system: true,
+                include: {
+                  permissions: {
+                    include: {
+                      permission: {
+                        select: {
+                          id: true,
+                          action: true,
+                          subject: true,
+                          fields: true,
+                          inverted: true,
+                        },
+                      },
+                    },
+                  },
                 },
               },
               scopes: {

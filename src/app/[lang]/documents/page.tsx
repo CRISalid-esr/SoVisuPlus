@@ -7,7 +7,12 @@ import {
   BibliographicPlatformMetadata,
 } from '@/types/BibliographicPlatform'
 import { Contribution } from '@/types/Contribution'
-import { Document, DocumentState, DocumentType } from '@/types/Document'
+import {
+  Document,
+  DocumentState,
+  DocumentType,
+  isDocument,
+} from '@/types/Document'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
@@ -54,10 +59,19 @@ import SyncIcon from '@mui/icons-material/Sync'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
 import DocumentSyncDialog from '@/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog'
 import { Trans } from '@lingui/react'
+import { useSession } from 'next-auth/react'
+import { subject } from '@casl/ability'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionSubject } from '@/types/Permission'
 
 dayjs.extend(utc)
 
 export default function DocumentsPage() {
+  const { data: session } = useSession()
+  const ability = useMemo(
+    () => abilityFromAuthzContext(session?.user.authz),
+    [session?.user?.authz],
+  )
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -666,16 +680,22 @@ export default function DocumentsPage() {
         personUid={currentPerspective?.uid || ''}
       />
 
-      <MaterialReactTable
+      <MaterialReactTable<Document>
         initialState={{ showColumnFilters: true }}
         getRowId={(row) => row.uid}
         manualFiltering
         manualPagination
         manualSorting
         enableColumnResizing
-        enableRowSelection={(row) =>
-          row.original.state == DocumentState.default
-        }
+        enableRowSelection={(row) => {
+          const canMerge =
+            isDocument(row.original) &&
+            ability.can(
+              'merge',
+              subject(PermissionSubject.Document, row.original.toAuthz()),
+            )
+          return canMerge && row.original.state == DocumentState.default
+        }}
         muiTableBodyRowProps={({ row }) => {
           const isWaiting = row.original.state === 'waiting_for_update'
 
