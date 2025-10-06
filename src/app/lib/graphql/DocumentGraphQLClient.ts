@@ -1,5 +1,5 @@
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
-import { Document } from '@/types/Document'
+import { Document, DocumentState } from '@/types/Document'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
 import { GraphPersonResponse, PersonGraphQLClient } from './PersonGraphQLClient'
 import { Literal } from '@/types/Literal'
@@ -52,7 +52,7 @@ interface GraphDocumentResponse {
         uid: string
         issn_l: string
         publisher: string
-        title: string
+        titles: string[]
         identifiers: { type: string; value: string; format?: string | null }[]
       }
     }>
@@ -113,7 +113,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
     const journalEdge = publishedInConnection?.edges?.[0]
     const journal = journalEdge
       ? new Journal(
-          journalEdge.node.title,
+          journalEdge.node.titles?.[0] ?? 'Unknown title',
           journalEdge.node.issn_l,
           journalEdge.node.publisher,
           journalEdge.node.identifiers.map(
@@ -181,6 +181,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
         },
         [],
       ),
+      DocumentState.default,
       journal,
       journalEdge?.properties.volume,
       journalEdge?.properties.issue,

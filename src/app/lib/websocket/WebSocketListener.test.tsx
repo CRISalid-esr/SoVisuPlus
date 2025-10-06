@@ -120,6 +120,7 @@ describe('WebSocketListener', () => {
         countDocuments: jest.fn(),
         fetchDocumentById: jest.fn(),
         removeConcepts: jest.fn(),
+        mergeDocuments: jest.fn(),
         error: null,
       },
       harvesting: {
@@ -252,13 +253,44 @@ describe('WebSocketListener', () => {
       objectType: 'Document',
       objectUid: 'doc-123',
       eventType: 'created',
-      objectLabel: 'Test document',
+      objectLabels: { en: 'Test document', fr: 'Document de test' },
       impliedPeopleUids: ['person-1'],
     })
 
     await waitFor(() => {
       expect(enqueueSnackbarMock).toHaveBeenCalled()
     })
+
+    window.WebSocket = OriginalWebSocket
+  })
+  it('does not enqueue snackbar for data event if user is not implied', async () => {
+    const enqueueSnackbarMock = jest.fn()
+    ;(useSnackbar as jest.Mock).mockReturnValue({
+      enqueueSnackbar: enqueueSnackbarMock,
+    })
+
+    const OriginalWebSocket = window.WebSocket
+    const mockWSInstance = new MockWebSocket('ws://localhost:3001')
+    // @ts-expect-error override global
+    window.WebSocket = jest.fn(() => mockWSInstance)
+
+    render(
+      <SnackbarProvider>
+        <WebSocketListener />
+      </SnackbarProvider>,
+    )
+
+    mockWSInstance.emitMessage({
+      type: 'data',
+      objectType: 'Document',
+      objectUid: 'doc-123',
+      eventType: 'created',
+      objectLabels: { en: 'Test document', fr: 'Document de test' },
+      impliedPeopleUids: ['person-2'], // different person
+    })
+
+    await new Promise((r) => setTimeout(r, 500)) // wait a bit to ensure no snackbar is called
+    expect(enqueueSnackbarMock).not.toHaveBeenCalled()
 
     window.WebSocket = OriginalWebSocket
   })

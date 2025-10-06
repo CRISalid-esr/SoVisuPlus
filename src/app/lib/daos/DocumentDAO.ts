@@ -1,13 +1,17 @@
 import { DocumentWithRelations as DbDocument } from '@/prisma-schema/extended-client'
 import {
   Concept as DbConcept,
+  DocumentState,
   Person as DbPerson,
   Prisma,
 } from '@prisma/client'
-import { Document } from '@/types/Document'
+import { Document, DocumentType } from '@/types/Document'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PersonDAO } from './PersonDAO'
-import { getBibliographicPlatformDbValue } from '@/types/BibliographicPlatform'
+import {
+  BibliographicPlatform,
+  getBibliographicPlatformDbValue,
+} from '@/types/BibliographicPlatform'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import QueryMode = Prisma.QueryMode
 
@@ -16,18 +20,19 @@ interface FetchDocumentsFromDBParams {
   searchLang: string
   page: number
   pageSize: number
-  columnFilters: { id: string; value: string }[]
+  columnFilters: { id: string; value: string | string[] }[]
   sorting: { id: string; desc: boolean }[]
   contributorUids: string[]
-  omittedHalCollectionCodes?: string[]
+  halCollectionCodes: string[]
+  areHalCollectionCodesOmitted: boolean
 }
 
 interface CountDocumentsFromDBParams {
   searchTerm: string
   searchLang: string
-  columnFilters: { id: string; value: string }[]
+  columnFilters: { id: string; value: string | string[] }[]
   contributorUids: string[]
-  omittedHalCollectionCodes?: string[]
+  halCollectionCodes: string[]
 }
 
 export class DocumentDAO extends AbstractDAO {
@@ -178,7 +183,7 @@ export class DocumentDAO extends AbstractDAO {
         }
 
         dbDocument = (await this.prismaClient.document.update({
-          where: { uid: uid },
+          where: { uid },
           data: {
             documentType: document.documentType,
             title_locale_0: document.getTitleInLocale(0),
@@ -192,13 +197,18 @@ export class DocumentDAO extends AbstractDAO {
               ? document.publicationDateEnd.toISOString()
               : null,
             journal: journalId ? { connect: { id: journalId } } : undefined,
+            state: DocumentState.default, // reset state to default on update
             volume,
             issue,
             pages,
           },
           include: {
-            titles: true, // Include related titles
-            abstracts: true, // Include related abstracts
+            titles: true,
+            abstracts: true,
+            subjects: { include: { labels: true } },
+            contributions: { include: { person: true } },
+            records: true,
+            journal: { include: { identifiers: true } },
           },
         })) as DbDocument
       }
@@ -312,12 +322,20 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
 
+      const incomingUids = new Set(records.map((r) => r.uid))
+
+      // Remove records no longer present
+      await this.prismaClient.documentRecord.deleteMany({
+        where: {
+          documentId: dbDocument.id,
+          uid: { notIn: Array.from(incomingUids) },
+        },
+      })
+
       for (const record of records) {
         try {
           await this.prismaClient.documentRecord.upsert({
-            where: {
-              uid: record.uid,
-            },
+            where: { uid: record.uid },
             update: {
               platform: {
                 set: getBibliographicPlatformDbValue(record.platform),
@@ -326,6 +344,8 @@ export class DocumentDAO extends AbstractDAO {
               url: record.url,
               halCollectionCodes: record.halCollectionCodes || [],
               halSubmitType: record.halSubmitType,
+              // in case the record was not previously linked to this document :
+              document: { connect: { id: dbDocument.id } },
             },
             create: {
               uid: record.uid,
@@ -334,7 +354,7 @@ export class DocumentDAO extends AbstractDAO {
               url: record.url,
               halCollectionCodes: record.halCollectionCodes || [],
               halSubmitType: record.halSubmitType,
-              documentId: dbDocument.id, // Link to document
+              documentId: dbDocument.id,
             },
           })
         } catch (error) {
@@ -354,17 +374,23 @@ export class DocumentDAO extends AbstractDAO {
     }
   }
 
+  computeExistingAnd(where: Prisma.DocumentWhereInput) {
+    return where.AND ? (Array.isArray(where.AND) ? where.AND : [where.AND]) : []
+  }
+
   createFetchDocumentsWhere({
     searchTerm,
     columnFilters,
-    omittedHalCollectionCodes,
+    halCollectionCodes,
+    areHalCollectionCodesOmitted,
     contributorUids,
   }: {
     searchTerm: string
     searchLang: string
-    columnFilters: { id: string; value: string }[]
+    columnFilters: { id: string; value: string | string[] }[]
     contributorUids: string[]
-    omittedHalCollectionCodes?: string[]
+    halCollectionCodes: string[]
+    areHalCollectionCodesOmitted: boolean
   }): Prisma.DocumentWhereInput {
     const publicationListRolesFilter: string[] =
       process.env.PUBLICATION_LIST_ROLES_FILTER?.split(',') || []
@@ -377,6 +403,7 @@ export class DocumentDAO extends AbstractDAO {
 
     if (publicationListRolesFilter.length > 0) {
       where = {
+        ...where,
         contributions: {
           every: {
             roles: {
@@ -389,59 +416,65 @@ export class DocumentDAO extends AbstractDAO {
 
     if (searchTerm) {
       where = {
-        OR: [
+        ...where,
+        AND: [
+          ...this.computeExistingAnd(where),
           {
-            titles: {
-              some: {
-                value: {
+            OR: [
+              {
+                titles: {
+                  some: {
+                    value: {
+                      contains: searchTerm,
+                      mode: QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                abstracts: {
+                  some: {
+                    value: {
+                      contains: searchTerm,
+                      mode: QueryMode.insensitive,
+                    },
+                  },
+                },
+              },
+              {
+                contributions: {
+                  some: {
+                    person: {
+                      displayName: {
+                        contains: searchTerm,
+                        mode: QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
+              {
+                publicationDate: {
                   contains: searchTerm,
                   mode: QueryMode.insensitive,
                 },
               },
-            },
-          },
-          {
-            abstracts: {
-              some: {
-                value: {
-                  contains: searchTerm,
-                  mode: QueryMode.insensitive,
-                },
-              },
-            },
-          },
-          {
-            contributions: {
-              some: {
-                person: {
-                  displayName: {
+              {
+                journal: {
+                  title: {
                     contains: searchTerm,
                     mode: QueryMode.insensitive,
                   },
                 },
               },
-            },
-          },
-          {
-            publicationDate: {
-              contains: searchTerm,
-              mode: QueryMode.insensitive,
-            },
-          },
-          {
-            journal: {
-              title: {
-                contains: searchTerm,
-                mode: QueryMode.insensitive,
-              },
-            },
+            ],
           },
         ],
       }
     }
 
     columnFilters.forEach((filter) => {
-      if (filter.id === 'titles') {
+      if (filter.id === 'titles' && typeof filter.value === 'string') {
         where = {
           ...where,
           titles: {
@@ -455,7 +488,7 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
 
-      if (filter.id === 'abstracts') {
+      if (filter.id === 'abstracts' && typeof filter.value === 'string') {
         where = {
           ...where,
           abstracts: {
@@ -469,7 +502,7 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
 
-      if (filter.id === 'contributions') {
+      if (filter.id === 'contributions' && typeof filter.value === 'string') {
         const nameFilter: Prisma.DocumentWhereInput = {
           contributions: {
             some: {
@@ -511,7 +544,7 @@ export class DocumentDAO extends AbstractDAO {
         if (dateConditions.length > 0) {
           where = {
             ...where,
-            AND: dateConditions,
+            AND: [...this.computeExistingAnd(where), ...dateConditions],
           }
         }
       }
@@ -519,7 +552,7 @@ export class DocumentDAO extends AbstractDAO {
         where = {
           ...where,
           documentType: {
-            in: filter.value,
+            in: filter.value as DocumentType[],
           },
         }
       }
@@ -530,14 +563,14 @@ export class DocumentDAO extends AbstractDAO {
           records: {
             some: {
               platform: {
-                in: filter.value,
+                in: filter.value as BibliographicPlatform[],
               },
             },
           },
         }
       }
 
-      if (filter.id === 'publishedIn') {
+      if (filter.id === 'publishedIn' && typeof filter.value === 'string') {
         where = {
           ...where,
           journal: {
@@ -548,9 +581,63 @@ export class DocumentDAO extends AbstractDAO {
           },
         }
       }
+
+      if (filter.id === 'halStatus' && Array.isArray(filter.value)) {
+        const halStatusOr: Prisma.DocumentWhereInput[] = []
+
+        filter.value.forEach((type) => {
+          if (type === 'in_collection') {
+            halStatusOr.push({
+              records: {
+                some: {
+                  platform: 'hal',
+                  halCollectionCodes: {
+                    hasSome: halCollectionCodes,
+                  },
+                },
+              },
+            })
+          }
+
+          if (type === 'out_of_collection') {
+            halStatusOr.push({
+              records: {
+                some: {
+                  platform: 'hal',
+                },
+                none: {
+                  halCollectionCodes: {
+                    hasSome: halCollectionCodes,
+                  },
+                },
+              },
+            })
+          }
+
+          if (type === 'outside_hal') {
+            halStatusOr.push({
+              records: {
+                none: {
+                  platform: 'hal',
+                },
+              },
+            })
+          }
+        })
+
+        where = {
+          ...where,
+          AND: [
+            ...this.computeExistingAnd(where),
+            {
+              OR: halStatusOr,
+            },
+          ],
+        }
+      }
     })
 
-    if (omittedHalCollectionCodes?.length) {
+    if (areHalCollectionCodesOmitted) {
       where = {
         ...where,
         records: {
@@ -565,7 +652,7 @@ export class DocumentDAO extends AbstractDAO {
               },
             ],
             halCollectionCodes: {
-              hasSome: omittedHalCollectionCodes,
+              hasSome: halCollectionCodes,
             },
           },
         },
@@ -589,15 +676,9 @@ export class DocumentDAO extends AbstractDAO {
     }
 
     if (contributionFilters.length > 0) {
-      const existingAnd = where.AND
-        ? Array.isArray(where.AND)
-          ? where.AND
-          : [where.AND]
-        : []
-
       where = {
         ...where,
-        AND: [...existingAnd, ...contributionFilters],
+        AND: [...this.computeExistingAnd(where), ...contributionFilters],
       }
     }
 
@@ -615,14 +696,6 @@ export class DocumentDAO extends AbstractDAO {
     const sortingTitleFieldName = `title_locale_${searchLangIndex}`
 
     return sorting.map((sort) => {
-      if (sort.id === 'contributions') {
-        return {
-          contributions: {
-            _count: sort.desc ? 'desc' : 'asc',
-          },
-        }
-      }
-
       if (sort.id === 'titles') {
         return {
           [sortingTitleFieldName]: sort.desc ? 'desc' : 'asc',
@@ -702,12 +775,13 @@ export class DocumentDAO extends AbstractDAO {
     allItems: number
     incompleteHalRepositoryItems: number
   }> {
-    const { omittedHalCollectionCodes, ...rest } = params
-
-    const allWhere = this.createFetchDocumentsWhere(rest)
+    const allWhere = this.createFetchDocumentsWhere({
+      ...params,
+      areHalCollectionCodesOmitted: false,
+    })
     const incompleteHalRepositoryWhere = this.createFetchDocumentsWhere({
-      ...rest,
-      omittedHalCollectionCodes,
+      ...params,
+      areHalCollectionCodesOmitted: true,
     })
 
     const allItems = await this.prismaClient.document.count({
@@ -777,6 +851,63 @@ export class DocumentDAO extends AbstractDAO {
           disconnect: conceptUids.map((uid) => ({ uid })),
         },
       },
+    })
+  }
+
+  public async deleteDocumentByUid(uid: string): Promise<void> {
+    await this.prismaClient.$transaction(async (tx) => {
+      const doc = await tx.document.findUnique({
+        where: { uid },
+        select: { id: true },
+      })
+      if (!doc) return
+
+      await tx.document.update({
+        where: { id: doc.id },
+        data: { subjects: { set: [] } },
+      })
+
+      await Promise.all([
+        tx.documentRecord.deleteMany({ where: { documentId: doc.id } }),
+        tx.contribution.deleteMany({ where: { documentId: doc.id } }),
+        tx.documentTitle.deleteMany({ where: { documentId: doc.id } }),
+        tx.documentAbstract.deleteMany({ where: { documentId: doc.id } }),
+      ])
+
+      await tx.document.delete({ where: { id: doc.id } })
+    })
+  }
+
+  public async getContributorUidsByDocumentUid(uid: string): Promise<string[]> {
+    const document = await this.prismaClient.document.findUnique({
+      where: { uid },
+      include: {
+        contributions: {
+          include: {
+            person: {
+              select: { uid: true },
+            },
+          },
+        },
+      },
+    })
+
+    if (!document) {
+      return []
+    }
+
+    return document.contributions.map((contribution) => contribution.person.uid)
+  }
+
+  public async markDocumentsWaitingForUpdate(uids: string[]) {
+    await this.prismaClient.document.updateMany({
+      where: { uid: { in: uids } },
+      data: { state: DocumentState.waiting_for_update },
+    })
+
+    return this.prismaClient.document.findMany({
+      where: { uid: { in: uids } },
+      select: { uid: true, state: true },
     })
   }
 }

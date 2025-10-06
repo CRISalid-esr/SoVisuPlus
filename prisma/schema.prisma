@@ -15,6 +15,8 @@ model User {
   id       Int     @id @default(autoincrement())
   personId Int?    @unique
   person   Person? @relation(fields: [personId], references: [id], onDelete: SetNull)
+
+  roles UserRole[]
 }
 
 model Person {
@@ -50,6 +52,11 @@ model Membership {
   @@index([personId])
 }
 
+enum DocumentState {
+  default
+  waiting_for_update
+}
+
 model Document {
   id                   Int                @id @default(autoincrement())
   uid                  String             @unique
@@ -65,6 +72,7 @@ model Document {
   title_locale_1       String?
   title_locale_2       String?
   records              DocumentRecord[]
+  state                DocumentState      @default(default)
 
   journalId Int?
   journal   Journal? @relation(fields: [journalId], references: [id], onDelete: SetNull)
@@ -264,6 +272,7 @@ enum ActionType {
   REMOVE
   UPDATE
   FETCH
+  MERGE
 }
 
 enum ActionTargetType {
@@ -287,4 +296,93 @@ model Action {
   @@index([targetType])
   @@index([targetUid])
   @@index([timestamp])
+}
+
+enum PermissionAction {
+  manage
+  read
+  create
+  update
+  delete
+  merge
+  unmerge
+}
+
+enum PermissionSubject {
+  all
+  Document
+  DocumentRecord
+  Person
+  ResearchStructure
+  Membership
+  Institution
+  InstitutionDivision
+}
+
+enum EntityType {
+  Person
+  ResearchStructure
+  Institution
+  InstitutionDivision
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  system      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          Int               @id @default(autoincrement())
+  action      PermissionAction
+  subject     PermissionSubject
+  fields      String[]          @default([])
+  inverted    Boolean           @default(false)
+  conditions  Json?
+  description String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model UserRole {
+  userId Int
+  roleId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  scopes UserRoleScope[]
+
+  @@id([userId, roleId])
+  @@index([roleId])
+}
+
+model UserRoleScope {
+  id         Int        @id @default(autoincrement())
+  userId     Int
+  roleId     Int
+  entityType EntityType
+  entityUid  String
+
+  userRole UserRole @relation(fields: [userId, roleId], references: [userId, roleId], onDelete: Cascade)
+
+  @@unique([userId, roleId, entityType, entityUid])
+  @@index([entityType, entityUid])
 }

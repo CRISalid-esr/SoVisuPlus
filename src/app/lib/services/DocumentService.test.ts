@@ -15,17 +15,20 @@ describe('DocumentService', () => {
   let mockCountDocuments: jest.Mock
   let mockDeleteConceptsFromDocument: jest.Mock
   let mockCreateAction: jest.Mock
+  let mockMarkDocumentsWaitingForUpdate: jest.Mock
   beforeEach(() => {
     mockFetchDocuments = jest.fn()
     mockfetchDocumentById = jest.fn()
     mockCountDocuments = jest.fn()
     mockDeleteConceptsFromDocument = jest.fn()
     mockCreateAction = jest.fn()
+    mockMarkDocumentsWaitingForUpdate = jest.fn()
     ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
       fetchDocuments: mockFetchDocuments,
       fetchDocumentById: mockfetchDocumentById,
       deleteConceptsFromDocument: mockDeleteConceptsFromDocument,
       countDocuments: mockCountDocuments,
+      markDocumentsWaitingForUpdate: mockMarkDocumentsWaitingForUpdate,
     }))
     ;(UserDAO as jest.Mock).mockImplementation(() => ({
       getUserByIdentifier: jest.fn().mockResolvedValue({
@@ -70,7 +73,7 @@ describe('DocumentService', () => {
       columnFilters: [{ id: 'category', value: 'reports' }],
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
-      omittedHalCollectionCodes: [],
+      halCollectionCodes: ['ABC', 'DEF'],
     }
 
     await expect(documentService.countDocuments(params)).resolves.toEqual(
@@ -97,7 +100,7 @@ describe('DocumentService', () => {
       columnFilters: [{ id: 'category', value: 'reports' }],
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
-      omittedHalCollectionCodes: [],
+      halCollectionCodes: ['ABC', 'DEF'],
     }
 
     await expect(documentService.countDocuments(params)).rejects.toThrow(
@@ -131,7 +134,8 @@ describe('DocumentService', () => {
       sorting: [{ id: 'name', desc: false }],
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
-      omittedHalCollectionCodes: [],
+      halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
     }
 
     await expect(documentService.fetchDocuments(params)).resolves.toEqual(
@@ -161,7 +165,8 @@ describe('DocumentService', () => {
       sorting: [],
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
-      omittedHalCollectionCodes: [],
+      halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
     }
 
     await expect(documentService.fetchDocuments(params)).rejects.toThrow(
@@ -233,5 +238,79 @@ describe('DocumentService', () => {
       parameters: { conceptUids: ['c1', 'c2'] },
       personUid: 'local-123',
     })
+  })
+  it('marks docs waiting, then creates MERGE action, and returns {updated}', async () => {
+    const updated = [
+      { uid: 'd1', state: 'waiting_for_update' },
+      { uid: 'd2', state: 'waiting_for_update' },
+      { uid: 'd3', state: 'waiting_for_update' },
+    ]
+    mockMarkDocumentsWaitingForUpdate.mockResolvedValue(updated)
+
+    const result = await documentService.mergeDocuments(
+      ['d1', 'd2', 'd3'],
+      'user-1234',
+    )
+
+    expect(mockMarkDocumentsWaitingForUpdate).toHaveBeenCalledTimes(1)
+    expect(mockMarkDocumentsWaitingForUpdate).toHaveBeenCalledWith([
+      'd1',
+      'd2',
+      'd3',
+    ])
+
+    expect(mockCreateAction).toHaveBeenCalledTimes(1)
+    expect(mockCreateAction).toHaveBeenCalledWith({
+      actionType: 'MERGE',
+      targetType: 'DOCUMENT',
+      targetUid: 'd1',
+      path: null,
+      parameters: { mergedDocumentUids: ['d2', 'd3'] },
+      personUid: 'local-123',
+    })
+
+    expect(result).toEqual({ updated })
+  })
+
+  it('throws and does not create action if marking waiting state fails', async () => {
+    mockMarkDocumentsWaitingForUpdate.mockRejectedValue(
+      new Error('DAO mark error'),
+    )
+
+    await expect(
+      documentService.mergeDocuments(['d1', 'd2'], 'user-1234'),
+    ).rejects.toThrow('Error merging documents')
+
+    expect(mockCreateAction).not.toHaveBeenCalled()
+  })
+
+  it('throws if fewer than 2 documents are provided to mergeDocuments', async () => {
+    await expect(
+      documentService.mergeDocuments(['only-one'], 'user-1234'),
+    ).rejects.toThrow('At least two documents are required to merge')
+
+    expect(mockCreateAction).not.toHaveBeenCalled()
+  })
+
+  it('throws when user submitting merge has no associated person', async () => {
+    ;(UserDAO as jest.Mock).mockImplementationOnce(() => ({
+      getUserByIdentifier: jest.fn().mockResolvedValue({ person: null }),
+    }))
+    const svc = new DocumentService()
+
+    await expect(svc.mergeDocuments(['d1', 'd2'], 'user-1234')).rejects.toThrow(
+      'Error merging documents',
+    )
+
+    // ensure no action is created when user not found
+    expect(mockCreateAction).not.toHaveBeenCalled()
+  })
+
+  it('throws when action creation fails during mergeDocuments', async () => {
+    mockCreateAction.mockRejectedValueOnce(new Error('DAO level error'))
+
+    await expect(
+      documentService.mergeDocuments(['d1', 'd2'], 'user-1234'),
+    ).rejects.toThrow('Error merging documents')
   })
 })

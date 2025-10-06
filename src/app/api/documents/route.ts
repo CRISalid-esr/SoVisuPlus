@@ -18,9 +18,11 @@ export const GET = async (req: NextRequest) => {
     const contributorType: AgentType | null = agentTypeFromString(
       urlParams.get('contributorType'),
     )
-    const omittedHalCollectionCodes = JSON.parse(
-      urlParams.get('omittedHalCollectionCodes') || '[]',
+    const halCollectionCodes = JSON.parse(
+      urlParams.get('halCollectionCodes') || '[]',
     )
+    const areHalCollectionCodesOmitted =
+      urlParams.get('areHalCollectionCodesOmitted') === 'true'
 
     if (!contributorType) {
       return NextResponse.json(
@@ -38,7 +40,8 @@ export const GET = async (req: NextRequest) => {
       sorting,
       contributorUid,
       contributorType,
-      omittedHalCollectionCodes,
+      halCollectionCodes,
+      areHalCollectionCodesOmitted,
     })
 
     return NextResponse.json({

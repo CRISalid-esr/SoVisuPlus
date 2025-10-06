@@ -11,7 +11,10 @@ dotenv.config()
   const semaphore = new Sema(1)
 
   try {
-    const websocketPort = parseInt(process.env.WS_PORT || '3001', 10)
+    const websocketPort = process.env.WS_INTERNAL_PORT
+      ? parseInt(process.env.WS_INTERNAL_PORT, 10)
+      : 3001
+    console.log(`Starting WebSocket server on port ${websocketPort}...`)
     startWebSocketServer(websocketPort)
 
     console.log('Connecting to RabbitMQ...')

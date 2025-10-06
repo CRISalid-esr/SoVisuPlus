@@ -5,6 +5,7 @@ import {
   Document,
   DocumentAbstract,
   DocumentRecord,
+  DocumentState,
   DocumentTitle,
   HalSubmitType,
   Journal,
@@ -15,6 +16,11 @@ import {
   ResearchStructure,
   ResearchStructureDescription,
   ResearchStructureName,
+  Role,
+  Permission,
+  RolePermission,
+  UserRole,
+  UserRoleScope,
 } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -36,6 +42,14 @@ export type JournalWithRelations = Journal & {
   identifiers: JournalIdentifier[]
 }
 
+export type ConceptLabelWithRelations = ConceptLabel & {
+  type: LabelType
+}
+
+export type ConceptWithRelations = Concept & {
+  labels: ConceptLabelWithRelations[]
+}
+
 export type DocumentWithRelations = Document & {
   titles: DocumentTitle[]
   abstracts: DocumentAbstract[]
@@ -43,14 +57,25 @@ export type DocumentWithRelations = Document & {
   contributions: ContributionWithRelations[]
   records: DocumentRecordWithRelations[]
   journal: JournalWithRelations | null
+  state: DocumentState
 }
 
-export type ConceptWithRelations = Concept & {
-  labels: ConceptLabelWithRelations[]
+export type RolePermissionWithPermission = RolePermission & {
+  permission: Permission
 }
 
-export type ConceptLabelWithRelations = ConceptLabel & {
-  type: LabelType
+export type RoleWithRelations = Role & {
+  permissions: RolePermissionWithPermission[] // include: { permissions: { include: { permission: true } } }
+}
+
+/** IDs-only shape — efficient when you just need to sync the join table */
+export type RoleWithPermissionIds = Role & {
+  permissions: Array<Pick<RolePermission, 'permissionId'>> // include: { permissions: { select: { permissionId: true } } }
+}
+
+export type UserRoleWithRelations = UserRole & {
+  role: RoleWithRelations
+  scopes: UserRoleScope[]
 }
 
 export default prisma

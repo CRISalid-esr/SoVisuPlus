@@ -10,16 +10,21 @@ import {
   isHarvestingResultEvent,
   isHarvestingStateEvent,
 } from '@/types/GenericEvent'
+import { buildWebSocketURL } from '@/lib/websocket/ws-url'
+import * as Lingui from '@lingui/core'
 
 export default function WebSocketListener() {
   const { enqueueSnackbar } = useSnackbar()
   const { startHarvesting, updateHarvestingStatus, incrementPlatformCount } =
     useStore((state) => state.harvesting)
-  const { currentPerspective } = useStore((state) => state.user)
+  const { currentPerspective, connectedUser } = useStore((state) => state.user)
   const { setListHasChanged, setSelectedDocumentHasChanged, selectedDocument } =
     useStore((state) => state.document)
+
+  // keep fresh values available inside the ws callback
   const perspectiveRef = useRef(currentPerspective)
   const documentRef = useRef(selectedDocument)
+  const userRef = useRef(connectedUser)
 
   const snackBarVariantByEventType = (
     eventType: string,
@@ -37,13 +42,15 @@ export default function WebSocketListener() {
         return 'default'
     }
   }
+
   useEffect(() => {
     perspectiveRef.current = currentPerspective
     documentRef.current = selectedDocument
-  }, [currentPerspective, selectedDocument])
+    userRef.current = connectedUser
+  }, [currentPerspective, selectedDocument, connectedUser])
 
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:3001')
+    const ws = new WebSocket(buildWebSocketURL())
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data) as GenericEvent
@@ -51,19 +58,39 @@ export default function WebSocketListener() {
 
       const currentPerspectiveRef = perspectiveRef.current
       const selectedDocumentRef = documentRef.current
+      const connectedUserRef = userRef.current
 
       if (isDataEvent(data)) {
         const variant = snackBarVariantByEventType(data.eventType)
         const peopleUids = data.impliedPeopleUids || []
 
         const currentUid = currentPerspectiveRef?.uid
-        if (currentUid && peopleUids.includes(currentUid)) {
+        const currentPerspectiveImplied =
+          currentUid && peopleUids.includes(currentUid)
+        const userImplied =
+          connectedUserRef?.person?.uid &&
+          peopleUids.includes(connectedUserRef.person.uid)
+
+        if (currentPerspectiveImplied) {
           setListHasChanged(true)
         }
 
         if (data.objectUid === selectedDocumentRef?.uid) {
           setSelectedDocumentHasChanged(true)
         }
+
+        if (!currentPerspectiveImplied && !userImplied) {
+          console.log(
+            'WebSocket event not relevant to current perspective or user, ignoring.',
+          )
+          return
+        }
+
+        const labels = data.objectLabels || {}
+
+        const currentLang = Lingui.i18n.locale as string
+        const selectedLabel =
+          (currentLang && labels[currentLang]) || Object.values(labels)[0] || ''
 
         enqueueSnackbar(
           <>
@@ -79,10 +106,17 @@ export default function WebSocketListener() {
             {data.eventType === 'unchanged' && (
               <Trans id='snackbar_document_unchanged' />
             )}
-            <strong>{data.objectLabel}</strong>
-            <a href={`/documents/${data.objectUid}`} style={{ marginLeft: 8 }}>
-              <Trans id='snackbar_view_document' />
-            </a>
+            {selectedLabel && (
+              <strong style={{ marginLeft: 6 }}>{selectedLabel}</strong>
+            )}
+            {data.eventType !== 'deleted' && (
+              <a
+                href={`/documents/${data.objectUid}`}
+                style={{ marginLeft: 8 }}
+              >
+                <Trans id='snackbar_view_document' />
+              </a>
+            )}
           </>,
           {
             variant,

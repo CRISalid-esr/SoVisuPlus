@@ -1,5 +1,5 @@
 'use client'
-
+import './page.css'
 import { TabFilter } from '@/components/TabFilter'
 import useStore from '@/stores/global_store'
 import {
@@ -7,7 +7,7 @@ import {
   BibliographicPlatformMetadata,
 } from '@/types/BibliographicPlatform'
 import { Contribution } from '@/types/Contribution'
-import { Document, DocumentType } from '@/types/Document'
+import { Document, DocumentState, DocumentType } from '@/types/Document'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
@@ -41,10 +41,13 @@ import {
 } from 'material-react-table'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation' // Import useRouter
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Highlighter from 'react-highlight-words'
 import DocumentHeader from './components/DocumentHeader'
 import HalStatusCell from './components/HalStatusCell'
+import HalStatusCellBadge, {
+  HalStatusCellType,
+} from './components/HalStatusCellBadge'
 import { DocumentTypeIcons } from './components/DocumentTypeIcons'
 import { DocumentTypeLabels } from './components/DocumentTypeLabels'
 import SyncIcon from '@mui/icons-material/Sync'
@@ -90,14 +93,21 @@ export default function DocumentsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const navigateToDetailsPage = (documentUid: string) => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('tab', 'bibliographic_information')
-    router.push(`/${lang}/documents/${documentUid}?${params.toString()}`)
-  }
+  const navigateToDetailsPage = useCallback(
+    (documentUid: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set('tab', 'bibliographic_information')
+      router.push(`/${lang}/documents/${documentUid}?${params.toString()}`)
+    },
+    [lang, router, searchParams],
+  )
 
-  const columns = useMemo<MRT_ColumnDef<Document>[]>(
-    () => [
+  const columns = useMemo<
+    MRT_ColumnDef<Document>[]
+  >((): MRT_ColumnDef<Document>[] => {
+    const acronyms = currentPerspective?.membershipAcronyms || []
+
+    return [
       {
         enableSorting: false,
         accessorKey: 'type',
@@ -146,10 +156,17 @@ export default function DocumentsPage() {
           row,
           column,
         }: {
-          row: { original: { titles: Array<Literal>; uid: string } }
+          row: {
+            original: {
+              titles: Array<Literal>
+              uid: string
+              state: DocumentState
+            }
+          }
           column: MRT_Column<Document>
         }) {
-          const { titles, uid } = row.original
+          const { titles, uid, state } = row.original
+          const isWaiting = state == DocumentState.waiting_for_update
           const preferredRowLang = selectedTitleLangs[uid] || lang
           const localizedTitle = getLocalizedValue(
             titles,
@@ -161,11 +178,12 @@ export default function DocumentsPage() {
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Box
                 onClick={() => {
+                  if (isWaiting) return
                   const documentUid = row.original.uid
                   navigateToDetailsPage(documentUid)
                 }}
                 sx={{
-                  cursor: 'pointer',
+                  cursor: isWaiting ? 'progress' : 'pointer',
                   color: 'primary.main',
                   textDecoration: 'none',
                   '&:hover': {
@@ -187,7 +205,10 @@ export default function DocumentsPage() {
                 texts={titles}
                 selectedLang={localizedTitle.language}
                 onLanguageSelect={(newLang) =>
-                  setSelectedTitleLangs((prev) => ({ ...prev, [uid]: newLang }))
+                  setSelectedTitleLangs((prev) => ({
+                    ...prev,
+                    [uid]: newLang,
+                  }))
                 }
               />
             </Box>
@@ -195,6 +216,7 @@ export default function DocumentsPage() {
         },
       },
       {
+        enableSorting: false,
         accessorFn: (row) => {
           return row.contributions
         },
@@ -282,11 +304,46 @@ export default function DocumentsPage() {
         },
       },
       {
+        enableSorting: false,
         accessorKey: 'halStatus',
         header: t`documents_page_halStatus_column`,
         Cell({ row }) {
           return <HalStatusCell row={row} />
         },
+        filterVariant: 'multi-select',
+        filterSelectOptions: [
+          {
+            // @ts-expect-error: so that label accepts an Element
+            label: (
+              <HalStatusCellBadge
+                type={HalStatusCellType.InCollection}
+                isSingleLine
+              />
+            ),
+            value: 'in_collection',
+          },
+          {
+            // @ts-expect-error: so that label accepts an Element
+            label: (
+              <HalStatusCellBadge
+                type={HalStatusCellType.OutOfCollection}
+                acronyms={acronyms}
+                isSingleLine
+              />
+            ),
+            value: 'out_of_collection',
+          },
+          {
+            // @ts-expect-error: so that label accepts an Element
+            label: (
+              <HalStatusCellBadge
+                type={HalStatusCellType.OutsideHal}
+                isSingleLine
+              />
+            ),
+            value: 'outside_hal',
+          },
+        ],
       },
       {
         enableSorting: false,
@@ -374,15 +431,15 @@ export default function DocumentsPage() {
           },
         ),
       },
-    ],
-    [
-      lang,
-      globalFilter,
-      selectedTitleLangs,
-      supportedLocales,
-      navigateToDetailsPage,
-    ],
-  )
+    ]
+  }, [
+    lang,
+    globalFilter,
+    selectedTitleLangs,
+    supportedLocales,
+    navigateToDetailsPage,
+    currentPerspective?.membershipAcronyms,
+  ])
 
   const requestIdRef = useRef(0)
   const countDocumentsRequestIdRef = useRef(0)
@@ -396,6 +453,7 @@ export default function DocumentsPage() {
     count: { allItems, incompleteHalRepositoryItems },
     listHasChanged,
     setListHasChanged,
+    mergeDocuments,
   } = useStore((state) => state.document)
 
   const tabs = [
@@ -477,11 +535,8 @@ export default function DocumentsPage() {
       contributorUid: currentPerspective?.uid || '',
       contributorType: contributorType,
       requestId: nextRequestId,
-      omittedHalCollectionCodes: JSON.stringify(
-        selectedTab === 'incomplete_hal_repository'
-          ? currentPerspective.membershipAcronyms
-          : [],
-      ),
+      halCollectionCodes: JSON.stringify(currentPerspective.membershipAcronyms),
+      areHalCollectionCodesOmitted: selectedTab === 'incomplete_hal_repository',
     }).catch((error) => {
       console.error('Error fetching documents:', error)
     })
@@ -495,9 +550,7 @@ export default function DocumentsPage() {
       contributorUid: currentPerspective?.uid || '',
       contributorType: contributorType,
       requestId: nextCountDocumentsRequestId,
-      omittedHalCollectionCodes: JSON.stringify(
-        currentPerspective.membershipAcronyms,
-      ),
+      halCollectionCodes: JSON.stringify(currentPerspective.membershipAcronyms),
     }).catch((error) => {
       console.error('Error counting documents:', error)
     })
@@ -528,6 +581,16 @@ export default function DocumentsPage() {
     router.push(`/${lang}/documents?${params.toString()}`)
   }
 
+  const onMergeDocuments = async (documentUids: string[]) => {
+    if (documentUids.length < 2) return
+    try {
+      await mergeDocuments(documentUids)
+      setTriggerReloadList((prev) => !prev)
+    } catch (error) {
+      console.error('Error merging documents:', error)
+    }
+  }
+
   return (
     <Box>
       <DocumentHeader
@@ -543,10 +606,9 @@ export default function DocumentsPage() {
         {listHasChanged && (
           <Alert
             severity='info'
-            sx={{ mb: 2 }}
-            onClose={() => {
-              setListHasChanged(false)
-            }}
+            variant='filled'
+            className='refresh-alert'
+            onClose={() => setListHasChanged(false)}
           >
             <Typography component='span'>
               {ownPerspective && (
@@ -611,6 +673,17 @@ export default function DocumentsPage() {
         manualPagination
         manualSorting
         enableColumnResizing
+        enableRowSelection={(row) =>
+          row.original.state == DocumentState.default
+        }
+        muiTableBodyRowProps={({ row }) => {
+          const isWaiting = row.original.state === 'waiting_for_update'
+
+          return {
+            className: isWaiting ? 'mrt-row-waiting' : '',
+          }
+        }}
+        muiSelectCheckboxProps={{ color: 'secondary' }}
         columns={columns}
         rowCount={totalItems}
         data={documents}
@@ -630,19 +703,45 @@ export default function DocumentsPage() {
         localization={Localization[lang]}
         enableRowActions
         positionActionsColumn='last'
-        renderRowActionMenuItems={({ row, table }) => [
-          <Box sx={{ display: 'flex' }} key={row.original.uid}>
-            <MRT_ActionMenuItem
-              icon={<InfoIcon />}
-              key='edit'
-              label={t`documents_page_action_column_details`}
-              onClick={() => {
-                navigateToDetailsPage(row.original.uid)
-              }}
-              table={table}
-            />
-          </Box>,
-        ]}
+        renderTopToolbarCustomActions={({ table }) =>
+          table.getSelectedRowModel().rows.length > 0 && (
+            <Box sx={{ display: 'flex', gap: '1rem', p: '4px' }}>
+              <Button
+                color='secondary'
+                disabled={table.getSelectedRowModel().rows.length < 2}
+                onClick={async () => {
+                  await onMergeDocuments(
+                    table
+                      .getSelectedRowModel()
+                      .rows.map((row) => row.original.uid),
+                  )
+                  table.resetRowSelection()
+                }}
+                variant='contained'
+              >
+                {t`documents_page_merge_selected_documents_button`}
+              </Button>
+            </Box>
+          )
+        }
+        renderRowActionMenuItems={({ row, table }) => {
+          const isWaiting =
+            row.original.state === DocumentState.waiting_for_update
+          if (isWaiting) return []
+          return [
+            <Box sx={{ display: 'flex' }} key={row.original.uid}>
+              <MRT_ActionMenuItem
+                icon={<InfoIcon />}
+                key='edit'
+                label={t`documents_page_action_column_details`}
+                onClick={() => {
+                  navigateToDetailsPage(row.original.uid)
+                }}
+                table={table}
+              />
+            </Box>,
+          ]
+        }}
       />
     </Box>
   )

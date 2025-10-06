@@ -2,7 +2,7 @@ import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { AgentType } from '@/types/IAgent'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
-import { ActionType, ActionTargetType } from '@/types/Action'
+import { ActionTargetType, ActionType } from '@/types/Action'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
@@ -15,7 +15,8 @@ interface FetchDocumentsParams {
   sorting: { id: string; desc: boolean }[]
   contributorUid: string | null
   contributorType: AgentType
-  omittedHalCollectionCodes: string[]
+  halCollectionCodes: string[]
+  areHalCollectionCodesOmitted: boolean
 }
 
 interface CountDocumentsParams {
@@ -24,7 +25,7 @@ interface CountDocumentsParams {
   columnFilters: { id: string; value: string }[]
   contributorUid: string | null
   contributorType: AgentType
-  omittedHalCollectionCodes: string[]
+  halCollectionCodes: string[]
 }
 
 export class DocumentService {
@@ -75,7 +76,8 @@ export class DocumentService {
     sorting,
     contributorUid,
     contributorType,
-    omittedHalCollectionCodes,
+    halCollectionCodes,
+    areHalCollectionCodesOmitted,
   }: FetchDocumentsParams) {
     const contributorUids = await this.selectContributorUids(
       contributorUid,
@@ -91,7 +93,8 @@ export class DocumentService {
         columnFilters,
         sorting,
         contributorUids,
-        omittedHalCollectionCodes,
+        halCollectionCodes,
+        areHalCollectionCodesOmitted,
       })
       return { documents, totalItems }
     } catch (error) {
@@ -106,7 +109,7 @@ export class DocumentService {
     columnFilters,
     contributorUid,
     contributorType,
-    omittedHalCollectionCodes,
+    halCollectionCodes,
   }: CountDocumentsParams) {
     const contributorUids = await this.selectContributorUids(
       contributorUid,
@@ -120,7 +123,7 @@ export class DocumentService {
           searchLang: searchLang,
           columnFilters,
           contributorUids,
-          omittedHalCollectionCodes,
+          halCollectionCodes,
         })
       return { allItems, incompleteHalRepositoryItems }
     } catch (error) {
@@ -166,6 +169,42 @@ export class DocumentService {
       })
     } catch (error) {
       const message = 'Error deleting concepts from document'
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
+
+  async mergeDocuments(documentUids: string[], userName: string) {
+    if (documentUids.length < 2) {
+      throw new Error('At least two documents are required to merge')
+    }
+    try {
+      const user = await this.userDAO.getUserByIdentifier({
+        type: PersonIdentifierType.LOCAL,
+        value: userName,
+      })
+      if (!user?.person) {
+        throw new Error(`User with username ${userName} not found`)
+      }
+
+      const updated =
+        await this.documentDAO.markDocumentsWaitingForUpdate(documentUids)
+
+      await this.actionDAO.createAction({
+        actionType: ActionType.MERGE,
+        targetType: ActionTargetType.DOCUMENT,
+        // for now, the primary document is elected by graph algorithm,
+        // not by user choice, thus the targetUid is simply the first in the list
+        // without any special meaning. The other merged documents are in parameters.
+        targetUid: documentUids[0],
+        path: null,
+        parameters: { mergedDocumentUids: documentUids.slice(1) },
+        personUid: user.person?.uid,
+      })
+
+      return { updated }
+    } catch (error) {
+      const message = 'Error merging documents'
       console.error(message, error)
       throw new Error(message)
     }

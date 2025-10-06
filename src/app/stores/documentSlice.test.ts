@@ -1,18 +1,19 @@
 import { create } from 'zustand'
 import {
   addDocumentSlice,
-  DocumentQuery,
   CountDocumentQuery,
+  DocumentQuery,
   DocumentSlice,
 } from './documentSlice'
 import { toQueryString } from '@/utils/query'
+import { DocumentState as DbDocumentState } from '@prisma/client' // for 'waiting_for_update'
+import { Document, DocumentType } from '@/types/Document'
+import { Literal } from '@/types/Literal'
 
-// Mock the toQueryString utility
 jest.mock('@/utils/query', () => ({
   toQueryString: jest.fn().mockReturnValue('mockQueryString'),
 }))
 
-// Mock fetch
 global.fetch = jest.fn()
 
 const createTestStore = () => {
@@ -20,6 +21,24 @@ const createTestStore = () => {
     addDocumentSlice(set, get, store),
   )
 }
+
+const makeDoc = (
+  uid: string,
+  state: DbDocumentState = DbDocumentState.default,
+): Document =>
+  new Document(
+    uid,
+    DocumentType.JournalArticle,
+    '2024-01-01',
+    new Date('2024-01-01'),
+    new Date('2024-01-01'),
+    [new Literal(`Title ${uid}`, 'en')],
+    [],
+    [], // subjects
+    [], // contributions
+    [], // records
+    state,
+  )
 
 describe('addDocumentSlice', () => {
   let useStore: ReturnType<typeof createTestStore>
@@ -85,7 +104,8 @@ describe('addDocumentSlice', () => {
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,
-      omittedHalCollectionCodes: '',
+      halCollectionCodes: '["ABC","DEF"]',
+      areHalCollectionCodesOmitted: false,
     }
 
     // Call the fetchDocuments method
@@ -120,7 +140,8 @@ describe('addDocumentSlice', () => {
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,
-      omittedHalCollectionCodes: '',
+      halCollectionCodes: '["ABC","DEF"]',
+      areHalCollectionCodesOmitted: false,
     }
 
     // Call the fetchDocuments method
@@ -153,7 +174,7 @@ describe('addDocumentSlice', () => {
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,
-      omittedHalCollectionCodes: '',
+      halCollectionCodes: '["ABC","DEF"]',
     }
 
     // Call the countDocuments method
@@ -188,7 +209,7 @@ describe('addDocumentSlice', () => {
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,
-      omittedHalCollectionCodes: '',
+      halCollectionCodes: '["ABC","DEF"]',
     }
 
     // Call the countDocuments method
@@ -198,5 +219,140 @@ describe('addDocumentSlice', () => {
     const state = useStore.getState().document
     expect(state.count.loading).toBe(false)
     expect(state.count.error).toBe(mockError)
+  })
+})
+
+describe('addDocumentSlice - mergeDocuments', () => {
+  let useStore: ReturnType<typeof createTestStore>
+
+  beforeEach(() => {
+    useStore = createTestStore()
+    jest.clearAllMocks()
+  })
+
+  it('does not call API when less than 2 document UIDs are provided', async () => {
+    const spyErr = jest.spyOn(console, 'error').mockImplementation(() => {})
+    await useStore.getState().document.mergeDocuments(['only-one'])
+
+    expect(global.fetch).not.toHaveBeenCalled()
+    expect(spyErr).toHaveBeenCalledWith(
+      'At least two documents are required to merge',
+    )
+    spyErr.mockRestore()
+  })
+
+  it('calls /api/documents/merge and updates states in store (list + selectedDocument)', async () => {
+    // Seed documents + selectedDocument
+    useStore.setState((s) => ({
+      document: {
+        ...s.document,
+        documents: [makeDoc('d1'), makeDoc('d2'), makeDoc('d3')],
+        selectedDocument: makeDoc('d2'),
+      },
+    }))
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        success: true,
+        queued: true,
+        updated: [
+          { uid: 'd1', state: DbDocumentState.waiting_for_update },
+          { uid: 'd2', state: DbDocumentState.waiting_for_update },
+        ],
+      }),
+    })
+
+    await useStore.getState().document.mergeDocuments(['d1', 'd2'])
+
+    // API called with correct payload
+    expect(global.fetch).toHaveBeenCalledWith('/api/documents/merge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ documentUids: ['d1', 'd2'] }),
+    })
+
+    const { documents, selectedDocument, error } = useStore.getState().document
+
+    // Only d1, d2 updated -> d3 remains default
+    expect(documents.find((d) => d.uid === 'd1')?.state).toBe(
+      DbDocumentState.waiting_for_update,
+    )
+    expect(documents.find((d) => d.uid === 'd2')?.state).toBe(
+      DbDocumentState.waiting_for_update,
+    )
+    expect(documents.find((d) => d.uid === 'd3')?.state).toBe('default')
+
+    // selectedDocument (d2) also updated
+    expect(selectedDocument?.uid).toBe('d2')
+    expect(selectedDocument?.state).toBe(DbDocumentState.waiting_for_update)
+
+    // no error
+    expect(error).toBeNull()
+  })
+
+  it('sets error when /api/documents/merge returns !ok', async () => {
+    useStore.setState((s) => ({
+      document: {
+        ...s.document,
+        documents: [makeDoc('d1'), makeDoc('d2')],
+      },
+    }))
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ error: 'Failed to merge documents' }),
+    })
+
+    await useStore.getState().document.mergeDocuments(['d1', 'd2'])
+
+    const { error, documents } = useStore.getState().document
+    expect(error).toBe('Failed to merge documents')
+    // states unchanged on failure
+    expect(documents.find((d) => d.uid === 'd1')?.state).toBe('default')
+    expect(documents.find((d) => d.uid === 'd2')?.state).toBe('default')
+  })
+
+  it('sets error when fetch throws', async () => {
+    useStore.setState((s) => ({
+      document: {
+        ...s.document,
+        documents: [makeDoc('d1'), makeDoc('d2')],
+      },
+    }))
+
+    const boom = new Error('network down')
+    ;(global.fetch as jest.Mock).mockRejectedValueOnce(boom)
+
+    await useStore.getState().document.mergeDocuments(['d1', 'd2'])
+
+    const { error } = useStore.getState().document
+    expect(error).toBe('network down')
+  })
+
+  it('ignores updated items not present in store (no throw, no update)', async () => {
+    useStore.setState((s) => ({
+      document: {
+        ...s.document,
+        documents: [makeDoc('local-1')],
+      },
+    }))
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        success: true,
+        queued: true,
+        updated: [
+          { uid: 'server-only', state: DbDocumentState.waiting_for_update },
+        ],
+      }),
+    })
+
+    await useStore
+      .getState()
+      .document.mergeDocuments(['server-only', 'local-1'])
+
+    const { documents, error } = useStore.getState().document
+    // local doc remains default (because 'server-only' isn't in list)
+    expect(documents.find((d) => d.uid === 'local-1')?.state).toBe('default')
+    expect(error).toBeNull()
   })
 })

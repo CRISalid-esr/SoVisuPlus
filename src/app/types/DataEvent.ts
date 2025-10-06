@@ -13,7 +13,7 @@ export class DataEvent extends EventBase {
       | 'User',
     public readonly objectUid: string,
     public readonly eventType: DataEventType,
-    public readonly objectLabel?: string,
+    public readonly objectLabels: Record<string, string> = {},
     public readonly impliedPeopleUids: string[] = [],
   ) {
     super()
@@ -25,7 +25,7 @@ export class DataEvent extends EventBase {
       objectType: this.objectType,
       objectUid: this.objectUid,
       eventType: this.eventType,
-      objectLabel: this.objectLabel,
+      objectLabels: this.objectLabels,
       impliedPeopleUids: this.impliedPeopleUids,
     }
   }

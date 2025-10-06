@@ -15,9 +15,14 @@ GIT_COMMIT_VAL="${GIT_COMMIT:-$(git rev-parse HEAD 2>/dev/null || true)}"
 GIT_BRANCH_VAL="${GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)}"
 [ -n "${GIT_BRANCH_VAL}" ] || GIT_BRANCH_VAL="unknown"
 
-# --- write .env (overwrite, not append) ------------------------------------
+# --- write .env (append to existing if present) -----------------------------
 # Quote values that may contain special chars/spaces
-cat > .env <<EOF
+cat <<EOF >> .env
+WS_SCHEME=${WS_SCHEME:-ws}
+WS_HOST=${WS_HOST:-localhost}
+WS_PORT=${WS_PORT:-3001}
+WS_INTERNAL_PORT=${WS_INTERNAL_PORT:-3001}
+WS_PATH=${WS_PATH:-/}
 DOCKER_IMAGE_NAME=${DOCKER_IMAGE_NAME:-unknown}
 DOCKER_TAG=${DOCKER_TAG:-unknown}
 DOCKER_DIGEST=${DOCKER_DIGEST:-unknown}
