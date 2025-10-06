@@ -1,4 +1,4 @@
-export const vocabs = process.env.VOCABS_AVAILABLE?.split(',') || []
+export const vocabs = process.env.AVAILABLE_VOCABS?.split(',') || []
 
 export function getVocab(name: string) {
   const vocab = vocabs.find((vocab) => vocab === name.toLowerCase())
