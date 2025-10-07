@@ -63,12 +63,12 @@ export type DocumentWithRelations = Document & {
   state: DocumentState
 }
 
-export type RolePermissionWithPermission = RolePermission & {
+export type RoleWithPermission = RolePermission & {
   permission: Permission
 }
 
 export type RoleWithRelations = Role & {
-  permissions: RolePermissionWithPermission[] // include: { permissions: { include: { permission: true } } }
+  permissions: RoleWithPermission[] // include: { permissions: { include: { permission: true } } }
 }
 
 export type RoleWithPermissionIds = Role & {

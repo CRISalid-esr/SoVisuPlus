@@ -96,7 +96,9 @@ export class RoleService {
       idValue: input.user.idValue,
     })
     if (!userId) {
-      throw new Error('User not found for provided selector')
+      throw new Error(
+        `User not found for provided selector ${JSON.stringify(input.user)}`,
+      )
     }
 
     const role = await this.roleDAO.getRoleByName(input.roleName)

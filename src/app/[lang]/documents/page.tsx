@@ -60,9 +60,8 @@ import HighlighterWithEllipsis from '@/app/[lang]/documents/components/Highlight
 import DocumentSyncDialog from '@/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog'
 import { Trans } from '@lingui/react'
 import { useSession } from 'next-auth/react'
-import { subject } from '@casl/ability'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
-import { PermissionSubject } from '@/types/Permission'
+import { PermissionAction } from '@/types/Permission'
 
 dayjs.extend(utc)
 
@@ -682,18 +681,16 @@ export default function DocumentsPage() {
 
       <MaterialReactTable<Document>
         initialState={{ showColumnFilters: true }}
-        getRowId={(row) => row.uid}
+        getRowId={(row) => {
+          return row.uid
+        }}
         manualFiltering
         manualPagination
         manualSorting
         enableColumnResizing
         enableRowSelection={(row) => {
-          const canMerge =
-            isDocument(row.original) &&
-            ability.can(
-              'merge',
-              subject(PermissionSubject.Document, row.original.toAuthz()),
-            )
+          if (!isDocument(row.original)) return false
+          const canMerge = ability.can(PermissionAction.merge, row.original)
           return canMerge && row.original.state == DocumentState.default
         }}
         muiTableBodyRowProps={({ row }) => {
