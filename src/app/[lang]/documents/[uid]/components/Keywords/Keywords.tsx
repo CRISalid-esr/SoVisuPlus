@@ -7,6 +7,7 @@ import {
   CardContent,
   Icon,
   InputAdornment,
+  Link,
   TextField,
   Tooltip,
   Typography,
@@ -26,6 +27,7 @@ import {
 } from '@/lib/services/VocabSearchClient'
 
 type SuggestedKeyword = {
+  link: string
   num: string
   text: string
   vocab: string
@@ -63,6 +65,7 @@ function getAcmNum(iri: string): string {
 
 function Keywords() {
   const theme = useTheme()
+  const [keywordInput, setKeywordInput] = useState<string>('')
   const [keywords, setKeywords] = useState<SuggestedKeyword[]>([])
 
   const { selectedDocument = null, error = null } = useStore(
@@ -84,13 +87,6 @@ function Keywords() {
     await removeConcepts(concepts.map((c) => c.uid as string))
   }
 
-  useEffect(() => {
-    // Implement a centralized error handling
-    if (error) {
-      console.error('Error in Keywords component:', error)
-    }
-  }, [error])
-
   const fetchKeywords = async (value: string) => {
     if (value) {
       const response = await fetch('/api/vocabs' + '?q=' + value)
@@ -103,6 +99,7 @@ function Keywords() {
             .map((item) =>
               item.best_label
                 ? Object.assign(
+                    { link: item.iri },
                     { num: numVocab(item.scheme)(item.iri) },
                     { text: item.best_label?.text, vocab: item.scheme },
                   )
@@ -113,6 +110,22 @@ function Keywords() {
       }
     }
   }
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      if (keywordInput) {
+        fetchKeywords(keywordInput)
+      }
+    }, 300)
+    return () => clearTimeout(delay)
+  }, [keywordInput])
+
+  useEffect(() => {
+    // Implement a centralized error handling
+    if (error) {
+      console.error('Error in Keywords component:', error)
+    }
+  }, [error])
 
   return (
     <CustomCard
@@ -156,10 +169,10 @@ function Keywords() {
         <Box>
           <Autocomplete
             filterOptions={(x) => x}
-            getOptionLabel={(option) => option.text + ' (' + option.num + ')'}
+            getOptionLabel={(option) => option.text}
             groupBy={(option) => option.vocab}
-            onInputChange={async (event, value) => {
-              await fetchKeywords(value)
+            onInputChange={(event, value) => {
+              setKeywordInput(value)
             }}
             options={keywords.sort((a, b) =>
               a.vocab.toLowerCase().localeCompare(b.vocab.toLowerCase()),
@@ -185,8 +198,15 @@ function Keywords() {
                 <Box key={key} component={'li'} {...optionProps}>
                   <Icon />
                   <Typography>{ownerState.getOptionLabel(option)}</Typography>
-                  <Tooltip title={'Info'}>
-                    <InfoOutlined />
+                  <Typography>({option.num})</Typography>
+                  <Tooltip title={option.link}>
+                    <Link
+                      href={option.link}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                    >
+                      <InfoOutlined />
+                    </Link>
                   </Tooltip>
                 </Box>
               )
