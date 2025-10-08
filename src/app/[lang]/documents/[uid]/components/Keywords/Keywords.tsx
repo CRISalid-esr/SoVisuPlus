@@ -1,112 +1,21 @@
 import { CustomCard } from '@/components/Card'
 import { Trans } from '@lingui/react'
-import {
-  Autocomplete,
-  Box,
-  Button,
-  CardContent,
-  Icon,
-  InputAdornment,
-  Link,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Box, Button, CardContent, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useStore from '@/stores/global_store'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { ConceptGroup } from '@/types/ConceptGroup'
 import ConceptChip from '@/app/[lang]/documents/[uid]/components/Keywords/ConceptChip'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Concept } from '@/types/Concept'
-import { Add, InfoOutlined } from '@mui/icons-material'
-import {
-  SuggestResponse,
-  SuggestResponseSchema,
-} from '@/lib/services/VocabSearchClient'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import KeywordSearchAutocomplete from '@/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-type SuggestedKeyword = {
-  link: string
-  num: string
-  text: string
-  vocab: string
-}
-
-function numVocab(vocab: string) {
-  switch (vocab.toLowerCase()) {
-    case 'aat':
-      return getAATNum
-    case 'jel':
-      return getJelNum
-    case 'acm':
-      return getAcmNum
-    default:
-      return (iri: string) => {
-        return iri
-      }
-  }
-}
-
-function getAATNum(iri: string): string {
-  const str = iri.split('/')
-  return str[str.length - 1]
-}
-
-function getJelNum(iri: string): string {
-  const str = iri.split('#')
-  return str[str.length - 1]
-}
-
-function getAcmNum(iri: string): string {
-  const str = iri.split('/')
-  return str[str.length - 1].replaceAll('.', ' - ')
-}
+const queryClient = new QueryClient()
 
 function Keywords() {
   const theme = useTheme()
-  const [keywordInput, setKeywordInput] = useState<string>('')
-  const queryClient = useQueryClient()
-
-  const fetchKeywords = async (value: string): Promise<SuggestedKeyword[]> => {
-    if (value) {
-      const response = await fetch('toto/api/vocabs' + '?q=' + value)
-      if (response.ok) {
-        const json: SuggestResponse = SuggestResponseSchema.parse(
-          await response.json(),
-        )
-        return json.items
-          .map((item) =>
-            item.best_label
-              ? Object.assign(
-                  { link: item.iri },
-                  { num: numVocab(item.scheme)(item.iri) },
-                  { text: item.best_label?.text, vocab: item.scheme },
-                )
-              : undefined,
-          )
-          .filter((item) => item != undefined)
-      } else {
-        throw new Error(
-          'Fail while fetching keywords suggestion : ' + response.statusText,
-        )
-      }
-    } else {
-      return []
-    }
-  }
-
-  const {
-    isPending,
-    isError,
-    error: fetchKeywordsError,
-    data: keywords = [],
-  } = useQuery({
-    queryKey: ['keywords'],
-    queryFn: async () => await fetchKeywords(keywordInput),
-    retry: false,
-  })
 
   const { selectedDocument = null, error = null } = useStore(
     (state) => state.document,
@@ -128,20 +37,11 @@ function Keywords() {
   }
 
   useEffect(() => {
-    const delay = setTimeout(() => {
-      queryClient.invalidateQueries({ queryKey: ['keywords'] })
-    }, 300)
-    return () => clearTimeout(delay)
-  }, [queryClient, keywordInput])
-
-  useEffect(() => {
     // Implement a centralized error handling
     if (error) {
       console.error('Error in Keywords component:', error)
-    } else if (isError) {
-      console.error('Error fetching keyword suggestions:', fetchKeywordsError)
     }
-  }, [error, isError, fetchKeywordsError])
+  }, [error])
 
   return (
     <CustomCard
@@ -183,61 +83,9 @@ function Keywords() {
           ))}
         </Box>
         <Box>
-          <Autocomplete
-            filterOptions={(x) => x}
-            getOptionLabel={(option) => option.text}
-            groupBy={(option) => option.vocab}
-            loading={isPending}
-            noOptionsText={
-              isError ? 'Unable to fetch suggestions' : 'No options'
-            }
-            onInputChange={(event, value) => {
-              setKeywordInput(value)
-            }}
-            options={
-              isError
-                ? []
-                : keywords.sort((a, b) =>
-                    a.vocab.toLowerCase().localeCompare(b.vocab.toLowerCase()),
-                  )
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                error={isError}
-                helperText={isError ? 'Error loading suggestions' : ''}
-                slotProps={{
-                  input: {
-                    ...params.InputProps,
-                    startAdornment: (
-                      <InputAdornment position='start'>
-                        <Add />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
-            )}
-            renderOption={(props, option, state, ownerState) => {
-              const { key, ...optionProps } = props
-              return (
-                <Box key={key} component={'li'} {...optionProps}>
-                  <Icon />
-                  <Typography>{ownerState.getOptionLabel(option)}</Typography>
-                  <Typography>({option.num})</Typography>
-                  <Tooltip title={option.link}>
-                    <Link
-                      href={option.link}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                    >
-                      <InfoOutlined />
-                    </Link>
-                  </Tooltip>
-                </Box>
-              )
-            }}
-          />
+          <QueryClientProvider client={queryClient}>
+            <KeywordSearchAutocomplete />
+          </QueryClientProvider>
         </Box>
       </CardContent>
     </CustomCard>
