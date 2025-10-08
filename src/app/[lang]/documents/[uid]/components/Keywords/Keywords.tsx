@@ -25,6 +25,7 @@ import {
   SuggestResponse,
   SuggestResponseSchema,
 } from '@/lib/services/VocabSearchClient'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 type SuggestedKeyword = {
   link: string
@@ -66,7 +67,46 @@ function getAcmNum(iri: string): string {
 function Keywords() {
   const theme = useTheme()
   const [keywordInput, setKeywordInput] = useState<string>('')
-  const [keywords, setKeywords] = useState<SuggestedKeyword[]>([])
+  const queryClient = useQueryClient()
+
+  const fetchKeywords = async (value: string): Promise<SuggestedKeyword[]> => {
+    if (value) {
+      const response = await fetch('toto/api/vocabs' + '?q=' + value)
+      if (response.ok) {
+        const json: SuggestResponse = SuggestResponseSchema.parse(
+          await response.json(),
+        )
+        return json.items
+          .map((item) =>
+            item.best_label
+              ? Object.assign(
+                  { link: item.iri },
+                  { num: numVocab(item.scheme)(item.iri) },
+                  { text: item.best_label?.text, vocab: item.scheme },
+                )
+              : undefined,
+          )
+          .filter((item) => item != undefined)
+      } else {
+        throw new Error(
+          'Fail while fetching keywords suggestion : ' + response.statusText,
+        )
+      }
+    } else {
+      return []
+    }
+  }
+
+  const {
+    isPending,
+    isError,
+    error: fetchKeywordsError,
+    data: keywords = [],
+  } = useQuery({
+    queryKey: ['keywords'],
+    queryFn: async () => await fetchKeywords(keywordInput),
+    retry: false,
+  })
 
   const { selectedDocument = null, error = null } = useStore(
     (state) => state.document,
@@ -87,45 +127,21 @@ function Keywords() {
     await removeConcepts(concepts.map((c) => c.uid as string))
   }
 
-  const fetchKeywords = async (value: string) => {
-    if (value) {
-      const response = await fetch('/api/vocabs' + '?q=' + value)
-      if (response.ok) {
-        const json: SuggestResponse = SuggestResponseSchema.parse(
-          await response.json(),
-        )
-        setKeywords(
-          json.items
-            .map((item) =>
-              item.best_label
-                ? Object.assign(
-                    { link: item.iri },
-                    { num: numVocab(item.scheme)(item.iri) },
-                    { text: item.best_label?.text, vocab: item.scheme },
-                  )
-                : undefined,
-            )
-            .filter((item) => item != undefined),
-        )
-      }
-    }
-  }
-
   useEffect(() => {
     const delay = setTimeout(() => {
-      if (keywordInput) {
-        fetchKeywords(keywordInput)
-      }
+      queryClient.invalidateQueries({ queryKey: ['keywords'] })
     }, 300)
     return () => clearTimeout(delay)
-  }, [keywordInput])
+  }, [queryClient, keywordInput])
 
   useEffect(() => {
     // Implement a centralized error handling
     if (error) {
       console.error('Error in Keywords component:', error)
+    } else if (isError) {
+      console.error('Error fetching keyword suggestions:', fetchKeywordsError)
     }
-  }, [error])
+  }, [error, isError, fetchKeywordsError])
 
   return (
     <CustomCard
@@ -171,15 +187,25 @@ function Keywords() {
             filterOptions={(x) => x}
             getOptionLabel={(option) => option.text}
             groupBy={(option) => option.vocab}
+            loading={isPending}
+            noOptionsText={
+              isError ? 'Unable to fetch suggestions' : 'No options'
+            }
             onInputChange={(event, value) => {
               setKeywordInput(value)
             }}
-            options={keywords.sort((a, b) =>
-              a.vocab.toLowerCase().localeCompare(b.vocab.toLowerCase()),
-            )}
+            options={
+              isError
+                ? []
+                : keywords.sort((a, b) =>
+                    a.vocab.toLowerCase().localeCompare(b.vocab.toLowerCase()),
+                  )
+            }
             renderInput={(params) => (
               <TextField
                 {...params}
+                error={isError}
+                helperText={isError ? 'Error loading suggestions' : ''}
                 slotProps={{
                   input: {
                     ...params.InputProps,

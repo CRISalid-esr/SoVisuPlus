@@ -24,6 +24,9 @@ import {
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Trans } from '@lingui/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+const queryClient = new QueryClient()
 
 export default function DocumentDetailsPage() {
   const theme = useTheme()
@@ -122,7 +125,11 @@ export default function DocumentDetailsPage() {
       case 'authors':
         return <Authors />
       case 'keywords':
-        return <Keywords />
+        return (
+          <QueryClientProvider client={queryClient}>
+            <Keywords />
+          </QueryClientProvider>
+        )
       case 'domains':
         return <Domains />
       default:
