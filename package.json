@@ -59,6 +59,7 @@
     "@storybook/react": "^8.4.6",
     "@storybook/test": "^8.4.6",
     "@svgr/webpack": "^8.1.0",
+    "@tanstack/react-query": "^5.90.2",
     "@testing-library/user-event": "^14.5.2",
     "@types/amqplib": "^0.10.6",
     "@types/lodash": "^4.17.13",

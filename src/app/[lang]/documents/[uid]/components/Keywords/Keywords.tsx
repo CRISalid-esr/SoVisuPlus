@@ -5,22 +5,66 @@ import {
   Box,
   Button,
   CardContent,
+  Icon,
   InputAdornment,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useStore from '@/stores/global_store'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ConceptGroup } from '@/types/ConceptGroup'
 import ConceptChip from '@/app/[lang]/documents/[uid]/components/Keywords/ConceptChip'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Concept } from '@/types/Concept'
-import { Add } from '@mui/icons-material'
+import { Add, InfoOutlined } from '@mui/icons-material'
+import {
+  SuggestResponse,
+  SuggestResponseSchema,
+} from '@/lib/services/VocabSearchClient'
+
+type SuggestedKeyword = {
+  num: string
+  text: string
+  vocab: string
+}
+
+function numVocab(vocab: string) {
+  switch (vocab.toLowerCase()) {
+    case 'aat':
+      return getAATNum
+    case 'jel':
+      return getJelNum
+    case 'acm':
+      return getAcmNum
+    default:
+      return (iri: string) => {
+        return iri
+      }
+  }
+}
+
+function getAATNum(iri: string): string {
+  const str = iri.split('/')
+  return str[str.length - 1]
+}
+
+function getJelNum(iri: string): string {
+  const str = iri.split('#')
+  return str[str.length - 1]
+}
+
+function getAcmNum(iri: string): string {
+  const str = iri.split('/')
+  return str[str.length - 1].replaceAll('.', ' - ')
+}
 
 function Keywords() {
   const theme = useTheme()
+  const [keywords, setKeywords] = useState<SuggestedKeyword[]>([])
+
   const { selectedDocument = null, error = null } = useStore(
     (state) => state.document,
   )
@@ -46,6 +90,29 @@ function Keywords() {
       console.error('Error in Keywords component:', error)
     }
   }, [error])
+
+  const fetchKeywords = async (value: string) => {
+    if (value) {
+      const response = await fetch('/api/vocabs' + '?q=' + value)
+      if (response.ok) {
+        const json: SuggestResponse = SuggestResponseSchema.parse(
+          await response.json(),
+        )
+        setKeywords(
+          json.items
+            .map((item) =>
+              item.best_label
+                ? Object.assign(
+                    { num: numVocab(item.scheme)(item.iri) },
+                    { text: item.best_label?.text, vocab: item.scheme },
+                  )
+                : undefined,
+            )
+            .filter((item) => item != undefined),
+        )
+      }
+    }
+  }
 
   return (
     <CustomCard
@@ -89,13 +156,20 @@ function Keywords() {
         <Box>
           <Autocomplete
             filterOptions={(x) => x}
-            freeSolo
-            options={[]}
+            getOptionLabel={(option) => option.text + ' (' + option.num + ')'}
+            groupBy={(option) => option.vocab}
+            onInputChange={async (event, value) => {
+              await fetchKeywords(value)
+            }}
+            options={keywords.sort((a, b) =>
+              a.vocab.toLowerCase().localeCompare(b.vocab.toLowerCase()),
+            )}
             renderInput={(params) => (
               <TextField
                 {...params}
                 slotProps={{
                   input: {
+                    ...params.InputProps,
                     startAdornment: (
                       <InputAdornment position='start'>
                         <Add />
@@ -105,6 +179,18 @@ function Keywords() {
                 }}
               />
             )}
+            renderOption={(props, option, state, ownerState) => {
+              const { key, ...optionProps } = props
+              return (
+                <Box key={key} component={'li'} {...optionProps}>
+                  <Icon />
+                  <Typography>{ownerState.getOptionLabel(option)}</Typography>
+                  <Tooltip title={'Info'}>
+                    <InfoOutlined />
+                  </Tooltip>
+                </Box>
+              )
+            }}
           />
         </Box>
       </CardContent>

@@ -24,12 +24,12 @@ const VocabItemSchema = z.object({
   narrower: z.array(z.string()),
 })
 
-const SuggestResponseSchema = z.object({
+export const SuggestResponseSchema = z.object({
   total: z.number(),
   items: z.array(VocabItemSchema),
 })
 
-type SuggestResponse = z.infer<typeof SuggestResponseSchema>
+export type SuggestResponse = z.infer<typeof SuggestResponseSchema>
 
 export class VocabSearchClient {
   public async suggest(
