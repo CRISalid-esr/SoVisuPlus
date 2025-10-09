@@ -110,12 +110,20 @@ describe('UserDAO', () => {
               select: {
                 startDate: true,
                 endDate: true,
+                positionCode: true,
+                id: true,
+                personId: true,
+                researchStructureId: true,
                 researchStructure: {
                   select: {
                     uid: true,
                     acronym: true,
                     signature: true,
                     slug: true,
+                    external: true,
+                    id: true,
+                    names: true,
+                    descriptions: true,
                   },
                 },
               },
@@ -125,12 +133,33 @@ describe('UserDAO', () => {
         roles: {
           include: {
             role: {
-              select: { id: true, name: true, description: true, system: true },
+              include: {
+                permissions: {
+                  include: {
+                    permission: {
+                      select: {
+                        id: true,
+                        action: true,
+                        conditions: true,
+                        createdAt: true,
+                        updatedAt: true,
+                        subject: true,
+                        description: true,
+                        fields: true,
+                        inverted: true,
+                      },
+                    },
+                  },
+                },
+              },
             },
             scopes: {
               select: {
+                id: true,
                 entityType: true,
                 entityUid: true,
+                roleId: true,
+                userId: true,
               },
             },
           },
@@ -161,12 +190,17 @@ describe('UserDAO', () => {
               select: {
                 startDate: true,
                 endDate: true,
+                id: true,
+                personId: true,
                 positionCode: true,
+                researchStructureId: true,
                 researchStructure: {
                   select: {
                     uid: true,
                     id: true,
                     acronym: true,
+                    descriptions: true,
+                    names: true,
                     signature: true,
                     slug: true,
                     external: true,
@@ -189,6 +223,10 @@ describe('UserDAO', () => {
                         subject: true,
                         fields: true,
                         inverted: true,
+                        conditions: true,
+                        createdAt: true,
+                        updatedAt: true,
+                        description: true,
                       },
                     },
                   },
@@ -197,8 +235,11 @@ describe('UserDAO', () => {
             },
             scopes: {
               select: {
+                id: true,
                 entityType: true,
                 entityUid: true,
+                roleId: true,
+                userId: true,
               },
             },
           },

@@ -15,6 +15,10 @@ import { DocumentRecord } from '@/types/DocumentRecord'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import { Contribution } from '@/types/Contribution'
 import { LocRelator } from '@/types/LocRelator'
+import { SessionProvider } from 'next-auth/react'
+import { makeMockSession } from '@/app/auth/makeMockSession'
+import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
+import { PermissionAction, PermissionSubject } from '@/types/Permission'
 
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
@@ -133,12 +137,27 @@ const theme = createTheme({
   },
 } as ThemeOptions)
 
+// The logged-in user has the "document_merger" role scoped to Person:person-1
+const authz = makeAuthzContext({
+  roleAssignments: [
+    makeAssignment(
+      'document_merger',
+      [{ action: PermissionAction.merge, subject: PermissionSubject.Document }],
+      [{ entityType: 'Person', entityUid: 'person-1' }],
+    ),
+  ],
+})
+
+const session = makeMockSession(authz)
+
 const renderComponent = () =>
   render(
     <ThemeProvider theme={theme}>
       <I18nProvider i18n={i18n}>
         <DateProvider>
-          <DocumentsPage />
+          <SessionProvider session={session}>
+            <DocumentsPage />
+          </SessionProvider>
         </DateProvider>
       </I18nProvider>
     </ThemeProvider>,
@@ -294,6 +313,8 @@ describe('DocumentsPage Component', () => {
 
   it('enables the "Merge selected publications" button only when 2 or more rows are selected', async () => {
     const doc1 = mockState.document.documents[0]
+    // person-1 is a contributor to doc1 and doc2 else
+    // the user would not have the "document_merger" permission on doc2
     const doc2 = new Document(
       'doc2',
       DocumentType.JournalArticle,
@@ -305,7 +326,7 @@ describe('DocumentsPage Component', () => {
       [],
       [
         new Contribution(
-          new InternalPerson('person-2', null, 'Jane Roe', 'Jane', 'Roe', []),
+          new InternalPerson('person-1', null, 'John Doe', 'John', 'Doe', []),
           [LocRelator.AUTHOR],
         ),
       ],
@@ -374,7 +395,7 @@ describe('DocumentsPage Component', () => {
       [],
       [
         new Contribution(
-          new InternalPerson('person-2', null, 'Jane Roe', 'Jane', 'Roe', []),
+          new InternalPerson('person-1', null, 'John Doe', 'John', 'Doe', []),
           [LocRelator.AUTHOR],
         ),
       ],

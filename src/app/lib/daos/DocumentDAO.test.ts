@@ -871,6 +871,7 @@ describe('DocumentDAO', () => {
             person: {
               include: {
                 identifiers: true,
+                memberships: { include: { researchStructure: true } },
               },
             },
           },
