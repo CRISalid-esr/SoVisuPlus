@@ -3,13 +3,13 @@ import { PermissionSubject } from '@/types/Permission'
 
 export type ScopeMap = Partial<Record<EntityType, string[]>>
 
-export type AuthorizationView = {
+export type AuthorizationProperties = {
   __type: PermissionSubject
   perimeter?: ScopeMap
   [key: string]: unknown
 }
 
 export interface Authorizable {
-  /** Read-only view used by CASL */
-  readonly authz: AuthorizationView
+  /** The mongo-style CASL `subject` the ability rules are resolved against */
+  readonly authzProperties: AuthorizationProperties
 }

@@ -9,7 +9,7 @@ const makeAuthzDoc = (
   rs: string[] = [],
   extras: Record<string, unknown> = {},
 ) => ({
-  authz: {
+  authzProperties: {
     __type: 'Document',
     perimeter: {
       Person: people,

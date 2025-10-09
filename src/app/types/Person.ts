@@ -7,7 +7,7 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Person as DbPerson } from '@prisma/client'
 import { PersonMembership } from '@/types/PersonMembership'
 import removeAccents from 'remove-accents'
-import { Authorizable, AuthorizationView } from '@/types/authorizable'
+import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
 
 interface PersonJson extends IAgentJson {
   uid: string
@@ -137,7 +137,7 @@ class Person implements IAgent, Authorizable {
     )
   }
 
-  get authz(): AuthorizationView {
+  get authzProperties(): AuthorizationProperties {
     const rs =
       this.memberships
         ?.map((m) => m.researchStructure?.uid)

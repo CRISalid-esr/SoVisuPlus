@@ -60,7 +60,7 @@ function scopesToCondition(scopes: Scope[]): Array<MongoQuery | undefined> {
   const conds: MongoQuery[] = []
   for (const [t, uids] of Object.entries(byType)) {
     if (!uids.length) continue
-    conds.push({ [`authz.perimeter.${t}`]: { $in: uids } })
+    conds.push({ [`authzProperties.perimeter.${t}`]: { $in: uids } })
   }
   // if we returned [], 0 rule would be generated for this role assignment
   return conds.length ? conds : [undefined]
@@ -88,6 +88,7 @@ export function abilityFromAuthzContext(
   }
 
   return createMongoAbility(rules, {
-    detectSubjectType: (obj) => obj?.authz?.__type ?? obj?.__type ?? 'all',
+    detectSubjectType: (obj) =>
+      obj?.authzProperties?.__type ?? obj?.__type ?? 'all',
   })
 }

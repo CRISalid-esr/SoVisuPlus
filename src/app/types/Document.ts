@@ -6,7 +6,7 @@ import { Literal } from '@/types/Literal'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 import { Journal, JournalJson } from '@/types/Journal'
 import { DocumentState } from '@prisma/client'
-import { Authorizable, AuthorizationView } from '@/types/authorizable'
+import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
 
 interface DocumentJson {
   uid: string
@@ -138,7 +138,7 @@ class Document implements Authorizable {
     }
   }
 
-  get authz(): AuthorizationView {
+  get authzProperties(): AuthorizationProperties {
     return {
       __type: 'Document',
       perimeter: this.computeScope(),
