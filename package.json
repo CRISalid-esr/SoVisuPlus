@@ -29,6 +29,8 @@
   "dependencies": {
     "@apollo/client": "^3.12.3",
     "@auth/core": "^0.34.2",
+    "@casl/ability": "^6.7.3",
+    "@casl/react": "^5.0.0",
     "@chromatic-com/storybook": "^3.2.2",
     "@emotion/cache": "^11.13.1",
     "@emotion/react": "^11.14.0",

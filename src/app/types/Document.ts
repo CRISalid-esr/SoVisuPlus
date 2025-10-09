@@ -6,6 +6,7 @@ import { Literal } from '@/types/Literal'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 import { Journal, JournalJson } from '@/types/Journal'
 import { DocumentState } from '@prisma/client'
+import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
 
 interface DocumentJson {
   uid: string
@@ -36,7 +37,7 @@ enum DocumentType {
   Proceedings = 'Proceedings',
 }
 
-class Document {
+class Document implements Authorizable {
   constructor(
     public uid: string,
     public documentType: DocumentType = DocumentType.Document,
@@ -119,6 +120,34 @@ class Document {
       document.pages || undefined,
     )
   }
+
+  private computeScope() {
+    const rs =
+      this.contributions
+        ?.flatMap((c) =>
+          c.person?.memberships?.map((m) => m.researchStructure?.uid),
+        )
+        ?.filter((x): x is string => !!x) ?? []
+    const persons =
+      this.contributions
+        ?.map((c) => c.person?.uid)
+        .filter((x): x is string => !!x) ?? []
+    return {
+      ResearchStructure: Array.from(new Set(rs)),
+      Person: Array.from(new Set(persons)),
+    }
+  }
+
+  get authzProperties(): AuthorizationProperties {
+    return {
+      __type: 'Document',
+      perimeter: this.computeScope(),
+      state: this.state,
+      documentType: this.documentType,
+    }
+  }
 }
 
-export { Document, DocumentType, DocumentState }
+const isDocument = (x: unknown): x is Document => x instanceof Document
+
+export { Document, DocumentType, DocumentState, isDocument }
