@@ -62,6 +62,7 @@ import { Trans } from '@lingui/react'
 import { useSession } from 'next-auth/react'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
+import { Can } from '@casl/react'
 
 dayjs.extend(utc)
 
@@ -653,31 +654,50 @@ export default function DocumentsPage() {
           </Alert>
         )}
 
-        <Button
-          startIcon={
-            isAnyHarvestingRunning ? (
-              <CircularProgress size={18} thickness={4} />
-            ) : (
-              <SyncIcon />
-            )
-          }
-          variant='outlined'
-          onClick={() => setOpenSynchronizeModal(true)}
-        >
-          <Trans id='documents_page_synchronize_button' />
-        </Button>
+        {currentPerspective && (
+          <Can
+            I={PermissionAction.fetch_documents}
+            a={currentPerspective}
+            passThrough
+            ability={ability}
+          >
+            {(allowed: boolean) => (
+              <Button
+                startIcon={
+                  isAnyHarvestingRunning ? (
+                    <CircularProgress size={18} thickness={4} />
+                  ) : (
+                    <SyncIcon />
+                  )
+                }
+                variant='outlined'
+                disabled={!allowed}
+                onClick={() => setOpenSynchronizeModal(true)}
+              >
+                <Trans id='documents_page_synchronize_button' />
+              </Button>
+            )}
+          </Can>
+        )}
       </DocumentHeader>
       <TabFilter
         tabsData={tabs}
         selectedValue={selectedTab}
         onTabChange={handleTabChange}
       />
-
-      <DocumentSyncDialog
-        openSynchronizeModal={openSynchronizeModal}
-        setOpenSynchronizeModal={setOpenSynchronizeModal}
-        personUid={currentPerspective?.uid || ''}
-      />
+      {currentPerspective && (
+        <Can
+          I={PermissionAction.fetch_documents}
+          a={currentPerspective}
+          ability={ability}
+        >
+          <DocumentSyncDialog
+            openSynchronizeModal={openSynchronizeModal}
+            setOpenSynchronizeModal={setOpenSynchronizeModal}
+            personUid={currentPerspective?.uid || ''}
+          />
+        </Can>
+      )}
 
       <MaterialReactTable<Document>
         initialState={{ showColumnFilters: true }}
