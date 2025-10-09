@@ -318,42 +318,42 @@ msgid "documents_page_hal_status_outside_hal"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:159
-#: src/app/[lang]/documents/page.test.tsx:182
+#: src/app/[lang]/documents/page.test.tsx:178
+#: src/app/[lang]/documents/page.test.tsx:201
 msgid "documents_page_main_title_first_person"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:163
-#: src/app/[lang]/documents/page.tsx:654
+#: src/app/[lang]/documents/page.test.tsx:182
+#: src/app/[lang]/documents/page.tsx:667
 msgid "documents_page_synchronize_button"
 msgstr "Mettre à jour les publications"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:201
+#: src/app/[lang]/documents/page.test.tsx:220
 msgid "documents_page_main_title"
 msgstr "Publications"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:253
+#: src/app/[lang]/documents/page.test.tsx:272
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:332
-#: src/app/[lang]/documents/page.test.tsx:342
-#: src/app/[lang]/documents/page.test.tsx:351
-#: src/app/[lang]/documents/page.test.tsx:406
+#: src/app/[lang]/documents/page.test.tsx:353
+#: src/app/[lang]/documents/page.test.tsx:363
+#: src/app/[lang]/documents/page.test.tsx:372
+#: src/app/[lang]/documents/page.test.tsx:427
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:615
+#: src/app/[lang]/documents/page.tsx:628
 msgid "documents_page_refresh_list_alert_own_perspective"
 msgstr "La liste de vos publications a changé"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:618
+#: src/app/[lang]/documents/page.tsx:631
 msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr "La liste des publications de {name} a changé"
 
@@ -521,11 +521,11 @@ msgstr ""
 msgid "documents_details_page_type_column_tab_author"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:736
+#: src/app/[lang]/documents/page.tsx:753
 msgid "documents_page_action_column_details"
 msgstr "Détails"
 
-#: src/app/[lang]/documents/page.tsx:461
+#: src/app/[lang]/documents/page.tsx:474
 msgid "documents_page_all_documents_filter"
 msgstr "Tous les documents"
 
@@ -542,7 +542,7 @@ msgid "documents_page_conference_article_icon_label"
 msgstr "Article de conférence"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:136
-#: src/app/[lang]/documents/page.tsx:224
+#: src/app/[lang]/documents/page.tsx:237
 msgid "documents_page_contributors_column"
 msgstr "auteurs"
 
@@ -558,11 +558,11 @@ msgstr "Dans la collection"
 msgid "documents_page_hal_status_outside_hal"
 msgstr "Hors HAL"
 
-#: src/app/[lang]/documents/page.tsx:309
+#: src/app/[lang]/documents/page.tsx:322
 msgid "documents_page_halStatus_column"
 msgstr "Statut hal"
 
-#: src/app/[lang]/documents/page.tsx:467
+#: src/app/[lang]/documents/page.tsx:480
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "Dépôt HAL incomplet"
 
@@ -570,15 +570,15 @@ msgstr "Dépôt HAL incomplet"
 msgid "documents_page_journal_article_icon_label"
 msgstr "Article de journal"
 
-#: src/app/[lang]/documents/page.tsx:603
+#: src/app/[lang]/documents/page.tsx:616
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:602
+#: src/app/[lang]/documents/page.tsx:615
 msgid "documents_page_main_title_first_person"
 msgstr "Mes publications"
 
-#: src/app/[lang]/documents/page.tsx:722
+#: src/app/[lang]/documents/page.tsx:739
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Fusionner les documents sélectionnés"
 
@@ -591,17 +591,17 @@ msgid "documents_page_proceedings_icon_label"
 msgstr "Procédure"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:141
-#: src/app/[lang]/documents/page.tsx:257
+#: src/app/[lang]/documents/page.tsx:270
 msgid "documents_page_publication_date_column"
 msgstr "Date de publication"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:13
-#: src/app/[lang]/documents/page.tsx:261
+#: src/app/[lang]/documents/page.tsx:274
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "Aucune date"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:146
-#: src/app/[lang]/documents/page.tsx:289
+#: src/app/[lang]/documents/page.tsx:302
 msgid "documents_page_publishedIn_column"
 msgstr "paru dans"
 
@@ -609,7 +609,7 @@ msgstr "paru dans"
 msgid "documents_page_refresh_document"
 msgstr "Mettre à jour l'affichage"
 
-#: src/app/[lang]/documents/page.tsx:638
+#: src/app/[lang]/documents/page.tsx:651
 msgid "documents_page_refresh_list"
 msgstr "Mettre à jour l'affichage"
 
@@ -618,7 +618,7 @@ msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Publication scientifique"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:154
-#: src/app/[lang]/documents/page.tsx:351
+#: src/app/[lang]/documents/page.tsx:364
 msgid "documents_page_source_column"
 msgstr "Sources"
 
@@ -662,12 +662,12 @@ msgid "documents_page_synchronize_modal_title"
 msgstr "Sources à synchroniser"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:103
-#: src/app/[lang]/documents/page.tsx:154
+#: src/app/[lang]/documents/page.tsx:167
 msgid "documents_page_title_column"
 msgstr "titre"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:61
-#: src/app/[lang]/documents/page.tsx:114
+#: src/app/[lang]/documents/page.tsx:127
 msgid "documents_page_type_column"
 msgstr "type"
 
@@ -704,7 +704,7 @@ msgstr "Notifications"
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:16
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:98
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:117
-#: src/app/[lang]/documents/page.tsx:175
+#: src/app/[lang]/documents/page.tsx:188
 msgid "no_title_available"
 msgstr "aucun titre disponible"
 
