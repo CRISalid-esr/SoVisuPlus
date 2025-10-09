@@ -810,6 +810,11 @@ export class DocumentDAO extends AbstractDAO {
             person: {
               include: {
                 identifiers: true,
+                memberships: {
+                  include: {
+                    researchStructure: true,
+                  },
+                },
               },
             },
           },
