@@ -429,6 +429,38 @@ export class PersonDAO extends AbstractDAO {
     return people.map((person) => Person.fromDbPerson(person))
   }
 
+  public async fetchPersonByUid(uid: string): Promise<Person | null> {
+    try {
+      const dbPerson = await this.prismaClient.person.findUnique({
+        where: { uid },
+        include: {
+          memberships: {
+            select: {
+              startDate: true,
+              endDate: true,
+              researchStructure: {
+                select: {
+                  uid: true,
+                  acronym: true,
+                  slug: true,
+                },
+              },
+            },
+          },
+        },
+      })
+
+      if (!dbPerson) {
+        return null
+      }
+
+      return Person.fromDbPerson(dbPerson)
+    } catch (error) {
+      console.error(`Error fetching person with uid ${uid}:`, error)
+      throw new Error(`Failed to fetch person with uid ${uid}`)
+    }
+  }
+
   public async fetchPersonByIdentifier(
     identifier: PersonIdentifier,
   ): Promise<Person | null> {
