@@ -14,7 +14,7 @@ import {
   SuggestResponse,
   SuggestResponseSchema,
 } from '@/lib/services/VocabSearchClient'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 export type SuggestedKeyword = {
   link: string
@@ -89,7 +89,7 @@ function KeywordSearchAutocomplete({
   fetchKeywords = fetchWrapper,
 }: KeywordSearchAutocompleteProps) {
   const [keywordInput, setKeywordInput] = useState<string>('')
-  const [debouncedInput, setDebouncedInput] = useState<string>('')
+  const queryClient = useQueryClient()
 
   const {
     isPending,
@@ -97,21 +97,21 @@ function KeywordSearchAutocomplete({
     error: fetchKeywordsError,
     data: keywords = [],
   } = useQuery({
-    queryKey: ['keywords', debouncedInput],
-    queryFn: async () => await fetchKeywords(debouncedInput),
+    queryKey: ['keywords'],
+    queryFn: async () => await fetchKeywords(keywordInput),
     retry: false,
-    enabled: !!debouncedInput,
+    enabled: !!keywordInput,
   })
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedInput(keywordInput)
+      queryClient.invalidateQueries({ queryKey: ['keywords'] })
     }, 300)
 
     return () => {
       clearTimeout(handler)
     }
-  }, [keywordInput])
+  }, [queryClient, keywordInput])
 
   useEffect(() => {
     if (isError) {

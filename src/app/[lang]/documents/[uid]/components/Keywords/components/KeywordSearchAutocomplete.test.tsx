@@ -1,16 +1,7 @@
-//lorsque les données sont chargées, je m'attends à ce que les options appraissent dans le menu déroulant
-//lorsqu'il y a une erreur, je m'attends à ce que l'affichage se mette à jour
-//lorsqu'une lettre est tapée et après un délai résonable, je m'attends à ce que le fetch est été lancé
-
-import {
-  //act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from '@testing-library/react'
-import KeywordSearchAutocomplete from //SuggestedKeyword,
-'@/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import KeywordSearchAutocomplete, {
+  SuggestedKeyword,
+} from '@/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 describe('KeywordSearchAutocomplete Component', () => {
@@ -43,7 +34,7 @@ describe('KeywordSearchAutocomplete Component', () => {
     )
   })
 
-  /*it('Check that a keystroke call the fetch', async () => {
+  it('Check that a keystroke call the fetch', async () => {
     const mockReturn: SuggestedKeyword[] = []
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
     render(
@@ -56,10 +47,44 @@ describe('KeywordSearchAutocomplete Component', () => {
 
     fireEvent.change(autocomplete, { target: { value: 'a' } })
     await waitFor(() => {
-      expect(fetchKeywordsMock).toHaveBeenCalled()
+      expect(fetchKeywordsMock).toHaveBeenCalledWith('a')
     })
   })
 
+  it('Check that result appear in option menu in right format', async () => {
+    const mockReturn: SuggestedKeyword[] = [
+      {
+        link: 'http://vocab.getty.edu/aat/300046021',
+        num: '300046021',
+        text: 'diadems',
+        vocab: 'AAT',
+      },
+    ]
+    const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
+    render(
+      <QueryClientProvider client={queryClient}>
+        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+      </QueryClientProvider>,
+    )
+    const autocomplete = screen.getByRole('combobox')
+    expect(autocomplete).toBeInTheDocument()
+
+    fireEvent.change(autocomplete, { target: { value: 'd' } })
+    await waitFor(async () => {
+      expect(fetchKeywordsMock).toHaveBeenCalledWith('d')
+      expect(screen.getByText('AAT')).toBeInTheDocument()
+      expect(screen.getByText('diadems')).toBeInTheDocument()
+      expect(screen.getByText('(300046021)')).toBeInTheDocument()
+      const link = await screen.findByRole('link')
+      expect(link).toBeInTheDocument()
+      expect(link).toHaveAttribute(
+        'href',
+        'http://vocab.getty.edu/aat/300046021',
+      )
+    })
+  })
+
+  /*
   it('Check that a keystroke call the refetch after delay', async () => {
     jest.useFakeTimers()
     const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries')
