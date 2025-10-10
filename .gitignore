@@ -47,3 +47,6 @@ next-env.d.ts
 
 *storybook.log
 .vscode/launch.json
+
+# RBAC (env-specific)
+rbac.roles.yaml

@@ -213,9 +213,8 @@ npm run assign_role -- \
 
 #### 4) Permission checks
 
-> [!WARNING] Client-side permission checks are **not a security boundary**. They only hide or disable UI. Always
-> re-check authorization on the **server** (e.g., rebuild the ability from the session and call `ability.can(...)`) before
-> executing any state-changing or sensitive operation. Assume users can bypass client code or forge HTTP requests.
+> ⚠️ **Warning:** Client-side permission checks are **not a security measure**. They only hide or disable UI. Always
+> re-check authorization on the **server** (e.g. call `ability.can(...)`).
 
 **Client side (React):**
 

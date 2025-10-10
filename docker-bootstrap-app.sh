@@ -52,6 +52,28 @@ if ! ./node_modules/.bin/prisma migrate deploy; then
 fi
 log "Prisma migrations complete."
 
+log "Seeding RBAC roles…"
+RBAC_DEFAULT="/app/rbac.roles.yaml"
+RBAC_MOUNTED="/config/rbac.roles.yaml"
+RBAC_FROM_ENV="${RBAC_ROLES_FILE:-}"
+
+RBAC_FILE=""
+
+if [ -n "$RBAC_FROM_ENV" ] && [ -f "$RBAC_FROM_ENV" ]; then
+  RBAC_FILE="$RBAC_FROM_ENV"
+elif [ -f "$RBAC_MOUNTED" ]; then
+  RBAC_FILE="$RBAC_MOUNTED"
+elif [ -f "$RBAC_DEFAULT" ]; then
+  RBAC_FILE="$RBAC_DEFAULT"
+fi
+
+if [ "${INIT_ROLES_ON_START:-true}" = "true" ] && [ -n "$RBAC_FILE" ]; then
+  log "Seeding RBAC roles from: $RBAC_FILE"
+  npm run init_roles -- --file "$RBAC_FILE" || { log "RBAC seeding FAILED"; exit 1; }
+else
+  log "Skipping RBAC seeding (INIT_ROLES_ON_START=${INIT_ROLES_ON_START:-false}, file='${RBAC_FILE:-none}')"
+fi
+
 export NODE_PATH=/app/node_modules # for the listener to find shared modules
 HOSTNAME="0.0.0.0" npm run start:web & npm run start:listener
 wait
