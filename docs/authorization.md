@@ -16,9 +16,9 @@ Create a `rbac.roles.yaml` at the root of your instance. Each role has:
 - `description` (optional)
 - `permissions`: list of rules, each with
 
-  - `action`: one of your domain actions (e.g. `manage`, `read`, `update`, `delete`, `merge`, `unmerge`...)
-  - `subject`: the domain entity (`Document`, `DocumentRecord`, `Person`, `ResearchStructure`, or `all`)
-  - `fields` (optional): field-level permissions for `update` (e.g. `titles`, `abstracts`)
+    - `action`: one of your domain actions (e.g. `manage`, `read`, `update`, `delete`, `merge`, `unmerge`...)
+    - `subject`: the domain entity (`Document`, `DocumentRecord`, `Person`, `ResearchStructure`, or `all`)
+    - `fields` (optional): field-level permissions for `update` (e.g. `titles`, `abstracts`)
 
 ```yaml
 # file: rbac.roles.yaml
@@ -35,7 +35,7 @@ roles:
     permissions:
       - action: update
         subject: Document
-        fields: [titles, abstracts, contributors, identifiers]
+        fields: [ titles, abstracts, contributors, identifiers ]
 
   - name: document_merger
     description: Merge / unmerge documents and source records
@@ -50,17 +50,17 @@ roles:
     permissions:
       - action: update
         subject: Person
-        fields: [identifiers]
+        fields: [ identifiers ]
 ```
 
 ### Notes
 
 - We created a small set of roles and rely on **polymorphic scopes** when assigning them:
 
-  - Scope to a **Person** → “this user can edit/merge documents to which this person is a contributor”
-  - Scope to a **ResearchStructure** → “this user can edit/merge documents that involve members of that structure as
-    contributors”
-  - Scope to an **Institution** or **InstitutionDivision** → similar idea, broader perimeters
+    - Scope to a **Person** → “this user can edit/merge documents to which this person is a contributor”
+    - Scope to a **ResearchStructure** → “this user can edit/merge documents that involve members of that structure as
+      contributors”
+    - Scope to an **Institution** or **InstitutionDivision** → similar idea, broader perimeters
 
 - Field-level checks are supported via `fields` (e.g. for `update` actions)
 
@@ -213,7 +213,9 @@ npm run assign_role -- \
 
 #### 4) Permission checks
 
-[//]: # 'add a note with a warning, client side checking is not a security measure, always check on server side too'
+> [!WARNING] Client-side permission checks are **not a security boundary**. They only hide or disable UI. Always
+> re-check authorization on the **server** (e.g., rebuild the ability from the session and call `ability.can(...)`) before
+> executing any state-changing or sensitive operation. Assume users can bypass client code or forge HTTP requests.
 
 **Client side (React):**
 
@@ -281,6 +283,9 @@ or with passthrough:
 
 **Server side (API/route):**
 
+> You should always verify permissions on the server. Client-side checks (e.g., using `<Can>`) are only for UX and must
+> not be treated as a security measure.
+
 ```ts
 import { getServerSession } from 'next-auth'
 import authOptions from '@/app/auth/auth_options'
@@ -323,19 +328,19 @@ Fix your tests :
 
 ```ts
 const authz = makeAuthzContext({
-  roleAssignments: [
-    makeAssignment(
-      'document_fetcher',
-      [
-        {
-          action: PermissionAction.fetch_documents,
-          subject: PermissionSubject.Person,
-        },
-      ],
-      [{ entityType: 'Person', entityUid: 'abc' }],
-    ),
-  ],
-})
+    roleAssignments: [
+      makeAssignment(
+        'document_fetcher',
+        [
+          {
+            action: PermissionAction.fetch_documents,
+            subject: PermissionSubject.Person,
+          },
+        ],
+        [{ entityType: 'Person', entityUid: 'abc' }],
+      ),
+    ],
+  })
 
 ;(getServerSession as jest.Mock).mockResolvedValue({
   user: { username: 'jdoe', authz },
@@ -351,5 +356,3 @@ const authz = makeAuthzContext({
   }),
 }))
 ```
-
-That’s it: schema → migrate → YAML → seed → assign → check on client/server.
