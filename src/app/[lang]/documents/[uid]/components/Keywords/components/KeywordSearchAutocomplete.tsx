@@ -14,9 +14,9 @@ import {
   SuggestResponse,
   SuggestResponseSchema,
 } from '@/lib/services/VocabSearchClient'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
-type SuggestedKeyword = {
+export type SuggestedKeyword = {
   link: string
   num: string
   text: string
@@ -53,37 +53,43 @@ function getAcmNum(iri: string): string {
   return str[str.length - 1].replaceAll('.', ' - ')
 }
 
-function KeywordSearchAutocomplete() {
-  const [keywordInput, setKeywordInput] = useState<string>('')
-  const queryClient = useQueryClient()
-
-  const fetchKeywords = async (value: string): Promise<SuggestedKeyword[]> => {
-    if (value) {
-      const response = await fetch('/api/vocabs' + '?q=' + value)
-      if (response.ok) {
-        const json: SuggestResponse = SuggestResponseSchema.parse(
-          await response.json(),
+async function fetchWrapper(value: string): Promise<SuggestedKeyword[]> {
+  if (value) {
+    const response = await fetch('/api/vocabs' + '?q=' + value)
+    if (response.ok) {
+      const json: SuggestResponse = SuggestResponseSchema.parse(
+        await response.json(),
+      )
+      return json.items
+        .map((item) =>
+          item.best_label
+            ? Object.assign(
+                { link: item.iri },
+                { num: numVocab(item.scheme)(item.iri) },
+                { text: item.best_label?.text, vocab: item.scheme },
+              )
+            : undefined,
         )
-        return json.items
-          .map((item) =>
-            item.best_label
-              ? Object.assign(
-                  { link: item.iri },
-                  { num: numVocab(item.scheme)(item.iri) },
-                  { text: item.best_label?.text, vocab: item.scheme },
-                )
-              : undefined,
-          )
-          .filter((item) => item != undefined)
-      } else {
-        throw new Error(
-          'Fail while fetching keywords suggestion : ' + response.statusText,
-        )
-      }
+        .filter((item) => item != undefined)
     } else {
-      return []
+      throw new Error(
+        'Fail while fetching keywords suggestion : ' + response.statusText,
+      )
     }
+  } else {
+    return []
   }
+}
+
+type KeywordSearchAutocompleteProps = {
+  fetchKeywords?: (value: string) => Promise<SuggestedKeyword[]>
+}
+
+function KeywordSearchAutocomplete({
+  fetchKeywords = fetchWrapper,
+}: KeywordSearchAutocompleteProps) {
+  const [keywordInput, setKeywordInput] = useState<string>('')
+  const [debouncedInput, setDebouncedInput] = useState<string>('')
 
   const {
     isPending,
@@ -91,17 +97,21 @@ function KeywordSearchAutocomplete() {
     error: fetchKeywordsError,
     data: keywords = [],
   } = useQuery({
-    queryKey: ['keywords'],
-    queryFn: async () => await fetchKeywords(keywordInput),
+    queryKey: ['keywords', debouncedInput],
+    queryFn: async () => await fetchKeywords(debouncedInput),
     retry: false,
+    enabled: !!debouncedInput,
   })
 
   useEffect(() => {
-    const delay = setTimeout(() => {
-      queryClient.invalidateQueries({ queryKey: ['keywords'] })
+    const handler = setTimeout(() => {
+      setDebouncedInput(keywordInput)
     }, 300)
-    return () => clearTimeout(delay)
-  }, [queryClient, keywordInput])
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [keywordInput])
 
   useEffect(() => {
     if (isError) {
@@ -114,7 +124,8 @@ function KeywordSearchAutocomplete() {
       filterOptions={(x) => x}
       getOptionLabel={(option) => option.text}
       groupBy={(option) => option.vocab}
-      loading={isPending}
+      inputValue={keywordInput}
+      loading={keywordInput ? isPending : false}
       noOptionsText={isError ? 'Unable to fetch suggestions' : 'No options'}
       onInputChange={(event, value) => {
         setKeywordInput(value)
