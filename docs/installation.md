@@ -121,4 +121,4 @@ SoVisu+ uses a role-based access control (RBAC) file to seed roles & permissions
      --person-uid local-yourusername
    ```
 
-See [Authorization with CASL](docs/authorization.md) for more details on role and permission management.
+See [Authorization with CASL](./authorization.md) for more details on role and permission management.
