@@ -190,6 +190,10 @@ Re-seed roles into the database:
 
 ```bash
 npm run init_roles -- --file rbac.roles.yaml
+
+# or with compiled version
+npm run build:listener
+npm run init_roles:js ./rbac.roles.yaml
 ```
 
 #### 3) Assign the role to users
@@ -198,6 +202,14 @@ Scope it to a specific Person (typical case: a researcher can fetch their own do
 
 ```bash
 npm run assign_role -- \
+  --role document_fetcher \
+  --scope Person:local-jdupont \
+  --person-uid local-jdupont
+  
+# or with compiled version
+  
+npm run build:listener
+node dist-listener/src/scripts/assign_role.js \
   --role document_fetcher \
   --scope Person:local-jdupont \
   --person-uid local-jdupont
