@@ -106,6 +106,10 @@ SoVisu+ uses a role-based access control (RBAC) file to seed roles & permissions
 
    # or pass an explicit file path
    npm run init_roles -- --file ./rbac.roles.yaml
+   
+   # or with compiled version
+   npm run build:listener
+   npm run init_roles:js ./rbac.roles.yaml
    ```
 
    This command is **idempotent**: run it any time you change the YAML file.
@@ -119,6 +123,11 @@ SoVisu+ uses a role-based access control (RBAC) file to seed roles & permissions
    npm run assign_role -- \
      --role admin \
      --person-uid local-yourusername
+   
+   # or with compiled version
+
+   npm run build:listener
+   node dist-listener/src/scripts/assign_role.js --role admin --person-uid local-yourusername
    ```
 
 See [Authorization with CASL](./authorization.md) for more details on role and permission management.
