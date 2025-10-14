@@ -18,7 +18,7 @@ export default function Splash() {
   return (
     <>
       <Box flex={{ xs: 1, md: 1 }} display='flex' flexDirection='column'>
-        <Box p={6}>
+        <Box p={{ xs: 2, md: 6 }}>
           <Logo />
         </Box>
 
@@ -28,19 +28,24 @@ export default function Splash() {
           flexDirection='column'
           justifyContent='center'
           alignItems='center'
-          px={15}
-          pb={21}
+          px={{ xs: 2, md: 15 }}
+          pb={{ xs: 3, md: 21 }}
         >
-          <Image
-            src={SplashPreview}
-            alt='SoVisuPlus preview screenshot'
-            width={478}
+          <Box
+            position='relative'
+            width={{ xs: '100%', md: 478 }}
             height={236}
-            style={{
-              boxShadow: '0px 4px 4px 0px rgba(0, 0, 0, 0.25)',
-              marginBottom: '3.5rem',
-            }}
-          />
+            mb={7}
+          >
+            <Image
+              src={SplashPreview}
+              alt='SoVisuPlus preview screenshot'
+              fill
+              style={{
+                boxShadow: '0px 4px 4px 0px rgba(0, 0, 0, 0.25)',
+              }}
+            />
+          </Box>
 
           <Typography
             component='p'
@@ -65,7 +70,13 @@ export default function Splash() {
           </Button>
         </Box>
 
-        <Box pl={6} pr={3} py={2} display='flex' justifyContent='space-between'>
+        <Box
+          pl={{ xs: 2, md: 6 }}
+          pr={{ xs: 2, md: 3 }}
+          py={2}
+          display='flex'
+          justifyContent='space-between'
+        >
           <Box>
             <Image
               src={CrisalidLogo}
@@ -75,7 +86,13 @@ export default function Splash() {
             />
           </Box>
 
-          <Box display='flex' gap={3} alignItems='center' pb={1}>
+          <Box
+            display='flex'
+            gap={3}
+            alignItems={{ xs: 'flex-end', md: 'center' }}
+            pb={1}
+            flexDirection={{ xs: 'column', md: 'row' }}
+          >
             <Link href='#' underline='none' fontWeight='bold'>
               À propos
             </Link>
