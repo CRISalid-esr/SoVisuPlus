@@ -271,14 +271,14 @@ function Sources() {
             <MenuItem value='pending'>
               <Box display='flex' alignItems='center'>
                 <DeleteIcon />
-                <Trans id='document_details_page_source_tab_select_action_delete_label' />
+                <Trans id='document_details_page_source_tab_select_action_invalidate_label' />
               </Box>{' '}
             </MenuItem>
 
             <MenuItem value='rejected'>
               <Box display='flex' alignItems='center'>
                 <CallMergeIcon />
-                <Trans id='document_details_page_source_tab_select_action_merge_label' />
+                <Trans id='document_details_page_source_tab_select_action_unmerge_label' />
               </Box>
             </MenuItem>
           </Select>
