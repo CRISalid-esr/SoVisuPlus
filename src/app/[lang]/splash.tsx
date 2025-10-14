@@ -39,7 +39,8 @@ export default function splash() {
           flex={1}
           alignItems='center'
           flexDirection='column'
-          p={15}
+          px={15}
+          py={24}
           bgcolor='teal'
           color='white'
           position='relative'
