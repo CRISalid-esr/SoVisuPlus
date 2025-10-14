@@ -838,6 +838,6 @@ msgstr "Light theme"
 msgid "sidebar_theme_system"
 msgstr "Auto Theme"
 
-#: src/app/[lang]/splash.tsx:33
+#: src/app/[lang]/splash.tsx:30
 msgid "splash.login"
 msgstr "Login"
