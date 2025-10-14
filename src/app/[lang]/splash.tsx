@@ -7,9 +7,9 @@ import { signIn } from 'next-auth/react'
 import { useTheme } from '@mui/material/styles'
 import { Link } from '@mui/material'
 
-import Logo from '@/public/icons/logo_splash_screen.svg'
-import Background from '@/public/icons/background.svg'
-import CrisalidLogo from '@/public/icons/crisalid.png'
+import Logo from '@/public/theme/splash_header_logo.svg'
+import Background from '@/public/theme/splash_background.svg'
+import CrisalidLogo from '@/public/theme/splash_footer_logo.png'
 import SplashPreview from '@/public/theme/splash_preview.png'
 
 export default function Splash() {
