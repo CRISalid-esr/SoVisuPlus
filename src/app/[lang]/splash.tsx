@@ -17,7 +17,7 @@ export default function Splash() {
 
   return (
     <>
-      <Box flex={{ xs: 1, md: 1 }} display='flex' flexDirection='column'>
+      <Box flex={1} display='flex' flexDirection='column'>
         <Box p={{ xs: 2, md: 6 }}>
           <Logo />
         </Box>
@@ -135,7 +135,6 @@ export default function Splash() {
             display='flex'
             flexDirection='column'
             justifyContent='center'
-            flex={2}
           >
             <Typography component='h1' variant='displayLarge' mb={5}>
               Prenez le contrôle de l’empreinte numérique de vos recherches
