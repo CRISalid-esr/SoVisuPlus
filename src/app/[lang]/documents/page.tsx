@@ -58,7 +58,7 @@ import { DocumentTypeLabels } from './components/DocumentTypeLabels'
 import SyncIcon from '@mui/icons-material/Sync'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
 import DocumentSyncDialog from '@/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog'
-import { Trans } from '@lingui/react'
+import { Trans, useLingui } from '@lingui/react'
 import { useSession } from 'next-auth/react'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
@@ -68,6 +68,7 @@ dayjs.extend(utc)
 
 export default function DocumentsPage() {
   const { data: session } = useSession()
+  const { _ } = useLingui()
   const ability = useMemo(
     () => abilityFromAuthzContext(session?.user.authz),
     [session?.user?.authz],
@@ -128,7 +129,7 @@ export default function DocumentsPage() {
         header: t`documents_page_type_column`,
         Cell({ row }: { row: { original: { documentType: DocumentType } } }) {
           return (
-            <Tooltip title={DocumentTypeLabels[row.original.documentType]}>
+            <Tooltip title={_(DocumentTypeLabels[row.original.documentType])}>
               {DocumentTypeIcons[row.original.documentType]}
             </Tooltip>
           )
@@ -147,7 +148,7 @@ export default function DocumentsPage() {
                 width: '100%',
               }}
             >
-              {DocumentTypeLabels[type]}
+              {_(DocumentTypeLabels[type])}
               <Box
                 sx={{
                   marginLeft: 'auto',

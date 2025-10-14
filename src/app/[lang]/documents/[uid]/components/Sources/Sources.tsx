@@ -11,7 +11,7 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
 import { t } from '@lingui/macro'
-import { Trans } from '@lingui/react'
+import { Trans, useLingui } from '@lingui/react'
 import DeleteIcon from '@mui/icons-material/Delete'
 import {
   Box,
@@ -52,6 +52,7 @@ function Sources() {
     Record<string, string>
   >({})
   const [action, setAction] = useState<string>('')
+  const { _ } = useLingui()
 
   const columns = useMemo<MRT_ColumnDef<DocumentRecord>[]>(
     () => [
@@ -73,7 +74,7 @@ function Sources() {
                 width: '100%',
               }}
             >
-              {DocumentTypeLabels[type]}
+              {_(DocumentTypeLabels[type])}
               <Box
                 sx={{
                   marginLeft: 'auto',
@@ -270,14 +271,14 @@ function Sources() {
             <MenuItem value='pending'>
               <Box display='flex' alignItems='center'>
                 <DeleteIcon />
-                <Trans id='document_details_page_source_tab_select_action_delete_label' />
+                <Trans id='document_details_page_source_tab_select_action_invalidate_label' />
               </Box>{' '}
             </MenuItem>
 
             <MenuItem value='rejected'>
               <Box display='flex' alignItems='center'>
                 <CallMergeIcon />
-                <Trans id='document_details_page_source_tab_select_action_merge_label' />
+                <Trans id='document_details_page_source_tab_select_action_unmerge_label' />
               </Box>
             </MenuItem>
           </Select>
