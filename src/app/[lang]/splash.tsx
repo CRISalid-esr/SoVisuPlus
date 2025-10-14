@@ -2,22 +2,19 @@
 
 import { Box, Button, Typography } from '@mui/material'
 import { t } from '@lingui/macro'
+import { signIn } from 'next-auth/react'
+
 import Logo from '@/public/icons/logo_splash_screen.svg'
-import Avatars from '@/public/icons/avatars.svg'
-import { signIn,  } from 'next-auth/react'
 import Background from '@/public/icons/background.svg'
 
 export default function splash() {
   return (
     <>
       <Box flex={{ xs: 1, md: 1 }}>
-        <Box
-          sx={(theme) => ({
-            padding: theme.spacing(6),
-          })}
-        >
+        <Box p={6}>
           <Logo />
         </Box>
+
         <Box display='flex' justifyContent='center' alignItems='center'>
           <Box width='100%' maxWidth='400px'>
             <Button
@@ -35,73 +32,50 @@ export default function splash() {
           </Box>
         </Box>
       </Box>
-      <Box
-        flex={1}
-        display={{ xs: 'none', md: 'flex' }} // Hide on small screens
-        justifyContent='center'
-        alignItems='center'
-        flexDirection='column'
-        p={4}
-        bgcolor='teal'
-        color='white'
-        position={'relative'}
-        sx={{
-          zIndex: 0,
-          overflow: 'hidden',
-        }}
-      >
-        <Background
-          style={{
-            position: 'absolute',
-            zIndex: -1,
-          }}
-        />
-        <Typography
-          variant='displayLarge'
-          sx={(theme) => ({
-            mb: theme.spacing(18),
-            zIndex: 1,
-          })}
-        >
-          Lorem Ipsum
-        </Typography>
+
+      <Box flex={1} display={{ xs: 'none', md: 'flex' }}>
         <Box
-          sx={{
-            maxWidth: '478.543px',
-            position: 'relative',
-          }}
+          display='flex'
+          flex={1}
+          alignItems='center'
+          flexDirection='column'
+          p={15}
+          bgcolor='teal'
+          color='white'
+          position='relative'
+          zIndex={0}
+          overflow='hidden'
         >
-          <Typography
-            component={'p'}
-            variant='headingSmall'
-            sx={(theme) => ({
-              mb: theme.spacing(18),
-              zIndex: 1,
-            })}
-          >
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua.
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            position: 'relative',
-            zIndex: 1,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Avatars />
-          <Typography
-            variant='bodyLarge'
-            component={'p'}
-            sx={{
-              lineHeight: 'normal',
+          <Background
+            style={{
+              position: 'absolute',
+              zIndex: -1,
             }}
+          />
+
+          <Box
+            maxWidth='60ch'
+            display='flex'
+            flexDirection='column'
+            justifyContent='flex-end'
+            flex={1}
           >
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit
-          </Typography>
+            <Typography component='h1' variant='displayLarge' mb={5}>
+              Prenez le contrôle de l’empreinte numérique de vos recherches
+            </Typography>
+
+            <Typography component='p' variant='headingSmall' mb={3}>
+              SoVisu+ vous aide à centraliser et qualifier vos données,
+              visualiser vos activités de recherche et mettre en avant vos
+              expertises.
+            </Typography>
+
+            <Typography component='p' variant='headingSmall'>
+              Un outil conçu par et pour les enseignants-chercheurs pour vous
+              aider à améliorer la visibilité de vos travaux, de la
+              visualisation à l’action.
+            </Typography>
+          </Box>
         </Box>
       </Box>
     </>
