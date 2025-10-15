@@ -19,6 +19,7 @@ const mockRouter = {
 jest.mock('next/navigation', () => ({
   useRouter: () => mockRouter,
   useSearchParams: jest.fn(() => new URLSearchParams()),
+  useParams: jest.fn(() => ({ uid: '123' })),
 }))
 
 // Mock MUI Theme
