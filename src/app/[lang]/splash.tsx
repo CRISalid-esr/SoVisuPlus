@@ -1,19 +1,40 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Box, Button, Typography } from '@mui/material'
 import { t } from '@lingui/macro'
 import Image from 'next/image'
 import { signIn } from 'next-auth/react'
 import { useTheme } from '@mui/material/styles'
 import { Link } from '@mui/material'
+import * as Lingui from '@lingui/core'
 
 import Logo from '@/public/theme/splash_header_logo.svg'
 import Background from '@/public/theme/splash_background.svg'
 import CrisalidLogo from '@/public/theme/splash_footer_logo.png'
 import SplashPreview from '@/public/theme/splash_preview.png'
+import { ThemeLocales } from '@/types/ThemeLocales'
 
 export default function Splash() {
+  const lang = Lingui.i18n.locale || 'fr'
+  const [locales, setLocales] = useState<ThemeLocales>()
   const theme = useTheme()
+
+  useEffect(() => {
+    async function importLocales() {
+      try {
+        const importedLocales = await import(
+          `@/public/theme/locales_${lang}.json`
+        )
+
+        setLocales(importedLocales.default)
+      } catch {
+        throw new Error('Theme locales could not be imported')
+      }
+    }
+
+    importLocales()
+  }, [lang])
 
   return (
     <>
@@ -55,7 +76,7 @@ export default function Splash() {
             color={theme.palette.primary.main}
             fontWeight='bold'
           >
-            Scientific Output Visualization
+            {locales?.previewLegend}
           </Typography>
 
           <Button
@@ -94,16 +115,16 @@ export default function Splash() {
             flexDirection={{ xs: 'column', md: 'row' }}
           >
             <Link href='#' underline='none' fontWeight='bold'>
-              À propos
+              {t`splash.about`}
             </Link>
             <Link href='#' underline='none' fontWeight='bold'>
-              Mentions légales
+              {t`splash.legal_mentions`}
             </Link>
             <Link href='#' underline='none' fontWeight='bold'>
-              Accessibilité
+              {t`splash.accessibility`}
             </Link>
             <Link href='#' underline='none' fontWeight='bold'>
-              Communauté
+              {t`splash.community`}
             </Link>
           </Box>
         </Box>
@@ -137,19 +158,15 @@ export default function Splash() {
             justifyContent='center'
           >
             <Typography component='h1' variant='displayLarge' mb={5}>
-              Prenez le contrôle de l’empreinte numérique de vos recherches
+              {locales?.header}
             </Typography>
 
             <Typography component='p' variant='headingSmall' mb={3}>
-              SoVisu+ vous aide à centraliser et qualifier vos données,
-              visualiser vos activités de recherche et mettre en avant vos
-              expertises.
+              {locales?.firstParagraph}
             </Typography>
 
             <Typography component='p' variant='headingSmall'>
-              Un outil conçu par et pour les enseignants-chercheurs pour vous
-              aider à améliorer la visibilité de vos travaux, de la
-              visualisation à l’action.
+              {locales?.secondParagraph}
             </Typography>
           </Box>
         </Box>
