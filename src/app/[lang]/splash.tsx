@@ -98,7 +98,11 @@ export default function Splash() {
           display='flex'
           justifyContent='space-between'
         >
-          <Box>
+          <Box
+            display='flex'
+            flexDirection={{ xs: 'column', md: 'row' }}
+            justifyContent={{ xs: 'flex-end', md: 'flex-start' }}
+          >
             <Image
               src={CrisalidLogo}
               alt='CRISalid logo'
@@ -111,7 +115,7 @@ export default function Splash() {
             display='flex'
             gap={3}
             alignItems={{ xs: 'flex-end', md: 'center' }}
-            pb={1}
+            pb={{ xs: 2, md: 0 }}
             flexDirection={{ xs: 'column', md: 'row' }}
           >
             <Link href='#' underline='none' fontWeight='bold'>
