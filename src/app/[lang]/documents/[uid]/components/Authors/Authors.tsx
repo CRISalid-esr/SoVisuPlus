@@ -13,6 +13,7 @@ import {
   useMaterialReactTable,
 } from 'material-react-table'
 import { ReactNode, useMemo } from 'react'
+
 const Authors = () => {
   const { selectedDocument = null } = useStore((state) => state.document)
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
@@ -20,8 +21,9 @@ const Authors = () => {
     () => [
       {
         id: 'person',
-        header: t`documents_details_page_type_column_tab_author`,
-        accessorFn: (row: { person: Person }) => row.person.displayName,
+        header: t`documents_details_page_authors_tab_name_column`,
+        accessorFn: (row: { person: Person }) =>
+          row.person.lastName || row.person.displayName,
         enableFilterMatchHighlighting: true,
         Cell({ renderedCellValue }: { renderedCellValue: ReactNode }) {
           return (
@@ -33,7 +35,7 @@ const Authors = () => {
       },
       {
         id: 'idref',
-        header: t`documents_details_page_idref_column_tab_select`,
+        header: t`documents_details_page_authors_tab_idref_column`,
         accessorFn: (row: { person: Person }) => {
           return row.person
             .getIdentifiers()
@@ -51,7 +53,7 @@ const Authors = () => {
       },
       {
         id: 'orcid',
-        header: t`documents_details_page_orcid_column_tab_select`,
+        header: t`documents_details_page_authors_tab_orcid_column`,
         accessorFn: (row: { person: Person }) => {
           return row.person
             .getIdentifiers()
@@ -69,7 +71,7 @@ const Authors = () => {
       },
       {
         id: 'idhal',
-        header: t`documents_details_page_idhal_column_tab_select`,
+        header: t`documents_details_page_authors_tab_idhal_column`,
         accessorFn: (row: { person: Person }) => {
           return row.person
             .getIdentifiers()
@@ -87,7 +89,7 @@ const Authors = () => {
       },
       {
         id: 'scopus',
-        header: t`documents_details_page_scopus_column_tab_select`,
+        header: t`documents_details_page_authors_tab_scopus_column`,
         accessorFn: (row: { person: Person }) => {
           return row.person
             .getIdentifiers()
