@@ -52,18 +52,16 @@ export default function Splash() {
           px={{ xs: 2, md: 15 }}
           pb={{ xs: 3, md: 21 }}
         >
-          <Box
-            position='relative'
-            width={{ xs: '100%', md: 478 }}
-            height={236}
-            mb={7}
-          >
+          <Box mb={7}>
             <Image
               src={SplashPreview}
               alt='SoVisuPlus preview screenshot'
-              fill
               style={{
                 boxShadow: '0px 4px 4px 0px rgba(0, 0, 0, 0.25)',
+                height: 'auto',
+                maxHeight: '236px',
+                maxWidth: '100%',
+                width: 'auto',
               }}
             />
           </Box>
@@ -117,6 +115,7 @@ export default function Splash() {
             alignItems={{ xs: 'flex-end', md: 'center' }}
             pb={{ xs: 2, md: 0 }}
             flexDirection={{ xs: 'column', md: 'row' }}
+            textAlign='right'
           >
             <Link href='#' underline='none' fontWeight='bold'>
               {t`splash.about`}
