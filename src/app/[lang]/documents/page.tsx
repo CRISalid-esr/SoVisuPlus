@@ -43,10 +43,18 @@ import {
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
   MRT_SortingState,
+  MRT_VisibilityState,
 } from 'material-react-table'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation' // Import useRouter
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, {
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import Highlighter from 'react-highlight-words'
 import DocumentHeader from './components/DocumentHeader'
 import HalStatusCell from './components/HalStatusCell'
@@ -63,6 +71,7 @@ import { useSession } from 'next-auth/react'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { Can } from '@casl/react'
+import { toUTCISOString } from '@/utils/toUTCISOString'
 
 dayjs.extend(utc)
 
@@ -91,9 +100,29 @@ export default function DocumentsPage() {
       return DEFAULT_PAGINATION
     }
   }
+  const readInitialColumnFilters = (): MRT_ColumnFiltersState => {
+    try {
+      const raw = sessionStorage.getItem('mrt_columnFilters_publication_table')
+      return raw ? JSON.parse(raw) : []
+    } catch {
+      return []
+    }
+  }
+
+  const readInitialGlobalFilter = () => {
+    try {
+      const raw = sessionStorage.getItem('mrt_global_publication_table')
+      return raw ? (JSON.parse(raw) as string) : ''
+    } catch {
+      return ''
+    }
+  }
   const [pagination, setPagination] = useState(readInitialPagination)
-  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([])
-  const [globalFilter, setGlobalFilter] = useState('')
+
+  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
+    readInitialColumnFilters,
+  )
+  const [globalFilter, setGlobalFilter] = useState(readInitialGlobalFilter)
 
   const readInitialSorting = (): MRT_SortingState => {
     try {
@@ -141,6 +170,26 @@ export default function DocumentsPage() {
       JSON.stringify(sorting),
     )
   }, [sorting])
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      sessionStorage.setItem(
+        'mrt_columnFilters_publication_table',
+        JSON.stringify(columnFilters),
+      )
+    }, 250)
+    return () => clearTimeout(id)
+  }, [columnFilters])
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      sessionStorage.setItem(
+        'mrt_global_publication_table',
+        JSON.stringify(globalFilter),
+      )
+    }, 250)
+    return () => clearTimeout(id)
+  }, [globalFilter])
 
   const navigateToDetailsPage = useCallback(
     (documentUid: string) => {
@@ -409,7 +458,7 @@ export default function DocumentsPage() {
                 gap: 1,
               }}
             >
-              {orderedPlatforms.reduce<JSX.Element[]>((acc, platform) => {
+              {orderedPlatforms.reduce<ReactElement[]>((acc, platform) => {
                 const record = row.original.records.find(
                   (record) => record.platform === platform,
                 )
@@ -488,7 +537,44 @@ export default function DocumentsPage() {
     supportedLocales,
     navigateToDetailsPage,
     currentPerspective?.membershipAcronyms,
+    _,
   ])
+
+  const getColumnIds = (columns: MRT_ColumnDef<Document>[]) => {
+    return columns
+      .map((c) => (typeof c.accessorKey === 'string' ? c.accessorKey : c.id))
+      .filter(Boolean) as string[]
+  }
+
+  const readInitialColumnVisibility = (
+    columns: MRT_ColumnDef<Document>[],
+  ): MRT_VisibilityState => {
+    try {
+      const raw = sessionStorage.getItem(
+        'mrt_columnVisibility_publication_table',
+      )
+      if (!raw) return {} // all visible by default
+      const parsed = JSON.parse(raw) as MRT_VisibilityState
+      const valid = new Set(getColumnIds(columns))
+      // keep only known columns
+      return Object.fromEntries(
+        Object.entries(parsed).filter(([id]) => valid.has(id)),
+      )
+    } catch {
+      return {}
+    }
+  }
+
+  const [columnVisibility, setColumnVisibility] = useState<MRT_VisibilityState>(
+    () => readInitialColumnVisibility(columns),
+  )
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      'mrt_columnVisibility_publication_table',
+      JSON.stringify(columnVisibility),
+    )
+  }, [columnVisibility])
 
   const requestIdRef = useRef(0)
   const countDocumentsRequestIdRef = useRef(0)
@@ -522,54 +608,26 @@ export default function DocumentsPage() {
 
   const [selectedTab, setSelectedTab] = useState(tabs[0].value)
 
-  useEffect(() => {
-    const adjustedFilters = columnFilters.map((filter) => {
+  /**
+   * Adjust MRT column filters so that `date` range filters are converted to UTC ISO strings.
+   */
+  const normalizeDateFilters = (
+    columnFilters: { id: string; value: unknown }[],
+  ): { id: string; value: unknown }[] => {
+    return columnFilters.map((filter) => {
       if (filter.id === 'date' && Array.isArray(filter.value)) {
-        const [startDate, endDate] = filter.value
-
-        // Function to safely convert startDate to 00:00:00 and endDate to 23:59:59.999
-        const toUTCISOString = (dateStr: string | null, isEndDate = false) => {
-          if (!dateStr) return null // Return null if no date
-
-          const parsedDate = dayjs(dateStr)
-          if (!parsedDate.isValid()) return null // Return null if invalid date
-
-          // If it's an end date, set it to 23:59:59.999, otherwise 00:00:00
-          const utcDate = isEndDate
-            ? new Date(
-                Date.UTC(
-                  parsedDate.year(),
-                  parsedDate.month(),
-                  parsedDate.date(),
-                  23,
-                  59,
-                  59,
-                  999,
-                ),
-              ) // Last second of the day
-            : new Date(
-                Date.UTC(
-                  parsedDate.year(),
-                  parsedDate.month(),
-                  parsedDate.date(),
-                  0,
-                  0,
-                  0,
-                  0,
-                ),
-              ) // Start of the day
-
-          return utcDate.toISOString()
-        }
-
+        const [startDate, endDate] = filter.value as (string | null)[]
         return {
           ...filter,
-          value: [toUTCISOString(startDate), toUTCISOString(endDate, true)], // Pass true for end date
+          value: [toUTCISOString(startDate), toUTCISOString(endDate, true)],
         }
       }
       return filter
     })
+  }
 
+  useEffect(() => {
+    const adjustedFilters = normalizeDateFilters(columnFilters)
     const contributorType = currentPerspective?.type
     if (!contributorType) return
 
@@ -735,7 +793,7 @@ export default function DocumentsPage() {
       )}
 
       <MaterialReactTable<Document>
-        initialState={{ showColumnFilters: true, sorting }}
+        initialState={{ showColumnFilters: true }}
         getRowId={(row) => {
           return row.uid
         }}
@@ -750,7 +808,6 @@ export default function DocumentsPage() {
         }}
         muiTableBodyRowProps={({ row }) => {
           const isWaiting = row.original.state === 'waiting_for_update'
-
           return {
             className: isWaiting ? 'mrt-row-waiting' : '',
           }
@@ -764,6 +821,9 @@ export default function DocumentsPage() {
         onColumnFiltersChange={setColumnFilters}
         onGlobalFilterChange={setGlobalFilter}
         onSortingChange={setSorting}
+        onColumnVisibilityChange={(newState) => {
+          setColumnVisibility(newState)
+        }}
         state={{
           isLoading: loading,
           showLoadingOverlay: false,
@@ -771,6 +831,7 @@ export default function DocumentsPage() {
           sorting: sorting || DEFAULT_SORTING,
           columnFilters,
           globalFilter,
+          columnVisibility,
         }}
         localization={Localization[lang]}
         enableRowActions
