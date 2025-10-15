@@ -38,97 +38,101 @@ export default function Splash() {
 
   return (
     <>
-      <Box flex={1} display='flex' flexDirection='column'>
-        <Box p={{ xs: 2, md: 6 }}>
-          <Logo />
-        </Box>
-
+      <Box flex={1} display='flex'>
         <Box
           flex={1}
           display='flex'
           flexDirection='column'
-          justifyContent='center'
-          alignItems='center'
-          px={{ xs: 2, md: 15 }}
-          pb={{ xs: 3, md: 21 }}
+          px={{ xs: 2, lg: 3 }}
+          pt={{ xs: 2, md: 6 }}
+          pb={2}
         >
-          <Box mb={7}>
-            <Image
-              src={SplashPreview}
-              alt='SoVisuPlus preview screenshot'
-              style={{
-                boxShadow: '0px 4px 4px 0px rgba(0, 0, 0, 0.25)',
-                height: 'auto',
-                maxHeight: '236px',
-                maxWidth: '100%',
-                width: 'auto',
+          <Box>
+            <Logo />
+          </Box>
+
+          <Box
+            flex={1}
+            display='flex'
+            flexDirection='column'
+            justifyContent='center'
+            alignItems='center'
+          >
+            <Box mb={7}>
+              <Image
+                src={SplashPreview}
+                alt='SoVisuPlus preview screenshot'
+                style={{
+                  boxShadow: '0px 4px 4px 0px rgba(0, 0, 0, 0.25)',
+                  height: 'auto',
+                  maxHeight: '236px',
+                  maxWidth: '100%',
+                  width: 'auto',
+                }}
+              />
+            </Box>
+
+            <Typography
+              component='p'
+              variant='headingSmall'
+              mb={7}
+              align='center'
+              color={theme.palette.primary.main}
+              fontWeight='bold'
+            >
+              {locales?.previewLegend}
+            </Typography>
+
+            <Button
+              onClick={() => signIn('keycloak')}
+              fullWidth
+              variant='contained'
+              sx={{
+                maxWidth: '30rem',
               }}
-            />
+            >
+              {t`splash.login`}
+            </Button>
           </Box>
 
-          <Typography
-            component='p'
-            variant='headingSmall'
-            mb={7}
-            align='center'
-            color={theme.palette.primary.main}
-            fontWeight='bold'
-          >
-            {locales?.previewLegend}
-          </Typography>
+          <Box display='flex' justifyContent='space-between'>
+            <Box
+              display='flex'
+              flexDirection={{ xs: 'column', lg: 'row' }}
+              justifyContent={{
+                xs: 'flex-end',
+                lg: 'flex-start',
+              }}
+            >
+              <Image
+                src={CrisalidLogo}
+                alt='CRISalid logo'
+                width={150}
+                height={45}
+              />
+            </Box>
 
-          <Button
-            onClick={() => signIn('keycloak')}
-            fullWidth
-            variant='contained'
-            sx={{
-              maxWidth: '30rem',
-            }}
-          >
-            {t`splash.login`}
-          </Button>
-        </Box>
-
-        <Box
-          pl={{ xs: 2, md: 6 }}
-          pr={{ xs: 2, md: 3 }}
-          py={2}
-          display='flex'
-          justifyContent='space-between'
-        >
-          <Box
-            display='flex'
-            flexDirection={{ xs: 'column', md: 'row' }}
-            justifyContent={{ xs: 'flex-end', md: 'flex-start' }}
-          >
-            <Image
-              src={CrisalidLogo}
-              alt='CRISalid logo'
-              width={150}
-              height={45}
-            />
-          </Box>
-
-          <Box
-            display='flex'
-            gap={3}
-            alignItems={{ xs: 'flex-end', md: 'center' }}
-            pb={{ xs: 2, md: 0 }}
-            flexDirection={{ xs: 'column', md: 'row' }}
-            textAlign='right'
-          >
-            <Link href='#' underline='none' fontWeight='bold'>
-              {t`splash.about`}
-            </Link>
-            <Link href='#' underline='none' fontWeight='bold'>
-              {t`splash.legal_mentions`}
-            </Link>
-            <Link href='#' underline='none' fontWeight='bold'>
-              {t`splash.accessibility`}
-            </Link>
-            <Link href='#' underline='none' fontWeight='bold'>
-              {t`splash.community`}
-            </Link>
+            <Box
+              display='flex'
+              gap={2.5}
+              alignItems={{ xs: 'flex-end', lg: 'center' }}
+              pb={{ xs: 2, md: 0 }}
+              flexDirection={{ xs: 'column', lg: 'row' }}
+              textAlign='right'
+            >
+              <Link href='#' underline='none' fontWeight='bold'>
+                {t`splash.about`}
+              </Link>
+              <Link href='#' underline='none' fontWeight='bold'>
+                {t`splash.legal_mentions`}
+              </Link>
+              <Link href='#' underline='none' fontWeight='bold'>
+                {t`splash.accessibility`}
+              </Link>
+              <Link href='#' underline='none' fontWeight='bold'>
+                {t`splash.community`}
+              </Link>
+            </Box>
           </Box>
         </Box>
       </Box>
@@ -137,10 +141,10 @@ export default function Splash() {
         <Box
           display='flex'
           flex={1}
-          alignItems='center'
+          justifyContent='center'
           flexDirection='column'
-          px={15}
-          py={21}
+          px={{ md: 6, lg: 15 }}
+          py={{ md: 6, lg: 21 }}
           bgcolor='teal'
           color='white'
           position='relative'
