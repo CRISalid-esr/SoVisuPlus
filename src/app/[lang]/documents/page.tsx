@@ -66,6 +66,12 @@ import { Can } from '@casl/react'
 
 dayjs.extend(utc)
 
+const DEFAULT_SORTING = [
+  {
+    id: 'date',
+    desc: true,
+  },
+]
 export default function DocumentsPage() {
   const { data: session } = useSession()
   const { _ } = useLingui()
@@ -79,12 +85,16 @@ export default function DocumentsPage() {
   })
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
-  const [sorting, setSorting] = useState<MRT_SortingState>([
-    {
-      id: 'date',
-      desc: true,
-    },
-  ])
+
+  const readInitialSorting = (): MRT_SortingState => {
+    try {
+      const raw = sessionStorage.getItem('mrt_sorting_publication_table')
+      return raw ? JSON.parse(raw) : DEFAULT_SORTING
+    } catch {
+      return DEFAULT_SORTING
+    }
+  }
+  const [sorting, setSorting] = useState<MRT_SortingState>(readInitialSorting)
 
   const [openSynchronizeModal, setOpenSynchronizeModal] =
     useState<boolean>(false)
@@ -107,6 +117,14 @@ export default function DocumentsPage() {
   const theme = useTheme()
   const router = useRouter()
   const searchParams = useSearchParams()
+
+  useEffect(() => {
+    if (!sorting) return
+    sessionStorage.setItem(
+      'mrt_sorting_publication_table',
+      JSON.stringify(sorting),
+    )
+  }, [sorting])
 
   const navigateToDetailsPage = useCallback(
     (documentUid: string) => {
@@ -701,7 +719,7 @@ export default function DocumentsPage() {
       )}
 
       <MaterialReactTable<Document>
-        initialState={{ showColumnFilters: true }}
+        initialState={{ showColumnFilters: true, sorting }}
         getRowId={(row) => {
           return row.uid
         }}
@@ -734,7 +752,7 @@ export default function DocumentsPage() {
           isLoading: loading,
           showLoadingOverlay: false,
           pagination,
-          sorting,
+          sorting: sorting || DEFAULT_SORTING,
           columnFilters,
           globalFilter,
         }}
