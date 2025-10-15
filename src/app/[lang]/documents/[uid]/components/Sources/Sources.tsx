@@ -104,7 +104,6 @@ function Sources() {
         header: t`documents_page_title_column`,
         Cell({
           row,
-          renderedCellValue,
         }: {
           row: MRT_Row<DocumentRecord>
           renderedCellValue: ReactNode
@@ -120,7 +119,7 @@ function Sources() {
           const effectiveRowLang = localizedTitle.language
           return (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography>{renderedCellValue}</Typography>
+              <Typography>{localizedTitle.value}</Typography>
               <LanguageChips
                 texts={titles}
                 selectedLang={effectiveRowLang}
@@ -227,7 +226,7 @@ function Sources() {
         },
       },
     ],
-    [],
+    [selectedTitleLangs],
   )
 
   const handleChange = () => {
