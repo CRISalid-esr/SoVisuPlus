@@ -141,6 +141,7 @@ export default function Splash() {
         <Box
           display='flex'
           flex={1}
+          alignItems='center'
           justifyContent='center'
           flexDirection='column'
           px={{ md: 6, lg: 15 }}
