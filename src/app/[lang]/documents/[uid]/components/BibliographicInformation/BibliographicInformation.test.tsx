@@ -25,6 +25,7 @@ const mockRouter = {
 
 jest.mock('next/navigation', () => ({
   useRouter: () => mockRouter,
+  useParams: jest.fn(() => ({ uid: '123' })),
   useSearchParams: jest.fn(() => new URLSearchParams()),
 }))
 
