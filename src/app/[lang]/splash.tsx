@@ -43,7 +43,8 @@ export default function Splash() {
           flex={1}
           display='flex'
           flexDirection='column'
-          px={{ xs: 2, lg: 3 }}
+          pl={{ xs: 2, lg: 5 }}
+          pr={{ xs: 2, lg: 2 }}
           pt={{ xs: 2, md: 6 }}
           pb={2}
         >
@@ -114,7 +115,7 @@ export default function Splash() {
 
             <Box
               display='flex'
-              gap={2.5}
+              gap={2.25}
               alignItems={{ xs: 'flex-end', lg: 'center' }}
               pb={{ xs: 2, md: 0 }}
               flexDirection={{ xs: 'column', lg: 'row' }}
