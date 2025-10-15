@@ -72,6 +72,10 @@ const DEFAULT_SORTING = [
     desc: true,
   },
 ]
+const DEFAULT_PAGINATION = {
+  pageIndex: 0,
+  pageSize: 10,
+}
 export default function DocumentsPage() {
   const { data: session } = useSession()
   const { _ } = useLingui()
@@ -79,10 +83,15 @@ export default function DocumentsPage() {
     () => abilityFromAuthzContext(session?.user.authz),
     [session?.user?.authz],
   )
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  })
+  const readInitialPagination = (): typeof DEFAULT_PAGINATION => {
+    try {
+      const raw = sessionStorage.getItem('mrt_pagination_publication_table')
+      return raw ? JSON.parse(raw) : DEFAULT_PAGINATION
+    } catch {
+      return DEFAULT_PAGINATION
+    }
+  }
+  const [pagination, setPagination] = useState(readInitialPagination)
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([])
   const [globalFilter, setGlobalFilter] = useState('')
 
@@ -117,6 +126,13 @@ export default function DocumentsPage() {
   const theme = useTheme()
   const router = useRouter()
   const searchParams = useSearchParams()
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      'mrt_pagination_publication_table',
+      JSON.stringify(pagination),
+    )
+  }, [pagination])
 
   useEffect(() => {
     if (!sorting) return
