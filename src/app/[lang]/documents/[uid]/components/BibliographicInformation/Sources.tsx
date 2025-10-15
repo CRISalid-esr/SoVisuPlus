@@ -1,5 +1,6 @@
 import useStore from '@/stores/global_store'
 import { Trans } from '@lingui/macro'
+import * as Lingui from '@lingui/core'
 import EditIcon from '@mui/icons-material/Edit'
 import { Avatar, Box, Button, Chip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -8,12 +9,24 @@ import {
   BibliographicPlatform,
   BibliographicPlatformMetadata,
 } from '@/types/BibliographicPlatform'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { ReactElement } from 'react'
 
 const Sources = () => {
   const theme = useTheme()
   const { selectedDocument = null } = useStore((state) => state.document)
 
-  // Ordered platforms as in your datatable cell
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { uid } = useParams<{ uid: string }>()
+  const lang = Lingui.i18n.locale
+
+  const goToSourcesTab = () => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', 'sources')
+    router.push(`/${lang}/documents/${uid}?${params.toString()}`)
+  }
+
   const orderedPlatforms = Object.values(BibliographicPlatform)
 
   return (
@@ -25,7 +38,7 @@ const Sources = () => {
         alignItems: 'center',
       }}
     >
-      {orderedPlatforms.reduce<JSX.Element[]>((acc, platform) => {
+      {orderedPlatforms.reduce<ReactElement[]>((acc, platform) => {
         const record = selectedDocument?.records.find(
           (record) => record.platform === platform,
         )
@@ -58,7 +71,11 @@ const Sources = () => {
         }
         return acc
       }, [])}
-      <Button variant='outlined' startIcon={<EditIcon />}>
+      <Button
+        variant='outlined'
+        startIcon={<EditIcon />}
+        onClick={goToSourcesTab}
+      >
         <Trans>document_details_page_sources_row_update_source</Trans>
       </Button>
     </Box>

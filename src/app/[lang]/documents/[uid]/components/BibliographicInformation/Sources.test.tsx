@@ -30,6 +30,16 @@ jest.mock('@mui/material/styles', () => ({
   }),
 }))
 
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => mockRouter,
+  useSearchParams: jest.fn(() => new URLSearchParams()),
+  useParams: jest.fn(() => ({ uid: '123' })),
+}))
+
 // Mock window.open to test external link clicks
 global.open = jest.fn()
 
