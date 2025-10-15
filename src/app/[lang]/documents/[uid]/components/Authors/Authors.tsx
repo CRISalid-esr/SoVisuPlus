@@ -22,8 +22,7 @@ const Authors = () => {
       {
         id: 'person',
         header: t`documents_details_page_authors_tab_name_column`,
-        accessorFn: (row: { person: Person }) =>
-          row.person.lastName || row.person.displayName,
+        accessorFn: (row: { person: Person }) => row.person.displayName,
         enableFilterMatchHighlighting: true,
         Cell({ renderedCellValue }: { renderedCellValue: ReactNode }) {
           return (
