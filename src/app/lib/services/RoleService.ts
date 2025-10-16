@@ -124,4 +124,18 @@ export class RoleService {
       scope: input.scope ?? null,
     }
   }
+
+  async ensureSelfScopedRoles(params: {
+    userId: number
+    personUid: string
+    roleNames: string[]
+  }): Promise<void> {
+    for (const roleName of params.roleNames) {
+      await this.assignRoleToUser({
+        roleName,
+        scope: { entityType: 'Person', entityUid: params.personUid },
+        user: { userId: params.userId },
+      })
+    }
+  }
 }

@@ -348,4 +348,124 @@ describe('RoleService Integration', () => {
     })
     expect(scopes).toHaveLength(0)
   })
+
+  test('ensureSelfScopedRoles: assigns self-scoped roles to a user and is idempotent', async () => {
+    // 1) Seed three roles used as defaults
+    await svc.reset({
+      roles: [
+        {
+          name: 'document_editor',
+          description: 'Edit document metadata',
+          system: false,
+          permissions: [
+            { action: 'update', subject: 'Document', fields: ['titles'] },
+          ],
+        },
+        {
+          name: 'document_fetcher',
+          description: 'Fetch documents for a person',
+          system: false,
+          permissions: [
+            { action: 'fetch_documents', subject: 'Person', fields: [] },
+          ],
+        },
+        {
+          name: 'document_merger',
+          description: 'Merge documents',
+          system: false,
+          permissions: [{ action: 'merge', subject: 'Document', fields: [] }],
+        },
+      ],
+    })
+
+    // 2) Create a Person/User
+    const person = await prisma.person.create({
+      data: {
+        uid: 'local-alice',
+        firstName: 'Alice',
+        lastName: 'Doe',
+        displayName: 'Alice Doe',
+        external: false,
+        normalizedName: 'alice doe',
+      },
+    })
+    await prisma.personIdentifier.create({
+      data: { personId: person.id, type: 'LOCAL', value: 'local-alice' },
+    })
+    const user = await prisma.user.create({ data: { personId: person.id } })
+
+    // 3) Ensure self-scoped roles
+    await svc.ensureSelfScopedRoles({
+      userId: user.id,
+      personUid: 'local-alice',
+      roleNames: ['document_editor', 'document_fetcher', 'document_merger'],
+    })
+
+    // 4) Verify the 3 role links exist
+    const roles = await prisma.role.findMany({
+      where: {
+        name: {
+          in: ['document_editor', 'document_fetcher', 'document_merger'],
+        },
+      },
+      select: { id: true, name: true },
+    })
+    const roleByName = Object.fromEntries(roles.map((r) => [r.name, r.id]))
+
+    const userRoles = await prisma.userRole.findMany({
+      where: { userId: user.id },
+    })
+    expect(userRoles).toHaveLength(3)
+    const userRoleRoleIds = new Set(userRoles.map((ur) => ur.roleId))
+    expect(userRoleRoleIds).toEqual(
+      new Set([
+        roleByName['document_editor'],
+        roleByName['document_fetcher'],
+        roleByName['document_merger'],
+      ]),
+    )
+
+    // 5) Verify one Person-scoped row per role (Person:local-alice)
+    const scopes = await prisma.userRoleScope.findMany({
+      where: { userId: user.id },
+      orderBy: [{ roleId: 'asc' }, { id: 'asc' }],
+    })
+    expect(scopes).toHaveLength(3)
+    for (const s of scopes) {
+      expect(s).toMatchObject({
+        entityType: 'Person',
+        entityUid: 'local-alice',
+      })
+    }
+
+    // 6) Idempotence: run again with same roles → no duplicates
+    await svc.ensureSelfScopedRoles({
+      userId: user.id,
+      personUid: 'local-alice',
+      roleNames: ['document_editor', 'document_fetcher', 'document_merger'],
+    })
+    const userRoles2 = await prisma.userRole.findMany({
+      where: { userId: user.id },
+    })
+    const scopes2 = await prisma.userRoleScope.findMany({
+      where: { userId: user.id },
+    })
+    expect(userRoles2).toHaveLength(3)
+    expect(scopes2).toHaveLength(3)
+
+    // 7) Running with a subset should not remove existing roles/scopes
+    await svc.ensureSelfScopedRoles({
+      userId: user.id,
+      personUid: 'local-alice',
+      roleNames: ['document_editor'], // subset
+    })
+    const userRoles3 = await prisma.userRole.findMany({
+      where: { userId: user.id },
+    })
+    const scopes3 = await prisma.userRoleScope.findMany({
+      where: { userId: user.id },
+    })
+    expect(userRoles3).toHaveLength(3)
+    expect(scopes3).toHaveLength(3)
+  })
 })

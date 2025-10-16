@@ -16,9 +16,9 @@ Create a `rbac.roles.yaml` at the root of your instance. Each role has:
 - `description` (optional)
 - `permissions`: list of rules, each with
 
-    - `action`: one of your domain actions (e.g. `manage`, `read`, `update`, `delete`, `merge`, `unmerge`...)
-    - `subject`: the domain entity (`Document`, `DocumentRecord`, `Person`, `ResearchStructure`, or `all`)
-    - `fields` (optional): field-level permissions for `update` (e.g. `titles`, `abstracts`)
+  - `action`: one of your domain actions (e.g. `manage`, `read`, `update`, `delete`, `merge`, `unmerge`...)
+  - `subject`: the domain entity (`Document`, `DocumentRecord`, `Person`, `ResearchStructure`, or `all`)
+  - `fields` (optional): field-level permissions for `update` (e.g. `titles`, `abstracts`)
 
 ```yaml
 # file: rbac.roles.yaml
@@ -35,7 +35,7 @@ roles:
     permissions:
       - action: update
         subject: Document
-        fields: [ titles, abstracts, contributors, identifiers ]
+        fields: [titles, abstracts, contributors, identifiers]
 
   - name: document_merger
     description: Merge / unmerge documents and source records
@@ -50,17 +50,17 @@ roles:
     permissions:
       - action: update
         subject: Person
-        fields: [ identifiers ]
+        fields: [identifiers]
 ```
 
 ### Notes
 
 - We created a small set of roles and rely on **polymorphic scopes** when assigning them:
 
-    - Scope to a **Person** → “this user can edit/merge documents to which this person is a contributor”
-    - Scope to a **ResearchStructure** → “this user can edit/merge documents that involve members of that structure as
-      contributors”
-    - Scope to an **Institution** or **InstitutionDivision** → similar idea, broader perimeters
+  - Scope to a **Person** → “this user can edit/merge documents to which this person is a contributor”
+  - Scope to a **ResearchStructure** → “this user can edit/merge documents that involve members of that structure as
+    contributors”
+  - Scope to an **Institution** or **InstitutionDivision** → similar idea, broader perimeters
 
 - Field-level checks are supported via `fields` (e.g. for `update` actions)
 
@@ -144,6 +144,34 @@ npm run assign_role -- \
 
 ---
 
+## 4) Default self-scoped roles (user → their own Person)
+
+You can automatically grant a set of roles to **every user on their own scope** (`Person:<theirUid>`) : the command is \*
+\*idempotent\*\* (safe to run anytime).
+
+### One-shot seeding for all existing users
+
+```bash
+# Seeds defaults for all users that have a linked person (person.uid)
+# Defaults: document_editor, document_fetcher, document_merger
+npm run seed:self-scoped-defaults
+
+# Or customize the roles via env:
+DEFAULT_SELF_SCOPED_ROLES="document_editor,document_fetcher" npm run seed:self-scoped-defaults
+```
+
+### NPM scripts
+
+Example uses:
+
+```bash
+npm run seed:self-scoped-defaults
+#or
+npm run seed:self-scoped-default:js
+```
+
+---
+
 ## Development
 
 ### Example: add a new permission to **fetch documents** for a **Person**
@@ -205,9 +233,9 @@ npm run assign_role -- \
   --role document_fetcher \
   --scope Person:local-jdupont \
   --person-uid local-jdupont
-  
+
 # or with compiled version
-  
+
 npm run build:listener
 node dist-listener/src/scripts/assign_role.js \
   --role document_fetcher \
@@ -339,19 +367,19 @@ Fix your tests :
 
 ```ts
 const authz = makeAuthzContext({
-    roleAssignments: [
-      makeAssignment(
-        'document_fetcher',
-        [
-          {
-            action: PermissionAction.fetch_documents,
-            subject: PermissionSubject.Person,
-          },
-        ],
-        [{ entityType: 'Person', entityUid: 'abc' }],
-      ),
-    ],
-  })
+  roleAssignments: [
+    makeAssignment(
+      'document_fetcher',
+      [
+        {
+          action: PermissionAction.fetch_documents,
+          subject: PermissionSubject.Person,
+        },
+      ],
+      [{ entityType: 'Person', entityUid: 'abc' }],
+    ),
+  ],
+})
 
 ;(getServerSession as jest.Mock).mockResolvedValue({
   user: { username: 'jdoe', authz },
