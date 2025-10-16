@@ -33,12 +33,11 @@ export default function Splash() {
           flex={1}
           display='flex'
           flexDirection='column'
-          pl={{ xs: 2, lg: 5 }}
-          pr={{ xs: 2, lg: 2 }}
+          px={2}
           pt={{ xs: 2, md: 6 }}
           pb={2}
         >
-          <Box>
+          <Box pl={{ lg: 3 }}>
             <Logo />
           </Box>
 
@@ -86,7 +85,7 @@ export default function Splash() {
             </Button>
           </Box>
 
-          <Box display='flex' justifyContent='space-between'>
+          <Box display='flex' justifyContent='space-between' pl={{ lg: 3 }}>
             <Box
               display='flex'
               flexDirection={{ xs: 'column', lg: 'row' }}
