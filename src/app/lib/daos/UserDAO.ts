@@ -211,4 +211,16 @@ export class UserDAO extends AbstractDAO {
       where: { userId, roleId },
     })
   }
+
+  async listUsersWithPersonUid(): Promise<
+    Array<{ id: number; personUid: string | null }>
+  > {
+    const rows = await this.prismaClient.user.findMany({
+      select: {
+        id: true,
+        person: { select: { uid: true } },
+      },
+    })
+    return rows.map((r) => ({ id: r.id, personUid: r.person?.uid ?? null }))
+  }
 }
