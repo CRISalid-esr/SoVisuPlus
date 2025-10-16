@@ -14,6 +14,8 @@ import Background from '@/public/theme/splash_background.svg'
 import CrisalidLogo from '@/public/theme/splash_footer_logo.png'
 import SplashPreview from '@/public/theme/splash_preview.png'
 import { ThemeLocales } from '@/types/ThemeLocales'
+import LocalesFr from '@/public/theme/locales_fr.json'
+import LocalesEn from '@/public/theme/locales_en.json'
 
 export default function Splash() {
   const lang = Lingui.i18n.locale || 'fr'
@@ -21,19 +23,7 @@ export default function Splash() {
   const theme = useTheme()
 
   useEffect(() => {
-    async function importLocales() {
-      try {
-        const importedLocales = await import(
-          `@/public/theme/locales_${lang}.json`
-        )
-
-        setLocales(importedLocales.default)
-      } catch {
-        throw new Error('Theme locales could not be imported')
-      }
-    }
-
-    importLocales()
+    setLocales(lang === 'en' ? LocalesEn : LocalesFr)
   }, [lang])
 
   return (
