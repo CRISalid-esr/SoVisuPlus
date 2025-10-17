@@ -95,6 +95,7 @@ const authOptions: AuthOptions = {
       user?: NextAuthUser
       profile?: Profile
     }) {
+      console.info('jwt callback', token, account, user, profile)
       if (profile) {
         token.username = (profile as KeycloakProfile)?.preferred_username
         token.email = profile?.email
@@ -111,12 +112,15 @@ const authOptions: AuthOptions = {
         : token.orcid
           ? { type: PersonIdentifierType.ORCID, value: String(token.orcid) }
           : null
+      console.info('resolving user for identifier', identifier)
 
       if (identifier) {
         try {
           const domainUser = await userDAO.getUserByIdentifier(identifier)
+          console.info('resolved domain user', domainUser)
           if (domainUser) {
             token.authz = userToAuthzContext(domainUser, String(token.id ?? ''))
+            console.info('enriched token with authz', token.authz)
           }
         } catch (e) {
           console.warn('[auth/jwt] failed to enrich token with authz:', e)
@@ -125,7 +129,9 @@ const authOptions: AuthOptions = {
       return token
     },
     async session({ session, token }: { session: Session; token: JWT }) {
+      console.info('session callback', session, token)
       if (token && session.user) {
+        console.info('enriching session user from token')
         session.user.id = token.id as string
         session.user.username = token.username as string
         session.user.orcid = token.orcid as string
