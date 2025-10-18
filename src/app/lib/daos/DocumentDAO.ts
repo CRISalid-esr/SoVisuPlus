@@ -15,12 +15,17 @@ import {
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import QueryMode = Prisma.QueryMode
 
+type DbColumnFilters =
+  | { id: 'date'; value: [string | null, string | null] }
+  | { id: 'type'; value: DocumentType[] }
+  | { id: string; value: string | string[] }
+
 interface FetchDocumentsFromDBParams {
   searchTerm: string
   searchLang: string
   page: number
   pageSize: number
-  columnFilters: { id: string; value: string | string[] }[]
+  columnFilters: DbColumnFilters[]
   sorting: { id: string; desc: boolean }[]
   contributorUids: string[]
   halCollectionCodes: string[]
@@ -30,7 +35,7 @@ interface FetchDocumentsFromDBParams {
 interface CountDocumentsFromDBParams {
   searchTerm: string
   searchLang: string
-  columnFilters: { id: string; value: string | string[] }[]
+  columnFilters: DbColumnFilters[]
   contributorUids: string[]
   halCollectionCodes: string[]
 }
@@ -387,7 +392,7 @@ export class DocumentDAO extends AbstractDAO {
   }: {
     searchTerm: string
     searchLang: string
-    columnFilters: { id: string; value: string | string[] }[]
+    columnFilters: DbColumnFilters[]
     contributorUids: string[]
     halCollectionCodes: string[]
     areHalCollectionCodesOmitted: boolean

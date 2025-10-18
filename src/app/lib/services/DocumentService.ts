@@ -5,13 +5,18 @@ import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
+
+type ColumnFilter =
+  | { id: 'date'; value: [string | null, string | null] }
+  | { id: string; value: string | string[] }
 
 interface FetchDocumentsParams {
   searchTerm: string
   searchLang: string
   page: number
   pageSize: number
-  columnFilters: { id: string; value: string }[]
+  columnFilters: ColumnFilter[]
   sorting: { id: string; desc: boolean }[]
   contributorUid: string | null
   contributorType: AgentType
@@ -22,7 +27,7 @@ interface FetchDocumentsParams {
 interface CountDocumentsParams {
   searchTerm: string
   searchLang: string
-  columnFilters: { id: string; value: string }[]
+  columnFilters: ColumnFilter[]
   contributorUid: string | null
   contributorType: AgentType
   halCollectionCodes: string[]
@@ -84,13 +89,15 @@ export class DocumentService {
       contributorType,
     )
 
+    const expandedColumnFilters = this.expandedColumnFilters(columnFilters)
+
     try {
       const { documents, totalItems } = await this.documentDAO.fetchDocuments({
         searchTerm,
         searchLang: searchLang,
         page,
         pageSize,
-        columnFilters,
+        columnFilters: expandedColumnFilters,
         sorting,
         contributorUids,
         halCollectionCodes,
@@ -101,6 +108,18 @@ export class DocumentService {
       console.error('Error in service layer:', error)
       throw new Error('Error fetching documents from service')
     }
+  }
+
+  private expandedColumnFilters(columnFilters: ColumnFilter[]) {
+    return columnFilters.map((f) => {
+      if (f.id !== 'type' || !Array.isArray(f.value)) return f
+      const validTypes = (f.value as unknown[]).filter(
+        DocumentTypeService.isDocumentType,
+      ) // ✅ type-safe guard
+
+      const expanded = DocumentTypeService.expandTypes(validTypes)
+      return { ...f, value: expanded }
+    })
   }
 
   async countDocuments({
@@ -116,12 +135,14 @@ export class DocumentService {
       contributorType,
     )
 
+    const expandedColumnFilters = this.expandedColumnFilters(columnFilters)
+
     try {
       const { allItems, incompleteHalRepositoryItems } =
         await this.documentDAO.countDocuments({
           searchTerm,
           searchLang: searchLang,
-          columnFilters,
+          columnFilters: expandedColumnFilters,
           contributorUids,
           halCollectionCodes,
         })

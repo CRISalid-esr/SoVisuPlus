@@ -529,15 +529,31 @@ msgstr "Details"
 msgid "documents_page_all_documents_filter"
 msgstr "All my documents"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:12
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:9
+msgid "documents_page_article_icon_label"
+msgstr ""
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:15
 msgid "documents_page_book_chapter_icon_label"
 msgstr "Book chapter"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:10
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:11
 msgid "documents_page_book_icon_label"
 msgstr "Book"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:13
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:12
+msgid "documents_page_book_of_chapters_icon_label"
+msgstr ""
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:20
+msgid "documents_page_comment_icon_label"
+msgstr ""
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:18
+msgid "documents_page_conference_abstract_icon_label"
+msgstr ""
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:16
 msgid "documents_page_conference_article_icon_label"
 msgstr "Conference article"
 
@@ -566,7 +582,7 @@ msgstr "status in Hal"
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "HAL incomplete filing"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:9
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:10
 msgid "documents_page_journal_article_icon_label"
 msgstr "Journal article"
 
@@ -582,11 +598,19 @@ msgstr ""
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:11
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:13
 msgid "documents_page_monograph_icon_label"
 msgstr "Monography"
 
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:19
+msgid "documents_page_preface_icon_label"
+msgstr ""
+
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:14
+msgid "documents_page_presentation_icon_label"
+msgstr ""
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:17
 msgid "documents_page_proceedings_icon_label"
 msgstr "Proceedings"
 

@@ -72,6 +72,7 @@ import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { Can } from '@casl/react'
 import { toUTCISOString } from '@/utils/toUTCISOString'
+import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 
 dayjs.extend(utc)
 
@@ -204,7 +205,26 @@ export default function DocumentsPage() {
     MRT_ColumnDef<Document>[]
   >((): MRT_ColumnDef<Document>[] => {
     const acronyms = currentPerspective?.membershipAcronyms || []
-
+    const typeOptions = DocumentTypeService.toMenuTree()
+      .filter((n) => n.value !== DocumentType.Document)
+      .map(({ value, depth }) => {
+        const plainLabel = _(DocumentTypeLabels[value])
+        return {
+          value,
+          label: (
+            <Box
+              className='doc-type-option'
+              sx={{ display: 'flex', alignItems: 'center', pl: depth * 2 }}
+            >
+              <Box sx={{ mr: 1 }}>{DocumentTypeIcons[value]}</Box>
+              <Typography variant='body2' noWrap>
+                {plainLabel}
+              </Typography>
+            </Box>
+          ),
+          plainLabel,
+        }
+      })
     return [
       {
         enableSorting: false,
@@ -220,28 +240,7 @@ export default function DocumentsPage() {
         filterVariant: 'multi-select',
         filterColumn: 'type',
         //@ts-expect-error:  overide filterSelectOptions to accept Element.jsx instead of Element
-        filterSelectOptions: Object.values(DocumentType).map((type) => ({
-          value: type,
-          label: (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-              }}
-            >
-              {_(DocumentTypeLabels[type])}
-              <Box
-                sx={{
-                  marginLeft: 'auto',
-                }}
-              >
-                {DocumentTypeIcons[type]}
-              </Box>
-            </Box>
-          ),
-        })),
+        filterSelectOptions: typeOptions,
       },
       {
         size: 200,
