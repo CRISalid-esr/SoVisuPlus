@@ -612,7 +612,7 @@ msgstr "Présentation"
 
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:17
 msgid "documents_page_proceedings_icon_label"
-msgstr "Procédure"
+msgstr "Actes"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:141
 #: src/app/[lang]/documents/page.tsx:355

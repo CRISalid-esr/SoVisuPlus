@@ -3,9 +3,9 @@ import { DOCUMENT_TYPES } from '@/lib/services/DocumentTypes'
 
 export { DOCUMENT_TYPES } from './DocumentTypes'
 
-type MenuNode = {
+export type MenuNode = {
   value: DocumentType
-  label: string
+  depth: number
   children?: MenuNode[]
 }
 
@@ -82,24 +82,20 @@ export class DocumentTypeService {
     return Array.from(out)
   }
 
-  static toMenuTree(
-    start: DocumentType = DocumentType.Document,
-    labeler: (t: DocumentType) => string = defaultLabeler,
-  ): MenuNode {
-    const build = (node: DocumentType): MenuNode => {
-      const children = DOCUMENT_TYPES[node] ?? []
-      return {
-        value: node,
-        label: labeler(node),
-        ...(children.length ? { children: children.map((c) => build(c)) } : {}),
-      }
-    }
-    return build(start)
-  }
-}
+  /**
+   * Return a flattened tree annotated with depth,
+   * ready for building hierarchical menus or select options.
+   * The root `Document` is included by default.
+   */
+  static toMenuTree(start: DocumentType = DocumentType.Document): MenuNode[] {
+    const nodes: MenuNode[] = []
 
-/** Simple default labeler; replace with i18n if you wish. */
-function defaultLabeler(t: DocumentType): string {
-  // Turn "JournalArticle" -> "Journal Article"
-  return String(t).replace(/([a-z])([A-Z])/g, '$1 $2')
+    const visit = (node: DocumentType, depth: number) => {
+      nodes.push({ value: node, depth })
+      for (const child of this.childrenOf(node)) visit(child, depth + 1)
+    }
+
+    visit(start, 0)
+    return nodes
+  }
 }

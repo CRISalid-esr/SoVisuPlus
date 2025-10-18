@@ -179,31 +179,64 @@ describe('DocumentTypeService / DocumentTypes', () => {
     expect(new Set(expanded).size).toBe(expanded.length) // uniqueness
   })
 
-  it('toMenuTree builds a nested tree with default labels', () => {
-    const root = DocumentTypeService.toMenuTree() // starts at Document
+  it('toMenuTree returns a flattened tree with depth annotations', () => {
+    const nodes = DocumentTypeService.toMenuTree()
 
-    expect(root.value).toBe(DocumentType.Document)
-    expect(root.children?.length).toBeGreaterThan(0)
+    // Root node should be Document at depth 0
+    const root = nodes.find((n) => n.value === DocumentType.Document)
+    expect(root).toBeDefined()
+    expect(root?.depth).toBe(0)
 
-    const sp = root.children?.find(
-      (n) => n.value === DocumentType.ScholarlyPublication,
-    )
-    expect(sp).toBeTruthy()
-    expect(sp?.children).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ value: DocumentType.Article }),
-        expect.objectContaining({ value: DocumentType.Book }),
-        expect.objectContaining({ value: DocumentType.Presentation }),
-      ]),
-    )
+    // ScholarlyPublication should exist at depth 1
+    const sp = nodes.find((n) => n.value === DocumentType.ScholarlyPublication)
+    expect(sp).toBeDefined()
+    expect(sp?.depth).toBe(1)
 
-    // label formatting "JournalArticle" -> "Journal Article"
-    const articleNode = sp?.children?.find(
-      (n) => n.value === DocumentType.Article,
+    // Its immediate children (Article, Book, Presentation) should be at depth 2
+    const children = nodes.filter((n) =>
+      (
+        [
+          DocumentType.Article,
+          DocumentType.Book,
+          DocumentType.Presentation,
+        ] as DocumentType[]
+      ).includes(n.value),
     )
-    const ja = articleNode?.children?.find(
-      (n) => n.value === DocumentType.JournalArticle,
+    expect(children).toHaveLength(3)
+    children.forEach((c) => expect(c.depth).toBe(2))
+
+    // Deeper descendants should have depth > 2
+    const articleLeaves = [
+      DocumentType.JournalArticle,
+      DocumentType.ConferenceArticle,
+      DocumentType.ConferenceAbstract,
+      DocumentType.Preface,
+      DocumentType.Comment,
+      DocumentType.BookChapter,
+    ]
+    articleLeaves.forEach((t) => {
+      const node = nodes.find((n) => n.value === t)
+      expect(node).toBeDefined()
+      expect(node!.depth).toBeGreaterThan(2)
+    })
+
+    // Book branch depths
+    const bookNode = nodes.find((n) => n.value === DocumentType.Book)
+    expect(bookNode?.depth).toBe(2)
+    ;[
+      DocumentType.Monograph,
+      DocumentType.Proceedings,
+      DocumentType.BookOfChapters,
+    ].forEach((t) => {
+      const child = nodes.find((n) => n.value === t)
+      expect(child).toBeDefined()
+      expect(child!.depth).toBe(bookNode!.depth + 1)
+    })
+
+    // Total number of nodes = all document types present in DOCUMENT_TYPES keys
+    const allDocumentTypes = Object.keys(DOCUMENT_TYPES)
+    expect(nodes.map((n) => n.value)).toEqual(
+      expect.arrayContaining(allDocumentTypes),
     )
-    expect(ja?.label).toBe('Journal Article')
   })
 })
