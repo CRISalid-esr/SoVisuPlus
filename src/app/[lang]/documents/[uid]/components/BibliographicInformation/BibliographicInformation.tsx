@@ -92,14 +92,16 @@ const BibliographicInformation = () => {
     'titles',
     'type',
     'date',
-    'journal',
     'authors',
     'abstracts',
     'sources',
   ]
 
+  const journalTypeFields: DocumentFieldKey[] = [...commonTypeFields, 'journal']
+
   const documentTypeFields: Record<DocumentType, DocumentFieldKey[]> = {
-    [DocumentType.JournalArticle]: commonTypeFields,
+    [DocumentType.Article]: commonTypeFields,
+    [DocumentType.JournalArticle]: journalTypeFields,
     [DocumentType.Document]: commonTypeFields,
     [DocumentType.ScholarlyPublication]: commonTypeFields,
     [DocumentType.Book]: commonTypeFields,
@@ -107,6 +109,11 @@ const BibliographicInformation = () => {
     [DocumentType.BookChapter]: commonTypeFields,
     [DocumentType.ConferenceArticle]: commonTypeFields,
     [DocumentType.Proceedings]: commonTypeFields,
+    [DocumentType.ConferenceAbstract]: commonTypeFields,
+    [DocumentType.Preface]: commonTypeFields,
+    [DocumentType.Comment]: commonTypeFields,
+    [DocumentType.Presentation]: commonTypeFields,
+    [DocumentType.BookOfChapters]: commonTypeFields,
   }
 
   const fieldsToDisplay: DocumentFieldKey[] =

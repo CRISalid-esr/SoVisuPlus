@@ -102,10 +102,16 @@ model JournalIdentifier {
 enum DocumentType {
   Document
   ScholarlyPublication
+  Presentation
+  Article
+  ConferenceAbstract
+  Preface
+  Comment
   JournalArticle
   Book
   Monograph
   BookChapter
+  BookOfChapters
   ConferenceArticle
   Proceedings
 }

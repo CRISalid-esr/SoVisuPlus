@@ -529,15 +529,31 @@ msgstr "Détails"
 msgid "documents_page_all_documents_filter"
 msgstr "Tous les documents"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:12
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:9
+msgid "documents_page_article_icon_label"
+msgstr "Article"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:15
 msgid "documents_page_book_chapter_icon_label"
 msgstr "Chapitre de livre"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:10
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:11
 msgid "documents_page_book_icon_label"
 msgstr "Livre"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:13
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:12
+msgid "documents_page_book_of_chapters_icon_label"
+msgstr "Recueil d'articles"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:20
+msgid "documents_page_comment_icon_label"
+msgstr "Commentaire"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:18
+msgid "documents_page_conference_abstract_icon_label"
+msgstr "Résumé de conférence"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:16
 msgid "documents_page_conference_article_icon_label"
 msgstr "Article de conférence"
 
@@ -566,7 +582,7 @@ msgstr "Statut hal"
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "Dépôt HAL incomplet"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:9
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:10
 msgid "documents_page_journal_article_icon_label"
 msgstr "Article de journal"
 
@@ -582,11 +598,19 @@ msgstr "Mes publications"
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Fusionner les documents sélectionnés"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:11
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:13
 msgid "documents_page_monograph_icon_label"
 msgstr "Monographie"
 
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:19
+msgid "documents_page_preface_icon_label"
+msgstr "Préface"
+
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:14
+msgid "documents_page_presentation_icon_label"
+msgstr "Présentation"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:17
 msgid "documents_page_proceedings_icon_label"
 msgstr "Procédure"
 

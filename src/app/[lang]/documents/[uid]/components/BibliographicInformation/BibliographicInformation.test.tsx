@@ -47,7 +47,7 @@ jest.mock('@mui/material/styles', () => ({
 
 const document: Document = new Document(
   'doc-123',
-  DocumentType.Document,
+  DocumentType.JournalArticle,
   '2022',
   new Date('2022-01-01T00:00:00.000Z'),
   new Date('2022-12-31T23:59:59.000Z'),
