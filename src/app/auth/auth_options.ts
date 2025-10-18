@@ -51,6 +51,7 @@ declare module 'next-auth/jwt' {
 }
 
 const authOptions: AuthOptions = {
+  debug: true,
   providers: [
     KeycloakProvider({
       clientId: process.env.KEYCLOAK_CLIENT_ID,
@@ -102,7 +103,6 @@ const authOptions: AuthOptions = {
         token.orcid = (profile as KeycloakProfile)?.orcid
       }
       if (account && user) {
-        token.accessToken = account.access_token
         token.id = user.id
       }
       const userDAO = new UserDAO()
