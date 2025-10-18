@@ -5,7 +5,7 @@ import { DocumentRecord, DocumentRecordJson } from '@/types/DocumentRecord'
 import { Literal } from '@/types/Literal'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 import { Journal, JournalJson } from '@/types/Journal'
-import { DocumentState } from '@prisma/client'
+import { DocumentState, DocumentType } from '@prisma/client'
 import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
 
 interface DocumentJson {
@@ -24,17 +24,6 @@ interface DocumentJson {
   volume?: string
   issue?: string
   pages?: string
-}
-
-enum DocumentType {
-  Document = 'Document',
-  ScholarlyPublication = 'ScholarlyPublication',
-  JournalArticle = 'JournalArticle',
-  Book = 'Book',
-  Monograph = 'Monograph',
-  BookChapter = 'BookChapter',
-  ConferenceArticle = 'ConferenceArticle',
-  Proceedings = 'Proceedings',
 }
 
 class Document implements Authorizable {
