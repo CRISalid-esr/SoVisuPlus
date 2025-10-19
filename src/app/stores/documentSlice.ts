@@ -280,10 +280,13 @@ export const addDocumentSlice: StateCreator<
               (d) => d.uid === state.document.selectedDocument?.uid,
             )
             if (updatedDoc) {
-              updatedSelectedDocument = {
-                ...state.document.selectedDocument,
-                state: updatedDoc.state as DocumentState,
-              } as Document
+              updatedSelectedDocument = Object.assign(
+                Object.create(
+                  Object.getPrototypeOf(state.document.selectedDocument),
+                ),
+                state.document.selectedDocument,
+                { state: updatedDoc.state as DocumentState },
+              )
             }
           }
           return {
@@ -328,14 +331,16 @@ export const addDocumentSlice: StateCreator<
           const updatedSubjects = doc.subjects.filter(
             (c) => !conceptUids.includes(c.uid),
           )
+          const updatedDocument = Object.assign(
+            Object.create(Object.getPrototypeOf(doc)),
+            doc,
+            { subjects: updatedSubjects },
+          )
 
           return {
             document: {
               ...state.document,
-              selectedDocument: {
-                ...doc,
-                subjects: updatedSubjects,
-              } as Document,
+              selectedDocument: updatedDocument,
             },
           }
         })
@@ -367,14 +372,15 @@ export const addDocumentSlice: StateCreator<
         set((state) => {
           const doc = state.document.selectedDocument
           if (!doc) return state
-
+          const updatedDoc = Object.assign(
+            Object.create(Object.getPrototypeOf(doc)),
+            doc,
+            { documentType: type },
+          )
           return {
             document: {
               ...state.document,
-              selectedDocument: {
-                ...doc,
-                documentType: type,
-              } as Document,
+              selectedDocument: updatedDoc,
             },
           }
         })
