@@ -2,11 +2,18 @@ import { PUT } from './route'
 import { DocumentType } from '@prisma/client'
 
 const updateDocumentType = jest.fn()
+const fetchDocumentById = jest.fn().mockResolvedValue({ uid: 'doc-1' })
 
 jest.mock('@/lib/services/DocumentService', () => ({
   DocumentService: jest.fn().mockImplementation(() => ({
     updateDocumentType,
+    fetchDocumentById,
   })),
+}))
+
+const canMock = jest.fn(() => true)
+jest.mock('@/auth/ability', () => ({
+  abilityFromAuthzContext: jest.fn(() => ({ can: canMock })),
 }))
 
 jest.mock('next/server', () => ({
@@ -20,13 +27,14 @@ jest.mock('next/server', () => ({
 
 jest.mock('next-auth', () => ({
   getServerSession: jest.fn().mockResolvedValue({
-    user: { username: 'user-1234' },
+    user: { username: 'user-1234', authz: {} },
   }),
 }))
 
 describe('PUT /api/documents/[uid]/type', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    canMock.mockReturnValue(true) // default: authorized
   })
 
   it('returns 400 if UID is missing', async () => {
@@ -84,6 +92,23 @@ describe('PUT /api/documents/[uid]/type', () => {
     expect(await response.json()).toEqual({
       error: 'Invalid or missing documentType',
     })
+  })
+
+  it('returns 403 when user is not allowed to update type', async () => {
+    canMock.mockReturnValueOnce(false) // forbid
+
+    const request = {
+      json: async () => ({ documentType: DocumentType.Book }),
+    } as unknown as Request
+
+    const context = { params: Promise.resolve({ uid: 'doc-1' }) }
+
+    const response = await PUT(request, context)
+    expect(response.status).toBe(403)
+    expect(await response.json()).toEqual({
+      error: 'Logged user cannot update document type',
+    })
+    expect(updateDocumentType).not.toHaveBeenCalled()
   })
 
   it('calls updateDocumentType and returns success on valid input', async () => {

@@ -4,6 +4,8 @@ import { getServerSession, Session } from 'next-auth'
 import authOptions from '@/app/auth/auth_options'
 import { DocumentService } from '@/lib/services/DocumentService'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
 
 export async function PUT(
   request: Request,
@@ -43,6 +45,22 @@ export async function PUT(
     }
 
     const documentService = new DocumentService()
+    const ability = abilityFromAuthzContext(session?.user.authz)
+    const document = await documentService.fetchDocumentById(uid)
+    if (!document) {
+      return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+    }
+    const canUpdateDocumentType = ability.can(
+      PermissionAction.update,
+      document!,
+      'documentType',
+    )
+    if (!canUpdateDocumentType) {
+      return NextResponse.json(
+        { error: 'Logged user cannot update document type' },
+        { status: 403 },
+      )
+    }
     await documentService.updateDocumentType(uid, documentType, userName)
 
     return NextResponse.json({ success: true })
