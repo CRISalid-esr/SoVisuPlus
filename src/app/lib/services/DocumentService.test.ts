@@ -17,6 +17,8 @@ describe('DocumentService', () => {
   let mockDeleteConceptsFromDocument: jest.Mock
   let mockCreateAction: jest.Mock
   let mockMarkDocumentsWaitingForUpdate: jest.Mock
+  let mockUpdateDocumentTypeByUid: jest.Mock
+
   beforeEach(() => {
     mockFetchDocuments = jest.fn()
     mockfetchDocumentById = jest.fn()
@@ -24,12 +26,14 @@ describe('DocumentService', () => {
     mockDeleteConceptsFromDocument = jest.fn()
     mockCreateAction = jest.fn()
     mockMarkDocumentsWaitingForUpdate = jest.fn()
+    mockUpdateDocumentTypeByUid = jest.fn()
     ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
       fetchDocuments: mockFetchDocuments,
       fetchDocumentById: mockfetchDocumentById,
       deleteConceptsFromDocument: mockDeleteConceptsFromDocument,
       countDocuments: mockCountDocuments,
       markDocumentsWaitingForUpdate: mockMarkDocumentsWaitingForUpdate,
+      updateDocumentTypeByUid: mockUpdateDocumentTypeByUid,
     }))
     ;(UserDAO as jest.Mock).mockImplementation(() => ({
       getUserByIdentifier: jest.fn().mockResolvedValue({
@@ -467,5 +471,77 @@ describe('DocumentService', () => {
 
     expect(typeFilter.value).toEqual(expect.arrayContaining(expected))
     expect(typeFilter.value.length).toBe(expected.length)
+  })
+  it('updates document type and creates UPDATE action', async () => {
+    mockUpdateDocumentTypeByUid.mockResolvedValue(undefined)
+
+    await expect(
+      documentService.updateDocumentType(
+        'doc-1',
+        DocumentType.Book,
+        'user-1234',
+      ),
+    ).resolves.toBeUndefined()
+
+    expect(mockUpdateDocumentTypeByUid).toHaveBeenCalledWith(
+      'doc-1',
+      DocumentType.Book,
+    )
+    expect(mockCreateAction).toHaveBeenCalledWith({
+      actionType: 'UPDATE',
+      targetType: 'DOCUMENT',
+      targetUid: 'doc-1',
+      path: 'documentType',
+      parameters: { value: DocumentType.Book },
+      personUid: 'local-123',
+    })
+  })
+
+  it('throws when user has no associated person for updateDocumentType', async () => {
+    ;(UserDAO as jest.Mock).mockImplementationOnce(() => ({
+      getUserByIdentifier: jest.fn().mockResolvedValue({ person: null }),
+    }))
+    const svc = new DocumentService()
+
+    await expect(
+      svc.updateDocumentType('doc-1', DocumentType.Book, 'user-1234'),
+    ).rejects.toThrow('Error updating document type')
+
+    expect(mockUpdateDocumentTypeByUid).not.toHaveBeenCalled()
+    expect(mockCreateAction).not.toHaveBeenCalled()
+  })
+
+  it('propagates DAO error and does not create action', async () => {
+    mockUpdateDocumentTypeByUid.mockRejectedValue(new Error('DAO error'))
+
+    await expect(
+      documentService.updateDocumentType(
+        'doc-1',
+        DocumentType.Book,
+        'user-1234',
+      ),
+    ).rejects.toThrow('Error updating document type')
+
+    expect(mockUpdateDocumentTypeByUid).toHaveBeenCalled()
+    expect(mockCreateAction).not.toHaveBeenCalled()
+  })
+
+  it('propagates action creation error after DAO success', async () => {
+    mockUpdateDocumentTypeByUid.mockResolvedValue(undefined)
+    mockCreateAction.mockRejectedValueOnce(new Error('Action DAO error'))
+
+    await expect(
+      documentService.updateDocumentType(
+        'doc-1',
+        DocumentType.Book,
+        'user-1234',
+      ),
+    ).rejects.toThrow('Error updating document type')
+
+    expect(mockUpdateDocumentTypeByUid).toHaveBeenCalledWith(
+      'doc-1',
+      DocumentType.Book,
+    )
+    expect(mockCreateAction).toHaveBeenCalled()
   })
 })

@@ -920,4 +920,25 @@ export class DocumentDAO extends AbstractDAO {
       select: { uid: true, state: true },
     })
   }
+
+  public async updateDocumentTypeByUid(
+    uid: string,
+    documentType: DocumentType,
+  ): Promise<void> {
+    const doc = await this.prismaClient.document.findUnique({
+      where: { uid },
+      select: { id: true },
+    })
+
+    if (!doc) {
+      throw new Error(`Document with UID ${uid} not found`)
+    }
+
+    await this.prismaClient.document.update({
+      where: { id: doc.id },
+      data: {
+        documentType,
+      },
+    })
+  }
 }
