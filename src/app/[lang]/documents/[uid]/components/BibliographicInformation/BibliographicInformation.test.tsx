@@ -45,6 +45,11 @@ jest.mock('@mui/material/styles', () => ({
   }),
 }))
 
+jest.mock('next-auth/react', () => ({
+  __esModule: true,
+  useSession: () => ({ data: { user: { authz: { roleAssignments: [] } } } }),
+}))
+
 const document: Document = new Document(
   'doc-123',
   DocumentType.JournalArticle,

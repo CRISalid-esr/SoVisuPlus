@@ -98,4 +98,61 @@ export class DocumentTypeService {
     visit(start, 0)
     return nodes
   }
+
+  static nonLeafTypes(
+    start: DocumentType = DocumentType.Document,
+  ): DocumentType[] {
+    const out = new Set<DocumentType>()
+    const walk = (t: DocumentType) => {
+      const kids = this.childrenOf(t)
+      if (kids.length > 0) out.add(t)
+      for (const k of kids) walk(k)
+    }
+    walk(start)
+    return Array.from(out)
+  }
+
+  static roots(): DocumentType[] {
+    return this.childrenOf(DocumentType.Document)
+  }
+
+  /**
+   * Compute default expanded items for a tree UI.
+   */
+  static expandedForTreeUI(
+    current: DocumentType,
+    opts: {
+      includeNonLeaves?: boolean
+      includeRoots?: boolean
+      includeAncestorsOfCurrent?: boolean
+      start?: DocumentType
+    } = {},
+  ): DocumentType[] {
+    const {
+      includeNonLeaves = true,
+      includeRoots = true,
+      includeAncestorsOfCurrent = true,
+      start = DocumentType.Document,
+    } = opts
+
+    const expanded = new Set<DocumentType>()
+
+    if (includeNonLeaves) {
+      for (const t of this.nonLeafTypes(start)) expanded.add(t)
+    }
+
+    if (includeRoots) {
+      for (const r of this.roots()) expanded.add(r)
+    }
+
+    if (includeAncestorsOfCurrent) {
+      for (const a of this.ancestorsOf(current, { includeSelf: false })) {
+        expanded.add(a)
+      }
+    }
+
+    if (start === DocumentType.Document) expanded.delete(DocumentType.Document)
+
+    return Array.from(expanded)
+  }
 }

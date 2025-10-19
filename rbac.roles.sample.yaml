@@ -11,7 +11,7 @@ roles:
     permissions:
       - action: update
         subject: Document
-        fields: [titles, abstracts, contributors, identifiers]
+        fields: [titles, abstracts, contributors, identifiers, documentType]
 
   - name: document_merger
     description: Merge / unmerge documents and source records

@@ -1,5 +1,6 @@
 import { DocumentService } from '@/lib/services/DocumentService'
 import prisma from '@/lib/daos/prisma'
+import { DocumentType } from '@/types/Document'
 
 describe('DocumentService Integration Tests', () => {
   const service = new DocumentService()
@@ -107,5 +108,64 @@ describe('DocumentService Integration Tests', () => {
       conceptUids: ['concept-service-1'],
     })
     expect(actions[0].personUid).toBe('local-test-person')
+  })
+  test('should update document type and create an UPDATE action', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'local-test-person',
+        firstName: 'Test',
+        lastName: 'User',
+        displayName: 'Test User',
+        external: false,
+        normalizedName: 'test user',
+      },
+    })
+
+    await prisma.personIdentifier.create({
+      data: {
+        personId: person.id,
+        type: 'LOCAL',
+        value: 'local-test-person',
+      },
+    })
+
+    await prisma.user.create({
+      data: { personId: person.id },
+    })
+
+    await prisma.document.create({
+      data: {
+        uid: 'doc-service-type-1',
+        documentType: 'JournalArticle',
+        publicationDate: '2024',
+        publicationDateStart: new Date('2024-01-01'),
+        publicationDateEnd: new Date('2024-12-31'),
+      },
+    })
+
+    await service.updateDocumentType(
+      'doc-service-type-1',
+      DocumentType.Book,
+      'local-test-person',
+    )
+
+    const updated = await prisma.document.findUnique({
+      where: { uid: 'doc-service-type-1' },
+      select: { documentType: true },
+    })
+    expect(updated?.documentType).toBe('Book')
+
+    const actions = await prisma.action.findMany({
+      where: { targetUid: 'doc-service-type-1' },
+      orderBy: { id: 'desc' },
+    })
+
+    expect(actions.length).toBeGreaterThanOrEqual(1)
+    const action = actions[0]
+    expect(action.actionType).toBe('UPDATE')
+    expect(action.targetType).toBe('DOCUMENT')
+    expect(action.path).toBe('documentType')
+    expect(action.parameters).toEqual({ value: 'Book' })
+    expect(action.personUid).toBe('local-test-person')
   })
 })

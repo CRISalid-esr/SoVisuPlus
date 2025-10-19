@@ -6,6 +6,7 @@ import { ActionTargetType, ActionType } from '@/types/Action'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
+import { DocumentType } from '@/types/Document'
 
 type ColumnFilter =
   | { id: 'date'; value: [string | null, string | null] }
@@ -226,6 +227,37 @@ export class DocumentService {
       return { updated }
     } catch (error) {
       const message = 'Error merging documents'
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
+
+  async updateDocumentType(
+    documentUid: string,
+    documentType: DocumentType,
+    userName: string,
+  ): Promise<void> {
+    try {
+      const user = await this.userDAO.getUserByIdentifier({
+        type: PersonIdentifierType.LOCAL,
+        value: userName,
+      })
+      if (!user?.person) {
+        throw new Error(`User with username ${userName} not found`)
+      }
+
+      await this.documentDAO.updateDocumentTypeByUid(documentUid, documentType)
+
+      await this.actionDAO.createAction({
+        actionType: ActionType.UPDATE,
+        targetType: ActionTargetType.DOCUMENT,
+        targetUid: documentUid,
+        path: 'documentType',
+        parameters: { value: documentType },
+        personUid: user.person.uid,
+      })
+    } catch (error) {
+      const message = 'Error updating document type'
       console.error(message, error)
       throw new Error(message)
     }

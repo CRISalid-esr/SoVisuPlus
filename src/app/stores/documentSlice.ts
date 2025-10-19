@@ -1,9 +1,8 @@
 import { StateCreator } from 'zustand'
-import { Document } from '@/types/Document'
+import { Document, DocumentState, DocumentType } from '@/types/Document'
 import { toQueryString } from '@/utils/query'
 import { BaseQuery } from '@/types/BaseQuery'
 import { AgentType } from '@/types/IAgent'
-import { DocumentState } from '@prisma/client'
 
 export interface DocumentQuery extends BaseQuery {
   searchTerm: string
@@ -56,6 +55,7 @@ export interface DocumentSlice {
     fetchDocumentById: (uid: string) => Promise<void>
     mergeDocuments: (documentUids: string[]) => Promise<void>
     removeConcepts: (conceptUids: string[]) => Promise<void>
+    updateDocumentType: (type: DocumentType) => Promise<void>
   }
 }
 
@@ -280,10 +280,13 @@ export const addDocumentSlice: StateCreator<
               (d) => d.uid === state.document.selectedDocument?.uid,
             )
             if (updatedDoc) {
-              updatedSelectedDocument = {
-                ...state.document.selectedDocument,
-                state: updatedDoc.state as DocumentState,
-              } as Document
+              updatedSelectedDocument = Object.assign(
+                Object.create(
+                  Object.getPrototypeOf(state.document.selectedDocument),
+                ),
+                state.document.selectedDocument,
+                { state: updatedDoc.state as DocumentState },
+              )
             }
           }
           return {
@@ -328,14 +331,56 @@ export const addDocumentSlice: StateCreator<
           const updatedSubjects = doc.subjects.filter(
             (c) => !conceptUids.includes(c.uid),
           )
+          const updatedDocument = Object.assign(
+            Object.create(Object.getPrototypeOf(doc)),
+            doc,
+            { subjects: updatedSubjects },
+          )
 
           return {
             document: {
               ...state.document,
-              selectedDocument: {
-                ...doc,
-                subjects: updatedSubjects,
-              } as Document,
+              selectedDocument: updatedDocument,
+            },
+          }
+        })
+      } catch (error) {
+        set((state) => ({
+          document: {
+            ...state.document,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        }))
+      }
+    },
+    updateDocumentType: async (type: DocumentType) => {
+      const documentUid = get().document.selectedDocument?.uid
+      if (!documentUid) {
+        console.error('Cannot update document type: no selected document')
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/documents/${documentUid}/type`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ documentType: type }),
+        })
+
+        if (!response.ok) throw new Error('Failed to update document type')
+
+        set((state) => {
+          const doc = state.document.selectedDocument
+          if (!doc) return state
+          const updatedDoc = Object.assign(
+            Object.create(Object.getPrototypeOf(doc)),
+            doc,
+            { documentType: type },
+          )
+          return {
+            document: {
+              ...state.document,
+              selectedDocument: updatedDoc,
             },
           }
         })
