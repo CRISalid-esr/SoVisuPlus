@@ -445,6 +445,10 @@ msgstr "Keywords"
 msgid "document_details_page_abstracts_row_label"
 msgstr ""
 
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:151
+msgid "document_details_page_apply_button"
+msgstr ""
+
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:69
 msgid "document_details_page_authors_row_label"
 msgstr "Authors"
@@ -460,6 +464,10 @@ msgstr "Back to my publications"
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.tsx:39
 msgid "document_details_page_back_to_publications"
 msgstr "Back to my publications"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:144
+msgid "document_details_page_cancel_button"
+msgstr ""
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:85
 msgid "document_details_page_journal_journal"
@@ -493,8 +501,16 @@ msgstr "Compare sources"
 msgid "document_details_page_titles_row_label"
 msgstr "Title"
 
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:102
+msgid "document_details_page_type_edit_button"
+msgstr ""
+
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:59
 msgid "document_details_page_type_row_label"
+msgstr ""
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:119
+msgid "document_details_page_type_select_label"
 msgstr ""
 
 #: src/app/[lang]/documents/[uid]/page.tsx:52

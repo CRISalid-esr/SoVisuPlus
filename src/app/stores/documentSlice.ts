@@ -1,9 +1,8 @@
 import { StateCreator } from 'zustand'
-import { Document } from '@/types/Document'
+import { Document, DocumentState, DocumentType } from '@/types/Document'
 import { toQueryString } from '@/utils/query'
 import { BaseQuery } from '@/types/BaseQuery'
 import { AgentType } from '@/types/IAgent'
-import { DocumentState } from '@prisma/client'
 
 export interface DocumentQuery extends BaseQuery {
   searchTerm: string
@@ -56,6 +55,7 @@ export interface DocumentSlice {
     fetchDocumentById: (uid: string) => Promise<void>
     mergeDocuments: (documentUids: string[]) => Promise<void>
     removeConcepts: (conceptUids: string[]) => Promise<void>
+    updateDocumentType: (type: DocumentType) => Promise<void>
   }
 }
 
@@ -335,6 +335,45 @@ export const addDocumentSlice: StateCreator<
               selectedDocument: {
                 ...doc,
                 subjects: updatedSubjects,
+              } as Document,
+            },
+          }
+        })
+      } catch (error) {
+        set((state) => ({
+          document: {
+            ...state.document,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        }))
+      }
+    },
+    updateDocumentType: async (type: DocumentType) => {
+      const documentUid = get().document.selectedDocument?.uid
+      if (!documentUid) {
+        console.error('Cannot update document type: no selected document')
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/documents/${documentUid}/type`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ documentType: type }),
+        })
+
+        if (!response.ok) throw new Error('Failed to update document type')
+
+        set((state) => {
+          const doc = state.document.selectedDocument
+          if (!doc) return state
+
+          return {
+            document: {
+              ...state.document,
+              selectedDocument: {
+                ...doc,
+                documentType: type,
               } as Document,
             },
           }
