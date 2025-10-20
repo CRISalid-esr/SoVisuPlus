@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Box, Button, Typography } from '@mui/material'
 import { t } from '@lingui/macro'
 import Image from 'next/image'
@@ -13,18 +12,13 @@ import Logo from '@/public/theme/splash_header_logo.svg'
 import Background from '@/public/theme/splash_background.svg'
 import CrisalidLogo from '@/public/theme/splash_footer_logo.png'
 import SplashPreview from '@/public/theme/splash_preview.png'
-import { ThemeLocales } from '@/types/ThemeLocales'
 import LocalesFr from '@/public/theme/locales_fr.json'
 import LocalesEn from '@/public/theme/locales_en.json'
 
 export default function Splash() {
   const lang = Lingui.i18n.locale || 'fr'
-  const [locales, setLocales] = useState<ThemeLocales>()
+  const locales = lang === 'en' ? LocalesEn : LocalesFr
   const theme = useTheme()
-
-  useEffect(() => {
-    setLocales(lang === 'en' ? LocalesEn : LocalesFr)
-  }, [lang])
 
   return (
     <>
