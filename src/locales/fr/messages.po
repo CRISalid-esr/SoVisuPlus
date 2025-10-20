@@ -838,22 +838,22 @@ msgstr "Thème clair"
 msgid "sidebar_theme_system"
 msgstr "Thème automatique"
 
-#: src/app/[lang]/splash.tsx:118
+#: src/app/[lang]/splash.tsx:108
 msgid "splash.about"
 msgstr "À propos"
 
-#: src/app/[lang]/splash.tsx:124
+#: src/app/[lang]/splash.tsx:114
 msgid "splash.accessibility"
 msgstr "Accessibilité"
 
-#: src/app/[lang]/splash.tsx:127
+#: src/app/[lang]/splash.tsx:117
 msgid "splash.community"
 msgstr "Communauté"
 
-#: src/app/[lang]/splash.tsx:121
+#: src/app/[lang]/splash.tsx:111
 msgid "splash.legal_mentions"
 msgstr "Mentions légales"
 
-#: src/app/[lang]/splash.tsx:90
+#: src/app/[lang]/splash.tsx:78
 msgid "splash.login"
 msgstr "Connectez-vous"
