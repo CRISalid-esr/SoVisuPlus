@@ -600,7 +600,7 @@ msgstr "Dépôt HAL incomplet"
 
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:10
 msgid "documents_page_journal_article_icon_label"
-msgstr "Article de journal"
+msgstr "Article de revue"
 
 #: src/app/[lang]/documents/page.tsx:709
 msgid "documents_page_main_title"
