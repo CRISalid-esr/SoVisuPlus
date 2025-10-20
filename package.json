@@ -28,7 +28,11 @@
     "assign_role": "ts-node --project tsconfig.listener.json src/scripts/assign_role.ts",
     "assign_role:js": "node dist-listener/src/scripts/assign_role.js",
     "seed:self-scoped-defaults": "tsx src/scripts/seed_self_scoped_defaults.ts",
-    "seed:self-scoped-defaults:js": "node dist-listener/src/scripts/seed_self_scoped_defaults.js"
+    "seed:self-scoped-defaults:js": "node dist-listener/src/scripts/seed_self_scoped_defaults.js",
+    "dispatch_actions": "ts-node --project tsconfig.listener.json src/scripts/dispatch_actions.ts",
+    "dispatch_actions:js": "node dist-listener/src/scripts/dispatch_actions.js",
+    "dispatch_action": "npm run dispatch_actions --",
+    "dispatch_action:js": "npm run dispatch_actions:js --"
   },
   "dependencies": {
     "@apollo/client": "^3.12.3",
