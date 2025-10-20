@@ -94,4 +94,13 @@ export class AmqpConnection {
       `✅ Message published to exchange "${exchange}" with routing key "${routingKey}"`,
     )
   }
+
+  async close() {
+    if (this.connected) {
+      await this.channel.close()
+      await this.connection.close()
+      this.connected = false
+      console.log('✅ AMQP connection closed')
+    }
+  }
 }
