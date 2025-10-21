@@ -14,7 +14,6 @@ import {
   SuggestResponse,
   SuggestResponseSchema,
 } from '@/lib/services/VocabSearchClient'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Vocab } from '@/types/Vocab'
 
 export type SuggestedKeyword = {
@@ -60,49 +59,52 @@ function KeywordSearchAutocomplete({
   fetchKeywords = fetchWrapper,
 }: KeywordSearchAutocompleteProps) {
   const [keywordInput, setKeywordInput] = useState<string>('')
-  const queryClient = useQueryClient()
-
-  const {
-    isPending,
-    isError,
-    error: fetchKeywordsError,
-    data: keywords = [],
-  } = useQuery({
-    queryKey: ['keywords'],
-    queryFn: async () => await fetchKeywords(keywordInput),
-    retry: false,
-    enabled: !!keywordInput,
-  })
+  const [keywords, setKeywords] = useState<SuggestedKeyword[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+  const [fetchError, setFetchError] = useState<Error | null>(null)
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      queryClient.invalidateQueries({ queryKey: ['keywords'] })
-    }, 300)
+    const handler = setTimeout(async () => {
+      setLoading(true)
+      try {
+        const data = await fetchKeywords(keywordInput)
+        setKeywords(data)
+      } catch (error) {
+        if (error instanceof Error) {
+          setFetchError(error)
+        }
+      }
+      setLoading(false)
+    }, 600)
 
     return () => {
       clearTimeout(handler)
     }
-  }, [queryClient, keywordInput])
+  }, [fetchKeywords, keywordInput])
 
   useEffect(() => {
-    if (isError) {
-      console.error('Error fetching keyword suggestions:', fetchKeywordsError)
+    if (fetchError) {
+      console.error('Error fetching keyword suggestions:', fetchError)
     }
-  }, [isError, fetchKeywordsError])
+  }, [fetchError])
 
   return (
     <Autocomplete
+      autoComplete
+      clearOnBlur={false}
+      clearOnEscape
       filterOptions={(x) => x}
       getOptionLabel={(option) => option.text}
       groupBy={(option) => option.vocab}
+      includeInputInList
       inputValue={keywordInput}
-      loading={keywordInput ? isPending : false}
-      noOptionsText={isError ? 'Unable to fetch suggestions' : 'No options'}
+      loading={loading}
+      noOptionsText={fetchError ? 'Unable to fetch suggestions' : 'No options'}
       onInputChange={(event, value) => {
         setKeywordInput(value)
       }}
       options={
-        isError
+        fetchError
           ? []
           : keywords.sort((a, b) =>
               a.vocab.toLowerCase().localeCompare(b.vocab.toLowerCase()),
@@ -111,8 +113,8 @@ function KeywordSearchAutocomplete({
       renderInput={(params) => (
         <TextField
           {...params}
-          error={isError}
-          helperText={isError ? 'Error loading suggestions' : ''}
+          error={!!fetchError}
+          helperText={fetchError ? 'Error loading suggestions' : ''}
           slotProps={{
             input: {
               ...params.InputProps,
@@ -128,7 +130,7 @@ function KeywordSearchAutocomplete({
       renderOption={(props, option, state, ownerState) => {
         const { key, ...optionProps } = props
         return (
-          <Box key={key} component={'li'} {...optionProps}>
+          <Box key={key + option.num} component={'li'} {...optionProps}>
             <Icon />
             <Typography>{ownerState.getOptionLabel(option)}</Typography>
             <Typography>({option.num})</Typography>

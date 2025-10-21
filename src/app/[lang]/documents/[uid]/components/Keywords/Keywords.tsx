@@ -10,9 +10,6 @@ import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Concept } from '@/types/Concept'
 import KeywordSearchAutocomplete from '@/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-
-const queryClient = new QueryClient()
 
 function Keywords() {
   const theme = useTheme()
@@ -83,9 +80,7 @@ function Keywords() {
           ))}
         </Box>
         <Box>
-          <QueryClientProvider client={queryClient}>
-            <KeywordSearchAutocomplete />
-          </QueryClientProvider>
+          <KeywordSearchAutocomplete />
         </Box>
       </CardContent>
     </CustomCard>
