@@ -9,7 +9,7 @@ export class VocabSearchService {
   }
 
   public async suggest(q: string, vocabs: string[], display_langs: string) {
-    const convertedVocabs = Vocab.getVocabs(vocabs)
+    const convertedVocabs = Vocab.getVocabsFromNames(vocabs)
     return this.client.suggest(q, convertedVocabs, display_langs)
   }
 }

@@ -1,5 +1,5 @@
 import { VocabsSearchClient } from '@/lib/services/VocabsSearchClient'
-import { getVocabs } from '@/types/Vocabs'
+import { Vocab } from '@/types/Vocab'
 
 export class VocabsSearchService {
   private client: VocabsSearchClient
@@ -9,7 +9,7 @@ export class VocabsSearchService {
   }
 
   async suggest(q: string, vocabs: string[], display_langs: string) {
-    const convertedVocabs = getVocabs(vocabs)
+    const convertedVocabs = Vocab.getVocabsFromNames(vocabs)
     return this.client.suggest(q, convertedVocabs, display_langs)
   }
 }

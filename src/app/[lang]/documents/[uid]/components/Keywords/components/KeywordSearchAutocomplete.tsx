@@ -15,42 +15,13 @@ import {
   SuggestResponseSchema,
 } from '@/lib/services/VocabSearchClient'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Vocab } from '@/types/Vocab'
 
 export type SuggestedKeyword = {
   link: string
   num: string
   text: string
   vocab: string
-}
-
-function numVocab(vocab: string) {
-  switch (vocab.toLowerCase()) {
-    case 'aat':
-      return getAATNum
-    case 'jel':
-      return getJelNum
-    case 'acm':
-      return getAcmNum
-    default:
-      return (iri: string) => {
-        return iri
-      }
-  }
-}
-
-function getAATNum(iri: string): string {
-  const str = iri.split('/')
-  return str[str.length - 1]
-}
-
-function getJelNum(iri: string): string {
-  const str = iri.split('#')
-  return str[str.length - 1]
-}
-
-function getAcmNum(iri: string): string {
-  const str = iri.split('/')
-  return str[str.length - 1].replaceAll('.', ' - ')
 }
 
 async function fetchWrapper(value: string): Promise<SuggestedKeyword[]> {
@@ -65,7 +36,7 @@ async function fetchWrapper(value: string): Promise<SuggestedKeyword[]> {
           item.best_label
             ? Object.assign(
                 { link: item.iri },
-                { num: numVocab(item.scheme)(item.iri) },
+                { num: Vocab.iriToIdentifier(item.iri, item.scheme) },
                 { text: item.best_label?.text, vocab: item.scheme },
               )
             : undefined,

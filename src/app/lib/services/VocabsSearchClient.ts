@@ -1,6 +1,4 @@
-import { vocabs } from '@/types/Vocabs'
-
-type Vocab = (typeof vocabs)[number]
+import { Vocab } from '@/types/Vocab'
 
 export class VocabsSearchClient {
   async suggest(q: string, vocabs: Vocab[], display_langs: string) {

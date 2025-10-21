@@ -1,3 +1,5 @@
+import { VOCABS } from '@/lib/services/Vocabs'
+
 export class Vocab {
   private static vocabs = Vocab.init()
 
@@ -12,10 +14,16 @@ export class Vocab {
   }
 
   private static init() {
-    return process.env.AVAILABLE_VOCABS?.split(',') || []
+    return process.env.NEXT_PUBLIC_AVAILABLE_VOCABS?.split(',') || []
+  }
+
+  public static getVocabs() {
+    this.init()
+    return this.vocabs
   }
 
   public static has(name: string) {
+    this.init()
     const vocab = Vocab.vocabs.find((vocab) => vocab === name.toLowerCase())
     return vocab !== undefined
   }
@@ -30,7 +38,7 @@ export class Vocab {
     }
   }
 
-  public static getVocabs(names: string[]) {
+  public static getVocabsFromNames(names: string[]) {
     return names
       .map((name) => {
         try {
@@ -40,5 +48,18 @@ export class Vocab {
         }
       })
       .filter((vocab) => vocab !== undefined)
+  }
+
+  public static iriToIdentifier(iri: string, vocab: string) {
+    if (this.has(vocab)) {
+      const identifiers = VOCABS[vocab.toUpperCase()]
+        ? iri.match(VOCABS[vocab.toUpperCase()])
+        : iri.match(RegExp('[A-Z,0-9]+$'))
+      return identifiers
+        ? identifiers[identifiers.length - 1].replaceAll('.', ' - ')
+        : ''
+    } else {
+      return ''
+    }
   }
 }
