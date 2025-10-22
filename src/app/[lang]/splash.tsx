@@ -42,8 +42,8 @@ export default function Splash() {
         >
           <Box pl={{ lg: 3 }}>
             {/* For all images on this page, <img> is used instead of <Image> so
-                that Next doesn't include it in the bundle, and instead deliver
-                it as is. It can then be replaced with a custom one at
+                that Next.js doesn't include it in the bundle, and instead
+                delivers it as is. It can then be replaced with a custom one at
                 runtime. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
