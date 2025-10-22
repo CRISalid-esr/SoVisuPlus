@@ -46,7 +46,11 @@ export default function Splash() {
                 it as is. It can then be replaced with a custom one at
                 runtime. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src='/theme/splash_header_logo.svg' alt='SoVisuPlus logo' />
+            <img
+              src='/theme/splash_header_logo.svg'
+              alt='SoVisuPlus logo'
+              style={{ maxHeight: '4.125rem' }}
+            />
           </Box>
 
           <Box
@@ -64,7 +68,7 @@ export default function Splash() {
                 style={{
                   boxShadow: '0px 4px 4px 0px rgba(0, 0, 0, 0.25)',
                   height: 'auto',
-                  maxHeight: '236px',
+                  maxHeight: '14.75rem',
                   maxWidth: '100%',
                   width: '100%',
                 }}
@@ -107,8 +111,7 @@ export default function Splash() {
               <img
                 src='/theme/splash_footer_logo.png'
                 alt='CRISalid logo'
-                width={150}
-                height={45}
+                style={{ maxHeight: '2.8125rem' }}
               />
             </Box>
 
