@@ -133,12 +133,13 @@ function KeywordSearchAutocomplete({
           <Box key={key + option.num} component={'li'} {...optionProps}>
             <Icon />
             <Typography>{ownerState.getOptionLabel(option)}</Typography>
-            <Typography>({option.num})</Typography>
+            <Typography sx={{ whiteSpace: 'pre' }}> ({option.num}) </Typography>
             <Tooltip title={option.link}>
               <Link
                 href={option.link}
                 target='_blank'
                 rel='noopener noreferrer'
+                sx={{ display: 'inherit' }}
               >
                 <InfoOutlined />
               </Link>
@@ -146,6 +147,7 @@ function KeywordSearchAutocomplete({
           </Box>
         )
       }}
+      sx={{ marginTop: '15px' }}
     />
   )
 }
