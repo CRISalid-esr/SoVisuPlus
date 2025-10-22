@@ -32,7 +32,7 @@ describe('VocabSearchClient class test', () => {
     })
 
     await expect(
-      client.suggest('strike', [Vocab.fromString('jel')], 'fr,en'),
+      client.suggest('strike', [Vocab.fromString('jel')], 20, 'fr,en'),
     ).rejects.toThrow(ZodError)
   })
 })

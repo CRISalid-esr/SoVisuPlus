@@ -8,8 +8,13 @@ export class VocabSearchService {
     this.client = new VocabSearchClient()
   }
 
-  public async suggest(q: string, vocabs: string[], display_langs: string) {
+  public async suggest(
+    q: string,
+    vocabs: string[],
+    limit: number,
+    display_langs: string,
+  ) {
     const convertedVocabs = Vocab.getVocabsFromNames(vocabs)
-    return this.client.suggest(q, convertedVocabs, display_langs)
+    return this.client.suggest(q, convertedVocabs, limit, display_langs)
   }
 }

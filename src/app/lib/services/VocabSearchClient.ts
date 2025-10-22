@@ -35,12 +35,14 @@ export class VocabSearchClient {
   public async suggest(
     q: string,
     vocabs: Vocab[],
+    limit: number,
     display_langs: string,
   ): Promise<SuggestResponse> {
     const vocabsUrl = process.env.VOCABS_URL!
     const params = new URLSearchParams({
       q: q,
       vocabs: vocabs.map((vocab) => vocab.getValue()).join(),
+      limit: limit.toString(),
       display_langs: display_langs,
       highlight: 'true',
     })
