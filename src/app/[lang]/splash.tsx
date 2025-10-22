@@ -2,7 +2,6 @@
 
 import { Box, Button, Typography } from '@mui/material'
 import { t } from '@lingui/macro'
-import Image from 'next/image'
 import { signIn } from 'next-auth/react'
 import { useTheme } from '@mui/material/styles'
 import { Link } from '@mui/material'
@@ -10,7 +9,6 @@ import * as Lingui from '@lingui/core'
 
 import Logo from '@/public/theme/splash_header_logo.svg'
 import Background from '@/public/theme/splash_background.svg'
-import CrisalidLogo from '@/public/theme/splash_footer_logo.png'
 import LocalesFr from '@/public/theme/locales_fr.json'
 import LocalesEn from '@/public/theme/locales_en.json'
 
@@ -42,13 +40,14 @@ export default function Splash() {
             alignItems='center'
           >
             <Box mb={7}>
-              {/* Regarding the height and width values: https://github.com/vercel/next.js/discussions/18474#discussioncomment-5501724 */}
-              <Image
+              {/* For all images on this page, <img> is used instead of <Image>
+                  so that Next doesn't include it in the bundle and instead
+                  deliver it as is. It can then be replaced with a custom one at
+                  runtime */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src='/theme/splash_preview.png'
                 alt='SoVisuPlus preview screenshot'
-                height={0}
-                width={0}
-                sizes='100vw'
                 style={{
                   boxShadow: '0px 4px 4px 0px rgba(0, 0, 0, 0.25)',
                   height: 'auto',
@@ -91,8 +90,9 @@ export default function Splash() {
                 lg: 'flex-start',
               }}
             >
-              <Image
-                src={CrisalidLogo}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src='/theme/splash_footer_logo.png'
                 alt='CRISalid logo'
                 width={150}
                 height={45}
