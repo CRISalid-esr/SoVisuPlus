@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Box, Button, Typography } from '@mui/material'
 import { t } from '@lingui/macro'
 import { signIn } from 'next-auth/react'
@@ -7,15 +8,26 @@ import { useTheme } from '@mui/material/styles'
 import { Link } from '@mui/material'
 import * as Lingui from '@lingui/core'
 
-import Logo from '@/public/theme/splash_header_logo.svg'
-import Background from '@/public/theme/splash_background.svg'
-import LocalesFr from '@/public/theme/locales_fr.json'
-import LocalesEn from '@/public/theme/locales_en.json'
+import { ThemeLocales } from '@/types/ThemeLocales'
 
 export default function Splash() {
   const lang = Lingui.i18n.locale || 'fr'
-  const locales = lang === 'en' ? LocalesEn : LocalesFr
+  const [locales, setLocales] = useState<ThemeLocales>()
   const theme = useTheme()
+
+  useEffect(() => {
+    async function importLocales() {
+      try {
+        const response = await fetch(`/theme/locales_${lang}.json`)
+        const importedLocales = await response.json()
+        setLocales(importedLocales)
+      } catch {
+        throw new Error('Theme locales could not be imported')
+      }
+    }
+
+    importLocales()
+  }, [lang])
 
   return (
     <>
@@ -29,7 +41,12 @@ export default function Splash() {
           pb={2}
         >
           <Box pl={{ lg: 3 }}>
-            <Logo />
+            {/* For all images on this page, <img> is used instead of <Image> so
+                that Next doesn't include it in the bundle, and instead deliver
+                it as is. It can then be replaced with a custom one at
+                runtime. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src='/theme/splash_header_logo.svg' alt='SoVisuPlus logo' />
           </Box>
 
           <Box
@@ -40,10 +57,6 @@ export default function Splash() {
             alignItems='center'
           >
             <Box mb={7}>
-              {/* For all images on this page, <img> is used instead of <Image>
-                  so that Next doesn't include it in the bundle and instead
-                  deliver it as is. It can then be replaced with a custom one at
-                  runtime */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src='/theme/splash_preview.png'
@@ -139,7 +152,10 @@ export default function Splash() {
           zIndex={0}
           overflow='hidden'
         >
-          <Background
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src='/theme/splash_background.svg'
+            alt='SoVisuPlus splash screen background'
             style={{
               position: 'absolute',
               zIndex: -1,
