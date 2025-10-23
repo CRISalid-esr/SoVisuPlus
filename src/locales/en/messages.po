@@ -838,6 +838,22 @@ msgstr "Light theme"
 msgid "sidebar_theme_system"
 msgstr "Auto Theme"
 
-#: src/app/[lang]/splash.tsx:33
+#: src/app/[lang]/splash.tsx:124
+msgid "splash.about"
+msgstr ""
+
+#: src/app/[lang]/splash.tsx:130
+msgid "splash.accessibility"
+msgstr ""
+
+#: src/app/[lang]/splash.tsx:133
+msgid "splash.community"
+msgstr ""
+
+#: src/app/[lang]/splash.tsx:127
+msgid "splash.legal_mentions"
+msgstr ""
+
+#: src/app/[lang]/splash.tsx:93
 msgid "splash.login"
 msgstr "Login"
