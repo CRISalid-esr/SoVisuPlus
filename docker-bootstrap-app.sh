@@ -45,6 +45,24 @@ ORCID_CLIENT_ID="${ORCID_CLIENT_ID:-}"
 ORCID_CLIENT_SECRET="${ORCID_CLIENT_SECRET:-}"
 EOF
 
+CUSTOM_THEME_MOUNT="/custom-theme"
+THEME_DIR="/app/public/theme"
+use_custom_theme=false
+if [ -d "${CUSTOM_THEME_MOUNT}" ] && [ "$(ls -A ${CUSTOM_THEME_MOUNT})" ]; then
+  log "Using custom theme from mounted volume: ${CUSTOM_THEME_MOUNT}"
+  use_custom_theme=true
+else
+  log "Using default theme"
+fi
+
+if $use_custom_theme; then
+  echo "Custom theme detected at $CUSTOM_THEME_MOUNT — overriding /public/theme"
+  rm -rf "${THEME_DIR}"
+  cp -r "${CUSTOM_THEME_MOUNT}" "${THEME_DIR}"
+else
+  log "No custom theme found at: ${CUSTOM_THEME_MOUNT}"
+fi
+
 log "Running Prisma migrations…"
 if ! ./node_modules/.bin/prisma migrate deploy; then
   log "Prisma migrations FAILED. Exiting."
