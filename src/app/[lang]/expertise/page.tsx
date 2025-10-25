@@ -1,6 +1,6 @@
 'use client'
 
-import { t } from '@lingui/macro'
+import { t } from '@lingui/core/macro'
 import { Box } from '@mui/material'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import DocumentHeader from '@/app/[lang]/documents/components/DocumentHeader'

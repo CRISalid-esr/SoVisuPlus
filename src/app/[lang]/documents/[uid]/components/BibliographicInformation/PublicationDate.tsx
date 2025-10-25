@@ -1,6 +1,6 @@
+import { t } from '@lingui/core/macro'
 import useStore from '@/stores/global_store'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
-import { t } from '@lingui/macro'
 import { Typography } from '@mui/material'
 import dayjs from 'dayjs'
 

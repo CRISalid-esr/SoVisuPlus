@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro'
 import React from 'react'
 import { usePathname } from 'next/navigation'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
@@ -5,7 +6,6 @@ import '@testing-library/jest-dom'
 import SearchInput from './SearchInput'
 import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles'
 import useStore from '@/stores/global_store'
-import { t } from '@lingui/macro'
 
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,

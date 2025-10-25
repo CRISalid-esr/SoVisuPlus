@@ -1,4 +1,4 @@
-import { Trans } from '@lingui/macro'
+import { Trans } from '@lingui/react/macro'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { IconButton, Typography } from '@mui/material'
 import { Box } from '@mui/system'

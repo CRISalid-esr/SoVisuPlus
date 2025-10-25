@@ -1,11 +1,11 @@
 'use client'
 
+import { t } from '@lingui/core/macro'
 import * as React from 'react'
 import { Box, Stack, Typography } from '@mui/material'
 import ConstructionRoundedIcon from '@mui/icons-material/ConstructionRounded'
 import HourglassEmptyRoundedIcon from '@mui/icons-material/HourglassEmptyRounded'
 import { useTheme } from '@mui/material/styles'
-import { t } from '@lingui/macro'
 
 export type WorkInProgressVariant = 'page' | 'inline'
 

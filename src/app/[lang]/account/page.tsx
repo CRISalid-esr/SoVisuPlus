@@ -1,7 +1,8 @@
 'use client'
+import { Trans } from '@lingui/react/macro'
+import { t } from '@lingui/core/macro'
 
 import { TabFilter } from '@/components/TabFilter'
-import { t, Trans } from '@lingui/macro'
 import { Box, Typography } from '@mui/material'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'

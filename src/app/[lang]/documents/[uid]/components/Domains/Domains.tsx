@@ -1,9 +1,9 @@
+import { t } from '@lingui/core/macro'
 import { CustomCard } from '@/components/Card'
 import { Trans } from '@lingui/react'
 import { Box, CardContent, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import WorkInProgress from '@/components/WorkInProgress/WorkInProgress'
-import { t } from '@lingui/macro'
 
 function Domains() {
   const theme = useTheme()

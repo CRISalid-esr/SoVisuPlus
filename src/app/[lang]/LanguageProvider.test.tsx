@@ -1,8 +1,8 @@
+import { Trans } from '@lingui/react/macro'
 // Import jest-dom at the top of your test file
 import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import { LanguageProvider } from './LanguageProvider'
-import { Trans } from '@lingui/macro'
 
 describe('LanguageProvider', () => {
   it('renders children with correct language translations for en', () => {
@@ -18,7 +18,7 @@ describe('LanguageProvider', () => {
         <TestComponent />
       </LanguageProvider>,
     )
-    expect(screen.getByText('Hello')).toBeInTheDocument();
+    expect(screen.getByText('Hello')).toBeInTheDocument()
   })
 
   it('renders children with correct language translations for fr', () => {
@@ -34,6 +34,6 @@ describe('LanguageProvider', () => {
         <TestComponent />
       </LanguageProvider>,
     )
-    expect(screen.getByText('Bonjour')).toBeInTheDocument();
+    expect(screen.getByText('Bonjour')).toBeInTheDocument()
   })
 })

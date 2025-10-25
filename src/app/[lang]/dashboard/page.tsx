@@ -1,6 +1,6 @@
 'use client'
 
-import { t } from '@lingui/macro'
+import { t } from '@lingui/core/macro'
 import { Box } from '@mui/material'
 import useStore from '@/stores/global_store'
 import * as Lingui from '@lingui/core'

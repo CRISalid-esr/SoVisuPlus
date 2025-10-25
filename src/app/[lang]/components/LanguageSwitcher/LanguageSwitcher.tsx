@@ -1,7 +1,7 @@
 'use client'
 
+import { t } from '@lingui/core/macro'
 import Image from 'next/image'
-import { t } from '@lingui/macro'
 import { Box } from '@mui/system'
 import {
   ListItemText,

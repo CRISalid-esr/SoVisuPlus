@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro'
 import { CustomCard } from '@/components/Card'
 import { LanguageChips } from '@/components/LanguageChips'
 import useStore from '@/stores/global_store'
@@ -10,7 +11,6 @@ import { DocumentRecord } from '@/types/DocumentRecord'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
-import { t } from '@lingui/macro'
 import { Trans, useLingui } from '@lingui/react'
 import DeleteIcon from '@mui/icons-material/Delete'
 import {
