@@ -1,7 +1,7 @@
+import { t } from '@lingui/core/macro'
 import { CustomCard } from '@/components/Card'
 import useStore from '@/stores/global_store'
 import { Trans } from '@lingui/react'
-import { t } from '@lingui/macro'
 import {
   Box,
   CardContent,

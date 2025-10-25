@@ -1,4 +1,5 @@
 'use client'
+import { t } from '@lingui/core/macro'
 import './page.css'
 import { TabFilter } from '@/components/TabFilter'
 import useStore from '@/stores/global_store'
@@ -17,7 +18,6 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
-import { t } from '@lingui/macro'
 
 import { LanguageChips } from '@/components/LanguageChips'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'

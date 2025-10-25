@@ -1,5 +1,6 @@
+import { Plural } from '@lingui/react/macro'
+import { t } from '@lingui/core/macro'
 import { Chip } from '@mui/material'
-import { t, Plural } from '@lingui/macro'
 
 export enum HalStatusCellType {
   InCollection = 'InCollection',

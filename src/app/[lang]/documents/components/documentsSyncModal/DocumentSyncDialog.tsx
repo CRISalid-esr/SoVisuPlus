@@ -1,5 +1,6 @@
 'use client'
 
+import { Trans } from '@lingui/react/macro'
 import {
   Box,
   Button,
@@ -10,7 +11,6 @@ import {
   DialogTitle,
   useTheme,
 } from '@mui/material'
-import { Trans } from '@lingui/macro'
 import Image from 'next/image'
 import React, { FC, useEffect, useState } from 'react'
 import useStore from '@/app/stores/global_store'

@@ -1,8 +1,8 @@
 'use client'
 
+import { t } from '@lingui/core/macro'
 import { TabFilter } from '@/components/TabFilter'
 import useStore from '@/stores/global_store'
-import { t } from '@lingui/macro'
 import { Alert, Box, CircularProgress, Link, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import {

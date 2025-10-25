@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro'
 import useStore from '@/stores/global_store'
 import { Contribution } from '@/types/Contribution'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
@@ -5,7 +6,6 @@ import { Localization } from '@/types/Localization'
 import { Person } from '@/types/Person'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import * as Lingui from '@lingui/core'
-import { t } from '@lingui/macro'
 import { Box, Paper, Typography } from '@mui/material'
 import {
   MaterialReactTable,

@@ -1,5 +1,4 @@
-import * as client from 'amqplib'
-import { Channel, Connection } from 'amqplib'
+import { Channel, connect, ChannelModel as Connection } from 'amqplib'
 
 type AMQPMessageHandler = (message: string) => void
 
@@ -33,7 +32,7 @@ export class AmqpConnection {
 
       const amqpUrl = `amqp://${user}:${pass}@${host}:${port}`
 
-      this.connection = await client.connect(amqpUrl)
+      this.connection = await connect(amqpUrl)
 
       this.channel = await this.connection.createChannel()
 

@@ -1,8 +1,8 @@
 'use client'
+import { Trans } from '@lingui/react/macro'
 import { useCallback, useMemo, useState } from 'react'
 import useStore from '@/stores/global_store'
 import { useLingui } from '@lingui/react'
-import { Trans } from '@lingui/macro'
 import {
   Box,
   Button,

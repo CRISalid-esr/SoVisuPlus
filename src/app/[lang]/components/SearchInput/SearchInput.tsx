@@ -1,3 +1,4 @@
+import { t } from '@lingui/core/macro'
 import React, { useEffect, useMemo, useState } from 'react'
 import {
   Autocomplete,
@@ -12,7 +13,6 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { t } from '@lingui/macro'
 import useStore from '@/stores/global_store'
 import Highlighter from 'react-highlight-words'
 import DoneIcon from '@mui/icons-material/Done'

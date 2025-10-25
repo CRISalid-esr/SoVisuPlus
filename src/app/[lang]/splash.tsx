@@ -1,8 +1,8 @@
 'use client'
 
+import { t } from '@lingui/core/macro'
 import { useEffect, useState } from 'react'
 import { Box, Button, Typography } from '@mui/material'
-import { t } from '@lingui/macro'
 import { signIn } from 'next-auth/react'
 import { useTheme } from '@mui/material/styles'
 import { Link } from '@mui/material'

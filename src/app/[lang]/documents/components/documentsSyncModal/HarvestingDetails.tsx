@@ -1,6 +1,6 @@
+import { Trans } from '@lingui/react/macro'
 import { Box, Typography } from '@mui/material'
 import { FC } from 'react'
-import { Trans } from '@lingui/macro'
 
 interface Props {
   changes: {

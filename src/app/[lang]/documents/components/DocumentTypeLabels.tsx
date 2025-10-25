@@ -1,4 +1,4 @@
-import { defineMessage } from '@lingui/macro'
+import { defineMessage } from '@lingui/core/macro'
 
 import { DocumentType } from '@/types/Document'
 import { MessageDescriptor } from '@lingui/core'

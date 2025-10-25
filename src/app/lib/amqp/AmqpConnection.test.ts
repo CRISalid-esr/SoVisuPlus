@@ -5,7 +5,7 @@ jest.mock('amqplib')
 
 describe('AMQPConnection', () => {
   let mockChannel: Partial<amqplib.Channel>
-  let mockConnection: Partial<amqplib.Connection>
+  let mockConnection: Partial<amqplib.ChannelModel>
   let amqpConnection: AmqpConnection
   let mockAmqpLibConnect: jest.Mock
   let mockChannelConsume: jest.Mock

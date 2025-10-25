@@ -1,5 +1,5 @@
+import { Trans } from '@lingui/react/macro'
 import useStore from '@/stores/global_store'
-import { Trans } from '@lingui/macro'
 import EditIcon from '@mui/icons-material/Edit'
 import { Box, Button, Chip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
