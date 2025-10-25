@@ -4,7 +4,6 @@ import { Trans } from '@lingui/react'
 import { t } from '@lingui/macro'
 import {
   Box,
-  Button,
   CardContent,
   Table,
   TableBody,
@@ -143,9 +142,6 @@ const BibliographicInformation = () => {
           >
             <Trans id='document_details_page_card_title' />
           </Typography>
-          <Button variant='contained' color='primary'>
-            <Trans id='document_details_page_card_validate_button' />
-          </Button>
         </Box>
       }
     >

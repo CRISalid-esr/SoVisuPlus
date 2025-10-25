@@ -15,7 +15,6 @@ import { Trans, useLingui } from '@lingui/react'
 import DeleteIcon from '@mui/icons-material/Delete'
 import {
   Box,
-  Button,
   CardContent,
   FormControl,
   IconButton,
@@ -315,9 +314,6 @@ function Sources() {
           >
             <Trans id='document_details_page_source_tab_card_title' />
           </Typography>
-          <Button variant='contained' color='primary'>
-            <Trans id='document_details_page_source_tab_card_validate_button' />
-          </Button>
         </Box>
       }
     >
