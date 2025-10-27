@@ -24,23 +24,27 @@ const VocabItemSchema = z.object({
   narrower: z.array(z.string()),
 })
 
-const SuggestResponseSchema = z.object({
+export const SuggestResponseSchema = z.object({
   total: z.number(),
   items: z.array(VocabItemSchema),
 })
 
-type SuggestResponse = z.infer<typeof SuggestResponseSchema>
+export type SuggestResponse = z.infer<typeof SuggestResponseSchema>
 
 export class VocabSearchClient {
   public async suggest(
     q: string,
     vocabs: Vocab[],
+    limit: number,
+    offset: number,
     display_langs: string,
   ): Promise<SuggestResponse> {
     const vocabsUrl = process.env.VOCABS_URL!
     const params = new URLSearchParams({
       q: q,
       vocabs: vocabs.map((vocab) => vocab.getValue()).join(),
+      limit: limit.toString(),
+      offset: offset.toString(),
       display_langs: display_langs,
       highlight: 'true',
     })

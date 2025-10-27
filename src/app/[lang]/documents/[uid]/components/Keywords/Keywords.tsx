@@ -9,9 +9,11 @@ import ConceptChip from '@/app/[lang]/documents/[uid]/components/Keywords/Concep
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Concept } from '@/types/Concept'
+import KeywordSearchAutocomplete from '@/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete'
 
 function Keywords() {
   const theme = useTheme()
+
   const { selectedDocument = null, error = null } = useStore(
     (state) => state.document,
   )
@@ -76,6 +78,9 @@ function Keywords() {
               onRemoveConcepts={onRemoveConcepts}
             />
           ))}
+        </Box>
+        <Box>
+          <KeywordSearchAutocomplete />
         </Box>
       </CardContent>
     </CustomCard>
