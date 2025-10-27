@@ -12,9 +12,10 @@ export class VocabSearchService {
     q: string,
     vocabs: string[],
     limit: number,
+    offset: number,
     display_langs: string,
   ) {
     const convertedVocabs = Vocab.getVocabsFromNames(vocabs)
-    return this.client.suggest(q, convertedVocabs, limit, display_langs)
+    return this.client.suggest(q, convertedVocabs, limit, offset, display_langs)
   }
 }

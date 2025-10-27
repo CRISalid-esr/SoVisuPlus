@@ -1,28 +1,17 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import KeywordSearchAutocomplete, {
   SuggestedKeyword,
+  SuggestedKeywordsData,
 } from '@/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 describe('KeywordSearchAutocomplete Component', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  afterEach(() => {
-    queryClient.clear()
-  })
+  const renderComponent = () => render(<KeywordSearchAutocomplete />)
 
-  const queryClient = new QueryClient()
-
-  const renderComponent = () =>
-    render(
-      <QueryClientProvider client={queryClient}>
-        <KeywordSearchAutocomplete />
-      </QueryClientProvider>,
-    )
-
-  it("Check that the 'No options' is displayed by default in the drop-down menu", async () => {
+  it("Check that the 'Please enter at least 3 characters' is displayed by default in the drop-down menu", async () => {
     renderComponent()
     const autocomplete = screen.getByRole('combobox')
     expect(autocomplete).toBeInTheDocument()
@@ -30,48 +19,71 @@ describe('KeywordSearchAutocomplete Component', () => {
     const autocompleteWrapper = autocomplete.parentElement as HTMLElement
     fireEvent.mouseDown(autocompleteWrapper)
     await waitFor(() =>
+      expect(
+        screen.getByText('Please enter at least 3 characters'),
+      ).toBeInTheDocument(),
+    )
+  })
+
+  it("Check that the 'No options' message is displayed when fetch return no data", async () => {
+    const mockReturn: SuggestedKeyword[] = []
+    const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
+    render(<KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />)
+    const autocomplete = screen.getByRole('combobox')
+    expect(autocomplete).toBeInTheDocument()
+
+    fireEvent.change(autocomplete, { target: { value: 'abc' } })
+    await waitFor(() =>
       expect(screen.getByText('No options')).toBeInTheDocument(),
     )
   })
 
-  it('Check that a keystroke call the fetch', async () => {
-    const mockReturn: SuggestedKeyword[] = []
+  it("Check that a keystroke doesn't call the fetch until there is three letters", async () => {
+    const mockReturn: SuggestedKeywordsData[] = []
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
-    render(
-      <QueryClientProvider client={queryClient}>
-        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
-      </QueryClientProvider>,
-    )
+    render(<KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />)
     const autocomplete = screen.getByRole('combobox')
     expect(autocomplete).toBeInTheDocument()
 
     fireEvent.change(autocomplete, { target: { value: 'a' } })
     await waitFor(() => {
-      expect(fetchKeywordsMock).toHaveBeenCalledWith('a')
+      expect(fetchKeywordsMock).not.toHaveBeenCalled()
+    })
+
+    fireEvent.change(autocomplete, { target: { value: 'ab' } })
+    await waitFor(() => {
+      expect(fetchKeywordsMock).not.toHaveBeenCalled()
+    })
+
+    fireEvent.change(autocomplete, { target: { value: 'abc' } })
+    await waitFor(() => {
+      expect(fetchKeywordsMock).toHaveBeenCalledWith('abc')
     })
   })
 
   it('Check that result appear in option menu in right format', async () => {
-    const mockReturn: SuggestedKeyword[] = [
+    const mockReturn: SuggestedKeywordsData[] = [
       {
-        link: 'http://vocab.getty.edu/aat/300046021',
-        num: '300046021',
-        text: 'diadems',
+        items: [
+          {
+            link: 'http://vocab.getty.edu/aat/300046021',
+            num: '300046021',
+            text: 'diadems',
+            vocab: 'AAT',
+          },
+        ],
+        total: 1,
         vocab: 'AAT',
       },
     ]
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
-    render(
-      <QueryClientProvider client={queryClient}>
-        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
-      </QueryClientProvider>,
-    )
+    render(<KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />)
     const autocomplete = screen.getByRole('combobox')
     expect(autocomplete).toBeInTheDocument()
 
-    fireEvent.change(autocomplete, { target: { value: 'd' } })
+    fireEvent.change(autocomplete, { target: { value: 'dia' } })
     await waitFor(async () => {
-      expect(fetchKeywordsMock).toHaveBeenCalledWith('d')
+      expect(fetchKeywordsMock).toHaveBeenCalledWith('dia')
       expect(screen.getByText('AAT')).toBeInTheDocument()
       expect(screen.getByText('diadems')).toBeInTheDocument()
       expect(screen.getByText('(300046021)')).toBeInTheDocument()
@@ -84,26 +96,23 @@ describe('KeywordSearchAutocomplete Component', () => {
     })
   })
 
-  /*
   it('Check that a keystroke call the refetch after delay', async () => {
     jest.useFakeTimers()
-    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries')
-    const mockReturn: SuggestedKeyword[] = []
+    const mockReturn: SuggestedKeywordsData[] = []
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
-    const { rerender } = render(
-      <QueryClientProvider client={queryClient}>
-        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
-      </QueryClientProvider>,
-    )
+    render(<KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />)
     const autocomplete = screen.getByRole('combobox')
     expect(autocomplete).toBeInTheDocument()
 
     fireEvent.change(autocomplete, { target: { value: 'a' } })
-    rerender(
-      <QueryClientProvider client={queryClient}>
-        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
-      </QueryClientProvider>,
-    )
+    expect(fetchKeywordsMock).not.toHaveBeenCalled()
+
+    fireEvent.change(autocomplete, { target: { value: 'abc' } })
+
+    await act(async () => {
+      jest.advanceTimersByTime(300)
+      await Promise.resolve()
+    })
 
     expect(fetchKeywordsMock).not.toHaveBeenCalled()
 
@@ -117,23 +126,26 @@ describe('KeywordSearchAutocomplete Component', () => {
       expect(fetchKeywordsMock).toHaveBeenCalledTimes(1)
     })
 
-    fireEvent.change(autocomplete, { target: { value: 'ab' } })
+    fireEvent.change(autocomplete, { target: { value: 'abcd' } })
 
     expect(fetchKeywordsMock).toHaveBeenCalledTimes(1)
 
     await act(async () => {
-      jest.runOnlyPendingTimers()
       jest.advanceTimersByTime(300)
+      await Promise.resolve()
+    })
+
+    fireEvent.change(autocomplete, { target: { value: 'abcde' } })
+
+    expect(fetchKeywordsMock).toHaveBeenCalledTimes(1)
+
+    await act(async () => {
+      jest.advanceTimersByTime(600)
       await Promise.resolve()
     })
 
     await waitFor(() => {
       expect(fetchKeywordsMock).toHaveBeenCalledTimes(2)
     })
-
-    //check that the query has been invalidated
-    expect(invalidateSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ queryKey: ['keywords'] }),
-    )
-  })*/
+  })
 })

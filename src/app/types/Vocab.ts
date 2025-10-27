@@ -50,14 +50,30 @@ export class Vocab {
       .filter((vocab) => vocab !== undefined)
   }
 
+  public static validVocabIri(iri: string, vocab: string) {
+    if (this.has(vocab)) {
+      return !!VOCABS[vocab.toUpperCase()]?.iriPatterns.find((pattern) =>
+        pattern.test(iri),
+      )
+    } else {
+      return false
+    }
+  }
+
   public static iriToIdentifier(iri: string, vocab: string) {
     if (this.has(vocab)) {
-      const identifiers = VOCABS[vocab.toUpperCase()]
-        ? iri.match(VOCABS[vocab.toUpperCase()])
-        : iri.match(RegExp('[A-Z,0-9]+$'))
-      return identifiers
-        ? identifiers[identifiers.length - 1].replaceAll('.', ' - ')
-        : ''
+      const iriPattern = VOCABS[vocab.toUpperCase()]?.iriPatterns.find(
+        (pattern) => pattern.test(iri),
+      )
+      if (iriPattern) {
+        const identifier = iri.match(iriPattern)?.groups?.identifier ?? ''
+        return identifier.replaceAll('.', ' - ')
+      } else {
+        const identifier = iri.match(RegExp('[A-Z0-9]+$'))
+        return identifier
+          ? identifier[identifier.length - 1].replaceAll('.', ' - ')
+          : ''
+      }
     } else {
       return ''
     }

@@ -6,9 +6,11 @@ export const GET = async (req: NextRequest) => {
   const q = urlParams.get('q') || ''
   const vocabs = urlParams.get('vocabs')?.split(',') || []
   const limit = urlParams.get('limit') || '20'
+  const offset = urlParams.get('offset') || '0'
   const display_langs = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES
 
   const limitNumber = parseInt(limit, 10)
+  const offsetNumber = parseInt(offset, 10)
 
   if (!q) {
     return NextResponse.json(
@@ -24,6 +26,11 @@ export const GET = async (req: NextRequest) => {
       { error: 'Invalid limit value : must be an integer between 1 and 100.' },
       { status: 400 },
     )
+  } else if (Number.isNaN(offsetNumber) || offsetNumber < 0) {
+    return NextResponse.json(
+      { error: 'Invalid offset value : must be an integer upper than 0.' },
+      { status: 400 },
+    )
   }
 
   const vocabsSearchService = new VocabSearchService()
@@ -33,6 +40,7 @@ export const GET = async (req: NextRequest) => {
       q,
       vocabs,
       limitNumber,
+      offsetNumber,
       display_langs,
     )
     return NextResponse.json(response)

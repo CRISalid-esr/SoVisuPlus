@@ -36,6 +36,7 @@ export class VocabSearchClient {
     q: string,
     vocabs: Vocab[],
     limit: number,
+    offset: number,
     display_langs: string,
   ): Promise<SuggestResponse> {
     const vocabsUrl = process.env.VOCABS_URL!
@@ -43,6 +44,7 @@ export class VocabSearchClient {
       q: q,
       vocabs: vocabs.map((vocab) => vocab.getValue()).join(),
       limit: limit.toString(),
+      offset: offset.toString(),
       display_langs: display_langs,
       highlight: 'true',
     })
