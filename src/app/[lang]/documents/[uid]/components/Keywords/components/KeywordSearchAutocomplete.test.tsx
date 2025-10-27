@@ -3,13 +3,20 @@ import KeywordSearchAutocomplete, {
   SuggestedKeyword,
   SuggestedKeywordsData,
 } from '@/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete'
+import { i18n } from '@lingui/core'
+import { I18nProvider } from '@lingui/react'
 
 describe('KeywordSearchAutocomplete Component', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  const renderComponent = () => render(<KeywordSearchAutocomplete />)
+  const renderComponent = () =>
+    render(
+      <I18nProvider i18n={i18n}>
+        <KeywordSearchAutocomplete />
+      </I18nProvider>,
+    )
 
   it("Check that the 'Please enter at least 3 characters' is displayed by default in the drop-down menu", async () => {
     renderComponent()
@@ -20,7 +27,9 @@ describe('KeywordSearchAutocomplete Component', () => {
     fireEvent.mouseDown(autocompleteWrapper)
     await waitFor(() =>
       expect(
-        screen.getByText('Please enter at least 3 characters'),
+        screen.getByText(
+          i18n.t('document_details_page_keywords_input_default'),
+        ),
       ).toBeInTheDocument(),
     )
   })
@@ -28,20 +37,32 @@ describe('KeywordSearchAutocomplete Component', () => {
   it("Check that the 'No options' message is displayed when fetch return no data", async () => {
     const mockReturn: SuggestedKeyword[] = []
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
-    render(<KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />)
+    render(
+      <I18nProvider i18n={i18n}>
+        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+      </I18nProvider>,
+    )
     const autocomplete = screen.getByRole('combobox')
     expect(autocomplete).toBeInTheDocument()
 
     fireEvent.change(autocomplete, { target: { value: 'abc' } })
     await waitFor(() =>
-      expect(screen.getByText('No options')).toBeInTheDocument(),
+      expect(
+        screen.getByText(
+          i18n.t('document_details_page_keywords_input_options_no_options'),
+        ),
+      ).toBeInTheDocument(),
     )
   })
 
   it("Check that a keystroke doesn't call the fetch until there is three letters", async () => {
     const mockReturn: SuggestedKeywordsData[] = []
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
-    render(<KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />)
+    render(
+      <I18nProvider i18n={i18n}>
+        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+      </I18nProvider>,
+    )
     const autocomplete = screen.getByRole('combobox')
     expect(autocomplete).toBeInTheDocument()
 
@@ -77,7 +98,11 @@ describe('KeywordSearchAutocomplete Component', () => {
       },
     ]
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
-    render(<KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />)
+    render(
+      <I18nProvider i18n={i18n}>
+        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+      </I18nProvider>,
+    )
     const autocomplete = screen.getByRole('combobox')
     expect(autocomplete).toBeInTheDocument()
 
@@ -100,7 +125,11 @@ describe('KeywordSearchAutocomplete Component', () => {
     jest.useFakeTimers()
     const mockReturn: SuggestedKeywordsData[] = []
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
-    render(<KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />)
+    render(
+      <I18nProvider i18n={i18n}>
+        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+      </I18nProvider>,
+    )
     const autocomplete = screen.getByRole('combobox')
     expect(autocomplete).toBeInTheDocument()
 
