@@ -12,6 +12,7 @@ jest.mock('@prisma/client', () => {
         findMany: jest.fn(),
         update: jest.fn(),
         updateMany: jest.fn(),
+        findUnique: jest.fn(),
       },
     })),
   }
@@ -142,5 +143,18 @@ describe('ActionDAO', () => {
         personUid: 'person-001',
       },
     })
+  })
+
+  it('should get a DB action by id (raw shape)', async () => {
+    ;(mockPrisma.action.findUnique as jest.Mock).mockResolvedValue(
+      baseActionData,
+    )
+
+    const row = await dao.getDbActionById('action-uuid')
+
+    expect(mockPrisma.action.findUnique).toHaveBeenCalledWith({
+      where: { id: 'action-uuid' },
+    })
+    expect(row).toBe(baseActionData)
   })
 })

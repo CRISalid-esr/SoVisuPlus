@@ -2,7 +2,7 @@ import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import '@testing-library/jest-dom'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 
 import DateProvider from '@/components/DateProvider'
 import useStore from '@/stores/global_store'
@@ -47,6 +47,8 @@ describe('Row Component', () => {
   const theme = createTheme({
     utils: { pxToRem: (value: number) => `${value / 16}rem` },
   })
+
+  i18n.activate('en')
 
   const titleField = {
     value: 'titles' as DocumentFieldKey,

@@ -63,8 +63,18 @@ describe('GET /api/route', () => {
         id: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
+        identifiers: [
+          {
+            id: 0,
+            type: 'LOCAL',
+            value: 'testuser',
+            personId: 123,
+          },
+        ],
+        memberships: [],
       },
       personId: null,
+      roles: [],
     })
 
     getUserByPersonIdentifier.mockResolvedValueOnce(mockUser)

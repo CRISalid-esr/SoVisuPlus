@@ -11,7 +11,7 @@ import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import '@testing-library/jest-dom'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import BibliographicInformation from './BibliographicInformation'
 // Mock Zustand store
 jest.mock('@/stores/global_store', () => ({
@@ -25,6 +25,7 @@ const mockRouter = {
 
 jest.mock('next/navigation', () => ({
   useRouter: () => mockRouter,
+  useParams: jest.fn(() => ({ uid: '123' })),
   useSearchParams: jest.fn(() => new URLSearchParams()),
 }))
 
@@ -44,9 +45,14 @@ jest.mock('@mui/material/styles', () => ({
   }),
 }))
 
+jest.mock('next-auth/react', () => ({
+  __esModule: true,
+  useSession: () => ({ data: { user: { authz: { roleAssignments: [] } } } }),
+}))
+
 const document: Document = new Document(
   'doc-123',
-  DocumentType.Document,
+  DocumentType.JournalArticle,
   '2022',
   new Date('2022-01-01T00:00:00.000Z'),
   new Date('2022-12-31T23:59:59.000Z'),
@@ -110,9 +116,6 @@ describe('BibliographicInformation Component', () => {
     expect(
       screen.getByText(i18n.t('document_details_page_card_title')),
     ).toBeInTheDocument()
-    expect(
-      screen.getByText(i18n.t('document_details_page_card_validate_button')),
-    ).toBeInTheDocument()
   })
 
   it('renders document fields based on selected document', () => {
@@ -141,17 +144,5 @@ describe('BibliographicInformation Component', () => {
     expect(
       screen.getByText(i18n.t('document_details_page_sources_row_label')),
     ).toBeInTheDocument()
-  })
-
-  it('handles button click', () => {
-    renderComponent()
-
-    const validateButton = screen.getByText(
-      i18n.t('document_details_page_card_validate_button'),
-    )
-    fireEvent.click(validateButton)
-
-    // No real action expected yet, but we confirm it exists and is clickable
-    expect(validateButton).toBeInTheDocument()
   })
 })

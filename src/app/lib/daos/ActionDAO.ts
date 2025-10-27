@@ -1,5 +1,5 @@
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
-import { ActionType, ActionTargetType } from '@prisma/client'
+import { ActionTargetType, ActionType } from '@prisma/client'
 import { Action } from '@/types/Action'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 
@@ -39,6 +39,13 @@ export class ActionDAO extends AbstractDAO {
   }
 
   /**
+   * Get a DB action by its ID
+   */
+  async getDbActionById(id: string) {
+    return this.prismaClient.action.findUnique({ where: { id } })
+  }
+
+  /**
    * Fetch actions that are not dispatched yet
    */
   async fetchUndispatchedActions(limit = 100): Promise<Action[]> {
@@ -46,6 +53,17 @@ export class ActionDAO extends AbstractDAO {
       where: { dispatched: false },
       orderBy: { timestamp: 'asc' },
       take: limit,
+    })
+
+    return dbActions.map(Action.fromDbAction)
+  }
+
+  /**
+   * Fetch all actions
+   */
+  async fetchAllActions(): Promise<Action[]> {
+    const dbActions = await this.prismaClient.action.findMany({
+      orderBy: { timestamp: 'asc' },
     })
 
     return dbActions.map(Action.fromDbAction)

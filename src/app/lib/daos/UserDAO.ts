@@ -53,14 +53,22 @@ export class UserDAO extends AbstractDAO {
               identifiers: true,
               memberships: {
                 select: {
+                  id: true,
+                  researchStructureId: true,
+                  personId: true,
                   startDate: true,
                   endDate: true,
+                  positionCode: true,
                   researchStructure: {
                     select: {
+                      id: true,
                       uid: true,
                       acronym: true,
                       signature: true,
                       slug: true,
+                      names: true,
+                      descriptions: true,
+                      external: true,
                     },
                   },
                 },
@@ -70,17 +78,33 @@ export class UserDAO extends AbstractDAO {
           roles: {
             include: {
               role: {
-                select: {
-                  id: true,
-                  name: true,
-                  description: true,
-                  system: true,
+                include: {
+                  permissions: {
+                    include: {
+                      permission: {
+                        select: {
+                          id: true,
+                          action: true,
+                          subject: true,
+                          fields: true,
+                          inverted: true,
+                          description: true,
+                          conditions: true,
+                          createdAt: true,
+                          updatedAt: true,
+                        },
+                      },
+                    },
+                  },
                 },
               },
               scopes: {
                 select: {
+                  id: true,
                   entityType: true,
                   entityUid: true,
+                  roleId: true,
+                  userId: true,
                 },
               },
             },
@@ -186,5 +210,17 @@ export class UserDAO extends AbstractDAO {
     await this.prismaClient.userRoleScope.deleteMany({
       where: { userId, roleId },
     })
+  }
+
+  async listUsersWithPersonUid(): Promise<
+    Array<{ id: number; personUid: string | null }>
+  > {
+    const rows = await this.prismaClient.user.findMany({
+      select: {
+        id: true,
+        person: { select: { uid: true } },
+      },
+    })
+    return rows.map((r) => ({ id: r.id, personUid: r.person?.uid ?? null }))
   }
 }

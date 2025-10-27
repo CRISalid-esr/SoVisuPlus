@@ -2,11 +2,17 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
 import YAML from 'yaml'
+import { parseArgs } from 'node:util'
 import { RoleConfigService } from '@/lib/services/RoleConfigService'
 
 async function main() {
-  const argPath = process.argv[2]
-  const filePath = path.resolve(process.cwd(), argPath ?? 'rbac.roles.yaml')
+  const { values, positionals } = parseArgs({
+    options: { file: { type: 'string', short: 'f' } },
+    allowPositionals: true,
+  })
+
+  const fileArg = values.file ?? positionals[0] ?? 'rbac.roles.yaml'
+  const filePath = path.resolve(process.cwd(), fileArg)
 
   const buf = await readFile(filePath, 'utf8')
   const parsed = YAML.parse(buf)

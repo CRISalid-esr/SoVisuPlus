@@ -871,6 +871,7 @@ describe('DocumentDAO', () => {
             person: {
               include: {
                 identifiers: true,
+                memberships: { include: { researchStructure: true } },
               },
             },
           },
@@ -1066,5 +1067,37 @@ describe('DocumentDAO', () => {
       select: { uid: true, state: true },
     })
     expect(result).toEqual([])
+  })
+
+  it('updates document type by uid', async () => {
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue({
+      id: 99,
+    })
+    ;(mockPrisma.document.update as jest.Mock).mockResolvedValue({})
+
+    const dao = new DocumentDAO()
+    await dao.updateDocumentTypeByUid('doc-99', DocumentType.JournalArticle)
+
+    expect(mockPrisma.document.findUnique).toHaveBeenCalledWith({
+      where: { uid: 'doc-99' },
+      select: { id: true },
+    })
+    expect(mockPrisma.document.update).toHaveBeenCalledWith({
+      where: { id: 99 },
+      data: {
+        documentType: DocumentType.JournalArticle,
+      },
+    })
+  })
+
+  it('throws if document not found when updating document type', async () => {
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
+
+    const dao = new DocumentDAO()
+    await expect(
+      dao.updateDocumentTypeByUid('missing-doc', DocumentType.Book),
+    ).rejects.toThrow('Document with UID missing-doc not found')
+
+    expect(mockPrisma.document.update).not.toHaveBeenCalled()
   })
 })

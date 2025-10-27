@@ -1,6 +1,7 @@
+import { t } from '@lingui/core/macro'
+import { Trans } from '@lingui/react/macro'
 import { useRef, useState } from 'react'
 import useStore from '@/stores/global_store'
-import { Trans, t } from '@lingui/macro'
 import {
   Box,
   Button,

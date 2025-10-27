@@ -26,6 +26,7 @@ describe('Zustand Global Store - useStore with DocumentSlice', () => {
         setSelectedDocumentHasChanged: jest.fn(),
         setListHasChanged: jest.fn(),
         mergeDocuments: jest.fn(),
+        updateDocumentType: jest.fn(),
       },
     })
   })

@@ -1,6 +1,7 @@
 import { DocumentService } from '@/lib/services/DocumentService'
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { AgentType } from '@/types/IAgent'
+import { DocumentType } from '@/types/Document'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
 
@@ -16,6 +17,8 @@ describe('DocumentService', () => {
   let mockDeleteConceptsFromDocument: jest.Mock
   let mockCreateAction: jest.Mock
   let mockMarkDocumentsWaitingForUpdate: jest.Mock
+  let mockUpdateDocumentTypeByUid: jest.Mock
+
   beforeEach(() => {
     mockFetchDocuments = jest.fn()
     mockfetchDocumentById = jest.fn()
@@ -23,12 +26,14 @@ describe('DocumentService', () => {
     mockDeleteConceptsFromDocument = jest.fn()
     mockCreateAction = jest.fn()
     mockMarkDocumentsWaitingForUpdate = jest.fn()
+    mockUpdateDocumentTypeByUid = jest.fn()
     ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
       fetchDocuments: mockFetchDocuments,
       fetchDocumentById: mockfetchDocumentById,
       deleteConceptsFromDocument: mockDeleteConceptsFromDocument,
       countDocuments: mockCountDocuments,
       markDocumentsWaitingForUpdate: mockMarkDocumentsWaitingForUpdate,
+      updateDocumentTypeByUid: mockUpdateDocumentTypeByUid,
     }))
     ;(UserDAO as jest.Mock).mockImplementation(() => ({
       getUserByIdentifier: jest.fn().mockResolvedValue({
@@ -312,5 +317,231 @@ describe('DocumentService', () => {
     await expect(
       documentService.mergeDocuments(['d1', 'd2'], 'user-1234'),
     ).rejects.toThrow('Error merging documents')
+  })
+  it('expands hierarchical types for fetchDocuments (ScholarlyPublication)', async () => {
+    const mockResponse = { documents: [], totalItems: 0 }
+    mockFetchDocuments.mockResolvedValue(mockResponse)
+
+    const params = {
+      searchTerm: '',
+      searchLang: 'en',
+      page: 1,
+      pageSize: 10,
+      columnFilters: [
+        { id: 'type', value: [DocumentType.ScholarlyPublication] },
+      ],
+      sorting: [],
+      contributorUid: 'local-xyz',
+      contributorType: 'person' as AgentType,
+      halCollectionCodes: [],
+      areHalCollectionCodesOmitted: false,
+    }
+
+    await expect(documentService.fetchDocuments(params)).resolves.toEqual(
+      mockResponse,
+    )
+
+    // Grab the args passed to the DAO
+    const calledWith = mockFetchDocuments.mock.calls[0][0]
+    const typeFilter = calledWith.columnFilters.find(
+      (f: { id: string; value: string }) => f.id === 'type',
+    )
+
+    const expected = [
+      DocumentType.ScholarlyPublication,
+      DocumentType.Presentation,
+      DocumentType.JournalArticle,
+      DocumentType.ConferenceArticle,
+      DocumentType.Book,
+      DocumentType.BookChapter,
+      DocumentType.Monograph,
+      DocumentType.Proceedings,
+      DocumentType.BookOfChapters,
+      DocumentType.Article,
+      DocumentType.ConferenceAbstract,
+      DocumentType.Preface,
+      DocumentType.Comment,
+    ]
+
+    expect(typeFilter.value).toEqual(expect.arrayContaining(expected))
+    expect(typeFilter.value.length).toBe(expected.length) // no duplicates
+  })
+
+  it('expands hierarchical types for fetchDocuments (Book -> Monograph, Proceedings)', async () => {
+    const mockResponse = { documents: [], totalItems: 0 }
+    mockFetchDocuments.mockResolvedValue(mockResponse)
+
+    const params = {
+      searchTerm: '',
+      searchLang: 'en',
+      page: 1,
+      pageSize: 10,
+      columnFilters: [{ id: 'type', value: [DocumentType.Book] }],
+      sorting: [],
+      contributorUid: 'local-xyz',
+      contributorType: 'person' as AgentType,
+      halCollectionCodes: [],
+      areHalCollectionCodesOmitted: false,
+    }
+
+    await documentService.fetchDocuments(params)
+
+    const calledWith = mockFetchDocuments.mock.calls[0][0]
+    const typeFilter = calledWith.columnFilters.find(
+      (f: { id: string; value: string }) => f.id === 'type',
+    )
+
+    const expected = [
+      DocumentType.Book,
+      DocumentType.BookOfChapters,
+      DocumentType.Monograph,
+      DocumentType.Proceedings,
+    ]
+
+    expect(typeFilter.value).toEqual(expect.arrayContaining(expected))
+    expect(typeFilter.value.length).toBe(expected.length)
+  })
+
+  it('does not expand a leaf type for fetchDocuments (JournalArticle stays itself)', async () => {
+    const mockResponse = { documents: [], totalItems: 0 }
+    mockFetchDocuments.mockResolvedValue(mockResponse)
+
+    const params = {
+      searchTerm: '',
+      searchLang: 'en',
+      page: 1,
+      pageSize: 10,
+      columnFilters: [{ id: 'type', value: [DocumentType.JournalArticle] }],
+      sorting: [],
+      contributorUid: 'local-xyz',
+      contributorType: 'person' as AgentType,
+      halCollectionCodes: [],
+      areHalCollectionCodesOmitted: false,
+    }
+
+    await documentService.fetchDocuments(params)
+
+    const calledWith = mockFetchDocuments.mock.calls[0][0]
+    const typeFilter = calledWith.columnFilters.find(
+      (f: { id: string; value: string }) => f.id === 'type',
+    )
+
+    expect(typeFilter.value).toEqual([DocumentType.JournalArticle])
+  })
+
+  it('expands hierarchical types for countDocuments as well', async () => {
+    mockCountDocuments.mockResolvedValue({
+      allItems: 0,
+      incompleteHalRepositoryItems: 0,
+    })
+
+    const params = {
+      searchTerm: '',
+      searchLang: 'en',
+      columnFilters: [
+        { id: 'type', value: [DocumentType.ScholarlyPublication] },
+      ],
+      contributorUid: 'local-xyz',
+      contributorType: 'person' as AgentType,
+      halCollectionCodes: [],
+    }
+
+    await documentService.countDocuments(params)
+
+    const calledWith = mockCountDocuments.mock.calls[0][0]
+    const typeFilter = calledWith.columnFilters.find(
+      (f: { id: string; value: string }) => f.id === 'type',
+    )
+
+    const expected = [
+      DocumentType.ScholarlyPublication,
+      DocumentType.JournalArticle,
+      DocumentType.ConferenceArticle,
+      DocumentType.Book,
+      DocumentType.BookChapter,
+      DocumentType.Monograph,
+      DocumentType.Proceedings,
+      DocumentType.BookOfChapters,
+      DocumentType.Presentation,
+      DocumentType.Article,
+      DocumentType.ConferenceAbstract,
+      DocumentType.Preface,
+      DocumentType.Comment,
+    ]
+
+    expect(typeFilter.value).toEqual(expect.arrayContaining(expected))
+    expect(typeFilter.value.length).toBe(expected.length)
+  })
+  it('updates document type and creates UPDATE action', async () => {
+    mockUpdateDocumentTypeByUid.mockResolvedValue(undefined)
+
+    await expect(
+      documentService.updateDocumentType(
+        'doc-1',
+        DocumentType.Book,
+        'user-1234',
+      ),
+    ).resolves.toBeUndefined()
+
+    expect(mockUpdateDocumentTypeByUid).toHaveBeenCalledWith(
+      'doc-1',
+      DocumentType.Book,
+    )
+    expect(mockCreateAction).toHaveBeenCalledWith({
+      actionType: 'UPDATE',
+      targetType: 'DOCUMENT',
+      targetUid: 'doc-1',
+      path: 'documentType',
+      parameters: { value: DocumentType.Book },
+      personUid: 'local-123',
+    })
+  })
+
+  it('throws when user has no associated person for updateDocumentType', async () => {
+    ;(UserDAO as jest.Mock).mockImplementationOnce(() => ({
+      getUserByIdentifier: jest.fn().mockResolvedValue({ person: null }),
+    }))
+    const svc = new DocumentService()
+
+    await expect(
+      svc.updateDocumentType('doc-1', DocumentType.Book, 'user-1234'),
+    ).rejects.toThrow('Error updating document type')
+
+    expect(mockUpdateDocumentTypeByUid).not.toHaveBeenCalled()
+    expect(mockCreateAction).not.toHaveBeenCalled()
+  })
+
+  it('propagates DAO error and does not create action', async () => {
+    mockUpdateDocumentTypeByUid.mockRejectedValue(new Error('DAO error'))
+
+    await expect(
+      documentService.updateDocumentType(
+        'doc-1',
+        DocumentType.Book,
+        'user-1234',
+      ),
+    ).rejects.toThrow('Error updating document type')
+
+    expect(mockUpdateDocumentTypeByUid).toHaveBeenCalled()
+    expect(mockCreateAction).not.toHaveBeenCalled()
+  })
+
+  it('propagates action creation error after DAO success', async () => {
+    mockUpdateDocumentTypeByUid.mockResolvedValue(undefined)
+    mockCreateAction.mockRejectedValueOnce(new Error('Action DAO error'))
+
+    await expect(
+      documentService.updateDocumentType(
+        'doc-1',
+        DocumentType.Book,
+        'user-1234',
+      ),
+    ).rejects.toThrow('Error updating document type')
+
+    expect(mockUpdateDocumentTypeByUid).toHaveBeenCalledWith(
+      'doc-1',
+      DocumentType.Book,
+    )
+    expect(mockCreateAction).toHaveBeenCalled()
   })
 })

@@ -47,12 +47,53 @@ VOCABS_URL="${VOCABS_URL:-http://localhost:8000/api/v0/autocomplete/}"
 NEXT_PUBLIC_AVAILABLE_VOCABS="${NEXT_PUBLIC_AVAILABLE_VOCABS:-jel,aat,acm,mesh}"
 EOF
 
+CUSTOM_THEME_MOUNT="/custom-theme"
+THEME_DIR="/app/public/theme"
+use_custom_theme=false
+if [ -d "${CUSTOM_THEME_MOUNT}" ] && [ "$(ls -A ${CUSTOM_THEME_MOUNT})" ]; then
+  log "Using custom theme from mounted volume: ${CUSTOM_THEME_MOUNT}"
+  use_custom_theme=true
+else
+  log "Using default theme"
+fi
+
+if $use_custom_theme; then
+  echo "Custom theme detected at $CUSTOM_THEME_MOUNT — overriding /public/theme"
+  rm -rf "${THEME_DIR}"
+  cp -r "${CUSTOM_THEME_MOUNT}" "${THEME_DIR}"
+else
+  log "No custom theme found at: ${CUSTOM_THEME_MOUNT}"
+fi
+
 log "Running Prisma migrations…"
 if ! ./node_modules/.bin/prisma migrate deploy; then
   log "Prisma migrations FAILED. Exiting."
   exit 1
 fi
 log "Prisma migrations complete."
+
+log "Seeding RBAC roles…"
+RBAC_DEFAULT="/app/rbac.roles.yaml"
+RBAC_MOUNTED="/config/rbac.roles.yaml"
+RBAC_FROM_ENV="${RBAC_ROLES_FILE:-}"
+
+RBAC_FILE=""
+
+if [ -n "$RBAC_FROM_ENV" ] && [ -f "$RBAC_FROM_ENV" ]; then
+  RBAC_FILE="$RBAC_FROM_ENV"
+elif [ -f "$RBAC_MOUNTED" ]; then
+  RBAC_FILE="$RBAC_MOUNTED"
+elif [ -f "$RBAC_DEFAULT" ]; then
+  RBAC_FILE="$RBAC_DEFAULT"
+fi
+
+if [ "${INIT_ROLES_ON_START:-true}" = "true" ] && [ -n "$RBAC_FILE" ]; then
+  log "Seeding RBAC roles from: $RBAC_FILE"
+  npm run init_roles:js "$RBAC_FILE" || { log "RBAC seeding FAILED"; exit 1; }
+else
+  log "Skipping RBAC seeding (INIT_ROLES_ON_START=${INIT_ROLES_ON_START:-false}, file='${RBAC_FILE:-none}')"
+fi
+
 
 export NODE_PATH=/app/node_modules # for the listener to find shared modules
 HOSTNAME="0.0.0.0" npm run start:web & npm run start:listener

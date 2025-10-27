@@ -1,4 +1,5 @@
 'use client'
+import { t } from '@lingui/core/macro'
 import './page.css'
 import { TabFilter } from '@/components/TabFilter'
 import useStore from '@/stores/global_store'
@@ -7,12 +8,16 @@ import {
   BibliographicPlatformMetadata,
 } from '@/types/BibliographicPlatform'
 import { Contribution } from '@/types/Contribution'
-import { Document, DocumentState, DocumentType } from '@/types/Document'
+import {
+  Document,
+  DocumentState,
+  DocumentType,
+  isDocument,
+} from '@/types/Document'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
-import { t } from '@lingui/macro'
 
 import { LanguageChips } from '@/components/LanguageChips'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
@@ -38,10 +43,18 @@ import {
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
   MRT_SortingState,
+  MRT_VisibilityState,
 } from 'material-react-table'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation' // Import useRouter
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, {
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import Highlighter from 'react-highlight-words'
 import DocumentHeader from './components/DocumentHeader'
 import HalStatusCell from './components/HalStatusCell'
@@ -53,23 +66,74 @@ import { DocumentTypeLabels } from './components/DocumentTypeLabels'
 import SyncIcon from '@mui/icons-material/Sync'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
 import DocumentSyncDialog from '@/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog'
-import { Trans } from '@lingui/react'
+import { Trans, useLingui } from '@lingui/react'
+import { useSession } from 'next-auth/react'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
+import { Can } from '@casl/react'
+import { toUTCISOString } from '@/utils/toUTCISOString'
+import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 
 dayjs.extend(utc)
 
+const DEFAULT_SORTING = [
+  {
+    id: 'date',
+    desc: true,
+  },
+]
+const DEFAULT_PAGINATION = {
+  pageIndex: 0,
+  pageSize: 10,
+}
 export default function DocumentsPage() {
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  })
-  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([])
-  const [globalFilter, setGlobalFilter] = useState('')
-  const [sorting, setSorting] = useState<MRT_SortingState>([
-    {
-      id: 'date',
-      desc: true,
-    },
-  ])
+  const { data: session } = useSession()
+  const { _ } = useLingui()
+  const ability = useMemo(
+    () => abilityFromAuthzContext(session?.user.authz),
+    [session?.user?.authz],
+  )
+  const readInitialPagination = (): typeof DEFAULT_PAGINATION => {
+    try {
+      const raw = sessionStorage.getItem('mrt_pagination_publication_table')
+      return raw ? JSON.parse(raw) : DEFAULT_PAGINATION
+    } catch {
+      return DEFAULT_PAGINATION
+    }
+  }
+  const readInitialColumnFilters = (): MRT_ColumnFiltersState => {
+    try {
+      const raw = sessionStorage.getItem('mrt_columnFilters_publication_table')
+      return raw ? JSON.parse(raw) : []
+    } catch {
+      return []
+    }
+  }
+
+  const readInitialGlobalFilter = () => {
+    try {
+      const raw = sessionStorage.getItem('mrt_global_publication_table')
+      return raw ? (JSON.parse(raw) as string) : ''
+    } catch {
+      return ''
+    }
+  }
+  const [pagination, setPagination] = useState(readInitialPagination)
+
+  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
+    readInitialColumnFilters,
+  )
+  const [globalFilter, setGlobalFilter] = useState(readInitialGlobalFilter)
+
+  const readInitialSorting = (): MRT_SortingState => {
+    try {
+      const raw = sessionStorage.getItem('mrt_sorting_publication_table')
+      return raw ? JSON.parse(raw) : DEFAULT_SORTING
+    } catch {
+      return DEFAULT_SORTING
+    }
+  }
+  const [sorting, setSorting] = useState<MRT_SortingState>(readInitialSorting)
 
   const [openSynchronizeModal, setOpenSynchronizeModal] =
     useState<boolean>(false)
@@ -93,6 +157,41 @@ export default function DocumentsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
+  useEffect(() => {
+    sessionStorage.setItem(
+      'mrt_pagination_publication_table',
+      JSON.stringify(pagination),
+    )
+  }, [pagination])
+
+  useEffect(() => {
+    if (!sorting) return
+    sessionStorage.setItem(
+      'mrt_sorting_publication_table',
+      JSON.stringify(sorting),
+    )
+  }, [sorting])
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      sessionStorage.setItem(
+        'mrt_columnFilters_publication_table',
+        JSON.stringify(columnFilters),
+      )
+    }, 250)
+    return () => clearTimeout(id)
+  }, [columnFilters])
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      sessionStorage.setItem(
+        'mrt_global_publication_table',
+        JSON.stringify(globalFilter),
+      )
+    }, 250)
+    return () => clearTimeout(id)
+  }, [globalFilter])
+
   const navigateToDetailsPage = useCallback(
     (documentUid: string) => {
       const params = new URLSearchParams(searchParams.toString())
@@ -106,7 +205,26 @@ export default function DocumentsPage() {
     MRT_ColumnDef<Document>[]
   >((): MRT_ColumnDef<Document>[] => {
     const acronyms = currentPerspective?.membershipAcronyms || []
-
+    const typeOptions = DocumentTypeService.toMenuTree()
+      .filter((n) => n.value !== DocumentType.Document)
+      .map(({ value, depth }) => {
+        const plainLabel = _(DocumentTypeLabels[value])
+        return {
+          value,
+          label: (
+            <Box
+              className='doc-type-option'
+              sx={{ display: 'flex', alignItems: 'center', pl: depth * 2 }}
+            >
+              <Box sx={{ mr: 1 }}>{DocumentTypeIcons[value]}</Box>
+              <Typography variant='body2' noWrap>
+                {plainLabel}
+              </Typography>
+            </Box>
+          ),
+          plainLabel,
+        }
+      })
     return [
       {
         enableSorting: false,
@@ -114,7 +232,7 @@ export default function DocumentsPage() {
         header: t`documents_page_type_column`,
         Cell({ row }: { row: { original: { documentType: DocumentType } } }) {
           return (
-            <Tooltip title={DocumentTypeLabels[row.original.documentType]}>
+            <Tooltip title={_(DocumentTypeLabels[row.original.documentType])}>
               {DocumentTypeIcons[row.original.documentType]}
             </Tooltip>
           )
@@ -122,28 +240,7 @@ export default function DocumentsPage() {
         filterVariant: 'multi-select',
         filterColumn: 'type',
         //@ts-expect-error:  overide filterSelectOptions to accept Element.jsx instead of Element
-        filterSelectOptions: Object.values(DocumentType).map((type) => ({
-          value: type,
-          label: (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-              }}
-            >
-              {DocumentTypeLabels[type]}
-              <Box
-                sx={{
-                  marginLeft: 'auto',
-                }}
-              >
-                {DocumentTypeIcons[type]}
-              </Box>
-            </Box>
-          ),
-        })),
+        filterSelectOptions: typeOptions,
       },
       {
         size: 200,
@@ -360,7 +457,7 @@ export default function DocumentsPage() {
                 gap: 1,
               }}
             >
-              {orderedPlatforms.reduce<JSX.Element[]>((acc, platform) => {
+              {orderedPlatforms.reduce<ReactElement[]>((acc, platform) => {
                 const record = row.original.records.find(
                   (record) => record.platform === platform,
                 )
@@ -439,7 +536,44 @@ export default function DocumentsPage() {
     supportedLocales,
     navigateToDetailsPage,
     currentPerspective?.membershipAcronyms,
+    _,
   ])
+
+  const getColumnIds = (columns: MRT_ColumnDef<Document>[]) => {
+    return columns
+      .map((c) => (typeof c.accessorKey === 'string' ? c.accessorKey : c.id))
+      .filter(Boolean) as string[]
+  }
+
+  const readInitialColumnVisibility = (
+    columns: MRT_ColumnDef<Document>[],
+  ): MRT_VisibilityState => {
+    try {
+      const raw = sessionStorage.getItem(
+        'mrt_columnVisibility_publication_table',
+      )
+      if (!raw) return {} // all visible by default
+      const parsed = JSON.parse(raw) as MRT_VisibilityState
+      const valid = new Set(getColumnIds(columns))
+      // keep only known columns
+      return Object.fromEntries(
+        Object.entries(parsed).filter(([id]) => valid.has(id)),
+      )
+    } catch {
+      return {}
+    }
+  }
+
+  const [columnVisibility, setColumnVisibility] = useState<MRT_VisibilityState>(
+    () => readInitialColumnVisibility(columns),
+  )
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      'mrt_columnVisibility_publication_table',
+      JSON.stringify(columnVisibility),
+    )
+  }, [columnVisibility])
 
   const requestIdRef = useRef(0)
   const countDocumentsRequestIdRef = useRef(0)
@@ -473,54 +607,26 @@ export default function DocumentsPage() {
 
   const [selectedTab, setSelectedTab] = useState(tabs[0].value)
 
-  useEffect(() => {
-    const adjustedFilters = columnFilters.map((filter) => {
+  /**
+   * Adjust MRT column filters so that `date` range filters are converted to UTC ISO strings.
+   */
+  const normalizeDateFilters = (
+    columnFilters: { id: string; value: unknown }[],
+  ): { id: string; value: unknown }[] => {
+    return columnFilters.map((filter) => {
       if (filter.id === 'date' && Array.isArray(filter.value)) {
-        const [startDate, endDate] = filter.value
-
-        // Function to safely convert startDate to 00:00:00 and endDate to 23:59:59.999
-        const toUTCISOString = (dateStr: string | null, isEndDate = false) => {
-          if (!dateStr) return null // Return null if no date
-
-          const parsedDate = dayjs(dateStr)
-          if (!parsedDate.isValid()) return null // Return null if invalid date
-
-          // If it's an end date, set it to 23:59:59.999, otherwise 00:00:00
-          const utcDate = isEndDate
-            ? new Date(
-                Date.UTC(
-                  parsedDate.year(),
-                  parsedDate.month(),
-                  parsedDate.date(),
-                  23,
-                  59,
-                  59,
-                  999,
-                ),
-              ) // Last second of the day
-            : new Date(
-                Date.UTC(
-                  parsedDate.year(),
-                  parsedDate.month(),
-                  parsedDate.date(),
-                  0,
-                  0,
-                  0,
-                  0,
-                ),
-              ) // Start of the day
-
-          return utcDate.toISOString()
-        }
-
+        const [startDate, endDate] = filter.value as (string | null)[]
         return {
           ...filter,
-          value: [toUTCISOString(startDate), toUTCISOString(endDate, true)], // Pass true for end date
+          value: [toUTCISOString(startDate), toUTCISOString(endDate, true)],
         }
       }
       return filter
     })
+  }
 
+  useEffect(() => {
+    const adjustedFilters = normalizeDateFilters(columnFilters)
     const contributorType = currentPerspective?.type
     if (!contributorType) return
 
@@ -640,45 +746,67 @@ export default function DocumentsPage() {
           </Alert>
         )}
 
-        <Button
-          startIcon={
-            isAnyHarvestingRunning ? (
-              <CircularProgress size={18} thickness={4} />
-            ) : (
-              <SyncIcon />
-            )
-          }
-          variant='outlined'
-          onClick={() => setOpenSynchronizeModal(true)}
-        >
-          <Trans id='documents_page_synchronize_button' />
-        </Button>
+        {currentPerspective && (
+          <Can
+            I={PermissionAction.fetch_documents}
+            a={currentPerspective}
+            passThrough
+            ability={ability}
+          >
+            {(allowed: boolean) => (
+              <Button
+                startIcon={
+                  isAnyHarvestingRunning ? (
+                    <CircularProgress size={18} thickness={4} />
+                  ) : (
+                    <SyncIcon />
+                  )
+                }
+                variant='outlined'
+                disabled={!allowed}
+                onClick={() => setOpenSynchronizeModal(true)}
+              >
+                <Trans id='documents_page_synchronize_button' />
+              </Button>
+            )}
+          </Can>
+        )}
       </DocumentHeader>
       <TabFilter
         tabsData={tabs}
         selectedValue={selectedTab}
         onTabChange={handleTabChange}
       />
+      {currentPerspective && (
+        <Can
+          I={PermissionAction.fetch_documents}
+          a={currentPerspective}
+          ability={ability}
+        >
+          <DocumentSyncDialog
+            openSynchronizeModal={openSynchronizeModal}
+            setOpenSynchronizeModal={setOpenSynchronizeModal}
+            personUid={currentPerspective?.uid || ''}
+          />
+        </Can>
+      )}
 
-      <DocumentSyncDialog
-        openSynchronizeModal={openSynchronizeModal}
-        setOpenSynchronizeModal={setOpenSynchronizeModal}
-        personUid={currentPerspective?.uid || ''}
-      />
-
-      <MaterialReactTable
+      <MaterialReactTable<Document>
         initialState={{ showColumnFilters: true }}
-        getRowId={(row) => row.uid}
+        getRowId={(row) => {
+          return row.uid
+        }}
         manualFiltering
         manualPagination
         manualSorting
         enableColumnResizing
-        enableRowSelection={(row) =>
-          row.original.state == DocumentState.default
-        }
+        enableRowSelection={(row) => {
+          if (!isDocument(row.original)) return false
+          const canMerge = ability.can(PermissionAction.merge, row.original)
+          return canMerge && row.original.state == DocumentState.default
+        }}
         muiTableBodyRowProps={({ row }) => {
           const isWaiting = row.original.state === 'waiting_for_update'
-
           return {
             className: isWaiting ? 'mrt-row-waiting' : '',
           }
@@ -692,13 +820,17 @@ export default function DocumentsPage() {
         onColumnFiltersChange={setColumnFilters}
         onGlobalFilterChange={setGlobalFilter}
         onSortingChange={setSorting}
+        onColumnVisibilityChange={(newState) => {
+          setColumnVisibility(newState)
+        }}
         state={{
           isLoading: loading,
           showLoadingOverlay: false,
           pagination,
-          sorting,
+          sorting: sorting || DEFAULT_SORTING,
           columnFilters,
           globalFilter,
+          columnVisibility,
         }}
         localization={Localization[lang]}
         enableRowActions

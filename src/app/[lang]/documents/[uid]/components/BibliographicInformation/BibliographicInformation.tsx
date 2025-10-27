@@ -1,10 +1,9 @@
+import { t } from '@lingui/core/macro'
 import { CustomCard } from '@/components/Card'
 import useStore from '@/stores/global_store'
 import { Trans } from '@lingui/react'
-import { t } from '@lingui/macro'
 import {
   Box,
-  Button,
   CardContent,
   Table,
   TableBody,
@@ -92,14 +91,16 @@ const BibliographicInformation = () => {
     'titles',
     'type',
     'date',
-    'journal',
     'authors',
     'abstracts',
     'sources',
   ]
 
+  const journalTypeFields: DocumentFieldKey[] = [...commonTypeFields, 'journal']
+
   const documentTypeFields: Record<DocumentType, DocumentFieldKey[]> = {
-    [DocumentType.JournalArticle]: commonTypeFields,
+    [DocumentType.Article]: commonTypeFields,
+    [DocumentType.JournalArticle]: journalTypeFields,
     [DocumentType.Document]: commonTypeFields,
     [DocumentType.ScholarlyPublication]: commonTypeFields,
     [DocumentType.Book]: commonTypeFields,
@@ -107,6 +108,11 @@ const BibliographicInformation = () => {
     [DocumentType.BookChapter]: commonTypeFields,
     [DocumentType.ConferenceArticle]: commonTypeFields,
     [DocumentType.Proceedings]: commonTypeFields,
+    [DocumentType.ConferenceAbstract]: commonTypeFields,
+    [DocumentType.Preface]: commonTypeFields,
+    [DocumentType.Comment]: commonTypeFields,
+    [DocumentType.Presentation]: commonTypeFields,
+    [DocumentType.BookOfChapters]: commonTypeFields,
   }
 
   const fieldsToDisplay: DocumentFieldKey[] =
@@ -136,9 +142,6 @@ const BibliographicInformation = () => {
           >
             <Trans id='document_details_page_card_title' />
           </Typography>
-          <Button variant='contained' color='primary'>
-            <Trans id='document_details_page_card_validate_button' />
-          </Button>
         </Box>
       }
     >

@@ -2,6 +2,9 @@ import { getServerSession } from 'next-auth'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { POST } from './route'
+import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
+import { PermissionAction, PermissionSubject } from '@/types/Permission'
 
 jest.mock('next-auth', () => ({
   getServerSession: jest.fn(() => ({
@@ -14,6 +17,7 @@ jest.mock('next-auth', () => ({
 }))
 jest.mock('@/lib/daos/ActionDAO')
 jest.mock('@/lib/daos/UserDAO')
+jest.mock('@/lib/daos/PersonDAO')
 jest.mock('next/server', () => ({
   NextResponse: {
     json: jest.fn((data, init) => ({
@@ -25,12 +29,37 @@ jest.mock('next/server', () => ({
 
 describe('POST /api/documents/harvestings', () => {
   it('should return 200 when action is created', async () => {
+    const authz = makeAuthzContext({
+      roleAssignments: [
+        makeAssignment(
+          'document_fetcher',
+          [
+            {
+              action: PermissionAction.fetch_documents,
+              subject: PermissionSubject.Person,
+            },
+          ],
+          [{ entityType: 'Person', entityUid: 'abc' }],
+        ),
+      ],
+    })
+
     ;(getServerSession as jest.Mock).mockResolvedValue({
-      user: { username: 'jdoe' },
+      user: { username: 'jdoe', authz },
+      expires: '2025-01-01T00:00:00.000Z',
     })
     ;(UserDAO as jest.Mock).mockImplementation(() => ({
       getUserByIdentifier: jest.fn().mockResolvedValue({
         person: { uid: 'actor-uid' },
+      }),
+    }))
+    ;(PersonDAO as unknown as jest.Mock).mockImplementation(() => ({
+      fetchPersonByUid: jest.fn().mockResolvedValue({
+        uid: 'abc',
+        authzProperties: {
+          __type: 'Person',
+          perimeter: { Person: ['abc'], ResearchStructure: [] },
+        },
       }),
     }))
     ;(ActionDAO as jest.Mock).mockImplementation(() => ({

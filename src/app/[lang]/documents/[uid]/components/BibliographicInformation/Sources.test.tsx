@@ -30,6 +30,16 @@ jest.mock('@mui/material/styles', () => ({
   }),
 }))
 
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => mockRouter,
+  useSearchParams: jest.fn(() => new URLSearchParams()),
+  useParams: jest.fn(() => ({ uid: '123' })),
+}))
+
 // Mock window.open to test external link clicks
 global.open = jest.fn()
 
@@ -163,5 +173,23 @@ describe('Sources Component', () => {
 
     // No specific event expected, but ensures the button is clickable
     expect(editButton).toBeInTheDocument()
+  })
+
+  it('navigates to the sources tab when clicking the edit button', () => {
+    i18n.activate('en')
+
+    renderComponent()
+
+    const editButton = screen.getByRole('button', {
+      name: 'document_details_page_sources_row_update_source',
+    })
+
+    fireEvent.click(editButton)
+
+    expect(mockRouter.push).toHaveBeenCalledTimes(1)
+    const pushedUrl = (mockRouter.push as jest.Mock).mock.calls[0][0] as string
+
+    expect(pushedUrl).toContain('/en/documents/123')
+    expect(pushedUrl).toContain('tab=sources')
   })
 })

@@ -22,7 +22,7 @@ COPY . .
 COPY .env.docker .env
 
 RUN npx prisma generate
-RUN npx lingui extract-template
+RUN npm run i18n:extract && npm run i18n:compile
 RUN npm run build
 RUN npm run build:listener
 
@@ -49,7 +49,7 @@ ENV NODE_ENV=production
 
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 
-COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Automatically leverage output traces to reduce image size
@@ -58,6 +58,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/dist-listener ./dist-listener
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/rbac.roles.sample.yaml /app/rbac.roles.yaml
 
 RUN touch .env && chown nextjs:nodejs .env
 

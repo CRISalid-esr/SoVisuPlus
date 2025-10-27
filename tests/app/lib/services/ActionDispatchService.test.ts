@@ -42,7 +42,7 @@ describe('ActionDispatchService Integration Test', () => {
       },
     })
 
-    await service.dispatchActions()
+    await service.dispatchUndispatchedActions()
 
     // ✅ 1. Ensure the action was published with correct routing key and payload
     expect(mockPublish).toHaveBeenCalledWith(

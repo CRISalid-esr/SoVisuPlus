@@ -1,7 +1,7 @@
+import { Trans } from '@lingui/react/macro'
 import { useEffect, useRef, useState } from 'react'
 import Highlighter from 'react-highlight-words'
 import styles from './HighlighterWithEllipsis.module.css'
-import { Trans } from '@lingui/macro'
 
 const HighlighterWithEllipsis = ({
   text,

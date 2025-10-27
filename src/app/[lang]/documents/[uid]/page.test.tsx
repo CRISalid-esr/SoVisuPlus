@@ -50,6 +50,11 @@ jest.mock('next/navigation', () => ({
   notFound: jest.fn(),
 }))
 
+jest.mock('next-auth/react', () => ({
+  __esModule: true,
+  useSession: () => ({ data: { user: { authz: { roleAssignments: [] } } } }),
+}))
+
 const document: Document = new Document(
   'doc-123',
   DocumentType.Document,

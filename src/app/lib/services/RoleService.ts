@@ -96,7 +96,9 @@ export class RoleService {
       idValue: input.user.idValue,
     })
     if (!userId) {
-      throw new Error('User not found for provided selector')
+      throw new Error(
+        `User not found for provided selector ${JSON.stringify(input.user)}`,
+      )
     }
 
     const role = await this.roleDAO.getRoleByName(input.roleName)
@@ -120,6 +122,20 @@ export class RoleService {
       roleId: role.id,
       roleName: input.roleName,
       scope: input.scope ?? null,
+    }
+  }
+
+  async ensureSelfScopedRoles(params: {
+    userId: number
+    personUid: string
+    roleNames: string[]
+  }): Promise<void> {
+    for (const roleName of params.roleNames) {
+      await this.assignRoleToUser({
+        roleName,
+        scope: { entityType: 'Person', entityUid: params.personUid },
+        user: { userId: params.userId },
+      })
     }
   }
 }

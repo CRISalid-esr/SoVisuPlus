@@ -9,6 +9,7 @@ jest.mock('@prisma/client', () => {
       upsert: jest.fn(),
       findFirst: jest.fn(),
       findUnique: jest.fn(),
+      findMany: jest.fn(),
     },
     person: {
       findUnique: jest.fn(),
@@ -110,12 +111,20 @@ describe('UserDAO', () => {
               select: {
                 startDate: true,
                 endDate: true,
+                positionCode: true,
+                id: true,
+                personId: true,
+                researchStructureId: true,
                 researchStructure: {
                   select: {
                     uid: true,
                     acronym: true,
                     signature: true,
                     slug: true,
+                    external: true,
+                    id: true,
+                    names: true,
+                    descriptions: true,
                   },
                 },
               },
@@ -125,12 +134,33 @@ describe('UserDAO', () => {
         roles: {
           include: {
             role: {
-              select: { id: true, name: true, description: true, system: true },
+              include: {
+                permissions: {
+                  include: {
+                    permission: {
+                      select: {
+                        id: true,
+                        action: true,
+                        conditions: true,
+                        createdAt: true,
+                        updatedAt: true,
+                        subject: true,
+                        description: true,
+                        fields: true,
+                        inverted: true,
+                      },
+                    },
+                  },
+                },
+              },
             },
             scopes: {
               select: {
+                id: true,
                 entityType: true,
                 entityUid: true,
+                roleId: true,
+                userId: true,
               },
             },
           },
@@ -149,10 +179,7 @@ describe('UserDAO', () => {
       where: {
         person: {
           identifiers: {
-            some: {
-              type: 'ORCID',
-              value: '0000-0001-2345-6789',
-            },
+            some: { type: 'ORCID', value: '0000-0001-2345-6789' },
           },
         },
       },
@@ -164,12 +191,20 @@ describe('UserDAO', () => {
               select: {
                 startDate: true,
                 endDate: true,
+                id: true,
+                personId: true,
+                positionCode: true,
+                researchStructureId: true,
                 researchStructure: {
                   select: {
                     uid: true,
+                    id: true,
                     acronym: true,
+                    descriptions: true,
+                    names: true,
                     signature: true,
                     slug: true,
+                    external: true,
                   },
                 },
               },
@@ -179,12 +214,33 @@ describe('UserDAO', () => {
         roles: {
           include: {
             role: {
-              select: { id: true, name: true, description: true, system: true },
+              include: {
+                permissions: {
+                  include: {
+                    permission: {
+                      select: {
+                        id: true,
+                        action: true,
+                        subject: true,
+                        fields: true,
+                        inverted: true,
+                        conditions: true,
+                        createdAt: true,
+                        updatedAt: true,
+                        description: true,
+                      },
+                    },
+                  },
+                },
+              },
             },
             scopes: {
               select: {
+                id: true,
                 entityType: true,
                 entityUid: true,
+                roleId: true,
+                userId: true,
               },
             },
           },
@@ -352,5 +408,50 @@ describe('UserDAO', () => {
     expect(mockPrisma.userRoleScope.deleteMany).toHaveBeenCalledWith({
       where: { userId: 7, roleId: 3 },
     })
+  })
+
+  it('listUsersWithPersonUid: maps person.uid to personUid and keeps nulls', async () => {
+    ;(mockPrisma.user.findMany as jest.Mock).mockResolvedValue([
+      { id: 1, person: { uid: 'p-001' } },
+      { id: 2, person: null },
+      { id: 3, person: { uid: 'p-003' } },
+    ])
+
+    const rows = await userDAO.listUsersWithPersonUid()
+
+    expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
+      select: {
+        id: true,
+        person: { select: { uid: true } },
+      },
+    })
+    expect(rows).toEqual([
+      { id: 1, personUid: 'p-001' },
+      { id: 2, personUid: null },
+      { id: 3, personUid: 'p-003' },
+    ])
+  })
+
+  it('listUsersWithPersonUid: returns empty array when no users', async () => {
+    ;(mockPrisma.user.findMany as jest.Mock).mockResolvedValue([])
+
+    const rows = await userDAO.listUsersWithPersonUid()
+    expect(rows).toEqual([])
+    expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
+      select: {
+        id: true,
+        person: { select: { uid: true } },
+      },
+    })
+  })
+
+  it('listUsersWithPersonUid: propagates errors', async () => {
+    ;(mockPrisma.user.findMany as jest.Mock).mockRejectedValue(
+      new Error('Database error'),
+    )
+
+    await expect(userDAO.listUsersWithPersonUid()).rejects.toThrow(
+      'Database error',
+    )
   })
 })

@@ -1,7 +1,9 @@
+import { t } from '@lingui/core/macro'
 import { CustomCard } from '@/components/Card'
 import { Trans } from '@lingui/react'
-import { Box, Button, CardContent, Typography } from '@mui/material'
+import { Box, CardContent, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
+import WorkInProgress from '@/components/WorkInProgress/WorkInProgress'
 
 function Domains() {
   const theme = useTheme()
@@ -27,13 +29,16 @@ function Domains() {
           >
             <Trans id='document_details_page_domains_tab_card_title' />
           </Typography>
-          <Button variant='contained' color='primary'>
-            <Trans id='document_details_page_domains_tab_card_validate_button' />
-          </Button>
         </Box>
       }
     >
-      <CardContent>Work in progress</CardContent>
+      <CardContent>
+        <WorkInProgress
+          title={t`document_details_page_domains_tab_wip_title`}
+          description={t`document_details_page_domains_tab_wip_description`}
+          variant='inline'
+        />
+      </CardContent>
     </CustomCard>
   )
 }

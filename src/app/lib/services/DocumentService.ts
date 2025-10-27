@@ -5,13 +5,19 @@ import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
+import { DocumentType } from '@/types/Document'
+
+type ColumnFilter =
+  | { id: 'date'; value: [string | null, string | null] }
+  | { id: string; value: string | string[] }
 
 interface FetchDocumentsParams {
   searchTerm: string
   searchLang: string
   page: number
   pageSize: number
-  columnFilters: { id: string; value: string }[]
+  columnFilters: ColumnFilter[]
   sorting: { id: string; desc: boolean }[]
   contributorUid: string | null
   contributorType: AgentType
@@ -22,7 +28,7 @@ interface FetchDocumentsParams {
 interface CountDocumentsParams {
   searchTerm: string
   searchLang: string
-  columnFilters: { id: string; value: string }[]
+  columnFilters: ColumnFilter[]
   contributorUid: string | null
   contributorType: AgentType
   halCollectionCodes: string[]
@@ -84,13 +90,15 @@ export class DocumentService {
       contributorType,
     )
 
+    const expandedColumnFilters = this.expandedColumnFilters(columnFilters)
+
     try {
       const { documents, totalItems } = await this.documentDAO.fetchDocuments({
         searchTerm,
         searchLang: searchLang,
         page,
         pageSize,
-        columnFilters,
+        columnFilters: expandedColumnFilters,
         sorting,
         contributorUids,
         halCollectionCodes,
@@ -101,6 +109,18 @@ export class DocumentService {
       console.error('Error in service layer:', error)
       throw new Error('Error fetching documents from service')
     }
+  }
+
+  private expandedColumnFilters(columnFilters: ColumnFilter[]) {
+    return columnFilters.map((f) => {
+      if (f.id !== 'type' || !Array.isArray(f.value)) return f
+      const validTypes = (f.value as unknown[]).filter(
+        DocumentTypeService.isDocumentType,
+      ) // ✅ type-safe guard
+
+      const expanded = DocumentTypeService.expandTypes(validTypes)
+      return { ...f, value: expanded }
+    })
   }
 
   async countDocuments({
@@ -116,12 +136,14 @@ export class DocumentService {
       contributorType,
     )
 
+    const expandedColumnFilters = this.expandedColumnFilters(columnFilters)
+
     try {
       const { allItems, incompleteHalRepositoryItems } =
         await this.documentDAO.countDocuments({
           searchTerm,
           searchLang: searchLang,
-          columnFilters,
+          columnFilters: expandedColumnFilters,
           contributorUids,
           halCollectionCodes,
         })
@@ -205,6 +227,37 @@ export class DocumentService {
       return { updated }
     } catch (error) {
       const message = 'Error merging documents'
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
+
+  async updateDocumentType(
+    documentUid: string,
+    documentType: DocumentType,
+    userName: string,
+  ): Promise<void> {
+    try {
+      const user = await this.userDAO.getUserByIdentifier({
+        type: PersonIdentifierType.LOCAL,
+        value: userName,
+      })
+      if (!user?.person) {
+        throw new Error(`User with username ${userName} not found`)
+      }
+
+      await this.documentDAO.updateDocumentTypeByUid(documentUid, documentType)
+
+      await this.actionDAO.createAction({
+        actionType: ActionType.UPDATE,
+        targetType: ActionTargetType.DOCUMENT,
+        targetUid: documentUid,
+        path: 'documentType',
+        parameters: { value: documentType },
+        personUid: user.person.uid,
+      })
+    } catch (error) {
+      const message = 'Error updating document type'
       console.error(message, error)
       throw new Error(message)
     }

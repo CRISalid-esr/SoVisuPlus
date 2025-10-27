@@ -1,4 +1,4 @@
-import { Trans } from '@lingui/macro'
+import { Trans } from '@lingui/react/macro'
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
 import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material'
 import { useTheme } from '@mui/material/styles'

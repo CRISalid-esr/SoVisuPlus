@@ -7,7 +7,7 @@ export function startChangePoller(connection: AmqpConnection): void {
 
   const pollLoop = async () => {
     try {
-      await dispatcher.dispatchActions()
+      await dispatcher.dispatchUndispatchedActions()
     } catch (err) {
       console.error('❌ Error dispatching DB changes:', err)
     } finally {

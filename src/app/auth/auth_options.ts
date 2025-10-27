@@ -1,4 +1,10 @@
-import { Account, AuthOptions, Profile, User as NextAuthUser } from 'next-auth'
+import {
+  Account,
+  AuthOptions,
+  DefaultSession,
+  Profile,
+  User as NextAuthUser,
+} from 'next-auth'
 import KeycloakProvider, { KeycloakProfile } from 'next-auth/providers/keycloak'
 import { UserService } from '@/lib/services/UserService'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
@@ -7,15 +13,45 @@ import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { JWT } from 'next-auth/jwt'
 import { Session } from '@auth/core/types'
+import { userToAuthzContext } from '@/app/auth/ability'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { AuthzContext } from '@/types/authz'
 
 declare module '@auth/core/types' {
   interface User {
     username?: string
     orcid?: string
+    userId?: number
+    personUid?: string | null
+    authz?: AuthzContext
+  }
+}
+
+declare module 'next-auth' {
+  interface Session {
+    user: DefaultSession['user'] & {
+      id?: string
+      username?: string
+      orcid?: string
+      userId?: number
+      personUid?: string | null
+      authz?: AuthzContext
+    }
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    username?: string
+    orcid?: string
+    userId?: number
+    personUid?: string | null
+    authz?: AuthzContext
   }
 }
 
 const authOptions: AuthOptions = {
+  debug: true,
   providers: [
     KeycloakProvider({
       clientId: process.env.KEYCLOAK_CLIENT_ID,
@@ -60,22 +96,48 @@ const authOptions: AuthOptions = {
       user?: NextAuthUser
       profile?: Profile
     }) {
+      console.info('jwt callback', token, account, user, profile)
       if (profile) {
         token.username = (profile as KeycloakProfile)?.preferred_username
         token.email = profile?.email
         token.orcid = (profile as KeycloakProfile)?.orcid
       }
       if (account && user) {
-        token.accessToken = account.access_token
         token.id = user.id
+      }
+      const userDAO = new UserDAO()
+
+      const identifier = token.username
+        ? { type: PersonIdentifierType.LOCAL, value: String(token.username) }
+        : token.orcid
+          ? { type: PersonIdentifierType.ORCID, value: String(token.orcid) }
+          : null
+      console.info('resolving user for identifier', identifier)
+
+      if (identifier) {
+        try {
+          const domainUser = await userDAO.getUserByIdentifier(identifier)
+          console.info('resolved domain user', domainUser)
+          if (domainUser) {
+            token.authz = userToAuthzContext(domainUser, String(token.id ?? ''))
+            console.info('enriched token with authz', token.authz)
+          }
+        } catch (e) {
+          console.warn('[auth/jwt] failed to enrich token with authz:', e)
+        }
       }
       return token
     },
     async session({ session, token }: { session: Session; token: JWT }) {
+      console.info('session callback', session, token)
       if (token && session.user) {
+        console.info('enriching session user from token')
         session.user.id = token.id as string
         session.user.username = token.username as string
         session.user.orcid = token.orcid as string
+        session.user.userId = token.userId
+        session.user.personUid = token.personUid ?? null
+        session.user.authz = token.authz
       }
       return session
     },

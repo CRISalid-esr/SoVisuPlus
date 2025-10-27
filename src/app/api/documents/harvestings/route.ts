@@ -5,6 +5,9 @@ import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
+import { PersonDAO } from '@/lib/daos/PersonDAO'
 
 export async function POST(request: Request) {
   const session = (await getServerSession(authOptions)) as Session & {
@@ -30,6 +33,20 @@ export async function POST(request: Request) {
 
     if (!user?.person?.uid) {
       return NextResponse.json({ error: 'Unknown user' }, { status: 403 })
+    }
+    const personDAO = new PersonDAO()
+    const targetPerson = await personDAO.fetchPersonByUid(personUid)
+    if (!targetPerson) {
+      return NextResponse.json(
+        { error: 'Unknown target person' },
+        { status: 404 },
+      )
+    }
+
+    const ability = abilityFromAuthzContext(session?.user.authz)
+    const canFetch = ability.can(PermissionAction.fetch_documents, targetPerson)
+    if (!canFetch) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const actionDAO = new ActionDAO()

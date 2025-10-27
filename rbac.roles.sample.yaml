@@ -7,11 +7,11 @@ roles:
         subject: all
 
   - name: document_editor
-    description: Edit document metadata globally
+    description: Edit document metadata
     permissions:
       - action: update
         subject: Document
-        fields: [titles, abstracts, contributors, identifiers]
+        fields: [titles, abstracts, contributors, identifiers, documentType]
 
   - name: document_merger
     description: Merge / unmerge documents and source records
@@ -20,3 +20,8 @@ roles:
         subject: Document
       - action: unmerge
         subject: DocumentRecord
+  - name: document_fetcher
+    description: Fetch documents from external sources
+    permissions:
+      - action: fetch_documents
+        subject: Person
