@@ -3,6 +3,7 @@ import {
   Box,
   Divider,
   Icon,
+  IconButton,
   InputAdornment,
   Link,
   Pagination,
@@ -19,6 +20,7 @@ import {
 import { Vocab } from '@/types/Vocab'
 import Image from 'next/image'
 import { VOCABS } from '@/lib/services/Vocabs'
+import { Trans } from '@lingui/react'
 
 export type SuggestedKeyword = {
   link: string
@@ -153,11 +155,13 @@ function KeywordSearchAutocomplete({
       inputValue={keywordInput}
       loading={loading}
       noOptionsText={
-        fetchError
-          ? 'Unable to fetch suggestions'
-          : keywordInput.length < 3
-            ? 'Please enter at least 3 characters'
-            : 'No options'
+        fetchError ? (
+          <Trans id='document_details_page_keywords_input_options_fetch_error' />
+        ) : keywordInput.length < 3 ? (
+          <Trans id='document_details_page_keywords_input_default' />
+        ) : (
+          <Trans id='document_details_page_keywords_input_options_no_options' />
+        )
       }
       onInputChange={(event, value) => {
         setKeywordInput(value)
@@ -172,13 +176,21 @@ function KeywordSearchAutocomplete({
         <TextField
           {...params}
           error={!!fetchError}
-          helperText={fetchError ? 'Error loading suggestions' : ''}
+          helperText={
+            fetchError ? (
+              <Trans id='document_details_page_keywords_input_fetch_error_label' />
+            ) : (
+              ''
+            )
+          }
           slotProps={{
             input: {
               ...params.InputProps,
               startAdornment: (
                 <InputAdornment position='start'>
-                  <Add />
+                  <IconButton>
+                    <Add />
+                  </IconButton>
                 </InputAdornment>
               ),
             },
