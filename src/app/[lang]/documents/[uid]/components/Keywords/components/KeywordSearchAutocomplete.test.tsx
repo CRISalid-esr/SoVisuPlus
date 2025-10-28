@@ -109,7 +109,9 @@ describe('KeywordSearchAutocomplete Component', () => {
     fireEvent.change(autocomplete, { target: { value: 'dia' } })
     await waitFor(async () => {
       expect(fetchKeywordsMock).toHaveBeenCalledWith('dia')
-      expect(screen.getByText('AAT')).toBeInTheDocument()
+      expect(
+        screen.getByText('AAT - Art & Architecture Thesaurus'),
+      ).toBeInTheDocument()
       expect(screen.getByText('diadems')).toBeInTheDocument()
       expect(screen.getByText('(300046021)')).toBeInTheDocument()
       const link = await screen.findByRole('link')

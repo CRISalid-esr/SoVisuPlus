@@ -219,7 +219,10 @@ function KeywordSearchAutocomplete({
                 height={24}
               />
               <Typography sx={{ marginLeft: '15px', fontWeight: 'bold' }}>
-                {params.group}
+                {params.group +
+                  (group
+                    ? ' - ' + VOCABS[group?.vocab.toUpperCase()].name
+                    : '')}
               </Typography>
             </Box>
             <Box sx={{ marginTop: '10px', marginBottom: '10px' }}>
