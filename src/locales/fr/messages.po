@@ -387,6 +387,11 @@ msgid "profile_affiliations_signature_label"
 msgstr "Ma signature"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:29
+msgid "profile_affiliations_signature_copy_button_label"
+msgstr "Copier"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Mes autorisations"
