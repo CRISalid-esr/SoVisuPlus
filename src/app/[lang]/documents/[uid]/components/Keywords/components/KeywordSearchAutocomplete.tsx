@@ -27,6 +27,7 @@ export type SuggestedKeyword = {
   num: string
   text: string
   vocab: string
+  highlight: string | null
 }
 
 export type SuggestedKeywordsData = {
@@ -48,7 +49,8 @@ async function getData(
       '&offset=' +
       offset +
       '&vocabs=' +
-      vocab,
+      vocab +
+      '&highlight=true',
   )
   if (response.ok) {
     const json: SuggestResponse = SuggestResponseSchema.parse(
@@ -63,7 +65,11 @@ async function getData(
             ? Object.assign(
                 { link: item.iri },
                 { num: Vocab.iriToIdentifier(item.iri, item.scheme) },
-                { text: item.best_label?.text, vocab: item.scheme },
+                {
+                  text: item.best_label?.text,
+                  highlight: item.best_label?.highlight,
+                  vocab: item.scheme,
+                },
               )
             : undefined,
         )
@@ -149,7 +155,9 @@ function KeywordSearchAutocomplete({
       clearOnBlur={false}
       clearOnEscape
       filterOptions={(x) => x}
-      getOptionLabel={(option) => option.text}
+      getOptionLabel={(option) =>
+        option.highlight ? option.highlight : option.text
+      }
       groupBy={(option) => option.vocab}
       includeInputInList
       inputValue={keywordInput}
@@ -243,7 +251,11 @@ function KeywordSearchAutocomplete({
         return (
           <Box key={key + option.num} component={'li'} {...optionProps}>
             <Icon />
-            <Typography>{ownerState.getOptionLabel(option)}</Typography>
+            <Typography
+              dangerouslySetInnerHTML={{
+                __html: ownerState.getOptionLabel(option),
+              }}
+            />
             <Typography sx={{ whiteSpace: 'pre' }}> ({option.num}) </Typography>
             <Tooltip title={option.link}>
               <Link
