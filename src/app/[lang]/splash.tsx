@@ -90,9 +90,7 @@ export default function Splash() {
               onClick={() => signIn('keycloak')}
               fullWidth
               variant='contained'
-              sx={{
-                maxWidth: '30rem',
-              }}
+              sx={{ maxWidth: '30rem' }}
             >
               {t`splash.login`}
             </Button>
@@ -102,10 +100,7 @@ export default function Splash() {
             <Box
               display='flex'
               flexDirection={{ xs: 'column', lg: 'row' }}
-              justifyContent={{
-                xs: 'flex-end',
-                lg: 'flex-start',
-              }}
+              justifyContent={{ xs: 'flex-end', lg: 'flex-start' }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -159,10 +154,7 @@ export default function Splash() {
           <img
             src='/theme/splash_background.svg'
             alt='SoVisuPlus splash screen background'
-            style={{
-              position: 'absolute',
-              zIndex: -1,
-            }}
+            style={{ position: 'absolute', zIndex: -1 }}
           />
 
           <Box
@@ -170,6 +162,8 @@ export default function Splash() {
             display='flex'
             flexDirection='column'
             justifyContent='center'
+            bgcolor={`rgb(from ${theme.palette.primary.main} r g b / 75%)`}
+            p={2}
           >
             <Typography component='h1' variant='displayLarge' mb={5}>
               {locales?.header}
