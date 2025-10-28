@@ -76,6 +76,7 @@ export default function Splash() {
             </Box>
 
             <Typography
+              id='splash-preview-legend'
               component='p'
               variant='headingSmall'
               mb={7}
@@ -87,6 +88,7 @@ export default function Splash() {
             </Typography>
 
             <Button
+              id='splash-login-button'
               onClick={() => signIn('keycloak')}
               fullWidth
               variant='contained'
@@ -111,6 +113,7 @@ export default function Splash() {
             </Box>
 
             <Box
+              id='splash-links'
               display='flex'
               gap={2.25}
               alignItems={{ xs: 'flex-end', lg: 'center' }}
@@ -137,6 +140,7 @@ export default function Splash() {
 
       <Box flex={1} display={{ xs: 'none', md: 'flex' }}>
         <Box
+          id='splash-background'
           display='flex'
           flex={1}
           alignItems='center'
@@ -158,6 +162,7 @@ export default function Splash() {
           />
 
           <Box
+            id='splash-description'
             maxWidth='60ch'
             display='flex'
             flexDirection='column'
