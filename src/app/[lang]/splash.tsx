@@ -31,6 +31,8 @@ export default function Splash() {
 
   return (
     <>
+      <link href='/theme/splash_stylesheet.css' rel='stylesheet' />
+
       <Box flex={1} display='flex'>
         <Box
           flex={1}
