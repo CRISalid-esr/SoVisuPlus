@@ -31,6 +31,8 @@ export default function Splash() {
 
   return (
     <>
+      {/* This is so that the custom style sheet is loaded at runtime. */}
+      {/* eslint-disable-next-line @next/next/no-css-tags */}
       <link href='/theme/splash_stylesheet.css' rel='stylesheet' />
 
       <Box flex={1} display='flex'>
