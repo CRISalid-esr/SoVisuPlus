@@ -89,6 +89,16 @@ msgid "documents_page_merge_selected_documents_button"
 msgstr ""
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:721
+msgid "documents_page_refresh_list_alert_own_perspective"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:724
+msgid "documents_page_refresh_list_alert_other_perspective"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/components/HalStatusCell.test.tsx:130
 #: src/app/[lang]/documents/components/HalStatusCell.test.tsx:193
 msgid "documents_page_hal_status_in_collection"
@@ -105,18 +115,13 @@ msgid "documents_page_hal_status_outside_hal"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:721
-msgid "documents_page_refresh_list_alert_own_perspective"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:724
-msgid "documents_page_refresh_list_alert_other_perspective"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
 msgid "documents_page_synchronize_modal_synchronize_button"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:145
+msgid "documents_page_refresh_document_alert"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -127,11 +132,6 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:174
 msgid "document_details_keywords_tab"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:145
-msgid "documents_page_refresh_document_alert"
 msgstr ""
 
 #. js-lingui-explicit-id
