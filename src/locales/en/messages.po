@@ -120,11 +120,6 @@ msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:145
-msgid "documents_page_refresh_document_alert"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:170
 msgid "document_details_bibliographic_information_tab"
 msgstr ""
@@ -132,6 +127,11 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:174
 msgid "document_details_keywords_tab"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:145
+msgid "documents_page_refresh_document_alert"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -381,13 +381,14 @@ msgid "orcid_identifier_no_orcid_provided"
 msgstr "No orcid identifier provided"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:82
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:23
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:88
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
 msgid "profile_affiliations_signature_label"
 msgstr "My signature"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:55
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:109
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:56
 msgid "profile_affiliations_signature_copied_message_confirmation"
 msgstr "Signature added to clipboard."
 
