@@ -71,7 +71,7 @@ export default function OrcidControl() {
         elevation={1}
         sx={{
           display: 'flex',
-          alignItems: 'end',
+          alignItems: 'center',
           gap: 2,
           p: 2,
           width: '100%',
@@ -81,7 +81,7 @@ export default function OrcidControl() {
         <Typography
           variant='subtitle1'
           fontWeight='bold'
-          sx={{ alignSelf: 'normal' }}
+          sx={{ alignSelf: 'center' }}
         >
           ORCID
         </Typography>

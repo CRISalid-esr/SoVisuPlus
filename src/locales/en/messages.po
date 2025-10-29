@@ -387,6 +387,11 @@ msgid "profile_affiliations_signature_label"
 msgstr "My signature"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:55
+msgid "profile_affiliations_signature_copied_message_confirmation"
+msgstr "Signature added to clipboard."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
 #: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
 msgid "profile_affiliations_laboratories_label"
