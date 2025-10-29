@@ -21,12 +21,14 @@ import { Vocab } from '@/types/Vocab'
 import Image from 'next/image'
 import { VOCABS } from '@/lib/services/Vocabs'
 import { Trans } from '@lingui/react'
+import DOMPurify from 'dompurify'
 
 export type SuggestedKeyword = {
   link: string
   num: string
   text: string
   vocab: string
+  highlight: string | null
 }
 
 export type SuggestedKeywordsData = {
@@ -48,7 +50,8 @@ async function getData(
       '&offset=' +
       offset +
       '&vocabs=' +
-      vocab,
+      vocab +
+      '&highlight=true',
   )
   if (response.ok) {
     const json: SuggestResponse = SuggestResponseSchema.parse(
@@ -63,7 +66,11 @@ async function getData(
             ? Object.assign(
                 { link: item.iri },
                 { num: Vocab.iriToIdentifier(item.iri, item.scheme) },
-                { text: item.best_label?.text, vocab: item.scheme },
+                {
+                  text: item.best_label?.text,
+                  highlight: item.best_label?.highlight,
+                  vocab: item.scheme,
+                },
               )
             : undefined,
         )
@@ -149,7 +156,9 @@ function KeywordSearchAutocomplete({
       clearOnBlur={false}
       clearOnEscape
       filterOptions={(x) => x}
-      getOptionLabel={(option) => option.text}
+      getOptionLabel={(option) =>
+        option.highlight ? option.highlight : option.text
+      }
       groupBy={(option) => option.vocab}
       includeInputInList
       inputValue={keywordInput}
@@ -246,7 +255,13 @@ function KeywordSearchAutocomplete({
         return (
           <Box key={key + option.num} component={'li'} {...optionProps}>
             <Icon />
-            <Typography>{ownerState.getOptionLabel(option)}</Typography>
+            <Typography
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(ownerState.getOptionLabel(option), {
+                  USE_PROFILES: { html: true },
+                }),
+              }}
+            />
             <Typography sx={{ whiteSpace: 'pre' }}> ({option.num}) </Typography>
             <Tooltip title={option.link}>
               <Link

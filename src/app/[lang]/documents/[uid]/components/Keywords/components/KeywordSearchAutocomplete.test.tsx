@@ -91,6 +91,7 @@ describe('KeywordSearchAutocomplete Component', () => {
             num: '300046021',
             text: 'diadems',
             vocab: 'AAT',
+            highlight: '<em> diadems </em>',
           },
         ],
         total: 1,
@@ -109,10 +110,10 @@ describe('KeywordSearchAutocomplete Component', () => {
     fireEvent.change(autocomplete, { target: { value: 'dia' } })
     await waitFor(async () => {
       expect(fetchKeywordsMock).toHaveBeenCalledWith('dia')
-      expect(
-        screen.getByText('AAT - Art & Architecture Thesaurus'),
-      ).toBeInTheDocument()
-      expect(screen.getByText('diadems')).toBeInTheDocument()
+      expect(screen.getByText('AAT - Art & Architecture Thesaurus')).toBeInTheDocument()
+      const emElement = screen.getByText('diadems')
+      expect(emElement).toBeInTheDocument()
+      expect(emElement.tagName).toBe('EM')
       expect(screen.getByText('(300046021)')).toBeInTheDocument()
       const link = await screen.findByRole('link')
       expect(link).toBeInTheDocument()

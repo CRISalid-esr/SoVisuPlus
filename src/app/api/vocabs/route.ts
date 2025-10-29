@@ -7,6 +7,7 @@ export const GET = async (req: NextRequest) => {
   const vocabs = urlParams.get('vocabs')?.split(',') || []
   const limit = urlParams.get('limit') || '20'
   const offset = urlParams.get('offset') || '0'
+  const highlight = urlParams.get('highlight') || 'false'
   const display_langs = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES
 
   const limitNumber = parseInt(limit, 10)
@@ -31,7 +32,14 @@ export const GET = async (req: NextRequest) => {
       { error: 'Invalid offset value : must be an integer upper than 0.' },
       { status: 400 },
     )
+  } else if (highlight !== 'false' && highlight !== 'true') {
+    return NextResponse.json(
+      { error: 'Invalid highlight value : must be a boolean.' },
+      { status: 400 },
+    )
   }
+
+  const highlightBoolean = highlight === 'true'
 
   const vocabsSearchService = new VocabSearchService()
 
@@ -41,6 +49,7 @@ export const GET = async (req: NextRequest) => {
       vocabs,
       limitNumber,
       offsetNumber,
+      highlightBoolean,
       display_langs,
     )
     return NextResponse.json(response)
