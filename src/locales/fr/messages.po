@@ -105,11 +105,6 @@ msgid "documents_page_hal_status_outside_hal"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
-msgid "documents_page_synchronize_modal_synchronize_button"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:721
 msgid "documents_page_refresh_list_alert_own_perspective"
 msgstr "La liste de vos publications a changé"
@@ -120,6 +115,16 @@ msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr "La liste des publications de {name} a changé"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
+msgid "documents_page_synchronize_modal_synchronize_button"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:145
+msgid "documents_page_refresh_document_alert"
+msgstr "Les informations relatives à cette publication ont changé"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:170
 msgid "document_details_bibliographic_information_tab"
 msgstr ""
@@ -128,11 +133,6 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/page.test.tsx:174
 msgid "document_details_keywords_tab"
 msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:145
-msgid "documents_page_refresh_document_alert"
-msgstr "Les informations relatives à cette publication ont changé"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
@@ -174,6 +174,33 @@ msgid "concept_chip_action_delete"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:167
+msgid "document_details_page_keywords_input_options_loading"
+msgstr "Chargement des données..."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:171
+msgid "document_details_page_keywords_input_options_fetch_error"
+msgstr "Chargement des données impossible"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:31
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:173
+msgid "document_details_page_keywords_input_default"
+msgstr "Veuillez entrer au minimum 3 caractères"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:52
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:175
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "Aucune option"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:193
+msgid "document_details_page_keywords_input_fetch_error_label"
+msgstr "Erreur lors du chargement des données"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:257
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:266
 msgid "document_details_page_source_tab_select_action_label"
@@ -198,33 +225,6 @@ msgstr "Références bibliographiques sources"
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
 msgid "document_details_page_domains_tab_card_title"
 msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:158
-msgid "document_details_page_keywords_input_options_loading"
-msgstr "Chargement des données..."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:162
-msgid "document_details_page_keywords_input_options_fetch_error"
-msgstr "Chargement des données impossible"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:31
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:164
-msgid "document_details_page_keywords_input_default"
-msgstr "Veuillez entrer au minimum 3 caractères"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:52
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:166
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "Aucune option"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:184
-msgid "document_details_page_keywords_input_fetch_error_label"
-msgstr "Erreur lors du chargement des données"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
