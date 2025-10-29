@@ -21,6 +21,7 @@ import { Vocab } from '@/types/Vocab'
 import Image from 'next/image'
 import { VOCABS } from '@/lib/services/Vocabs'
 import { Trans } from '@lingui/react'
+import DOMPurify from 'dompurify'
 
 export type SuggestedKeyword = {
   link: string
@@ -253,7 +254,9 @@ function KeywordSearchAutocomplete({
             <Icon />
             <Typography
               dangerouslySetInnerHTML={{
-                __html: ownerState.getOptionLabel(option),
+                __html: DOMPurify.sanitize(ownerState.getOptionLabel(option), {
+                  USE_PROFILES: { html: true },
+                }),
               }}
             />
             <Typography sx={{ whiteSpace: 'pre' }}> ({option.num}) </Typography>
