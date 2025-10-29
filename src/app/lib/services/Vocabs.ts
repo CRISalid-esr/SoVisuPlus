@@ -1,4 +1,7 @@
-export const VOCABS: Record<string, { iriPatterns: [RegExp]; icon: string }> = {
+export const VOCABS: Record<
+  string,
+  { iriPatterns: [RegExp]; icon: string; name: string }
+> = {
   ['AAT']: {
     iriPatterns: [
       RegExp(
@@ -6,6 +9,7 @@ export const VOCABS: Record<string, { iriPatterns: [RegExp]; icon: string }> = {
       ),
     ],
     icon: '/icons/aat-vocab.gif',
+    name: 'Art & Architecture Thesaurus',
   },
   ['JEL']: {
     iriPatterns: [
@@ -14,11 +18,13 @@ export const VOCABS: Record<string, { iriPatterns: [RegExp]; icon: string }> = {
       ),
     ],
     icon: '/icons/jel-vocab-old.svg',
+    name: 'Journal of Economic Literature',
   },
   ['ACM']: {
     iriPatterns: [
       RegExp('^https://dl\\.acm\\.org(?:/(?<identifier>[0-9.]+))?(?:/.*)*$'),
     ],
     icon: '/icons/acm-vocab.svg',
+    name: 'Association for Computing Machinery',
   },
 }
