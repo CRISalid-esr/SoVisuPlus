@@ -67,11 +67,11 @@ export class Vocab {
       )
       if (iriPattern) {
         const identifier = iri.match(iriPattern)?.groups?.identifier ?? ''
-        return identifier.replaceAll('.', ' - ')
+        return identifier.replace(/\./g, ' - ')
       } else {
         const identifier = iri.match(RegExp('[A-Z0-9]+$'))
         return identifier
-          ? identifier[identifier.length - 1].replaceAll('.', ' - ')
+          ? identifier[identifier.length - 1].replace(/\./g, ' - ')
           : ''
       }
     } else {

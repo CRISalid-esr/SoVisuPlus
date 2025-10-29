@@ -35,7 +35,7 @@ describe('Vocab type test', () => {
     const v2 = 'acm'
     const iri2 = 'https://dl.acm.org/10010583.10010633.10010650'
     const match2 = iri2.match(VOCABS[v2.toUpperCase()].iriPatterns[0])
-    const expected2 = match2?.groups?.identifier.replaceAll('.', ' - ') ?? ''
+    const expected2 = match2?.groups?.identifier.replace(/\./g, ' - ') ?? ''
 
     expect(Vocab.iriToIdentifier(iri1, v1)).toEqual(expected1)
     expect(Vocab.iriToIdentifier(iri2, v2)).toEqual(expected2)
