@@ -387,9 +387,9 @@ msgid "profile_affiliations_signature_label"
 msgstr "Ma signature"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:29
-msgid "profile_affiliations_signature_copy_button_label"
-msgstr "Copier"
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:55
+msgid "profile_affiliations_signature_copied_message_confirmation"
+msgstr "Signature ajoutée au presse-papier."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28

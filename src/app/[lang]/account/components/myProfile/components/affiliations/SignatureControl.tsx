@@ -52,7 +52,11 @@ export default function SignatureControl() {
       <Snackbar
         open={open}
         autoHideDuration={3000}
-        message={'Signature copied!'}
+        message={
+          <Trans
+            id={'profile_affiliations_signature_copied_message_confirmation'}
+          />
+        }
         onClose={handleClose}
       />
     </Paper>
