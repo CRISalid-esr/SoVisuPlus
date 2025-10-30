@@ -7,6 +7,8 @@ import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 import { DocumentType } from '@/types/Document'
+import { Concept, ConceptJson } from '@/types/Concept'
+import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 
 type ColumnFilter =
   | { id: 'date'; value: [string | null, string | null] }
@@ -39,12 +41,14 @@ export class DocumentService {
   private personDAO: PersonDAO
   private actionDAO: ActionDAO
   private userDAO: UserDAO
+  private conceptDAO: ConceptDAO
 
   constructor() {
     this.documentDAO = new DocumentDAO()
     this.personDAO = new PersonDAO()
     this.actionDAO = new ActionDAO()
     this.userDAO = new UserDAO()
+    this.conceptDAO = new ConceptDAO()
   }
 
   async selectContributorUids(
@@ -191,6 +195,41 @@ export class DocumentService {
       })
     } catch (error) {
       const message = 'Error deleting concepts from document'
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
+
+  async addConceptsToDocument(
+    documentUid: string,
+    concepts: ConceptJson[],
+    userName: string,
+  ): Promise<void> {
+    try {
+      const user = await this.userDAO.getUserByIdentifier({
+        type: PersonIdentifierType.LOCAL,
+        value: userName,
+      })
+      if (!user?.person) {
+        throw new Error(`User with username ${userName} not found`)
+      }
+      await Promise.all(
+        concepts.map((concept) =>
+          this.conceptDAO.createOrUpdateConcept(Concept.fromObject(concept)),
+        ),
+      )
+      await this.documentDAO.addConceptsToDocument(documentUid, concepts)
+
+      await this.actionDAO.createAction({
+        actionType: ActionType.ADD,
+        targetType: ActionTargetType.DOCUMENT,
+        targetUid: documentUid,
+        path: 'subjects',
+        parameters: JSON.stringify(concepts),
+        personUid: user.person?.uid,
+      })
+    } catch (error) {
+      const message = 'Error adding concepts from document'
       console.error(message, error)
       throw new Error(message)
     }

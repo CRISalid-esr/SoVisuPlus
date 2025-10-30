@@ -21,9 +21,12 @@ import { Vocab } from '@/types/Vocab'
 import Image from 'next/image'
 import { VOCABS } from '@/lib/services/Vocabs'
 import { Trans } from '@lingui/react'
+import { Concept } from '@/types/Concept'
+import { Literal } from '@/types/Literal'
+import useStore from '@/stores/global_store'
 
 export type SuggestedKeyword = {
-  link: string
+  concept: Concept
   num: string
   text: string
   vocab: string
@@ -61,9 +64,30 @@ async function getData(
         .map((item) =>
           item.best_label
             ? Object.assign(
-                { link: item.iri },
                 { num: Vocab.iriToIdentifier(item.iri, item.scheme) },
                 { text: item.best_label?.text, vocab: item.scheme },
+                {
+                  concept: new Concept(
+                    item.iri,
+                    item.pref
+                      ? item.pref.map((label) =>
+                          Literal.fromObject({
+                            value: label.text,
+                            language: label.lang,
+                          }),
+                        )
+                      : [],
+                    item.alt
+                      ? item.alt.map((label) =>
+                          Literal.fromObject({
+                            value: label.text,
+                            language: label.lang,
+                          }),
+                        )
+                      : [],
+                    item.iri,
+                  ),
+                },
               )
             : undefined,
         )
@@ -101,6 +125,8 @@ function KeywordSearchAutocomplete({
   const [keywords, setKeywords] = useState<SuggestedKeywordsData[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [fetchError, setFetchError] = useState<Error | null>(null)
+  const [add, setAdd] = useState<boolean>(false)
+  const [selectedConcept, setSelectedConcept] = useState<SuggestedKeyword>()
 
   const updateKeywords = async (vocab: string, page: number) => {
     const pageItems = await getData(keywordInput, vocab, (page - 1) * 5)
@@ -111,6 +137,14 @@ function KeywordSearchAutocomplete({
           : keyword,
       ),
     )
+  }
+
+  const addConcepts = useStore((state) => state.document.addConcepts)
+
+  const onAddConcept = async () => {
+    if (selectedConcept?.concept) {
+      await addConcepts([selectedConcept.concept])
+    }
   }
 
   useEffect(() => {
@@ -166,7 +200,18 @@ function KeywordSearchAutocomplete({
           <Trans id='document_details_page_keywords_input_options_no_options' />
         )
       }
+      onChange={(event, value) => {
+        if (value) {
+          setAdd(true)
+          setSelectedConcept(value)
+        } else {
+          setAdd(false)
+          setSelectedConcept(undefined)
+        }
+      }}
       onInputChange={(event, value) => {
+        setSelectedConcept(undefined)
+        setAdd(false)
         setKeywordInput(value)
       }}
       options={keywords
@@ -191,7 +236,7 @@ function KeywordSearchAutocomplete({
               ...params.InputProps,
               startAdornment: (
                 <InputAdornment position='start'>
-                  <IconButton>
+                  <IconButton disabled={!add} onClick={onAddConcept}>
                     <Add />
                   </IconButton>
                 </InputAdornment>
@@ -245,9 +290,9 @@ function KeywordSearchAutocomplete({
             <Icon />
             <Typography>{ownerState.getOptionLabel(option)}</Typography>
             <Typography sx={{ whiteSpace: 'pre' }}> ({option.num}) </Typography>
-            <Tooltip title={option.link}>
+            <Tooltip title={option.concept.uid}>
               <Link
-                href={option.link}
+                href={option.concept.uid}
                 target='_blank'
                 rel='noopener noreferrer'
                 sx={{ display: 'inherit' }}

@@ -34,6 +34,15 @@ class Concept {
     public uri: string | null = null,
   ) {}
 
+  static toJson(concept: Concept): ConceptJson {
+    return {
+      uid: concept.uid,
+      uri: concept.uri,
+      prefLabels: concept.prefLabels,
+      altLabels: concept.prefLabels,
+    }
+  }
+
   static fromObject(concept: ConceptJson): Concept {
     const altLabels = concept.altLabels.map(Literal.fromObject)
     const prefLabels = concept.prefLabels.map(Literal.fromObject)

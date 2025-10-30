@@ -5,6 +5,7 @@ import KeywordSearchAutocomplete, {
 } from '@/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
+import { Concept } from '@/types/Concept'
 
 describe('KeywordSearchAutocomplete Component', () => {
   beforeEach(() => {
@@ -87,7 +88,12 @@ describe('KeywordSearchAutocomplete Component', () => {
       {
         items: [
           {
-            link: 'http://vocab.getty.edu/aat/300046021',
+            concept: Concept.fromObject({
+              uid: 'http://vocab.getty.edu/aat/300046021',
+              uri: 'http://vocab.getty.edu/aat/300046021',
+              prefLabels: [],
+              altLabels: [],
+            }),
             num: '300046021',
             text: 'diadems',
             vocab: 'AAT',
