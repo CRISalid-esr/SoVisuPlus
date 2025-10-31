@@ -1,10 +1,18 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import KeywordSearchAutocomplete, {
   SuggestedKeyword,
   SuggestedKeywordsData,
 } from '@/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
+import { Concept } from '@/types/Concept'
 
 describe('KeywordSearchAutocomplete Component', () => {
   beforeEach(() => {
@@ -35,7 +43,7 @@ describe('KeywordSearchAutocomplete Component', () => {
   })
 
   it("Check that the 'No options' message is displayed when fetch return no data", async () => {
-    const mockReturn: SuggestedKeyword[] = []
+    const mockReturn: SuggestedKeywordsData[] = []
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
     render(
       <I18nProvider i18n={i18n}>
@@ -87,7 +95,12 @@ describe('KeywordSearchAutocomplete Component', () => {
       {
         items: [
           {
-            link: 'http://vocab.getty.edu/aat/300046021',
+            concept: Concept.fromObject({
+              uid: 'http://vocab.getty.edu/aat/300046021',
+              uri: 'http://vocab.getty.edu/aat/300046021',
+              prefLabels: [],
+              altLabels: [],
+            }),
             num: '300046021',
             text: 'diadems',
             vocab: 'AAT',
@@ -179,5 +192,52 @@ describe('KeywordSearchAutocomplete Component', () => {
     await waitFor(() => {
       expect(fetchKeywordsMock).toHaveBeenCalledTimes(2)
     })
+  })
+
+  it('Check that the adding button behave as expected', async () => {
+    const mockReturn: SuggestedKeywordsData[] = [
+      {
+        items: [
+          {
+            concept: Concept.fromObject({
+              uid: 'http://vocab.getty.edu/aat/300046021',
+              uri: 'http://vocab.getty.edu/aat/300046021',
+              prefLabels: [],
+              altLabels: [],
+            }),
+            num: '300046021',
+            text: 'abcd',
+            vocab: 'AAT',
+            highlight: '<em> diadems </em>',
+          },
+        ],
+        total: 1,
+        vocab: 'AAT',
+      },
+    ]
+    const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
+    render(
+      <I18nProvider i18n={i18n}>
+        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+      </I18nProvider>,
+    )
+    const autocomplete = screen.getByRole('combobox')
+    const addingButton = screen.getByRole('button', { name: /adding_button/i })
+    expect(autocomplete).toBeInTheDocument()
+    expect(addingButton).toBeInTheDocument()
+    expect(addingButton).toBeDisabled()
+
+    fireEvent.change(autocomplete, { target: { value: 'a' } })
+    expect(addingButton).toBeDisabled()
+
+    fireEvent.change(autocomplete, { target: { value: 'abc' } })
+    expect(addingButton).toBeDisabled()
+
+    const listbox = await screen.findByRole('listbox')
+    const options = within(listbox).getAllByRole('option')
+    expect(options.length).toBeGreaterThan(0)
+    fireEvent.click(options[0])
+
+    expect(addingButton).toBeEnabled()
   })
 })

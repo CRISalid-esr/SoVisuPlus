@@ -1,6 +1,6 @@
 import { CustomCard } from '@/components/Card'
 import { Trans } from '@lingui/react'
-import { Box, Button, CardContent, Typography } from '@mui/material'
+import { Box, CardContent, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useStore from '@/stores/global_store'
 import { useEffect, useMemo } from 'react'
@@ -61,9 +61,6 @@ function Keywords() {
           >
             <Trans id='document_details_page_keywords_tab_card_title' />
           </Typography>
-          <Button variant='contained' color='primary'>
-            <Trans id='document_details_page_keywords_tab_card_validate_button' />
-          </Button>
         </Box>
       }
     >

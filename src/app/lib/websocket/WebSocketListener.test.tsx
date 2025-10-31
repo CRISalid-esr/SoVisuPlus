@@ -120,6 +120,7 @@ describe('WebSocketListener', () => {
         countDocuments: jest.fn(),
         fetchDocumentById: jest.fn(),
         removeConcepts: jest.fn(),
+        addConcepts: jest.fn(),
         mergeDocuments: jest.fn(),
         updateDocumentType: jest.fn(),
         error: null,
