@@ -43,7 +43,7 @@ describe('KeywordSearchAutocomplete Component', () => {
   })
 
   it("Check that the 'No options' message is displayed when fetch return no data", async () => {
-    const mockReturn: SuggestedKeywordData[] = []
+    const mockReturn: SuggestedKeywordsData[] = []
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
     render(
       <I18nProvider i18n={i18n}>
