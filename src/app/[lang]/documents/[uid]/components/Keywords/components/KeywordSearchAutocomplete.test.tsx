@@ -43,7 +43,7 @@ describe('KeywordSearchAutocomplete Component', () => {
   })
 
   it("Check that the 'No options' message is displayed when fetch return no data", async () => {
-    const mockReturn: SuggestedKeyword[] = []
+    const mockReturn: SuggestedKeywordData[] = []
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
     render(
       <I18nProvider i18n={i18n}>
@@ -208,6 +208,7 @@ describe('KeywordSearchAutocomplete Component', () => {
             num: '300046021',
             text: 'abcd',
             vocab: 'AAT',
+            highlight: '<em> diadems </em>',
           },
         ],
         total: 1,
