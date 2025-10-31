@@ -37,6 +37,7 @@ export class VocabSearchClient {
     vocabs: Vocab[],
     limit: number,
     offset: number,
+    highlight: boolean,
     display_langs: string,
   ): Promise<SuggestResponse> {
     const vocabsUrl = process.env.VOCABS_URL!
@@ -46,7 +47,7 @@ export class VocabSearchClient {
       limit: limit.toString(),
       offset: offset.toString(),
       display_langs: display_langs,
-      highlight: 'true',
+      highlight: highlight.toString(),
     })
     const response = await fetch(vocabsUrl + '?' + params, {
       method: 'GET',

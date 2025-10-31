@@ -24,12 +24,14 @@ import { Trans } from '@lingui/react'
 import { Concept } from '@/types/Concept'
 import { Literal } from '@/types/Literal'
 import useStore from '@/stores/global_store'
+import DOMPurify from 'dompurify'
 
 export type SuggestedKeyword = {
   concept: Concept
   num: string
   text: string
   vocab: string
+  highlight: string | null
 }
 
 export type SuggestedKeywordsData = {
@@ -51,7 +53,8 @@ async function getData(
       '&offset=' +
       offset +
       '&vocabs=' +
-      vocab,
+      vocab +
+      '&highlight=true',
   )
   if (response.ok) {
     const json: SuggestResponse = SuggestResponseSchema.parse(
@@ -65,7 +68,7 @@ async function getData(
           item.best_label
             ? Object.assign(
                 { num: Vocab.iriToIdentifier(item.iri, item.scheme) },
-                { text: item.best_label?.text, vocab: item.scheme },
+                { text: item.best_label?.text, highlight: item.best_label?.highlight, vocab: item.scheme },
                 {
                   concept: new Concept(
                     item.iri,
@@ -86,7 +89,7 @@ async function getData(
                         )
                       : [],
                     item.iri,
-                  ),
+                  )
                 },
               )
             : undefined,
@@ -183,7 +186,9 @@ function KeywordSearchAutocomplete({
       clearOnBlur={false}
       clearOnEscape
       filterOptions={(x) => x}
-      getOptionLabel={(option) => option.text}
+      getOptionLabel={(option) =>
+        option.highlight ? option.highlight : option.text
+      }
       groupBy={(option) => option.vocab}
       includeInputInList
       inputValue={keywordInput}
@@ -268,7 +273,10 @@ function KeywordSearchAutocomplete({
                 height={24}
               />
               <Typography sx={{ marginLeft: '15px', fontWeight: 'bold' }}>
-                {params.group}
+                {params.group +
+                  (group
+                    ? ' - ' + VOCABS[group?.vocab.toUpperCase()].name
+                    : '')}
               </Typography>
             </Box>
             <Box sx={{ marginTop: '10px', marginBottom: '10px' }}>
@@ -292,7 +300,13 @@ function KeywordSearchAutocomplete({
         return (
           <Box key={key + option.num} component={'li'} {...optionProps}>
             <Icon />
-            <Typography>{ownerState.getOptionLabel(option)}</Typography>
+            <Typography
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(ownerState.getOptionLabel(option), {
+                  USE_PROFILES: { html: true },
+                }),
+              }}
+            />
             <Typography sx={{ whiteSpace: 'pre' }}> ({option.num}) </Typography>
             <Tooltip title={option.concept.uid}>
               <Link
