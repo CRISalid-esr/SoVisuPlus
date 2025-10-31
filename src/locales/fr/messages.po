@@ -120,6 +120,11 @@ msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:145
+msgid "documents_page_refresh_document_alert"
+msgstr "Les informations relatives à cette publication ont changé"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:170
 msgid "document_details_bibliographic_information_tab"
 msgstr ""
@@ -130,11 +135,6 @@ msgid "document_details_keywords_tab"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:145
-msgid "documents_page_refresh_document_alert"
-msgstr "Les informations relatives à cette publication ont changé"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
 msgid "document_details_page_back_to_my_publications"
 msgstr ""
@@ -143,11 +143,6 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:62
 msgid "document_details_page_keywords_tab_card_title"
 msgstr "Mots-clés"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:65
-msgid "document_details_page_keywords_tab_card_validate_button"
-msgstr "Valider"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
@@ -200,29 +195,29 @@ msgid "document_details_page_domains_tab_card_title"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:31
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:173
-msgid "document_details_page_keywords_input_default"
-msgstr "Veuillez entrer au minimum 3 caractères"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:52
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:175
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "Aucune option"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:167
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:197
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "Chargement des données..."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:171
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:201
 msgid "document_details_page_keywords_input_options_fetch_error"
 msgstr "Chargement des données impossible"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:193
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:39
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:203
+msgid "document_details_page_keywords_input_default"
+msgstr "Veuillez entrer au minimum 3 caractères"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:60
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:205
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "Aucune option"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:234
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Erreur lors du chargement des données"
 
@@ -323,15 +318,15 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "Une nouvelle expertise est en attente de validation"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
+msgid "profile_identifiers_card_title"
+msgstr "Mes identifiants chercheurs"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:101
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:31
 msgid "profile_affiliations_card_title"
 msgstr "Mes affiliations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
-msgid "profile_identifiers_card_title"
-msgstr "Mes identifiants chercheurs"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:36
@@ -381,6 +376,12 @@ msgid "orcid_identifier_no_orcid_provided"
 msgstr "Identifiant ORCID non fourni"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
+msgid "profile_affiliations_laboratories_label"
+msgstr "Laboratoire(s)"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:88
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
 msgid "profile_affiliations_signature_label"
@@ -391,12 +392,6 @@ msgstr "Ma signature"
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:56
 msgid "profile_affiliations_signature_copied_message_confirmation"
 msgstr "Signature ajoutée au presse-papier."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
-msgid "profile_affiliations_laboratories_label"
-msgstr "Laboratoire(s)"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
