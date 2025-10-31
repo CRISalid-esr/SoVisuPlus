@@ -229,7 +229,7 @@ export class DocumentService {
         personUid: user.person?.uid,
       })
     } catch (error) {
-      const message = 'Error adding concepts from document'
+      const message = 'Error adding concepts to document'
       console.error(message, error)
       throw new Error(message)
     }

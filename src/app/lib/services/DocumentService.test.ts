@@ -4,10 +4,13 @@ import { AgentType } from '@/types/IAgent'
 import { DocumentType } from '@/types/Document'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
+import { ConceptDAO } from '@/lib/daos/ConceptDAO'
+import { Concept } from '@/types/Concept'
 
 jest.mock('@/lib/daos/DocumentDAO')
 jest.mock('@/lib/daos/UserDAO')
 jest.mock('@/lib/daos/ActionDAO')
+jest.mock('@/lib/daos/ConceptDAO')
 
 describe('DocumentService', () => {
   let documentService: DocumentService
@@ -15,7 +18,9 @@ describe('DocumentService', () => {
   let mockfetchDocumentById: jest.Mock
   let mockCountDocuments: jest.Mock
   let mockDeleteConceptsFromDocument: jest.Mock
+  let mockAddConceptsToDocument: jest.Mock
   let mockCreateAction: jest.Mock
+  let mockCreateOrUpdateConcept: jest.Mock
   let mockMarkDocumentsWaitingForUpdate: jest.Mock
   let mockUpdateDocumentTypeByUid: jest.Mock
 
@@ -24,13 +29,16 @@ describe('DocumentService', () => {
     mockfetchDocumentById = jest.fn()
     mockCountDocuments = jest.fn()
     mockDeleteConceptsFromDocument = jest.fn()
+    mockAddConceptsToDocument = jest.fn()
     mockCreateAction = jest.fn()
+    mockCreateOrUpdateConcept = jest.fn()
     mockMarkDocumentsWaitingForUpdate = jest.fn()
     mockUpdateDocumentTypeByUid = jest.fn()
     ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
       fetchDocuments: mockFetchDocuments,
       fetchDocumentById: mockfetchDocumentById,
       deleteConceptsFromDocument: mockDeleteConceptsFromDocument,
+      addConceptsToDocument: mockAddConceptsToDocument,
       countDocuments: mockCountDocuments,
       markDocumentsWaitingForUpdate: mockMarkDocumentsWaitingForUpdate,
       updateDocumentTypeByUid: mockUpdateDocumentTypeByUid,
@@ -42,6 +50,9 @@ describe('DocumentService', () => {
     }))
     ;(ActionDAO as jest.Mock).mockImplementation(() => ({
       createAction: mockCreateAction,
+    }))
+    ;(ConceptDAO as jest.Mock).mockImplementation(() => ({
+      createOrUpdateConcept: mockCreateOrUpdateConcept,
     }))
 
     documentService = new DocumentService()
@@ -244,6 +255,154 @@ describe('DocumentService', () => {
       personUid: 'local-123',
     })
   })
+
+  it('should call addConceptsToDocument with correct arguments', async () => {
+    mockAddConceptsToDocument.mockResolvedValue(undefined)
+
+    await expect(
+      documentService.addConceptsToDocument(
+        'doc-123',
+        [
+          {
+            uid: 'c1',
+            prefLabels: [],
+            altLabels: [],
+            uri: null,
+          },
+          {
+            uid: 'c2',
+            prefLabels: [],
+            altLabels: [],
+            uri: null,
+          },
+        ],
+        'user-1234',
+      ),
+    ).resolves.toBeUndefined()
+
+    expect(mockCreateOrUpdateConcept).toHaveBeenCalledWith(
+      new Concept('c1', [], []),
+    )
+
+    expect(mockCreateOrUpdateConcept).toHaveBeenCalledWith(
+      new Concept('c2', [], []),
+    )
+
+    expect(mockAddConceptsToDocument).toHaveBeenCalledWith('doc-123', [
+      {
+        uid: 'c1',
+        prefLabels: [],
+        altLabels: [],
+        uri: null,
+      },
+      {
+        uid: 'c2',
+        prefLabels: [],
+        altLabels: [],
+        uri: null,
+      },
+    ])
+  })
+  it('should throw an error when addConceptsToDocument fails', async () => {
+    mockAddConceptsToDocument.mockRejectedValue(new Error('DB error'))
+
+    await expect(
+      documentService.addConceptsToDocument(
+        'doc-123',
+        [
+          {
+            uid: 'c1',
+            prefLabels: [],
+            altLabels: [],
+            uri: null,
+          },
+          {
+            uid: 'c2',
+            prefLabels: [],
+            altLabels: [],
+            uri: null,
+          },
+        ],
+        'user-1234',
+      ),
+    ).rejects.toThrow('Error adding concepts to document')
+
+    expect(mockAddConceptsToDocument).toHaveBeenCalledWith('doc-123', [
+      {
+        uid: 'c1',
+        prefLabels: [],
+        altLabels: [],
+        uri: null,
+      },
+      {
+        uid: 'c2',
+        prefLabels: [],
+        altLabels: [],
+        uri: null,
+      },
+    ])
+  })
+  it('should create an action corresponding to added concept', async () => {
+    mockAddConceptsToDocument.mockResolvedValue(undefined)
+
+    await expect(
+      documentService.addConceptsToDocument(
+        'doc-123',
+        [
+          {
+            uid: 'c1',
+            prefLabels: [],
+            altLabels: [],
+            uri: null,
+          },
+          {
+            uid: 'c2',
+            prefLabels: [],
+            altLabels: [],
+            uri: null,
+          },
+        ],
+        'user-1234',
+      ),
+    ).resolves.toBeUndefined()
+
+    expect(mockAddConceptsToDocument).toHaveBeenCalledWith('doc-123', [
+      {
+        uid: 'c1',
+        prefLabels: [],
+        altLabels: [],
+        uri: null,
+      },
+      {
+        uid: 'c2',
+        prefLabels: [],
+        altLabels: [],
+        uri: null,
+      },
+    ])
+    expect(mockCreateAction).toHaveBeenCalledWith({
+      actionType: 'ADD',
+      targetType: 'DOCUMENT',
+      targetUid: 'doc-123',
+      path: 'subjects',
+      parameters: JSON.stringify([
+        {
+          uid: 'c1',
+          prefLabels: [],
+          altLabels: [],
+          uri: null,
+        },
+        {
+          uid: 'c2',
+          prefLabels: [],
+          altLabels: [],
+          uri: null,
+        },
+      ]),
+      personUid: 'local-123',
+    })
+  })
+
   it('marks docs waiting, then creates MERGE action, and returns {updated}', async () => {
     const updated = [
       { uid: 'd1', state: 'waiting_for_update' },

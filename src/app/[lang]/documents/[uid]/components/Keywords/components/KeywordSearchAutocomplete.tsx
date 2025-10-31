@@ -236,7 +236,11 @@ function KeywordSearchAutocomplete({
               ...params.InputProps,
               startAdornment: (
                 <InputAdornment position='start'>
-                  <IconButton disabled={!add} onClick={onAddConcept}>
+                  <IconButton
+                    disabled={!add}
+                    onClick={onAddConcept}
+                    aria-label={'adding_button'}
+                  >
                     <Add />
                   </IconButton>
                 </InputAdornment>

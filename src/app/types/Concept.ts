@@ -39,7 +39,7 @@ class Concept {
       uid: concept.uid,
       uri: concept.uri,
       prefLabels: concept.prefLabels,
-      altLabels: concept.prefLabels,
+      altLabels: concept.altLabels,
     }
   }
 

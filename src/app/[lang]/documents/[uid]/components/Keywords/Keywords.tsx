@@ -1,6 +1,6 @@
 import { CustomCard } from '@/components/Card'
 import { Trans } from '@lingui/react'
-import { Box, Button, CardContent, Typography } from '@mui/material'
+import { Box, CardContent, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useStore from '@/stores/global_store'
 import { useEffect, useMemo } from 'react'

@@ -1008,6 +1008,47 @@ describe('DocumentDAO', () => {
     })
   })
 
+  it('should add specified concepts to a document', async () => {
+    const mockDocId = 42
+
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue({
+      id: mockDocId,
+    })
+    ;(mockPrisma.document.update as jest.Mock).mockResolvedValue({})
+
+    const documentUid = 'doc-uid-to-add'
+    const concepts = [
+      {
+        uid: 'concept-1',
+        prefLabels: [],
+        altLabels: [],
+        uri: null,
+      },
+      {
+        uid: 'concept-2',
+        prefLabels: [],
+        altLabels: [],
+        uri: null,
+      },
+    ]
+
+    await documentDAO.addConceptsToDocument(documentUid, concepts)
+
+    expect(mockPrisma.document.findUnique).toHaveBeenCalledWith({
+      where: { uid: documentUid },
+      select: { id: true },
+    })
+
+    expect(mockPrisma.document.update).toHaveBeenCalledWith({
+      where: { id: mockDocId },
+      data: {
+        subjects: {
+          connect: [{ uid: 'concept-1' }, { uid: 'concept-2' }],
+        },
+      },
+    })
+  })
+
   it('should throw an error if document is not found when deleting concepts', async () => {
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
 

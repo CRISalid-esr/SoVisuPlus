@@ -3,6 +3,31 @@ import { Concept } from '@/types/Concept'
 import { Literal } from '@/types/Literal'
 import { describe, expect, it } from '@jest/globals'
 
+describe('Concept.toJson', () => {
+  it('should parse Concept to ConceptJson correctly ', () => {
+    const input: Concept = new Concept(
+      'http://www.wikidata.org/entity/Q3054749',
+      [new Literal('Question du Sens', 'fr')],
+      [new Literal('meaning', 'en'), new Literal('Sens', 'en')],
+      null,
+    )
+
+    const concept = Concept.toJson(input)
+
+    expect(concept.uid).toBe('http://www.wikidata.org/entity/Q3054749')
+    expect(concept.uri).toBe(null)
+
+    expect(concept.prefLabels).toHaveLength(1)
+    expect(concept.prefLabels[0].value).toBe('Question du Sens')
+    expect(concept.prefLabels[0].language).toBe('fr')
+
+    expect(concept.altLabels).toHaveLength(2)
+    expect(concept.altLabels.map((l) => l.value)).toEqual(
+      expect.arrayContaining(['meaning', 'Sens']),
+    )
+  })
+})
+
 describe('Concept.fromObject', () => {
   it('should parse labels array into altLabels and prefLabels correctly', () => {
     const input: ConceptJson = {
