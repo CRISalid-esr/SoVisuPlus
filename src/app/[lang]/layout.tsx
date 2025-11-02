@@ -11,6 +11,7 @@ import DateProvider from './components/DateProvider'
 import ErrorFallback from './components/ErrorFallback'
 import { LanguageProvider } from './LanguageProvider'
 import { EnvInjector } from '@/components/EnvInjector'
+import Script from 'next/script'
 
 type Props = {
   children: React.ReactNode
@@ -46,6 +47,8 @@ export default async function RootLayout({ params, children }: Props) {
             WS_PATH: process.env.WS_PATH ?? '/',
           }}
         />
+        <Script src='/vendor/d3.v4.min.js' strategy='beforeInteractive' />
+        <Script src='/vendor/wordstream.js' strategy='afterInteractive' />
         <ThemeProvider>
           <CssBaseline />
           <LanguageProvider locale={lang} messages={selectedMessages}>

@@ -6,6 +6,6 @@ export default chain([localeMiddleware, authMiddleware])
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|public|icons|theme).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|public|icons|theme|vendor).*)',
   ],
 }
