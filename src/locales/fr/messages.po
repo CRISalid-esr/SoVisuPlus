@@ -39,6 +39,16 @@ msgid "snackbar_view_document"
 msgstr "Voir la publication"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:43
+msgid "forbidden_page_back_home"
+msgstr "Retour"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:108
+msgid "forbidden_page_description"
+msgstr "Vous n'êtes pas autorisé à accéder à cette ressource. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/not-found.tsx:43
 msgid "notfound_page_back_home"
 msgstr "Retour à la page d'accueil"
@@ -49,14 +59,40 @@ msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/forbidden.tsx:43
-msgid "forbidden_page_back_home"
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:130
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:193
+msgid "documents_page_hal_status_in_collection"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/forbidden.tsx:108
-msgid "forbidden_page_description"
-msgstr "Vous n'êtes pas autorisé à accéder à cette ressource. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur"
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:146
+msgid "documents_page_hal_status_out_of_collection"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:171
+msgid "documents_page_hal_status_outside_hal"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
+msgid "documents_page_synchronize_modal_synchronize_button"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.test.tsx:170
+msgid "document_details_bibliographic_information_tab"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.test.tsx:174
+msgid "document_details_keywords_tab"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:145
+msgid "documents_page_refresh_document_alert"
+msgstr "Les informations relatives à cette publication ont changé"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:178
@@ -87,52 +123,6 @@ msgstr ""
 #: src/app/[lang]/documents/page.test.tsx:427
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:130
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:193
-msgid "documents_page_hal_status_in_collection"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:146
-msgid "documents_page_hal_status_out_of_collection"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:171
-msgid "documents_page_hal_status_outside_hal"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:721
-msgid "documents_page_refresh_list_alert_own_perspective"
-msgstr "La liste de vos publications a changé"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:724
-msgid "documents_page_refresh_list_alert_other_perspective"
-msgstr "La liste des publications de {name} a changé"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
-msgid "documents_page_synchronize_modal_synchronize_button"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:145
-msgid "documents_page_refresh_document_alert"
-msgstr "Les informations relatives à cette publication ont changé"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.test.tsx:170
-msgid "document_details_bibliographic_information_tab"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.test.tsx:174
-msgid "document_details_keywords_tab"
-msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
@@ -174,11 +164,6 @@ msgid "concept_chip_action_delete"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr "Domaines"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:257
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:266
 msgid "document_details_page_source_tab_select_action_label"
@@ -200,13 +185,13 @@ msgid "document_details_page_source_tab_card_title"
 msgstr "Références bibliographiques sources"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
-msgid "document_details_page_sources_row_update_source"
-msgstr ""
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr "Domaines"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
-msgid "documents_page_publication_date_column_no_date_available"
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
+msgid "document_details_page_sources_row_update_source"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -230,10 +215,30 @@ msgid "document_details_page_type_row_label"
 msgstr ""
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:721
+msgid "documents_page_refresh_list_alert_own_perspective"
+msgstr "La liste de vos publications a changé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:724
+msgid "documents_page_refresh_list_alert_other_perspective"
+msgstr "La liste des publications de {name} a changé"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:117
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:143
 msgid "document_details_page_card_title"
 msgstr "Informations bibliographiques"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:114
+msgid "document_details_page_authors_row_update_author"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
+msgid "documents_page_publication_date_column_no_date_available"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:131
@@ -259,11 +264,6 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:145
 msgid "document_details_page_sources_row_label"
 msgstr "Sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:114
-msgid "document_details_page_authors_row_update_author"
-msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
@@ -296,15 +296,15 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "Une nouvelle expertise est en attente de validation"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
+msgid "profile_identifiers_card_title"
+msgstr "Mes identifiants chercheurs"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:101
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:31
 msgid "profile_affiliations_card_title"
 msgstr "Mes affiliations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
-msgid "profile_identifiers_card_title"
-msgstr "Mes identifiants chercheurs"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:36
@@ -317,6 +317,12 @@ msgstr "Modifier mon identifiant ORCID"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:52
 msgid "orcid_button_provide_identifier"
 msgstr "Fournir mon identifiant ORCID"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
+msgid "profile_affiliations_laboratories_label"
+msgstr "Laboratoire(s)"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:52
@@ -360,12 +366,6 @@ msgid "profile_affiliations_signature_label"
 msgstr "Ma signature"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
-msgid "profile_affiliations_laboratories_label"
-msgstr "Laboratoire(s)"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Mes autorisations"
@@ -407,17 +407,49 @@ msgstr "{numberOfAcronyms, plural, one {Dans HAL mais hors de la collection {for
 msgid "document_details_page_journal_issn"
 msgstr "ISSN : <0>{0}</0>"
 
-#: src/app/[lang]/dashboard/page.tsx:18
+#: src/app/[lang]/dashboard/page.tsx:289
+msgid "dashboard_page_international_collaborations_title"
+msgstr "Collaborations internationales"
+
+#: src/app/[lang]/dashboard/page.tsx:116
 msgid "dashboard_page_main_title"
 msgstr "Tableau de bord"
 
-#: src/app/[lang]/dashboard/page.tsx:22
-msgid "dashboard_page_wip_description"
-msgstr "Cette page vous permettra de visualiser des indicateurs concernant les orientations de vos recherches et le degré d'ouverture de vos publications"
+#: src/app/[lang]/dashboard/page.tsx:262
+msgid "dashboard_page_publication_by_year_title"
+msgstr "Publications scientifiques"
 
-#: src/app/[lang]/dashboard/page.tsx:21
-msgid "dashboard_page_wip_title"
-msgstr "Tableau de bord : implémentation en cours"
+#: src/app/[lang]/dashboard/page.tsx:182
+msgid "dashboard_page_wordstream_font_range_a11y"
+msgstr "Police min ↔ max"
+
+#: src/app/[lang]/dashboard/page.tsx:171
+msgid "dashboard_page_wordstream_font_range_label"
+msgstr "Police min ↔ max"
+
+#: src/app/[lang]/dashboard/page.tsx:137
+msgid "dashboard_page_wordstream_title"
+msgstr "Mots-clés et collaborations"
+
+#: src/app/[lang]/dashboard/page.tsx:161
+msgid "dashboard_page_wordstream_topN_a11y"
+msgstr "Max. occurrences / an"
+
+#: src/app/[lang]/dashboard/page.tsx:152
+msgid "dashboard_page_wordstream_topN_label"
+msgstr "Max. occurrences / an"
+
+#: src/app/[lang]/dashboard/page.tsx:215
+msgid "dashboard_page_wordstream_validate_button_label"
+msgstr "Mettre à jour"
+
+#: src/app/[lang]/dashboard/page.tsx:204
+msgid "dashboard_page_wordstream_year_range_a11y"
+msgstr "Années début ↔ fin"
+
+#: src/app/[lang]/dashboard/page.tsx:192
+msgid "dashboard_page_wordstream_year_range_label"
+msgstr "Années début ↔ fin"
 
 #: src/app/[lang]/documents/[uid]/page.tsx:57
 msgid "document_details_authors_tab"
@@ -463,10 +495,14 @@ msgstr "Retour aux publications"
 msgid "document_details_page_cancel_button"
 msgstr "Annuler"
 
+#: src/app/[lang]/dashboard/page.tsx:270
+#: src/app/[lang]/dashboard/page.tsx:297
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:38
 msgid "document_details_page_domains_tab_wip_description"
 msgstr "Cette rubrique vous permettra de caractériser les domaines de recherche associés à cette publication."
 
+#: src/app/[lang]/dashboard/page.tsx:269
+#: src/app/[lang]/dashboard/page.tsx:296
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:37
 msgid "document_details_page_domains_tab_wip_title"
 msgstr "Domaines de recherche : implémentation en cours"
@@ -871,3 +907,8 @@ msgstr "Connectez-vous"
 #: src/app/[lang]/components/WorkInProgress/WorkInProgress.tsx:100
 msgid "wip_component_coming_soon"
 msgstr "C'est bientôt prêt !"
+
+#: src/app/[lang]/components/WordStream/WordStream.tsx:133
+#: src/app/[lang]/components/WordStream/WordStream.tsx:187
+msgid "wordstream_no_data_to_display"
+msgstr "Aucune donnée à afficher"

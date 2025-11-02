@@ -47,7 +47,7 @@ export class DocumentService {
     this.userDAO = new UserDAO()
   }
 
-  async selectContributorUids(
+  async buildContributorUidArray(
     contributorUid: string | null,
     contributorType: AgentType,
   ) {
@@ -85,7 +85,7 @@ export class DocumentService {
     halCollectionCodes,
     areHalCollectionCodesOmitted,
   }: FetchDocumentsParams) {
-    const contributorUids = await this.selectContributorUids(
+    const contributorUids = await this.buildContributorUidArray(
       contributorUid,
       contributorType,
     )
@@ -131,7 +131,7 @@ export class DocumentService {
     contributorType,
     halCollectionCodes,
   }: CountDocumentsParams) {
-    const contributorUids = await this.selectContributorUids(
+    const contributorUids = await this.buildContributorUidArray(
       contributorUid,
       contributorType,
     )
