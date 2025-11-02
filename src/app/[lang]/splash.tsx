@@ -31,6 +31,10 @@ export default function Splash() {
 
   return (
     <>
+      {/* This is so that the custom style sheet is loaded at runtime. */}
+      {/* eslint-disable-next-line @next/next/no-css-tags */}
+      <link href='/theme/splash_stylesheet.css' rel='stylesheet' />
+
       <Box flex={1} display='flex'>
         <Box
           flex={1}
@@ -76,6 +80,7 @@ export default function Splash() {
             </Box>
 
             <Typography
+              id='splash-preview-legend'
               component='p'
               variant='headingSmall'
               mb={7}
@@ -87,12 +92,11 @@ export default function Splash() {
             </Typography>
 
             <Button
+              id='splash-login-button'
               onClick={() => signIn('keycloak')}
               fullWidth
               variant='contained'
-              sx={{
-                maxWidth: '30rem',
-              }}
+              sx={{ maxWidth: '30rem' }}
             >
               {t`splash.login`}
             </Button>
@@ -102,10 +106,7 @@ export default function Splash() {
             <Box
               display='flex'
               flexDirection={{ xs: 'column', lg: 'row' }}
-              justifyContent={{
-                xs: 'flex-end',
-                lg: 'flex-start',
-              }}
+              justifyContent={{ xs: 'flex-end', lg: 'flex-start' }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -116,6 +117,7 @@ export default function Splash() {
             </Box>
 
             <Box
+              id='splash-links'
               display='flex'
               gap={2.25}
               alignItems={{ xs: 'flex-end', lg: 'center' }}
@@ -142,6 +144,7 @@ export default function Splash() {
 
       <Box flex={1} display={{ xs: 'none', md: 'flex' }}>
         <Box
+          id='splash-background'
           display='flex'
           flex={1}
           alignItems='center'
@@ -159,17 +162,17 @@ export default function Splash() {
           <img
             src='/theme/splash_background.svg'
             alt='SoVisuPlus splash screen background'
-            style={{
-              position: 'absolute',
-              zIndex: -1,
-            }}
+            style={{ position: 'absolute', zIndex: -1 }}
           />
 
           <Box
+            id='splash-description'
             maxWidth='60ch'
             display='flex'
             flexDirection='column'
             justifyContent='center'
+            bgcolor={`rgb(from ${theme.palette.primary.main} r g b / 75%)`}
+            p={2}
           >
             <Typography component='h1' variant='displayLarge' mb={5}>
               {locales?.header}

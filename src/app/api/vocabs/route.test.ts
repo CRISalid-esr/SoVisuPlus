@@ -129,4 +129,78 @@ describe('GET handler', () => {
     const jsonResponse = await response.json()
     expect(jsonResponse.error).toBe('Invalid query string.')
   })
+
+  it('should return error if invalid limit, offset or highlight', async () => {
+    req = {
+      nextUrl: new URL(
+        process.env.VOCABS_URL! + '?q=strike&vocabs=jel,aat&limit=hello',
+      ),
+    } as unknown as NextRequest
+
+    let response = await GET(req)
+
+    expect(response.status).toBe(400)
+    let jsonResponse = await response.json()
+    expect(jsonResponse.error).toBe(
+      'Invalid limit value : must be an integer between 1 and 100.',
+    )
+
+    req = {
+      nextUrl: new URL(
+        process.env.VOCABS_URL! + '?q=strike&vocabs=jel,aat&limit=0',
+      ),
+    } as unknown as NextRequest
+
+    response = await GET(req)
+
+    expect(response.status).toBe(400)
+    jsonResponse = await response.json()
+    expect(jsonResponse.error).toBe(
+      'Invalid limit value : must be an integer between 1 and 100.',
+    )
+
+    req = {
+      nextUrl: new URL(
+        process.env.VOCABS_URL! + '?q=strike&vocabs=jel,aat&limit=101',
+      ),
+    } as unknown as NextRequest
+
+    response = await GET(req)
+
+    expect(response.status).toBe(400)
+    jsonResponse = await response.json()
+    expect(jsonResponse.error).toBe(
+      'Invalid limit value : must be an integer between 1 and 100.',
+    )
+
+    req = {
+      nextUrl: new URL(
+        process.env.VOCABS_URL! +
+          '?q=strike&vocabs=jel,aat&limit=10&offset=hello',
+      ),
+    } as unknown as NextRequest
+
+    response = await GET(req)
+
+    expect(response.status).toBe(400)
+    jsonResponse = await response.json()
+    expect(jsonResponse.error).toBe(
+      'Invalid offset value : must be an integer upper than 0.',
+    )
+
+    req = {
+      nextUrl: new URL(
+        process.env.VOCABS_URL! +
+          '?q=strike&vocabs=jel,aat&limit=20&offset=0&highlight=hello',
+      ),
+    } as unknown as NextRequest
+
+    response = await GET(req)
+
+    expect(response.status).toBe(400)
+    jsonResponse = await response.json()
+    expect(jsonResponse.error).toBe(
+      'Invalid highlight value : must be a boolean.',
+    )
+  })
 })

@@ -43,6 +43,7 @@ ORCID_URL="${ORCID_URL:-https://orcid.org}"
 ORCID_SCOPES="${ORCID_SCOPES:-/authenticate}"
 ORCID_CLIENT_ID="${ORCID_CLIENT_ID:-}"
 ORCID_CLIENT_SECRET="${ORCID_CLIENT_SECRET:-}"
+VOCABS_URL="${VOCABS_URL:-http://localhost:8000/api/v0/autocomplete/}"
 EOF
 
 CUSTOM_THEME_MOUNT="/custom-theme"

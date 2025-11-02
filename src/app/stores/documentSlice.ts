@@ -3,6 +3,7 @@ import { Document, DocumentState, DocumentType } from '@/types/Document'
 import { toQueryString } from '@/utils/query'
 import { BaseQuery } from '@/types/BaseQuery'
 import { AgentType } from '@/types/IAgent'
+import { Concept } from '@/types/Concept'
 
 export interface DocumentQuery extends BaseQuery {
   searchTerm: string
@@ -54,6 +55,7 @@ export interface DocumentSlice {
     countDocuments: (obj: CountDocumentQuery) => Promise<void>
     fetchDocumentById: (uid: string) => Promise<void>
     mergeDocuments: (documentUids: string[]) => Promise<void>
+    addConcepts: (concepts: Concept[]) => Promise<void>
     removeConcepts: (conceptUids: string[]) => Promise<void>
     updateDocumentType: (type: DocumentType) => Promise<void>
   }
@@ -331,6 +333,51 @@ export const addDocumentSlice: StateCreator<
           const updatedSubjects = doc.subjects.filter(
             (c) => !conceptUids.includes(c.uid),
           )
+          const updatedDocument = Object.assign(
+            Object.create(Object.getPrototypeOf(doc)),
+            doc,
+            { subjects: updatedSubjects },
+          )
+
+          return {
+            document: {
+              ...state.document,
+              selectedDocument: updatedDocument,
+            },
+          }
+        })
+      } catch (error) {
+        set((state) => ({
+          document: {
+            ...state.document,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        }))
+      }
+    },
+    addConcepts: async (concepts: Concept[]) => {
+      const documentUid = get().document.selectedDocument?.uid
+      if (!documentUid) {
+        console.error('Cannot add concepts: no selected document')
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/documents/${documentUid}/concepts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            concepts: concepts.map((concept) => Concept.toJson(concept)),
+          }),
+        })
+
+        if (!response.ok) throw new Error('Failed to add concepts')
+
+        set((state) => {
+          const doc = state.document.selectedDocument
+          if (!doc) return state
+
+          const updatedSubjects = doc.subjects.concat(concepts)
           const updatedDocument = Object.assign(
             Object.create(Object.getPrototypeOf(doc)),
             doc,

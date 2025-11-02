@@ -130,14 +130,9 @@ msgid "document_details_page_back_to_my_publications"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:60
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:62
 msgid "document_details_page_keywords_tab_card_title"
 msgstr "Mots-clés"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:63
-msgid "document_details_page_keywords_tab_card_validate_button"
-msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
@@ -190,6 +185,36 @@ msgid "document_details_page_domains_tab_card_title"
 msgstr "Domaines"
 
 #. js-lingui-explicit-id
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:197
+msgid "document_details_page_keywords_input_options_loading"
+msgstr "Chargement des données..."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:201
+msgid "document_details_page_keywords_input_options_fetch_error"
+msgstr "Chargement des données impossible"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:39
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:203
+msgid "document_details_page_keywords_input_default"
+msgstr "Veuillez entrer au minimum 3 caractères"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:60
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:205
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "Aucune option"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:234
+msgid "document_details_page_keywords_input_fetch_error_label"
+msgstr "Erreur lors du chargement des données"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
 msgid "document_details_page_sources_row_update_source"
 msgstr ""
@@ -223,6 +248,11 @@ msgstr "La liste de vos publications a changé"
 #: src/app/[lang]/documents/page.tsx:724
 msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr "La liste des publications de {name} a changé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
+msgid "documents_page_publication_date_column_no_date_available"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:117
@@ -362,8 +392,22 @@ msgstr "Identifiant ORCID non fourni"
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:82
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:23
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
+msgid "profile_affiliations_laboratories_label"
+msgstr "Laboratoire(s)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:88
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
 msgid "profile_affiliations_signature_label"
 msgstr "Ma signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:109
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:56
+msgid "profile_affiliations_signature_copied_message_confirmation"
+msgstr "Signature ajoutée au presse-papier."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
@@ -884,23 +928,23 @@ msgstr "Thème clair"
 msgid "sidebar_theme_system"
 msgstr "Thème automatique"
 
-#: src/app/[lang]/splash.tsx:127
+#: src/app/[lang]/splash.tsx:129
 msgid "splash.about"
 msgstr "À propos"
 
-#: src/app/[lang]/splash.tsx:133
+#: src/app/[lang]/splash.tsx:135
 msgid "splash.accessibility"
 msgstr "Accessibilité"
 
-#: src/app/[lang]/splash.tsx:136
+#: src/app/[lang]/splash.tsx:138
 msgid "splash.community"
 msgstr "Communauté"
 
-#: src/app/[lang]/splash.tsx:130
+#: src/app/[lang]/splash.tsx:132
 msgid "splash.legal_mentions"
 msgstr "Mentions légales"
 
-#: src/app/[lang]/splash.tsx:97
+#: src/app/[lang]/splash.tsx:101
 msgid "splash.login"
 msgstr "Connectez-vous"
 

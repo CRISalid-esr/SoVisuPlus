@@ -1,5 +1,5 @@
 import useStore from '@/stores/global_store'
-import { act, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import SignatureControl from '@/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl'
@@ -66,6 +66,12 @@ beforeEach(() => {
     selector(mockState),
   )
 
+  Object.assign(navigator, {
+    clipboard: {
+      writeText: jest.fn().mockResolvedValue(undefined),
+    },
+  })
+
   act(() => {
     i18n.activate('en')
   })
@@ -86,5 +92,23 @@ describe('SignatureControl Component', () => {
         mockState.user.connectedUser.person.membershipSignatures.join(),
       ),
     ).toBeInTheDocument()
+  })
+
+  it('signature copy button works', async () => {
+    render(
+      <I18nProvider i18n={i18n}>
+        <SignatureControl />
+      </I18nProvider>,
+    )
+    const copyButton = screen.getByRole('button')
+    fireEvent.click(copyButton)
+    await waitFor(() => {
+      expect(navigator.clipboard.writeText).toHaveBeenCalled()
+      expect(
+        screen.getByText(
+          i18n.t('profile_affiliations_signature_copied_message_confirmation'),
+        ),
+      ).toBeInTheDocument()
+    })
   })
 })

@@ -14,6 +14,7 @@ import {
 } from '@/types/BibliographicPlatform'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import QueryMode = Prisma.QueryMode
+import { ConceptJson } from '@/types/Concept'
 
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
@@ -859,6 +860,29 @@ export class DocumentDAO extends AbstractDAO {
       data: {
         subjects: {
           disconnect: conceptUids.map((uid) => ({ uid })),
+        },
+      },
+    })
+  }
+
+  async addConceptsToDocument(
+    documentUid: string,
+    concepts: ConceptJson[],
+  ): Promise<void> {
+    const document = await this.prismaClient.document.findUnique({
+      where: { uid: documentUid },
+      select: { id: true },
+    })
+
+    if (!document) {
+      throw new Error(`Document with UID ${documentUid} not found`)
+    }
+
+    await this.prismaClient.document.update({
+      where: { id: document.id },
+      data: {
+        subjects: {
+          connect: concepts.map((concept) => ({ uid: concept.uid })),
         },
       },
     })

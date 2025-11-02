@@ -1,6 +1,6 @@
 import { CustomCard } from '@/components/Card'
 import { Trans } from '@lingui/react'
-import { Box, Button, CardContent, Typography } from '@mui/material'
+import { Box, CardContent, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useStore from '@/stores/global_store'
 import { useEffect, useMemo } from 'react'
@@ -9,9 +9,11 @@ import ConceptChip from '@/app/[lang]/documents/[uid]/components/Keywords/Concep
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Concept } from '@/types/Concept'
+import KeywordSearchAutocomplete from '@/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete'
 
 function Keywords() {
   const theme = useTheme()
+
   const { selectedDocument = null, error = null } = useStore(
     (state) => state.document,
   )
@@ -59,9 +61,6 @@ function Keywords() {
           >
             <Trans id='document_details_page_keywords_tab_card_title' />
           </Typography>
-          <Button variant='contained' color='primary'>
-            <Trans id='document_details_page_keywords_tab_card_validate_button' />
-          </Button>
         </Box>
       }
     >
@@ -76,6 +75,9 @@ function Keywords() {
               onRemoveConcepts={onRemoveConcepts}
             />
           ))}
+        </Box>
+        <Box>
+          <KeywordSearchAutocomplete />
         </Box>
       </CardContent>
     </CustomCard>
