@@ -256,8 +256,8 @@ export default function DashboardPage() {
           >
             <CardContent>
               <WorkInProgress
-                title={t`document_details_page_domains_tab_wip_title`}
-                description={t`document_details_page_domains_tab_wip_description`}
+                title={t`dashboard_page_publication_by_year_wip_title`}
+                description={t`dashboard_page_publication_by_year_wip_description`}
                 variant='inline'
               />
             </CardContent>
@@ -282,8 +282,8 @@ export default function DashboardPage() {
           >
             <CardContent>
               <WorkInProgress
-                title={t`document_details_page_domains_tab_wip_title`}
-                description={t`document_details_page_domains_tab_wip_description`}
+                title={t`dashboard_page_international_collaborations_wip_title`}
+                description={t`dashboard_page_international_collaborations_wip_description`}
                 variant='inline'
               />
             </CardContent>
