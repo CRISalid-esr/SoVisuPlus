@@ -7,17 +7,87 @@ import {
   within,
 } from '@testing-library/react'
 import KeywordSearchAutocomplete, {
-  SuggestedKeyword,
   SuggestedKeywordsData,
 } from '@/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { Concept } from '@/types/Concept'
+import { Document, DocumentType } from '@/types/Document'
+import { Literal } from '@/types/Literal'
+import { Contribution } from '@/types/Contribution'
+import { Person } from '@/types/Person'
+import { LocRelator } from '@/types/LocRelator'
+import useStore from '@/stores/global_store'
+
+jest.mock('@/stores/global_store', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
 
 describe('KeywordSearchAutocomplete Component', () => {
   beforeEach(() => {
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector(mockState),
+    )
     jest.clearAllMocks()
   })
+
+  const document: Document = new Document(
+    'doc-123',
+    DocumentType.Document,
+    '2022',
+    new Date('2022-01-01T00:00:00.000Z'),
+    new Date('2022-12-31T23:59:59.000Z'),
+    [
+      new Literal('Sample Document Title', 'en'),
+      new Literal('Sample Abstract', 'fr'),
+    ],
+    [new Literal('Sample Abstract', 'fr')],
+    [], // empty subjects
+    [
+      new Contribution(
+        new Person(
+          'person-1',
+          false,
+          'john@example.com',
+          'John Doe',
+          'John',
+          'Doe',
+          [],
+        ),
+        [LocRelator.AUTHOR_OF_INTRODUCTION__ETC_],
+      ),
+    ],
+  )
+
+  const mockState = {
+    document: {
+      fetchDocumentById: jest.fn(),
+      loading: false,
+      selectedDocument: document,
+      addConcepts: jest.fn(),
+    },
+    user: {
+      currentPerspective: {
+        person: {
+          id: '1',
+          firstName: 'John',
+          lastName: 'Doe',
+          type: 'people',
+          slug: 'person:john-doe',
+        },
+      },
+      connectedUser: {
+        person: {
+          id: '1',
+          firstName: 'John',
+          lastName: 'Doe',
+          type: 'people',
+          slug: 'person:john-doe',
+        },
+      },
+    },
+  }
 
   const renderComponent = () =>
     render(
@@ -123,7 +193,9 @@ describe('KeywordSearchAutocomplete Component', () => {
     fireEvent.change(autocomplete, { target: { value: 'dia' } })
     await waitFor(async () => {
       expect(fetchKeywordsMock).toHaveBeenCalledWith('dia')
-      expect(screen.getByText('AAT - Art & Architecture Thesaurus')).toBeInTheDocument()
+      expect(
+        screen.getByText('AAT - Art & Architecture Thesaurus'),
+      ).toBeInTheDocument()
       const emElement = screen.getByText('diadems')
       expect(emElement).toBeInTheDocument()
       expect(emElement.tagName).toBe('EM')
@@ -239,5 +311,11 @@ describe('KeywordSearchAutocomplete Component', () => {
     fireEvent.click(options[0])
 
     expect(addingButton).toBeEnabled()
+    fireEvent.click(addingButton)
+    await waitFor(() => {
+      expect(
+        screen.getByText(i18n.t('keywords_concept_added_success')),
+      ).toBeInTheDocument()
+    })
   })
 })

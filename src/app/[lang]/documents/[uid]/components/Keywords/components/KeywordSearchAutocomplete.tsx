@@ -7,6 +7,7 @@ import {
   InputAdornment,
   Link,
   Pagination,
+  Snackbar,
   TextField,
   Tooltip,
   Typography,
@@ -68,7 +69,11 @@ async function getData(
           item.best_label
             ? Object.assign(
                 { num: Vocab.iriToIdentifier(item.iri, item.scheme) },
-                { text: item.best_label?.text, highlight: item.best_label?.highlight, vocab: item.scheme },
+                {
+                  text: item.best_label?.text,
+                  highlight: item.best_label?.highlight,
+                  vocab: item.scheme,
+                },
                 {
                   concept: new Concept(
                     item.iri,
@@ -89,7 +94,7 @@ async function getData(
                         )
                       : [],
                     item.iri,
-                  )
+                  ),
                 },
               )
             : undefined,
@@ -129,7 +134,9 @@ function KeywordSearchAutocomplete({
   const [loading, setLoading] = useState<boolean>(false)
   const [fetchError, setFetchError] = useState<Error | null>(null)
   const [add, setAdd] = useState<boolean>(false)
-  const [selectedConcept, setSelectedConcept] = useState<SuggestedKeyword>()
+  const [selectedKeyword, setSelectedKeyword] = useState<SuggestedKeyword>()
+  const [open, setOpen] = useState<boolean>(false)
+  const [idMessage, setIdMessage] = useState<string | null>(null)
 
   const updateKeywords = async (vocab: string, page: number) => {
     const pageItems = await getData(keywordInput, vocab, (page - 1) * 5)
@@ -145,9 +152,20 @@ function KeywordSearchAutocomplete({
   const addConcepts = useStore((state) => state.document.addConcepts)
 
   const onAddConcept = async () => {
-    if (selectedConcept?.concept) {
-      await addConcepts([selectedConcept.concept])
+    if (selectedKeyword?.concept) {
+      try {
+        await addConcepts([selectedKeyword.concept])
+        setIdMessage('keywords_concept_added_success')
+      } catch (e) {
+        setIdMessage('keywords_concept_added_failure')
+      } finally {
+        setOpen(true)
+      }
     }
+  }
+
+  const handleClose = () => {
+    setOpen(false)
   }
 
   useEffect(() => {
@@ -181,148 +199,164 @@ function KeywordSearchAutocomplete({
   }, [fetchError])
 
   return (
-    <Autocomplete
-      autoComplete
-      clearOnBlur={false}
-      clearOnEscape
-      filterOptions={(x) => x}
-      getOptionLabel={(option) =>
-        option.highlight ? option.highlight : option.text
-      }
-      groupBy={(option) => option.vocab}
-      includeInputInList
-      inputValue={keywordInput}
-      loading={loading}
-      loadingText={
-        <Trans id='document_details_page_keywords_input_options_loading' />
-      }
-      noOptionsText={
-        fetchError ? (
-          <Trans id='document_details_page_keywords_input_options_fetch_error' />
-        ) : keywordInput.length < 3 ? (
-          <Trans id='document_details_page_keywords_input_default' />
-        ) : (
-          <Trans id='document_details_page_keywords_input_options_no_options' />
-        )
-      }
-      onChange={(event, value) => {
-        if (value) {
-          setAdd(true)
-          setSelectedConcept(value)
-        } else {
-          setAdd(false)
-          setSelectedConcept(undefined)
+    <Box>
+      <Autocomplete
+        autoComplete
+        clearOnBlur={false}
+        clearOnEscape
+        filterOptions={(x) => x}
+        getOptionLabel={(option) => option.text}
+        groupBy={(option) => option.vocab}
+        includeInputInList
+        inputValue={keywordInput}
+        loading={loading}
+        loadingText={
+          <Trans id='document_details_page_keywords_input_options_loading' />
         }
-      }}
-      onInputChange={(event, value) => {
-        setSelectedConcept(undefined)
-        setAdd(false)
-        setKeywordInput(value)
-      }}
-      options={keywords
-        .sort((a, b) =>
-          a.vocab.toLowerCase().localeCompare(b.vocab.toLowerCase()),
-        )
-        .map((item) => item.items)
-        .flat()}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          error={!!fetchError}
-          helperText={
-            fetchError ? (
-              <Trans id='document_details_page_keywords_input_fetch_error_label' />
-            ) : (
-              ''
-            )
+        noOptionsText={
+          fetchError ? (
+            <Trans id='document_details_page_keywords_input_options_fetch_error' />
+          ) : keywordInput.length < 3 ? (
+            <Trans id='document_details_page_keywords_input_default' />
+          ) : (
+            <Trans id='document_details_page_keywords_input_options_no_options' />
+          )
+        }
+        onChange={(event, value) => {
+          if (value) {
+            setAdd(true)
+            setSelectedKeyword(value)
+          } else {
+            setAdd(false)
+            setSelectedKeyword(undefined)
           }
-          slotProps={{
-            input: {
-              ...params.InputProps,
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <IconButton
-                    disabled={!add}
-                    onClick={onAddConcept}
-                    aria-label={'adding_button'}
-                  >
-                    <Add />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
-        />
-      )}
-      renderGroup={(params) => {
-        const group = keywords.find((group) => group.vocab === params.group)
-        return (
-          <Box
-            key={params.key}
-            sx={{ marginLeft: '20px', marginTop: '10px', marginBottom: '30px' }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Image
-                src={
-                  group
-                    ? VOCABS[group?.vocab.toUpperCase()].icon
-                    : '/icons/default.png'
-                }
-                alt={(group ? group.vocab.toUpperCase() : 'Vocab') + ' icon'}
-                width={24}
-                height={24}
-              />
-              <Typography sx={{ marginLeft: '15px', fontWeight: 'bold' }}>
-                {params.group +
-                  (group
-                    ? ' - ' + VOCABS[group?.vocab.toUpperCase()].name
-                    : '')}
-              </Typography>
-            </Box>
-            <Box sx={{ marginTop: '10px', marginBottom: '10px' }}>
-              {params.children}
-            </Box>
-            {group && group.total > group.items.length ? (
-              <Pagination
-                count={Math.ceil(group.total / 5)}
-                onChange={async (event, page) =>
-                  await updateKeywords(group.vocab.toLowerCase(), page)
-                }
-                sx={{ marginBottom: '20px' }}
-              />
-            ) : null}
-            <Divider />
-          </Box>
-        )
-      }}
-      renderOption={(props, option, state, ownerState) => {
-        const { key, ...optionProps } = props
-        return (
-          <Box key={key + option.num} component={'li'} {...optionProps}>
-            <Icon />
-            <Typography
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(ownerState.getOptionLabel(option), {
-                  USE_PROFILES: { html: true },
-                }),
+        }}
+        onInputChange={(event, value) => {
+          setSelectedKeyword(undefined)
+          setAdd(false)
+          setKeywordInput(value)
+        }}
+        options={keywords
+          .sort((a, b) =>
+            a.vocab.toLowerCase().localeCompare(b.vocab.toLowerCase()),
+          )
+          .map((item) => item.items)
+          .flat()}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            error={!!fetchError}
+            helperText={
+              fetchError ? (
+                <Trans id='document_details_page_keywords_input_fetch_error_label' />
+              ) : (
+                ''
+              )
+            }
+            slotProps={{
+              input: {
+                ...params.InputProps,
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <IconButton
+                      disabled={!add}
+                      onClick={onAddConcept}
+                      aria-label={'adding_button'}
+                    >
+                      <Add />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+        )}
+        renderGroup={(params) => {
+          const group = keywords.find((group) => group.vocab === params.group)
+          return (
+            <Box
+              key={params.key}
+              sx={{
+                marginLeft: '20px',
+                marginTop: '10px',
+                marginBottom: '30px',
               }}
-            />
-            <Typography sx={{ whiteSpace: 'pre' }}> ({option.num}) </Typography>
-            <Tooltip title={option.concept.uid}>
-              <Link
-                href={option.concept.uid}
-                target='_blank'
-                rel='noopener noreferrer'
-                sx={{ display: 'inherit' }}
-              >
-                <InfoOutlined />
-              </Link>
-            </Tooltip>
-          </Box>
-        )
-      }}
-      sx={{ marginTop: '15px' }}
-    />
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Image
+                  src={
+                    group
+                      ? VOCABS[group?.vocab.toUpperCase()].icon
+                      : '/icons/default.png'
+                  }
+                  alt={(group ? group.vocab.toUpperCase() : 'Vocab') + ' icon'}
+                  width={24}
+                  height={24}
+                />
+                <Typography sx={{ marginLeft: '15px', fontWeight: 'bold' }}>
+                  {params.group +
+                    (group
+                      ? ' - ' + VOCABS[group?.vocab.toUpperCase()].name
+                      : '')}
+                </Typography>
+              </Box>
+              <Box sx={{ marginTop: '10px', marginBottom: '10px' }}>
+                {params.children}
+              </Box>
+              {group && group.total > group.items.length ? (
+                <Pagination
+                  count={Math.ceil(group.total / 5)}
+                  onChange={async (event, page) =>
+                    await updateKeywords(group.vocab.toLowerCase(), page)
+                  }
+                  sx={{ marginBottom: '20px' }}
+                />
+              ) : null}
+              <Divider />
+            </Box>
+          )
+        }}
+        renderOption={(props, option, state, ownerState) => {
+          const { key, ...optionProps } = props
+          return (
+            <Box key={key + option.num} component={'li'} {...optionProps}>
+              <Icon />
+              <Typography
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(
+                    option.highlight ? option.highlight : option.text,
+                    {
+                      USE_PROFILES: { html: true },
+                    },
+                  ),
+                }}
+              />
+              <Typography sx={{ whiteSpace: 'pre' }}>
+                {' '}
+                ({option.num}){' '}
+              </Typography>
+              <Tooltip title={option.concept.uid}>
+                <Link
+                  href={option.concept.uid}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  sx={{ display: 'inherit' }}
+                >
+                  <InfoOutlined />
+                </Link>
+              </Tooltip>
+            </Box>
+          )
+        }}
+        sx={{ marginTop: '15px' }}
+      />
+      <Snackbar
+        open={open}
+        autoHideDuration={3000}
+        message={<Trans id={idMessage ?? ''} />}
+        onClose={handleClose}
+      />
+    </Box>
   )
 }
 
