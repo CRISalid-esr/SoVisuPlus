@@ -51,7 +51,7 @@ msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> 
 #. js-lingui-explicit-id
 #: src/app/[lang]/forbidden.tsx:43
 msgid "forbidden_page_back_home"
-msgstr ""
+msgstr "Retour"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/forbidden.tsx:108
@@ -145,6 +145,27 @@ msgid "document_details_page_keywords_tab_card_title"
 msgstr "Mots-clés"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:257
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:266
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "Actions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:272
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalider"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:279
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissocier"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:315
+msgid "document_details_page_source_tab_card_title"
+msgstr "Références bibliographiques sources"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:237
 msgid "concept_chips_free_keyword"
@@ -169,40 +190,9 @@ msgid "concept_chip_action_delete"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:257
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:266
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "Actions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:272
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalider"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:279
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissocier"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:315
-msgid "document_details_page_source_tab_card_title"
-msgstr "Références bibliographiques sources"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
 msgid "document_details_page_domains_tab_card_title"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:197
-msgid "document_details_page_keywords_input_options_loading"
-msgstr "Chargement des données..."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:201
-msgid "document_details_page_keywords_input_options_fetch_error"
-msgstr "Chargement des données impossible"
+msgstr "Domaines"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:39
@@ -215,6 +205,16 @@ msgstr "Veuillez entrer au minimum 3 caractères"
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:205
 msgid "document_details_page_keywords_input_options_no_options"
 msgstr "Aucune option"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:197
+msgid "document_details_page_keywords_input_options_loading"
+msgstr "Chargement des données..."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:201
+msgid "document_details_page_keywords_input_options_fetch_error"
+msgstr "Chargement des données impossible"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:234
@@ -328,15 +328,15 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "Une nouvelle expertise est en attente de validation"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
-msgid "profile_identifiers_card_title"
-msgstr "Mes identifiants chercheurs"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:101
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:31
 msgid "profile_affiliations_card_title"
 msgstr "Mes affiliations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
+msgid "profile_identifiers_card_title"
+msgstr "Mes identifiants chercheurs"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:36
@@ -386,12 +386,6 @@ msgid "orcid_identifier_no_orcid_provided"
 msgstr "Identifiant ORCID non fourni"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
-msgid "profile_affiliations_laboratories_label"
-msgstr "Laboratoire(s)"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:88
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
 msgid "profile_affiliations_signature_label"
@@ -402,6 +396,12 @@ msgstr "Ma signature"
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:56
 msgid "profile_affiliations_signature_copied_message_confirmation"
 msgstr "Signature ajoutée au presse-papier."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
+msgid "profile_affiliations_laboratories_label"
+msgstr "Laboratoire(s)"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
@@ -445,17 +445,65 @@ msgstr "{numberOfAcronyms, plural, one {Dans HAL mais hors de la collection {for
 msgid "document_details_page_journal_issn"
 msgstr "ISSN : <0>{0}</0>"
 
-#: src/app/[lang]/dashboard/page.tsx:18
+#: src/app/[lang]/dashboard/page.tsx:278
+msgid "dashboard_page_international_collaborations_title"
+msgstr "Collaborations internationales"
+
+#: src/app/[lang]/dashboard/page.tsx:286
+msgid "dashboard_page_international_collaborations_wip_description"
+msgstr "Cette carte vous permettra de visualiser les collaborations internationales nouées au travers de vos publications."
+
+#: src/app/[lang]/dashboard/page.tsx:285
+msgid "dashboard_page_international_collaborations_wip_title"
+msgstr "Collaborations internationales : implémentation en cours"
+
+#: src/app/[lang]/dashboard/page.tsx:105
 msgid "dashboard_page_main_title"
 msgstr "Tableau de bord"
 
-#: src/app/[lang]/dashboard/page.tsx:22
-msgid "dashboard_page_wip_description"
-msgstr "Cette page vous permettra de visualiser des indicateurs concernant les orientations de vos recherches et le degré d'ouverture de vos publications"
+#: src/app/[lang]/dashboard/page.tsx:252
+msgid "dashboard_page_publication_by_year_title"
+msgstr "Publications scientifiques"
 
-#: src/app/[lang]/dashboard/page.tsx:21
-msgid "dashboard_page_wip_title"
-msgstr "Tableau de bord : implémentation en cours"
+#: src/app/[lang]/dashboard/page.tsx:260
+msgid "dashboard_page_publication_by_year_wip_description"
+msgstr "Ce visuel vous permettra de visualiser l'évolution du nombre de publications scientifiques au fil des années ainsi que leur statut en regard des critères de la science ouverte."
+
+#: src/app/[lang]/dashboard/page.tsx:259
+msgid "dashboard_page_publication_by_year_wip_title"
+msgstr "Publications par an : implémentation en cours."
+
+#: src/app/[lang]/dashboard/page.tsx:202
+msgid "dashboard_page_wordstream_font_range_a11y"
+msgstr "Police min ↔ max"
+
+#: src/app/[lang]/dashboard/page.tsx:191
+msgid "dashboard_page_wordstream_font_range_label"
+msgstr "Police min ↔ max"
+
+#: src/app/[lang]/dashboard/page.tsx:120
+msgid "dashboard_page_wordstream_title"
+msgstr "Mots-clés et collaborations"
+
+#: src/app/[lang]/dashboard/page.tsx:182
+msgid "dashboard_page_wordstream_topN_a11y"
+msgstr "Max. occurrences / an"
+
+#: src/app/[lang]/dashboard/page.tsx:173
+msgid "dashboard_page_wordstream_topN_label"
+msgstr "Max. occurrences / an"
+
+#: src/app/[lang]/dashboard/page.tsx:233
+msgid "dashboard_page_wordstream_validate_button_label"
+msgstr "Mettre à jour"
+
+#: src/app/[lang]/dashboard/page.tsx:223
+msgid "dashboard_page_wordstream_year_range_a11y"
+msgstr "Années début ↔ fin"
+
+#: src/app/[lang]/dashboard/page.tsx:211
+msgid "dashboard_page_wordstream_year_range_label"
+msgstr "Années début ↔ fin"
 
 #: src/app/[lang]/documents/[uid]/page.tsx:57
 msgid "document_details_authors_tab"
@@ -909,3 +957,8 @@ msgstr "Connectez-vous"
 #: src/app/[lang]/components/WorkInProgress/WorkInProgress.tsx:100
 msgid "wip_component_coming_soon"
 msgstr "C'est bientôt prêt !"
+
+#: src/app/[lang]/components/WordStream/WordStream.tsx:133
+#: src/app/[lang]/components/WordStream/WordStream.tsx:187
+msgid "wordstream_no_data_to_display"
+msgstr "Aucune donnée à afficher"
