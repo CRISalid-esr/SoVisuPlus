@@ -222,6 +222,16 @@ msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:346
+msgid "keywords_concept_added_success"
+msgstr "Keyword successfully added."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:346
+msgid "keywords_concept_added_failure"
+msgstr "Failed to add keyword to publication."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
 msgid "document_details_page_sources_row_update_source"
 msgstr ""
