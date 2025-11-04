@@ -11,7 +11,8 @@ roles:
     permissions:
       - action: update
         subject: Document
-        fields: [titles, abstracts, contributors, identifiers, documentType]
+        fields:
+          [titles, abstracts, contributors, identifiers, documentType, subjects]
 
   - name: document_merger
     description: Merge / unmerge documents and source records
@@ -20,6 +21,7 @@ roles:
         subject: Document
       - action: unmerge
         subject: DocumentRecord
+
   - name: document_fetcher
     description: Fetch documents from external sources
     permissions:
