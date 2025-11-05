@@ -12,7 +12,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Add, InfoOutlined } from '@mui/icons-material'
 import {
   SuggestResponse,
@@ -26,6 +26,9 @@ import { Concept } from '@/types/Concept'
 import { Literal } from '@/types/Literal'
 import useStore from '@/stores/global_store'
 import DOMPurify from 'dompurify'
+import { useSession } from 'next-auth/react'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
 
 export type SuggestedKeyword = {
   concept: Concept
@@ -124,10 +127,12 @@ async function fetchWrapper(
 
 export type KeywordSearchAutocompleteProps = {
   fetchKeywords?: (value: string) => Promise<SuggestedKeywordsData[]>
+  authorization?: boolean
 }
 
 function KeywordSearchAutocomplete({
   fetchKeywords = fetchWrapper,
+  authorization = false,
 }: KeywordSearchAutocompleteProps) {
   const [keywordInput, setKeywordInput] = useState<string>('')
   const [keywords, setKeywords] = useState<SuggestedKeywordsData[]>([])
@@ -137,6 +142,16 @@ function KeywordSearchAutocomplete({
   const [selectedKeyword, setSelectedKeyword] = useState<SuggestedKeyword>()
   const [open, setOpen] = useState<boolean>(false)
   const [idMessage, setIdMessage] = useState<string | null>(null)
+  const { data: session } = useSession()
+
+  const ability = useMemo(
+    () => abilityFromAuthzContext(session?.user.authz),
+    [session?.user?.authz],
+  )
+
+  const { selectedDocument = null, error = null } = useStore(
+    (state) => state.document,
+  )
 
   const updateKeywords = async (vocab: string, page: number) => {
     const pageItems = await getData(keywordInput, vocab, (page - 1) * 5)
@@ -152,6 +167,14 @@ function KeywordSearchAutocomplete({
   const addConcepts = useStore((state) => state.document.addConcepts)
 
   const onAddConcept = async () => {
+    if (!selectedDocument) {
+      return
+    }
+    if (
+      !ability.can(PermissionAction.update, selectedDocument, 'documentType')
+    ) {
+      return
+    }
     if (selectedKeyword?.concept) {
       try {
         await addConcepts([selectedKeyword.concept])
@@ -348,7 +371,7 @@ function KeywordSearchAutocomplete({
             </Box>
           )
         }}
-        sx={{ marginTop: '15px' }}
+        sx={{ display: authorization ? 'inherit' : 'none', marginTop: '15px' }}
       />
       <Snackbar
         open={open}

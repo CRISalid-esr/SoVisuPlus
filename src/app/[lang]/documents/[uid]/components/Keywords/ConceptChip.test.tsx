@@ -97,4 +97,30 @@ describe('ConceptChips Component', () => {
       }),
     ])
   })
+
+  it("Check that unauthorized users can't delete", async () => {
+    const mockOnDelete = jest.fn().mockResolvedValue(undefined)
+    render(
+      <ThemeProvider theme={theme}>
+        <I18nProvider i18n={i18n}>
+          <ConceptChip
+            group={group[0]}
+            language='fr'
+            removable={false}
+            onRemoveConcepts={mockOnDelete}
+          />
+        </I18nProvider>
+      </ThemeProvider>,
+    )
+
+    // Open popper
+    const chip = screen.getByRole('button', { name: 'Neutralité' })
+    fireEvent.click(chip)
+
+    // Click the delete button for the second concept
+    const deleteButtons = screen.queryAllByRole('button', {
+      name: i18n.t('concept_chip_action_delete'),
+    })
+    expect(deleteButtons).toHaveLength(0)
+  })
 })

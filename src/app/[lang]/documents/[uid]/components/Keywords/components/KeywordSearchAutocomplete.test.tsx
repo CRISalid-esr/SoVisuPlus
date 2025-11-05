@@ -15,20 +15,56 @@ import { Concept } from '@/types/Concept'
 import { Document, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 import { Contribution } from '@/types/Contribution'
-import { Person } from '@/types/Person'
 import { LocRelator } from '@/types/LocRelator'
 import useStore from '@/stores/global_store'
+import { PermissionAction, PermissionSubject } from '@/types/Permission'
+import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
+import { InternalPerson } from '@/types/InternalPerson'
+import { useSession } from 'next-auth/react'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
 
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
 
+jest.mock('next-auth/react', () => ({
+  __esModule: true,
+  useSession: jest.fn(),
+}))
+
+const authz = makeAuthzContext({
+  roleAssignments: [
+    makeAssignment(
+      'document_editor',
+      [
+        {
+          action: PermissionAction.update,
+          subject: PermissionSubject.Document,
+          fields: [
+            'titles',
+            'abstracts',
+            'contributors',
+            'identifiers',
+            'documentType',
+            'subjects',
+          ],
+        },
+      ],
+      [{ entityType: 'Person', entityUid: 'local-me' }],
+    ),
+  ],
+})
+
 describe('KeywordSearchAutocomplete Component', () => {
   beforeEach(() => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { authz: authz } },
+    })
     ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
       selector(mockState),
     )
+    expect(() => abilityFromAuthzContext(authz)).not.toThrow()
     jest.clearAllMocks()
   })
 
@@ -46,16 +82,8 @@ describe('KeywordSearchAutocomplete Component', () => {
     [], // empty subjects
     [
       new Contribution(
-        new Person(
-          'person-1',
-          false,
-          'john@example.com',
-          'John Doe',
-          'John',
-          'Doe',
-          [],
-        ),
-        [LocRelator.AUTHOR_OF_INTRODUCTION__ETC_],
+        new InternalPerson('local-me', null, 'local-me', 'First', 'Last', []),
+        [LocRelator.AUTHOR],
       ),
     ],
   )
@@ -71,19 +99,19 @@ describe('KeywordSearchAutocomplete Component', () => {
       currentPerspective: {
         person: {
           id: '1',
-          firstName: 'John',
-          lastName: 'Doe',
+          firstName: 'First',
+          lastName: 'Last',
           type: 'people',
-          slug: 'person:john-doe',
+          slug: 'person:local-me',
         },
       },
       connectedUser: {
         person: {
           id: '1',
-          firstName: 'John',
-          lastName: 'Doe',
+          firstName: 'First',
+          lastName: 'Last',
           type: 'people',
-          slug: 'person:john-doe',
+          slug: 'person:local-me',
         },
       },
     },
@@ -92,7 +120,7 @@ describe('KeywordSearchAutocomplete Component', () => {
   const renderComponent = () =>
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete />
+        <KeywordSearchAutocomplete authorization={true} />
       </I18nProvider>,
     )
 
@@ -117,7 +145,10 @@ describe('KeywordSearchAutocomplete Component', () => {
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+        <KeywordSearchAutocomplete
+          fetchKeywords={fetchKeywordsMock}
+          authorization={true}
+        />
       </I18nProvider>,
     )
     const autocomplete = screen.getByRole('combobox')
@@ -138,7 +169,10 @@ describe('KeywordSearchAutocomplete Component', () => {
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+        <KeywordSearchAutocomplete
+          fetchKeywords={fetchKeywordsMock}
+          authorization={true}
+        />
       </I18nProvider>,
     )
     const autocomplete = screen.getByRole('combobox')
@@ -184,7 +218,10 @@ describe('KeywordSearchAutocomplete Component', () => {
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+        <KeywordSearchAutocomplete
+          fetchKeywords={fetchKeywordsMock}
+          authorization={true}
+        />
       </I18nProvider>,
     )
     const autocomplete = screen.getByRole('combobox')
@@ -215,7 +252,10 @@ describe('KeywordSearchAutocomplete Component', () => {
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+        <KeywordSearchAutocomplete
+          fetchKeywords={fetchKeywordsMock}
+          authorization={true}
+        />
       </I18nProvider>,
     )
     const autocomplete = screen.getByRole('combobox')
@@ -290,7 +330,10 @@ describe('KeywordSearchAutocomplete Component', () => {
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+        <KeywordSearchAutocomplete
+          fetchKeywords={fetchKeywordsMock}
+          authorization={true}
+        />
       </I18nProvider>,
     )
     const autocomplete = screen.getByRole('combobox')
@@ -317,5 +360,21 @@ describe('KeywordSearchAutocomplete Component', () => {
         screen.getByText(i18n.t('keywords_concept_added_success')),
       ).toBeInTheDocument()
     })
+  })
+
+  it("Check that unauthorized user can't see the autocomplete field", async () => {
+    const mockReturn: SuggestedKeywordsData[] = []
+    const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
+    render(
+      <I18nProvider i18n={i18n}>
+        <KeywordSearchAutocomplete
+          fetchKeywords={fetchKeywordsMock}
+          authorization={false}
+        />
+      </I18nProvider>,
+    )
+
+    const comboBox = screen.queryByRole('combobox')
+    expect(comboBox).not.toBeInTheDocument()
   })
 })
