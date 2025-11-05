@@ -353,6 +353,12 @@ function KeywordSearchAutocomplete({
                     },
                   ),
                 }}
+                sx={{
+                  '& em': {
+                    fontStyle: 'normal',
+                    backgroundColor: 'yellow',
+                  },
+                }}
               />
               <Typography sx={{ whiteSpace: 'pre' }}>
                 {' '}
