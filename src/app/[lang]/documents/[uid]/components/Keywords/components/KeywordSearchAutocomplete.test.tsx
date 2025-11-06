@@ -12,16 +12,115 @@ import KeywordSearchAutocomplete, {
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { Concept } from '@/types/Concept'
+import { Document, DocumentType } from '@/types/Document'
+import { Literal } from '@/types/Literal'
+import { Contribution } from '@/types/Contribution'
+import { LocRelator } from '@/types/LocRelator'
+import useStore from '@/stores/global_store'
+import { PermissionAction, PermissionSubject } from '@/types/Permission'
+import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
+import { InternalPerson } from '@/types/InternalPerson'
+import { useSession } from 'next-auth/react'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+
+jest.mock('@/stores/global_store', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+
+jest.mock('next-auth/react', () => ({
+  __esModule: true,
+  useSession: jest.fn(),
+}))
+
+const authz = makeAuthzContext({
+  roleAssignments: [
+    makeAssignment(
+      'document_editor',
+      [
+        {
+          action: PermissionAction.update,
+          subject: PermissionSubject.Document,
+          fields: [
+            'titles',
+            'abstracts',
+            'contributors',
+            'identifiers',
+            'documentType',
+            'subjects',
+          ],
+        },
+      ],
+      [{ entityType: 'Person', entityUid: 'local-me' }],
+    ),
+  ],
+})
 
 describe('KeywordSearchAutocomplete Component', () => {
   beforeEach(() => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { authz: authz } },
+    })
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector(mockState),
+    )
+    expect(() => abilityFromAuthzContext(authz)).not.toThrow()
     jest.clearAllMocks()
   })
+
+  const document: Document = new Document(
+    'doc-123',
+    DocumentType.Document,
+    '2022',
+    new Date('2022-01-01T00:00:00.000Z'),
+    new Date('2022-12-31T23:59:59.000Z'),
+    [
+      new Literal('Sample Document Title', 'en'),
+      new Literal('Sample Abstract', 'fr'),
+    ],
+    [new Literal('Sample Abstract', 'fr')],
+    [], // empty subjects
+    [
+      new Contribution(
+        new InternalPerson('local-me', null, 'local-me', 'First', 'Last', []),
+        [LocRelator.AUTHOR],
+      ),
+    ],
+  )
+
+  const mockState = {
+    document: {
+      fetchDocumentById: jest.fn(),
+      loading: false,
+      selectedDocument: document,
+      addConcepts: jest.fn(),
+    },
+    user: {
+      currentPerspective: {
+        person: {
+          id: '1',
+          firstName: 'First',
+          lastName: 'Last',
+          type: 'people',
+          slug: 'person:local-me',
+        },
+      },
+      connectedUser: {
+        person: {
+          id: '1',
+          firstName: 'First',
+          lastName: 'Last',
+          type: 'people',
+          slug: 'person:local-me',
+        },
+      },
+    },
+  }
 
   const renderComponent = () =>
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete selectedVocabs={['vocab-test']} />
+        <KeywordSearchAutocomplete authorization={true} selectedVocabs={['vocab-test']}/>
       </I18nProvider>,
     )
 
@@ -49,6 +148,7 @@ describe('KeywordSearchAutocomplete Component', () => {
         <KeywordSearchAutocomplete
           fetchKeywords={fetchKeywordsMock}
           selectedVocabs={['vocab-test']}
+          authorization={true}
         />
       </I18nProvider>,
     )
@@ -73,6 +173,7 @@ describe('KeywordSearchAutocomplete Component', () => {
         <KeywordSearchAutocomplete
           fetchKeywords={fetchKeywordsMock}
           selectedVocabs={['vocab-test']}
+          authorization={true}
         />
       </I18nProvider>,
     )
@@ -122,6 +223,7 @@ describe('KeywordSearchAutocomplete Component', () => {
         <KeywordSearchAutocomplete
           fetchKeywords={fetchKeywordsMock}
           selectedVocabs={['vocab-test']}
+          authorization={true}
         />
       </I18nProvider>,
     )
@@ -156,6 +258,7 @@ describe('KeywordSearchAutocomplete Component', () => {
         <KeywordSearchAutocomplete
           fetchKeywords={fetchKeywordsMock}
           selectedVocabs={['vocab-test']}
+          authorization={true}
         />
       </I18nProvider>,
     )
@@ -234,6 +337,7 @@ describe('KeywordSearchAutocomplete Component', () => {
         <KeywordSearchAutocomplete
           fetchKeywords={fetchKeywordsMock}
           selectedVocabs={['vocab-test']}
+          authorization={true}
         />
       </I18nProvider>,
     )
@@ -255,6 +359,28 @@ describe('KeywordSearchAutocomplete Component', () => {
     fireEvent.click(options[0])
 
     expect(addingButton).toBeEnabled()
+    fireEvent.click(addingButton)
+    await waitFor(() => {
+      expect(
+        screen.getByText(i18n.t('keywords_concept_added_success')),
+      ).toBeInTheDocument()
+    })
+  })
+
+  it("Check that unauthorized user can't see the autocomplete field", async () => {
+    const mockReturn: SuggestedKeywordsData[] = []
+    const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
+    render(
+      <I18nProvider i18n={i18n}>
+        <KeywordSearchAutocomplete
+          fetchKeywords={fetchKeywordsMock}
+          authorization={false}
+        />
+      </I18nProvider>,
+    )
+
+    const comboBox = screen.queryByRole('combobox')
+    expect(comboBox).not.toBeInTheDocument()
   })
 })
 

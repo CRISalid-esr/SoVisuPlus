@@ -120,11 +120,6 @@ msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:145
-msgid "documents_page_refresh_document_alert"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:170
 msgid "document_details_bibliographic_information_tab"
 msgstr ""
@@ -140,32 +135,8 @@ msgid "document_details_page_back_to_my_publications"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:62
-msgid "document_details_page_keywords_tab_card_title"
-msgstr "Keywords"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:237
-msgid "concept_chips_free_keyword"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:68
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:254
-msgid "concept_chips_pref_label"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:71
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:283
-msgid "concept_chips_alt_label"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:86
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:355
-msgid "concept_chip_action_delete"
+#: src/app/[lang]/documents/[uid]/page.tsx:145
+msgid "documents_page_refresh_document_alert"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -190,23 +161,48 @@ msgid "document_details_page_source_tab_card_title"
 msgstr "Sources"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:78
+msgid "document_details_page_keywords_tab_card_title"
+msgstr "Keywords"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:237
+msgid "concept_chips_free_keyword"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:197
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:68
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:254
+msgid "concept_chips_pref_label"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:71
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:283
+msgid "concept_chips_alt_label"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:86
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:122
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:355
+msgid "concept_chip_action_delete"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:237
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "Loading..."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:201
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:241
 msgid "document_details_page_keywords_input_options_fetch_error"
 msgstr "Unable to fetch suggestions"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:39
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:203
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:137
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:243
 msgid "document_details_page_keywords_input_default"
 msgstr "Please enter at least 3 characters"
 
@@ -222,13 +218,28 @@ msgid "document_details_page_keywords_input_options_no_options"
 msgstr "No options"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:234
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:274
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
 msgid "document_details_page_sources_row_update_source"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:360
+msgid "keywords_concept_added_success"
+msgstr "Keyword successfully added."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
+msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -249,11 +260,6 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:128
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:76
 msgid "document_details_page_type_row_label"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
-msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -381,12 +387,6 @@ msgid "orcid_identifier_no_orcid_provided"
 msgstr "No orcid identifier provided"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
-msgid "profile_affiliations_laboratories_label"
-msgstr "Laboratory/ies"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:88
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
 msgid "profile_affiliations_signature_label"
@@ -397,6 +397,12 @@ msgstr "My signature"
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:56
 msgid "profile_affiliations_signature_copied_message_confirmation"
 msgstr "Signature added to clipboard."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
+msgid "profile_affiliations_laboratories_label"
+msgstr "Laboratory/ies"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
@@ -440,17 +446,65 @@ msgstr ""
 msgid "document_details_page_journal_issn"
 msgstr "ISSN: <0>{0}</0>"
 
-#: src/app/[lang]/dashboard/page.tsx:18
+#: src/app/[lang]/dashboard/page.tsx:278
+msgid "dashboard_page_international_collaborations_title"
+msgstr ""
+
+#: src/app/[lang]/dashboard/page.tsx:286
+msgid "dashboard_page_international_collaborations_wip_description"
+msgstr ""
+
+#: src/app/[lang]/dashboard/page.tsx:285
+msgid "dashboard_page_international_collaborations_wip_title"
+msgstr ""
+
+#: src/app/[lang]/dashboard/page.tsx:105
 msgid "dashboard_page_main_title"
 msgstr "Dashboard page"
 
-#: src/app/[lang]/dashboard/page.tsx:22
-msgid "dashboard_page_wip_description"
-msgstr "This page will allow you to visualize indicators regarding the orientations of your work and the degree of openness of your publications."
+#: src/app/[lang]/dashboard/page.tsx:252
+msgid "dashboard_page_publication_by_year_title"
+msgstr ""
 
-#: src/app/[lang]/dashboard/page.tsx:21
-msgid "dashboard_page_wip_title"
-msgstr "Dashboard page : work in progress"
+#: src/app/[lang]/dashboard/page.tsx:260
+msgid "dashboard_page_publication_by_year_wip_description"
+msgstr ""
+
+#: src/app/[lang]/dashboard/page.tsx:259
+msgid "dashboard_page_publication_by_year_wip_title"
+msgstr ""
+
+#: src/app/[lang]/dashboard/page.tsx:202
+msgid "dashboard_page_wordstream_font_range_a11y"
+msgstr ""
+
+#: src/app/[lang]/dashboard/page.tsx:191
+msgid "dashboard_page_wordstream_font_range_label"
+msgstr ""
+
+#: src/app/[lang]/dashboard/page.tsx:120
+msgid "dashboard_page_wordstream_title"
+msgstr ""
+
+#: src/app/[lang]/dashboard/page.tsx:182
+msgid "dashboard_page_wordstream_topN_a11y"
+msgstr ""
+
+#: src/app/[lang]/dashboard/page.tsx:173
+msgid "dashboard_page_wordstream_topN_label"
+msgstr ""
+
+#: src/app/[lang]/dashboard/page.tsx:233
+msgid "dashboard_page_wordstream_validate_button_label"
+msgstr ""
+
+#: src/app/[lang]/dashboard/page.tsx:223
+msgid "dashboard_page_wordstream_year_range_a11y"
+msgstr ""
+
+#: src/app/[lang]/dashboard/page.tsx:211
+msgid "dashboard_page_wordstream_year_range_label"
+msgstr ""
 
 #: src/app/[lang]/documents/[uid]/page.tsx:57
 msgid "document_details_authors_tab"
@@ -904,3 +958,8 @@ msgstr "Login"
 #: src/app/[lang]/components/WorkInProgress/WorkInProgress.tsx:100
 msgid "wip_component_coming_soon"
 msgstr "Coming soon !"
+
+#: src/app/[lang]/components/WordStream/WordStream.tsx:133
+#: src/app/[lang]/components/WordStream/WordStream.tsx:187
+msgid "wordstream_no_data_to_display"
+msgstr ""

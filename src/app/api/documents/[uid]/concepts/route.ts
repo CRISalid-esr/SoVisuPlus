@@ -3,6 +3,8 @@ import { DocumentService } from '@/lib/services/DocumentService'
 import { getServerSession, Session } from 'next-auth'
 import authOptions from '@/app/auth/auth_options'
 import { ConceptJson } from '@/types/Concept'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
 
 export async function DELETE(
   request: Request,
@@ -10,7 +12,6 @@ export async function DELETE(
 ) {
   const { uid } = await context.params
 
-  // TODO implement access control !
   const session = (await getServerSession(authOptions)) as Session & {
     user: { username?: string }
   }
@@ -41,6 +42,22 @@ export async function DELETE(
     }
 
     const documentService = new DocumentService()
+    const ability = abilityFromAuthzContext(session?.user.authz)
+    const document = await documentService.fetchDocumentById(uid)
+    if (!document) {
+      return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+    }
+    const canUpdateDocumentSubjects = ability.can(
+      PermissionAction.update,
+      document!,
+      'subjects',
+    )
+    if (!canUpdateDocumentSubjects) {
+      return NextResponse.json(
+        { error: 'Logged user cannot update document subjects' },
+        { status: 403 },
+      )
+    }
     await documentService.deleteConceptsFromDocument(uid, conceptUids, userName)
 
     return NextResponse.json({ success: true })
@@ -59,7 +76,6 @@ export async function POST(
 ) {
   const { uid } = await context.params
 
-  // TODO implement access control !
   const session = (await getServerSession(authOptions)) as Session & {
     user: { username?: string }
   }
@@ -90,6 +106,22 @@ export async function POST(
     }
 
     const documentService = new DocumentService()
+    const ability = abilityFromAuthzContext(session?.user.authz)
+    const document = await documentService.fetchDocumentById(uid)
+    if (!document) {
+      return NextResponse.json({ error: 'Document not found' }, { status: 404 })
+    }
+    const canUpdateDocumentSubjects = ability.can(
+      PermissionAction.update,
+      document!,
+      'subjects',
+    )
+    if (!canUpdateDocumentSubjects) {
+      return NextResponse.json(
+        { error: 'Logged user cannot update document subjects' },
+        { status: 403 },
+      )
+    }
     await documentService.addConceptsToDocument(uid, concepts, userName)
 
     return NextResponse.json({ success: true })
