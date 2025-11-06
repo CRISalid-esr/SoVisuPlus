@@ -1,18 +1,28 @@
 import { CustomCard } from '@/components/Card'
 import { Trans } from '@lingui/react'
-import { Box, CardContent, Typography } from '@mui/material'
+import {
+  Box,
+  CardContent,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  Typography,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import useStore from '@/stores/global_store'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ConceptGroup } from '@/types/ConceptGroup'
 import ConceptChip from '@/app/[lang]/documents/[uid]/components/Keywords/ConceptChip'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Concept } from '@/types/Concept'
 import KeywordSearchAutocomplete from '@/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete'
+import { Vocab } from '@/types/Vocab'
 
 function Keywords() {
   const theme = useTheme()
+  const [selectedVocabs, setSelectedVocabs] =
+    useState<Record<string, boolean>>()
 
   const { selectedDocument = null, error = null } = useStore(
     (state) => state.document,
@@ -31,6 +41,13 @@ function Keywords() {
   const onRemoveConcepts = async (concepts: Concept[]) => {
     if (!selectedDocument) return
     await removeConcepts(concepts.map((c) => c.uid as string))
+  }
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedVocabs({
+      ...selectedVocabs,
+      [e.target.name]: e.target.checked,
+    })
   }
 
   useEffect(() => {
@@ -76,8 +93,29 @@ function Keywords() {
             />
           ))}
         </Box>
-        <Box>
-          <KeywordSearchAutocomplete />
+        <Box sx={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+          <KeywordSearchAutocomplete
+            selectedVocabs={
+              selectedVocabs
+                ? Object.keys(selectedVocabs).filter(
+                    (key) => selectedVocabs[key],
+                  )
+                : []
+            }
+          />
+          <FormGroup
+            sx={{ display: 'flex', flexDirection: 'row', width: '30%' }}
+          >
+            {Vocab.getVocabs().map((vocab) => (
+              <FormControlLabel
+                key={vocab + '-checkbox'}
+                control={
+                  <Checkbox onChange={handleCheckboxChange} name={vocab} />
+                }
+                label={vocab.toUpperCase()}
+              />
+            ))}
+          </FormGroup>
         </Box>
       </CardContent>
     </CustomCard>

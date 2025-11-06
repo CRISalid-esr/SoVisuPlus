@@ -68,7 +68,11 @@ async function getData(
           item.best_label
             ? Object.assign(
                 { num: Vocab.iriToIdentifier(item.iri, item.scheme) },
-                { text: item.best_label?.text, highlight: item.best_label?.highlight, vocab: item.scheme },
+                {
+                  text: item.best_label?.text,
+                  highlight: item.best_label?.highlight,
+                  vocab: item.scheme,
+                },
                 {
                   concept: new Concept(
                     item.iri,
@@ -89,7 +93,7 @@ async function getData(
                         )
                       : [],
                     item.iri,
-                  )
+                  ),
                 },
               )
             : undefined,
@@ -118,11 +122,16 @@ async function fetchWrapper(
 }
 
 export type KeywordSearchAutocompleteProps = {
-  fetchKeywords?: (value: string) => Promise<SuggestedKeywordsData[]>
+  fetchKeywords?: (
+    value: string,
+    vocabs?: string[],
+  ) => Promise<SuggestedKeywordsData[]>
+  selectedVocabs?: string[]
 }
 
 function KeywordSearchAutocomplete({
   fetchKeywords = fetchWrapper,
+  selectedVocabs,
 }: KeywordSearchAutocompleteProps) {
   const [keywordInput, setKeywordInput] = useState<string>('')
   const [keywords, setKeywords] = useState<SuggestedKeywordsData[]>([])
@@ -152,10 +161,14 @@ function KeywordSearchAutocomplete({
 
   useEffect(() => {
     setLoading(true)
-    if (keywordInput.length >= 3) {
+    if (
+      keywordInput.length >= 3 &&
+      selectedVocabs &&
+      selectedVocabs?.length != 0
+    ) {
       const handler = setTimeout(async () => {
         try {
-          const data = await fetchKeywords(keywordInput)
+          const data = await fetchKeywords(keywordInput, selectedVocabs)
           setKeywords(data)
         } catch (error) {
           if (error instanceof Error) {
@@ -172,7 +185,7 @@ function KeywordSearchAutocomplete({
       setKeywords([])
     }
     setLoading(false)
-  }, [fetchKeywords, keywordInput])
+  }, [fetchKeywords, keywordInput, selectedVocabs])
 
   useEffect(() => {
     if (fetchError) {
@@ -201,6 +214,8 @@ function KeywordSearchAutocomplete({
           <Trans id='document_details_page_keywords_input_options_fetch_error' />
         ) : keywordInput.length < 3 ? (
           <Trans id='document_details_page_keywords_input_default' />
+        ) : selectedVocabs?.length == 0 ? (
+          <Trans id='document_details_page_keywords_input_options_no_vocabs' />
         ) : (
           <Trans id='document_details_page_keywords_input_options_no_options' />
         )
@@ -321,7 +336,7 @@ function KeywordSearchAutocomplete({
           </Box>
         )
       }}
-      sx={{ marginTop: '15px' }}
+      sx={{ marginTop: '15px', display: 'flex', width: '70%' }}
     />
   )
 }

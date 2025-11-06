@@ -7,7 +7,6 @@ import {
   within,
 } from '@testing-library/react'
 import KeywordSearchAutocomplete, {
-  SuggestedKeyword,
   SuggestedKeywordsData,
 } from '@/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete'
 import { i18n } from '@lingui/core'
@@ -22,7 +21,7 @@ describe('KeywordSearchAutocomplete Component', () => {
   const renderComponent = () =>
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete />
+        <KeywordSearchAutocomplete selectedVocabs={['vocab-test']} />
       </I18nProvider>,
     )
 
@@ -47,7 +46,10 @@ describe('KeywordSearchAutocomplete Component', () => {
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+        <KeywordSearchAutocomplete
+          fetchKeywords={fetchKeywordsMock}
+          selectedVocabs={['vocab-test']}
+        />
       </I18nProvider>,
     )
     const autocomplete = screen.getByRole('combobox')
@@ -68,7 +70,10 @@ describe('KeywordSearchAutocomplete Component', () => {
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+        <KeywordSearchAutocomplete
+          fetchKeywords={fetchKeywordsMock}
+          selectedVocabs={['vocab-test']}
+        />
       </I18nProvider>,
     )
     const autocomplete = screen.getByRole('combobox')
@@ -86,7 +91,7 @@ describe('KeywordSearchAutocomplete Component', () => {
 
     fireEvent.change(autocomplete, { target: { value: 'abc' } })
     await waitFor(() => {
-      expect(fetchKeywordsMock).toHaveBeenCalledWith('abc')
+      expect(fetchKeywordsMock).toHaveBeenCalledWith('abc', ['vocab-test'])
     })
   })
 
@@ -114,7 +119,10 @@ describe('KeywordSearchAutocomplete Component', () => {
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+        <KeywordSearchAutocomplete
+          fetchKeywords={fetchKeywordsMock}
+          selectedVocabs={['vocab-test']}
+        />
       </I18nProvider>,
     )
     const autocomplete = screen.getByRole('combobox')
@@ -122,8 +130,10 @@ describe('KeywordSearchAutocomplete Component', () => {
 
     fireEvent.change(autocomplete, { target: { value: 'dia' } })
     await waitFor(async () => {
-      expect(fetchKeywordsMock).toHaveBeenCalledWith('dia')
-      expect(screen.getByText('AAT - Art & Architecture Thesaurus')).toBeInTheDocument()
+      expect(fetchKeywordsMock).toHaveBeenCalledWith('dia', ['vocab-test'])
+      expect(
+        screen.getByText('AAT - Art & Architecture Thesaurus'),
+      ).toBeInTheDocument()
       const emElement = screen.getByText('diadems')
       expect(emElement).toBeInTheDocument()
       expect(emElement.tagName).toBe('EM')
@@ -143,7 +153,10 @@ describe('KeywordSearchAutocomplete Component', () => {
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+        <KeywordSearchAutocomplete
+          fetchKeywords={fetchKeywordsMock}
+          selectedVocabs={['vocab-test']}
+        />
       </I18nProvider>,
     )
     const autocomplete = screen.getByRole('combobox')
@@ -218,7 +231,10 @@ describe('KeywordSearchAutocomplete Component', () => {
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete fetchKeywords={fetchKeywordsMock} />
+        <KeywordSearchAutocomplete
+          fetchKeywords={fetchKeywordsMock}
+          selectedVocabs={['vocab-test']}
+        />
       </I18nProvider>,
     )
     const autocomplete = screen.getByRole('combobox')
@@ -241,3 +257,5 @@ describe('KeywordSearchAutocomplete Component', () => {
     expect(addingButton).toBeEnabled()
   })
 })
+
+//add test about selectedVocab length
