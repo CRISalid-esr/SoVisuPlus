@@ -237,9 +237,7 @@ function KeywordSearchAutocomplete({
         clearOnBlur={false}
         clearOnEscape
         filterOptions={(x) => x}
-        getOptionLabel={(option) =>
-          option.highlight ? option.highlight : option.text
-        }
+        getOptionLabel={(option) => option.text}
         groupBy={(option) => option.vocab}
         includeInputInList
         inputValue={keywordInput}
@@ -257,130 +255,84 @@ function KeywordSearchAutocomplete({
           ) : (
             <Trans id='document_details_page_keywords_input_options_no_options' />
           )
-         } 
-         onChange={(event, value) => {
-            if (value) {
-              setAdd(true)
-              setSelectedKeyword(value)
-            } else {
-              setAdd(false)
-              setSelectedKeyword(undefined)
-            }
-          }}
-          onInputChange={(event, value) => {
-            setSelectedKeyword(undefined)
+        }
+        onChange={(event, value) => {
+          if (value) {
+            setAdd(true)
+            setSelectedKeyword(value)
+          } else {
             setAdd(false)
-            setKeywordInput(value)
-          }}
-          options={keywords
-            .sort((a, b) =>
-              a.vocab.toLowerCase().localeCompare(b.vocab.toLowerCase()),
-            )
-            .map((item) => item.items)
-            .flat()}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              error={!!fetchError}
-              helperText={
-                fetchError ? (
-                  <Trans id='document_details_page_keywords_input_fetch_error_label' />
-                ) : (
-                  ''
-                )
-              }
-              slotProps={{
-                input: {
-                  ...params.InputProps,
-                  startAdornment: (
-                    <InputAdornment position='start'>
-                      <IconButton
-                        disabled={!add}
-                        onClick={onAddConcept}
-                        aria-label={'adding_button'}
-                      >
-                        <Add />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
+            setSelectedKeyword(undefined)
+          }
+        }}
+        onInputChange={(event, value) => {
+          setSelectedKeyword(undefined)
+          setAdd(false)
+          setKeywordInput(value)
+        }}
+        options={keywords
+          .sort((a, b) =>
+            a.vocab.toLowerCase().localeCompare(b.vocab.toLowerCase()),
+          )
+          .map((item) => item.items)
+          .flat()}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            error={!!fetchError}
+            helperText={
+              fetchError ? (
+                <Trans id='document_details_page_keywords_input_fetch_error_label' />
+              ) : (
+                ''
+              )
+            }
+            slotProps={{
+              input: {
+                ...params.InputProps,
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <IconButton
+                      disabled={!add}
+                      onClick={onAddConcept}
+                      aria-label={'adding_button'}
+                    >
+                      <Add />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+        )}
+        renderGroup={(params) => {
+          const group = keywords.find((group) => group.vocab === params.group)
+          return (
+            <Box
+              key={params.key}
+              sx={{
+                marginLeft: '20px',
+                marginTop: '10px',
+                marginBottom: '30px',
               }}
-            />
-          )}
-          renderGroup={(params) => {
-            const group = keywords.find((group) => group.vocab === params.group)
-            return (
-              <Box
-                key={params.key}
-                sx={{
-                  marginLeft: '20px',
-                  marginTop: '10px',
-                  marginBottom: '30px',
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Image
-                    src={
-                      group
-                        ? VOCABS[group?.vocab.toUpperCase()].icon
-                        : '/icons/default.png'
-                    }
-                    alt={(group ? group.vocab.toUpperCase() : 'Vocab') + ' icon'}
-                    width={24}
-                    height={24}
-                  />
-                  <Typography sx={{ marginLeft: '15px', fontWeight: 'bold' }}>
-                    {params.group +
-                      (group
-                        ? ' - ' + VOCABS[group?.vocab.toUpperCase()].name
-                        : '')}
-                  </Typography>
-                </Box>
-                <Box sx={{ marginTop: '10px', marginBottom: '10px' }}>
-                  {params.children}
-                </Box>
-                {group && group.total > group.items.length ? (
-                  <Pagination
-                    count={Math.ceil(group.total / 5)}
-                    onChange={async (event, page) =>
-                      await updateKeywords(group.vocab.toLowerCase(), page)
-                    }
-                    sx={{ marginBottom: '20px' }}
-                  />
-                ) : null}
-                <Divider />
-              </Box>
-            )
-          }}
-          renderOption={(props, option, state, ownerState) => {
-            const { key, ...optionProps } = props
-            return (
-              <Box key={key + option.num} component={'li'} {...optionProps}>
-                <Icon />
-                <Typography
-                  dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(
-                      option.highlight ? option.highlight : option.text,
-                      {
-                        USE_PROFILES: { html: true },
-                      },
-                    ),
-                  }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Image
+                  src={
+                    group
+                      ? VOCABS[group?.vocab.toUpperCase()].icon
+                      : '/icons/default.png'
+                  }
+                  alt={(group ? group.vocab.toUpperCase() : 'Vocab') + ' icon'}
+                  width={24}
+                  height={24}
                 />
-                <Typography sx={{ whiteSpace: 'pre' }}>
-                  {' '}
-                  ({option.num}){' '}
+                <Typography sx={{ marginLeft: '15px', fontWeight: 'bold' }}>
+                  {params.group +
+                    (group
+                      ? ' - ' + VOCABS[group?.vocab.toUpperCase()].name
+                      : '')}
                 </Typography>
-                <Tooltip title={option.concept.uid}>
-                  <Link
-                    href={option.concept.uid}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    sx={{ display: 'inherit' }}
-                  >
-                    <InfoOutlined />
-                  </Link>
-                </Tooltip>
               </Box>
               <Box sx={{ marginTop: '10px', marginBottom: '10px' }}>
                 {params.children}
@@ -405,12 +357,18 @@ function KeywordSearchAutocomplete({
               <Icon />
               <Typography
                 dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(ownerState.getOptionLabel(option), {
-                    USE_PROFILES: { html: true },
-                  }),
+                  __html: DOMPurify.sanitize(
+                    option.highlight ? option.highlight : option.text,
+                    {
+                      USE_PROFILES: { html: true },
+                    },
+                  ),
                 }}
               />
-              <Typography sx={{ whiteSpace: 'pre' }}> ({option.num}) </Typography>
+              <Typography sx={{ whiteSpace: 'pre' }}>
+                {' '}
+                ({option.num}){' '}
+              </Typography>
               <Tooltip title={option.concept.uid}>
                 <Link
                   href={option.concept.uid}
@@ -424,13 +382,13 @@ function KeywordSearchAutocomplete({
             </Box>
           )
         }}
-        sx={{ display: authorization ? 'inherit' : 'none', marginTop: '15px', display: 'flex', width: '70%' }}
+        sx={{ display: authorization ? 'flex' : 'none', marginTop: '15px', width:'70%' }}
       />
-     <Snackbar
-          open={open}
-          autoHideDuration={3000}
-          message={<Trans id={idMessage ?? ''} />}
-          onClose={handleClose}
+      <Snackbar
+        open={open}
+        autoHideDuration={3000}
+        message={<Trans id={idMessage ?? ''} />}
+        onClose={handleClose}
       />
     </Box>
   )
