@@ -225,7 +225,7 @@ export class DocumentService {
         targetType: ActionTargetType.DOCUMENT,
         targetUid: documentUid,
         path: 'subjects',
-        parameters: JSON.stringify(concepts),
+        parameters: concepts.map((concept) => JSON.stringify(concept)),
         personUid: user.person?.uid,
       })
     } catch (error) {

@@ -385,20 +385,20 @@ describe('DocumentService', () => {
       targetType: 'DOCUMENT',
       targetUid: 'doc-123',
       path: 'subjects',
-      parameters: JSON.stringify([
-        {
+      parameters: [
+        JSON.stringify({
           uid: 'c1',
           prefLabels: [],
           altLabels: [],
           uri: null,
-        },
-        {
+        }),
+        JSON.stringify({
           uid: 'c2',
           prefLabels: [],
           altLabels: [],
           uri: null,
-        },
-      ]),
+        }),
+      ],
       personUid: 'local-123',
     })
   })
