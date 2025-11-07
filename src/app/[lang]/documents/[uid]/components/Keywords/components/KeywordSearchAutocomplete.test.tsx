@@ -236,6 +236,7 @@ describe('KeywordSearchAutocomplete Component', () => {
       const emElement = screen.getByText('diadems')
       expect(emElement).toBeInTheDocument()
       expect(emElement.tagName).toBe('EM')
+      expect(emElement).toHaveStyle({ backgroundColor: 'yellow' })
       expect(screen.getByText('(300046021)')).toBeInTheDocument()
       const link = await screen.findByRole('link')
       expect(link).toBeInTheDocument()
