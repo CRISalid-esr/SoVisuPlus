@@ -120,7 +120,10 @@ describe('KeywordSearchAutocomplete Component', () => {
   const renderComponent = () =>
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete authorization={true} selectedVocabs={['vocab-test']}/>
+        <KeywordSearchAutocomplete
+          authorization={true}
+          selectedVocabs={['vocab-test']}
+        />
       </I18nProvider>,
     )
 
@@ -374,6 +377,7 @@ describe('KeywordSearchAutocomplete Component', () => {
       <I18nProvider i18n={i18n}>
         <KeywordSearchAutocomplete
           fetchKeywords={fetchKeywordsMock}
+          selectedVocabs={['vocab-test']}
           authorization={false}
         />
       </I18nProvider>,
@@ -382,6 +386,31 @@ describe('KeywordSearchAutocomplete Component', () => {
     const comboBox = screen.queryByRole('combobox')
     expect(comboBox).not.toBeInTheDocument()
   })
-})
 
-//add test about selectedVocab length
+  it('Check that there is no fetch if no vocab selected', async () => {
+    const mockReturn: SuggestedKeywordsData[] = []
+    const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
+    render(
+      <I18nProvider i18n={i18n}>
+        <KeywordSearchAutocomplete
+          fetchKeywords={fetchKeywordsMock}
+          selectedVocabs={[]}
+          authorization={true}
+        />
+      </I18nProvider>,
+    )
+
+    const autocomplete = screen.getByRole('combobox')
+    expect(autocomplete).toBeInTheDocument()
+
+    fireEvent.change(autocomplete, { target: { value: 'abc' } })
+    await waitFor(() => {
+      expect(fetchKeywordsMock).not.toHaveBeenCalled()
+      expect(
+        screen.getByText(
+          i18n.t('document_details_page_keywords_input_options_no_vocabs'),
+        ),
+      ).toBeInTheDocument()
+    })
+  })
+})
