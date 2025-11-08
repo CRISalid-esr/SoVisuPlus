@@ -75,6 +75,7 @@ beforeEach(() => {
   act(() => {
     i18n.activate('en')
   })
+  jest.clearAllMocks()
 })
 
 describe('SignatureControl Component', () => {
@@ -110,5 +111,69 @@ describe('SignatureControl Component', () => {
         ),
       ).toBeInTheDocument()
     })
+  })
+
+  it('signature copy button disabled if no signature', async () => {
+    const mockStateWithNoSignature = {
+      user: {
+        connectedUser: {
+          id: '1',
+          person: {
+            uid: 'local-jdoe',
+            external: false,
+            displayName: 'John Doe',
+            firstName: 'John',
+            lastName: 'Doe',
+            memberships: [
+              {
+                id: 1,
+                personId: 1,
+                researchStructureId: 1,
+                startDate: null,
+                endDate: null,
+                positionCode: null,
+                researchStructure: {
+                  id: 1,
+                  uid: '12345',
+                  acronym: 'ABC',
+                  signature: '',
+                  external: false,
+                  slug: 'research-structure:abc',
+                },
+              },
+              {
+                id: 2,
+                personId: 1,
+                researchStructureId: 2,
+                startDate: null,
+                endDate: null,
+                positionCode: null,
+                researchStructure: {
+                  id: 2,
+                  uid: '67890',
+                  acronym: 'DEF',
+                  signature: '',
+                  external: false,
+                  slug: 'research-structure:def',
+                },
+              },
+            ],
+            membershipSignatures: [],
+          },
+          type: 'person',
+          slug: 'person:john-doe',
+        },
+      },
+    }
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector(mockStateWithNoSignature),
+    )
+    render(
+      <I18nProvider i18n={i18n}>
+        <SignatureControl />
+      </I18nProvider>,
+    )
+    const copyButton = screen.getByRole('button')
+    expect(copyButton).toBeDisabled()
   })
 })

@@ -46,7 +46,7 @@ export default function SignatureControl() {
       <Typography key='signatures' variant='body2' color='text.secondary'>
         {signatures.join()}
       </Typography>
-      <IconButton onClick={handleCopy}>
+      <IconButton onClick={handleCopy} disabled={signatures.length == 0}>
         <ContentCopy sx={open ? { color: 'black' } : { color: 'inherit' }} />
       </IconButton>
       <Snackbar
