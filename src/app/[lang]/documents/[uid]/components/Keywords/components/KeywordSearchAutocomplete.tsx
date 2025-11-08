@@ -126,12 +126,17 @@ async function fetchWrapper(
 }
 
 export type KeywordSearchAutocompleteProps = {
-  fetchKeywords?: (value: string) => Promise<SuggestedKeywordsData[]>
+  fetchKeywords?: (
+    value: string,
+    vocabs?: string[],
+  ) => Promise<SuggestedKeywordsData[]>
+  selectedVocabs?: string[]
   authorization?: boolean
 }
 
 function KeywordSearchAutocomplete({
   fetchKeywords = fetchWrapper,
+  selectedVocabs,
   authorization = false,
 }: KeywordSearchAutocompleteProps) {
   const [keywordInput, setKeywordInput] = useState<string>('')
@@ -193,10 +198,14 @@ function KeywordSearchAutocomplete({
 
   useEffect(() => {
     setLoading(true)
-    if (keywordInput.length >= 3) {
+    if (
+      keywordInput.length >= 3 &&
+      selectedVocabs &&
+      selectedVocabs?.length != 0
+    ) {
       const handler = setTimeout(async () => {
         try {
-          const data = await fetchKeywords(keywordInput)
+          const data = await fetchKeywords(keywordInput, selectedVocabs)
           setKeywords(data)
         } catch (error) {
           if (error instanceof Error) {
@@ -213,7 +222,7 @@ function KeywordSearchAutocomplete({
       setKeywords([])
     }
     setLoading(false)
-  }, [fetchKeywords, keywordInput])
+  }, [fetchKeywords, keywordInput, selectedVocabs])
 
   useEffect(() => {
     if (fetchError) {
@@ -241,6 +250,8 @@ function KeywordSearchAutocomplete({
             <Trans id='document_details_page_keywords_input_options_fetch_error' />
           ) : keywordInput.length < 3 ? (
             <Trans id='document_details_page_keywords_input_default' />
+          ) : selectedVocabs?.length == 0 ? (
+            <Trans id='document_details_page_keywords_input_options_no_vocabs' />
           ) : (
             <Trans id='document_details_page_keywords_input_options_no_options' />
           )
@@ -377,7 +388,7 @@ function KeywordSearchAutocomplete({
             </Box>
           )
         }}
-        sx={{ display: authorization ? 'inherit' : 'none', marginTop: '15px' }}
+        sx={{ display: authorization ? 'flex' : 'none', marginTop: '15px', width:'70%' }}
       />
       <Snackbar
         open={open}

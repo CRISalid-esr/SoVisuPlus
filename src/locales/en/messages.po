@@ -202,8 +202,13 @@ msgid "document_details_page_keywords_input_default"
 msgstr "Please enter at least 3 characters"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:161
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:245
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:206
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Please select one vocabulary at least"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:60
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:208
 msgid "document_details_page_keywords_input_options_no_options"
 msgstr "No options"
 
