@@ -42,7 +42,11 @@ import {
   MRT_Column,
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
+  MRT_ShowHideColumnsButton,
   MRT_SortingState,
+  MRT_ToggleDensePaddingButton,
+  MRT_ToggleFiltersButton,
+  MRT_ToggleGlobalFilterButton,
   MRT_VisibilityState,
 } from 'material-react-table'
 import Image from 'next/image'
@@ -73,6 +77,7 @@ import { PermissionAction } from '@/types/Permission'
 import { Can } from '@casl/react'
 import { toUTCISOString } from '@/utils/toUTCISOString'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
+import { FilterAltOff } from '@mui/icons-material'
 
 dayjs.extend(utc)
 
@@ -835,6 +840,7 @@ export default function DocumentsPage() {
         localization={Localization[lang]}
         enableRowActions
         positionActionsColumn='last'
+        enableToolbarInternalActions
         renderTopToolbarCustomActions={({ table }) =>
           table.getSelectedRowModel().rows.length > 0 && (
             <Box sx={{ display: 'flex', gap: '1rem', p: '4px' }}>
@@ -856,6 +862,17 @@ export default function DocumentsPage() {
             </Box>
           )
         }
+        renderToolbarInternalActions={({ table }) => (
+          <>
+            <MRT_ToggleGlobalFilterButton table={table} />
+            <MRT_ToggleFiltersButton table={table} />
+            <MRT_ShowHideColumnsButton table={table} />
+            <MRT_ToggleDensePaddingButton table={table} />
+            <IconButton onClick={() => table.resetColumnFilters()}>
+              <FilterAltOff />
+            </IconButton>
+          </>
+        )}
         renderRowActionMenuItems={({ row, table }) => {
           const isWaiting =
             row.original.state === DocumentState.waiting_for_update
