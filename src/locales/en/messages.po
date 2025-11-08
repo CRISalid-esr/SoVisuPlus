@@ -105,11 +105,6 @@ msgid "documents_page_hal_status_outside_hal"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
-msgid "documents_page_synchronize_modal_synchronize_button"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:726
 msgid "documents_page_refresh_list_alert_own_perspective"
 msgstr ""
@@ -117,6 +112,11 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:729
 msgid "documents_page_refresh_list_alert_other_perspective"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
+msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -140,7 +140,7 @@ msgid "document_details_page_back_to_my_publications"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:78
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:95
 msgid "document_details_page_keywords_tab_card_title"
 msgstr "Keywords"
 
@@ -191,55 +191,51 @@ msgid "document_details_page_source_tab_card_title"
 msgstr "Sources"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:246
+msgid "document_details_page_keywords_input_options_loading"
+msgstr "Loading..."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:250
+msgid "document_details_page_keywords_input_options_fetch_error"
+msgstr "Unable to fetch suggestions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:252
+msgid "document_details_page_keywords_input_default"
+msgstr "Please enter at least 3 characters"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:412
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:254
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Please select one vocabulary at least"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:165
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:256
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "No options"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:285
+msgid "document_details_page_keywords_input_fetch_error_label"
+msgstr "Error loading suggestions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:369
+msgid "keywords_concept_added_success"
+msgstr "Keyword successfully added."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
 msgid "document_details_page_domains_tab_card_title"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:137
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:243
-msgid "document_details_page_keywords_input_default"
-msgstr "Please enter at least 3 characters"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:206
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Please select one vocabulary at least"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:60
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:208
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "No options"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:361
-msgid "keywords_concept_added_success"
-msgstr "Keyword successfully added."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:237
-msgid "document_details_page_keywords_input_options_loading"
-msgstr "Loading..."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:241
-msgid "document_details_page_keywords_input_options_fetch_error"
-msgstr "Unable to fetch suggestions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:274
-msgid "document_details_page_keywords_input_fetch_error_label"
-msgstr "Error loading suggestions"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
 msgid "document_details_page_sources_row_update_source"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
-msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -260,6 +256,11 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:128
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:76
 msgid "document_details_page_type_row_label"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
+msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
 
 #. js-lingui-explicit-id
