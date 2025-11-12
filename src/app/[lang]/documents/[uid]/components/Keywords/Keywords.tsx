@@ -109,26 +109,36 @@ function Keywords() {
                 />
               ))}
             </Box>
-            <Box sx={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-              <KeywordSearchAutocomplete authorization={allowed} selectedVocabs={
-                selectedVocabs
-                  ? Object.keys(selectedVocabs).filter(
-                      (key) => selectedVocabs[key],
-                    )
-                  : []
-              }/>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: '20px',
+                alignItems: 'center',
+                marginTop: '15px',
+              }}
+            >
+              <KeywordSearchAutocomplete
+                authorization={allowed}
+                selectedVocabs={
+                  selectedVocabs
+                    ? Object.keys(selectedVocabs).filter(
+                        (key) => selectedVocabs[key],
+                      )
+                    : []
+                }
+              />
               <FormGroup
                 sx={{ display: 'flex', flexDirection: 'row', width: '30%' }}
               >
-              {Vocab.getVocabs().map((vocab) => (
-                <FormControlLabel
-                  key={vocab + '-checkbox'}
-                  control={
-                    <Checkbox onChange={handleCheckboxChange} name={vocab} />
-                  }
-                  label={vocab.toUpperCase()}
-                />
-              ))}
+                {Vocab.getVocabs().map((vocab) => (
+                  <FormControlLabel
+                    key={vocab + '-checkbox'}
+                    control={
+                      <Checkbox onChange={handleCheckboxChange} name={vocab} />
+                    }
+                    label={vocab.toUpperCase()}
+                  />
+                ))}
               </FormGroup>
             </Box>
           </CardContent>

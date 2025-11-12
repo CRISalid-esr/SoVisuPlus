@@ -231,7 +231,7 @@ function KeywordSearchAutocomplete({
   }, [fetchError])
 
   return (
-    <Box>
+    <Box sx={{ width: '70%' }}>
       <Autocomplete
         autoComplete
         clearOnBlur={false}
@@ -388,7 +388,7 @@ function KeywordSearchAutocomplete({
             </Box>
           )
         }}
-        sx={{ display: authorization ? 'flex' : 'none', marginTop: '15px', width:'70%' }}
+        sx={{ display: authorization ? 'flex' : 'none' }}
       />
       <Snackbar
         open={open}
