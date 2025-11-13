@@ -137,7 +137,6 @@ export type KeywordSearchAutocompleteProps = {
 function KeywordSearchAutocomplete({
   fetchKeywords = fetchWrapper,
   selectedVocabs,
-  authorization = false,
 }: KeywordSearchAutocompleteProps) {
   const [keywordInput, setKeywordInput] = useState<string>('')
   const [keywords, setKeywords] = useState<SuggestedKeywordsData[]>([])
@@ -231,7 +230,7 @@ function KeywordSearchAutocomplete({
   }, [fetchError])
 
   return (
-    <Box sx={{ width: '70%' }}>
+    <Box sx={{ width: '60%' }}>
       <Autocomplete
         autoComplete
         clearOnBlur={false}
@@ -328,10 +327,11 @@ function KeywordSearchAutocomplete({
                   height={24}
                 />
                 <Typography sx={{ marginLeft: '15px', fontWeight: 'bold' }}>
-                  {params.group +
-                    (group
-                      ? ' - ' + VOCABS[group?.vocab.toUpperCase()].name
-                      : '')}
+                  {group
+                    ? VOCABS[group?.vocab.toUpperCase()].org +
+                      ' - ' +
+                      VOCABS[group?.vocab.toUpperCase()].name
+                    : ''}
                 </Typography>
               </Box>
               <Box sx={{ marginTop: '10px', marginBottom: '10px' }}>
@@ -388,7 +388,6 @@ function KeywordSearchAutocomplete({
             </Box>
           )
         }}
-        sx={{ display: authorization ? 'flex' : 'none' }}
       />
       <Snackbar
         open={open}

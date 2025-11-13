@@ -120,10 +120,7 @@ describe('KeywordSearchAutocomplete Component', () => {
   const renderComponent = () =>
     render(
       <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete
-          authorization={true}
-          selectedVocabs={['vocab-test']}
-        />
+        <KeywordSearchAutocomplete selectedVocabs={['vocab-test']} />
       </I18nProvider>,
     )
 
@@ -151,7 +148,6 @@ describe('KeywordSearchAutocomplete Component', () => {
         <KeywordSearchAutocomplete
           fetchKeywords={fetchKeywordsMock}
           selectedVocabs={['vocab-test']}
-          authorization={true}
         />
       </I18nProvider>,
     )
@@ -176,7 +172,6 @@ describe('KeywordSearchAutocomplete Component', () => {
         <KeywordSearchAutocomplete
           fetchKeywords={fetchKeywordsMock}
           selectedVocabs={['vocab-test']}
-          authorization={true}
         />
       </I18nProvider>,
     )
@@ -226,7 +221,6 @@ describe('KeywordSearchAutocomplete Component', () => {
         <KeywordSearchAutocomplete
           fetchKeywords={fetchKeywordsMock}
           selectedVocabs={['vocab-test']}
-          authorization={true}
         />
       </I18nProvider>,
     )
@@ -237,7 +231,9 @@ describe('KeywordSearchAutocomplete Component', () => {
     await waitFor(async () => {
       expect(fetchKeywordsMock).toHaveBeenCalledWith('dia', ['vocab-test'])
       expect(
-        screen.getByText('AAT - Art & Architecture Thesaurus'),
+        screen.getByText(
+          'Getty Research Institute - Art & Architecture Thesaurus',
+        ),
       ).toBeInTheDocument()
       const emElement = screen.getByText('diadems')
       expect(emElement).toBeInTheDocument()
@@ -262,7 +258,6 @@ describe('KeywordSearchAutocomplete Component', () => {
         <KeywordSearchAutocomplete
           fetchKeywords={fetchKeywordsMock}
           selectedVocabs={['vocab-test']}
-          authorization={true}
         />
       </I18nProvider>,
     )
@@ -341,7 +336,6 @@ describe('KeywordSearchAutocomplete Component', () => {
         <KeywordSearchAutocomplete
           fetchKeywords={fetchKeywordsMock}
           selectedVocabs={['vocab-test']}
-          authorization={true}
         />
       </I18nProvider>,
     )
@@ -371,23 +365,6 @@ describe('KeywordSearchAutocomplete Component', () => {
     })
   })
 
-  it("Check that unauthorized user can't see the autocomplete field", async () => {
-    const mockReturn: SuggestedKeywordsData[] = []
-    const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
-    render(
-      <I18nProvider i18n={i18n}>
-        <KeywordSearchAutocomplete
-          fetchKeywords={fetchKeywordsMock}
-          selectedVocabs={['vocab-test']}
-          authorization={false}
-        />
-      </I18nProvider>,
-    )
-
-    const comboBox = screen.queryByRole('combobox')
-    expect(comboBox).not.toBeInTheDocument()
-  })
-
   it('Check that there is no fetch if no vocab selected', async () => {
     const mockReturn: SuggestedKeywordsData[] = []
     const fetchKeywordsMock = jest.fn().mockResolvedValue(mockReturn)
@@ -396,7 +373,6 @@ describe('KeywordSearchAutocomplete Component', () => {
         <KeywordSearchAutocomplete
           fetchKeywords={fetchKeywordsMock}
           selectedVocabs={[]}
-          authorization={true}
         />
       </I18nProvider>,
     )
