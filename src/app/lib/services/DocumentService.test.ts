@@ -385,20 +385,25 @@ describe('DocumentService', () => {
       targetType: 'DOCUMENT',
       targetUid: 'doc-123',
       path: 'subjects',
-      parameters: [
-        JSON.stringify({
-          uid: 'c1',
-          prefLabels: [],
-          altLabels: [],
-          uri: null,
-        }),
-        JSON.stringify({
-          uid: 'c2',
-          prefLabels: [],
-          altLabels: [],
-          uri: null,
-        }),
-      ],
+      parameters: JSON.stringify({
+        uid: 'c1',
+        prefLabels: [],
+        altLabels: [],
+        uri: null,
+      }),
+      personUid: 'local-123',
+    })
+    expect(mockCreateAction).toHaveBeenCalledWith({
+      actionType: 'ADD',
+      targetType: 'DOCUMENT',
+      targetUid: 'doc-123',
+      path: 'subjects',
+      parameters: JSON.stringify({
+        uid: 'c2',
+        prefLabels: [],
+        altLabels: [],
+        uri: null,
+      }),
       personUid: 'local-123',
     })
   })

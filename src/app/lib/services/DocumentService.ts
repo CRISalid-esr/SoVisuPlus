@@ -220,14 +220,18 @@ export class DocumentService {
       )
       await this.documentDAO.addConceptsToDocument(documentUid, concepts)
 
-      await this.actionDAO.createAction({
-        actionType: ActionType.ADD,
-        targetType: ActionTargetType.DOCUMENT,
-        targetUid: documentUid,
-        path: 'subjects',
-        parameters: concepts.map((concept) => JSON.stringify(concept)),
-        personUid: user.person?.uid,
-      })
+      await Promise.all(
+        concepts.map((concept) =>
+          this.actionDAO.createAction({
+            actionType: ActionType.ADD,
+            targetType: ActionTargetType.DOCUMENT,
+            targetUid: documentUid,
+            path: 'subjects',
+            parameters: JSON.stringify(concept),
+            personUid: user.person?.uid || '',
+          }),
+        ),
+      )
     } catch (error) {
       const message = 'Error adding concepts to document'
       console.error(message, error)
