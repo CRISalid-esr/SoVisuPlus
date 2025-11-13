@@ -111,14 +111,13 @@ function Keywords() {
             </Box>
             <Box
               sx={{
-                display: 'flex',
+                display: allowed ? 'flex' : 'none',
                 gap: '20px',
                 alignItems: 'center',
                 marginTop: '15px',
               }}
             >
               <KeywordSearchAutocomplete
-                authorization={allowed}
                 selectedVocabs={
                   selectedVocabs
                     ? Object.keys(selectedVocabs).filter(

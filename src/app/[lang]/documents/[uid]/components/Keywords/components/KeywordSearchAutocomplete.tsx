@@ -137,7 +137,6 @@ export type KeywordSearchAutocompleteProps = {
 function KeywordSearchAutocomplete({
   fetchKeywords = fetchWrapper,
   selectedVocabs,
-  authorization = false,
 }: KeywordSearchAutocompleteProps) {
   const [keywordInput, setKeywordInput] = useState<string>('')
   const [keywords, setKeywords] = useState<SuggestedKeywordsData[]>([])
@@ -388,7 +387,6 @@ function KeywordSearchAutocomplete({
             </Box>
           )
         }}
-        sx={{ display: authorization ? 'flex' : 'none' }}
       />
       <Snackbar
         open={open}
