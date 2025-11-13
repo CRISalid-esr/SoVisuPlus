@@ -230,7 +230,7 @@ function KeywordSearchAutocomplete({
   }, [fetchError])
 
   return (
-    <Box sx={{ width: '70%' }}>
+    <Box sx={{ width: '60%' }}>
       <Autocomplete
         autoComplete
         clearOnBlur={false}
@@ -327,10 +327,11 @@ function KeywordSearchAutocomplete({
                   height={24}
                 />
                 <Typography sx={{ marginLeft: '15px', fontWeight: 'bold' }}>
-                  {params.group +
-                    (group
-                      ? ' - ' + VOCABS[group?.vocab.toUpperCase()].name
-                      : '')}
+                  {group
+                    ? VOCABS[group?.vocab.toUpperCase()].org +
+                      ' - ' +
+                      VOCABS[group?.vocab.toUpperCase()].name
+                    : ''}
                 </Typography>
               </Box>
               <Box sx={{ marginTop: '10px', marginBottom: '10px' }}>

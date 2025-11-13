@@ -231,7 +231,9 @@ describe('KeywordSearchAutocomplete Component', () => {
     await waitFor(async () => {
       expect(fetchKeywordsMock).toHaveBeenCalledWith('dia', ['vocab-test'])
       expect(
-        screen.getByText('AAT - Art & Architecture Thesaurus'),
+        screen.getByText(
+          'Getty Research Institute - Art & Architecture Thesaurus',
+        ),
       ).toBeInTheDocument()
       const emElement = screen.getByText('diadems')
       expect(emElement).toBeInTheDocument()
