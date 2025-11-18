@@ -3,27 +3,13 @@ import {
   ConceptLabelWithRelations as DbConceptLabel,
   ConceptWithRelations as DbConcept,
 } from '@/prisma-schema/extended-client'
+import { VOCABS } from '@/lib/services/Vocabs'
 
 interface ConceptJson {
   uid: string
   uri: string | null
   prefLabels: Array<Literal>
   altLabels: Array<Literal>
-}
-
-enum ConceptVocabulary {
-  WIKIDATA = 'WIKIDATA',
-  IDREF = 'IDREF',
-  JEL = 'JEL',
-  ABES = 'ABES',
-  UNKNOWN = 'UNKNOWN',
-}
-
-const VOCAB_PREFIX_MAP: Record<string, ConceptVocabulary> = {
-  'http://www.wikidata.org': ConceptVocabulary.WIKIDATA,
-  'http://www.idref.fr': ConceptVocabulary.IDREF,
-  'http://zbw.eu': ConceptVocabulary.JEL,
-  'http://hub.abes.fr': ConceptVocabulary.ABES,
 }
 
 class Concept {
@@ -63,51 +49,28 @@ class Concept {
     )
   }
 
-  getVocabulary(): ConceptVocabulary | null {
+  getVocabulary(): string | null {
     if (!this.uri) {
       return null
     }
-
-    for (const prefix in VOCAB_PREFIX_MAP) {
-      if (this.uri.startsWith(prefix)) {
-        return VOCAB_PREFIX_MAP[prefix]
+    for (const vocab in VOCABS) {
+      if (this.uri.match(VOCABS[vocab].iriPatterns[0])) {
+        return vocab
       }
     }
-
-    return ConceptVocabulary.UNKNOWN
+    return 'UNKNOWN'
   }
 
   getIdentifier(): string {
     if (!this.uri) return ''
 
     const vocab = this.getVocabulary()
-    if (!vocab) return ''
-
-    switch (vocab) {
-      case ConceptVocabulary.WIKIDATA: {
-        const match = this.uri.match(/\/entity\/(Q\d+)/)
-        return match ? match[1] : ''
-      }
-      case ConceptVocabulary.IDREF: {
-        const match = this.uri.match(/idref\.fr\/(\d+)/)
-        return match ? match[1] : ''
-      }
-      case ConceptVocabulary.JEL: {
-        const match = this.uri.match(
-          /zbw\.eu\/beta\/external_identifiers\/jel#(J\d+)/,
-        )
-        return match ? match[1] : ''
-      }
-      case ConceptVocabulary.ABES: {
-        const match = this.uri.match(/\/subject\/([^/]+)/)
-        return match ? match[1] : ''
-      }
-      default:
-        return ''
-    }
+    if (!vocab || vocab == 'UNKNOWN') return ''
+    return (
+      this.uri.match(VOCABS[vocab].iriPatterns[0])?.groups?.identifier ?? ''
+    )
   }
 }
 
 export { Concept }
 export type { ConceptJson }
-export type { ConceptVocabulary }

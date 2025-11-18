@@ -18,22 +18,10 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { ConceptGroup } from '@/types/ConceptGroup'
 import { Trans } from '@lingui/react'
 import DeleteIcon from '@mui/icons-material/Delete'
-import Wikidata from '@/public/icons/wikidata-vocab.png'
-import Jel from '@/public/icons/jel-vocab.png'
-import Abes from '@/public/icons/abes-vocab.png'
-import { StaticImageData } from 'next/image'
-import { Concept, ConceptVocabulary } from '@/types/Concept'
-import Idref from '@/public/icons/idref-vocab.png'
+import { Concept } from '@/types/Concept'
 import UnknownVocab from '@/public/icons/unknown-vocab.png'
 import { CancelSharp } from '@mui/icons-material'
-
-const vocabularyIcons: Record<ConceptVocabulary, StaticImageData | null> = {
-  WIKIDATA: Wikidata,
-  IDREF: Idref,
-  JEL: Jel,
-  ABES: Abes,
-  UNKNOWN: null,
-}
+import { VOCABS } from '@/lib/services/Vocabs'
 
 type Props = {
   group: ConceptGroup
@@ -51,13 +39,13 @@ const unknownVocabularyIcon = (
     style={{ verticalAlign: 'text-bottom' }}
   />
 )
-const getVocabularyIcon = (vocab: ConceptVocabulary) => {
-  const icon = vocabularyIcons[vocab]
-  if (icon) {
+const getVocabularyIcon = (vocab: string | null) => {
+  if (vocab && vocab != 'UNKNOWN') {
+    const icon = VOCABS[vocab].icon
     return (
       // add margin right 1
       <img
-        src={icon.src}
+        src={icon}
         alt={vocab}
         width={24}
         height={24}
