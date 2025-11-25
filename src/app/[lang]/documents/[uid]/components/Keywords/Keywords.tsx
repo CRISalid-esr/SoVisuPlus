@@ -102,15 +102,21 @@ function Keywords() {
         >
           <CardContent>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              {groups.map((group) => (
-                <ConceptChip
-                  key={group.uid as string}
-                  group={group}
-                  language={lang as ExtendedLanguageCode}
-                  removable={allowed}
-                  onRemoveConcepts={onRemoveConcepts}
-                />
-              ))}
+              {groups.length > 0 ? (
+                groups.map((group) => (
+                  <ConceptChip
+                    key={group.uid as string}
+                    group={group}
+                    language={lang as ExtendedLanguageCode}
+                    removable={allowed}
+                    onRemoveConcepts={onRemoveConcepts}
+                  />
+                ))
+              ) : (
+                <Typography sx={{ fontStyle: 'italic' }}>
+                  <Trans id='document_details_page_keywords_tab_card_empty_content' />
+                </Typography>
+              )}
             </Box>
             <Box
               sx={{

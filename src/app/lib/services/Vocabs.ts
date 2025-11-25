@@ -19,16 +19,16 @@ export const VOCABS: Record<
     org: 'Getty Research Institute',
     url: 'https://www.getty.edu/research/tools/vocabularies/aat/',
   },
-  ['JEL']: {
+  ['ABES']: {
     iriPatterns: [
       RegExp(
-        '^http://zbw.eu/beta/external_identifiers(?:/(?!jel#).*)*(?:/jel#(?<identifier>[A-Z0-9]+))?(?:/.*)*$',
+        '^http://hub\\.abes\\.fr(?:/(?!subject)[^/]*)*(?:/subject/(?<identifier>[^/]+))?(?:/[^/]*)*$',
       ),
     ],
-    icon: '/icons/jel-vocab-old.svg',
-    name: 'Journal of Economic Literature',
-    org: 'American Economic Association',
-    url: 'https://www.aeaweb.org/jel/guide/jel.php',
+    icon: '/icons/abes-vocab.png',
+    name: 'Scienceplus',
+    org: "ABES : Agence bibliographique de l'enseignement supérieur",
+    url: 'http://hub.abes.fr',
   },
   ['ACM']: {
     iriPatterns: [
@@ -38,5 +38,36 @@ export const VOCABS: Record<
     name: 'Computing Classification System',
     org: 'Association for Computing Machinery',
     url: 'https://dl.acm.org/ccs',
+  },
+  ['IDREF']: {
+    iriPatterns: [
+      RegExp('^http://www\\.idref\\.fr(?:/(?<identifier>[A-Z0-9]+))?(?:/.*)*$'),
+    ],
+    icon: '/icons/idref-vocab.png',
+    name: "IdRef : Identifiants et référentiels pour l'enseignement supérieur et la recherche",
+    org: "ABES : Agence bibliographique de l'enseignement supérieur",
+    url: 'http://www.idref.fr',
+  },
+  ['JEL']: {
+    iriPatterns: [
+      RegExp(
+        '^http://zbw\\.eu(?:/(?!jel#)[^/]*)*(?:/jel#(?<identifier>[^/]+))?(?:/[^/]*)*',
+      ),
+    ],
+    icon: '/icons/jel-vocab.png', //or '@/public/icons/jel-vocab-old.svg'
+    name: 'Journal of Economic Literature',
+    org: 'American Economic Association',
+    url: 'https://www.aeaweb.org/jel/guide/jel.php',
+  },
+  ['WIKIDATA']: {
+    iriPatterns: [
+      RegExp(
+        '^http://www\\.wikidata\\.org/entity(?:/(?<identifier>[A-Z0-9]+))?(?:/.*)*$',
+      ),
+    ],
+    icon: '/icons/wikidata-vocab.png',
+    name: 'Wikidata',
+    org: 'Wikimedia Foundation',
+    url: 'http://www.wikidata.org',
   },
 }
