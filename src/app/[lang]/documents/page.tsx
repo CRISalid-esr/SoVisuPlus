@@ -386,6 +386,9 @@ export default function DocumentsPage() {
           )
         },
         filterVariant: 'date-range',
+        muiTableHeadCellProps: {
+          sx: { '& .MuiBox-root': { gridTemplateColumns: '1fr' } },
+        },
       },
       {
         accessorKey: 'publishedIn',
