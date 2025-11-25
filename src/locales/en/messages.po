@@ -66,7 +66,7 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:182
-#: src/app/[lang]/documents/page.tsx:774
+#: src/app/[lang]/documents/page.tsx:806
 msgid "documents_page_synchronize_button"
 msgstr ""
 
@@ -105,12 +105,12 @@ msgid "documents_page_hal_status_outside_hal"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:726
+#: src/app/[lang]/documents/page.tsx:758
 msgid "documents_page_refresh_list_alert_own_perspective"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:729
+#: src/app/[lang]/documents/page.tsx:761
 msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr ""
 
@@ -196,6 +196,29 @@ msgid "document_details_page_domains_tab_card_title"
 msgstr ""
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:137
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:251
+msgid "document_details_page_keywords_input_default"
+msgstr "Please enter at least 3 characters"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:161
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:255
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "No options"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:363
+msgid "keywords_concept_added_success"
+msgstr "Keyword successfully added."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:388
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:253
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Please select one vocabulary at least"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:245
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "Loading..."
@@ -206,41 +229,13 @@ msgid "document_details_page_keywords_input_options_fetch_error"
 msgstr "Unable to fetch suggestions"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:137
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:251
-msgid "document_details_page_keywords_input_default"
-msgstr "Please enter at least 3 characters"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:388
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:253
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Please select one vocabulary at least"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:161
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:255
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "No options"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:284
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:363
-msgid "keywords_concept_added_success"
-msgstr "Keyword successfully added."
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
 msgid "document_details_page_sources_row_update_source"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
-msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -261,6 +256,11 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:128
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:76
 msgid "document_details_page_type_row_label"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
+msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -627,11 +627,11 @@ msgstr "ORCID"
 msgid "documents_details_page_authors_tab_scopus_column"
 msgstr "Scopus"
 
-#: src/app/[lang]/documents/page.tsx:885
+#: src/app/[lang]/documents/page.tsx:919
 msgid "documents_page_action_column_details"
 msgstr "Details"
 
-#: src/app/[lang]/documents/page.tsx:600
+#: src/app/[lang]/documents/page.tsx:632
 msgid "documents_page_all_documents_filter"
 msgstr "All my documents"
 
@@ -664,7 +664,7 @@ msgid "documents_page_conference_article_icon_label"
 msgstr "Conference article"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:135
-#: src/app/[lang]/documents/page.tsx:326
+#: src/app/[lang]/documents/page.tsx:327
 msgid "documents_page_contributors_column"
 msgstr "authors"
 
@@ -680,11 +680,11 @@ msgstr ""
 msgid "documents_page_hal_status_outside_hal"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:411
+#: src/app/[lang]/documents/page.tsx:415
 msgid "documents_page_halStatus_column"
 msgstr "status in Hal"
 
-#: src/app/[lang]/documents/page.tsx:606
+#: src/app/[lang]/documents/page.tsx:638
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "HAL incomplete filing"
 
@@ -692,15 +692,15 @@ msgstr "HAL incomplete filing"
 msgid "documents_page_journal_article_icon_label"
 msgstr "Journal article"
 
-#: src/app/[lang]/documents/page.tsx:714
+#: src/app/[lang]/documents/page.tsx:746
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:713
+#: src/app/[lang]/documents/page.tsx:745
 msgid "documents_page_main_title_first_person"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:860
+#: src/app/[lang]/documents/page.tsx:894
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
 
@@ -721,17 +721,17 @@ msgid "documents_page_proceedings_icon_label"
 msgstr "Proceedings"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:140
-#: src/app/[lang]/documents/page.tsx:359
+#: src/app/[lang]/documents/page.tsx:360
 msgid "documents_page_publication_date_column"
 msgstr "Date"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:13
-#: src/app/[lang]/documents/page.tsx:363
+#: src/app/[lang]/documents/page.tsx:364
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "No date available"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:145
-#: src/app/[lang]/documents/page.tsx:391
+#: src/app/[lang]/documents/page.tsx:395
 msgid "documents_page_publishedIn_column"
 msgstr "published in"
 
@@ -739,7 +739,7 @@ msgstr "published in"
 msgid "documents_page_refresh_document"
 msgstr ""
 
-#: src/app/[lang]/documents/page.tsx:749
+#: src/app/[lang]/documents/page.tsx:781
 msgid "documents_page_refresh_list"
 msgstr ""
 
@@ -748,7 +748,7 @@ msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Scientific publication"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:153
-#: src/app/[lang]/documents/page.tsx:453
+#: src/app/[lang]/documents/page.tsx:457
 msgid "documents_page_source_column"
 msgstr "Sources"
 
@@ -792,12 +792,12 @@ msgid "documents_page_synchronize_modal_title"
 msgstr "Sources to be syncronized"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:103
-#: src/app/[lang]/documents/page.tsx:256
+#: src/app/[lang]/documents/page.tsx:257
 msgid "documents_page_title_column"
 msgstr "title"
 
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:61
-#: src/app/[lang]/documents/page.tsx:237
+#: src/app/[lang]/documents/page.tsx:238
 msgid "documents_page_type_column"
 msgstr "type"
 
@@ -842,7 +842,7 @@ msgstr "Notifications"
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:16
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:98
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:116
-#: src/app/[lang]/documents/page.tsx:277
+#: src/app/[lang]/documents/page.tsx:278
 msgid "no_title_available"
 msgstr "no title available"
 
