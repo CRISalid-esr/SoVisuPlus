@@ -42,6 +42,7 @@ import {
   MRT_Column,
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
+  MRT_ColumnSizingState,
   MRT_ShowHideColumnsButton,
   MRT_SortingState,
   MRT_ToggleDensePaddingButton,
@@ -580,6 +581,34 @@ export default function DocumentsPage() {
     )
   }, [columnVisibility])
 
+  const readInitialColumnSizing = (
+    columns: MRT_ColumnDef<Document>[],
+  ): MRT_ColumnSizingState => {
+    try {
+      const raw = sessionStorage.getItem('mrt_columnSizing_publication_table')
+      if (!raw) return {} // all visible by default
+      const parsed = JSON.parse(raw) as MRT_ColumnSizingState
+      const valid = new Set(getColumnIds(columns))
+      // keep only known columns
+      return Object.fromEntries(
+        Object.entries(parsed).filter(([id]) => valid.has(id)),
+      )
+    } catch {
+      return {}
+    }
+  }
+
+  const [columnSizing, setColumnSizing] = useState<MRT_ColumnSizingState>(() =>
+    readInitialColumnSizing(columns),
+  )
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      'mrt_columnSizing_publication_table',
+      JSON.stringify(columnSizing),
+    )
+  }, [columnSizing])
+
   const requestIdRef = useRef(0)
   const countDocumentsRequestIdRef = useRef(0)
 
@@ -823,6 +852,7 @@ export default function DocumentsPage() {
         enablePagination
         onPaginationChange={setPagination}
         onColumnFiltersChange={setColumnFilters}
+        onColumnSizingChange={setColumnSizing}
         onGlobalFilterChange={setGlobalFilter}
         onSortingChange={setSorting}
         onColumnVisibilityChange={(newState) => {
@@ -834,6 +864,7 @@ export default function DocumentsPage() {
           pagination,
           sorting: sorting || DEFAULT_SORTING,
           columnFilters,
+          columnSizing,
           globalFilter,
           columnVisibility,
         }}
