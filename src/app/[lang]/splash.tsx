@@ -190,7 +190,12 @@ export default function Splash({ images }: Props) {
             bgcolor={`rgb(from ${theme.palette.primary.main} r g b / 75%)`}
             p={2}
           >
-            <Typography component='h1' variant='displayLarge' mb={5}>
+            <Typography
+              component='h1'
+              variant='displayLarge'
+              mb={5}
+              sx={{ fontFamily: 'Montserrat' }}
+            >
               {locales?.header}
             </Typography>
 
