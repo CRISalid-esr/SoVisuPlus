@@ -57,7 +57,7 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
           ...state.user,
           currentPerspective: perspective,
           ownPerspective:
-            state.user.connectedUser?.person?.uid === perspective.uid,
+            state.user.connectedUser?.person?.uid === perspective?.uid,
         },
       }))
     },
