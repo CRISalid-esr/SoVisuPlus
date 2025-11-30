@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H sovisuplus.local -p 3000",
+    "dev-tls": "next dev --experimental-https --experimental-https-key ~/local-certs/sovisuplus.local+4-key.pem --experimental-https-cert ~/local-certs/sovisuplus.local+4.pem -H sovisuplus.local -p 3000",
     "build": "next build",
     "build:custom": "cross-env NEXT_PUBLIC_INSTITUTIONAL=custom next build",
     "dev:custom": "cross-env NEXT_PUBLIC_INSTITUTIONAL=custom next dev",
