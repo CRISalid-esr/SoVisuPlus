@@ -59,22 +59,6 @@ msgid "forbidden_page_description"
 msgstr "Vous n'êtes pas autorisé à accéder à cette ressource. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:130
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:193
-msgid "documents_page_hal_status_in_collection"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:146
-msgid "documents_page_hal_status_out_of_collection"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:171
-msgid "documents_page_hal_status_outside_hal"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:178
 #: src/app/[lang]/documents/page.test.tsx:201
 msgid "documents_page_main_title_first_person"
@@ -103,6 +87,22 @@ msgstr ""
 #: src/app/[lang]/documents/page.test.tsx:427
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:130
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:193
+msgid "documents_page_hal_status_in_collection"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:146
+msgid "documents_page_hal_status_out_of_collection"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:171
+msgid "documents_page_hal_status_outside_hal"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:758
@@ -150,6 +150,27 @@ msgid "document_details_page_keywords_tab_card_empty_content"
 msgstr "Aucun mot-clé"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:257
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:266
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "Actions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:272
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalider"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:279
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissocier"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:315
+msgid "document_details_page_source_tab_card_title"
+msgstr "Références bibliographiques sources"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:225
 msgid "concept_chips_free_keyword"
@@ -173,27 +194,6 @@ msgstr "Formes alternatives"
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:343
 msgid "concept_chip_action_delete"
 msgstr "Supprimer"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:257
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:266
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "Actions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:272
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalider"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:279
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissocier"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:315
-msgid "document_details_page_source_tab_card_title"
-msgstr "Références bibliographiques sources"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:245
@@ -239,6 +239,11 @@ msgid "document_details_page_domains_tab_card_title"
 msgstr "Domaines"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
+msgid "document_details_page_sources_row_update_source"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:125
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:55
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:99
@@ -256,11 +261,6 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:128
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:76
 msgid "document_details_page_type_row_label"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
-msgid "document_details_page_sources_row_update_source"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -941,23 +941,23 @@ msgstr "Thème clair"
 msgid "sidebar_theme_system"
 msgstr "Thème automatique"
 
-#: src/app/[lang]/splash.tsx:129
+#: src/app/[lang]/splash.tsx:145
 msgid "splash.about"
 msgstr "À propos"
 
-#: src/app/[lang]/splash.tsx:135
+#: src/app/[lang]/splash.tsx:151
 msgid "splash.accessibility"
 msgstr "Accessibilité"
 
-#: src/app/[lang]/splash.tsx:138
+#: src/app/[lang]/splash.tsx:154
 msgid "splash.community"
 msgstr "Communauté"
 
-#: src/app/[lang]/splash.tsx:132
+#: src/app/[lang]/splash.tsx:148
 msgid "splash.legal_mentions"
 msgstr "Mentions légales"
 
-#: src/app/[lang]/splash.tsx:101
+#: src/app/[lang]/splash.tsx:117
 msgid "splash.login"
 msgstr "Connectez-vous"
 
