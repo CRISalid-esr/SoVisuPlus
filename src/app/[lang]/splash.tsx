@@ -7,10 +7,16 @@ import { signIn } from 'next-auth/react'
 import { useTheme } from '@mui/material/styles'
 import { Link } from '@mui/material'
 import * as Lingui from '@lingui/core'
-
 import { ThemeLocales } from '@/types/ThemeLocales'
 
-export default function Splash() {
+export type Props = {
+  images: {
+    backgroundUrl: string
+    logoUrl: string
+  }
+}
+
+export default function Splash({ images }: Props) {
   const lang = Lingui.i18n.locale || 'fr'
   const [locales, setLocales] = useState<ThemeLocales>()
   const theme = useTheme()
@@ -64,6 +70,16 @@ export default function Splash() {
             justifyContent='center'
             alignItems='center'
           >
+            <Box mb={7}>
+              <img
+                src={images.logoUrl}
+                alt='Organisation logo'
+                style={{
+                  maxHeight: '250px',
+                }}
+              />
+            </Box>
+
             <Box mb={7}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -160,7 +176,7 @@ export default function Splash() {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src='/theme/splash_background.svg'
+            src={images.backgroundUrl}
             alt='SoVisuPlus splash screen background'
             style={{ position: 'absolute', zIndex: -1 }}
           />
@@ -174,7 +190,12 @@ export default function Splash() {
             bgcolor={`rgb(from ${theme.palette.primary.main} r g b / 75%)`}
             p={2}
           >
-            <Typography component='h1' variant='displayLarge' mb={5}>
+            <Typography
+              component='h1'
+              variant='displayLarge'
+              mb={5}
+              sx={{ fontFamily: 'Montserrat' }}
+            >
               {locales?.header}
             </Typography>
 
