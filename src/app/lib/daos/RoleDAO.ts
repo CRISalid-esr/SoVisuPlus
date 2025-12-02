@@ -58,6 +58,10 @@ export class RoleDAO extends AbstractDAO {
     const toRemove = [...currentIds].filter((id) => !desiredIds.has(id))
 
     if (toAdd.length) {
+      console.log(
+        `Adding ${toAdd.length} permissions to role ID ${roleId} : `,
+        toAdd,
+      )
       await this.prismaClient.rolePermission.createMany({
         data: toAdd.map((permissionId) => ({ roleId, permissionId })),
         skipDuplicates: true,
@@ -65,6 +69,9 @@ export class RoleDAO extends AbstractDAO {
     }
 
     for (const permissionId of toRemove) {
+      console.log(
+        `Removing permission ID ${permissionId} from role ID ${roleId}`,
+      )
       await this.prismaClient.rolePermission.deleteMany({
         where: { roleId, permissionId },
       })
@@ -91,7 +98,9 @@ export class RoleDAO extends AbstractDAO {
       },
     })
     if (found) return found
-
+    console.log(
+      `Creating permission: ${action} ${subject} [inverted=${inverted}] fields=${fields.join(',')}`,
+    )
     return this.prismaClient.permission.create({
       data: {
         action,
