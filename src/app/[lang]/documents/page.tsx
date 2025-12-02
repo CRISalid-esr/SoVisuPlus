@@ -110,7 +110,35 @@ export default function DocumentsPage() {
   const readInitialColumnFilters = (): MRT_ColumnFiltersState => {
     try {
       const raw = sessionStorage.getItem('mrt_columnFilters_publication_table')
-      return raw ? JSON.parse(raw) : []
+
+      if (!raw) {
+        return []
+      }
+
+      return JSON.parse(raw).reduce(
+        (
+          filters: MRT_ColumnFiltersState,
+          filter: {
+            id: string
+            value: unknown
+          },
+        ) => {
+          if (filter.id !== 'date' || !Array.isArray(filter.value)) {
+            return [...filters, filter]
+          }
+
+          return [
+            ...filters,
+            {
+              id: filter.id,
+              value: filter.value.map((value: string | null) =>
+                value ? dayjs(value) : '',
+              ),
+            },
+          ]
+        },
+        [],
+      )
     } catch {
       return []
     }
