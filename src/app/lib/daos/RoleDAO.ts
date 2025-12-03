@@ -112,4 +112,18 @@ export class RoleDAO extends AbstractDAO {
       },
     })
   }
+
+  async removeOrphanPermissions(): Promise<void> {
+    const result = await this.prismaClient.permission.deleteMany({
+      where: {
+        roles: {
+          none: {},
+        },
+      },
+    })
+
+    if (result.count > 0) {
+      console.log(`Removed ${result.count} orphan permission(s)`)
+    }
+  }
 }
