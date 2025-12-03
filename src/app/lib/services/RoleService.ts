@@ -57,6 +57,7 @@ export class RoleService {
 
       await this.roleDAO.setRolePermissions(dbRole.id, permissionIds)
     }
+    await this.roleDAO.removeOrphanPermissions()
   }
 
   private normalize(config: RolesFileSeed) {
