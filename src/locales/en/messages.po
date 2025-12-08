@@ -150,6 +150,27 @@ msgid "document_details_page_keywords_tab_card_empty_content"
 msgstr "No keywords"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:257
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:266
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "action"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:272
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:279
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:315
+msgid "document_details_page_source_tab_card_title"
+msgstr "Sources"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:225
 msgid "concept_chips_free_keyword"
@@ -173,27 +194,6 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:343
 msgid "concept_chip_action_delete"
 msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:257
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:266
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "action"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:272
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:279
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:315
-msgid "document_details_page_source_tab_card_title"
-msgstr "Sources"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
@@ -941,23 +941,23 @@ msgstr "Light theme"
 msgid "sidebar_theme_system"
 msgstr "Auto Theme"
 
-#: src/app/[lang]/splash.tsx:145
+#: src/app/[lang]/splash.tsx:146
 msgid "splash.about"
 msgstr ""
 
-#: src/app/[lang]/splash.tsx:151
+#: src/app/[lang]/splash.tsx:152
 msgid "splash.accessibility"
 msgstr ""
 
-#: src/app/[lang]/splash.tsx:154
+#: src/app/[lang]/splash.tsx:155
 msgid "splash.community"
 msgstr ""
 
-#: src/app/[lang]/splash.tsx:148
+#: src/app/[lang]/splash.tsx:149
 msgid "splash.legal_mentions"
 msgstr ""
 
-#: src/app/[lang]/splash.tsx:117
+#: src/app/[lang]/splash.tsx:118
 msgid "splash.login"
 msgstr "Login"
 
