@@ -41,6 +41,9 @@ import { DocumentTypeLabels } from '../../../components/DocumentTypeLabels'
 
 import CallMergeIcon from '@mui/icons-material/CallMerge'
 import { Localization } from '@/types/Localization'
+import { LocRelator } from '@/types/LocRelator'
+import dayjs from 'dayjs'
+import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 
 function Sources() {
   const { selectedDocument = null } = useStore((state) => state.document)
@@ -132,6 +135,15 @@ function Sources() {
       },
       {
         accessorKey: 'contributions',
+        accessorFn: (row) => {
+          return row.contributions
+            .map((contribution) =>
+              contribution.role == LocRelator.AUTHOR
+                ? contribution.person.name
+                : '',
+            )
+            .join(', ')
+        },
         header: t`documents_page_contributors_column`,
       },
       {
@@ -139,13 +151,38 @@ function Sources() {
         accessorKey: 'date',
         header: t`documents_page_publication_date_column`,
         filterVariant: 'date-range',
+        Cell({
+          row,
+        }: {
+          row: { original: DocumentRecord }
+          renderedCellValue: ReactNode
+        }) {
+          const date = row.original.publicationDate
+          return (
+            <Typography>
+              {!date
+                ? t`documents_page_publication_date_column_no_date_available`
+                : !dayjs(date, 'YYYY-MM-DD').isValid()
+                  ? date.toString()
+                  : dayjs(date, 'YYYY-MM-DD').format(
+                      LocaleDateFormats['lang'] || 'MM-DD-YYYY',
+                    )}
+            </Typography>
+          )
+        },
       },
       {
         accessorKey: 'publishedIn',
-        header: t`documents_page_publishedIn_column`,
-        Cell() {
-          return ''
+        accessorFn: (row) => {
+          if (row.journal) {
+            let str = row.journal?.titles[0]
+            if (row.journal?.publisher) {
+              str += ' (' + row.journal?.publisher + ')'
+            }
+            return str
+          }
         },
+        header: t`documents_page_publishedIn_column`,
       },
       {
         enableSorting: false,
@@ -318,7 +355,7 @@ function Sources() {
       }
     >
       <CardContent>
-        <MaterialReactTable table={table} />;
+        <MaterialReactTable table={table} />
       </CardContent>
     </CustomCard>
   )

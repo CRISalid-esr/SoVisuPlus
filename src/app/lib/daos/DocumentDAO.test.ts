@@ -22,6 +22,9 @@ import {
 } from '@/types/BibliographicPlatform'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
+import { SourceContribution } from '@/types/SourceContribution'
+import { SourcePerson } from '@/types/SourcePerson'
+import { SourceJournal } from '@/types/SourceJournal'
 
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
@@ -174,7 +177,16 @@ describe('DocumentDAO', () => {
       include: {
         titles: true,
         abstracts: true,
-        records: true,
+        records: {
+          include: {
+            contributions: {
+              include: {
+                person: true,
+              },
+            },
+            journal: true,
+          },
+        },
         subjects: {
           include: {
             labels: true,
@@ -275,6 +287,28 @@ describe('DocumentDAO', () => {
       [
         new DocumentRecord(
           'hal-123',
+          [
+            new SourceContribution(
+              LocRelator.AUTHOR,
+              new SourcePerson(
+                'hal-001-uid',
+                'Matthieu Dupond',
+                'hal',
+                'hal-001-uid',
+              ),
+            ),
+            new SourceContribution(
+              LocRelator.TEACHER,
+              new SourcePerson(
+                'hal-002-uid',
+                'Laura Dupuis',
+                'hal',
+                'hal-002-uid',
+              ),
+            ),
+          ],
+          ['Document', 'Book'],
+          new Date('2022-01-01T00:00:00.000Z'),
           getBibliographicPlatformByNameIgnoreCase(
             'hal',
           ) as BibliographicPlatform,
@@ -282,6 +316,13 @@ describe('DocumentDAO', () => {
           'https://hal.science/hal-123',
           ['UNIV-NANTES', 'CNRS'],
           'notice',
+          new SourceJournal(
+            'uid-journal-0001',
+            'ScanR',
+            'scanr-0001',
+            ['Journal du savoir'],
+            'Les Grandes Editions',
+          ),
         ),
       ],
     )
@@ -300,21 +341,130 @@ describe('DocumentDAO', () => {
     expect(mockPrisma.documentRecord.upsert).toHaveBeenCalledWith({
       where: { uid: 'hal-123' },
       update: {
+        contributions: {
+          deleteMany: {},
+          create: [
+            {
+              person: {
+                connectOrCreate: {
+                  create: {
+                    name: 'Matthieu Dupond',
+                    source: 'hal',
+                    sourceId: 'hal-001-uid',
+                    uid: 'hal-001-uid',
+                  },
+                  where: {
+                    uid: 'hal-001-uid',
+                  },
+                },
+              },
+              role: 'author',
+            },
+            {
+              person: {
+                connectOrCreate: {
+                  create: {
+                    name: 'Laura Dupuis',
+                    source: 'hal',
+                    sourceId: 'hal-002-uid',
+                    uid: 'hal-002-uid',
+                  },
+                  where: {
+                    uid: 'hal-002-uid',
+                  },
+                },
+              },
+              role: 'teacher',
+            },
+          ],
+        },
+        documentTypes: ['Document', 'Book'],
+        publicationDate: new Date('2022-01-01T00:00:00.000Z'),
         document: { connect: { id: 42 } },
         platform: { set: 'hal' },
         titles: [{ value: 'HAL Record Title', language: 'fr' }],
         url: 'https://hal.science/hal-123',
         halCollectionCodes: ['UNIV-NANTES', 'CNRS'],
         halSubmitType: 'notice',
+        journal: {
+          connectOrCreate: {
+            create: {
+              publisher: 'Les Grandes Editions',
+              source: 'ScanR',
+              sourceId: 'scanr-0001',
+              titles: ['Journal du savoir'],
+              uid: 'uid-journal-0001',
+            },
+            where: {
+              uid: 'uid-journal-0001',
+            },
+          },
+        },
       },
       create: {
         uid: 'hal-123',
+        contributions: {
+          create: [
+            {
+              person: {
+                connectOrCreate: {
+                  create: {
+                    name: 'Matthieu Dupond',
+                    source: 'hal',
+                    sourceId: 'hal-001-uid',
+                    uid: 'hal-001-uid',
+                  },
+                  where: {
+                    uid: 'hal-001-uid',
+                  },
+                },
+              },
+              role: 'author',
+            },
+            {
+              person: {
+                connectOrCreate: {
+                  create: {
+                    name: 'Laura Dupuis',
+                    source: 'hal',
+                    sourceId: 'hal-002-uid',
+                    uid: 'hal-002-uid',
+                  },
+                  where: {
+                    uid: 'hal-002-uid',
+                  },
+                },
+              },
+              role: 'teacher',
+            },
+          ],
+        },
+        documentTypes: ['Document', 'Book'],
+        publicationDate: new Date('2022-01-01T00:00:00.000Z'),
         platform: 'hal',
         titles: [{ value: 'HAL Record Title', language: 'fr' }],
         url: 'https://hal.science/hal-123',
         halCollectionCodes: ['UNIV-NANTES', 'CNRS'],
         halSubmitType: 'notice',
-        documentId: 42,
+        document: {
+          connect: {
+            id: 42,
+          },
+        },
+        journal: {
+          connectOrCreate: {
+            create: {
+              publisher: 'Les Grandes Editions',
+              source: 'ScanR',
+              sourceId: 'scanr-0001',
+              titles: ['Journal du savoir'],
+              uid: 'uid-journal-0001',
+            },
+            where: {
+              uid: 'uid-journal-0001',
+            },
+          },
+        },
       },
     })
 
@@ -385,6 +535,8 @@ describe('DocumentDAO', () => {
         records: [
           {
             uid: '123456',
+            contributions: [],
+            documentTypes: [],
             platform: 'hal',
             titles: [
               {
@@ -542,7 +694,16 @@ describe('DocumentDAO', () => {
             person: true,
           },
         },
-        records: true,
+        records: {
+          include: {
+            contributions: {
+              include: {
+                person: true,
+              },
+            },
+            journal: true,
+          },
+        },
         journal: {
           include: {
             identifiers: true,
@@ -630,7 +791,16 @@ describe('DocumentDAO', () => {
             person: true,
           },
         },
-        records: true,
+        records: {
+          include: {
+            contributions: {
+              include: {
+                person: true,
+              },
+            },
+            journal: true,
+          },
+        },
         journal: {
           include: {
             identifiers: true,
@@ -713,7 +883,16 @@ describe('DocumentDAO', () => {
             person: true,
           },
         },
-        records: true,
+        records: {
+          include: {
+            contributions: {
+              include: {
+                person: true,
+              },
+            },
+            journal: true,
+          },
+        },
         journal: {
           include: {
             identifiers: true,
@@ -800,7 +979,16 @@ describe('DocumentDAO', () => {
             person: true,
           },
         },
-        records: true,
+        records: {
+          include: {
+            contributions: {
+              include: {
+                person: true,
+              },
+            },
+            journal: true,
+          },
+        },
         journal: {
           include: {
             identifiers: true,
@@ -876,7 +1064,16 @@ describe('DocumentDAO', () => {
             },
           },
         },
-        records: true,
+        records: {
+          include: {
+            contributions: {
+              include: {
+                person: true,
+              },
+            },
+            journal: true,
+          },
+        },
         subjects: {
           include: {
             labels: true,
@@ -951,7 +1148,16 @@ describe('DocumentDAO', () => {
           abstracts: true,
           subjects: { include: { labels: true } },
           contributions: { include: { person: true } },
-          records: true,
+          records: {
+            include: {
+              contributions: {
+                include: {
+                  person: true,
+                },
+              },
+              journal: true,
+            },
+          },
           journal: {
             include: {
               identifiers: true,

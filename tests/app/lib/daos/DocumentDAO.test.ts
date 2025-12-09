@@ -9,6 +9,9 @@ import { Contribution } from '@/types/Contribution'
 import { Concept } from '@/types/Concept'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
+import { SourceContribution } from '@/types/SourceContribution'
+import { SourcePerson } from '@/types/SourcePerson'
+import { SourceJournal } from '@/types/SourceJournal'
 
 describe('DocumentDAO Integration Tests', () => {
   let documentDAO: DocumentDAO
@@ -196,11 +199,35 @@ describe('DocumentDAO Integration Tests', () => {
   test('should persist document with HAL source record and custom fields', async () => {
     const halRecord = new DocumentRecord(
       'hal-doc-001',
+      [
+        new SourceContribution(
+          LocRelator.AUTHOR,
+          new SourcePerson(
+            'hal-001-uid',
+            'Matthieu Dupond',
+            'hal',
+            'hal-001-uid',
+          ),
+        ),
+        new SourceContribution(
+          LocRelator.TEACHER,
+          new SourcePerson('hal-002-uid', 'Laura Dupuis', 'hal', 'hal-002-uid'),
+        ),
+      ],
+      ['Document', 'Book'],
+      new Date('2022-01-01T00:00:00.000Z'),
       BibliographicPlatform.HAL,
       [new Literal('HAL Document Title', 'fr')],
       'https://hal.science/hal-doc-001',
       ['CNRS', 'UNIV-NANTES'],
       'notice',
+      new SourceJournal(
+        'uid-journal-0001',
+        'ScanR',
+        'scanr-0001',
+        ['Journal du savoir'],
+        'Les Grandes Editions',
+      ),
     )
 
     const doc = new Document(
@@ -221,7 +248,16 @@ describe('DocumentDAO Integration Tests', () => {
     const documentFromDB = await prisma.document.findUnique({
       where: { uid: 'doc-hal-int' },
       include: {
-        records: true,
+        records: {
+          include: {
+            contributions: {
+              include: {
+                person: true,
+              },
+            },
+            journal: true,
+          },
+        },
       },
     })
 
@@ -229,12 +265,18 @@ describe('DocumentDAO Integration Tests', () => {
     expect(documentFromDB?.records).toHaveLength(1)
     const record = documentFromDB!.records[0]
     expect(record.uid).toBe('hal-doc-001')
+    expect(record.contributions).toHaveLength(2)
+    expect(record.contributions[0].role).toBe('author')
+    expect(record.contributions[0].person.uid).toBe('hal-001-uid')
+    expect(record.documentTypes).toBe(['Document', 'Book'])
+    expect(record.publicationDate).toBe('2018-02-01T00:00:00.000Z')
     expect(record.platform).toBe('hal')
     expect(record.url).toBe('https://hal.science/hal-doc-001')
     expect(record.halSubmitType).toBe('notice')
     expect(record.halCollectionCodes).toEqual(
       expect.arrayContaining(['CNRS', 'UNIV-NANTES']),
     )
+    expect(record.journal?.uid).toBe('uid-journal-0001')
   })
 
   test('should delete specific concepts from a document', async () => {

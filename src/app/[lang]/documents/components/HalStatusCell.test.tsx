@@ -80,19 +80,27 @@ const createDocument = (
         ? [
             new DocumentRecord(
               'rec1',
+              [],
+              [],
+              new Date('2024-01-01'),
               BibliographicPlatform.HAL,
               [new Literal('Record Title 1', 'en')],
               'https://url-to-record-1',
               halCollectionCodes,
               halSubmitType,
+              undefined,
             ),
           ]
         : []),
       new DocumentRecord(
         'rec2',
+        [],
+        [],
+        new Date('2024-01-01'),
         BibliographicPlatform.OPENALEX,
         [new Literal('Record Title 2', 'fr')],
         'https://url-to-record-2',
+        undefined,
       ),
     ],
   )

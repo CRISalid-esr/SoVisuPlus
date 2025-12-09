@@ -145,7 +145,7 @@ model SourceJournal {
   uid            String           @unique
   source         String
   sourceId       String
-  publisher      String
+  publisher      String?
   titles         String[]
   DocumentRecord DocumentRecord[]
 }
