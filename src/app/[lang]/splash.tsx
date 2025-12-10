@@ -75,6 +75,7 @@ export default function Splash({ images }: Props) {
                 src={images.logoUrl}
                 alt='Organisation logo'
                 style={{
+                  minHeight: '200px',
                   maxHeight: '250px',
                 }}
               />
