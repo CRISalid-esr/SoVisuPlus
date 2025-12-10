@@ -318,7 +318,7 @@ function Sources() {
       }
     >
       <CardContent>
-        <MaterialReactTable table={table} />;
+        <MaterialReactTable table={table} />
       </CardContent>
     </CustomCard>
   )
