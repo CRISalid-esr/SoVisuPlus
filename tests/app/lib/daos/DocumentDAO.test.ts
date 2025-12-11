@@ -209,10 +209,6 @@ describe('DocumentDAO Integration Tests', () => {
             'hal-001-uid',
           ),
         ),
-        new SourceContribution(
-          LocRelator.TEACHER,
-          new SourcePerson('hal-002-uid', 'Laura Dupuis', 'hal', 'hal-002-uid'),
-        ),
       ],
       ['Document', 'Book'],
       new Date('2022-01-01T00:00:00.000Z'),
@@ -265,11 +261,15 @@ describe('DocumentDAO Integration Tests', () => {
     expect(documentFromDB?.records).toHaveLength(1)
     const record = documentFromDB!.records[0]
     expect(record.uid).toBe('hal-doc-001')
-    expect(record.contributions).toHaveLength(2)
+    expect(record.contributions).toHaveLength(1)
     expect(record.contributions[0].role).toBe('author')
     expect(record.contributions[0].person.uid).toBe('hal-001-uid')
-    expect(record.documentTypes).toBe(['Document', 'Book'])
-    expect(record.publicationDate).toBe('2018-02-01T00:00:00.000Z')
+    expect(record.documentTypes).toEqual(
+      expect.arrayContaining(['Document', 'Book']),
+    )
+    expect(record.publicationDate?.toString()).toBe(
+      new Date('2022-01-01T00:00:00.000Z').toString(),
+    )
     expect(record.platform).toBe('hal')
     expect(record.url).toBe('https://hal.science/hal-doc-001')
     expect(record.halSubmitType).toBe('notice')

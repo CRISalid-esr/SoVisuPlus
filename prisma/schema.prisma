@@ -134,9 +134,9 @@ model SourcePerson {
 model SourceContribution {
   id               Int            @id @default(autoincrement())
   role             String
-  person           SourcePerson   @relation(fields: [sourcePersonId], references: [id])
+  person           SourcePerson   @relation(fields: [sourcePersonId], references: [id], onDelete: Cascade)
   sourcePersonId   Int
-  DocumentRecord   DocumentRecord @relation(fields: [documentRecordId], references: [id])
+  DocumentRecord   DocumentRecord @relation(fields: [documentRecordId], references: [id], onDelete: Cascade)
   documentRecordId Int
 }
 
