@@ -21,6 +21,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -35,7 +36,7 @@ import {
   useMaterialReactTable,
 } from 'material-react-table'
 import Image from 'next/image'
-import { ReactNode, useMemo, useState } from 'react'
+import React, { ReactNode, useMemo, useState } from 'react'
 import { DocumentTypeIcons } from '../../../components/DocumentTypeIcons'
 import { DocumentTypeLabels } from '../../../components/DocumentTypeLabels'
 
@@ -44,6 +45,7 @@ import { Localization } from '@/types/Localization'
 import { LocRelator } from '@/types/LocRelator'
 import dayjs from 'dayjs'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
+import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 
 function Sources() {
   const { selectedDocument = null } = useStore((state) => state.document)
@@ -55,6 +57,27 @@ function Sources() {
   >({})
   const [action, setAction] = useState<string>('')
   const { _ } = useLingui()
+
+  const getPreciseType = (types: DocumentType[]) => {
+    const clearDocumentTypes = types.filter(
+      (type) =>
+        type.toString() != 'Unknown' &&
+        DocumentTypeService.isDocumentType(type),
+    )
+    if (clearDocumentTypes.length == 0) {
+      return DocumentType.Document
+    }
+    const typeHierarchy = DocumentTypeService.toMenuTree()
+    let preciseTypeIndex: number = 0
+    for (const [index, type] of typeHierarchy.entries()) {
+      if (clearDocumentTypes.includes(type.value)) {
+        if (type.depth > preciseTypeIndex) {
+          preciseTypeIndex = index
+        }
+      }
+    }
+    return typeHierarchy[preciseTypeIndex].value
+  }
 
   const columns = useMemo<MRT_ColumnDef<DocumentRecord>[]>(
     () => [
@@ -87,6 +110,19 @@ function Sources() {
             </Box>
           ),
         })),
+        Cell({
+          row,
+        }: {
+          row: MRT_Row<DocumentRecord>
+          renderedCellValue: ReactNode
+        }) {
+          const type = getPreciseType(row.original.documentTypes)
+          return (
+            <Tooltip title={_(DocumentTypeLabels[type])}>
+              {DocumentTypeIcons[type]}
+            </Tooltip>
+          )
+        },
       },
       {
         size: 200,
