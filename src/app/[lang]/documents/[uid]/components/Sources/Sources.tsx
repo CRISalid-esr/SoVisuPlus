@@ -6,7 +6,7 @@ import {
   BibliographicPlatform,
   BibliographicPlatformMetadata,
 } from '@/types/BibliographicPlatform'
-import { Document, DocumentType } from '@/types/Document'
+import { DocumentType } from '@/types/Document'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
@@ -91,7 +91,7 @@ function Sources() {
           label: (
             <Box
               className='doc-type-option'
-              sx={{ display: 'flex', alignItems: 'center', pl: depth * 2 }}
+              sx={{ display: 'flex', alignItems: 'center', pl: depth * 1.5 }}
             >
               <Box sx={{ mr: 1 }}>{DocumentTypeIcons[value]}</Box>
               <Typography variant='body2' noWrap>
