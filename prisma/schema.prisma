@@ -122,10 +122,43 @@ enum HalSubmitType {
   annex
 }
 
+model SourcePerson {
+  id                 Int                  @id @default(autoincrement())
+  uid                String               @unique
+  name               String
+  source             String
+  sourceId           String
+  SourceContribution SourceContribution[]
+}
+
+model SourceContribution {
+  id               Int            @id @default(autoincrement())
+  role             String
+  person           SourcePerson   @relation(fields: [sourcePersonId], references: [id], onDelete: Cascade)
+  sourcePersonId   Int
+  DocumentRecord   DocumentRecord @relation(fields: [documentRecordId], references: [id], onDelete: Cascade)
+  documentRecordId Int
+}
+
+model SourceJournal {
+  id             Int              @id @default(autoincrement())
+  uid            String           @unique
+  source         String
+  sourceId       String
+  publisher      String?
+  titles         String[]
+  DocumentRecord DocumentRecord[]
+}
+
 model DocumentRecord {
   id                 Int                   @id @default(autoincrement())
   uid                String                @unique
   url                String?
+  contributions      SourceContribution[]
+  documentTypes      DocumentType[]
+  sourceJournalId    Int?
+  journal            SourceJournal?        @relation(fields: [sourceJournalId], references: [id])
+  publicationDate    DateTime?
   platform           BibliographicPlatform
   titles             Json
   halCollectionCodes String[]

@@ -3,7 +3,7 @@ import { AbstractGraphQLClient } from './AbstractGraphQLClient'
 import { Document, DocumentType } from '@/types/Document'
 import { Contribution } from '@/types/Contribution'
 import { PersonGraphQLClient } from './PersonGraphQLClient'
-import { LocRelatorHelper } from '@/types/LocRelator'
+import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import {
   BibliographicPlatform,
@@ -12,6 +12,9 @@ import {
 import { Literal } from '@/types/Literal'
 import { Person } from '@/types/Person'
 import { Concept } from '@/types/Concept'
+import { SourcePerson } from '@/types/SourcePerson'
+import { SourceContribution } from '@/types/SourceContribution'
+import { SourceJournal } from '@/types/SourceJournal'
 
 jest.mock('./AbstractGraphQLClient')
 jest.mock('./PersonGraphQLClient')
@@ -71,7 +74,31 @@ describe('DocumentGraphQLClient', () => {
             {
               uid: 'record-001',
               url: 'http://platform.com/record/record-001',
+              document_types: ['Book', 'Document'],
               harvester: 'idref',
+              has_contributions: [
+                {
+                  role: 'AUTHOR',
+                  contributor: {
+                    uid: 'author001',
+                    name: 'John Smith',
+                    source: 'somesource',
+                    source_identifier: 'source001',
+                  },
+                },
+              ],
+              issued: '2022-01-01',
+              published_in: {
+                issued_by: {
+                  uid: '1234',
+                  source: 'HAL',
+                  source_identifier: 'hal//1234',
+                  titles: ['Journal of Knowledge'],
+                  publisher: 'The One Publisher',
+                },
+                source: 'HAL',
+                source_identifier: 'hal//1234',
+              },
               titles: [{ language: 'en', value: 'Record Title' }],
               hal_collection_codes: null,
               hal_submit_type: null,
@@ -92,6 +119,14 @@ describe('DocumentGraphQLClient', () => {
       'Doe',
       [],
     )
+
+    const mockSourcePerson: SourcePerson = new SourcePerson(
+      'author001',
+      'John Smith',
+      'somesource',
+      'source001',
+    )
+
     jest
       .spyOn(PersonGraphQLClient.prototype, 'hydrate')
       .mockReturnValue(mockPerson)
@@ -135,10 +170,22 @@ describe('DocumentGraphQLClient', () => {
       [
         new DocumentRecord(
           'record-001',
+          [new SourceContribution(LocRelator.AUTHOR, mockSourcePerson)],
+          ['Book', 'Document'],
+          new Date('2022-01-01'),
           getBibliographicPlatformByNameIgnoreCase('idref') ??
             ({ name: 'idref' } as unknown as BibliographicPlatform),
           [Literal.fromObject({ language: 'en', value: 'Record Title' })],
           'http://platform.com/record/record-001',
+          undefined,
+          null,
+          new SourceJournal(
+            '1234',
+            'HAL',
+            'hal//1234',
+            ['Journal of Knowledge'],
+            'The One Publisher',
+          ),
         ),
       ],
     )
@@ -230,6 +277,30 @@ describe('DocumentGraphQLClient', () => {
           recorded_by: [
             {
               uid: 'scanr-halhal-02538579',
+              document_types: ['Book', 'Document'],
+              has_contributions: [
+                {
+                  role: 'AUTHOR',
+                  contributor: {
+                    uid: 'author001',
+                    name: 'John Smith',
+                    source: 'somesource',
+                    source_identifier: 'source001',
+                  },
+                },
+              ],
+              issued: '2022-01-01',
+              published_in: {
+                issued_by: {
+                  uid: '1234',
+                  source: 'HAL',
+                  source_identifier: 'hal//1234',
+                  titles: ['Journal of Knowledge'],
+                  publisher: 'The One Publisher',
+                },
+                source: 'HAL',
+                source_identifier: 'hal//1234',
+              },
               harvester: 'scanr',
               titles: [
                 {
@@ -245,6 +316,30 @@ describe('DocumentGraphQLClient', () => {
             {
               uid: 'hal-hal-02538579',
               harvester: 'hal',
+              document_types: ['Book', 'Document'],
+              has_contributions: [
+                {
+                  role: 'AUTHOR',
+                  contributor: {
+                    uid: 'author001',
+                    name: 'John Smith',
+                    source: 'somesource',
+                    source_identifier: 'source001',
+                  },
+                },
+              ],
+              issued: '2022-01-01',
+              published_in: {
+                issued_by: {
+                  uid: '1234',
+                  source: 'HAL',
+                  source_identifier: 'hal//1234',
+                  titles: ['Journal of Knowledge'],
+                  publisher: 'The One Publisher',
+                },
+                source: 'HAL',
+                source_identifier: 'hal//1234',
+              },
               titles: [
                 {
                   value:

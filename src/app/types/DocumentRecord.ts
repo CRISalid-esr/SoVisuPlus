@@ -8,18 +8,26 @@ import { IAgent } from '@/types/IAgent'
 import { Person } from '@/types/Person'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { getStringInLocale } from '@/utils/getStringInLocale'
+import { DocumentType, HalSubmitType as DbHalSubmitType } from '@prisma/client'
+import { DocumentRecordWithRelations as DbDocumentRecord } from '@/prisma-schema/extended-client'
 import {
-  DocumentRecord as DbDocumentRecord,
-  HalSubmitType as DbHalSubmitType,
-} from '@prisma/client'
+  SourceContribution,
+  SourceContributionJson,
+} from '@/types/SourceContribution'
+import { SourceJournal, SourceJournalJson } from '@/types/SourceJournal'
+import { Document } from '@/types/Document'
 
 export interface DocumentRecordJson {
   uid: string
+  contributions: Array<SourceContributionJson>
+  documentTypes: string[]
+  publicationDate: Date | null
   platform: BibliographicPlatform
   titles: Array<Literal>
   _url: string | null
   halCollectionCodes: string[]
   halSubmitType: DbHalSubmitType | null
+  journal?: SourceJournalJson
 }
 
 export class DocumentRecord {
@@ -27,11 +35,15 @@ export class DocumentRecord {
 
   constructor(
     public uid: string,
+    public contributions: Array<SourceContribution> = [],
+    public documentTypes: DocumentType[],
+    public publicationDate: Date | null,
     public platform: BibliographicPlatform,
     public titles: Array<Literal>,
     url?: string | null,
     public halCollectionCodes: string[] = [],
     public halSubmitType: DbHalSubmitType | null = null,
+    public journal?: SourceJournal,
   ) {
     if (url) this.setUrl(url)
   }
@@ -101,17 +113,30 @@ export class DocumentRecord {
   static fromObject(record: DocumentRecordJson): DocumentRecord {
     return new DocumentRecord(
       record.uid,
+      record.contributions.map((contribution: SourceContributionJson) =>
+        SourceContribution.fromObject(contribution),
+      ),
+      record.documentTypes.map((type: string) =>
+        Document.documentTypeFromString(type),
+      ),
+      record.publicationDate,
       record.platform,
       record.titles.map((title) => Literal.fromObject(title)),
       record._url,
       record.halCollectionCodes,
       record.halSubmitType,
+      record.journal ? SourceJournal.fromJson(record.journal) : undefined,
     )
   }
 
   static fromDbDocumentRecord(record: DbDocumentRecord) {
     return new DocumentRecord(
       record.uid,
+      record.contributions.map((contribution) =>
+        SourceContribution.fromDbContribution(contribution),
+      ),
+      record.documentTypes,
+      record.publicationDate,
       getBibliographicPlatformFromDbValue(record.platform),
       (record.titles as { value: string; language: string }[]).map(
         (title: { value: string; language: string }) =>
@@ -120,6 +145,9 @@ export class DocumentRecord {
       record.url,
       record.halCollectionCodes,
       record.halSubmitType,
+      record.journal
+        ? SourceJournal.fromDbSourceJournal(record.journal)
+        : undefined,
     )
   }
 }

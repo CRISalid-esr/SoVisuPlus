@@ -78,9 +78,31 @@ query Documents($where: DocumentWhere) {
     recorded_by {
       uid
       url
+      issued
+      published_in {
+        issued_by {
+          uid
+          titles
+          publisher
+          source
+          source_identifier
+        }
+        source
+        source_identifier
+      }
+      document_types
       harvester
       hal_collection_codes
       hal_submit_type
+      has_contributions {
+        role
+        contributor {
+          uid
+          name
+          source
+          source_identifier
+        }
+      }
       titles {
         language
         value

@@ -21,6 +21,9 @@ import {
   ResearchStructureName,
   Role,
   RolePermission,
+  SourceContribution,
+  SourceJournal,
+  SourcePerson,
   User,
   UserRole,
   UserRoleScope,
@@ -37,7 +40,13 @@ export type ContributionWithRelations = Contribution & {
   person: Person
 }
 
+export type SourceContributionWithRelations = SourceContribution & {
+  person: SourcePerson
+}
+
 export type DocumentRecordWithRelations = DocumentRecord & {
+  contributions: SourceContributionWithRelations[]
+  journal: SourceJournal | null
   halSubmitType: HalSubmitType | null
 }
 
