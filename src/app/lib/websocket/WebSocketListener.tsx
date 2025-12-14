@@ -12,6 +12,7 @@ import {
 } from '@/types/GenericEvent'
 import { buildWebSocketURL } from '@/lib/websocket/ws-url'
 import * as Lingui from '@lingui/core'
+import { useSearchParams } from 'next/navigation'
 
 export default function WebSocketListener() {
   const { enqueueSnackbar } = useSnackbar()
@@ -25,6 +26,7 @@ export default function WebSocketListener() {
   const perspectiveRef = useRef(currentPerspective)
   const documentRef = useRef(selectedDocument)
   const userRef = useRef(connectedUser)
+  const searchParams = useSearchParams()
 
   const snackBarVariantByEventType = (
     eventType: string,
@@ -91,6 +93,8 @@ export default function WebSocketListener() {
         const currentLang = Lingui.i18n.locale as string
         const selectedLabel =
           (currentLang && labels[currentLang]) || Object.values(labels)[0] || ''
+        const params = new URLSearchParams(searchParams?.toString())
+        params.set('tab', 'bibliographic_information')
 
         enqueueSnackbar(
           <>
@@ -111,7 +115,7 @@ export default function WebSocketListener() {
             )}
             {data.eventType !== 'deleted' && (
               <a
-                href={`/documents/${data.objectUid}`}
+                href={`/documents/${data.objectUid}` + '?' + params.toString()}
                 style={{ marginLeft: 8 }}
               >
                 <Trans id='snackbar_view_document' />
@@ -148,6 +152,7 @@ export default function WebSocketListener() {
     setListHasChanged,
     setSelectedDocumentHasChanged,
     selectedDocument,
+    searchParams,
   ])
 
   return null
