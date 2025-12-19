@@ -105,24 +105,9 @@ msgid "documents_page_hal_status_outside_hal"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:786
-msgid "documents_page_refresh_list_alert_own_perspective"
-msgstr "La liste de vos publications a changé"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:789
-msgid "documents_page_refresh_list_alert_other_perspective"
-msgstr "La liste des publications de {name} a changé"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
 msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:145
-msgid "documents_page_refresh_document_alert"
-msgstr "Les informations relatives à cette publication ont changé"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:170
@@ -133,6 +118,21 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/page.test.tsx:174
 msgid "document_details_keywords_tab"
 msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:145
+msgid "documents_page_refresh_document_alert"
+msgstr "Les informations relatives à cette publication ont changé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:786
+msgid "documents_page_refresh_list_alert_own_perspective"
+msgstr "La liste de vos publications a changé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:789
+msgid "documents_page_refresh_list_alert_other_perspective"
+msgstr "La liste des publications de {name} a changé"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
@@ -175,27 +175,6 @@ msgid "concept_chip_action_delete"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:330
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:339
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "Actions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:345
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalider"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:352
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissocier"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:388
-msgid "document_details_page_source_tab_card_title"
-msgstr "Références bibliographiques sources"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:245
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "Chargement des données..."
@@ -232,6 +211,27 @@ msgstr "Erreur lors du chargement des données"
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
 msgid "document_details_page_domains_tab_card_title"
 msgstr "Domaines"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:330
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:339
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "Actions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:345
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalider"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:352
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissocier"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:388
+msgid "document_details_page_source_tab_card_title"
+msgstr "Références bibliographiques sources"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:363
@@ -346,18 +346,6 @@ msgid "profile_affiliations_card_title"
 msgstr "Mes affiliations"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:36
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
-msgid "orcid_button_update_identifier"
-msgstr "Modifier mon identifiant ORCID"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:46
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:52
-msgid "orcid_button_provide_identifier"
-msgstr "Fournir mon identifiant ORCID"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:52
 msgid "orcid-authentication-success"
 msgstr "La validation de votre ORCID a réussi"
@@ -391,6 +379,18 @@ msgstr "Échec de l'insertion de l'ORCID en base de données. Veuillez réessaye
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:101
 msgid "orcid_identifier_no_orcid_provided"
 msgstr "Identifiant ORCID non fourni"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:36
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
+msgid "orcid_button_update_identifier"
+msgstr "Modifier mon identifiant ORCID"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:46
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:52
+msgid "orcid_button_provide_identifier"
+msgstr "Fournir mon identifiant ORCID"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
