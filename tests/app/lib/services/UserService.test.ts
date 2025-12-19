@@ -1,25 +1,13 @@
 import { UserService } from '@/lib/services/UserService'
-import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
-import { UserDAO } from '@/lib/daos/UserDAO'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
-import { PersonDAO } from '@/lib/daos/PersonDAO'
 import prisma from '@/lib/daos/prisma'
 import { Person } from '@/types/Person'
 
 describe('UserService Integration Tests', () => {
   let userService: UserService
-  let personGraphQLClientMock: jest.Mocked<PersonGraphQLClient>
 
   beforeAll(async () => {
-    // Initialize the UserService with mocks and real database DAO
-    personGraphQLClientMock = {
-      isEnabled: jest.fn().mockReturnValue(true),
-      getPersonByIdentifier: jest.fn(),
-    } as unknown as jest.Mocked<PersonGraphQLClient>
-
-    const userDAO = new UserDAO()
-    const personDAO = new PersonDAO()
-    userService = new UserService(userDAO, personDAO, personGraphQLClientMock)
+    userService = new UserService()
   })
 
   afterEach(async () => {
@@ -30,38 +18,6 @@ describe('UserService Integration Tests', () => {
 
   afterAll(async () => {
     await prisma.$disconnect()
-  })
-
-  test('should create or update a user with username using GraphQL data', async () => {
-    const personData = new Person(
-      'local-test123',
-      false,
-      'rgarcia@example.com',
-      'Robert',
-      'Garcia',
-      'Robert Garcia',
-      [{ type: 'ORCID', value: '0000-0002-1234-5678' }],
-    )
-    personGraphQLClientMock.getPersonByIdentifier.mockResolvedValue(personData)
-
-    const profile: AuthenticationProfile = { username: 'graphql-test123' }
-    const result = await userService.submitProfile(profile)
-
-    expect(result).toBe(true)
-
-    const createdPerson = await prisma.person.findUnique({
-      where: { uid: personData.uid },
-    })
-
-    expect(createdPerson).not.toBeNull()
-    expect(createdPerson?.email).toBe(personData.email)
-
-    const createdPersonIdentifier = await prisma.personIdentifier.findFirst({
-      where: { value: '0000-0002-1234-5678' },
-    })
-
-    expect(createdPersonIdentifier).not.toBeNull()
-    expect(createdPersonIdentifier?.personId).toBe(createdPerson?.id)
   })
 
   test('should return true for an existing user in the database', async () => {
@@ -90,8 +46,6 @@ describe('UserService Integration Tests', () => {
       },
     })
 
-    personGraphQLClientMock.isEnabled.mockReturnValue(false)
-
     const profile: AuthenticationProfile = { username: 'existing-test123' }
     const result = await userService.submitProfile(profile)
 
@@ -106,8 +60,6 @@ describe('UserService Integration Tests', () => {
   })
 
   test('should return false for an unknown profile', async () => {
-    personGraphQLClientMock.isEnabled.mockReturnValue(false)
-
     const profile: AuthenticationProfile = { username: 'unknown-user' }
     const result = await userService.submitProfile(profile)
 

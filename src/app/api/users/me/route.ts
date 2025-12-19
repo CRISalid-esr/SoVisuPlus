@@ -43,7 +43,7 @@ export const GET = async () => {
         { status: 400 },
       )
     }
-    const userService = new UserService(new UserDAO(), new PersonDAO())
+    const userService = new UserService()
     const connectedUser =
       await userService.getUserByPersonIdentifier(electedIdentifier)
 
