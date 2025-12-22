@@ -15,6 +15,7 @@ import { Concept } from '@/types/Concept'
 import { SourcePerson } from '@/types/SourcePerson'
 import { SourceContribution } from '@/types/SourceContribution'
 import { SourceJournal } from '@/types/SourceJournal'
+import { OAStatus } from '@prisma/client'
 
 jest.mock('./AbstractGraphQLClient')
 jest.mock('./PersonGraphQLClient')
@@ -49,9 +50,11 @@ describe('DocumentGraphQLClient', () => {
         {
           uid: 'doc-456',
           document_type: 'ConferenceArticle',
+          oa_status: 'GREEN',
           publication_date: '2022-01-01',
           publication_date_start: '2022-01-01',
           publication_date_end: '2022-12-31',
+          upw_oa_status: 'DIAMOND',
           titles: [{ language: 'en', value: 'Test Document' }],
           abstracts: [{ language: 'en', value: 'This is a test abstract.' }],
           has_subjects: [
@@ -136,9 +139,11 @@ describe('DocumentGraphQLClient', () => {
     const expectedDocument = new Document(
       'doc-456',
       DocumentType.ConferenceArticle,
+      OAStatus.GREEN,
       '2022-01-01',
       new Date('2022-01-01'),
       new Date('2022-12-31'),
+      OAStatus.DIAMOND,
       [Literal.fromObject({ language: 'en', value: 'Test Document' })],
       [
         Literal.fromObject({
@@ -204,9 +209,11 @@ describe('DocumentGraphQLClient', () => {
         {
           uid: 'doc-789',
           document_type: 'Monograph',
+          oa_status: 'GREEN',
           publication_date: null,
           publication_date_start: null,
           publication_date_end: null,
+          upw_oa_status: 'DIAMOND',
           titles: [{ language: 'en', value: 'Filtered Document' }],
           abstracts: [
             { language: 'en', value: 'This is another test abstract.' },
@@ -251,9 +258,11 @@ describe('DocumentGraphQLClient', () => {
         {
           uid: '28c1e1da-83ce-4bdb-b2ea-f3ab78076d99',
           document_type: 'BookChapter',
+          oa_status: 'GREEN',
           publication_date: '2017',
           publication_date_start: '2017-01-01T00:00:00.000Z',
           publication_date_end: '2017-12-31T23:59:59.000Z',
+          upw_oa_status: 'DIAMOND',
           titles: [
             {
               value:
@@ -401,9 +410,11 @@ describe('DocumentGraphQLClient', () => {
         {
           uid: '6b3355cd-35b2-40ae-bfbe-5e8a60deb47f',
           document_type: 'JournalArticle',
+          oa_status: 'GREEN',
           publication_date: '2012-06-07',
           publication_date_start: '2012-06-07T00:00:00.000Z',
           publication_date_end: '2012-06-07T23:59:59.000Z',
+          upw_oa_status: 'DIAMOND',
           titles: [
             {
               language: 'en',

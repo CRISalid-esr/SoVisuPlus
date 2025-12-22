@@ -57,13 +57,25 @@ enum DocumentState {
   waiting_for_update
 }
 
+enum OAStatus {
+  GREEN   @map("green")
+  DIAMOND @map("diamond")
+  GOLD    @map("gold")
+  BRONZE  @map("bronze")
+  HYBRID  @map("hybrid")
+  OTHER   @map("other")
+  CLOSED  @map("closed")
+}
+
 model Document {
   id                   Int                @id @default(autoincrement())
   uid                  String             @unique
   documentType         DocumentType       @default(Document)
+  oaStatus             OAStatus?
   publicationDate      String?
   publicationDateStart DateTime?
   publicationDateEnd   DateTime?
+  upwOAStatus          OAStatus?
   titles               DocumentTitle[]
   abstracts            DocumentAbstract[]
   contributions        Contribution[]

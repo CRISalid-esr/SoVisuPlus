@@ -12,6 +12,7 @@ import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import { SourceContribution } from '@/types/SourceContribution'
 import { SourcePerson } from '@/types/SourcePerson'
 import { SourceJournal } from '@/types/SourceJournal'
+import { OAStatus } from '@prisma/client'
 
 describe('DocumentDAO Integration Tests', () => {
   let documentDAO: DocumentDAO
@@ -41,9 +42,11 @@ describe('DocumentDAO Integration Tests', () => {
     const documentData = new Document(
       'doc-1',
       Document.documentTypeFromString('JournalArticle'),
+      OAStatus.GREEN,
       '2023-01-01',
       new Date('2023-01-01T00:00:00.000Z'),
       new Date('2023-01-01T23:59:59.000Z'),
+      OAStatus.DIAMOND,
       [new Literal('Test Document', 'en')],
       [], // No abstracts
       [], // No subjects
@@ -72,9 +75,11 @@ describe('DocumentDAO Integration Tests', () => {
     const updatedDocumentData = new Document(
       'doc-1',
       Document.documentTypeFromString('JournalArticle'),
+      OAStatus.GREEN,
       '2023-01-01',
       new Date('2023-01-01T00:00:00.000Z'),
       new Date('2023-01-01T23:59:59.000Z'),
+      OAStatus.DIAMOND,
       [new Literal('Test Document', 'en')],
       [], // No abstracts
       [], // No subjects
@@ -106,9 +111,11 @@ describe('DocumentDAO Integration Tests', () => {
     const documentData = new Document(
       'doc-2',
       Document.documentTypeFromString('JournalArticle'),
+      OAStatus.GREEN,
       '2023-02-01',
       new Date('2023-02-01T00:00:00.000Z'),
       new Date('2023-02-01T23:59:59.000Z'),
+      OAStatus.DIAMOND,
       [new Literal('Subject Test Document', 'en')],
       [], // No abstracts
       [subject1], // subjects
@@ -145,9 +152,11 @@ describe('DocumentDAO Integration Tests', () => {
     const updatedDocumentData = new Document(
       'doc-2',
       Document.documentTypeFromString('JournalArticle'),
+      OAStatus.GREEN,
       '2023-02-01',
       new Date('2023-02-01T00:00:00.000Z'),
       new Date('2023-02-01T23:59:59.000Z'),
+      OAStatus.DIAMOND,
       [new Literal('Subject Test Document', 'en')],
       [], // No abstracts
       [subject1, subject2], // both subjects
@@ -176,9 +185,11 @@ describe('DocumentDAO Integration Tests', () => {
     const updatedDocumentData2 = new Document(
       'doc-2',
       Document.documentTypeFromString('JournalArticle'),
+      OAStatus.GREEN,
       '2023-02-01',
       new Date('2023-02-01T00:00:00.000Z'),
       new Date('2023-02-01T23:59:59.000Z'),
+      OAStatus.DIAMOND,
       [new Literal('Subject Test Document', 'en')],
       [], // No abstracts
       [subject2], // only the second subject
@@ -229,9 +240,11 @@ describe('DocumentDAO Integration Tests', () => {
     const doc = new Document(
       'doc-hal-int',
       Document.documentTypeFromString('Book'),
+      OAStatus.GREEN,
       '2019',
       new Date('2019-01-01T00:00:00.000Z'),
       new Date('2019-12-31T23:59:59.000Z'),
+      OAStatus.DIAMOND,
       [new Literal('HAL Document Title', 'fr')],
       [],
       [],

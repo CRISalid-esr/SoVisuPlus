@@ -13,6 +13,7 @@ import { JournalIdentifier } from '@/types/JournalIdentifier'
 import { SourceContribution } from '@/types/SourceContribution'
 import { SourceJournal } from '@/types/SourceJournal'
 import { SourcePerson } from '@/types/SourcePerson'
+import { OAStatus } from '@prisma/client'
 
 interface GraphSourcePersonResponse {
   uid: string
@@ -61,9 +62,11 @@ interface GraphDocumentRecordResponse {
 interface GraphDocumentResponse {
   uid: string
   document_type: string
+  oa_status: string | null
   publication_date: string | null
   publication_date_start: string | null
   publication_date_end: string | null
+  upw_oa_status: string | null
   titles: { language: string; value: string }[]
   abstracts: { language: string; value: string }[]
   has_subjects: {
@@ -134,12 +137,13 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
     const {
       uid,
       document_type,
+      oa_status,
+      upw_oa_status,
       titles,
       abstracts,
       publication_date,
       publication_date_start,
       publication_date_end,
-      recorded_by,
       publishedInConnection,
     } = documentData
 
@@ -158,9 +162,13 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
     return new Document(
       uid,
       Document.documentTypeFromString(document_type),
+      oa_status ? Document.oaStatusFromString(oa_status) : OAStatus.CLOSED,
       publication_date,
       publication_date_start ? new Date(publication_date_start) : null,
       publication_date_end ? new Date(publication_date_end) : null,
+      upw_oa_status
+        ? Document.upwOAStatusFromString(upw_oa_status)
+        : OAStatus.CLOSED,
       titles.map(Literal.fromObject),
       abstracts.map(Literal.fromObject),
       documentData.has_subjects.map((subject) => {

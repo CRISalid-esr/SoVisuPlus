@@ -11,6 +11,7 @@ import { Literal } from '@/types/Literal'
 import { DocumentFieldKey } from './BibliographicInformation'
 import Row from './Row'
 import Titles from './Titles'
+import { OAStatus } from '@prisma/client'
 
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
@@ -20,9 +21,11 @@ jest.mock('@/stores/global_store', () => ({
 const document: Document = new Document(
   'doc-123',
   DocumentType.Document,
+  OAStatus.GREEN,
   '2022',
   new Date('2022-01-01T00:00:00.000Z'),
   new Date('2022-12-31T23:59:59.000Z'),
+  OAStatus.DIAMOND,
   [
     new Literal('Sample Document Title', 'en'),
     new Literal('Exemple de titre de document', 'fr'),

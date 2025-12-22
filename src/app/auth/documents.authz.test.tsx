@@ -12,14 +12,17 @@ import { Literal } from '@/types/Literal'
 import { Contribution } from '@/types/Contribution'
 import { LocRelator } from '@/types/LocRelator'
 import { InternalPerson } from '@/types/InternalPerson'
+import { OAStatus } from '@prisma/client'
 
 const makeDocByContribUids = (uid: string, contributorUids: string[]) =>
   new Document(
     uid,
     DocumentType.JournalArticle,
+    OAStatus.GREEN,
     '2023-12-31',
     new Date('2023-12-31'),
     new Date('2023-12-31'),
+    OAStatus.GREEN,
     [new Literal(`Title ${uid}`, 'en')],
     [],
     [],

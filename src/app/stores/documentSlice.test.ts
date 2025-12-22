@@ -6,7 +6,7 @@ import {
   DocumentSlice,
 } from './documentSlice'
 import { toQueryString } from '@/utils/query'
-import { DocumentState as DbDocumentState } from '@prisma/client' // for 'waiting_for_update'
+import { DocumentState as DbDocumentState, OAStatus } from '@prisma/client' // for 'waiting_for_update'
 import { Document, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 
@@ -29,9 +29,11 @@ const makeDoc = (
   new Document(
     uid,
     DocumentType.JournalArticle,
+    OAStatus.GREEN,
     '2024-01-01',
     new Date('2024-01-01'),
     new Date('2024-01-01'),
+    OAStatus.DIAMOND,
     [new Literal(`Title ${uid}`, 'en')],
     [],
     [], // subjects
@@ -57,9 +59,11 @@ describe('addDocumentSlice', () => {
       {
         uid: 'mock-uid-1',
         documentType: 'JournalArticle',
+        oaStatus: 'GREEN',
         publicationDate: '2022-01-01',
         publicationDateStart: '2022-01-01T00:00:00.000Z',
         publicationDateEnd: '2022-01-01T23:59:59.000Z',
+        upwOAStatus: 'DIAMOND',
         titles: [{ value: 'Mock Title', language: 'en' }],
         abstracts: [{ value: 'Mock abstract', language: 'en' }],
         subjects: [],

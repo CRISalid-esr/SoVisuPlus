@@ -79,6 +79,7 @@ import { Can } from '@casl/react'
 import { toUTCISOString } from '@/utils/toUTCISOString'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 import { FilterAltOff } from '@mui/icons-material'
+import OAStatusCell from '@/app/[lang]/documents/components/OAStatusCell'
 
 dayjs.extend(utc)
 
@@ -443,6 +444,48 @@ export default function DocumentsPage() {
         header: t`documents_page_halStatus_column`,
         Cell({ row }) {
           return <HalStatusCell row={row} />
+        },
+        filterVariant: 'multi-select',
+        filterSelectOptions: [
+          {
+            // @ts-expect-error: so that label accepts an Element
+            label: (
+              <HalStatusCellBadge
+                type={HalStatusCellType.InCollection}
+                isSingleLine
+              />
+            ),
+            value: 'in_collection',
+          },
+          {
+            // @ts-expect-error: so that label accepts an Element
+            label: (
+              <HalStatusCellBadge
+                type={HalStatusCellType.OutOfCollection}
+                acronyms={acronyms}
+                isSingleLine
+              />
+            ),
+            value: 'out_of_collection',
+          },
+          {
+            // @ts-expect-error: so that label accepts an Element
+            label: (
+              <HalStatusCellBadge
+                type={HalStatusCellType.OutsideHal}
+                isSingleLine
+              />
+            ),
+            value: 'outside_hal',
+          },
+        ],
+      },
+      {
+        enableSorting: false,
+        accessorKey: 'oaStatus',
+        header: t`documents_page_oaStatus_column`,
+        Cell({ row }) {
+          return <OAStatusCell row={row} />
         },
         filterVariant: 'multi-select',
         filterSelectOptions: [

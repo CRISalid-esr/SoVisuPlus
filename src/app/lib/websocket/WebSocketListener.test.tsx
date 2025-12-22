@@ -14,6 +14,7 @@ import { Contribution } from '@/types/Contribution'
 import { LocRelator } from '@/types/LocRelator'
 import { SnackbarProvider, useSnackbar } from 'notistack'
 import * as React from 'react'
+import { OAStatus } from '@prisma/client'
 
 jest.mock('notistack', () => {
   const originalModule = jest.requireActual('notistack')
@@ -60,9 +61,11 @@ const mockUser = new User(1, connectedUserPerson)
 const document: Document = new Document(
   'doc-123',
   DocumentType.Document,
+  OAStatus.GREEN,
   '2022',
   new Date('2022-01-01T00:00:00.000Z'),
   new Date('2022-12-31T23:59:59.000Z'),
+  OAStatus.DIAMOND,
   [new Literal('Sample Document Title', 'en')],
   [new Literal('Sample Abstract', 'en')],
   [
