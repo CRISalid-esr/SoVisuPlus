@@ -5,7 +5,9 @@ import {
   CardContent,
   Checkbox,
   FormGroup,
+  IconButton,
   Link,
+  Paper,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -25,6 +27,7 @@ import { PermissionAction } from '@/types/Permission'
 import { Can } from '@casl/react'
 import { VOCABS } from '@/lib/services/Vocabs'
 import Image from 'next/image'
+import { Help, HelpOutline } from '@mui/icons-material'
 
 function Keywords() {
   const { data: session } = useSession()
@@ -122,10 +125,72 @@ function Keywords() {
               sx={{
                 display: allowed ? 'flex' : 'none',
                 gap: '20px',
-                alignItems: 'center',
-                marginTop: '15px',
+                alignItems: 'start',
+                marginTop: '45px',
+                flexDirection: 'column',
               }}
             >
+              <Typography sx={{ fontSize: '17px' }}>
+                <Trans id='document_details_page_keywords_search_field_title' />
+              </Typography>
+              <FormGroup
+                sx={{
+                  display: 'grid',
+                  gap: 1.5,
+                  gridTemplateRows: 'repeat(2,1fr)',
+                  gridTemplateColumns: 'repeat(2,1fr)',
+                  marginBottom: '12px',
+                  width: '100%',
+                }}
+              >
+                {Vocab.getVocabs().map(
+                  (vocab) =>
+                    Object.keys(VOCABS).includes(vocab.toUpperCase()) && (
+                      <Paper
+                        key={vocab + '-checkbox'}
+                        sx={{
+                          alignItems: 'center',
+                          display: 'flex',
+                          gap: 1,
+                          padding: '10px 8px',
+                        }}
+                      >
+                        <Checkbox
+                          onChange={handleCheckboxChange}
+                          name={vocab}
+                        />
+                        <Box
+                          sx={{ alignItems: 'center', display: 'flex', gap: 1 }}
+                        >
+                          <Image
+                            src={VOCABS[vocab.toUpperCase()]?.icon || ''}
+                            alt={vocab.toUpperCase()}
+                            width={24}
+                            height={24}
+                          />
+                          <Link
+                            href={VOCABS[vocab.toUpperCase()]?.url || ''}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            sx={{ display: 'inherit' }}
+                          >
+                            <Typography>
+                              {VOCABS[vocab.toUpperCase()]?.name || ''}
+                            </Typography>
+                          </Link>
+                        </Box>
+                        <Tooltip
+                          title={VOCABS[vocab.toUpperCase()]?.org || ''}
+                          key={vocab + '-checkbox-and-label'}
+                        >
+                          <IconButton sx={{ marginLeft: 'auto' }}>
+                            <HelpOutline />
+                          </IconButton>
+                        </Tooltip>
+                      </Paper>
+                    ),
+                )}
+              </FormGroup>
               <KeywordSearchAutocomplete
                 selectedVocabs={
                   selectedVocabs
@@ -135,45 +200,6 @@ function Keywords() {
                     : []
                 }
               />
-              <FormGroup
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  width: '40%',
-                  gap: 1.5,
-                }}
-              >
-                {Vocab.getVocabs().map((vocab) => (
-                  <Tooltip
-                    title={VOCABS[vocab.toUpperCase()]?.org || ''}
-                    key={vocab + '-checkbox-and-label'}
-                  >
-                    <Box sx={{ alignItems: 'center', display: 'flex' }}>
-                      <Checkbox onChange={handleCheckboxChange} name={vocab} />
-                      <Box
-                        sx={{ alignItems: 'center', display: 'flex', gap: 1 }}
-                      >
-                        <Image
-                          src={VOCABS[vocab.toUpperCase()]?.icon || ''}
-                          alt={vocab.toUpperCase()}
-                          width={24}
-                          height={24}
-                        />
-                        <Link
-                          href={VOCABS[vocab.toUpperCase()]?.url || ''}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          sx={{ display: 'inherit' }}
-                        >
-                          <Typography>
-                            {VOCABS[vocab.toUpperCase()]?.name || ''}
-                          </Typography>
-                        </Link>
-                      </Box>
-                    </Box>
-                  </Tooltip>
-                ))}
-              </FormGroup>
             </Box>
           </CardContent>
         </CustomCard>
