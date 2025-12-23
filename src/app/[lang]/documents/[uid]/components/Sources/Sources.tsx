@@ -420,9 +420,11 @@ function Sources() {
         <DocumentTable<DocumentRecord>
           columns={columns}
           data={data}
-          enableRowSelection={(row) => {
+          enableRowSelection={
+            true /*(row) => {
             return ability.can(PermissionAction.unmerge, row.original)
-          }}
+          }*/
+          }
           localization={Localization[lang]}
           positionToolbarAlertBanner={'bottom'}
           onGlobalFilterChange={setGlobalFilter}
