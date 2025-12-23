@@ -44,11 +44,11 @@ export type SuggestedKeywordsData = {
   vocab: string
 }
 
-async function getData(
+const getData = async (
   value: string,
   vocab: string,
   offset: number,
-): Promise<SuggestedKeywordsData> {
+): Promise<SuggestedKeywordsData> => {
   const response = await fetch(
     '/api/vocabs' +
       '?q=' +
@@ -111,10 +111,10 @@ async function getData(
   }
 }
 
-async function fetchWrapper(
+const fetchWrapper = async (
   value: string,
   vocabs = Vocab.getVocabs(),
-): Promise<SuggestedKeywordsData[]> {
+): Promise<SuggestedKeywordsData[]> => {
   if (value) {
     const results = await Promise.all(
       vocabs.map((vocab) => getData(value, vocab, 0)),
@@ -134,10 +134,10 @@ export type KeywordSearchAutocompleteProps = {
   authorization?: boolean
 }
 
-function KeywordSearchAutocomplete({
+const KeywordSearchAutocomplete = ({
   fetchKeywords = fetchWrapper,
   selectedVocabs,
-}: KeywordSearchAutocompleteProps) {
+}: KeywordSearchAutocompleteProps) => {
   const [keywordInput, setKeywordInput] = useState<string>('')
   const [keywords, setKeywords] = useState<SuggestedKeywordsData[]>([])
   const [loading, setLoading] = useState<boolean>(false)

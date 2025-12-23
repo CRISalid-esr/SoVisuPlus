@@ -31,12 +31,12 @@ type HalStatusCellBadgeProps =
       isSingleLine?: boolean
     }
 
-export default function HalStatusCellBadge({
+const HalStatusCellBadge = ({
   type,
   icon,
   acronyms,
   isSingleLine,
-}: HalStatusCellBadgeProps) {
+}: HalStatusCellBadgeProps) => {
   if (type === HalStatusCellType.OutsideHal)
     return (
       <Chip
@@ -80,3 +80,4 @@ export default function HalStatusCellBadge({
     )
   }
 }
+export default HalStatusCellBadge

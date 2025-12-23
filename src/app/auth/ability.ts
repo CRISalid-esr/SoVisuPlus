@@ -47,7 +47,7 @@ export const userToAuthzContext = (
   }
 }
 
-function scopesToCondition(scopes: Scope[]): Array<MongoQuery | undefined> {
+const scopesToCondition = (scopes: Scope[]): Array<MongoQuery | undefined> => {
   if (!scopes?.length) return [undefined] // global role
 
   // Group UIDs by entity type
@@ -66,9 +66,9 @@ function scopesToCondition(scopes: Scope[]): Array<MongoQuery | undefined> {
   return conds.length ? conds : [undefined]
 }
 
-export function abilityFromAuthzContext(
+export const abilityFromAuthzContext = (
   p: AuthzContext = EMPTY_PRINCIPAL,
-): AppAbility {
+): AppAbility => {
   const rules: RawRuleOf<AppAbility>[] = []
 
   for (const ra of p.roleAssignments) {

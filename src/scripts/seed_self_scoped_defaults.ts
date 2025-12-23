@@ -9,7 +9,7 @@ import { UserDAO } from '@/lib/daos/UserDAO'
  * Roles taken from env DEFAULT_SELF_SCOPED_ROLES or fallback list.
  * Example env: DEFAULT_SELF_SCOPED_ROLES="document_editor,document_fetcher,document_merger"
  */
-async function main() {
+const main = async () => {
   const defaultRoles = (process.env.DEFAULT_SELF_SCOPED_ROLES ?? '')
     .split(',')
     .map((s) => s.trim())

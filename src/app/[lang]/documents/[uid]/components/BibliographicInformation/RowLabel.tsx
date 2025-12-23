@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
-export default function RowLabel({ children }: { children: React.ReactNode }) {
+const RowLabel = ({ children }: { children: React.ReactNode }) => {
   const theme = useTheme()
 
   return (
@@ -19,3 +19,4 @@ export default function RowLabel({ children }: { children: React.ReactNode }) {
     </Typography>
   )
 }
+export default RowLabel

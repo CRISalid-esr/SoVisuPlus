@@ -30,7 +30,7 @@ const getSplashImages = () => {
   return { backgroundUrl: backgroundPath, logoUrl: logoPath }
 }
 
-export default async function Home() {
+const Home = async () => {
   const splashImages = getSplashImages()
   return (
     <UnauthenticatedRoute>
@@ -40,3 +40,4 @@ export default async function Home() {
     </UnauthenticatedRoute>
   )
 }
+export default Home

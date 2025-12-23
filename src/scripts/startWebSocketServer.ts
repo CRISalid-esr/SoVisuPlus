@@ -1,7 +1,7 @@
 import { WebSocketServer } from 'ws'
 import { WebSocketNotifier } from '@/lib/websocket/WebSocketNotifier'
 
-export function startWebSocketServer(port: number): WebSocketServer {
+export const startWebSocketServer = (port: number): WebSocketServer => {
   const wss = new WebSocketServer({ port })
   WebSocketNotifier.attach(wss)
 

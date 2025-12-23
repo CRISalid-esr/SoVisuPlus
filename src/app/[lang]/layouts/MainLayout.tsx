@@ -12,11 +12,7 @@ import { useSearchParams } from 'next/navigation'
 import { SnackbarProvider } from 'notistack'
 import WebSocketListener from '@/lib/websocket/WebSocketListener'
 
-export default function MainLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const [open, setOpen] = useState(true) // Determines if the drawer is expanded or collapsed
 
   const { currentPerspective, setPerspective, setPerspectiveBySlug } = useStore(
@@ -111,3 +107,4 @@ export default function MainLayout({
     </AuthenticatedRoute>
   )
 }
+export default MainLayout

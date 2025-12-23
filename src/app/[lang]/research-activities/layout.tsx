@@ -1,10 +1,8 @@
+import DefaultLayout from '../layouts/MainLayout'
 
-  import DefaultLayout from '../layouts/MainLayout'
-
-  export default function ResearchActivitiesLayout({
-    children,
-  }: {
-    children: React.ReactNode
-  }) {
-    return <DefaultLayout>{children}</DefaultLayout>
-  }
+const ResearchActivitiesLayout = ({
+  children,
+}: {
+  children: React.ReactNode
+}) => <DefaultLayout>{children}</DefaultLayout>
+export default ResearchActivitiesLayout

@@ -15,7 +15,7 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 
-export default function Journal() {
+const Journal = () => {
   const titleRef = useRef(null)
   const [isPopperOpen, setIsPopperOpen] = useState(false)
   const theme = useTheme()
@@ -103,3 +103,4 @@ export default function Journal() {
     )
   )
 }
+export default Journal

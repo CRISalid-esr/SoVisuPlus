@@ -12,7 +12,7 @@ type Args = {
   scope?: string // "EntityType:entityUid"
 }
 
-function parseArgs(argv: string[]): Args {
+const parseArgs = (argv: string[]): Args => {
   const out: Args = { role: '' }
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]
@@ -45,10 +45,12 @@ function parseArgs(argv: string[]): Args {
   return out
 }
 
-function parseScope(scope?: string): {
+const parseScope = (
+  scope?: string,
+): {
   entityType: EntityType
   entityUid: string
-} | null {
+} | null => {
   if (!scope) return null // global role, no scope
   const idx = scope.indexOf(':')
   if (idx <= 0 || idx === scope.length - 1) {
@@ -75,7 +77,7 @@ function parseScope(scope?: string): {
   return { entityType, entityUid }
 }
 
-async function main() {
+const main = async () => {
   const argv = process.argv.slice(2)
   const args = parseArgs(argv)
 

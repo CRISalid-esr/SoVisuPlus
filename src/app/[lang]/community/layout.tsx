@@ -1,9 +1,6 @@
 import UnauthenticatedLayout from '../layouts/UnauthenticatedLayout'
 
-export default function CommunityLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return <UnauthenticatedLayout>{children}</UnauthenticatedLayout>
-}
+const CommunityLayout = ({ children }: { children: React.ReactNode }) => (
+  <UnauthenticatedLayout>{children}</UnauthenticatedLayout>
+)
+export default CommunityLayout

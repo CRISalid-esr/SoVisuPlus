@@ -18,11 +18,7 @@ const halSubmitTypeToHalSubmitTypeIcon = (halSubmitType: string | null) => {
   }
 }
 
-export default function HalStatusCell({
-  row,
-}: {
-  row: { original: Document }
-}) {
+const HalStatusCell = ({ row }: { row: { original: Document } }) => {
   const { currentPerspective } = useStore((state) => state.user)
 
   const halRecord = row.original.records.find(
@@ -58,3 +54,4 @@ export default function HalStatusCell({
     />
   )
 }
+export default HalStatusCell

@@ -1,9 +1,6 @@
 import DefaultLayout from '../layouts/MainLayout'
 
-export default function MyAccountLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return <DefaultLayout>{children}</DefaultLayout>
-}
+const MyAccountLayout = ({ children }: { children: React.ReactNode }) => (
+  <DefaultLayout>{children}</DefaultLayout>
+)
+export default MyAccountLayout

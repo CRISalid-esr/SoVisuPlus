@@ -14,7 +14,7 @@ import { buildWebSocketURL } from '@/lib/websocket/ws-url'
 import * as Lingui from '@lingui/core'
 import { useSearchParams } from 'next/navigation'
 
-export default function WebSocketListener() {
+const WebSocketListener = () => {
   const { enqueueSnackbar } = useSnackbar()
   const { startHarvesting, updateHarvestingStatus, incrementPlatformCount } =
     useStore((state) => state.harvesting)
@@ -157,3 +157,4 @@ export default function WebSocketListener() {
 
   return null
 }
+export default WebSocketListener

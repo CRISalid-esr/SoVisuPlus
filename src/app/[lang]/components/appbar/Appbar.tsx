@@ -7,11 +7,7 @@ import { Menu02 as Menu } from '@untitled-ui/icons-react'
 import Image from 'next/image'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
 
-export default function Appbar({
-  handleToggleDrawer,
-}: {
-  handleToggleDrawer: () => void
-}) {
+const Appbar = ({ handleToggleDrawer }: { handleToggleDrawer: () => void }) => {
   const toggleDrawer = () => handleToggleDrawer()
   const { currentTheme } = useThemeContext()
 
@@ -65,3 +61,4 @@ export default function Appbar({
     </AppBar>
   )
 }
+export default Appbar

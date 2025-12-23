@@ -8,7 +8,7 @@ import useStore from '@/stores/global_store'
 import * as Lingui from '@lingui/core'
 import WorkInProgress from '@/components/WorkInProgress/WorkInProgress'
 
-export default function ExpertisePage() {
+const ExpertisePage = () => {
   const { currentPerspective } = useStore((state) => state.user)
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   return (
@@ -27,3 +27,4 @@ export default function ExpertisePage() {
     </Box>
   )
 }
+export default ExpertisePage

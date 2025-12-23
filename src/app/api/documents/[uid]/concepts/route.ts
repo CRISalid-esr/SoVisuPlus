@@ -6,10 +6,10 @@ import { ConceptJson } from '@/types/Concept'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 
-export async function DELETE(
+export const DELETE = async (
   request: Request,
   context: { params: Promise<{ uid: string }> },
-) {
+) => {
   const { uid } = await context.params
 
   const session = (await getServerSession(authOptions)) as Session & {
@@ -70,10 +70,10 @@ export async function DELETE(
   }
 }
 
-export async function POST(
+export const POST = async (
   request: Request,
   context: { params: Promise<{ uid: string }> },
-) {
+) => {
   const { uid } = await context.params
 
   const session = (await getServerSession(authOptions)) as Session & {

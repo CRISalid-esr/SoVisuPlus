@@ -7,11 +7,11 @@ import { Trans } from '@lingui/react'
 import React from 'react'
 import { getRuntimeEnv } from '@/utils/runtimeEnv'
 
-export function OrcidLoginButton({
+export const OrcidLoginButton = ({
   orcidProvided,
 }: {
   orcidProvided: boolean
-}) {
+}) => {
   const clientId = getRuntimeEnv().ORCID_CLIENT_ID
   const orcidURL = getRuntimeEnv().ORCID_URL
   const orcidScopes = getRuntimeEnv().ORCID_SCOPES

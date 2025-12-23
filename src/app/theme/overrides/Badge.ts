@@ -1,11 +1,10 @@
-export default function Badge() {
-  return {
-    MuiBadge: {
-      defaultProps: {},
-      styleOverrides: {
-        root: {},
-        badge: {},
-      },
+const Badge = () => ({
+  MuiBadge: {
+    defaultProps: {},
+    styleOverrides: {
+      root: {},
+      badge: {},
     },
-  }
-}
+  },
+})
+export default Badge

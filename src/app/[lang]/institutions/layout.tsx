@@ -1,9 +1,6 @@
 import DefaultLayout from '../layouts/MainLayout'
 
-export default function InstitutionsLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return <DefaultLayout>{children}</DefaultLayout>
-}
+const InstitutionsLayout = ({ children }: { children: React.ReactNode }) => (
+  <DefaultLayout>{children}</DefaultLayout>
+)
+export default InstitutionsLayout

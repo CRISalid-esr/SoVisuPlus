@@ -16,25 +16,24 @@ type OAStatusCellBadgeProps = {
   type?: OAStatus
 }
 
-export default function OAStatusCellBadge({ type }: OAStatusCellBadgeProps) {
-  return (
-    <Chip
-      icon={
-        type === OAStatus.CLOSED ? (
-          <LockOutlined sx={{ fontSize: 'large' }} />
-        ) : (
-          <LockOpen sx={{ fontSize: 'large' }} />
-        )
-      }
-      label={type}
-      size='small'
-      color='info'
-      sx={{
-        backgroundColor: type
-          ? OAStatusColor[type]
-          : OAStatusColor[OAStatus.CLOSED],
-        padding: '1px',
-      }}
-    />
-  )
-}
+const OAStatusCellBadge = ({ type }: OAStatusCellBadgeProps) => (
+  <Chip
+    icon={
+      type === OAStatus.CLOSED ? (
+        <LockOutlined sx={{ fontSize: 'large' }} />
+      ) : (
+        <LockOpen sx={{ fontSize: 'large' }} />
+      )
+    }
+    label={type}
+    size='small'
+    color='info'
+    sx={{
+      backgroundColor: type
+        ? OAStatusColor[type]
+        : OAStatusColor[OAStatus.CLOSED],
+      padding: '1px',
+    }}
+  />
+)
+export default OAStatusCellBadge

@@ -26,7 +26,7 @@ import { Can } from '@casl/react'
 import { VOCABS } from '@/lib/services/Vocabs'
 import Image from 'next/image'
 
-function Keywords() {
+const Keywords = () => {
   const { data: session } = useSession()
 
   const ability = useMemo(

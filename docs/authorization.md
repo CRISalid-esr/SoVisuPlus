@@ -15,7 +15,6 @@ Create a `rbac.roles.yaml` at the root of your instance. Each role has:
 - `system` (optional): if `true`, marks a system role
 - `description` (optional)
 - `permissions`: list of rules, each with
-
   - `action`: one of your domain actions (e.g. `manage`, `read`, `update`, `delete`, `merge`, `unmerge`...)
   - `subject`: the domain entity (`Document`, `DocumentRecord`, `Person`, `ResearchStructure`, or `all`)
   - `fields` (optional): field-level permissions for `update` (e.g. `titles`, `abstracts`)
@@ -56,7 +55,6 @@ roles:
 ### Notes
 
 - We created a small set of roles and rely on **polymorphic scopes** when assigning them:
-
   - Scope to a **Person** → “this user can edit/merge documents to which this person is a contributor”
   - Scope to a **ResearchStructure** → “this user can edit/merge documents that involve members of that structure as
     contributors”
@@ -331,7 +329,7 @@ import authOptions from '@/app/auth/auth_options'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 
-export async function POST(req: Request) {
+export const POST = async (req: Request) => {
   const session = await getServerSession(authOptions)
   if (!session?.user?.authz) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

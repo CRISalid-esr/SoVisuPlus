@@ -28,7 +28,7 @@ type WordStreamProps = {
 const DEFAULT_XS_HEIGHT = 360
 
 const DEFAULT_MD_HEIGHT = 480
-export default function WordStream({
+const WordStream = ({
   uid,
   entityType,
   lang,
@@ -44,7 +44,7 @@ export default function WordStream({
   maxFont = 30,
   tickFont = 12,
   legendFont = 12,
-}: WordStreamProps) {
+}: WordStreamProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const svgRef = useRef<SVGSVGElement | null>(null)
   const [ready, setReady] = useState<boolean>(
@@ -219,3 +219,4 @@ export default function WordStream({
     </Card>
   )
 }
+export default WordStream

@@ -8,7 +8,7 @@ import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { PersonService } from '@/lib/services/PersonService'
 
-export async function GET(req: NextRequest) {
+export const GET = async (req: NextRequest) => {
   const sovisuplusHost = process.env.APP_URL
   const lang =
     req.nextUrl.searchParams.get('lang') ??

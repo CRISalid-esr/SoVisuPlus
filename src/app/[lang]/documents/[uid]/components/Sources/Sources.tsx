@@ -47,7 +47,7 @@ import dayjs from 'dayjs'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 
-function Sources() {
+const Sources = () => {
   const { selectedDocument = null } = useStore((state) => state.document)
   const theme = useTheme()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode

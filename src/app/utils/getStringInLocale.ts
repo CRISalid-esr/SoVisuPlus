@@ -1,9 +1,9 @@
 import { Literal } from '@/types/Literal'
 
-export function getStringInLocale(
+export const getStringInLocale = (
   items: Array<Literal>,
   localeNumber: number,
-): string {
+): string => {
   const locales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',') || []
   if (localeNumber >= locales.length) {
     return ''

@@ -9,7 +9,7 @@ import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 
-export async function POST(request: Request) {
+export const POST = async (request: Request) => {
   const session = (await getServerSession(authOptions)) as Session & {
     user: { username?: string }
   }

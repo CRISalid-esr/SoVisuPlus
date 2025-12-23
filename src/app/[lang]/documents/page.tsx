@@ -93,7 +93,7 @@ const DEFAULT_PAGINATION = {
   pageIndex: 0,
   pageSize: 10,
 }
-export default function DocumentsPage() {
+const DocumentsPage = () => {
   const { data: session } = useSession()
   const { _ } = useLingui()
   const ability = useMemo(
@@ -1000,3 +1000,4 @@ export default function DocumentsPage() {
     </Box>
   )
 }
+export default DocumentsPage

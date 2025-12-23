@@ -2,8 +2,9 @@ import { CustomMiddleware } from '@/middlewares/chain'
 import { NextFetchEvent, NextRequest, NextResponse } from 'next/server'
 import { NextRequestWithAuth, withAuth } from 'next-auth/middleware'
 
-export function authMiddleware(middleware: CustomMiddleware) {
-  return async (request: NextRequest, event: NextFetchEvent) => {
+export const authMiddleware =
+  (middleware: CustomMiddleware) =>
+  async (request: NextRequest, event: NextFetchEvent) => {
     const withAuthMiddleware = withAuth({
       pages: {
         signIn: '/fr',
@@ -17,4 +18,3 @@ export function authMiddleware(middleware: CustomMiddleware) {
     )
     return middleware(request, event, customResponse as NextResponse)
   }
-}

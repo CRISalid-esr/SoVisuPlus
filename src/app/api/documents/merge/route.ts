@@ -3,7 +3,7 @@ import { getServerSession, Session } from 'next-auth'
 import authOptions from '@/app/auth/auth_options'
 import { DocumentService } from '@/lib/services/DocumentService'
 
-export async function POST(request: Request) {
+export const POST = async (request: Request) => {
   // TODO implement access control / authorization by perspective
   const session = (await getServerSession(authOptions)) as Session & {
     user: { username?: string }
