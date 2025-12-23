@@ -25,7 +25,12 @@ import {
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import { MRT_ColumnDef, MRT_Row } from 'material-react-table'
+import {
+  MRT_Cell,
+  MRT_Column,
+  MRT_ColumnDef,
+  MRT_Row,
+} from 'material-react-table'
 import Image from 'next/image'
 import React, { ReactNode, useMemo, useState } from 'react'
 import { DocumentTypeIcons } from '../../../components/DocumentTypeIcons'
@@ -37,10 +42,15 @@ import { LocRelator } from '@/types/LocRelator'
 import dayjs from 'dayjs'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
-import { DocumentTable } from '@/app/[lang]/documents/components/DocumentTable'
+import {
+  DocumentTable,
+  readInitialGlobalFilter,
+} from '@/app/[lang]/documents/components/DocumentTable'
 import { PermissionAction } from '@/types/Permission'
 import { useSession } from 'next-auth/react'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
+import Highlighter from 'react-highlight-words'
+import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
 
 function Sources() {
   const { _ } = useLingui()
@@ -53,6 +63,7 @@ function Sources() {
   >({})
   const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
   const theme = useTheme()
+  const { currentPerspective, ownPerspective } = useStore((state) => state.user)
   const ability = useMemo(
     () => abilityFromAuthzContext(session?.user.authz),
     [session?.user?.authz],
@@ -60,6 +71,7 @@ function Sources() {
   const [data, setData] = useState<DocumentRecord[]>(
     selectedDocument?.records || [],
   )
+  const [globalFilter, setGlobalFilter] = useState(readInitialGlobalFilter)
 
   const getPreciseType = (types: DocumentType[]) => {
     const clearDocumentTypes = types.filter(
@@ -151,7 +163,9 @@ function Sources() {
         header: t`documents_page_title_column`,
         Cell({
           row,
+          column,
         }: {
+          column: MRT_Column<DocumentRecord>
           row: MRT_Row<DocumentRecord>
           renderedCellValue: ReactNode
         }) {
@@ -166,7 +180,12 @@ function Sources() {
           const effectiveRowLang = localizedTitle.language
           return (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography>{localizedTitle.value}</Typography>
+              <Highlighter
+                highlightClassName='highlight'
+                searchWords={[globalFilter, column.getFilterValue() as string]}
+                autoEscape
+                textToHighlight={localizedTitle.value}
+              />
               <LanguageChips
                 texts={titles}
                 selectedLang={effectiveRowLang}
@@ -191,6 +210,20 @@ function Sources() {
             .join(', ')
         },
         header: t`documents_page_contributors_column`,
+        Cell({
+          cell,
+          column,
+        }: {
+          cell: MRT_Cell<DocumentRecord>
+          column: MRT_Column<DocumentRecord>
+        }) {
+          return (
+            <HighlighterWithEllipsis
+              searchWords={[globalFilter, column.getFilterValue() as string]}
+              text={cell.getValue<string>()}
+            />
+          )
+        },
       },
       {
         size: 100,
@@ -210,12 +243,15 @@ function Sources() {
           if (dateJs.isValid()) {
             dateStr = dateJs.format(dateFormat)
           }
-          return (
-            <Typography>
-              {!dateStr
-                ? t`documents_page_publication_date_column_no_date_available`
-                : dateStr}
-            </Typography>
+          return !dateStr ? (
+            t`documents_page_publication_date_column_no_date_available`
+          ) : (
+            <Highlighter
+              highlightClassName='highlight'
+              searchWords={[globalFilter]}
+              autoEscape
+              textToHighlight={dateStr}
+            />
           )
         },
         filterFn: (row, id, value) => {
@@ -250,6 +286,19 @@ function Sources() {
           }
         },
         header: t`documents_page_publishedIn_column`,
+        Cell({ cell, column }) {
+          const title = cell.getValue<string>()
+          return (
+            title && (
+              <Highlighter
+                highlightClassName='highlight'
+                searchWords={[globalFilter, column.getFilterValue() as string]}
+                autoEscape
+                textToHighlight={title}
+              />
+            )
+          )
+        },
       },
       {
         enableSorting: false,
@@ -329,7 +378,7 @@ function Sources() {
         },
       },
     ]
-  }, [lang, selectedTitleLangs, supportedLocales, _])
+  }, [lang, globalFilter, selectedTitleLangs, supportedLocales, _])
 
   const handleChange = () => {
     setAction('')
@@ -376,6 +425,7 @@ function Sources() {
           }}
           localization={Localization[lang]}
           positionToolbarAlertBanner={'bottom'}
+          onGlobalFilterChange={setGlobalFilter}
           renderTopToolbarCustomActions={({ table }) => {
             const rowSelected = table.getSelectedRowModel().rows.length > 0
             return (
@@ -447,6 +497,9 @@ function Sources() {
             )
           }}
           rowCount={data.length}
+          state={{
+            globalFilter,
+          }}
         />
       </CardContent>
     </CustomCard>
