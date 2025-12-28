@@ -3,6 +3,7 @@ import {
   Concept as DbConcept,
   DocumentState,
   Person as DbPerson,
+  DocumentRecord as DbDocumentRecord,
   Prisma,
 } from '@prisma/client'
 import { Document, DocumentType } from '@/types/Document'
@@ -15,6 +16,8 @@ import {
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import QueryMode = Prisma.QueryMode
 import { ConceptJson } from '@/types/Concept'
+import { Literal } from '@/types/Literal'
+import { LocRelatorHelper } from '@/types/LocRelator'
 
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
@@ -70,7 +73,12 @@ export class DocumentDAO extends AbstractDAO {
             abstracts: true,
             subjects: { include: { labels: true } },
             contributions: { include: { person: true } },
-            records: true,
+            records: {
+              include: {
+                contributions: { include: { person: true } },
+                journal: true,
+              },
+            },
             journal: {
               include: {
                 identifiers: true,
@@ -141,7 +149,12 @@ export class DocumentDAO extends AbstractDAO {
             abstracts: true,
             subjects: { include: { labels: true } },
             contributions: { include: { person: true } },
-            records: true,
+            records: {
+              include: {
+                contributions: { include: { person: true } },
+                journal: true,
+              },
+            },
             journal: {
               include: {
                 identifiers: true,
@@ -213,7 +226,12 @@ export class DocumentDAO extends AbstractDAO {
             abstracts: true,
             subjects: { include: { labels: true } },
             contributions: { include: { person: true } },
-            records: true,
+            records: {
+              include: {
+                contributions: { include: { person: true } },
+                journal: true,
+              },
+            },
             journal: { include: { identifiers: true } },
           },
         })) as DbDocument
@@ -341,26 +359,88 @@ export class DocumentDAO extends AbstractDAO {
       for (const record of records) {
         try {
           await this.prismaClient.documentRecord.upsert({
-            where: { uid: record.uid },
+            where: {
+              uid: record.uid,
+            },
             update: {
+              url: record.url,
+              documentTypes: record.documentTypes,
+              publicationDate: record.publicationDate,
+              titles: record.titles.map((title) => title.toJson()),
+              halCollectionCodes: record.halCollectionCodes || [],
+              halSubmitType: record.halSubmitType,
+              journal: record.journal && {
+                connectOrCreate: {
+                  where: { uid: record.journal.uid },
+                  create: {
+                    uid: record.journal.uid,
+                    source: record.journal.source,
+                    sourceId: record.journal.sourceId,
+                    publisher: record.journal.publisher,
+                    titles: record.journal.titles,
+                  },
+                },
+              },
+              contributions: {
+                deleteMany: {},
+                create: record.contributions.map((contribution) => ({
+                  role: LocRelatorHelper.toLabel(contribution.role),
+                  person: {
+                    connectOrCreate: {
+                      where: { uid: contribution.person.uid },
+                      create: {
+                        uid: contribution.person.uid,
+                        name: contribution.person.name,
+                        source: contribution.person.source,
+                        sourceId: contribution.person.sourceId,
+                      },
+                    },
+                  },
+                })),
+              },
+              document: { connect: { id: dbDocument.id } },
               platform: {
                 set: getBibliographicPlatformDbValue(record.platform),
               },
-              titles: record.titles.map((title) => title.toJson()),
-              url: record.url,
-              halCollectionCodes: record.halCollectionCodes || [],
-              halSubmitType: record.halSubmitType,
-              // in case the record was not previously linked to this document :
-              document: { connect: { id: dbDocument.id } },
             },
             create: {
               uid: record.uid,
-              platform: getBibliographicPlatformDbValue(record.platform),
-              titles: record.titles.map((title) => title.toJson()),
               url: record.url,
+              documentTypes: record.documentTypes,
+              publicationDate: record.publicationDate,
+              titles: record.titles.map((title) => title.toJson()),
+              platform: getBibliographicPlatformDbValue(record.platform),
               halCollectionCodes: record.halCollectionCodes || [],
               halSubmitType: record.halSubmitType,
-              documentId: dbDocument.id,
+              journal: record.journal && {
+                connectOrCreate: {
+                  where: { uid: record.journal.uid },
+                  create: {
+                    uid: record.journal.uid,
+                    source: record.journal.source,
+                    sourceId: record.journal.sourceId,
+                    publisher: record.journal.publisher,
+                    titles: record.journal.titles,
+                  },
+                },
+              },
+              contributions: {
+                create: record.contributions.map((contribution) => ({
+                  role: LocRelatorHelper.toLabel(contribution.role),
+                  person: {
+                    connectOrCreate: {
+                      where: { uid: contribution.person.uid },
+                      create: {
+                        uid: contribution.person.uid,
+                        name: contribution.person.name,
+                        source: contribution.person.source,
+                        sourceId: contribution.person.sourceId,
+                      },
+                    },
+                  },
+                })),
+              },
+              document: { connect: { id: dbDocument.id } },
             },
           })
         } catch (error) {
@@ -758,7 +838,12 @@ export class DocumentDAO extends AbstractDAO {
             person: true,
           },
         },
-        records: true,
+        records: {
+          include: {
+            contributions: { include: { person: true } },
+            journal: true,
+          },
+        },
         journal: {
           include: {
             identifiers: true,
@@ -770,7 +855,7 @@ export class DocumentDAO extends AbstractDAO {
     const totalItems = await this.prismaClient.document.count({ where })
 
     return {
-      documents: dbDocuments.map((dbDocument) => {
+      documents: dbDocuments?.map((dbDocument) => {
         return Document.fromDbDocument(dbDocument)
       }),
       totalItems,
@@ -825,7 +910,12 @@ export class DocumentDAO extends AbstractDAO {
             },
           },
         },
-        records: true,
+        records: {
+          include: {
+            contributions: { include: { person: true } },
+            journal: true,
+          },
+        },
         subjects: {
           include: {
             labels: true,

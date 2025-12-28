@@ -21,6 +21,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -35,12 +36,16 @@ import {
   useMaterialReactTable,
 } from 'material-react-table'
 import Image from 'next/image'
-import { ReactNode, useMemo, useState } from 'react'
+import React, { ReactNode, useMemo, useState } from 'react'
 import { DocumentTypeIcons } from '../../../components/DocumentTypeIcons'
 import { DocumentTypeLabels } from '../../../components/DocumentTypeLabels'
 
 import CallMergeIcon from '@mui/icons-material/CallMerge'
 import { Localization } from '@/types/Localization'
+import { LocRelator } from '@/types/LocRelator'
+import dayjs from 'dayjs'
+import { LocaleDateFormats } from '@/types/LocaleDateFormats'
+import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 
 function Sources() {
   const { selectedDocument = null } = useStore((state) => state.document)
@@ -53,8 +58,51 @@ function Sources() {
   const [action, setAction] = useState<string>('')
   const { _ } = useLingui()
 
-  const columns = useMemo<MRT_ColumnDef<DocumentRecord>[]>(
-    () => [
+  const getPreciseType = (types: DocumentType[]) => {
+    const clearDocumentTypes = types.filter(
+      (type) =>
+        type.toString() != 'Unknown' &&
+        DocumentTypeService.isDocumentType(type),
+    )
+    if (clearDocumentTypes.length == 0) {
+      return DocumentType.Document
+    }
+    const typeHierarchy = DocumentTypeService.toMenuTree()
+    let preciseTypeIndex: number = 0
+    for (const [index, type] of typeHierarchy.entries()) {
+      if (clearDocumentTypes.includes(type.value)) {
+        if (type.depth > preciseTypeIndex) {
+          preciseTypeIndex = index
+        }
+      }
+    }
+    return typeHierarchy[preciseTypeIndex].value
+  }
+
+  const columns = useMemo<
+    MRT_ColumnDef<DocumentRecord>[]
+  >((): MRT_ColumnDef<DocumentRecord>[] => {
+    const typeOptions = DocumentTypeService.toMenuTree()
+      .filter((n) => n.value !== DocumentType.Document)
+      .map(({ value, depth }) => {
+        const plainLabel = _(DocumentTypeLabels[value])
+        return {
+          value,
+          label: (
+            <Box
+              className='doc-type-option'
+              sx={{ display: 'flex', alignItems: 'center', pl: depth * 1.5 }}
+            >
+              <Box sx={{ mr: 1 }}>{DocumentTypeIcons[value]}</Box>
+              <Typography variant='body2' noWrap>
+                {plainLabel}
+              </Typography>
+            </Box>
+          ),
+          plainLabel,
+        }
+      })
+    return [
       {
         enableSorting: false,
         accessorKey: 'type',
@@ -62,28 +110,20 @@ function Sources() {
         filterVariant: 'multi-select',
         filterColumn: 'type',
         //@ts-expect-error:  overide filterSelectOptions to accept Element.jsx instead of Element
-        filterSelectOptions: Object.values(DocumentType).map((type) => ({
-          value: type,
-          label: (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-              }}
-            >
-              {_(DocumentTypeLabels[type])}
-              <Box
-                sx={{
-                  marginLeft: 'auto',
-                }}
-              >
-                {DocumentTypeIcons[type]}
-              </Box>
-            </Box>
-          ),
-        })),
+        filterSelectOptions: typeOptions,
+        Cell({
+          row,
+        }: {
+          row: MRT_Row<DocumentRecord>
+          renderedCellValue: ReactNode
+        }) {
+          const type = getPreciseType(row.original.documentTypes)
+          return (
+            <Tooltip title={_(DocumentTypeLabels[type])}>
+              {DocumentTypeIcons[type]}
+            </Tooltip>
+          )
+        },
       },
       {
         size: 200,
@@ -132,6 +172,15 @@ function Sources() {
       },
       {
         accessorKey: 'contributions',
+        accessorFn: (row) => {
+          return row.contributions
+            .map((contribution) =>
+              contribution.role == LocRelator.AUTHOR
+                ? contribution.person.name
+                : '',
+            )
+            .join(', ')
+        },
         header: t`documents_page_contributors_column`,
       },
       {
@@ -139,13 +188,38 @@ function Sources() {
         accessorKey: 'date',
         header: t`documents_page_publication_date_column`,
         filterVariant: 'date-range',
+        Cell({
+          row,
+        }: {
+          row: { original: DocumentRecord }
+          renderedCellValue: ReactNode
+        }) {
+          let dateStr = row.original.publicationDate?.toString()
+          const dateFormat = LocaleDateFormats['lang'] || 'MM-DD-YYYY'
+          if (dayjs(dateStr, 'YYYY-MM-DD').isValid()) {
+            dateStr = dayjs(dateStr, 'YYYY-MM-DD').format(dateFormat)
+          }
+          return (
+            <Typography>
+              {!dateStr
+                ? t`documents_page_publication_date_column_no_date_available`
+                : dateStr}
+            </Typography>
+          )
+        },
       },
       {
         accessorKey: 'publishedIn',
-        header: t`documents_page_publishedIn_column`,
-        Cell() {
-          return ''
+        accessorFn: (row) => {
+          if (row.journal) {
+            let str = row.journal?.titles[0]
+            if (row.journal?.publisher) {
+              str += ' (' + row.journal?.publisher + ')'
+            }
+            return str
+          }
         },
+        header: t`documents_page_publishedIn_column`,
       },
       {
         enableSorting: false,
@@ -224,9 +298,8 @@ function Sources() {
           return filterValues.includes(row.original.platform)
         },
       },
-    ],
-    [selectedTitleLangs],
-  )
+    ]
+  }, [lang, selectedTitleLangs, supportedLocales, _])
 
   const handleChange = () => {
     setAction('')

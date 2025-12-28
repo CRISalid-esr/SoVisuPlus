@@ -10,16 +10,49 @@ import { DocumentRecord } from '@/types/DocumentRecord'
 import { Concept } from '@/types/Concept'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
+import { SourceContribution } from '@/types/SourceContribution'
+import { SourceJournal } from '@/types/SourceJournal'
+import { SourcePerson } from '@/types/SourcePerson'
+
+interface GraphSourcePersonResponse {
+  uid: string
+  name: string
+  source: string
+  source_identifier: string
+}
 
 interface GraphContributionResponse {
   roles: string[]
   contributor: Array<GraphPersonResponse>
 }
 
+interface GraphSourceContributionResponse {
+  role: string
+  contributor: GraphSourcePersonResponse
+}
+
+interface GraphSourceJournalResponse {
+  uid: string
+  source: string
+  source_identifier: string
+  titles: string[]
+  publisher: string
+}
+
+interface GraphSourceIssueResponse {
+  issued_by: GraphSourceJournalResponse
+  source: string
+  source_identifier: string
+}
+
 interface GraphDocumentRecordResponse {
   uid: string
   url: string | null
+  document_types: string[]
   harvester: string
+  has_contributions: Array<GraphSourceContributionResponse>
+  issued: string | null
+  published_in: GraphSourceIssueResponse
   titles: { language: string; value: string }[]
   hal_collection_codes?: string[] | null
   hal_submit_type?: 'file' | 'notice' | 'annex' | null
@@ -156,7 +189,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
         },
         [],
       ),
-      recorded_by.reduce<DocumentRecord[]>(
+      documentData.recorded_by.reduce<DocumentRecord[]>(
         (acc, recordData: GraphDocumentRecordResponse) => {
           const platform = getBibliographicPlatformByNameIgnoreCase(
             recordData.harvester,
@@ -165,18 +198,58 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
             console.error(`Unknown platform: ${recordData.harvester}`)
             return acc
           }
+          const publisher = recordData.published_in?.issued_by
 
           acc.push(
             new DocumentRecord(
               recordData.uid,
+              recordData.has_contributions.reduce<SourceContribution[]>(
+                (
+                  acc,
+                  sourceContributionData: GraphSourceContributionResponse,
+                ) => {
+                  const contributor = sourceContributionData.contributor
+                  const person = new SourcePerson(
+                    contributor.uid,
+                    contributor.name,
+                    contributor.source,
+                    contributor.source_identifier,
+                  )
+                  const { role } = sourceContributionData
+                  const locRelator = LocRelatorHelper.fromLabel(
+                    role.toLowerCase(),
+                  )
+                  if (!locRelator) {
+                    console.error(
+                      `Unknown role label ${role} for document record ${recordData.uid}`,
+                    )
+                    return acc
+                  }
+                  acc.push(new SourceContribution(locRelator, person))
+                  return acc
+                },
+                [],
+              ),
+              recordData.document_types.map((type) =>
+                Document.documentTypeFromString(type),
+              ),
+              recordData.issued ? new Date(recordData.issued) : null,
               platform,
               recordData.titles.map(Literal.fromObject),
               recordData.url,
               recordData.hal_collection_codes ?? [],
               recordData.hal_submit_type,
+              publisher
+                ? new SourceJournal(
+                    publisher.uid,
+                    publisher.source,
+                    publisher.source_identifier,
+                    publisher.titles,
+                    publisher.publisher,
+                  )
+                : undefined,
             ),
           )
-
           return acc
         },
         [],
