@@ -1,3 +1,9 @@
+type FontMap = Record<string, string>
+
+import { institutionalConfig } from '@/configs/index'
+
+const fonts: FontMap = institutionalConfig.fonts
+
 const htmlFontSize = 16 // Browser default - do not change it
 const baseFontSize = 14 // Real "base" fontSize - "0.875rem" - do not change it
 

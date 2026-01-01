@@ -468,4 +468,73 @@ describe('RoleService Integration', () => {
     expect(userRoles3).toHaveLength(3)
     expect(scopes3).toHaveLength(3)
   })
+
+  test('reset removes orphan permissions', async () => {
+    // 1) Initial config: role has two permissions (merge + unmerge)
+    const initial: RolesFileSeed = {
+      roles: [
+        {
+          name: 'document_merger',
+          description: 'Merge / unmerge documents and source records',
+          system: false,
+          permissions: [
+            { action: 'merge', subject: 'Document', fields: [] },
+            { action: 'unmerge', subject: 'DocumentRecord', fields: [] },
+          ],
+        },
+      ],
+    }
+    await svc.reset(initial)
+
+    // Sanity check: two permission rows exist, including unmerge
+    const allPerms1 = await prisma.permission.findMany({
+      orderBy: { id: 'asc' },
+    })
+    expect(allPerms1).toHaveLength(2)
+
+    const unmergePermBefore = await prisma.permission.findFirst({
+      where: {
+        action: 'unmerge',
+        subject: 'DocumentRecord',
+        fields: { equals: [] },
+        inverted: false,
+      },
+    })
+    expect(unmergePermBefore).toBeTruthy()
+
+    // 2) New config: role has only one permission (merge)
+    const minusUnmerge: RolesFileSeed = {
+      roles: [
+        {
+          name: 'document_merger',
+          description: 'Merge only',
+          system: false,
+          permissions: [{ action: 'merge', subject: 'Document', fields: [] }],
+        },
+      ],
+    }
+    await svc.reset(minusUnmerge)
+
+    // 3) After reset, orphan permissions should have been removed
+    const allPerms2 = await prisma.permission.findMany({
+      orderBy: { id: 'asc' },
+    })
+    expect(allPerms2).toHaveLength(1)
+    expect(allPerms2[0]).toMatchObject({
+      action: 'merge',
+      subject: 'Document',
+      inverted: false,
+      fields: [],
+    })
+
+    const unmergePermAfter = await prisma.permission.findFirst({
+      where: {
+        action: 'unmerge',
+        subject: 'DocumentRecord',
+        fields: { equals: [] },
+        inverted: false,
+      },
+    })
+    expect(unmergePermAfter).toBeNull()
+  })
 })

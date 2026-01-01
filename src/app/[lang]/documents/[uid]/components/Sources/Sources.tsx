@@ -94,6 +94,27 @@ function Sources() {
     return typeHierarchy[preciseTypeIndex].value
   }
 
+  const getPreciseType = (types: DocumentType[]) => {
+    const clearDocumentTypes = types.filter(
+      (type) =>
+        type.toString() != 'Unknown' &&
+        DocumentTypeService.isDocumentType(type),
+    )
+    if (clearDocumentTypes.length == 0) {
+      return DocumentType.Document
+    }
+    const typeHierarchy = DocumentTypeService.toMenuTree()
+    let preciseTypeIndex: number = 0
+    for (const [index, type] of typeHierarchy.entries()) {
+      if (clearDocumentTypes.includes(type.value)) {
+        if (type.depth > preciseTypeIndex) {
+          preciseTypeIndex = index
+        }
+      }
+    }
+    return typeHierarchy[preciseTypeIndex].value
+  }
+
   const columns = useMemo<
     MRT_ColumnDef<DocumentRecord>[]
   >((): MRT_ColumnDef<DocumentRecord>[] => {
@@ -299,6 +320,7 @@ function Sources() {
             )
           )
         },
+        header: t`documents_page_publishedIn_column`,
       },
       {
         enableSorting: false,

@@ -88,6 +88,76 @@ export default function DocumentsPage() {
     () => abilityFromAuthzContext(session?.user.authz),
     [session?.user?.authz],
   )
+  const readInitialPagination = (): typeof DEFAULT_PAGINATION => {
+    try {
+      const raw = sessionStorage.getItem('mrt_pagination_publication_table')
+      return raw ? JSON.parse(raw) : DEFAULT_PAGINATION
+    } catch {
+      return DEFAULT_PAGINATION
+    }
+  }
+  const readInitialColumnFilters = (): MRT_ColumnFiltersState => {
+    try {
+      const raw = sessionStorage.getItem('mrt_columnFilters_publication_table')
+
+      if (!raw) {
+        return []
+      }
+
+      return JSON.parse(raw).reduce(
+        (
+          filters: MRT_ColumnFiltersState,
+          filter: {
+            id: string
+            value: unknown
+          },
+        ) => {
+          if (filter.id !== 'date' || !Array.isArray(filter.value)) {
+            return [...filters, filter]
+          }
+
+          return [
+            ...filters,
+            {
+              id: filter.id,
+              value: filter.value.map((value: string | null) =>
+                value ? dayjs(value) : '',
+              ),
+            },
+          ]
+        },
+        [],
+      )
+    } catch {
+      return []
+    }
+  }
+
+  const readInitialGlobalFilter = () => {
+    try {
+      const raw = sessionStorage.getItem('mrt_global_publication_table')
+      return raw ? (JSON.parse(raw) as string) : ''
+    } catch {
+      return ''
+    }
+  }
+  const [pagination, setPagination] = useState(readInitialPagination)
+
+  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
+    readInitialColumnFilters,
+  )
+  const [globalFilter, setGlobalFilter] = useState(readInitialGlobalFilter)
+
+  const readInitialSorting = (): MRT_SortingState => {
+    try {
+      const raw = sessionStorage.getItem('mrt_sorting_publication_table')
+      return raw ? JSON.parse(raw) : DEFAULT_SORTING
+    } catch {
+      return DEFAULT_SORTING
+    }
+  }
+  const [sorting, setSorting] = useState<MRT_SortingState>(readInitialSorting)
+
   const [openSynchronizeModal, setOpenSynchronizeModal] =
     useState<boolean>(false)
   const [triggerReloadList, setTriggerReloadList] = useState<boolean>(false)

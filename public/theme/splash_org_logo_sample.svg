@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 250">
+  <rect width="180" height="190" x="20" y="30" fill="#003A78" stroke="#fff" stroke-width="3" rx="22"/>
+  <g fill="#0F4C99">
+    <path d="M57.45 63c-24 36-24 84 0 120-3.6-6-15.6-30-15.6-54s12-48 15.6-54ZM165.45 63c24 36 24 84 0 120 3.6-6 15.6-30 15.6-54s-12-48-15.6-54Z"/>
+  </g>
+  <path fill="#fff" stroke="#cfd9e6" stroke-width="3.1500000000000004" d="M53.25 72.5 111 85.1v92.4l-57.75-12.6ZM168.75 72.5 111 85.1v92.4l57.75-12.6Z"/>
+  <path fill="#e5edf5" d="M107.85 85.1h6.3v92.4h-6.3z"/>
+  <path stroke="#003A78" stroke-width="2.1" d="m63.75 95.6 36.75 8.4M63.75 112.4l36.75 8.4M63.75 130.25l36.75 8.4M121.5 104l36.75-8.4M121.5 120.8l36.75-8.4M121.5 138.65l36.75-8.4" opacity=".65"/>
+  <path fill="#e8eef5" d="M53.25 164.9 111 177.5l57.75-12.6-57.75 7.35Z"/>
+  <text x="220" y="120" fill="#003A78" font-family="Georgia, serif" font-size="40">
+    UNIVERSITAS NOVA
+  </text>
+  <text x="220" y="165" fill="#0F4C99" font-family="Georgia, serif" font-size="22">
+    Faculty of Knowledge &amp; Excellence
+  </text>
+</svg>
