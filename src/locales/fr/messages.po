@@ -689,6 +689,10 @@ msgstr "Hors HAL"
 msgid "documents_page_halStatus_column"
 msgstr "Statut HAL"
 
+#: src/app/[lang]/documents/page.tsx:485
+msgid "documents_page_oaStatus_column"
+msgstr "Statut Open Access"
+
 #: src/app/[lang]/documents/page.tsx:496
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "Dépôt HAL incomplet"

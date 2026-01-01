@@ -2,9 +2,11 @@ query Documents($where: DocumentWhere) {
   documents(where: $where) {
     uid
     document_type
+    oa_status
     publication_date
     publication_date_start
     publication_date_end
+    upw_oa_status
     titles {
       language
       value

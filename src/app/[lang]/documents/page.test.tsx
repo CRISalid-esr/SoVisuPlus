@@ -19,6 +19,7 @@ import { SessionProvider } from 'next-auth/react'
 import { makeMockSession } from '@/app/auth/makeMockSession'
 import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
 import { PermissionAction, PermissionSubject } from '@/types/Permission'
+import { OAStatus } from '@prisma/client'
 
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
@@ -53,9 +54,11 @@ const mockState = {
       new Document(
         'doc1',
         DocumentType.JournalArticle,
+        OAStatus.GREEN,
         '2024-01-01',
         new Date('2024-01-01'),
         new Date('2024-01-01'),
+        OAStatus.DIAMOND,
         [new Literal('Test Title', 'en')],
         [new Literal('Test Abstract', 'en')],
         [],
@@ -330,9 +333,11 @@ describe('DocumentsPage Component', () => {
     const doc2 = new Document(
       'doc2',
       DocumentType.JournalArticle,
+      OAStatus.GREEN,
       '2023-12-31',
       new Date('2023-12-31'),
       new Date('2023-12-31'),
+      OAStatus.DIAMOND,
       [new Literal('Another Title', 'en')],
       [],
       [],
@@ -399,9 +404,11 @@ describe('DocumentsPage Component', () => {
     const doc2 = new Document(
       'doc2',
       DocumentType.JournalArticle,
+      OAStatus.GREEN,
       '2023-12-31',
       new Date('2023-12-31'),
       new Date('2023-12-31'),
+      OAStatus.DIAMOND,
       [new Literal('Another Title', 'en')],
       [],
       [],

@@ -3,8 +3,8 @@ import {
   Concept as DbConcept,
   DocumentState,
   Person as DbPerson,
-  DocumentRecord as DbDocumentRecord,
   Prisma,
+  OAStatus,
 } from '@prisma/client'
 import { Document, DocumentType } from '@/types/Document'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
@@ -16,12 +16,12 @@ import {
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import QueryMode = Prisma.QueryMode
 import { ConceptJson } from '@/types/Concept'
-import { Literal } from '@/types/Literal'
 import { LocRelatorHelper } from '@/types/LocRelator'
 
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
   | { id: 'type'; value: DocumentType[] }
+  | { id: 'oaStatus'; value: OAStatus[] }
   | { id: string; value: string | string[] }
 
 interface FetchDocumentsFromDBParams {
@@ -129,6 +129,7 @@ export class DocumentDAO extends AbstractDAO {
           data: {
             uid: uid,
             documentType: document.documentType,
+            oaStatus: document.oaStatus,
             title_locale_0: document.getTitleInLocale(0),
             title_locale_1: document.getTitleInLocale(1),
             title_locale_2: document.getTitleInLocale(2),
@@ -139,6 +140,7 @@ export class DocumentDAO extends AbstractDAO {
             publicationDateEnd: document.publicationDateEnd
               ? document.publicationDateEnd.toISOString()
               : null,
+            upwOAStatus: document.upwOAStatus,
             journal: journalId ? { connect: { id: journalId } } : undefined,
             volume,
             issue,
@@ -205,6 +207,7 @@ export class DocumentDAO extends AbstractDAO {
           where: { uid },
           data: {
             documentType: document.documentType,
+            oaStatus: document.oaStatus,
             title_locale_0: document.getTitleInLocale(0),
             title_locale_1: document.getTitleInLocale(1),
             title_locale_2: document.getTitleInLocale(2),
@@ -215,6 +218,7 @@ export class DocumentDAO extends AbstractDAO {
             publicationDateEnd: document.publicationDateEnd
               ? document.publicationDateEnd.toISOString()
               : null,
+            upwOAStatus: document.upwOAStatus,
             journal: journalId ? { connect: { id: journalId } } : undefined,
             state: DocumentState.default, // reset state to default on update
             volume,
@@ -640,6 +644,23 @@ export class DocumentDAO extends AbstractDAO {
           documentType: {
             in: filter.value as DocumentType[],
           },
+        }
+      }
+      if (filter.id === 'oaStatus' && Array.isArray(filter.value)) {
+        where = {
+          ...where,
+          OR: [
+            {
+              oaStatus: {
+                in: filter.value as OAStatus[],
+              },
+            },
+            {
+              upwOAStatus: {
+                in: filter.value as OAStatus[],
+              },
+            },
+          ],
         }
       }
 

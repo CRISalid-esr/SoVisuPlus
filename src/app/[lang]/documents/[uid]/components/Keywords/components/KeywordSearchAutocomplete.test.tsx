@@ -22,6 +22,7 @@ import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
 import { InternalPerson } from '@/types/InternalPerson'
 import { useSession } from 'next-auth/react'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { OAStatus } from '@prisma/client'
 
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
@@ -71,9 +72,11 @@ describe('KeywordSearchAutocomplete Component', () => {
   const document: Document = new Document(
     'doc-123',
     DocumentType.Document,
+    OAStatus.GREEN,
     '2022',
     new Date('2022-01-01T00:00:00.000Z'),
     new Date('2022-12-31T23:59:59.000Z'),
+    OAStatus.DIAMOND,
     [
       new Literal('Sample Document Title', 'en'),
       new Literal('Sample Abstract', 'fr'),

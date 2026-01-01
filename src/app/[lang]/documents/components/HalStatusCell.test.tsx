@@ -2,7 +2,7 @@ import useStore from '@/stores/global_store'
 import { render, screen, act } from '@testing-library/react'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
-import { HalSubmitType as DbHalSubmitType } from '@prisma/client'
+import { HalSubmitType as DbHalSubmitType, OAStatus } from '@prisma/client'
 
 import { Document, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
@@ -68,9 +68,11 @@ const createDocument = (
   new Document(
     'doc1',
     DocumentType.JournalArticle,
+    OAStatus.CLOSED,
     '2024-01-01',
     new Date('2024-01-01'),
     new Date('2024-01-01'),
+    OAStatus.CLOSED,
     [new Literal('Test Title', 'en')],
     [new Literal('Test Abstract', 'en')],
     [],

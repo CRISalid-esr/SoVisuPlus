@@ -5,15 +5,17 @@ import { DocumentRecord, DocumentRecordJson } from '@/types/DocumentRecord'
 import { Literal } from '@/types/Literal'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 import { Journal, JournalJson } from '@/types/Journal'
-import { DocumentState, DocumentType } from '@prisma/client'
+import { DocumentState, DocumentType, OAStatus } from '@prisma/client'
 import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
 
 interface DocumentJson {
   uid: string
   documentType: string
+  oaStatus: string | null
   publicationDate: string | null
   publicationDateStart: Date | null
   publicationDateEnd: Date | null
+  upwOAStatus: string | null
   titles: Array<Literal>
   abstracts: Array<Literal>
   subjects: Array<Concept>
@@ -30,9 +32,11 @@ class Document implements Authorizable {
   constructor(
     public uid: string,
     public documentType: DocumentType = DocumentType.Document,
+    public oaStatus: OAStatus = OAStatus.CLOSED,
     public publicationDate: string | null,
     public publicationDateStart: Date | null,
     public publicationDateEnd: Date | null,
+    public upwOAStatus: OAStatus | null,
     public titles: Array<Literal>,
     public abstracts: Array<Literal>,
     public subjects: Array<Concept>,
@@ -43,7 +47,9 @@ class Document implements Authorizable {
     public volume?: string,
     public issue?: string,
     public pages?: string,
-  ) {}
+  ) {
+    this.oaStatus = oaStatus == OAStatus.GREEN ? oaStatus : OAStatus.CLOSED
+  }
 
   getTitleInLocale(localeNumber: number): string {
     return getStringInLocale(this.titles, localeNumber)
@@ -60,13 +66,33 @@ class Document implements Authorizable {
       : DocumentType.Document
   }
 
+  static oaStatusFromString(statusString: string): OAStatus {
+    const convertStatus = statusString.toUpperCase()
+    return convertStatus == 'GREEN'
+      ? (convertStatus as OAStatus)
+      : OAStatus.CLOSED
+  }
+
+  static upwOAStatusFromString(statusString: string): OAStatus {
+    const convertStatus = statusString.toUpperCase()
+    return (Object.values(OAStatus) as string[]).includes(convertStatus)
+      ? (convertStatus as OAStatus)
+      : OAStatus.CLOSED
+  }
+
   static fromJson(document: DocumentJson): Document {
     return new Document(
       document.uid,
       Document.documentTypeFromString(document.documentType),
+      document.oaStatus
+        ? Document.oaStatusFromString(document.oaStatus)
+        : OAStatus.CLOSED,
       document.publicationDate,
       document.publicationDateStart,
       document.publicationDateEnd,
+      document.upwOAStatus
+        ? Document.upwOAStatusFromString(document.upwOAStatus)
+        : OAStatus.CLOSED,
       document.titles.map((title) => Literal.fromObject(title)),
       document.abstracts.map((abstract) => Literal.fromObject(abstract)),
       document.subjects.map((subject: ConceptJson) =>
@@ -90,9 +116,15 @@ class Document implements Authorizable {
     return new Document(
       document.uid,
       Document.documentTypeFromString(document.documentType),
+      document.oaStatus
+        ? Document.oaStatusFromString(document.oaStatus)
+        : OAStatus.CLOSED,
       document.publicationDate,
       document.publicationDateStart,
       document.publicationDateEnd,
+      document.upwOAStatus
+        ? Document.upwOAStatusFromString(document.upwOAStatus)
+        : OAStatus.CLOSED,
       document.titles.map((title) => Literal.fromObject(title)),
       document.abstracts.map((abstract) => Literal.fromObject(abstract)),
       document.subjects.map((subject) => Concept.fromDbConcept(subject)),
