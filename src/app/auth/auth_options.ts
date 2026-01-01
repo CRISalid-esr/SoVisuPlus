@@ -79,11 +79,7 @@ const authOptions: AuthOptions = {
       profile?: Profile
     }) {
       console.info('signIn callback', user, account, profile)
-      const userService = new UserService(
-        new UserDAO(),
-        new PersonDAO(),
-        new PersonGraphQLClient(),
-      )
+      const userService = new UserService()
       const username = (profile as KeycloakProfile)?.preferred_username
       const authenticationProfile: AuthenticationProfile = {
         // Temporary : if username is an eppn jdupont@my-univ.fr, remove the domain part

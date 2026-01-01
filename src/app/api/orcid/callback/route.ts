@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
       `${userRedirectionUrl}?error=orcid-authentication-failure-no-session`,
     )
   }
-  const userService = new UserService(new UserDAO(), new PersonDAO())
+  const userService = new UserService()
   const user = await userService.getUserByPersonIdentifier({
     type: PersonIdentifierType.LOCAL,
     value: session?.user.username,
