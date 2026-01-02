@@ -21,7 +21,6 @@ import * as Lingui from '@lingui/core'
 
 import { LanguageChips } from '@/components/LanguageChips'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
-import { Localization } from '@/types/Localization'
 import InfoIcon from '@mui/icons-material/Info'
 import {
   Alert,
@@ -37,18 +36,11 @@ import { useTheme } from '@mui/material/styles'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import {
-  MaterialReactTable,
   MRT_ActionMenuItem,
   MRT_Column,
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
-  MRT_ColumnSizingState,
-  MRT_ShowHideColumnsButton,
   MRT_SortingState,
-  MRT_ToggleDensePaddingButton,
-  MRT_ToggleFiltersButton,
-  MRT_ToggleGlobalFilterButton,
-  MRT_VisibilityState,
 } from 'material-react-table'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation' // Import useRouter
@@ -76,7 +68,6 @@ import { useSession } from 'next-auth/react'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { Can } from '@casl/react'
-import { toUTCISOString } from '@/utils/toUTCISOString'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 import { FilterAltOff } from '@mui/icons-material'
 import OAStatusCell from '@/app/[lang]/documents/components/OAStatusCell'
@@ -100,59 +91,7 @@ const DocumentsPage = () => {
     () => abilityFromAuthzContext(session?.user.authz),
     [session?.user?.authz],
   )
-  const readInitialPagination = (): typeof DEFAULT_PAGINATION => {
-    try {
-      const raw = sessionStorage.getItem('mrt_pagination_publication_table')
-      return raw ? JSON.parse(raw) : DEFAULT_PAGINATION
-    } catch {
-      return DEFAULT_PAGINATION
-    }
-  }
-  const readInitialColumnFilters = (): MRT_ColumnFiltersState => {
-    try {
-      const raw = sessionStorage.getItem('mrt_columnFilters_publication_table')
 
-      if (!raw) {
-        return []
-      }
-
-      return JSON.parse(raw).reduce(
-        (
-          filters: MRT_ColumnFiltersState,
-          filter: {
-            id: string
-            value: unknown
-          },
-        ) => {
-          if (filter.id !== 'date' || !Array.isArray(filter.value)) {
-            return [...filters, filter]
-          }
-
-          return [
-            ...filters,
-            {
-              id: filter.id,
-              value: filter.value.map((value: string | null) =>
-                value ? dayjs(value) : '',
-              ),
-            },
-          ]
-        },
-        [],
-      )
-    } catch {
-      return []
-    }
-  }
-
-  const readInitialGlobalFilter = () => {
-    try {
-      const raw = sessionStorage.getItem('mrt_global_publication_table')
-      return raw ? (JSON.parse(raw) as string) : ''
-    } catch {
-      return ''
-    }
-  }
   const [pagination, setPagination] = useState(readInitialPagination)
 
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
@@ -160,14 +99,6 @@ const DocumentsPage = () => {
   )
   const [globalFilter, setGlobalFilter] = useState(readInitialGlobalFilter)
 
-  const readInitialSorting = (): MRT_SortingState => {
-    try {
-      const raw = sessionStorage.getItem('mrt_sorting_publication_table')
-      return raw ? JSON.parse(raw) : DEFAULT_SORTING
-    } catch {
-      return DEFAULT_SORTING
-    }
-  }
   const [sorting, setSorting] = useState<MRT_SortingState>(readInitialSorting)
 
   const [openSynchronizeModal, setOpenSynchronizeModal] =
@@ -191,41 +122,6 @@ const DocumentsPage = () => {
   const theme = useTheme()
   const router = useRouter()
   const searchParams = useSearchParams()
-
-  useEffect(() => {
-    sessionStorage.setItem(
-      'mrt_pagination_publication_table',
-      JSON.stringify(pagination),
-    )
-  }, [pagination])
-
-  useEffect(() => {
-    if (!sorting) return
-    sessionStorage.setItem(
-      'mrt_sorting_publication_table',
-      JSON.stringify(sorting),
-    )
-  }, [sorting])
-
-  useEffect(() => {
-    const id = setTimeout(() => {
-      sessionStorage.setItem(
-        'mrt_columnFilters_publication_table',
-        JSON.stringify(columnFilters),
-      )
-    }, 250)
-    return () => clearTimeout(id)
-  }, [columnFilters])
-
-  useEffect(() => {
-    const id = setTimeout(() => {
-      sessionStorage.setItem(
-        'mrt_global_publication_table',
-        JSON.stringify(globalFilter),
-      )
-    }, 250)
-    return () => clearTimeout(id)
-  }, [globalFilter])
 
   const navigateToDetailsPage = useCallback(
     (documentUid: string) => {
@@ -619,70 +515,6 @@ const DocumentsPage = () => {
     _,
   ])
 
-  const getColumnIds = (columns: MRT_ColumnDef<Document>[]) => {
-    return columns
-      .map((c) => (typeof c.accessorKey === 'string' ? c.accessorKey : c.id))
-      .filter(Boolean) as string[]
-  }
-
-  const readInitialColumnVisibility = (
-    columns: MRT_ColumnDef<Document>[],
-  ): MRT_VisibilityState => {
-    try {
-      const raw = sessionStorage.getItem(
-        'mrt_columnVisibility_publication_table',
-      )
-      if (!raw) return {} // all visible by default
-      const parsed = JSON.parse(raw) as MRT_VisibilityState
-      const valid = new Set(getColumnIds(columns))
-      // keep only known columns
-      return Object.fromEntries(
-        Object.entries(parsed).filter(([id]) => valid.has(id)),
-      )
-    } catch {
-      return {}
-    }
-  }
-
-  const [columnVisibility, setColumnVisibility] = useState<MRT_VisibilityState>(
-    () => readInitialColumnVisibility(columns),
-  )
-
-  useEffect(() => {
-    sessionStorage.setItem(
-      'mrt_columnVisibility_publication_table',
-      JSON.stringify(columnVisibility),
-    )
-  }, [columnVisibility])
-
-  const readInitialColumnSizing = (
-    columns: MRT_ColumnDef<Document>[],
-  ): MRT_ColumnSizingState => {
-    try {
-      const raw = sessionStorage.getItem('mrt_columnSizing_publication_table')
-      if (!raw) return {} // all visible by default
-      const parsed = JSON.parse(raw) as MRT_ColumnSizingState
-      const valid = new Set(getColumnIds(columns))
-      // keep only known columns
-      return Object.fromEntries(
-        Object.entries(parsed).filter(([id]) => valid.has(id)),
-      )
-    } catch {
-      return {}
-    }
-  }
-
-  const [columnSizing, setColumnSizing] = useState<MRT_ColumnSizingState>(() =>
-    readInitialColumnSizing(columns),
-  )
-
-  useEffect(() => {
-    sessionStorage.setItem(
-      'mrt_columnSizing_publication_table',
-      JSON.stringify(columnSizing),
-    )
-  }, [columnSizing])
-
   const requestIdRef = useRef(0)
   const countDocumentsRequestIdRef = useRef(0)
 
@@ -714,24 +546,6 @@ const DocumentsPage = () => {
   ]
 
   const [selectedTab, setSelectedTab] = useState(tabs[0].value)
-
-  /**
-   * Adjust MRT column filters so that `date` range filters are converted to UTC ISO strings.
-   */
-  const normalizeDateFilters = (
-    columnFilters: { id: string; value: unknown }[],
-  ): { id: string; value: unknown }[] => {
-    return columnFilters.map((filter) => {
-      if (filter.id === 'date' && Array.isArray(filter.value)) {
-        const [startDate, endDate] = filter.value as (string | null)[]
-        return {
-          ...filter,
-          value: [toUTCISOString(startDate), toUTCISOString(endDate, true)],
-        }
-      }
-      return filter
-    })
-  }
 
   useEffect(() => {
     const adjustedFilters = normalizeDateFilters(columnFilters)
@@ -804,6 +618,41 @@ const DocumentsPage = () => {
       console.error('Error merging documents:', error)
     }
   }
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      'mrt_pagination_publication_table',
+      JSON.stringify(pagination),
+    )
+  }, [pagination])
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      sessionStorage.setItem(
+        'mrt_global_publication_table',
+        JSON.stringify(globalFilter),
+      )
+    }, 250)
+    return () => clearTimeout(id)
+  }, [globalFilter])
+
+  useEffect(() => {
+    if (!sorting) return
+    sessionStorage.setItem(
+      'mrt_sorting_publication_table',
+      JSON.stringify(sorting),
+    )
+  }, [sorting])
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      sessionStorage.setItem(
+        'mrt_columnFilters_publication_table',
+        JSON.stringify(columnFilters),
+      )
+    }, 250)
+    return () => clearTimeout(id)
+  }, [columnFilters])
 
   return (
     <Box>
@@ -899,53 +748,37 @@ const DocumentsPage = () => {
         </Can>
       )}
 
-      <MaterialReactTable<Document>
-        initialState={{ showColumnFilters: true }}
-        getRowId={(row) => {
-          return row.uid
-        }}
-        manualFiltering
-        manualPagination
-        manualSorting
-        enableColumnResizing
+      <DocumentTable<Document>
+        columns={columns}
+        data={documents}
+        enableRowActions
         enableRowSelection={(row) => {
           if (!isDocument(row.original)) return false
           const canMerge = ability.can(PermissionAction.merge, row.original)
           return canMerge && row.original.state == DocumentState.default
         }}
+        manualFiltering
+        manualPagination
+        manualSorting
         muiTableBodyRowProps={({ row }) => {
           const isWaiting = row.original.state === 'waiting_for_update'
           return {
             className: isWaiting ? 'mrt-row-waiting' : '',
           }
         }}
-        muiSelectCheckboxProps={{ color: 'secondary' }}
-        columns={columns}
-        rowCount={totalItems}
-        data={documents}
-        enablePagination
-        onPaginationChange={setPagination}
         onColumnFiltersChange={setColumnFilters}
-        onColumnSizingChange={setColumnSizing}
         onGlobalFilterChange={setGlobalFilter}
+        onPaginationChange={setPagination}
         onSortingChange={setSorting}
-        onColumnVisibilityChange={(newState) => {
-          setColumnVisibility(newState)
-        }}
+        positionActionsColumn='last'
+        rowCount={totalItems}
         state={{
+          columnFilters,
+          globalFilter,
           isLoading: loading,
-          showLoadingOverlay: false,
           pagination,
           sorting: sorting || DEFAULT_SORTING,
-          columnFilters,
-          columnSizing,
-          globalFilter,
-          columnVisibility,
         }}
-        localization={Localization[lang]}
-        enableRowActions
-        positionActionsColumn='last'
-        enableToolbarInternalActions
         renderTopToolbarCustomActions={({ table }) =>
           table.getSelectedRowModel().rows.length > 0 && (
             <Box sx={{ display: 'flex', gap: '1rem', p: '4px' }}>
@@ -967,17 +800,6 @@ const DocumentsPage = () => {
             </Box>
           )
         }
-        renderToolbarInternalActions={({ table }) => (
-          <>
-            <MRT_ToggleGlobalFilterButton table={table} />
-            <MRT_ToggleFiltersButton table={table} />
-            <MRT_ShowHideColumnsButton table={table} />
-            <MRT_ToggleDensePaddingButton table={table} />
-            <IconButton onClick={() => table.resetColumnFilters()}>
-              <FilterAltOff />
-            </IconButton>
-          </>
-        )}
         renderRowActionMenuItems={({ row, table }) => {
           const isWaiting =
             row.original.state === DocumentState.waiting_for_update
