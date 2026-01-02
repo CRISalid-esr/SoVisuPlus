@@ -69,8 +69,15 @@ import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { Can } from '@casl/react'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
-import { FilterAltOff } from '@mui/icons-material'
 import OAStatusCell from '@/app/[lang]/documents/components/OAStatusCell'
+import {
+  DocumentTable,
+  normalizeDateFilters,
+  readInitialColumnFilters,
+  readInitialGlobalFilter,
+  readInitialPagination,
+  readInitialSorting,
+} from '@/app/[lang]/documents/components/DocumentTable'
 
 dayjs.extend(utc)
 
