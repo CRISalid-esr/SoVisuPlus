@@ -150,6 +150,11 @@ msgid "document_details_page_keywords_tab_card_empty_content"
 msgstr "No keywords"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:134
+msgid "document_details_page_keywords_search_field_title"
+msgstr "Select one or more controlled vocabulary"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:411
 msgid "document_details_page_source_tab_card_title"
 msgstr "Sources"

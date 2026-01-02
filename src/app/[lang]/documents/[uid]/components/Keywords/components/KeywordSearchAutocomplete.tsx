@@ -1,6 +1,7 @@
 import {
   Autocomplete,
   Box,
+  Button,
   Divider,
   Icon,
   IconButton,
@@ -13,7 +14,13 @@ import {
   Typography,
 } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
-import { Add, InfoOutlined } from '@mui/icons-material'
+import {
+  Add,
+  Help,
+  HelpOutlined,
+  InfoOutlined,
+  Search,
+} from '@mui/icons-material'
 import {
   SuggestResponse,
   SuggestResponseSchema,
@@ -230,7 +237,7 @@ const KeywordSearchAutocomplete = ({
   }, [fetchError])
 
   return (
-    <Box sx={{ width: '60%' }}>
+    <Box sx={{ width: '100%', display: 'flex', gap: '10px' }}>
       <Autocomplete
         autoComplete
         clearOnBlur={false}
@@ -290,14 +297,8 @@ const KeywordSearchAutocomplete = ({
               input: {
                 ...params.InputProps,
                 startAdornment: (
-                  <InputAdornment position='start'>
-                    <IconButton
-                      disabled={!add}
-                      onClick={onAddConcept}
-                      aria-label={'adding_button'}
-                    >
-                      <Add />
-                    </IconButton>
+                  <InputAdornment position='start' sx={{ marginLeft: '12px' }}>
+                    <Search />
                   </InputAdornment>
                 ),
               },
@@ -388,6 +389,14 @@ const KeywordSearchAutocomplete = ({
             </Box>
           )
         }}
+        sx={{ flex: '1' }}
+      />
+      <Button
+        disabled={!add}
+        onClick={onAddConcept}
+        aria-label={'adding_button'}
+        sx={{ borderRadius: '5px' }}
+        startIcon={<Add />}
       />
       <Snackbar
         open={open}
