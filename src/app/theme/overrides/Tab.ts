@@ -1,10 +1,9 @@
-export default function Tab() {
-  return {
-    MuiTab: {
-      defaultProps: {},
-      styleOverrides: {
-        root: {},
-      },
+const Tab = () => ({
+  MuiTab: {
+    defaultProps: {},
+    styleOverrides: {
+      root: {},
     },
-  }
-}
+  },
+})
+export default Tab

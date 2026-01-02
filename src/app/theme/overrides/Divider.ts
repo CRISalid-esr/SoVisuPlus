@@ -9,23 +9,22 @@
 
 import { Theme } from '@mui/material/styles'
 
-export default function Divider(theme: Theme) {
-  return {
-    MuiDivider: {
-      defaultProps: {},
-      styleOverrides: {
-        root: {
-          color: theme.palette.outlineVariant,
-          borderColor: theme.palette.outlineVariant,
-          fontSize: '2px',
-          '&::before': {
-            position: 'inherit',
-          },
-          '&::after': {
-            position: 'inherit',
-          },
+const Divider = (theme: Theme) => ({
+  MuiDivider: {
+    defaultProps: {},
+    styleOverrides: {
+      root: {
+        color: theme.palette.outlineVariant,
+        borderColor: theme.palette.outlineVariant,
+        fontSize: '2px',
+        '&::before': {
+          position: 'inherit',
+        },
+        '&::after': {
+          position: 'inherit',
         },
       },
     },
-  }
-}
+  },
+})
+export default Divider

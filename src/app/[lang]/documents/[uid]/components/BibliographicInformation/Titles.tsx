@@ -1,5 +1,6 @@
 import { Typography } from '@mui/material'
 
-export default function Titles({ content }: { content: string }) {
-  return <Typography>{content}</Typography>
-}
+const Titles = ({ content }: { content: string }) => (
+  <Typography>{content}</Typography>
+)
+export default Titles

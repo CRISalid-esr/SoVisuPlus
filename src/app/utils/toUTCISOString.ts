@@ -5,10 +5,10 @@ import dayjs from 'dayjs'
  * - Start dates → 00:00:00.000 UTC
  * - End dates   → 23:59:59.999 UTC
  */
-export function toUTCISOString(
+export const toUTCISOString = (
   dateStr: string | null,
   isEndDate = false,
-): string | null {
+): string | null => {
   if (!dateStr) return null
   const parsedDate = dayjs(dateStr)
   if (!parsedDate.isValid()) return null

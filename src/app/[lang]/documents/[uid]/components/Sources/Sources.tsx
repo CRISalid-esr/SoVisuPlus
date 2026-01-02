@@ -52,25 +52,22 @@ import { abilityFromAuthzContext } from '@/app/auth/ability'
 import Highlighter from 'react-highlight-words'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
 
-function Sources() {
+const Sources = () => {
+  const { selectedDocument = null } = useStore((state) => state.document)
+  const theme = useTheme()
   const { _ } = useLingui()
   const [action, setAction] = useState<string>('')
   const { data: session } = useSession()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
-  const { selectedDocument = null } = useStore((state) => state.document)
   const [selectedTitleLangs, setSelectedTitleLangs] = useState<
     Record<string, string>
   >({})
   const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
-  const theme = useTheme()
-  const { currentPerspective, ownPerspective } = useStore((state) => state.user)
   const ability = useMemo(
     () => abilityFromAuthzContext(session?.user.authz),
     [session?.user?.authz],
   )
-  const [data, setData] = useState<DocumentRecord[]>(
-    selectedDocument?.records || [],
-  )
+  const [data] = useState<DocumentRecord[]>(selectedDocument?.records || [])
   const [globalFilter, setGlobalFilter] = useState(readInitialGlobalFilter)
 
   const getPreciseType = (types: DocumentType[]) => {

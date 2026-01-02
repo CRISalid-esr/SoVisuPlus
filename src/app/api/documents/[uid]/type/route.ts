@@ -7,10 +7,10 @@ import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 
-export async function PUT(
+export const PUT = async (
   request: Request,
   context: { params: Promise<{ uid: string }> },
-) {
+) => {
   try {
     const { uid } = await context.params
 

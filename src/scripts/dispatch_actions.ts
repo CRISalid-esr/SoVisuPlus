@@ -2,7 +2,7 @@ import { parseArgs } from 'node:util'
 import { AmqpConnection } from '@/lib/amqp/AmqpConnection'
 import { ActionDispatchService } from '@/lib/services/ActionDispatchService'
 
-async function main() {
+const main = async () => {
   const { positionals } = parseArgs({ allowPositionals: true })
   const ids = positionals
 

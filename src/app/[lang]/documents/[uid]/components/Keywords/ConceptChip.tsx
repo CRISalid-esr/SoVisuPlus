@@ -56,12 +56,12 @@ const getVocabularyIcon = (vocab: string | null) => {
   return unknownVocabularyIcon
 }
 
-export default function ConceptChip({
+const ConceptChip = ({
   group,
   removable,
   language,
   onRemoveConcepts,
-}: Props) {
+}: Props) => {
   const chipRef = useRef<HTMLDivElement>(null)
   const [openPopper, setOpenPopper] = useState(false)
 
@@ -359,3 +359,4 @@ export default function ConceptChip({
     </ClickAwayListener>
   )
 }
+export default ConceptChip

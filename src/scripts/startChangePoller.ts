@@ -1,7 +1,7 @@
 import { ActionDispatchService } from '@/lib/services/ActionDispatchService'
 import { AmqpConnection } from '@/lib/amqp/AmqpConnection'
 
-export function startChangePoller(connection: AmqpConnection): void {
+export const startChangePoller = (connection: AmqpConnection): void => {
   const dispatcher = new ActionDispatchService(connection)
   const pollIntervalMs = 3000
 

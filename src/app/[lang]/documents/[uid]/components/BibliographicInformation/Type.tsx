@@ -24,7 +24,7 @@ import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { Can } from '@casl/react'
 
-export default function Type() {
+const Type = () => {
   const { _ } = useLingui()
   const { data: session } = useSession()
   const ability = useMemo(
@@ -202,3 +202,4 @@ export default function Type() {
     </Box>
   )
 }
+export default Type

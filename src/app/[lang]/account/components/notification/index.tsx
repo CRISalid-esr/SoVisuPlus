@@ -9,7 +9,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { Box } from '@mui/system'
 
-export default function NotificationPage() {
+const NotificationPage = () => {
   const theme = useTheme()
   return (
     <Box>
@@ -63,3 +63,4 @@ export default function NotificationPage() {
     </Box>
   )
 }
+export default NotificationPage

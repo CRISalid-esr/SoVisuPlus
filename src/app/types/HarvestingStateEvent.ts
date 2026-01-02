@@ -10,9 +10,8 @@ export const harvestingStates = [
 
 export type HarvestingState = (typeof harvestingStates)[number]
 
-export function isHarvestingState(value: string): value is HarvestingState {
-  return (harvestingStates as readonly string[]).includes(value)
-}
+export const isHarvestingState = (value: string): value is HarvestingState =>
+  (harvestingStates as readonly string[]).includes(value)
 
 export class HarvestingStateEvent extends EventBase {
   readonly type = 'harvesting_state'

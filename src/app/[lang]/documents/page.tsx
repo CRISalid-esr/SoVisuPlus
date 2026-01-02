@@ -69,10 +69,8 @@ import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { Can } from '@casl/react'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
-import { FilterAltOff } from '@mui/icons-material'
 import OAStatusCell from '@/app/[lang]/documents/components/OAStatusCell'
 import {
-  DEFAULT_SORTING,
   DocumentTable,
   normalizeDateFilters,
   readInitialColumnFilters,
@@ -83,7 +81,17 @@ import {
 
 dayjs.extend(utc)
 
-export default function DocumentsPage() {
+const DEFAULT_SORTING = [
+  {
+    id: 'date',
+    desc: true,
+  },
+]
+const DEFAULT_PAGINATION = {
+  pageIndex: 0,
+  pageSize: 10,
+}
+const DocumentsPage = () => {
   const { data: session } = useSession()
   const { _ } = useLingui()
   const ability = useMemo(
@@ -821,3 +829,4 @@ export default function DocumentsPage() {
     </Box>
   )
 }
+export default DocumentsPage

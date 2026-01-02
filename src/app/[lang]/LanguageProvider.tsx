@@ -9,7 +9,7 @@ type Props = {
   locale: string
 }
 
-export function LanguageProvider({ children, messages, locale }: Props) {
+export const LanguageProvider = ({ children, messages, locale }: Props) => {
   const [ready, setReady] = useState(i18n.locale === locale)
 
   useEffect(() => {

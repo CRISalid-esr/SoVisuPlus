@@ -12,12 +12,12 @@ interface LanguageChipsProps {
 /**
  * A reusable component to display language selection chips.
  */
-export default function LanguageChips({
+const LanguageChips = ({
   texts,
   selectedLang,
   onLanguageSelect,
   isInline,
-}: LanguageChipsProps) {
+}: LanguageChipsProps) => {
   const theme = useTheme()
   const hideUndeterminedLanguage = texts.length < 2
   return (
@@ -44,3 +44,7 @@ export default function LanguageChips({
     </Box>
   )
 }
+/**
+ * A reusable component to display language selection chips.
+ */
+export default LanguageChips

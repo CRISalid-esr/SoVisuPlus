@@ -6,7 +6,7 @@ import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { EntityType } from '@/types/UserRoleScope'
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 
-export async function resetAuthzDb() {
+export const resetAuthzDb = async () => {
   await prisma.rolePermission.deleteMany()
   await prisma.userRoleScope.deleteMany()
   await prisma.userRole.deleteMany()
@@ -27,13 +27,13 @@ export async function resetAuthzDb() {
   await prisma.researchStructure.deleteMany()
 }
 
-export async function seedRoles(payload: RolesFileSeed) {
+export const seedRoles = async (payload: RolesFileSeed) => {
   const svc = new RoleService()
   await svc.reset(payload)
 }
 
-export async function createResearchStructure(uid: string, acronym?: string) {
-  return prisma.researchStructure.create({
+export const createResearchStructure = async (uid: string, acronym?: string) =>
+  prisma.researchStructure.create({
     data: {
       uid,
       acronym: acronym ?? null,
@@ -42,16 +42,15 @@ export async function createResearchStructure(uid: string, acronym?: string) {
       descriptions: { create: [{ language: 'en', value: `RS ${uid}` }] },
     },
   })
-}
 
-export async function createPersonWithUser(
+export const createPersonWithUser = async (
   personUid: string,
   opts?: {
     firstName?: string
     lastName?: string
     displayName?: string
   },
-) {
+) => {
   const person = await prisma.person.create({
     data: {
       uid: personUid,
@@ -75,8 +74,8 @@ export async function createPersonWithUser(
   return { person, user }
 }
 
-export async function addMembership(personId: number, rsId: number) {
-  return prisma.membership.create({
+export const addMembership = async (personId: number, rsId: number) =>
+  prisma.membership.create({
     data: {
       personId,
       researchStructureId: rsId,
@@ -84,12 +83,11 @@ export async function addMembership(personId: number, rsId: number) {
       positionCode: 'RES',
     },
   })
-}
 
-export async function createDocumentWithContributors(
+export const createDocumentWithContributors = async (
   docUid: string,
   contributorPersonIds: number[],
-) {
+) => {
   const doc = await prisma.document.create({
     data: {
       uid: docUid,
@@ -119,11 +117,11 @@ export async function createDocumentWithContributors(
 }
 
 /** Assign a role to the user, optionally scoped */
-export async function assignRoleToPersonUid(
+export const assignRoleToPersonUid = async (
   roleName: string,
   personUid: string,
   scope?: { entityType: EntityType; entityUid: string } | null,
-) {
+) => {
   const svc = new RoleService()
   return svc.assignRoleToUser({
     roleName,

@@ -10,7 +10,7 @@ type Props = {
   children: React.ReactNode
 }
 
-export default function DateProvider({ children }: Props) {
+const DateProvider = ({ children }: Props) => {
   const { i18n } = useLingui() // Get the current language from Lingui
   return (
     <LocalizationProvider
@@ -21,3 +21,4 @@ export default function DateProvider({ children }: Props) {
     </LocalizationProvider>
   )
 }
+export default DateProvider

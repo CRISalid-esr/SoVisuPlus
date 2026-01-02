@@ -3,8 +3,9 @@ import { NextResponse } from 'next/server'
 import { CustomMiddleware } from '@/middlewares/chain'
 import process from 'process'
 
-export function localeMiddleware(middleware: CustomMiddleware) {
-  return async (request: NextRequest, event: NextFetchEvent) => {
+export const localeMiddleware =
+  (middleware: CustomMiddleware) =>
+  async (request: NextRequest, event: NextFetchEvent) => {
     let supportedLocales: string[] = ['fr', 'en']
     if (process.env.NEXT_PUBLIC_SUPPORTED_LOCALES) {
       const localesFromEnv =
@@ -32,4 +33,3 @@ export function localeMiddleware(middleware: CustomMiddleware) {
     // Proceed if the locale is valid
     return middleware(request, event, response)
   }
-}

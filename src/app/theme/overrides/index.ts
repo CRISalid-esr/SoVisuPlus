@@ -9,8 +9,8 @@ import Badge from './Badge'
 import Tab from './Tab'
 import Tabs from './Tabs'
 
-export default function ComponentsOverrides(theme: Theme) {
-  return merge(
+const ComponentsOverrides = (theme: Theme) =>
+  merge(
     Select(theme),
     Button(theme) as unknown as Components,
     Divider(theme),
@@ -18,4 +18,4 @@ export default function ComponentsOverrides(theme: Theme) {
     Tabs(theme),
     Badge(),
   )
-}
+export default ComponentsOverrides

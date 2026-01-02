@@ -8,7 +8,7 @@ import styles from './OrcidControl.module.css'
 import { OrcidLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton'
 import { Trans } from '@lingui/react'
 
-export default function OrcidControl() {
+const OrcidControl = () => {
   const { connectedUser } = useStore((state) => state.user)
   const person = connectedUser?.person
   const identifiers = person?.getIdentifiers() ?? []
@@ -117,3 +117,4 @@ export default function OrcidControl() {
     </>
   )
 }
+export default OrcidControl

@@ -2,7 +2,7 @@ import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { abilityFromAuthzContext, userToAuthzContext } from '@/app/auth/ability'
 
-export async function abilityForPersonUid(personUid: string) {
+export const abilityForPersonUid = async (personUid: string) => {
   const dao = new UserDAO()
   const user = await dao.getUserByIdentifier({
     type: PersonIdentifierType.LOCAL,

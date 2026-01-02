@@ -5,30 +5,23 @@ import { AMQPResearchStructureMessage } from '@/types/AMQPResearchStructureMessa
 import { AMQPHarvestingStateEventMessage } from '@/types/AMQPHarvestingStateEventMessage'
 import { AMQPHarvestingResultEventMessage } from '@/types/AMQPHarvestingResultEventMessage'
 
-export function isPersonMessage(msg: AMQPMessage): msg is AMQPPersonMessage {
-  return msg.type === 'person'
-}
+export const isPersonMessage = (msg: AMQPMessage): msg is AMQPPersonMessage =>
+  msg.type === 'person'
 
-export function isResearchStructureMessage(
+export const isResearchStructureMessage = (
   msg: AMQPMessage,
-): msg is AMQPResearchStructureMessage {
-  return msg.type === 'research_structure'
-}
+): msg is AMQPResearchStructureMessage => msg.type === 'research_structure'
 
-export function isDocumentMessage(
+export const isDocumentMessage = (
   msg: AMQPMessage,
-): msg is AMQPDocumentMessage {
-  return msg.type === 'document'
-}
+): msg is AMQPDocumentMessage => msg.type === 'document'
 
-export function isHarvestingStateEventMessage(
+export const isHarvestingStateEventMessage = (
   msg: AMQPMessage,
-): msg is AMQPHarvestingStateEventMessage {
-  return msg.type === 'harvesting_state_event'
-}
+): msg is AMQPHarvestingStateEventMessage =>
+  msg.type === 'harvesting_state_event'
 
-export function isHarvestingResultEventMessage(
+export const isHarvestingResultEventMessage = (
   msg: AMQPMessage,
-): msg is AMQPHarvestingResultEventMessage {
-  return msg.type === 'harvesting_result_event'
-}
+): msg is AMQPHarvestingResultEventMessage =>
+  msg.type === 'harvesting_result_event'

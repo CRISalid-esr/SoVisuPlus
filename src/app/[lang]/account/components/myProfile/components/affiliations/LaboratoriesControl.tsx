@@ -2,7 +2,7 @@ import { Paper, Typography } from '@mui/material'
 import useStore from '@/stores/global_store'
 import { Trans } from '@lingui/react'
 
-export default function LaboratoriesControl() {
+const LaboratoriesControl = () => {
   const { connectedUser } = useStore((state) => state.user)
   const person = connectedUser?.person
   const laboratories = person?.membershipAcronyms ?? []
@@ -28,3 +28,4 @@ export default function LaboratoriesControl() {
     </Paper>
   )
 }
+export default LaboratoriesControl

@@ -8,7 +8,7 @@ import AttachFileOffIcon from '@/app/theme/icons/AttachFileOffIcon'
 import OAStatusCellBadge from '@/app/[lang]/documents/components/OAStatusCellBadge'
 import { OAStatus } from '@prisma/client'
 
-export default function OAStatusCell({ row }: { row: { original: Document } }) {
+const OAStatusCell = ({ row }: { row: { original: Document } }) => {
   const defaultOAStatus = row.original.oaStatus
   const upwOAStatus = row.original.upwOAStatus
 
@@ -22,3 +22,4 @@ export default function OAStatusCell({ row }: { row: { original: Document } }) {
     )
   }
 }
+export default OAStatusCell

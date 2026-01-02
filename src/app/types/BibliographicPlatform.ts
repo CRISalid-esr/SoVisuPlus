@@ -22,9 +22,9 @@ export const BibliographicPlatformMetadata: Record<
   [BibliographicPlatform.SCOPUS]: { name: 'Scopus', icon: '/icons/scopus.png' },
 }
 
-export function getBibliographicPlatformByNameIgnoreCase(
+export const getBibliographicPlatformByNameIgnoreCase = (
   name: string,
-): BibliographicPlatform | null {
+): BibliographicPlatform | null => {
   const lowerName = name.toLowerCase()
   return (
     Object.values(BibliographicPlatform).find(
@@ -33,14 +33,11 @@ export function getBibliographicPlatformByNameIgnoreCase(
   )
 }
 
-export function getBibliographicPlatformDbValue(
+export const getBibliographicPlatformDbValue = (
   platform: BibliographicPlatform,
-): keyof typeof DbBibliographicPlatform {
-  return platform as keyof typeof DbBibliographicPlatform
-}
+): keyof typeof DbBibliographicPlatform =>
+  platform as keyof typeof DbBibliographicPlatform
 
-export function getBibliographicPlatformFromDbValue(
+export const getBibliographicPlatformFromDbValue = (
   value: keyof typeof DbBibliographicPlatform,
-): BibliographicPlatform {
-  return value as BibliographicPlatform
-}
+): BibliographicPlatform => value as BibliographicPlatform

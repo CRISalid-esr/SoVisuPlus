@@ -17,13 +17,13 @@ export interface WorkInProgressProps {
   icon?: React.ReactNode
 }
 
-export default function WorkInProgress({
+const WorkInProgress = ({
   title = 'Work in progress',
   description = 'This section is being built. Some features may be missing or change.',
   variant = 'page',
   dense = false,
   icon,
-}: WorkInProgressProps) {
+}: WorkInProgressProps) => {
   const theme = useTheme()
   const isPage = variant === 'page'
 
@@ -105,3 +105,4 @@ export default function WorkInProgress({
     </Wrapper>
   )
 }
+export default WorkInProgress

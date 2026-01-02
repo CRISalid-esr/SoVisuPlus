@@ -689,6 +689,10 @@ msgstr "Out of HAL"
 msgid "documents_page_halStatus_column"
 msgstr "Status in HAL"
 
+#: src/app/[lang]/documents/page.tsx:485
+msgid "documents_page_oaStatus_column"
+msgstr "Open Access Status"
+
 #: src/app/[lang]/documents/page.tsx:540
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "HAL incomplete filling"

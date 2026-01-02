@@ -5,7 +5,7 @@ import { Box, CardContent, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import WorkInProgress from '@/components/WorkInProgress/WorkInProgress'
 
-function Domains() {
+const Domains = () => {
   const theme = useTheme()
 
   return (

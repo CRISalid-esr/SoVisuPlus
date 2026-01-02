@@ -31,7 +31,7 @@ export const metadata = {
   description: 'Setup checks for the application',
 }
 
-export default async function SetupChecks() {
+const SetupChecks = async () => {
   const { dbStatus, dbError } = await dbCheckup()
 
   return (
@@ -202,3 +202,4 @@ export default async function SetupChecks() {
     </Box>
   )
 }
+export default SetupChecks

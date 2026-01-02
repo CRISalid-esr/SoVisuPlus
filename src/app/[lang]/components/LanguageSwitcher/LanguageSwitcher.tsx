@@ -17,7 +17,7 @@ type Props = {
   value: ExtendedLanguageCode
 }
 
-export default function LanguageSwitcher({ value }: Props) {
+const LanguageSwitcher = ({ value }: Props) => {
   const theme = useTheme()
   const pathname = usePathname()
   const router = useRouter()
@@ -105,3 +105,4 @@ export default function LanguageSwitcher({ value }: Props) {
     </Select>
   )
 }
+export default LanguageSwitcher

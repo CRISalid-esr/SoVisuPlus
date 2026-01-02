@@ -1,5 +1,6 @@
-import DefaultLayout from '../layouts/MainLayout';
+import DefaultLayout from '../layouts/MainLayout'
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return <DefaultLayout>{children}</DefaultLayout>;
-}
+const DashboardLayout = ({ children }: { children: React.ReactNode }) => (
+  <DefaultLayout>{children}</DefaultLayout>
+)
+export default DashboardLayout

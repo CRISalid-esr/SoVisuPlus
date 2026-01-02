@@ -28,7 +28,7 @@ const DEFAULT_START_YEAR = 2010
 const DEFAULT_MIN_FONT = 15
 const DEFAULT_MAX_FONT = 30
 
-export default function DashboardPage() {
+const DashboardPage = () => {
   const theme = useTheme()
   const { _ } = useLingui()
   const { currentPerspective } = useStore((state) => state.user)
@@ -293,3 +293,4 @@ export default function DashboardPage() {
     </Box>
   )
 }
+export default DashboardPage

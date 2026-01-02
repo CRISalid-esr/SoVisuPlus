@@ -4,7 +4,7 @@ import { getRuntimeEnv } from '@/utils/runtimeEnv'
  * Client-side only: builds full WebSocket URL from window.env
  * (injected by EnvInjector component at runtime)
  */
-export function buildWebSocketURL(): string {
+export const buildWebSocketURL = (): string => {
   const scheme = getRuntimeEnv().WS_SCHEME
   const host = getRuntimeEnv().WS_HOST
   const port = getRuntimeEnv().WS_PORT

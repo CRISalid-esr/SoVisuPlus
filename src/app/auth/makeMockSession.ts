@@ -1,7 +1,7 @@
 import type { Session } from 'next-auth'
 import type { AuthzContext } from '@/types/authz'
 
-export function makeMockSession(authz: AuthzContext): Session {
+export const makeMockSession = (authz: AuthzContext): Session => {
   return {
     user: {
       id: 'test-user',

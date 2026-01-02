@@ -5,7 +5,7 @@ import { Trans } from '@lingui/react'
 import { useState } from 'react'
 import { ContentCopy } from '@mui/icons-material'
 
-export default function SignatureControl() {
+const SignatureControl = () => {
   const { connectedUser } = useStore((state) => state.user)
   const person = connectedUser?.person
   const signatures = person?.membershipSignatures ?? []
@@ -62,3 +62,4 @@ export default function SignatureControl() {
     </Paper>
   )
 }
+export default SignatureControl

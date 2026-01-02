@@ -9,7 +9,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { Box } from '@mui/system'
 
-export default function AuthorizationsPage() {
+const AuthorizationsPage = () => {
   const theme = useTheme()
 
   return (
@@ -62,3 +62,4 @@ export default function AuthorizationsPage() {
     </Box>
   )
 }
+export default AuthorizationsPage
