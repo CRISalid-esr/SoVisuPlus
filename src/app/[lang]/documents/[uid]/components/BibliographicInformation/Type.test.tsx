@@ -17,6 +17,7 @@ import { Contribution } from '@/types/Contribution'
 import { InternalPerson } from '@/types/InternalPerson'
 import { LocRelator } from '@/types/LocRelator'
 import userEvent from '@testing-library/user-event'
+import { OAStatus } from '@prisma/client'
 
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
@@ -35,9 +36,11 @@ const makeDoc = (type: DocumentType) =>
   new Document(
     'doc-xyz',
     type,
+    OAStatus.GREEN,
     '2024',
     new Date('2024-01-01T00:00:00.000Z'),
     new Date('2024-12-31T23:59:59.000Z'),
+    OAStatus.DIAMOND,
     [new Literal('Title', 'en')],
     [],
     [],

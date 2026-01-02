@@ -16,13 +16,13 @@ export type Props = {
   }
 }
 
-export default function Splash({ images }: Props) {
+const Splash = ({ images }: Props) => {
   const lang = Lingui.i18n.locale || 'fr'
   const [locales, setLocales] = useState<ThemeLocales>()
   const theme = useTheme()
 
   useEffect(() => {
-    async function importLocales() {
+    const importLocales = async () => {
       try {
         const response = await fetch(`/theme/locales_${lang}.json`)
         const importedLocales = await response.json()
@@ -213,3 +213,4 @@ export default function Splash({ images }: Props) {
     </>
   )
 }
+export default Splash

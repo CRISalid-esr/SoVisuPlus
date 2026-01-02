@@ -12,7 +12,7 @@ import {
   DocumentLocalizableFieldKey,
 } from './BibliographicInformation'
 
-export default function Row({ field }: { field: DocumentField }) {
+const Row = ({ field }: { field: DocumentField }) => {
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const [selectedLang, setSelectedLang] = useState<string>(lang)
   const [content, setContent] = useState('')
@@ -79,3 +79,4 @@ export default function Row({ field }: { field: DocumentField }) {
     </TableRow>
   )
 }
+export default Row

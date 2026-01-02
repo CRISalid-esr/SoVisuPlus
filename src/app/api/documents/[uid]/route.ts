@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
 import { DocumentService } from '@/lib/services/DocumentService'
 
-export async function GET(
+export const GET = async (
   request: Request,
   context: { params: Promise<{ uid: string }> },
-) {
+) => {
   const { uid } = await context.params
 
   if (!uid) {

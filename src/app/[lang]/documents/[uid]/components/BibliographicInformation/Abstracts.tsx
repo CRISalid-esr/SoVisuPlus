@@ -1,5 +1,6 @@
 import { Typography } from '@mui/material'
 
-export default function Abstracts({ content }: { content: string }) {
-  return <Typography>{content}</Typography>
-}
+const Abstracts = ({ content }: { content: string }) => (
+  <Typography>{content}</Typography>
+)
+export default Abstracts

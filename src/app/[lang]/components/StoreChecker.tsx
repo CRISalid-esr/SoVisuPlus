@@ -3,7 +3,7 @@ import useStore from 'src/app/stores/global_store'
 import { useEffect, useState } from 'react'
 import { Alert } from '@mui/material'
 
-export default function StoreChecker() {
+const StoreChecker = () => {
   const loading = useStore<boolean>((state) => state.document.loading)
   const fetchDocuments = useStore((state) => state.document.fetchDocuments)
   const [failure, setFailure] = useState<boolean>(false)
@@ -32,3 +32,4 @@ export default function StoreChecker() {
   }
   return <Alert severity='success'>Server data loaded</Alert>
 }
+export default StoreChecker

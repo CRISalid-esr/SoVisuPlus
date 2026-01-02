@@ -122,7 +122,7 @@ const Authors = () => {
         <Typography variant='h6'>Authors</Typography>
       </Box>
       <Box>
-        <MaterialReactTable table={table} />;
+        <MaterialReactTable table={table} />
       </Box>
     </Paper>
   )

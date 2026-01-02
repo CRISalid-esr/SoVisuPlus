@@ -2,7 +2,7 @@ import { Link, Paper, Typography } from '@mui/material'
 import useStore from '@/stores/global_store'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
-export default function IdrefControl() {
+const IdrefControl = () => {
   const { connectedUser } = useStore((state) => state.user)
   const person = connectedUser?.person
   const identifiers = person?.getIdentifiers() ?? []
@@ -39,3 +39,4 @@ export default function IdrefControl() {
     </Paper>
   )
 }
+export default IdrefControl

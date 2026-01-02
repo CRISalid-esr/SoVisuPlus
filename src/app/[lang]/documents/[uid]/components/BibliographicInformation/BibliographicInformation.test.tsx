@@ -13,6 +13,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles'
 import '@testing-library/jest-dom'
 import { render, screen } from '@testing-library/react'
 import BibliographicInformation from './BibliographicInformation'
+import { OAStatus } from '@prisma/client'
 // Mock Zustand store
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
@@ -53,9 +54,11 @@ jest.mock('next-auth/react', () => ({
 const document: Document = new Document(
   'doc-123',
   DocumentType.JournalArticle,
+  OAStatus.GREEN,
   '2022',
   new Date('2022-01-01T00:00:00.000Z'),
   new Date('2022-12-31T23:59:59.000Z'),
+  OAStatus.DIAMOND,
   [new Literal('Sample Document Title', 'en')],
   [new Literal('Sample Abstract', 'en')],
   [], // empty subjects

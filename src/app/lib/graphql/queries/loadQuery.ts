@@ -6,7 +6,7 @@ import { join } from 'path'
  * @param filePath - The relative path to the .graphql file.
  * @returns The content of the file as a string.
  */
-export function loadQuery(filePath: string): string {
+export const loadQuery = (filePath: string): string => {
   try {
     const fullPath = join(
       process.cwd(),

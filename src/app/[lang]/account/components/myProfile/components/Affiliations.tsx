@@ -6,7 +6,7 @@ import { CustomCard } from '@/components/Card'
 import SignatureControl from '@/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl'
 import LaboratoriesControl from '@/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl'
 
-export default function Affiliations() {
+const Affiliations = () => {
   const theme = useTheme()
 
   return (
@@ -94,3 +94,4 @@ export default function Affiliations() {
     </CustomCard>
   )
 }
+export default Affiliations

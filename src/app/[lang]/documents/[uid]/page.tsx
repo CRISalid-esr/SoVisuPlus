@@ -25,7 +25,7 @@ import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Trans } from '@lingui/react'
 
-export default function DocumentDetailsPage() {
+const DocumentDetailsPage = () => {
   const theme = useTheme()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -167,3 +167,4 @@ export default function DocumentDetailsPage() {
     </Box>
   )
 }
+export default DocumentDetailsPage

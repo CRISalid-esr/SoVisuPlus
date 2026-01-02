@@ -29,7 +29,7 @@ import { VOCABS } from '@/lib/services/Vocabs'
 import Image from 'next/image'
 import { Help, HelpOutline } from '@mui/icons-material'
 
-function Keywords() {
+const Keywords = () => {
   const { data: session } = useSession()
 
   const ability = useMemo(

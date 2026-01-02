@@ -26,14 +26,10 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import {
-  MaterialReactTable,
+  MRT_Cell,
+  MRT_Column,
   MRT_ColumnDef,
-  MRT_GlobalFilterTextField,
   MRT_Row,
-  MRT_ShowHideColumnsButton,
-  MRT_ToggleDensePaddingButton,
-  MRT_ToggleFullScreenButton,
-  useMaterialReactTable,
 } from 'material-react-table'
 import Image from 'next/image'
 import React, { ReactNode, useMemo, useState } from 'react'
@@ -46,17 +42,33 @@ import { LocRelator } from '@/types/LocRelator'
 import dayjs from 'dayjs'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
+import {
+  DocumentTable,
+  readInitialGlobalFilter,
+} from '@/app/[lang]/documents/components/DocumentTable'
+import { PermissionAction } from '@/types/Permission'
+import { useSession } from 'next-auth/react'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import Highlighter from 'react-highlight-words'
+import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
 
-function Sources() {
+const Sources = () => {
   const { selectedDocument = null } = useStore((state) => state.document)
   const theme = useTheme()
+  const { _ } = useLingui()
+  const [action, setAction] = useState<string>('')
+  const { data: session } = useSession()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
-  const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
   const [selectedTitleLangs, setSelectedTitleLangs] = useState<
     Record<string, string>
   >({})
-  const [action, setAction] = useState<string>('')
-  const { _ } = useLingui()
+  const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
+  const ability = useMemo(
+    () => abilityFromAuthzContext(session?.user.authz),
+    [session?.user?.authz],
+  )
+  const [data] = useState<DocumentRecord[]>(selectedDocument?.records || [])
+  const [globalFilter, setGlobalFilter] = useState(readInitialGlobalFilter)
 
   const getPreciseType = (types: DocumentType[]) => {
     const clearDocumentTypes = types.filter(
@@ -124,6 +136,11 @@ function Sources() {
             </Tooltip>
           )
         },
+        filterFn: (row, id, value) => {
+          if (!value || value.length === 0) return true
+          const type = getPreciseType(row.original.documentTypes)
+          return value.includes(type)
+        },
       },
       {
         size: 200,
@@ -143,7 +160,9 @@ function Sources() {
         header: t`documents_page_title_column`,
         Cell({
           row,
+          column,
         }: {
+          column: MRT_Column<DocumentRecord>
           row: MRT_Row<DocumentRecord>
           renderedCellValue: ReactNode
         }) {
@@ -158,7 +177,12 @@ function Sources() {
           const effectiveRowLang = localizedTitle.language
           return (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography>{localizedTitle.value}</Typography>
+              <Highlighter
+                highlightClassName='highlight'
+                searchWords={[globalFilter, column.getFilterValue() as string]}
+                autoEscape
+                textToHighlight={localizedTitle.value}
+              />
               <LanguageChips
                 texts={titles}
                 selectedLang={effectiveRowLang}
@@ -179,9 +203,24 @@ function Sources() {
                 ? contribution.person.name
                 : '',
             )
+            .sort()
             .join(', ')
         },
         header: t`documents_page_contributors_column`,
+        Cell({
+          cell,
+          column,
+        }: {
+          cell: MRT_Cell<DocumentRecord>
+          column: MRT_Column<DocumentRecord>
+        }) {
+          return (
+            <HighlighterWithEllipsis
+              searchWords={[globalFilter, column.getFilterValue() as string]}
+              text={cell.getValue<string>()}
+            />
+          )
+        },
       },
       {
         size: 100,
@@ -194,18 +233,42 @@ function Sources() {
           row: { original: DocumentRecord }
           renderedCellValue: ReactNode
         }) {
-          let dateStr = row.original.publicationDate?.toString()
-          const dateFormat = LocaleDateFormats['lang'] || 'MM-DD-YYYY'
-          if (dayjs(dateStr, 'YYYY-MM-DD').isValid()) {
-            dateStr = dayjs(dateStr, 'YYYY-MM-DD').format(dateFormat)
+          const date = row.original.publicationDate
+          const dateFormat = LocaleDateFormats[lang] || 'MM-DD-YYYY'
+          const dateJs = dayjs(date)
+          let dateStr = date?.toString()
+          if (dateJs.isValid()) {
+            dateStr = dateJs.format(dateFormat)
           }
-          return (
-            <Typography>
-              {!dateStr
-                ? t`documents_page_publication_date_column_no_date_available`
-                : dateStr}
-            </Typography>
+          return !dateStr ? (
+            t`documents_page_publication_date_column_no_date_available`
+          ) : (
+            <Highlighter
+              highlightClassName='highlight'
+              searchWords={[globalFilter]}
+              autoEscape
+              textToHighlight={dateStr}
+            />
           )
+        },
+        filterFn: (row, id, value) => {
+          const [startDate, endDate] = (value as (string | null)[]) ?? []
+          if (!startDate && !endDate) return true
+          const rowDate = dayjs(row.original.publicationDate)
+          if (!rowDate.isValid()) return false
+          const rowDay = rowDate.startOf('day')
+          if (startDate) {
+            const startDay = dayjs(startDate).startOf('day')
+            if (rowDay.isBefore(startDay)) return false
+          }
+          if (endDate) {
+            const endDay = dayjs(endDate).endOf('day')
+            if (rowDay.isAfter(endDay)) return false
+          }
+          return true
+        },
+        muiTableHeadCellProps: {
+          sx: { '& .MuiBox-root': { gridTemplateColumns: '1fr' } },
         },
       },
       {
@@ -220,6 +283,19 @@ function Sources() {
           }
         },
         header: t`documents_page_publishedIn_column`,
+        Cell({ cell, column }) {
+          const title = cell.getValue<string>()
+          return (
+            title && (
+              <Highlighter
+                highlightClassName='highlight'
+                searchWords={[globalFilter, column.getFilterValue() as string]}
+                autoEscape
+                textToHighlight={title}
+              />
+            )
+          )
+        },
       },
       {
         enableSorting: false,
@@ -293,78 +369,25 @@ function Sources() {
             }
           },
         ),
-        filterFn: (row, filterValues) => {
-          if (!filterValues || filterValues.length === 0) return true
-          return filterValues.includes(row.original.platform)
+        filterFn: (row, id, value) => {
+          if (!value || value.length === 0) return true
+          return value.includes(row.original.platform)
         },
       },
     ]
-  }, [lang, selectedTitleLangs, supportedLocales, _])
+  }, [lang, globalFilter, selectedTitleLangs, supportedLocales, _])
 
   const handleChange = () => {
     setAction('')
   }
 
-  const table = useMaterialReactTable({
-    columns,
-    data: selectedDocument?.records || [],
-    enableRowSelection: true,
-    localization: Localization[lang],
-    positionToolbarAlertBanner: 'bottom', //show selected rows count on bottom toolbar
-    renderTopToolbarCustomActions: () => (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2,
-        }}
-      >
-        <FormControl
-          sx={{
-            minWidth: 120,
-            width: '100%',
-          }}
-        >
-          <InputLabel id='demo-simple-select-autowidth-label'>
-            {' '}
-            <Trans id='document_details_page_source_tab_select_action_label' />
-          </InputLabel>
-          <Select
-            labelId='demo-simple-select-autowidth-label'
-            id='demo-simple-select-autowidth'
-            value={action}
-            onChange={handleChange}
-            autoWidth
-            label={
-              <Trans id='document_details_page_source_tab_select_action_label' />
-            }
-          >
-            <MenuItem value='pending'>
-              <Box display='flex' alignItems='center'>
-                <DeleteIcon />
-                <Trans id='document_details_page_source_tab_select_action_invalidate_label' />
-              </Box>{' '}
-            </MenuItem>
+  const onUnmergeDocument = async (documentRecordUids: string[]) => {
+    if (documentRecordUids.length < 1) return
+  }
 
-            <MenuItem value='rejected'>
-              <Box display='flex' alignItems='center'>
-                <CallMergeIcon />
-                <Trans id='document_details_page_source_tab_select_action_unmerge_label' />
-              </Box>
-            </MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-    ),
-    renderToolbarInternalActions: ({ table }) => (
-      <Box>
-        <MRT_ToggleDensePaddingButton table={table} />
-        <MRT_ToggleFullScreenButton table={table} />
-        <MRT_ShowHideColumnsButton table={table} />
-        <MRT_GlobalFilterTextField table={table} />
-      </Box>
-    ),
-  })
+  const onInvalidateDocument = async (documentRecordUids: string[]) => {
+    if (documentRecordUids.length < 1) return
+  }
 
   return (
     <CustomCard
@@ -391,7 +414,90 @@ function Sources() {
       }
     >
       <CardContent>
-        <MaterialReactTable table={table} />
+        <DocumentTable<DocumentRecord>
+          columns={columns}
+          data={data}
+          enableRowSelection={(row) => {
+            return ability.can(PermissionAction.unmerge, row.original)
+          }}
+          localization={Localization[lang]}
+          positionToolbarAlertBanner={'bottom'}
+          onGlobalFilterChange={setGlobalFilter}
+          renderTopToolbarCustomActions={({ table }) => {
+            const rowSelected = table.getSelectedRowModel().rows.length > 0
+            return (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                }}
+              >
+                <FormControl
+                  sx={{
+                    minWidth: 120,
+                    width: '100%',
+                  }}
+                >
+                  <InputLabel id='demo-simple-select-autowidth-label'>
+                    {' '}
+                    <Trans id='document_details_page_source_tab_select_action_label' />
+                  </InputLabel>
+                  <Select
+                    labelId='demo-simple-select-autowidth-label'
+                    id='demo-simple-select-autowidth'
+                    value={action}
+                    onChange={handleChange}
+                    autoWidth
+                    label={
+                      <Trans id='document_details_page_source_tab_select_action_label' />
+                    }
+                  >
+                    <MenuItem
+                      value='pending'
+                      disabled={!rowSelected}
+                      onClick={async () => {
+                        await onInvalidateDocument(
+                          table
+                            .getSelectedRowModel()
+                            .rows.map((row) => row.original.uid),
+                        )
+                        table.resetRowSelection()
+                      }}
+                    >
+                      <Box display='flex' alignItems='center'>
+                        <DeleteIcon />
+                        <Trans id='document_details_page_source_tab_select_action_invalidate_label' />
+                      </Box>{' '}
+                    </MenuItem>
+
+                    <MenuItem
+                      value='rejected'
+                      disabled={!rowSelected}
+                      onClick={async () => {
+                        await onUnmergeDocument(
+                          table
+                            .getSelectedRowModel()
+                            .rows.map((row) => row.original.uid),
+                        )
+                        table.resetRowSelection()
+                      }}
+                    >
+                      <Box display='flex' alignItems='center'>
+                        <CallMergeIcon />
+                        <Trans id='document_details_page_source_tab_select_action_unmerge_label' />
+                      </Box>
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+            )
+          }}
+          rowCount={data.length}
+          state={{
+            globalFilter,
+          }}
+        />
       </CardContent>
     </CustomCard>
   )

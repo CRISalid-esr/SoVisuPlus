@@ -42,7 +42,7 @@ describe('getSplashImages tests', () => {
     jest.clearAllMocks()
   })
 
-  function mockExistsSync(mockFilesTree: Record<string, boolean>) {
+  const mockExistsSync = (mockFilesTree: Record<string, boolean>) => {
     ;(fs.existsSync as jest.Mock).mockImplementation((filePath: string) => {
       return !!mockFilesTree[filePath]
     })

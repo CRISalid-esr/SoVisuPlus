@@ -5,7 +5,7 @@ import YAML from 'yaml'
 import { parseArgs } from 'node:util'
 import { RoleConfigService } from '@/lib/services/RoleConfigService'
 
-async function main() {
+const main = async () => {
   const { values, positionals } = parseArgs({
     options: { file: { type: 'string', short: 'f' } },
     allowPositionals: true,

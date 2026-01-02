@@ -6,7 +6,7 @@ import { CustomCard } from '@/components/Card'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { identifierComponentMap } from '@/app/[lang]/account/components/myProfile/components/identifiers/index'
 
-export default function Identifiers() {
+const Identifiers = () => {
   const theme = useTheme()
 
   return (
@@ -89,3 +89,4 @@ export default function Identifiers() {
     </CustomCard>
   )
 }
+export default Identifiers

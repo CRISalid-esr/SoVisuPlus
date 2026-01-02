@@ -2,10 +2,7 @@
 
 import AuthenticatedRoute from '@/components/AuthenticatedRoute'
 
-export default function UnauthenticatedLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return <AuthenticatedRoute>{children}</AuthenticatedRoute>
-}
+const UnauthenticatedLayout = ({ children }: { children: React.ReactNode }) => (
+  <AuthenticatedRoute>{children}</AuthenticatedRoute>
+)
+export default UnauthenticatedLayout

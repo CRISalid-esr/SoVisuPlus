@@ -50,11 +50,7 @@ interface SidebarProps {
   user: User | null
 }
 
-export default function Sidebar({
-  open,
-  handleToggleDrawerAction,
-  user,
-}: SidebarProps) {
+const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
   const pathname = usePathname()
   const lang = pathname.split('/')[1]
   const theme = useTheme()
@@ -992,3 +988,4 @@ export default function Sidebar({
     </>
   )
 }
+export default Sidebar

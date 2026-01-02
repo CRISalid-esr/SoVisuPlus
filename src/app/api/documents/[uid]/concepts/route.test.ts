@@ -7,6 +7,7 @@ import { Contribution } from '@/types/Contribution'
 import { InternalPerson } from '@/types/InternalPerson'
 import { LocRelator } from '@/types/LocRelator'
 import { getServerSession } from 'next-auth'
+import { OAStatus } from '@prisma/client'
 
 const deleteConceptsFromDocument = jest.fn()
 const addConceptsToDocument = jest.fn()
@@ -14,9 +15,11 @@ const addConceptsToDocument = jest.fn()
 const document: Document = new Document(
   'doc-123',
   DocumentType.Document,
+  OAStatus.GREEN,
   '2022',
   new Date('2022-01-01T00:00:00.000Z'),
   new Date('2022-12-31T23:59:59.000Z'),
+  OAStatus.GREEN,
   [
     new Literal('Sample Document Title', 'en'),
     new Literal('Sample Abstract', 'fr'),

@@ -18,7 +18,7 @@ type Props = {
   params: Promise<{ lang: string }>
 }
 
-export default async function RootLayout({ params, children }: Props) {
+const RootLayout = async ({ params, children }: Props) => {
   const messages: { [key: string]: Record<string, string> } = {
     en: enMessages,
     fr: frMessages,
@@ -65,3 +65,4 @@ export default async function RootLayout({ params, children }: Props) {
     </html>
   )
 }
+export default RootLayout

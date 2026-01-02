@@ -12,7 +12,7 @@ import Authorizations from './components/authorizations/'
 import MyProfile from './components/myProfile'
 import Notifications from './components/notification'
 
-export default function MyAccountPage() {
+const MyAccountPage = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -90,3 +90,4 @@ export default function MyAccountPage() {
     </Box>
   )
 }
+export default MyAccountPage
