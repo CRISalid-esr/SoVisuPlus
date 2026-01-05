@@ -4,7 +4,7 @@ export interface SourcePersonJson {
   uid: string
   name: string
   source: string
-  sourceId: string
+  sourceId: string | null
 }
 
 export class SourcePerson {
@@ -12,7 +12,7 @@ export class SourcePerson {
     public uid: string,
     public name: string,
     public source: string,
-    public sourceId: string,
+    public sourceId: string | null,
   ) {}
 
   static fromJson(json: SourcePersonJson): SourcePerson {
