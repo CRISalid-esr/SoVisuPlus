@@ -32,7 +32,7 @@ class Document implements Authorizable {
   constructor(
     public uid: string,
     public documentType: DocumentType = DocumentType.Document,
-    public oaStatus: OAStatus = OAStatus.CLOSED,
+    public oaStatus: OAStatus | null,
     public publicationDate: string | null,
     public publicationDateStart: Date | null,
     public publicationDateEnd: Date | null,
@@ -47,9 +47,7 @@ class Document implements Authorizable {
     public volume?: string,
     public issue?: string,
     public pages?: string,
-  ) {
-    this.oaStatus = oaStatus == OAStatus.GREEN ? oaStatus : OAStatus.CLOSED
-  }
+  ) {}
 
   getTitleInLocale(localeNumber: number): string {
     return getStringInLocale(this.titles, localeNumber)
@@ -66,33 +64,28 @@ class Document implements Authorizable {
       : DocumentType.Document
   }
 
-  static oaStatusFromString(statusString: string): OAStatus {
-    const convertStatus = statusString.toUpperCase()
-    return convertStatus == 'GREEN'
-      ? (convertStatus as OAStatus)
-      : OAStatus.CLOSED
+  static oaStatusFromString(statusString: string | null): OAStatus | null {
+    const convertStatus = statusString?.toUpperCase()
+    return convertStatus == 'GREEN' ? (convertStatus as OAStatus) : null
   }
 
-  static upwOAStatusFromString(statusString: string): OAStatus {
-    const convertStatus = statusString.toUpperCase()
-    return (Object.values(OAStatus) as string[]).includes(convertStatus)
-      ? (convertStatus as OAStatus)
-      : OAStatus.CLOSED
+  static upwOAStatusFromString(statusString: string | null): OAStatus | null {
+    const convertStatus = statusString?.toUpperCase()
+    const valid = convertStatus
+      ? (Object.values(OAStatus) as string[]).includes(convertStatus)
+      : false
+    return valid ? (convertStatus as OAStatus) : null
   }
 
   static fromJson(document: DocumentJson): Document {
     return new Document(
       document.uid,
       Document.documentTypeFromString(document.documentType),
-      document.oaStatus
-        ? Document.oaStatusFromString(document.oaStatus)
-        : OAStatus.CLOSED,
+      Document.oaStatusFromString(document.oaStatus),
       document.publicationDate,
       document.publicationDateStart,
       document.publicationDateEnd,
-      document.upwOAStatus
-        ? Document.upwOAStatusFromString(document.upwOAStatus)
-        : OAStatus.CLOSED,
+      Document.upwOAStatusFromString(document.upwOAStatus),
       document.titles.map((title) => Literal.fromObject(title)),
       document.abstracts.map((abstract) => Literal.fromObject(abstract)),
       document.subjects.map((subject: ConceptJson) =>
@@ -116,15 +109,11 @@ class Document implements Authorizable {
     return new Document(
       document.uid,
       Document.documentTypeFromString(document.documentType),
-      document.oaStatus
-        ? Document.oaStatusFromString(document.oaStatus)
-        : OAStatus.CLOSED,
+      Document.oaStatusFromString(document.oaStatus),
       document.publicationDate,
       document.publicationDateStart,
       document.publicationDateEnd,
-      document.upwOAStatus
-        ? Document.upwOAStatusFromString(document.upwOAStatus)
-        : OAStatus.CLOSED,
+      Document.upwOAStatusFromString(document.upwOAStatus),
       document.titles.map((title) => Literal.fromObject(title)),
       document.abstracts.map((abstract) => Literal.fromObject(abstract)),
       document.subjects.map((subject) => Concept.fromDbConcept(subject)),

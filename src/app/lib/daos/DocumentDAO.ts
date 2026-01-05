@@ -21,7 +21,7 @@ import { LocRelatorHelper } from '@/types/LocRelator'
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
   | { id: 'type'; value: DocumentType[] }
-  | { id: 'oaStatus'; value: OAStatus[] }
+  | { id: 'oaStatus'; value: (OAStatus | 'UNKNOWN')[] }
   | { id: string; value: string | string[] }
 
 interface FetchDocumentsFromDBParams {
@@ -647,19 +647,31 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
       if (filter.id === 'oaStatus' && Array.isArray(filter.value)) {
+        const hasUnknown = filter.value.includes('UNKNOWN')
+        const knownValues = filter.value.filter((v) => v !== 'UNKNOWN')
         where = {
           ...where,
           OR: [
             {
               oaStatus: {
-                in: filter.value as OAStatus[],
+                not: null,
+                in: knownValues as OAStatus[],
               },
             },
             {
               upwOAStatus: {
-                in: filter.value as OAStatus[],
+                not: null,
+                in: knownValues as OAStatus[],
               },
             },
+            ...(hasUnknown
+              ? [
+                  {
+                    oaStatus: null,
+                    upwOAStatus: null,
+                  },
+                ]
+              : []),
           ],
         }
       }

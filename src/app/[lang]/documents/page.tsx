@@ -36,6 +36,7 @@ import { useTheme } from '@mui/material/styles'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import {
+  DropdownOption,
   MRT_ActionMenuItem,
   MRT_Column,
   MRT_ColumnDef,
@@ -78,6 +79,8 @@ import {
   readInitialPagination,
   readInitialSorting,
 } from '@/app/[lang]/documents/components/DocumentTable'
+import { OAStatus } from '@prisma/client'
+import OAStatusCellBadge from '@/app/[lang]/documents/components/OAStatusCellBadge'
 
 dayjs.extend(utc)
 
@@ -177,7 +180,7 @@ const DocumentsPage = () => {
         },
         filterVariant: 'multi-select',
         filterColumn: 'type',
-        //@ts-expect-error:  overide filterSelectOptions to accept Element.jsx instead of Element
+        //@ts-expect-error:  override filterSelectOptions to accept Element.jsx instead of Element
         filterSelectOptions: typeOptions,
       },
       {
@@ -385,6 +388,12 @@ const DocumentsPage = () => {
       },
       {
         enableSorting: false,
+        accessorFn: (row) =>
+          row.upwOAStatus
+            ? row.upwOAStatus
+            : row.oaStatus
+              ? row.oaStatus
+              : 'UNKNOWN',
         accessorKey: 'oaStatus',
         header: t`documents_page_oaStatus_column`,
         Cell({ row }) {
@@ -392,36 +401,17 @@ const DocumentsPage = () => {
         },
         filterVariant: 'multi-select',
         filterSelectOptions: [
+          //@ts-expect-error:  override filterSelectOptions to accept Element.jsx instead of Element
+          ...Object.values(OAStatus).map((option) => {
+            return {
+              label: <OAStatusCellBadge type={option} />,
+              value: option,
+            }
+          }),
           {
             // @ts-expect-error: so that label accepts an Element
-            label: (
-              <HalStatusCellBadge
-                type={HalStatusCellType.InCollection}
-                isSingleLine
-              />
-            ),
-            value: 'in_collection',
-          },
-          {
-            // @ts-expect-error: so that label accepts an Element
-            label: (
-              <HalStatusCellBadge
-                type={HalStatusCellType.OutOfCollection}
-                acronyms={acronyms}
-                isSingleLine
-              />
-            ),
-            value: 'out_of_collection',
-          },
-          {
-            // @ts-expect-error: so that label accepts an Element
-            label: (
-              <HalStatusCellBadge
-                type={HalStatusCellType.OutsideHal}
-                isSingleLine
-              />
-            ),
-            value: 'outside_hal',
+            label: <OAStatusCellBadge type={'UNKNOWN'} />,
+            value: 'UNKNOWN',
           },
         ],
       },
@@ -482,7 +472,7 @@ const DocumentsPage = () => {
         },
         filterVariant: 'multi-select',
         filterColumn: 'source',
-        //@ts-expect-error:  overide filterSelectOptions to accept Element.jsx instead of Element
+        //@ts-expect-error:  override filterSelectOptions to accept Element.jsx instead of Element
         filterSelectOptions: Object.values(BibliographicPlatform).map(
           (platform) => {
             const metadata = BibliographicPlatformMetadata[platform]

@@ -3,6 +3,7 @@ import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { render, screen, act } from '@testing-library/react'
 import OAStatusCellBadge from '@/app/[lang]/documents/components/OAStatusCellBadge'
+import { LockOpen } from '@mui/icons-material'
 
 beforeEach(() => {
   act(() => {
@@ -12,17 +13,36 @@ beforeEach(() => {
 
 describe('OAStatusCellBadge Component', () => {
   it('displays the right logo', async () => {
-    render(
+    const { rerender } = render(
       <I18nProvider i18n={i18n}>
         <OAStatusCellBadge type={OAStatus.CLOSED} />
       </I18nProvider>,
     )
     expect(screen.getByTestId('LockOutlinedIcon')).toBeInTheDocument()
-    expect(screen.queryByTestId('LockOpenIcon')).not.toBeInTheDocument()
-    const chip = screen.getByText('CLOSED')
+    let chip = screen.getByText('CLOSED')
     expect(chip).toBeInTheDocument()
-    const chiproot = chip.closest('.MuiChip-root')
+    let chiproot = chip.closest('.MuiChip-root')
     expect(chiproot).toHaveStyle({ backgroundColor: '#f23427' })
+
+    rerender(
+      <I18nProvider i18n={i18n}>
+        <OAStatusCellBadge type={'UNKNOWN'} />
+      </I18nProvider>,
+    )
+    expect(screen.getByTestId('BlockIcon')).toBeInTheDocument()
+    chip = screen.getByText('UNKNOWN')
+    expect(chip).toBeInTheDocument()
+    chiproot = chip.closest('.MuiChip-root')
+    expect(chiproot).toHaveStyle({ backgroundColor: '#81888f' })
+
+    rerender(
+      <I18nProvider i18n={i18n}>
+        <OAStatusCellBadge type={'GREEN'} />
+      </I18nProvider>,
+    )
+    expect(screen.getByTestId('LockOpenIcon')).toBeInTheDocument()
+    chip = screen.getByText('GREEN')
+    expect(chip).toBeInTheDocument()
   })
 
   it('displays the right open access status color', async () => {
@@ -84,6 +104,6 @@ describe('OAStatusCellBadge Component', () => {
     chip = screen.getByText('OTHER')
     expect(chip).toBeInTheDocument()
     chiproot = chip.closest('.MuiChip-root')
-    expect(chiproot).toHaveStyle({ backgroundColor: '#81888f' })
+    expect(chiproot).toHaveStyle({ backgroundColor: '#eb6580' })
   })
 })
