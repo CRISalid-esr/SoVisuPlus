@@ -19,7 +19,7 @@ interface GraphSourcePersonResponse {
   uid: string
   name: string
   source: string
-  source_identifier: string
+  source_identifier: string | null
 }
 
 interface GraphContributionResponse {

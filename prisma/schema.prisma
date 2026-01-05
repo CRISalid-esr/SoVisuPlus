@@ -139,7 +139,7 @@ model SourcePerson {
   uid                String               @unique
   name               String
   source             String
-  sourceId           String
+  sourceId           String?
   SourceContribution SourceContribution[]
 }
 
