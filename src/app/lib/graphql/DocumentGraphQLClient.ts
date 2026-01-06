@@ -162,13 +162,11 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
     return new Document(
       uid,
       Document.documentTypeFromString(document_type),
-      oa_status ? Document.oaStatusFromString(oa_status) : OAStatus.CLOSED,
+      Document.oaStatusFromString(oa_status),
       publication_date,
       publication_date_start ? new Date(publication_date_start) : null,
       publication_date_end ? new Date(publication_date_end) : null,
-      upw_oa_status
-        ? Document.upwOAStatusFromString(upw_oa_status)
-        : OAStatus.CLOSED,
+      Document.upwOAStatusFromString(upw_oa_status),
       titles.map(Literal.fromObject),
       abstracts.map(Literal.fromObject),
       documentData.has_subjects.map((subject) => {
