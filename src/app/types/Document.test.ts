@@ -23,14 +23,14 @@ describe('Document type', () => {
     )
   })
 
-  it('should convert open access status from string to OAStatus.GREEN regardless the case, to OAStatus.CLOSED in other cases', async () => {
+  it('should convert open access status from string to OAStatus.GREEN regardless the case, to null in other cases', async () => {
     expect(Document.oaStatusFromString('green')).toEqual(OAStatus.GREEN)
     expect(Document.oaStatusFromString('GREEN')).toEqual(OAStatus.GREEN)
-    expect(Document.oaStatusFromString('DIAMOND')).toEqual(OAStatus.CLOSED)
-    expect(Document.oaStatusFromString('hello')).toEqual(OAStatus.CLOSED)
+    expect(Document.oaStatusFromString('DIAMOND')).toEqual(null)
+    expect(Document.oaStatusFromString('hello')).toEqual(null)
   })
 
-  it('should convert unpaidwall open access status from string to the right OAStatus regardless the case, to OAStatus.CLOSED in other cases', async () => {
+  it('should convert unpaywall open access status from string to the right OAStatus regardless the case, to null in other cases', async () => {
     expect(Document.upwOAStatusFromString('green')).toEqual(OAStatus.GREEN)
     expect(Document.upwOAStatusFromString('GREEN')).toEqual(OAStatus.GREEN)
     expect(Document.upwOAStatusFromString('diamond')).toEqual(OAStatus.DIAMOND)
@@ -45,7 +45,7 @@ describe('Document type', () => {
     expect(Document.upwOAStatusFromString('OTHER')).toEqual(OAStatus.OTHER)
     expect(Document.upwOAStatusFromString('closed')).toEqual(OAStatus.CLOSED)
     expect(Document.upwOAStatusFromString('CLOSED')).toEqual(OAStatus.CLOSED)
-    expect(Document.upwOAStatusFromString('hello')).toEqual(OAStatus.CLOSED)
+    expect(Document.upwOAStatusFromString('hello')).toEqual(null)
   })
 
   it('Document from Json', async () => {

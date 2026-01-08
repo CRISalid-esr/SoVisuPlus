@@ -11,11 +11,11 @@ beforeEach(() => {
   })
 })
 
-const mockRow = (oatype?: OAStatus, upwType?: OAStatus) => {
+const mockRow = (oaType?: OAStatus, upwType?: OAStatus) => {
   const mockDocument = new Document(
     'doc1',
     DocumentType.Document,
-    oatype,
+    oaType ? oaType : null,
     '2024-01-01',
     new Date('2024-01-01'),
     new Date('2024-01-01'),
@@ -53,13 +53,13 @@ describe('OAStatusCell Component', () => {
     expect(chip).toBeInTheDocument()
   })
 
-  it('should display OAStatusCellBadge with CLOSED OAStatus type if both oaStatus and upwOAStatus are not provided', async () => {
+  it('should display OAStatusCellBadge with UNKNOWN type if both oaStatus and upwOAStatus are not provided', async () => {
     render(
       <I18nProvider i18n={i18n}>
         <OAStatusCell row={mockRow()} />
       </I18nProvider>,
     )
-    const chip = screen.getByText('CLOSED')
+    const chip = screen.getByText('UNKNOWN')
     expect(chip).toBeInTheDocument()
   })
 })

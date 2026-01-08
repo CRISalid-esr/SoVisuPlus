@@ -18,7 +18,7 @@ const OAStatusCell = ({ row }: { row: { original: Document } }) => {
     return defaultOAStatus ? (
       <OAStatusCellBadge type={defaultOAStatus} />
     ) : (
-      <OAStatusCellBadge type={OAStatus.CLOSED} />
+      <OAStatusCellBadge type={'UNKNOWN'} />
     )
   }
 }
