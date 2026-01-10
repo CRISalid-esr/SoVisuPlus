@@ -51,6 +51,10 @@ import { useSession } from 'next-auth/react'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import Highlighter from 'react-highlight-words'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
+import { SourceRecordType } from '@prisma/client'
+import { SourceRecordTypeLabels } from '@/app/[lang]/documents/components/SourceRecordTypeLabels'
+import { SourceRecordTypeIcons } from '@/app/[lang]/documents/components/SourceRecordTypeIcons'
+import { SourceRecordTypeService } from '@/lib/services/SourceRecordTypeService'
 
 const Sources = () => {
   const { selectedDocument = null } = useStore((state) => state.document)
@@ -70,50 +74,27 @@ const Sources = () => {
   const [data] = useState<DocumentRecord[]>(selectedDocument?.records || [])
   const [globalFilter, setGlobalFilter] = useState(readInitialGlobalFilter)
 
-  const getPreciseType = (types: DocumentType[]) => {
-    const clearDocumentTypes = types.filter(
-      (type) =>
-        type.toString() != 'Unknown' &&
-        DocumentTypeService.isDocumentType(type),
-    )
-    if (clearDocumentTypes.length == 0) {
-      return DocumentType.Document
-    }
-    const typeHierarchy = DocumentTypeService.toMenuTree()
-    let preciseTypeIndex: number = 0
-    for (const [index, type] of typeHierarchy.entries()) {
-      if (clearDocumentTypes.includes(type.value)) {
-        if (type.depth > preciseTypeIndex) {
-          preciseTypeIndex = index
-        }
-      }
-    }
-    return typeHierarchy[preciseTypeIndex].value
-  }
-
   const columns = useMemo<
     MRT_ColumnDef<DocumentRecord>[]
   >((): MRT_ColumnDef<DocumentRecord>[] => {
-    const typeOptions = DocumentTypeService.toMenuTree()
-      .filter((n) => n.value !== DocumentType.Document)
-      .map(({ value, depth }) => {
-        const plainLabel = _(DocumentTypeLabels[value])
-        return {
-          value,
-          label: (
-            <Box
-              className='doc-type-option'
-              sx={{ display: 'flex', alignItems: 'center', pl: depth * 1.5 }}
-            >
-              <Box sx={{ mr: 1 }}>{DocumentTypeIcons[value]}</Box>
-              <Typography variant='body2' noWrap>
-                {plainLabel}
-              </Typography>
-            </Box>
-          ),
-          plainLabel,
-        }
-      })
+    const typeOptions = Object.values(SourceRecordType).map((type) => {
+      const plainLabel = _(SourceRecordTypeLabels[type])
+      return {
+        value: type,
+        label: (
+          <Box
+            className='doc-type-option'
+            sx={{ display: 'flex', alignItems: 'center' }}
+          >
+            <Box sx={{ mr: 1 }}>{SourceRecordTypeIcons[type]}</Box>
+            <Typography variant='body2' noWrap>
+              {plainLabel}
+            </Typography>
+          </Box>
+        ),
+        plainLabel,
+      }
+    })
     return [
       {
         enableSorting: false,
@@ -129,16 +110,22 @@ const Sources = () => {
           row: MRT_Row<DocumentRecord>
           renderedCellValue: ReactNode
         }) {
-          const type = getPreciseType(row.original.documentTypes)
+          let type = SourceRecordTypeService.getPreciseType(
+            row.original.documentTypes,
+          )
+          type = type ? type : SourceRecordType.Unknown
           return (
-            <Tooltip title={_(DocumentTypeLabels[type])}>
-              {DocumentTypeIcons[type]}
+            <Tooltip title={_(SourceRecordTypeLabels[type])}>
+              {SourceRecordTypeIcons[type]}
             </Tooltip>
           )
         },
         filterFn: (row, id, value) => {
           if (!value || value.length === 0) return true
-          const type = getPreciseType(row.original.documentTypes)
+          let type = SourceRecordTypeService.getPreciseType(
+            row.original.documentTypes,
+          )
+          type = type ? type : SourceRecordType.Unknown
           return value.includes(type)
         },
       },
