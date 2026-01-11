@@ -120,11 +120,6 @@ msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:145
-msgid "documents_page_refresh_document_alert"
-msgstr "Data concerning this publication has changed"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:173
 msgid "document_details_bibliographic_information_tab"
 msgstr ""
@@ -133,6 +128,11 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/page.test.tsx:177
 msgid "document_details_keywords_tab"
 msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:145
+msgid "documents_page_refresh_document_alert"
+msgstr "Data concerning this publication has changed"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
@@ -153,6 +153,27 @@ msgstr "No keywords"
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:134
 msgid "document_details_page_keywords_search_field_title"
 msgstr "Select one or more controlled vocabulary"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:398
+msgid "document_details_page_source_tab_card_title"
+msgstr "Sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:431
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:440
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "action"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:457
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalidate"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:475
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissociate"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
@@ -180,30 +201,32 @@ msgid "concept_chip_action_delete"
 msgstr "Delete"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:398
-msgid "document_details_page_source_tab_card_title"
-msgstr "Sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:431
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:440
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "action"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:457
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalidate"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:475
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissociate"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
 msgid "document_details_page_domains_tab_card_title"
 msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
+msgid "document_details_page_keywords_input_default"
+msgstr "Please enter at least 3 characters"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Keyword successfully added."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Please select one vocabulary at least"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:252
@@ -216,36 +239,18 @@ msgid "document_details_page_keywords_input_options_fetch_error"
 msgstr "Unable to fetch suggestions"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
-msgid "document_details_page_keywords_input_default"
-msgstr "Please enter at least 3 characters"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Please select one vocabulary at least"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:291
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Keyword successfully added."
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
 msgid "document_details_page_sources_row_update_source"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
+msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -266,11 +271,6 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:131
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:79
 msgid "document_details_page_type_row_label"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
-msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -320,47 +320,15 @@ msgid "internal_server_page_description"
 msgstr "The server detected an internal error and was unable to process your request. Please try again later!"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/notification/index.tsx:27
-msgid "notification_page_notification_title"
-msgstr "Nofications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/notification/index.tsx:49
-msgid "notification_page_description"
-msgstr "Select the activities for which you wish to receive e-mail or push notifications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/notification/index.tsx:53
-msgid "notification_page_new_publication_referenced"
-msgstr "A new publication has been referenced"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/notification/index.tsx:58
-msgid "notification_page_new_expertise_awaiting_validation"
-msgstr "A new expertise is awaiting validation"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
-msgid "profile_identifiers_card_title"
-msgstr "My researchers identifiers"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:101
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:31
 msgid "profile_affiliations_card_title"
 msgstr "My affiliations"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:36
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
-msgid "orcid_button_update_identifier"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:46
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:52
-msgid "orcid_button_provide_identifier"
-msgstr "Sign-in to ORCID"
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
+msgid "profile_identifiers_card_title"
+msgstr "My researchers identifiers"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:52
@@ -398,10 +366,36 @@ msgid "orcid_identifier_no_orcid_provided"
 msgstr "No orcid identifier provided"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
-msgid "profile_affiliations_laboratories_label"
-msgstr "Laboratory/ies"
+#: src/app/[lang]/account/components/notification/index.tsx:27
+msgid "notification_page_notification_title"
+msgstr "Nofications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/notification/index.tsx:49
+msgid "notification_page_description"
+msgstr "Select the activities for which you wish to receive e-mail or push notifications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/notification/index.tsx:53
+msgid "notification_page_new_publication_referenced"
+msgstr "A new publication has been referenced"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/notification/index.tsx:58
+msgid "notification_page_new_expertise_awaiting_validation"
+msgstr "A new expertise is awaiting validation"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:36
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
+msgid "orcid_button_update_identifier"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:46
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:52
+msgid "orcid_button_provide_identifier"
+msgstr "Sign-in to ORCID"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
@@ -414,6 +408,12 @@ msgstr "My signature"
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:56
 msgid "profile_affiliations_signature_copied_message_confirmation"
 msgstr "Signature added to clipboard."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
+msgid "profile_affiliations_laboratories_label"
+msgstr "Laboratory/ies"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
