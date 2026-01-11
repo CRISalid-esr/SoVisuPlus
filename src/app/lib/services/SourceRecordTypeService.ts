@@ -45,6 +45,12 @@ export const SOURCE_RECORD_TYPE_ORDER: SourceRecordType[] = [
 ]
 
 export class SourceRecordTypeService {
-  static getPreciseType = (types: SourceRecordType[]) =>
-    SOURCE_RECORD_TYPE_ORDER.findLast((type) => types.includes(type))
+  static getPreciseType = (types: SourceRecordType[]) => {
+    for (let i = SOURCE_RECORD_TYPE_ORDER.length - 1; i >= 0; i--) {
+      const type = SOURCE_RECORD_TYPE_ORDER[i]
+      if (types.includes(type)) {
+        return type
+      }
+    }
+  }
 }
