@@ -74,8 +74,8 @@ const mockPrisma = new PrismaClient()
 describe('DocumentDAO', () => {
   let documentDAO: DocumentDAO
   beforeEach(() => {
-    process.env.PUBLICATION_LIST_ROLES_FILTER = 'editor,reviewer'
-    process.env.PERSPECTIVES_ROLES_FILTER = 'author,co-author'
+    process.env.PUBLICATION_LIST_ROLES_FILTER = '["editor","reviewer"]'
+    process.env.PERSPECTIVE_ROLES_FILTER = '["author","co-author"]'
     process.env.NEXT_PUBLIC_SUPPORTED_LOCALES = 'en,fr'
     jest.clearAllMocks()
     documentDAO = new DocumentDAO()
