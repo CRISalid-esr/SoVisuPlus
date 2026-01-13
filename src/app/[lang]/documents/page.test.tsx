@@ -369,11 +369,13 @@ describe('DocumentsPage Component', () => {
     let mergeBtn = screen.queryByRole('button', {
       name: i18n.t('documents_page_merge_selected_documents_button'),
     })
-    expect(mergeBtn).not.toBeInTheDocument()
+    // default : button is present but not enabled
+    expect(mergeBtn).toBeInTheDocument()
+    expect(mergeBtn).toBeDisabled()
 
     const checkboxes = screen.getAllByRole('checkbox')
 
-    // Select first row -> button appears but is disabled
+    // Select first row -> button still disabled
     fireEvent.click(checkboxes[1])
     await waitFor(() => {
       mergeBtn = screen.getByRole('button', {

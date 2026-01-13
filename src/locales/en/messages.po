@@ -66,7 +66,7 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:197
-#: src/app/[lang]/documents/page.tsx:723
+#: src/app/[lang]/documents/page.tsx:722
 msgid "documents_page_synchronize_button"
 msgstr "Update all publications"
 
@@ -82,9 +82,9 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:370
-#: src/app/[lang]/documents/page.test.tsx:380
-#: src/app/[lang]/documents/page.test.tsx:389
-#: src/app/[lang]/documents/page.test.tsx:446
+#: src/app/[lang]/documents/page.test.tsx:382
+#: src/app/[lang]/documents/page.test.tsx:391
+#: src/app/[lang]/documents/page.test.tsx:448
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
 
@@ -105,14 +105,24 @@ msgid "documents_page_hal_status_outside_hal"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:675
+#: src/app/[lang]/documents/page.tsx:674
 msgid "documents_page_refresh_list_alert_own_perspective"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:678
+#: src/app/[lang]/documents/page.tsx:677
 msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
+msgid "documents_page_synchronize_modal_synchronize_button"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:145
+msgid "documents_page_refresh_document_alert"
+msgstr "Data concerning this publication has changed"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:173
@@ -122,16 +132,6 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:177
 msgid "document_details_keywords_tab"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:145
-msgid "documents_page_refresh_document_alert"
-msgstr "Data concerning this publication has changed"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
-msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -155,25 +155,25 @@ msgid "document_details_page_keywords_search_field_title"
 msgstr "Select one or more controlled vocabulary"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:411
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:398
 msgid "document_details_page_source_tab_card_title"
 msgstr "Sources"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:444
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:453
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:431
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:440
 msgid "document_details_page_source_tab_select_action_label"
 msgstr "action"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:470
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:457
 msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr ""
+msgstr "Invalidate"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:488
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:475
 msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr ""
+msgstr "Dissociate"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
@@ -206,29 +206,6 @@ msgid "document_details_page_domains_tab_card_title"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
-msgid "document_details_page_keywords_input_default"
-msgstr "Please enter at least 3 characters"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "No options"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Keyword successfully added."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Please select one vocabulary at least"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:252
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "Loading..."
@@ -239,9 +216,32 @@ msgid "document_details_page_keywords_input_options_fetch_error"
 msgstr "Unable to fetch suggestions"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
+msgid "document_details_page_keywords_input_default"
+msgstr "Please enter at least 3 characters"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Please select one vocabulary at least"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:291
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Keyword successfully added."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
@@ -280,11 +280,6 @@ msgid "document_details_page_card_title"
 msgstr "Bibliographic information"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:114
-msgid "document_details_page_authors_row_update_author"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:134
 msgid "document_details_page_authors_row_label"
 msgstr "Authors"
@@ -310,6 +305,11 @@ msgid "document_details_page_sources_row_label"
 msgstr "Sources"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:114
+msgid "document_details_page_authors_row_update_author"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Back to home page"
@@ -318,6 +318,11 @@ msgstr "Back to home page"
 #: src/app/[lang]/components/ErrorFallback.tsx:103
 msgid "internal_server_page_description"
 msgstr "The server detected an internal error and was unable to process your request. Please try again later!"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
+msgid "profile_identifiers_card_title"
+msgstr "My researchers identifiers"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/notification/index.tsx:27
@@ -338,11 +343,6 @@ msgstr "A new publication has been referenced"
 #: src/app/[lang]/account/components/notification/index.tsx:58
 msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "A new expertise is awaiting validation"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
-msgid "profile_identifiers_card_title"
-msgstr "My researchers identifiers"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:101
@@ -653,48 +653,48 @@ msgstr "ORCID"
 msgid "documents_details_page_authors_tab_scopus_column"
 msgstr "Scopus"
 
-#: src/app/[lang]/documents/page.tsx:809
+#: src/app/[lang]/documents/page.tsx:806
 msgid "documents_page_action_column_details"
 msgstr "Details"
 
-#: src/app/[lang]/documents/page.tsx:532
+#: src/app/[lang]/documents/page.tsx:531
 msgid "documents_page_all_documents_filter"
 msgstr "All my documents"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:9
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:8
 msgid "documents_page_article_icon_label"
 msgstr "Article"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:15
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:14
 msgid "documents_page_book_chapter_icon_label"
 msgstr "Book chapter"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:11
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:10
 msgid "documents_page_book_icon_label"
 msgstr "Book"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:12
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:11
 msgid "documents_page_book_of_chapters_icon_label"
 msgstr "Article collection"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:20
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:19
 msgid "documents_page_comment_icon_label"
 msgstr "Comment"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:18
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:17
 msgid "documents_page_conference_abstract_icon_label"
 msgstr "Conference summary"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:16
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:15
 msgid "documents_page_conference_article_icon_label"
 msgstr "Conference article"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:209
-#: src/app/[lang]/documents/page.tsx:262
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:196
+#: src/app/[lang]/documents/page.tsx:261
 msgid "documents_page_contributors_column"
 msgstr "Authors"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:7
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:6
 msgid "documents_page_document_icon_label"
 msgstr "Document"
 
@@ -706,63 +706,63 @@ msgstr "In collection"
 msgid "documents_page_hal_status_outside_hal"
 msgstr "Out of HAL"
 
-#: src/app/[lang]/documents/page.tsx:350
+#: src/app/[lang]/documents/page.tsx:349
 msgid "documents_page_halStatus_column"
 msgstr "Status in HAL"
 
-#: src/app/[lang]/documents/page.tsx:538
+#: src/app/[lang]/documents/page.tsx:537
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "HAL incomplete filling"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:10
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:9
 msgid "documents_page_journal_article_icon_label"
 msgstr "Journal article"
 
-#: src/app/[lang]/documents/page.tsx:663
+#: src/app/[lang]/documents/page.tsx:662
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:662
+#: src/app/[lang]/documents/page.tsx:661
 msgid "documents_page_main_title_first_person"
 msgstr "My publications"
 
-#: src/app/[lang]/documents/page.tsx:795
+#: src/app/[lang]/documents/page.tsx:793
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:13
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:12
 msgid "documents_page_monograph_icon_label"
 msgstr "Monography"
 
-#: src/app/[lang]/documents/page.tsx:398
+#: src/app/[lang]/documents/page.tsx:397
 msgid "documents_page_oaStatus_column"
 msgstr "Open Access Status"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:19
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:18
 msgid "documents_page_preface_icon_label"
 msgstr "Introduction"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:14
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:13
 msgid "documents_page_presentation_icon_label"
 msgstr "Description"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:17
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:16
 msgid "documents_page_proceedings_icon_label"
 msgstr "Proceedings"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:228
-#: src/app/[lang]/documents/page.tsx:295
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:215
+#: src/app/[lang]/documents/page.tsx:294
 msgid "documents_page_publication_date_column"
 msgstr "Publication Date"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:13
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:244
-#: src/app/[lang]/documents/page.tsx:299
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:231
+#: src/app/[lang]/documents/page.tsx:298
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "No date available"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:285
-#: src/app/[lang]/documents/page.tsx:330
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:272
+#: src/app/[lang]/documents/page.tsx:329
 msgid "documents_page_publishedIn_column"
 msgstr "Published in"
 
@@ -770,16 +770,16 @@ msgstr "Published in"
 msgid "documents_page_refresh_document"
 msgstr "Update view"
 
-#: src/app/[lang]/documents/page.tsx:698
+#: src/app/[lang]/documents/page.tsx:697
 msgid "documents_page_refresh_list"
 msgstr "Update view"
 
-#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:8
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:7
 msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Scholarly publication"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:303
-#: src/app/[lang]/documents/page.tsx:421
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:290
+#: src/app/[lang]/documents/page.tsx:420
 msgid "documents_page_source_column"
 msgstr "Sources"
 
@@ -822,13 +822,13 @@ msgstr "Modified"
 msgid "documents_page_synchronize_modal_title"
 msgstr "Sources to be syncronized"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:160
-#: src/app/[lang]/documents/page.tsx:192
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:147
+#: src/app/[lang]/documents/page.tsx:191
 msgid "documents_page_title_column"
 msgstr "Title"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:121
-#: src/app/[lang]/documents/page.tsx:173
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:102
+#: src/app/[lang]/documents/page.tsx:172
 msgid "documents_page_type_column"
 msgstr "Type"
 
@@ -871,9 +871,9 @@ msgid "my_account_page_notification_tab"
 msgstr "Notifications"
 
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:16
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:155
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:175
-#: src/app/[lang]/documents/page.tsx:213
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:142
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:162
+#: src/app/[lang]/documents/page.tsx:212
 msgid "no_title_available"
 msgstr "no title available"
 
@@ -966,6 +966,178 @@ msgstr "Light theme"
 #: src/app/[lang]/components/Sidebar/Sidebar.tsx:766
 msgid "sidebar_theme_system"
 msgstr "Auto Theme"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:9
+msgid "sources_page_article_icon_label"
+msgstr "Article"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:10
+msgid "sources_page_audiovisual_document_icon_label"
+msgstr "Audiovisual document"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:23
+msgid "sources_page_blog_post_icon_label"
+msgstr "Blog Post"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:11
+msgid "sources_page_book_icon_label"
+msgstr "Book"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:34
+msgid "sources_page_book_review_icon_label"
+msgstr "Book Review"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:12
+msgid "sources_page_chapter_icon_label"
+msgstr "Chapter"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:24
+msgid "sources_page_conference_output_icon_label"
+msgstr "Conference Output"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:35
+msgid "sources_page_conference_paper_icon_label"
+msgstr "Conference Paper"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:36
+msgid "sources_page_conference_poster_icon_label"
+msgstr "Conference Poster"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:37
+msgid "sources_page_data_management_plan_icon_label"
+msgstr "Data Management Plan"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:25
+msgid "sources_page_data_paper_icon_label"
+msgstr "Data Paper"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:38
+msgid "sources_page_dataset_icon_label"
+msgstr "Dataset"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:13
+msgid "sources_page_document_icon_label"
+msgstr "Document"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:39
+msgid "sources_page_editorial_icon_label"
+msgstr "Editorial"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:40
+msgid "sources_page_erratum_icon_label"
+msgstr "Erratum"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:14
+msgid "sources_page_excerpt_icon_label"
+msgstr "Excerpt"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:49
+msgid "sources_page_grant_icon_label"
+msgstr "Grant"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:41
+msgid "sources_page_image_icon_label"
+msgstr "Image"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:26
+msgid "sources_page_lecture_icon_label"
+msgstr "Lecture"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:15
+msgid "sources_page_letter_icon_label"
+msgstr "Letter"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:16
+msgid "sources_page_manual_icon_label"
+msgstr "Manual"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:17
+msgid "sources_page_map_icon_label"
+msgstr "Map"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:27
+msgid "sources_page_master_thesis_icon_label"
+msgstr "Master Thesis"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:42
+msgid "sources_page_metadata_document_icon_label"
+msgstr "Metadata Document"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:18
+msgid "sources_page_note_icon_label"
+msgstr "Note"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:28
+msgid "sources_page_other_icon_label"
+msgstr "Other"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:19
+msgid "sources_page_patent_icon_label"
+msgstr "Patent"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:29
+msgid "sources_page_peer_review_icon_label"
+msgstr "Peer Review"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:43
+msgid "sources_page_preprint_icon_label"
+msgstr "Preprint"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:20
+msgid "sources_page_proceedings_icon_label"
+msgstr "Proceedings"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:44
+msgid "sources_page_reference_book_icon_label"
+msgstr "Reference Book"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:30
+msgid "sources_page_report_icon_label"
+msgstr "Report"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:31
+msgid "sources_page_research_report_icon_label"
+msgstr "Research Report"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:45
+msgid "sources_page_review_article_icon_label"
+msgstr "Review Article"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:46
+msgid "sources_page_review_paper_icon_label"
+msgstr "Review Paper"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:32
+msgid "sources_page_software_icon_label"
+msgstr "Software"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:21
+msgid "sources_page_standard_icon_label"
+msgstr "Standard"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:47
+msgid "sources_page_still_image_icon_label"
+msgstr "Still Image"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:33
+msgid "sources_page_technical_report_icon_label"
+msgstr "Technical Report"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:22
+msgid "sources_page_thesis_icon_label"
+msgstr "Thesis"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:51
+msgid "sources_page_unknown_icon_label"
+msgstr "Unknown"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:50
+msgid "sources_page_work_icon_label"
+msgstr "Work"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:48
+msgid "sources_page_working_paper_icon_label"
+msgstr "Working Paper"
 
 #: src/app/[lang]/splash.tsx:146
 msgid "splash.about"

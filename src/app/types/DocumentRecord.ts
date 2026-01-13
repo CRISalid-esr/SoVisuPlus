@@ -8,14 +8,16 @@ import { IAgent } from '@/types/IAgent'
 import { Person } from '@/types/Person'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { getStringInLocale } from '@/utils/getStringInLocale'
-import { DocumentType, HalSubmitType as DbHalSubmitType } from '@prisma/client'
+import {
+  SourceRecordType,
+  HalSubmitType as DbHalSubmitType,
+} from '@prisma/client'
 import { DocumentRecordWithRelations as DbDocumentRecord } from '@/prisma-schema/extended-client'
 import {
   SourceContribution,
   SourceContributionJson,
 } from '@/types/SourceContribution'
 import { SourceJournal, SourceJournalJson } from '@/types/SourceJournal'
-import { Document } from '@/types/Document'
 
 export interface DocumentRecordJson {
   uid: string
@@ -36,7 +38,7 @@ export class DocumentRecord {
   constructor(
     public uid: string,
     public contributions: Array<SourceContribution> = [],
-    public documentTypes: DocumentType[],
+    public documentTypes: SourceRecordType[],
     public publicationDate: Date | null,
     public platform: BibliographicPlatform,
     public titles: Array<Literal>,
@@ -72,6 +74,17 @@ export class DocumentRecord {
       return
     }
     this.setUrl(value)
+  }
+
+  /**
+   * Convert a string to a valid SourceRecordType or return SourceRecordType.Document as default
+   * @param typeString - The string representation of the source record type
+   * @returns A valid SourceRecordType
+   */
+  static sourceRecordTypeFromString(typeString: string): SourceRecordType {
+    return (Object.values(SourceRecordType) as string[]).includes(typeString)
+      ? (typeString as SourceRecordType)
+      : SourceRecordType.Document
   }
 
   isResearchStructureInCollectionCodes(perspective: IAgent | null): boolean {
@@ -117,7 +130,7 @@ export class DocumentRecord {
         SourceContribution.fromObject(contribution),
       ),
       record.documentTypes.map((type: string) =>
-        Document.documentTypeFromString(type),
+        DocumentRecord.sourceRecordTypeFromString(type),
       ),
       record.publicationDate,
       record.platform,

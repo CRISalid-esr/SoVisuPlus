@@ -237,7 +237,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
                 [],
               ),
               recordData.document_types.map((type) =>
-                Document.documentTypeFromString(type),
+                DocumentRecord.sourceRecordTypeFromString(type),
               ),
               recordData.issued ? new Date(recordData.issued) : null,
               platform,
