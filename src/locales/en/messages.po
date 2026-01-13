@@ -477,6 +477,22 @@ msgstr "Dashboard page"
 msgid "dashboard_page_publication_by_year_title"
 msgstr "Scholarly publication"
 
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:7
+msgid "dashboard_page_publication_by_year_graph_title"
+msgstr "Publication per year and open access rate"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:25
+msgid "dashboard_page_publication_by_year_graph_toolbox_save_as_image"
+msgstr "Download into PNG format"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:151
+msgid "dashboard_page_publication_by_year_graph_legend_open_access"
+msgstr "Open Access"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:152
+msgid "dashboard_page_publication_by_year_graph_legend_closed_access"
+msgstr "Closed Access"
+
 #: src/app/[lang]/dashboard/page.tsx:260
 msgid "dashboard_page_publication_by_year_wip_description"
 msgstr "This chart shows the evolution of the number of scholarly publications and their status regarding open science criteria."
