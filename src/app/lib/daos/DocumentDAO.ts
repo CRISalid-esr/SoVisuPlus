@@ -2,9 +2,9 @@ import { DocumentWithRelations as DbDocument } from '@/prisma-schema/extended-cl
 import {
   Concept as DbConcept,
   DocumentState,
+  OAStatus,
   Person as DbPerson,
   Prisma,
-  OAStatus,
 } from '@prisma/client'
 import { Document, DocumentType } from '@/types/Document'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
@@ -14,9 +14,10 @@ import {
   getBibliographicPlatformDbValue,
 } from '@/types/BibliographicPlatform'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
-import QueryMode = Prisma.QueryMode
 import { ConceptJson } from '@/types/Concept'
 import { LocRelatorHelper } from '@/types/LocRelator'
+import { parseStrArrayEnvVar } from '@/utils/parseStrArrayEnvVar'
+import QueryMode = Prisma.QueryMode
 
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
@@ -482,11 +483,13 @@ export class DocumentDAO extends AbstractDAO {
     halCollectionCodes: string[]
     areHalCollectionCodesOmitted: boolean
   }): Prisma.DocumentWhereInput {
-    const publicationListRolesFilter: string[] =
-      process.env.PUBLICATION_LIST_ROLES_FILTER?.split(',') || []
+    const publicationListRolesFilter = parseStrArrayEnvVar(
+      process.env.PUBLICATION_LIST_ROLES_FILTER,
+    )
 
-    const perspectiveRolesFilter: string[] =
-      process.env.PERSPECTIVES_ROLES_FILTER?.split(',') || []
+    const perspectiveRolesFilter: string[] = parseStrArrayEnvVar(
+      process.env.PERSPECTIVE_ROLES_FILTER,
+    )
 
     let where: Prisma.DocumentWhereInput = {}
     const contributionFilters: Prisma.DocumentWhereInput[] = []

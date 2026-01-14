@@ -36,7 +36,6 @@ import { useTheme } from '@mui/material/styles'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import {
-  DropdownOption,
   MRT_ActionMenuItem,
   MRT_Column,
   MRT_ColumnDef,
@@ -777,27 +776,25 @@ const DocumentsPage = () => {
           pagination,
           sorting: sorting || DEFAULT_SORTING,
         }}
-        renderTopToolbarCustomActions={({ table }) =>
-          table.getSelectedRowModel().rows.length > 0 && (
-            <Box sx={{ display: 'flex', gap: '1rem', p: '4px' }}>
-              <Button
-                color='secondary'
-                disabled={table.getSelectedRowModel().rows.length < 2}
-                onClick={async () => {
-                  await onMergeDocuments(
-                    table
-                      .getSelectedRowModel()
-                      .rows.map((row) => row.original.uid),
-                  )
-                  table.resetRowSelection()
-                }}
-                variant='contained'
-              >
-                {t`documents_page_merge_selected_documents_button`}
-              </Button>
-            </Box>
-          )
-        }
+        renderTopToolbarCustomActions={({ table }) => (
+          <Box sx={{ display: 'flex', gap: '1rem', p: '4px' }}>
+            <Button
+              color='secondary'
+              disabled={table.getSelectedRowModel().rows.length < 2}
+              onClick={async () => {
+                await onMergeDocuments(
+                  table
+                    .getSelectedRowModel()
+                    .rows.map((row) => row.original.uid),
+                )
+                table.resetRowSelection()
+              }}
+              variant='contained'
+            >
+              {t`documents_page_merge_selected_documents_button`}
+            </Button>
+          </Box>
+        )}
         renderRowActionMenuItems={({ row, table }) => {
           const isWaiting =
             row.original.state === DocumentState.waiting_for_update
