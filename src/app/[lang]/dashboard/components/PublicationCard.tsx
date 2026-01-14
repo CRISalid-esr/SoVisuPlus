@@ -238,7 +238,7 @@ const PublicationCard = () => {
           show: true,
           position: 'inside',
           formatter: (param) =>
-            !Number.isNaN(param.value)
+            !Number.isNaN(param.value) && Number(param.value) != 0
               ? Math.round(
                   (Number(param.value) / filteredData[param.dataIndex].total) *
                     100,
