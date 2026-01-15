@@ -22,6 +22,7 @@ import WordStream from '@/app/[lang]/components/WordStream/WordStream'
 import { useLingui } from '@lingui/react'
 import { useEffect, useState } from 'react'
 import { WordstreamTopic } from '@/types/WordStream'
+import PublicationCard from '@/app/[lang]/dashboard/components/PublicationCard'
 
 const DEFAULT_TOP_N = 10
 const DEFAULT_START_YEAR = 2010
@@ -255,11 +256,7 @@ const DashboardPage = () => {
             }
           >
             <CardContent>
-              <WorkInProgress
-                title={t`dashboard_page_publication_by_year_wip_title`}
-                description={t`dashboard_page_publication_by_year_wip_description`}
-                variant='inline'
-              />
+              <PublicationCard />
             </CardContent>
           </CustomCard>
         </Grid>

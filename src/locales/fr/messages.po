@@ -477,6 +477,46 @@ msgstr "Tableau de bord"
 msgid "dashboard_page_publication_by_year_title"
 msgstr "Publications scientifiques"
 
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:7
+msgid "dashboard_page_publication_by_year_graph_title"
+msgstr "Nombre de publications par année et taux d'accès"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:25
+msgid "dashboard_page_publication_by_year_graph_toolbox_save_as_image"
+msgstr "Télécharger en PNG"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:151
+msgid "dashboard_page_publication_by_year_graph_legend_open_access"
+msgstr "Accès Ouvert"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:152
+msgid "dashboard_page_publication_by_year_graph_legend_closed_access"
+msgstr "Accès Fermé"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:269
+msgid "dashboard_page_publication_by_year_graph_start_year_selection_label"
+msgstr "De :"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:273
+msgid "dashboard_page_publication_by_year_graph_end_year_selection_label"
+msgstr "à :"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:218
+msgid "dashboard_page_publication_by_year_no_publication_found"
+msgstr "Aucune publication trouvée"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:207
+msgid "dashboard_page_publication_by_year_graph_tooltip_year"
+msgstr "Année"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:208
+msgid "dashboard_page_publication_by_year_graph_tooltip_total"
+msgstr "Total :"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:209
+msgid "dashboard_page_publication_by_year_graph_open_access"
+msgstr "Accès Ouvert :"
+
 #: src/app/[lang]/dashboard/page.tsx:260
 msgid "dashboard_page_publication_by_year_wip_description"
 msgstr "Ce visuel vous permettra de visualiser l'évolution du nombre de publications scientifiques au fil des années ainsi que leur statut en regard des critères de la science ouverte."

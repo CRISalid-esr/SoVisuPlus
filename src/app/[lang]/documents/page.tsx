@@ -511,20 +511,21 @@ const DocumentsPage = () => {
     _,
   ])
 
-  const requestIdRef = useRef(0)
-  const countDocumentsRequestIdRef = useRef(0)
-
   const {
     fetchDocuments,
     countDocuments,
     loading,
     documents = [],
+    latestDocumentRequestId,
     totalItems,
     count: { allItems, incompleteHalRepositoryItems },
     listHasChanged,
     setListHasChanged,
     mergeDocuments,
   } = useStore((state) => state.document)
+
+  const requestIdRef = useRef(latestDocumentRequestId || 0)
+  const countDocumentsRequestIdRef = useRef(0)
 
   const tabs = [
     {

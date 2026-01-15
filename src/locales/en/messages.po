@@ -206,6 +206,29 @@ msgid "document_details_page_domains_tab_card_title"
 msgstr ""
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
+msgid "document_details_page_keywords_input_default"
+msgstr "Please enter at least 3 characters"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "No options"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Keyword successfully added."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Please select one vocabulary at least"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:252
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "Loading..."
@@ -216,32 +239,9 @@ msgid "document_details_page_keywords_input_options_fetch_error"
 msgstr "Unable to fetch suggestions"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
-msgid "document_details_page_keywords_input_default"
-msgstr "Please enter at least 3 characters"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Please select one vocabulary at least"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:291
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Keyword successfully added."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
@@ -280,6 +280,11 @@ msgid "document_details_page_card_title"
 msgstr "Bibliographic information"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:114
+msgid "document_details_page_authors_row_update_author"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:134
 msgid "document_details_page_authors_row_label"
 msgstr "Authors"
@@ -303,11 +308,6 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:148
 msgid "document_details_page_sources_row_label"
 msgstr "Sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:114
-msgid "document_details_page_authors_row_update_author"
-msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
@@ -477,9 +477,45 @@ msgstr "Dashboard page"
 msgid "dashboard_page_publication_by_year_title"
 msgstr "Scholarly publication"
 
-#: src/app/[lang]/dashboard/page.tsx:260
-msgid "dashboard_page_publication_by_year_wip_description"
-msgstr "This chart shows the evolution of the number of scholarly publications and their status regarding open science criteria."
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:7
+msgid "dashboard_page_publication_by_year_graph_title"
+msgstr "Publication per year and open access rate"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:25
+msgid "dashboard_page_publication_by_year_graph_toolbox_save_as_image"
+msgstr "Download into PNG format"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:151
+msgid "dashboard_page_publication_by_year_graph_legend_open_access"
+msgstr "Open Access"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:152
+msgid "dashboard_page_publication_by_year_graph_legend_closed_access"
+msgstr "Closed Access"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:269
+msgid "dashboard_page_publication_by_year_graph_start_year_selection_label"
+msgstr "From:"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:273
+msgid "dashboard_page_publication_by_year_graph_end_year_selection_label"
+msgstr "to:"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:218
+msgid "dashboard_page_publication_by_year_no_publication_found"
+msgstr "No publication found"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:207
+msgid "dashboard_page_publication_by_year_graph_tooltip_year"
+msgstr "Year"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:208
+msgid "dashboard_page_publication_by_year_graph_tooltip_total"
+msgstr "Total:"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:209
+msgid "dashboard_page_publication_by_year_graph_open_access"
+msgstr "Open access:"
 
 #: src/app/[lang]/dashboard/page.tsx:259
 msgid "dashboard_page_publication_by_year_wip_title"
