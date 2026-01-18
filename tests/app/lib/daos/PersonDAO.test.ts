@@ -6,6 +6,7 @@ import { PersonMembership } from '@/types/PersonMembership'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { Literal } from '@/types/Literal'
 import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 
 describe('PersonDAO Integration Tests', () => {
   let personDAO: PersonDAO
@@ -21,7 +22,7 @@ describe('PersonDAO Integration Tests', () => {
     'John',
     'Doe',
     'John Doe',
-    [{ type: PersonIdentifierType.ORCID, value: '0000-0001-2345-6789' }],
+    [new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0001-2345-6789')],
     [
       new PersonMembership(
         new ResearchStructure(
@@ -172,8 +173,8 @@ describe('PersonDAO Integration Tests', () => {
 
     const newPersonData = person
     newPersonData.setIdentifiers([
-      { type: PersonIdentifierType.SCOPUS_EID, value: '1234-5678-9012' },
-      { type: PersonIdentifierType.IDREF, value: 'AB-1234-5678' },
+      new PersonIdentifier(PersonIdentifierType.SCOPUS_EID, '1234-5678-9012'),
+      new PersonIdentifier(PersonIdentifierType.IDREF, 'AB-1234-5678'),
     ])
 
     const updatedPerson = await personDAO.createOrUpdatePerson(newPersonData)
@@ -205,7 +206,7 @@ describe('PersonDAO Integration Tests', () => {
       'John Doe',
       'John',
       'Doe',
-      [{ type: PersonIdentifierType.ORCID, value: '0000-0001-2345-6789' }],
+      [new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0001-2345-6789')],
     )
 
     const person2 = new Person(
@@ -215,7 +216,7 @@ describe('PersonDAO Integration Tests', () => {
       'John Doe',
       'John',
       'Doe',
-      [{ type: PersonIdentifierType.ORCID, value: '0000-0001-9876-5432' }],
+      [new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0001-9876-5432')],
     )
 
     // Insert first person

@@ -4,7 +4,10 @@ import {
 } from '@/types/PersonIdentifier'
 import { IAgent, IAgentJson } from '@/types/IAgent'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import { Person as DbPerson } from '@prisma/client'
+import {
+  Person as DbPerson,
+  PersonIdentifier as DbPersonIdentifier,
+} from '@prisma/client'
 import { PersonMembership } from '@/types/PersonMembership'
 import removeAccents from 'remove-accents'
 import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
@@ -110,7 +113,11 @@ class Person implements IAgent, Authorizable {
       displayName,
       person.firstName || '',
       person.lastName || '',
-      'identifiers' in person ? (person.identifiers as PersonIdentifier[]) : [],
+      ('identifiers' in person
+        ? (person.identifiers as DbPersonIdentifier[]).map((x) =>
+            PersonIdentifier.fromJson(x),
+          )
+        : []) as PersonIdentifier[],
       'memberships' in person ? (person.memberships as PersonMembership[]) : [],
       'person',
       person.slug,
@@ -130,7 +137,7 @@ class Person implements IAgent, Authorizable {
       displayName,
       json.firstName ?? '',
       json.lastName ?? '',
-      json.identifiers ?? [],
+      (json.identifiers ?? []).map((x) => PersonIdentifier.fromJson(x)),
       json.memberships ?? [],
       'person',
       json.slug ?? null,
@@ -152,5 +159,11 @@ class Person implements IAgent, Authorizable {
   }
 }
 
-export { Person }
+const isPerson = (agent: IAgent | null | undefined): agent is Person =>
+  !!agent && agent.type === 'person'
+
+const isResearchStructure = (agent: IAgent | null | undefined): boolean =>
+  !!agent && agent.type === 'research_structure'
+
+export { Person, isPerson, isResearchStructure }
 export type { PersonJson }

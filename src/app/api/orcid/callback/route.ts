@@ -5,7 +5,10 @@ import authOptions from '@/app/auth/auth_options'
 import { UserService } from '@/lib/services/UserService'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { PersonService } from '@/lib/services/PersonService'
 
 export const GET = async (req: NextRequest) => {
@@ -29,10 +32,9 @@ export const GET = async (req: NextRequest) => {
     )
   }
   const userService = new UserService()
-  const user = await userService.getUserByPersonIdentifier({
-    type: PersonIdentifierType.LOCAL,
-    value: session?.user.username,
-  })
+  const user = await userService.getUserByPersonIdentifier(
+    new PersonIdentifier(PersonIdentifierType.LOCAL, session.user.username),
+  )
   if (!user || !user.person) {
     console.error(`User not found for session ID: ${session?.user?.id}`)
     return NextResponse.redirect(

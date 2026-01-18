@@ -1,13 +1,15 @@
 import { UserDAO } from '@/lib/daos/UserDAO'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { abilityFromAuthzContext, userToAuthzContext } from '@/app/auth/ability'
 
 export const abilityForPersonUid = async (personUid: string) => {
   const dao = new UserDAO()
-  const user = await dao.getUserByIdentifier({
-    type: PersonIdentifierType.LOCAL,
-    value: personUid,
-  })
+  const user = await dao.getUserByIdentifier(
+    new PersonIdentifier(PersonIdentifierType.LOCAL, personUid),
+  )
   if (!user) throw new Error(`User not found for personUid=${personUid}`)
   const ctx = userToAuthzContext(user, String(user.id))
   const ability = abilityFromAuthzContext(ctx)

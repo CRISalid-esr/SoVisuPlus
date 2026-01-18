@@ -25,8 +25,9 @@ import { dbCheckup } from 'src/app/lib/db_checkup'
 import Image from 'next/image'
 import { Grid } from '@mui/system'
 import Link from 'next/link'
+import { Metadata } from 'next'
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Setup Checks',
   description: 'Setup checks for the application',
 }

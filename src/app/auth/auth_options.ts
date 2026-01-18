@@ -8,13 +8,14 @@ import {
 import KeycloakProvider, { KeycloakProfile } from 'next-auth/providers/keycloak'
 import { UserService } from '@/lib/services/UserService'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
-import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
 import { UserDAO } from '@/lib/daos/UserDAO'
-import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { JWT } from 'next-auth/jwt'
 import { Session } from '@auth/core/types'
 import { userToAuthzContext } from '@/app/auth/ability'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { AuthzContext } from '@/types/authz'
 
 declare module '@auth/core/types' {
@@ -112,11 +113,16 @@ const authOptions: AuthOptions = {
         token.id = user.id
       }
       const userDAO = new UserDAO()
-
       const identifier = token.username
-        ? { type: PersonIdentifierType.LOCAL, value: String(token.username) }
+        ? new PersonIdentifier(
+            PersonIdentifierType.LOCAL,
+            String(token.username),
+          )
         : token.orcid
-          ? { type: PersonIdentifierType.ORCID, value: String(token.orcid) }
+          ? new PersonIdentifier(
+              PersonIdentifierType.ORCID,
+              String(token.orcid),
+            )
           : null
       console.info('resolving user for identifier', identifier)
 

@@ -14,7 +14,7 @@ const ExpertisePage = () => {
   return (
     <Box>
       <DocumentHeader
-        perspective={
+        perspectiveName={
           currentPerspective?.getDisplayName(lang as ExtendedLanguageCode) || ''
         }
         pageName={t`expertise_page_main_title`}

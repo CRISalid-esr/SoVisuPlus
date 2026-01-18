@@ -22,15 +22,15 @@ export class UserService {
   public async submitProfile(profile: AuthenticationProfile): Promise<boolean> {
     let electedIdentifier: PersonIdentifier | null = null
     if (profile.username) {
-      electedIdentifier = {
-        type: PersonIdentifierType.LOCAL,
-        value: profile.username,
-      }
+      electedIdentifier = new PersonIdentifier(
+        PersonIdentifierType.LOCAL,
+        profile.username,
+      )
     } else if (profile.orcid) {
-      electedIdentifier = {
-        type: PersonIdentifierType.ORCID,
-        value: profile.orcid,
-      }
+      electedIdentifier = new PersonIdentifier(
+        PersonIdentifierType.ORCID,
+        profile.orcid,
+      )
     }
     if (!electedIdentifier) {
       // None of the data provided by the profile allows to identify the user

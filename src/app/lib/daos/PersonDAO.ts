@@ -382,6 +382,7 @@ export class PersonDAO extends AbstractDAO {
               },
             },
           },
+          identifiers: true,
         },
       })
 

@@ -4,6 +4,10 @@ import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { PersonMembership } from '@/types/PersonMembership'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { Literal } from '@/types/Literal'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 
 jest.mock('@prisma/client', () => {
   // avoid PersonIdentifierType to be mocked
@@ -57,7 +61,7 @@ describe('PersonDAO', () => {
     'John Doe',
     'John',
     'Doe',
-    [{ type: 'ORCID', value: '0000-0001-2345-6789' }],
+    [new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0001-2345-6789')],
     [
       new PersonMembership(
         new ResearchStructure(
