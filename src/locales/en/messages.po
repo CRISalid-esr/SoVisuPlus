@@ -39,16 +39,6 @@ msgid "snackbar_view_document"
 msgstr "Show publication"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/forbidden.tsx:43
-msgid "forbidden_page_back_home"
-msgstr "Back to home page"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/forbidden.tsx:108
-msgid "forbidden_page_description"
-msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/not-found.tsx:43
 msgid "notfound_page_back_home"
 msgstr "Back to home page"
@@ -57,6 +47,16 @@ msgstr "Back to home page"
 #: src/app/[lang]/not-found.tsx:108
 msgid "notfound_page_description"
 msgstr "We couldn't find the page you were looking for. Our <0>faq</0> or our <1>community</1> might be able to help."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:43
+msgid "forbidden_page_back_home"
+msgstr "Back to home page"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:108
+msgid "forbidden_page_description"
+msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:193
@@ -89,6 +89,16 @@ msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:675
+msgid "documents_page_refresh_list_alert_own_perspective"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:678
+msgid "documents_page_refresh_list_alert_other_perspective"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/components/HalStatusCell.test.tsx:140
 #: src/app/[lang]/documents/components/HalStatusCell.test.tsx:203
 msgid "documents_page_hal_status_in_collection"
@@ -110,9 +120,9 @@ msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
-msgid "document_details_page_back_to_my_publications"
-msgstr ""
+#: src/app/[lang]/documents/[uid]/page.tsx:145
+msgid "documents_page_refresh_document_alert"
+msgstr "Data concerning this publication has changed"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:173
@@ -125,9 +135,9 @@ msgid "document_details_keywords_tab"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:145
-msgid "documents_page_refresh_document_alert"
-msgstr "Data concerning this publication has changed"
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
+msgid "document_details_page_back_to_my_publications"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:101
@@ -170,11 +180,6 @@ msgid "concept_chip_action_delete"
 msgstr "Delete"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:398
 msgid "document_details_page_source_tab_card_title"
 msgstr "Sources"
@@ -196,14 +201,32 @@ msgid "document_details_page_source_tab_select_action_unmerge_label"
 msgstr "Dissociate"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:675
-msgid "documents_page_refresh_list_alert_own_perspective"
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:678
-msgid "documents_page_refresh_list_alert_other_perspective"
-msgstr ""
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
+msgid "document_details_page_keywords_input_default"
+msgstr "Please enter at least 3 characters"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "No options"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Keyword successfully added."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Please select one vocabulary at least"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:252
@@ -216,32 +239,9 @@ msgid "document_details_page_keywords_input_options_fetch_error"
 msgstr "Unable to fetch suggestions"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
-msgid "document_details_page_keywords_input_default"
-msgstr "Please enter at least 3 characters"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Please select one vocabulary at least"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "No options"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:291
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Keyword successfully added."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
@@ -351,6 +351,18 @@ msgid "profile_affiliations_card_title"
 msgstr "My affiliations"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:36
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
+msgid "orcid_button_update_identifier"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:46
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:52
+msgid "orcid_button_provide_identifier"
+msgstr "Sign-in to ORCID"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:52
 msgid "orcid-authentication-success"
 msgstr "ORCID validation successful"
@@ -386,16 +398,10 @@ msgid "orcid_identifier_no_orcid_provided"
 msgstr "No orcid identifier provided"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:36
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
-msgid "orcid_button_update_identifier"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:46
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:52
-msgid "orcid_button_provide_identifier"
-msgstr "Sign-in to ORCID"
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
+msgid "profile_affiliations_laboratories_label"
+msgstr "Laboratory/ies"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
@@ -430,12 +436,6 @@ msgid "authorizations_page_my_expertise"
 msgstr "My expertise"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
-msgid "profile_affiliations_laboratories_label"
-msgstr "Laboratory/ies"
-
-#. js-lingui-explicit-id
 #. placeholder {0}: import { t } from '@lingui/core/macro' import { Trans } from '@lingui/react/macro' import { useRef, useState } from 'react' import useStore from '@/stores/global_store' import { Box, Button, Card, CardContent, ClickAwayListener, Grow, Link, Popper, Typography, } from '@mui/material' import { useTheme } from '@mui/material/styles' const Journal = () => { const titleRef = useRef(null) const [isPopperOpen, setIsPopperOpen] = useState(false) const theme = useTheme() const { selectedDocument = null } = useStore((state) => state.document) const journal = selectedDocument?.journal const title = journal?.title const handleClick = () => { setIsPopperOpen(!isPopperOpen) } const handleClickAway = () => { setIsPopperOpen(false) } return ( title && ( <ClickAwayListener onClickAway={handleClickAway}> <Box> <Button variant='text' ref={titleRef} onClick={handleClick} sx={{ p: 0 }} > {title} </Button> <Popper open={isPopperOpen} anchorEl={titleRef.current} placement='bottom-start' transition disablePortal sx={{ zIndex: 1, }} > {({ TransitionProps }) => ( <Grow {...TransitionProps} timeout={200}> <Card> <CardContent> <Typography gutterBottom variant='h6' sx={{ color: theme.palette.primary.main }} > {title} </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_issn'> <Link href={`https://portal.issn.org/resource/ISSN/${journal.issnL}`} target='_blank' rel='noopener noreferrer' > {journal.issnL} </Link> </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_source_type'> {t`document_details_page_journal_journal`} </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_publisher'> {journal.publisher} </Trans> </Typography> </CardContent> </Card> </Grow> )} </Popper> </Box> </ClickAwayListener> ) ) } export default Journal 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:85
 msgid "document_details_page_journal_source_type"
@@ -461,7 +461,7 @@ msgstr "ISSN: <0>{0}</0>"
 msgid "dashboard_page_agent_identity_card_no_agent_selected"
 msgstr "No actor selected"
 
-#: src/app/[lang]/dashboard/page.tsx:119
+#: src/app/[lang]/dashboard/page.tsx:114
 msgid "dashboard_page_main_title"
 msgstr "Dashboard page"
 
@@ -507,39 +507,39 @@ msgstr "Year"
 msgid "dashboard_page_publication_by_year_no_publication_found"
 msgstr "No publication found"
 
-#: src/app/[lang]/dashboard/page.tsx:138
+#: src/app/[lang]/dashboard/page.tsx:133
 msgid "dashboard_page_publication_by_year_title"
 msgstr "Scholarly publication"
 
-#: src/app/[lang]/dashboard/page.tsx:239
+#: src/app/[lang]/dashboard/page.tsx:234
 msgid "dashboard_page_wordstream_font_range_a11y"
 msgstr "Font min ↔ max"
 
-#: src/app/[lang]/dashboard/page.tsx:228
+#: src/app/[lang]/dashboard/page.tsx:223
 msgid "dashboard_page_wordstream_font_range_label"
 msgstr "Font min ↔ max"
 
-#: src/app/[lang]/dashboard/page.tsx:160
+#: src/app/[lang]/dashboard/page.tsx:155
 msgid "dashboard_page_wordstream_title"
 msgstr "Concepts and collaborations"
 
-#: src/app/[lang]/dashboard/page.tsx:219
+#: src/app/[lang]/dashboard/page.tsx:214
 msgid "dashboard_page_wordstream_topN_a11y"
 msgstr "Max. occurrences / year"
 
-#: src/app/[lang]/dashboard/page.tsx:210
+#: src/app/[lang]/dashboard/page.tsx:205
 msgid "dashboard_page_wordstream_topN_label"
 msgstr "Max. occurrences / year"
 
-#: src/app/[lang]/dashboard/page.tsx:270
+#: src/app/[lang]/dashboard/page.tsx:265
 msgid "dashboard_page_wordstream_validate_button_label"
 msgstr "Update"
 
-#: src/app/[lang]/dashboard/page.tsx:260
+#: src/app/[lang]/dashboard/page.tsx:255
 msgid "dashboard_page_wordstream_year_range_a11y"
 msgstr "Years start ↔ end"
 
-#: src/app/[lang]/dashboard/page.tsx:248
+#: src/app/[lang]/dashboard/page.tsx:243
 msgid "dashboard_page_wordstream_year_range_label"
 msgstr "Years start ↔ end"
 
