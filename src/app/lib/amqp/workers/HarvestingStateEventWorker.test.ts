@@ -2,7 +2,10 @@ import { HarvestingStateEventWorker } from '@/lib/amqp/workers/HarvestingStateEv
 import { AMQPHarvestingStateEventMessage } from '@/types/AMQPHarvestingStateEventMessage'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { HarvestingStateEvent } from '@/types/HarvestingStateEvent'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 
@@ -42,8 +45,8 @@ describe('HarvestingStateEventWorker', () => {
       'John',
       'Doe',
       [
-        { type: PersonIdentifierType.LOCAL, value: 'user-001' },
-        { type: PersonIdentifierType.IDREF, value: '999999' },
+        new PersonIdentifier(PersonIdentifierType.LOCAL, 'user-001'),
+        new PersonIdentifier(PersonIdentifierType.IDREF, '999999'),
       ],
       [],
     )

@@ -1,6 +1,7 @@
 import { Person } from '@/types/Person'
 import { PersonIdentifierType } from '@prisma/client'
 import { describe, expect, it } from '@jest/globals'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 
 describe('Person', () => {
   it('should create a valid Person object', () => {
@@ -12,8 +13,8 @@ describe('Person', () => {
       'John',
       'Doe',
       [
-        { type: PersonIdentifierType.ORCID, value: '0000-0002-1825-0097' },
-        { type: PersonIdentifierType.LOCAL, value: '12345' },
+        new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0002-1825-0097'),
+        new PersonIdentifier(PersonIdentifierType.LOCAL, '12345'),
       ],
     )
 
@@ -33,7 +34,7 @@ describe('Person', () => {
   it('should throw an error for invalid identifier types', () => {
     expect(() => {
       new Person('P456', false, null, 'Jane Doe', 'Jane', 'Doe', [
-        { type: 'INVALID_TYPE' as PersonIdentifierType, value: '00000' },
+        new PersonIdentifier('INVALID_TYPE' as PersonIdentifierType, '67890'),
       ])
     }).toThrowError(/INVALID_TYPE is not a valid PersonIdentifierType/)
   })
@@ -109,7 +110,7 @@ describe('Person', () => {
       null,
       'John',
       'Doe',
-      [{ type: PersonIdentifierType.ORCID, value: '0000-0002-1825-0097' }],
+      [new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0002-1825-0097')],
     )
     expect(personWithNullDisplayName.displayName).toBe('John Doe')
     expect(personWithNullDisplayName.normalizedName).toBe('john doe')
@@ -122,7 +123,7 @@ describe('Person', () => {
       'John Doe Jr',
       'John',
       'Doe',
-      [{ type: PersonIdentifierType.ORCID, value: '0000-0002-1825-0097' }],
+      [new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0002-1825-0097')],
     )
     expect(personWithDisplayName.displayName).toBe('John Doe Jr')
     expect(personWithDisplayName.normalizedName).toBe('john doe jr')

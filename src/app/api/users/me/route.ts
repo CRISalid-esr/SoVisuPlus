@@ -6,8 +6,6 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { UserService } from '@/lib/services/UserService'
-import { UserDAO } from '@/lib/daos/UserDAO'
-import { PersonDAO } from '@/lib/daos/PersonDAO'
 
 export const GET = async () => {
   try {
@@ -26,15 +24,15 @@ export const GET = async () => {
     }
 
     if (session?.user.username) {
-      electedIdentifier = {
-        type: PersonIdentifierType.LOCAL,
-        value: session?.user.username,
-      }
+      electedIdentifier = new PersonIdentifier(
+        PersonIdentifierType.LOCAL,
+        session?.user.username,
+      )
     } else if (session?.user.orcid) {
-      electedIdentifier = {
-        type: PersonIdentifierType.ORCID,
-        value: session?.user.orcid,
-      }
+      electedIdentifier = new PersonIdentifier(
+        PersonIdentifierType.ORCID,
+        session?.user.orcid,
+      )
     }
 
     if (!electedIdentifier) {

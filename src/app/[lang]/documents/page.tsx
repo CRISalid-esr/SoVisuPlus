@@ -654,7 +654,7 @@ const DocumentsPage = () => {
   return (
     <Box>
       <DocumentHeader
-        perspective={
+        perspectiveName={
           currentPerspective?.getDisplayName(lang as ExtendedLanguageCode) || ''
         }
         pageName={

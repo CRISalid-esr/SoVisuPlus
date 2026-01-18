@@ -1,7 +1,10 @@
 import { HarvestingResultEventWorker } from '@/lib/amqp/workers/HarvestingResultEventWorker'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { AMQPHarvestingResultEventMessage } from '@/types/AMQPHarvestingResultEventMessage'
 import { HarvestingResultEvent } from '@/types/HarvestingResultEvent'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
@@ -63,8 +66,8 @@ describe('HarvestingResultEventWorker', () => {
       'John',
       'Doe',
       [
-        { type: PersonIdentifierType.LOCAL, value: 'person-123' },
-        { type: PersonIdentifierType.IDREF, value: '999999' },
+        new PersonIdentifier(PersonIdentifierType.LOCAL, 'person-123'),
+        new PersonIdentifier(PersonIdentifierType.IDREF, '999999'),
       ],
     )
 

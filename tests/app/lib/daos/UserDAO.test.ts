@@ -1,6 +1,7 @@
 import { PersonIdentifierType } from '@prisma/client'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import prisma from '@/lib/daos/prisma'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 
 describe('UserDAO Integration Tests', () => {
   let userDAO: UserDAO
@@ -54,20 +55,18 @@ describe('UserDAO Integration Tests', () => {
       data: { personId: person.id },
     })
 
-    const dbUser = await userDAO.getUserByIdentifier({
-      type: 'ORCID',
-      value: '0000-0001-2345-6789',
-    })
+    const dbUser = await userDAO.getUserByIdentifier(
+      new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0001-2345-6789'),
+    )
 
     expect(dbUser).not.toBeNull()
     expect(dbUser?.person?.uid).toBe(person.uid)
   })
 
   test('should return null if no user matches the identifier', async () => {
-    const dbUser = await userDAO.getUserByIdentifier({
-      type: 'ORCID',
-      value: 'non-existent-value',
-    })
+    const dbUser = await userDAO.getUserByIdentifier(
+      new PersonIdentifier(PersonIdentifierType.ORCID, 'non-existent-value'),
+    )
 
     expect(dbUser).toBeNull()
   })

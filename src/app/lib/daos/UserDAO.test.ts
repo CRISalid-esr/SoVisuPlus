@@ -1,9 +1,14 @@
 import { EntityType, PrismaClient, User as DbUser } from '@prisma/client'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { User } from '@/types/User'
 
 jest.mock('@prisma/client', () => {
+  const actual = jest.requireActual('@prisma/client')
+
   const mockPrismaClient = {
     user: {
       upsert: jest.fn(),
@@ -26,7 +31,11 @@ jest.mock('@prisma/client', () => {
       findMany: jest.fn(),
     },
   }
-  return { PrismaClient: jest.fn(() => mockPrismaClient) }
+
+  return {
+    ...actual, // keep enums like PersonIdentifierType
+    PrismaClient: jest.fn(() => mockPrismaClient),
+  }
 })
 const mockPrisma = new PrismaClient()
 
@@ -37,10 +46,10 @@ describe('UserDAO', () => {
     userDAO = new UserDAO()
   })
 
-  const identifier: PersonIdentifier = {
-    type: 'ORCID',
-    value: '0000-0001-2345-6789',
-  }
+  const identifier: PersonIdentifier = new PersonIdentifier(
+    PersonIdentifierType.ORCID,
+    '0000-0001-2345-6789',
+  )
 
   it('should upsert a user', async () => {
     ;(mockPrisma.user.upsert as jest.Mock).mockResolvedValue({

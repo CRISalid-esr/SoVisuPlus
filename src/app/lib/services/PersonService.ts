@@ -44,17 +44,17 @@ export class PersonService {
     identifierValue: string,
   ): Promise<void> {
     try {
-      const identifier: PersonIdentifier = {
-        type: DbPersonIdentifierType.ORCID,
-        value: identifierValue,
-      }
+      const identifier = new PersonIdentifier(
+        DbPersonIdentifierType.ORCID,
+        identifierValue,
+      )
       await this.personDAO.upsertIdentifier(identifier, personUid)
       await this.actionDAO.createAction({
         actionType: ActionType.ADD,
         targetType: ActionTargetType.PERSON,
         targetUid: personUid,
         path: 'identifiers',
-        parameters: { identifier },
+        parameters: { identifier: identifier.toJson() },
         personUid: personUid,
       })
     } catch (error) {

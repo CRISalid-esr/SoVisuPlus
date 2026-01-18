@@ -17,17 +17,24 @@ import useStore from '@/stores/global_store'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import DocumentHeader from '@/app/[lang]/documents/components/DocumentHeader'
 import { CustomCard } from '@/components/Card'
-import WorkInProgress from '@/components/WorkInProgress/WorkInProgress'
 import WordStream from '@/app/[lang]/components/WordStream/WordStream'
 import { useLingui } from '@lingui/react'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { WordstreamTopic } from '@/types/WordStream'
 import PublicationCard from '@/app/[lang]/dashboard/components/PublicationCard'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import AgentIdentityCard from '@/app/[lang]/dashboard/components/AgentIdentityCard'
 
 const DEFAULT_TOP_N = 10
 const DEFAULT_START_YEAR = 2010
 const DEFAULT_MIN_FONT = 15
 const DEFAULT_MAX_FONT = 30
+
+const IDENTIFIERS_TO_SHOW: PersonIdentifierType[] = [
+  PersonIdentifierType.ID_HAL_S,
+  PersonIdentifierType.ORCID,
+  PersonIdentifierType.IDREF,
+]
 
 const DashboardPage = () => {
   const theme = useTheme()
@@ -36,6 +43,7 @@ const DashboardPage = () => {
   const lang = (Lingui.i18n.locale || 'ul') as ExtendedLanguageCode
   const entityType = currentPerspective?.type
   const uid = currentPerspective?.uid
+  const displayName = currentPerspective?.getDisplayName(lang) || ''
 
   const currentYear = new Date().getUTCFullYear()
 
@@ -102,144 +110,16 @@ const DashboardPage = () => {
   return (
     <Box>
       <DocumentHeader
-        perspective={currentPerspective?.getDisplayName(lang) || ''}
+        perspectiveName={displayName}
         pageName={t`dashboard_page_main_title`}
       />
 
       <Grid container spacing={2} sx={{ mt: 1 }}>
-        <Grid size={{ xs: 12 }}>
-          <CustomCard
-            header={
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <DashboardHeaderTitle
-                  i18nMessage={defineMessage`dashboard_page_wordstream_title`}
-                />
-              </Box>
-            }
-          >
-            <CardContent>
-              {canShowWordstream ? (
-                <Box sx={{ width: '100%' }}>
-                  <WordStream
-                    uid={uid!}
-                    entityType={entityType!}
-                    lang={lang}
-                    topics={[
-                      WordstreamTopic.Concepts,
-                      WordstreamTopic.CoAuthors,
-                    ]}
-                    fromYear={appliedWSYearRange[0]}
-                    toYear={appliedWSYearRange[1]}
-                    topN={appliedWSTopN}
-                    minFont={appliedWSFontRange[0]}
-                    maxFont={appliedWSFontRange[1]}
-                    autoSize
-                  />
-                </Box>
-              ) : (
-                <Typography color='text.secondary'>
-                  No person selected.
-                </Typography>
-              )}
-            </CardContent>
-
-            <Box
-              sx={{
-                px: 2,
-                py: 1.5,
-                mt: 1,
-                borderTop: `1px solid ${theme.palette.divider}`,
-                bgcolor:
-                  theme.palette.mode === 'light'
-                    ? 'rgba(0,0,0,0.02)'
-                    : 'rgba(255,255,255,0.03)',
-              }}
-            >
-              <Stack
-                direction={{ xs: 'column', md: 'row' }}
-                spacing={3}
-                alignItems={{ xs: 'stretch', md: 'center' }}
-              >
-                <Box sx={{ minWidth: 220, flex: 1 }}>
-                  <Typography
-                    variant='caption'
-                    sx={{ display: 'block', mb: 0.5 }}
-                  >
-                    {t`dashboard_page_wordstream_topN_label`}
-                  </Typography>
-                  <Slider
-                    value={pendingWSTopN}
-                    onChange={(_, v) => setPendingWSTopN(v as number)}
-                    min={5}
-                    max={100}
-                    step={1}
-                    valueLabelDisplay='auto'
-                    aria-label={t`dashboard_page_wordstream_topN_a11y`}
-                  />
-                </Box>
-
-                <Box sx={{ minWidth: 260, flex: 1 }}>
-                  <Typography
-                    variant='caption'
-                    sx={{ display: 'block', mb: 0.5 }}
-                  >
-                    {t`dashboard_page_wordstream_font_range_label`}
-                  </Typography>
-                  <Slider
-                    value={pendingWSFontRange}
-                    onChange={(_, v) =>
-                      setPendingWSFontRange(v as [number, number])
-                    }
-                    min={8}
-                    max={64}
-                    step={1}
-                    valueLabelDisplay='auto'
-                    aria-label={t`dashboard_page_wordstream_font_range_a11y`}
-                  />
-                </Box>
-
-                <Box sx={{ minWidth: 300, flex: 1 }}>
-                  <Typography
-                    variant='caption'
-                    sx={{ display: 'block', mb: 0.5 }}
-                  >
-                    {t`dashboard_page_wordstream_year_range_label`}
-                  </Typography>
-                  <Slider
-                    value={pendingWSYearRange}
-                    onChange={(_, v) =>
-                      setPendingWSYearRange(v as [number, number])
-                    }
-                    min={1990}
-                    max={currentYear}
-                    step={1}
-                    valueLabelDisplay='auto'
-                    getAriaLabel={() => 'Year range'}
-                    aria-label={t`dashboard_page_wordstream_year_range_a11y`}
-                  />
-                </Box>
-
-                <Box sx={{ ml: { md: 'auto' } }}>
-                  <Button
-                    variant='contained'
-                    onClick={handleWSSliderValidate}
-                    disabled={!wsSliderHaveChanges}
-                  >
-                    {t`dashboard_page_wordstream_validate_button_label`}
-                  </Button>
-                </Box>
-              </Stack>
-            </Box>
-          </CustomCard>
+        <Grid size={{ xs: 12, md: 3 }} sx={{ display: 'flex' }}>
+          <AgentIdentityCard agent={currentPerspective} />
         </Grid>
 
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid size={{ xs: 12, md: 9 }}>
           <CustomCard
             header={
               <Box
@@ -260,32 +140,134 @@ const DashboardPage = () => {
             </CardContent>
           </CustomCard>
         </Grid>
-
-        <Grid size={{ xs: 12, md: 6 }}>
-          <CustomCard
-            header={
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <DashboardHeaderTitle
-                  i18nMessage={defineMessage`dashboard_page_international_collaborations_title`}
+      </Grid>
+      <Grid size={{ xs: 12 }}>
+        <CustomCard
+          header={
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <DashboardHeaderTitle
+                i18nMessage={defineMessage`dashboard_page_wordstream_title`}
+              />
+            </Box>
+          }
+        >
+          <CardContent>
+            {canShowWordstream ? (
+              <Box sx={{ width: '100%' }}>
+                <WordStream
+                  uid={uid!}
+                  entityType={entityType!}
+                  lang={lang}
+                  topics={[WordstreamTopic.Concepts, WordstreamTopic.CoAuthors]}
+                  fromYear={appliedWSYearRange[0]}
+                  toYear={appliedWSYearRange[1]}
+                  topN={appliedWSTopN}
+                  minFont={appliedWSFontRange[0]}
+                  maxFont={appliedWSFontRange[1]}
+                  autoSize
                 />
               </Box>
-            }
+            ) : (
+              <Typography color='text.secondary'>
+                No person selected.
+              </Typography>
+            )}
+          </CardContent>
+
+          <Box
+            sx={{
+              px: 2,
+              py: 1.5,
+              mt: 1,
+              borderTop: `1px solid ${theme.palette.divider}`,
+              bgcolor:
+                theme.palette.mode === 'light'
+                  ? 'rgba(0,0,0,0.02)'
+                  : 'rgba(255,255,255,0.03)',
+            }}
           >
-            <CardContent>
-              <WorkInProgress
-                title={t`dashboard_page_international_collaborations_wip_title`}
-                description={t`dashboard_page_international_collaborations_wip_description`}
-                variant='inline'
-              />
-            </CardContent>
-          </CustomCard>
-        </Grid>
+            <Stack
+              direction={{ xs: 'column', md: 'row' }}
+              spacing={3}
+              alignItems={{ xs: 'stretch', md: 'center' }}
+            >
+              <Box sx={{ minWidth: 220, flex: 1 }}>
+                <Typography
+                  variant='caption'
+                  sx={{ display: 'block', mb: 0.5 }}
+                >
+                  {t`dashboard_page_wordstream_topN_label`}
+                </Typography>
+                <Slider
+                  value={pendingWSTopN}
+                  onChange={(_, v) => setPendingWSTopN(v as number)}
+                  min={5}
+                  max={100}
+                  step={1}
+                  valueLabelDisplay='auto'
+                  aria-label={t`dashboard_page_wordstream_topN_a11y`}
+                />
+              </Box>
+
+              <Box sx={{ minWidth: 260, flex: 1 }}>
+                <Typography
+                  variant='caption'
+                  sx={{ display: 'block', mb: 0.5 }}
+                >
+                  {t`dashboard_page_wordstream_font_range_label`}
+                </Typography>
+                <Slider
+                  value={pendingWSFontRange}
+                  onChange={(_, v) =>
+                    setPendingWSFontRange(v as [number, number])
+                  }
+                  min={8}
+                  max={64}
+                  step={1}
+                  valueLabelDisplay='auto'
+                  aria-label={t`dashboard_page_wordstream_font_range_a11y`}
+                />
+              </Box>
+
+              <Box sx={{ minWidth: 300, flex: 1 }}>
+                <Typography
+                  variant='caption'
+                  sx={{ display: 'block', mb: 0.5 }}
+                >
+                  {t`dashboard_page_wordstream_year_range_label`}
+                </Typography>
+                <Slider
+                  value={pendingWSYearRange}
+                  onChange={(_, v) =>
+                    setPendingWSYearRange(v as [number, number])
+                  }
+                  min={1990}
+                  max={currentYear}
+                  step={1}
+                  valueLabelDisplay='auto'
+                  getAriaLabel={() => 'Year range'}
+                  aria-label={t`dashboard_page_wordstream_year_range_a11y`}
+                />
+              </Box>
+
+              <Box sx={{ ml: { md: 'auto' } }}>
+                <Button
+                  variant='contained'
+                  onClick={handleWSSliderValidate}
+                  disabled={!wsSliderHaveChanges}
+                >
+                  {t`dashboard_page_wordstream_validate_button_label`}
+                </Button>
+              </Box>
+            </Stack>
+          </Box>
+        </CustomCard>
       </Grid>
     </Box>
   )

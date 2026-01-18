@@ -4,7 +4,10 @@ import authOptions from '@/app/auth/auth_options'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
 import { UserDAO } from '@/lib/daos/UserDAO'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
@@ -26,10 +29,9 @@ export const POST = async (request: Request) => {
 
   try {
     const userDAO = new UserDAO()
-    const user = await userDAO.getUserByIdentifier({
-      type: PersonIdentifierType.LOCAL,
-      value: session.user.username,
-    })
+    const user = await userDAO.getUserByIdentifier(
+      new PersonIdentifier(PersonIdentifierType.LOCAL, session.user.username),
+    )
 
     if (!user?.person?.uid) {
       return NextResponse.json({ error: 'Unknown user' }, { status: 403 })

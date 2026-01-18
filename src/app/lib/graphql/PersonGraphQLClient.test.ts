@@ -31,7 +31,10 @@ describe('PersonGraphQLClient', () => {
   test('should return null if no person matches the agent identifier', async () => {
     mockQuery.mockResolvedValue({ people: [] })
 
-    const personIdentifier: PersonIdentifier = { type: 'ORCID', value: '12345' }
+    const personIdentifier: PersonIdentifier = new PersonIdentifier(
+      PersonIdentifierType.ORCID,
+      '12345',
+    )
     const person = await client.getPersonByIdentifier(personIdentifier)
 
     expect(person).toBeNull()
@@ -73,7 +76,10 @@ describe('PersonGraphQLClient', () => {
 
     mockQuery.mockResolvedValue(mockResponse)
 
-    const personIdentifier: PersonIdentifier = { type: 'ORCID', value: '12345' }
+    const personIdentifier: PersonIdentifier = new PersonIdentifier(
+      PersonIdentifierType.ORCID,
+      '12345',
+    )
     const person = await client.getPersonByIdentifier(personIdentifier)
 
     const expectedPerson = new Person(
@@ -84,9 +90,9 @@ describe('PersonGraphQLClient', () => {
       'John',
       'Doe',
       [
-        { type: PersonIdentifierType.ORCID, value: '12345' },
-        { type: PersonIdentifierType.SCOPUS_EID, value: '67890' },
-        { type: PersonIdentifierType.EPPN, value: 'jdoe@univ.edu' },
+        new PersonIdentifier(PersonIdentifierType.ORCID, '12345'),
+        new PersonIdentifier(PersonIdentifierType.SCOPUS_EID, '67890'),
+        new PersonIdentifier(PersonIdentifierType.EPPN, 'jdoe@univ.edu'),
       ],
     )
     expect(person).toEqual(expectedPerson)
@@ -127,7 +133,10 @@ describe('PersonGraphQLClient', () => {
 
     mockQuery.mockResolvedValue(mockResponse)
 
-    const personIdentifier: PersonIdentifier = { type: 'ORCID', value: '98765' }
+    const personIdentifier: PersonIdentifier = new PersonIdentifier(
+      PersonIdentifierType.ORCID,
+      '98765',
+    )
     const person = await client.getPersonByIdentifier(personIdentifier)
 
     const expectedPerson = new Person(
@@ -137,7 +146,7 @@ describe('PersonGraphQLClient', () => {
       'Jane Smith',
       'Jane',
       'Smith',
-      [{ type: PersonIdentifierType.ORCID, value: '98765' }],
+      [new PersonIdentifier(PersonIdentifierType.ORCID, '98765')],
     )
     expect(person).toEqual(expectedPerson)
     expect(consoleWarnSpy).toHaveBeenCalledWith(

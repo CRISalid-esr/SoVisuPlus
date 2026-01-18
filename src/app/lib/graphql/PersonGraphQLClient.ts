@@ -1,8 +1,5 @@
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
-import {
-  convertStringPersonIdentifierType,
-  PersonIdentifier,
-} from '@/types/PersonIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { Person } from '@/types/Person'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
 import { ExternalPerson } from '@/types/ExternalPerson'
@@ -146,10 +143,10 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
       personData.identifiers
         .map((identifier: GraphPersonIdentifier) => {
           try {
-            return {
-              type: convertStringPersonIdentifierType(identifier.type),
-              value: identifier.value,
-            }
+            return new PersonIdentifier(
+              PersonIdentifier.typeFromString(identifier.type),
+              identifier.value,
+            )
           } catch {
             console.warn(
               `Unsupported identifier type for ${identifier.value}: ${identifier.type}`,

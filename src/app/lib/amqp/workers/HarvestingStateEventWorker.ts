@@ -6,7 +6,10 @@ import {
 } from '@/types/HarvestingStateEvent'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { getBibliographicPlatformByNameIgnoreCase } from '@/types/BibliographicPlatform'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 
 /**
  * Worker for processing harvesting state event messages
@@ -48,10 +51,9 @@ export class HarvestingStateEventWorker extends MessageProcessingWorker<AMQPHarv
       console.warn('No local identifier found in entity identifiers')
       return events
     }
-    const person = await this.personDAO.fetchPersonByIdentifier({
-      type: PersonIdentifierType.LOCAL,
-      value: localIdentifier,
-    })
+    const person = await this.personDAO.fetchPersonByIdentifier(
+      new PersonIdentifier(PersonIdentifierType.LOCAL, localIdentifier),
+    )
     if (!person) {
       console.warn(`No person found for local identifier: ${localIdentifier}`)
       return events
