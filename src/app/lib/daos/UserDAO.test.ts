@@ -7,6 +7,8 @@ import { UserDAO } from '@/lib/daos/UserDAO'
 import { User } from '@/types/User'
 
 jest.mock('@prisma/client', () => {
+  const actual = jest.requireActual('@prisma/client')
+
   const mockPrismaClient = {
     user: {
       upsert: jest.fn(),
@@ -29,7 +31,11 @@ jest.mock('@prisma/client', () => {
       findMany: jest.fn(),
     },
   }
-  return { PrismaClient: jest.fn(() => mockPrismaClient) }
+
+  return {
+    ...actual, // keep enums like PersonIdentifierType
+    PrismaClient: jest.fn(() => mockPrismaClient),
+  }
 })
 const mockPrisma = new PrismaClient()
 
