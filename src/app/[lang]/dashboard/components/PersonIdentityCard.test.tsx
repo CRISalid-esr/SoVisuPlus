@@ -10,6 +10,7 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { PersonMembership } from '@/types/PersonMembership'
+import { IAgent } from '@/types/IAgent'
 
 const pushMock = jest.fn()
 
@@ -21,7 +22,6 @@ jest.mock('next/navigation', () => ({
   }),
 }))
 
-// ---------- next/image mock ----------
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
@@ -30,7 +30,6 @@ jest.mock('next/image', () => ({
   ),
 }))
 
-// ---------- next/link mock ----------
 jest.mock('next/link', () => ({
   __esModule: true,
   default: ({
@@ -147,8 +146,7 @@ describe('PersonIdentityCard', () => {
   })
 
   it('throws if a non-Person agent is provided', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const notPerson = { type: 'institution' } as any
+    const notPerson = { type: 'institution' } as IAgent
 
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
 

@@ -73,11 +73,6 @@ const DashboardPage = () => {
     setAppliedWSYearRange([DEFAULT_START_YEAR, currentYear])
   }, [uid, entityType, currentYear])
 
-  // use effet to log current perspective
-  useEffect(() => {
-    console.log('Current perspective changed:', currentPerspective)
-  }, [currentPerspective])
-
   const wsSliderHaveChanges = !(
     pendingWSTopN === appliedWSTopN &&
     pendingWSFontRange[0] === appliedWSFontRange[0] &&
