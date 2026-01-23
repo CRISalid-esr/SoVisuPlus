@@ -16,6 +16,7 @@ import {
   Person,
   PersonIdentifier,
   PrismaClient,
+  PublicationIdentifier,
   ResearchStructure,
   ResearchStructureDescription,
   ResearchStructureName,
@@ -28,6 +29,7 @@ import {
   UserRole,
   UserRoleScope,
 } from '@prisma/client'
+import { PublicationIdentifierJson } from '@/types/PublicationIdentifier'
 
 const prisma = new PrismaClient()
 
@@ -46,6 +48,7 @@ export type SourceContributionWithRelations = SourceContribution & {
 
 export type DocumentRecordWithRelations = DocumentRecord & {
   contributions: SourceContributionWithRelations[]
+  identifiers: PublicationIdentifier[]
   journal: SourceJournal | null
   halSubmitType: HalSubmitType | null
 }

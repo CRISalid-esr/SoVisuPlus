@@ -11,6 +11,7 @@ import { getStringInLocale } from '@/utils/getStringInLocale'
 import {
   SourceRecordType,
   HalSubmitType as DbHalSubmitType,
+  PublicationIdentifier as DbPublicationIdentifier,
 } from '@prisma/client'
 import { DocumentRecordWithRelations as DbDocumentRecord } from '@/prisma-schema/extended-client'
 import {
@@ -18,9 +19,15 @@ import {
   SourceContributionJson,
 } from '@/types/SourceContribution'
 import { SourceJournal, SourceJournalJson } from '@/types/SourceJournal'
+import {
+  PublicationIdentifier,
+  PublicationIdentifierJson,
+} from '@/types/PublicationIdentifier'
 
 export interface DocumentRecordJson {
   uid: string
+  sourceIdentifier: string
+  identifiers: Array<PublicationIdentifierJson>
   contributions: Array<SourceContributionJson>
   documentTypes: string[]
   publicationDate: Date | null
@@ -37,6 +44,8 @@ export class DocumentRecord {
 
   constructor(
     public uid: string,
+    public sourceIdentifier: string | null,
+    public identifiers: PublicationIdentifier[],
     public contributions: Array<SourceContribution> = [],
     public documentTypes: SourceRecordType[],
     public publicationDate: Date | null,
@@ -126,6 +135,10 @@ export class DocumentRecord {
   static fromObject(record: DocumentRecordJson): DocumentRecord {
     return new DocumentRecord(
       record.uid,
+      record.sourceIdentifier,
+      record.identifiers.map((identifier: PublicationIdentifierJson) =>
+        PublicationIdentifier.fromJSON(identifier),
+      ),
       record.contributions.map((contribution: SourceContributionJson) =>
         SourceContribution.fromObject(contribution),
       ),
@@ -145,6 +158,10 @@ export class DocumentRecord {
   static fromDbDocumentRecord(record: DbDocumentRecord) {
     return new DocumentRecord(
       record.uid,
+      record.sourceIdentifier,
+      record.identifiers.map((identifier: DbPublicationIdentifier) =>
+        PublicationIdentifier.fromDbIdentifier(identifier),
+      ),
       record.contributions.map((contribution) =>
         SourceContribution.fromDbContribution(contribution),
       ),

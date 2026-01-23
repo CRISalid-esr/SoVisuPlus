@@ -208,21 +208,32 @@ model SourceJournal {
   DocumentRecord DocumentRecord[]
 }
 
+model PublicationIdentifier {
+  id               Int            @id @default(autoincrement())
+  uid              String         @unique
+  type             String
+  value            String?
+  DocumentRecord   DocumentRecord @relation(fields: [documentRecordId], references: [id], onDelete: Cascade)
+  documentRecordId Int
+}
+
 model DocumentRecord {
-  id                 Int                   @id @default(autoincrement())
-  uid                String                @unique
+  id                 Int                     @id @default(autoincrement())
+  uid                String                  @unique
   url                String?
+  sourceIdentifier   String?
+  identifiers        PublicationIdentifier[]
   contributions      SourceContribution[]
   documentTypes      SourceRecordType[]
   sourceJournalId    Int?
-  journal            SourceJournal?        @relation(fields: [sourceJournalId], references: [id])
+  journal            SourceJournal?          @relation(fields: [sourceJournalId], references: [id])
   publicationDate    DateTime?
   platform           BibliographicPlatform
   titles             Json
   halCollectionCodes String[]
   halSubmitType      HalSubmitType?
   documentId         Int
-  document           Document              @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  document           Document                @relation(fields: [documentId], references: [id], onDelete: Cascade)
 }
 
 enum BibliographicPlatform {

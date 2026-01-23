@@ -76,6 +76,7 @@ export class DocumentDAO extends AbstractDAO {
             contributions: { include: { person: true } },
             records: {
               include: {
+                identifiers: true,
                 contributions: { include: { person: true } },
                 journal: true,
               },
@@ -154,6 +155,7 @@ export class DocumentDAO extends AbstractDAO {
             contributions: { include: { person: true } },
             records: {
               include: {
+                identifiers: true,
                 contributions: { include: { person: true } },
                 journal: true,
               },
@@ -233,6 +235,7 @@ export class DocumentDAO extends AbstractDAO {
             contributions: { include: { person: true } },
             records: {
               include: {
+                identifiers: true,
                 contributions: { include: { person: true } },
                 journal: true,
               },
@@ -363,12 +366,13 @@ export class DocumentDAO extends AbstractDAO {
 
       for (const record of records) {
         try {
-          await this.prismaClient.documentRecord.upsert({
+          const documentRecord = await this.prismaClient.documentRecord.upsert({
             where: {
               uid: record.uid,
             },
             update: {
               url: record.url,
+              sourceIdentifier: record.sourceIdentifier,
               documentTypes: record.documentTypes,
               publicationDate: record.publicationDate,
               titles: record.titles.map((title) => title.toJson()),
@@ -411,6 +415,7 @@ export class DocumentDAO extends AbstractDAO {
             create: {
               uid: record.uid,
               url: record.url,
+              sourceIdentifier: record.sourceIdentifier,
               documentTypes: record.documentTypes,
               publicationDate: record.publicationDate,
               titles: record.titles.map((title) => title.toJson()),
@@ -448,6 +453,29 @@ export class DocumentDAO extends AbstractDAO {
               document: { connect: { id: dbDocument.id } },
             },
           })
+          for (const identifier of record.identifiers) {
+            try {
+              await this.prismaClient.publicationIdentifier.upsert({
+                where: { uid: identifier.uid },
+                create: {
+                  uid: identifier.uid,
+                  type: identifier.type,
+                  value: identifier.value,
+                  DocumentRecord: { connect: { id: documentRecord.id } },
+                },
+                update: {
+                  type: identifier.type,
+                  value: identifier.value,
+                  DocumentRecord: { connect: { id: documentRecord.id } },
+                },
+              })
+            } catch (error) {
+              console.error(
+                `Failed to upsert document record identifier: ${identifier.uid}`,
+                error,
+              )
+            }
+          }
         } catch (error) {
           console.error(
             `Failed to upsert document record: ${record.uid}`,
@@ -876,6 +904,7 @@ export class DocumentDAO extends AbstractDAO {
         },
         records: {
           include: {
+            identifiers: true,
             contributions: { include: { person: true } },
             journal: true,
           },
@@ -948,6 +977,7 @@ export class DocumentDAO extends AbstractDAO {
         },
         records: {
           include: {
+            identifiers: true,
             contributions: { include: { person: true } },
             journal: true,
           },

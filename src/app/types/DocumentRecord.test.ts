@@ -4,6 +4,7 @@ import { LocRelator } from '@/types/LocRelator'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import { SourceContribution } from '@/types/SourceContribution'
 import { SourcePerson } from '@/types/SourcePerson'
+import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 
 describe('DocumentRecord type', () => {
   it('should convert source record type from string to the right SourceRecordType or to SourceRecordType.Document if unknown', async () => {
@@ -18,6 +19,14 @@ describe('DocumentRecord type', () => {
   it('DocumentRecord from Json', async () => {
     const mockJson = {
       uid: 'hal-123',
+      sourceIdentifier: 'hal0001',
+      identifiers: [
+        {
+          uid: 'pubid003',
+          type: 'hal',
+          value: 'hal-0001',
+        },
+      ],
       contributions: [
         {
           role: LocRelator.AUTHOR,
@@ -40,6 +49,8 @@ describe('DocumentRecord type', () => {
 
     const mockDocument = new DocumentRecord(
       'hal-123',
+      'hal0001',
+      [new PublicationIdentifier('pubid003', 'hal', 'hal-0001')],
       [
         new SourceContribution(
           LocRelator.AUTHOR,
@@ -62,6 +73,8 @@ describe('DocumentRecord type', () => {
     const dbDocument = {
       id: 1,
       uid: 'hal-123',
+      sourceIdentifier: 'hal0001',
+      identifiers: [],
       url: 'https://example.com',
       contributions: [],
       documentTypes: [DocumentType.Document, DocumentType.Book],
@@ -77,6 +90,8 @@ describe('DocumentRecord type', () => {
 
     const mockDocument = new DocumentRecord(
       'hal-123',
+      'hal0001',
+      [],
       [],
       [SourceRecordType.Document, SourceRecordType.Book],
       new Date('2022-01-01T00:00:00.000Z'),

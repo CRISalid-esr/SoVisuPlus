@@ -13,6 +13,7 @@ import { SourceContribution } from '@/types/SourceContribution'
 import { SourcePerson } from '@/types/SourcePerson'
 import { SourceJournal } from '@/types/SourceJournal'
 import { OAStatus } from '@prisma/client'
+import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 
 describe('DocumentDAO Integration Tests', () => {
   let documentDAO: DocumentDAO
@@ -210,6 +211,8 @@ describe('DocumentDAO Integration Tests', () => {
   test('should persist document with HAL source record and custom fields', async () => {
     const halRecord = new DocumentRecord(
       'hal-doc-001',
+      'hal0001',
+      [new PublicationIdentifier('pubid003', 'hal', 'hal-0001')],
       [
         new SourceContribution(
           LocRelator.AUTHOR,
@@ -259,6 +262,7 @@ describe('DocumentDAO Integration Tests', () => {
       include: {
         records: {
           include: {
+            identifiers: true,
             contributions: {
               include: {
                 person: true,
@@ -274,6 +278,11 @@ describe('DocumentDAO Integration Tests', () => {
     expect(documentFromDB?.records).toHaveLength(1)
     const record = documentFromDB!.records[0]
     expect(record.uid).toBe('hal-doc-001')
+    expect(record.sourceIdentifier).toBe('hal0001')
+    expect(record.identifiers).toHaveLength(1)
+    expect(record.identifiers[0].uid).toBe('pubid003')
+    expect(record.identifiers[0].type).toBe('hal')
+    expect(record.identifiers[0].value).toBe('hal-0001')
     expect(record.contributions).toHaveLength(1)
     expect(record.contributions[0].role).toBe('author')
     expect(record.contributions[0].person.uid).toBe('hal-001-uid')
