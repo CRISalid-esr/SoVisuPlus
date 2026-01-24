@@ -42,6 +42,8 @@
     "src/app/theme",
     "src/app/auth",
     "src/app/types/theme.d.ts",
-    "dist-listener"
+    "dist-listener",
+    "src/app/api/cas/**", // exclude everything related to CAS
+    ".next/**"
   ]
 }
