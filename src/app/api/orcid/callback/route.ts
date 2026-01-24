@@ -12,7 +12,7 @@ import {
 import { PersonService } from '@/lib/services/PersonService'
 
 export const GET = async (req: NextRequest) => {
-  const sovisuplusHost = process.env.APP_URL
+  const sovisuplusHost = process.env.NEXT_PUBLIC_BASE_URL
   const lang =
     req.nextUrl.searchParams.get('lang') ??
     process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0]

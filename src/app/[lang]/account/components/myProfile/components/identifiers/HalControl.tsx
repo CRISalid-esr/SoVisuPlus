@@ -2,8 +2,11 @@ import { Paper, Typography } from '@mui/material'
 import useStore from '@/stores/global_store'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { login } from 'next-cas-client'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
 
 const HalControl = () => {
+  const sovisuplusHost = getRuntimeEnv().NEXT_PUBLIC_BASE_URL
+  const casUrl = getRuntimeEnv().NEXT_PUBLIC_CAS_URL
   const { connectedUser } = useStore((state) => state.user)
   const person = connectedUser?.person
   const identifiers = person?.getIdentifiers() ?? []
