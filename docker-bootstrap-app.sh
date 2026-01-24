@@ -18,6 +18,7 @@ GIT_BRANCH_VAL="${GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || t
 # --- write .env (append to existing if present) -----------------------------
 # Quote values that may contain special chars/spaces
 cat <<EOF >> .env
+NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-http://sovisuplus.local:3000}
 WS_SCHEME=${WS_SCHEME:-ws}
 WS_HOST=${WS_HOST:-localhost}
 WS_PORT=${WS_PORT:-3001}
@@ -33,7 +34,7 @@ KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-}
 KEYCLOAK_CLIENT_SECRET="${KEYCLOAK_CLIENT_SECRET:-}"
 KEYCLOAK_ISSUER=${KEYCLOAK_INTERNAL_ADDR:-}/realms/${KEYCLOAK_REALM:-}
 KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PUBLIC_ADDR:-http://keycloak.local:8080}/realms/${KEYCLOAK_REALM:-}
-NEXTAUTH_URL=${APP_URL:-http://sovisuplus.local:3000}/api/auth
+NEXTAUTH_URL=${NEXT_PUBLIC_BASE_URL:-http://sovisuplus.local:3000}/api/auth
 NEXTAUTH_SECRET="${NEXTAUTH_SECRET:-}"
 GRAPHQL_ENDPOINT_ENABLED="${GRAPHQL_ENDPOINT_ENABLED:-false}"
 GRAPHQL_ENDPOINT_URL="${GRAPHQL_ENDPOINT_URL:-}"
@@ -44,6 +45,9 @@ ORCID_SCOPES="${ORCID_SCOPES:-/authenticate}"
 ORCID_CLIENT_ID="${ORCID_CLIENT_ID:-}"
 ORCID_CLIENT_SECRET="${ORCID_CLIENT_SECRET:-}"
 VOCABS_URL="${VOCABS_URL:-http://localhost:8000/api/v0/autocomplete/}"
+NEXT_PUBLIC_CAS_URL=${NEXT_PUBLIC_CAS_URL:-https://cas.ccsd.cnrs.fr/cas}
+NEXT_CAS_CLIENT_SAML_TOLERANCE=${NEXT_CAS_CLIENT_SAML_TOLERANCE:-18000}
+NEXT_CAS_CLIENT_SECRET="${NEXT_CAS_CLIENT_SECRET:-xxxxxx32carscasclientsecretxxxxx}"
 EOF
 
 CUSTOM_THEME_MOUNT="/custom-theme"

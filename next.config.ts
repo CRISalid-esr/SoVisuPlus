@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_SUPPORTED_LOCALES: process.env.NEXT_PUBLIC_SUPPORTED_LOCALES,
     ORCID_URL: process.env.ORCID_URL,
-    APP_URL: process.env.APP_URL,
+    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+    NEXT_PUBLIC_CAS_URL: process.env.NEXT_PUBLIC_CAS_URL,
     ORCID_SCOPES: process.env.ORCID_SCOPES,
     ORCID_CLIENT_ID: process.env.ORCID_CLIENT_ID,
   },
@@ -17,7 +18,7 @@ const nextConfig: NextConfig = {
     middlewarePrefetch: 'flexible',
   },
   webpack: (config) => {
-    config.module.rules.push(
+    ;(config.module.rules.push(
       {
         test: /\.svg$/,
         use: ['@svgr/webpack'],
@@ -29,7 +30,7 @@ const nextConfig: NextConfig = {
         },
       },
     ),
-      (config.resolve.alias['@'] = path.join(__dirname, 'src', 'app'))
+      (config.resolve.alias['@'] = path.join(__dirname, 'src', 'app')))
     return config
   },
 }
