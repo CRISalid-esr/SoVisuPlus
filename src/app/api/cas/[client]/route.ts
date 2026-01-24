@@ -3,7 +3,7 @@ import { ValidatorProtocol } from 'next-cas-client'
 import { handleAuth } from 'next-cas-client/app'
 
 const casHandler = handleAuth({
-  validator: ValidatorProtocol.CAS30,
+  validator: ValidatorProtocol.CAS20,
   async loadUser(casUser) {
     console.log('[CAS] raw casUser:', JSON.stringify(casUser, null, 2))
     return casUser
