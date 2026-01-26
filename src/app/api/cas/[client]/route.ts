@@ -24,6 +24,24 @@ export async function GET(
   if (!isLoginOrLogout(client)) {
     return new Response('Not found', { status: 404 })
   }
+  // Uncomment the following block to get CAS ticket validation logs
+  // if (client === 'login') {
+  //   const ticket = new URL(req.url).searchParams.get('ticket')
+  //   if (ticket) {
+  //     const host =
+  //       req.headers.get('x-forwarded-host') ?? req.headers.get('host')
+  //     const service = `https://${host}/api/cas/login`
+  //     console.log('[CAS] service URL:', service)
+  //
+  //     const validateUrl =
+  //       `${process.env.NEXT_PUBLIC_CAS_URL}/serviceValidate` +
+  //       `?service=${encodeURIComponent(service)}` +
+  //       `&ticket=${encodeURIComponent(ticket)}`
+  //     const r = await fetch(validateUrl, { headers: { accept: 'text/xml' } })
+  //     console.log('[CAS] validateUrl', validateUrl)
+  //     console.log('[CAS] validation XML:\n', await r.text())
+  //   }
+  // }
 
   return (
     casHandler as unknown as (
