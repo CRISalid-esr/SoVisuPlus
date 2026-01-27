@@ -12,6 +12,8 @@ import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 import { DocumentType } from '@/types/Document'
 import { Concept, ConceptJson } from '@/types/Concept'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
+import dayjs from 'dayjs'
+import { OAStatus } from '@prisma/client'
 
 type ColumnFilter =
   | { id: 'date'; value: [string | null, string | null] }
@@ -112,6 +114,43 @@ export class DocumentService {
         areHalCollectionCodesOmitted,
       })
       return { documents, totalItems }
+    } catch (error) {
+      console.error('Error in service layer:', error)
+      throw new Error('Error fetching documents from service')
+    }
+  }
+
+  async documentsPerYear(contributorUid: string, contributorType: AgentType) {
+    const contributorUids = await this.buildContributorUidArray(
+      contributorUid,
+      contributorType,
+    )
+    try {
+      const { documents } =
+        await this.documentDAO.fetchOAYearDocuments(contributorUids)
+      const publicationsPerYear = documents.reduce<
+        Record<
+          number,
+          {
+            uid: string
+            oaStatus: OAStatus | null
+            publicationDate: string | null
+            upwOAStatus: OAStatus | null
+          }[]
+        >
+      >((acc, doc) => {
+        const publicationDate = doc.publicationDate
+        if (publicationDate) {
+          const parsedDate = dayjs(publicationDate)
+          if (parsedDate.isValid()) {
+            const year = parsedDate.year()
+            acc[year] ??= []
+            acc[year].push(doc)
+          }
+        }
+        return acc
+      }, {})
+      return { publicationsPerYear }
     } catch (error) {
       console.error('Error in service layer:', error)
       throw new Error('Error fetching documents from service')

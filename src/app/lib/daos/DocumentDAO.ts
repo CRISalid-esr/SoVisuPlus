@@ -898,6 +898,50 @@ export class DocumentDAO extends AbstractDAO {
     }
   }
 
+  public async fetchOAYearDocuments(contributorUids: string[]): Promise<{
+    documents: {
+      uid: string
+      oaStatus: OAStatus | null
+      publicationDate: string | null
+      upwOAStatus: OAStatus | null
+    }[]
+  }> {
+    const perspectiveRolesFilter: string[] = parseStrArrayEnvVar(
+      process.env.PERSPECTIVE_ROLES_FILTER,
+    )
+
+    const dbDocuments = await this.prismaClient.document.findMany({
+      select: {
+        uid: true,
+        oaStatus: true,
+        publicationDate: true,
+        upwOAStatus: true,
+      },
+      where: {
+        publicationDate: { not: null },
+        contributions: {
+          some: {
+            person: {
+              uid: { in: contributorUids },
+            },
+            ...(perspectiveRolesFilter.length > 0 && {
+              roles: { hasSome: perspectiveRolesFilter },
+            }),
+          },
+        },
+      },
+      orderBy: [
+        {
+          publicationDate: 'desc',
+        },
+      ],
+    })
+
+    return {
+      documents: dbDocuments,
+    }
+  }
+
   public async countDocuments(params: CountDocumentsFromDBParams): Promise<{
     allItems: number
     incompleteHalRepositoryItems: number

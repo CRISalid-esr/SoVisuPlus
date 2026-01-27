@@ -1013,6 +1013,51 @@ describe('DocumentDAO', () => {
     })
   })
 
+  it('should fetch documents where publication date is not null', async () => {
+    const mockDbDocuments = [
+      {
+        uid: 'doc-123',
+        oaStatus: 'GREEN',
+        publicationDate: '2022',
+        upwOAStatus: 'DIAMOND',
+      },
+    ] as unknown as DbDocument[]
+
+    ;(mockPrisma.document.findMany as jest.Mock).mockResolvedValue(
+      mockDbDocuments,
+    )
+
+    const contributorUids = ['local-123']
+
+    const result = await documentDAO.fetchOAYearDocuments(contributorUids)
+
+    expect(result.documents).toHaveLength(1)
+    expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
+      select: {
+        uid: true,
+        oaStatus: true,
+        publicationDate: true,
+        upwOAStatus: true,
+      },
+      where: {
+        publicationDate: { not: null },
+        contributions: {
+          some: {
+            person: {
+              uid: { in: ['local-123'] },
+            },
+            roles: { hasSome: ['author', 'co-author'] },
+          },
+        },
+      },
+      orderBy: [
+        {
+          publicationDate: 'desc',
+        },
+      ],
+    })
+  })
+
   it('should count documents', async () => {
     ;(mockPrisma.document.count as jest.Mock).mockResolvedValue(1)
 

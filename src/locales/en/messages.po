@@ -479,6 +479,10 @@ msgstr "Closed Access"
 msgid "dashboard_page_publication_by_year_graph_legend_open_access"
 msgstr "Open Access"
 
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:253
+msgid "dashboard_page_publication_by_year_graph_legend_unknown"
+msgstr "Unknown access"
+
 #: src/app/[lang]/dashboard/components/PublicationCard.tsx:194
 msgid "dashboard_page_publication_by_year_graph_open_access"
 msgstr "Open access:"
@@ -502,6 +506,10 @@ msgstr "Total:"
 #: src/app/[lang]/dashboard/components/PublicationCard.tsx:186
 msgid "dashboard_page_publication_by_year_graph_tooltip_year"
 msgstr "Year"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:221
+msgid "dashboard_page_publication_by_year_graph_tooltip_unknown"
+msgstr "Unknown access"
 
 #: src/app/[lang]/dashboard/components/PublicationCard.tsx:363
 msgid "dashboard_page_publication_by_year_no_publication_found"
