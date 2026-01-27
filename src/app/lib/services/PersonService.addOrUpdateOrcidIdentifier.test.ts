@@ -1,4 +1,5 @@
 import { PersonService } from '@/lib/services/PersonService'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
 const mockFetchPeople = jest.fn()
 const mockUpsertIdentifier = jest.fn()
@@ -21,7 +22,7 @@ jest.mock('@/lib/daos/ActionDAO', () => {
   }
 })
 
-describe('PersonService.addOrUpdateOrcidIdentifier', () => {
+describe('PersonService.addOrUpdateIdentifier', () => {
   let service: PersonService
 
   beforeEach(() => {
@@ -35,7 +36,11 @@ describe('PersonService.addOrUpdateOrcidIdentifier', () => {
     mockUpsertIdentifier.mockResolvedValue(undefined)
     mockCreateAction.mockResolvedValue(undefined)
 
-    await service.addOrUpdateOrcidIdentifier(personUid, orcid)
+    await service.addOrUpdateIdentifier(
+      personUid,
+      PersonIdentifierType.ORCID,
+      orcid,
+    )
 
     expect(mockUpsertIdentifier).toHaveBeenCalledTimes(1)
     expect(mockUpsertIdentifier).toHaveBeenCalledWith(
@@ -62,9 +67,13 @@ describe('PersonService.addOrUpdateOrcidIdentifier', () => {
     mockUpsertIdentifier.mockRejectedValue(new Error('DB failure'))
 
     await expect(
-      service.addOrUpdateOrcidIdentifier(personUid, orcid),
+      service.addOrUpdateIdentifier(
+        personUid,
+        PersonIdentifierType.ORCID,
+        orcid,
+      ),
     ).rejects.toThrow(
-      `Error adding/updating identifier (type=ORCID, value=${orcid}, personUid=${personUid}) in service`,
+      `Error adding/updating identifier (type=ORCID, value=${orcid}, personUid=${personUid})`,
     )
 
     expect(mockCreateAction).not.toHaveBeenCalled()

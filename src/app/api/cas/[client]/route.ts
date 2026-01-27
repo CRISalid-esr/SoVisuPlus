@@ -1,52 +1,156 @@
-import type { NextRequest } from 'next/server'
-import { ValidatorProtocol } from 'next-cas-client'
-import { handleAuth } from 'next-cas-client/app'
+import { NextRequest, NextResponse } from 'next/server'
+import * as process from 'node:process'
+import { getServerSession, Session } from 'next-auth'
+import authOptions from '@/app/auth/auth_options'
 
-const casHandler = handleAuth({
-  validator: ValidatorProtocol.CAS20,
-  async loadUser(casUser) {
-    console.log('[CAS] raw casUser:', JSON.stringify(casUser, null, 2))
-    return casUser
-  },
-})
+import { AureHalAPIClient } from '@/lib/services/AureHalAPIClient'
+import { PersonService } from '@/lib/services/PersonService'
+import { UserService } from '@/lib/services/UserService'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
+import { parseCasTicketValidationResult } from '@/app/utils/parseCasTicketValidationResult'
 
-const isLoginOrLogout = (client: string): client is 'login' | 'logout' => {
-  return client === 'login' || client === 'logout'
-}
+const isLoginOrLogout = (client: string): client is 'login' | 'logout' =>
+  client === 'login' || client === 'logout'
 
 export async function GET(
   req: NextRequest,
   context: { params: Promise<{ client: string }> },
 ) {
-  const params = await context.params
-
-  const client = params.client
-  if (!isLoginOrLogout(client)) {
-    return new Response('Not found', { status: 404 })
+  const sovisuplusHost = process.env.NEXT_PUBLIC_BASE_URL
+  if (!sovisuplusHost) {
+    return new NextResponse('NEXT_PUBLIC_BASE_URL is not set', { status: 500 })
   }
-  // Uncomment the following block to get CAS ticket validation logs
-  // if (client === 'login') {
-  //   const ticket = new URL(req.url).searchParams.get('ticket')
-  //   if (ticket) {
-  //     const host =
-  //       req.headers.get('x-forwarded-host') ?? req.headers.get('host')
-  //     const service = `https://${host}/api/cas/login`
-  //     console.log('[CAS] service URL:', service)
-  //
-  //     const validateUrl =
-  //       `${process.env.NEXT_PUBLIC_CAS_URL}/serviceValidate` +
-  //       `?service=${encodeURIComponent(service)}` +
-  //       `&ticket=${encodeURIComponent(ticket)}`
-  //     const r = await fetch(validateUrl, { headers: { accept: 'text/xml' } })
-  //     console.log('[CAS] validateUrl', validateUrl)
-  //     console.log('[CAS] validation XML:\n', await r.text())
-  //   }
-  // }
 
-  return (
-    casHandler as unknown as (
-      req: NextRequest,
-      ctx: { params: { client: 'login' | 'logout' } },
-    ) => Promise<Response>
-  )(req, { params: { client: client } })
+  // Notice: hardcode fr for now
+  const userRedirectionUrl = `${sovisuplusHost}/fr/account`
+
+  const { client } = await context.params
+  if (!isLoginOrLogout(client))
+    return new Response('Not found', { status: 404 })
+
+  // If we implement logout later
+  if (client === 'logout') {
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?success=hal-logout-success`,
+    )
+  }
+
+  const ticket = req.nextUrl.searchParams.get('ticket')
+  if (!ticket) {
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=hal-authentication-failure-no-ticket`,
+    )
+  }
+
+  // Require a valid NextAuth session
+  const session = (await getServerSession(authOptions)) as Session & {
+    user: { username?: string; id?: string }
+  }
+  if (!session?.user?.id || !session?.user?.username) {
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=hal-authentication-failure-no-session`,
+    )
+  }
+
+  // Find user/person in DB
+  const userService = new UserService()
+  const user = await userService.getUserByPersonIdentifier(
+    new PersonIdentifier(PersonIdentifierType.LOCAL, session.user.username),
+  )
+  if (!user?.person) {
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=hal-authentication-failure-user-not-found`,
+    )
+  }
+
+  // Validate CAS ticket (CAS 2.0)
+  const casBase = process.env.NEXT_PUBLIC_CAS_URL // e.g. https://cas.ccsd.cnrs.fr/cas
+  if (!casBase) {
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=hal-authentication-failure-misconfig`,
+    )
+  }
+
+  // avoid double slashes
+  const service = `${sovisuplusHost.replace(/\/$/, '')}/api/cas/login`
+
+  const validateUrl =
+    `${casBase.replace(/\/$/, '')}/serviceValidate` +
+    `?service=${encodeURIComponent(service)}` +
+    `&ticket=${encodeURIComponent(ticket)}`
+
+  const validationRes = await fetch(validateUrl, {
+    headers: { accept: 'text/xml' },
+    // avoid caching for fresh validation
+    cache: 'no-store',
+  })
+
+  const xml = await validationRes.text()
+  const parsed = parseCasTicketValidationResult(xml)
+
+  if (!validationRes.ok || !parsed.success) {
+    console.error('[CAS] Ticket validation failed', {
+      httpStatus: validationRes.status,
+      failureCode: parsed.success ? undefined : parsed.failureCode,
+      failureMessage: parsed.success ? undefined : parsed.failureMessage,
+      validateUrl,
+    })
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=hal-authentication-failure`,
+    )
+  }
+
+  const email = parsed.attributes.email
+  if (!email) {
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=hal-auth-missing-data`,
+    )
+  }
+
+  // Resolve idHal from AureHAL
+  const aurehal = new AureHalAPIClient()
+  let idHalDoc
+  try {
+    idHalDoc = await aurehal.findAuthorByEmail(email)
+  } catch (e) {
+    console.error('[AureHAL] lookup failed', e)
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=hal-unavailable-data`,
+    )
+  }
+
+  if (!idHalDoc?.idHal_s && typeof idHalDoc?.idHal_i !== 'number') {
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=hal-missing-identifiers`,
+    )
+  }
+
+  const personService = new PersonService()
+  try {
+    if (idHalDoc.idHal_s) {
+      await personService.addOrUpdateIdentifier(
+        user.person.uid,
+        PersonIdentifierType.ID_HAL_S,
+        idHalDoc.idHal_s,
+      )
+    } else {
+      await personService.addOrUpdateIdentifier(
+        user.person.uid,
+        PersonIdentifierType.ID_HAL_I,
+        String(idHalDoc.idHal_i),
+      )
+    }
+  } catch (e) {
+    console.error('[HAL] DB write failed', e)
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=hal-identifier-insert-failure`,
+    )
+  }
+
+  return NextResponse.redirect(
+    `${userRedirectionUrl}?success=hal-authentication-success`,
+  )
 }
