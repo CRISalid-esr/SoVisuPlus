@@ -103,6 +103,8 @@ export async function GET(
     )
   }
 
+  console.debug('[CAS] Ticket validated, attributes:', parsed.attributes)
+
   const email = parsed.attributes.email
   if (!email) {
     return NextResponse.redirect(
@@ -121,6 +123,7 @@ export async function GET(
       `${userRedirectionUrl}?error=hal-unavailable-data`,
     )
   }
+  console.debug('[AureHAL] resolved idHalDoc', idHalDoc)
 
   if (!idHalDoc?.idHal_s && typeof idHalDoc?.idHal_i !== 'number') {
     return NextResponse.redirect(

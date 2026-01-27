@@ -32,6 +32,11 @@ export class AureHalAPIClient {
     url.searchParams.set('indent', 'true')
     url.searchParams.set('fl', 'idHal_s,idHal_i')
 
+    console.log(
+      'AureHalAPIClient.findAuthorByEmail: fetching URL',
+      url.toString(),
+    )
+
     const res = await fetch(url.toString(), {
       method: 'GET',
       headers: {
@@ -50,6 +55,8 @@ export class AureHalAPIClient {
 
     const data = (await res.json()) as AureHalSearchResponse
     const docs = data?.response?.docs ?? []
+
+    console.debug('AureHalAPIClient.findAuthorByEmail: docs', docs)
 
     if (!docs.length) return null
 
