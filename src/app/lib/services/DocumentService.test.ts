@@ -15,6 +15,7 @@ jest.mock('@/lib/daos/ConceptDAO')
 describe('DocumentService', () => {
   let documentService: DocumentService
   let mockFetchDocuments: jest.Mock
+  let mockFetchOAYearDocuments: jest.Mock
   let mockfetchDocumentById: jest.Mock
   let mockCountDocuments: jest.Mock
   let mockDeleteConceptsFromDocument: jest.Mock
@@ -26,6 +27,7 @@ describe('DocumentService', () => {
 
   beforeEach(() => {
     mockFetchDocuments = jest.fn()
+    mockFetchOAYearDocuments = jest.fn()
     mockfetchDocumentById = jest.fn()
     mockCountDocuments = jest.fn()
     mockDeleteConceptsFromDocument = jest.fn()
@@ -36,6 +38,7 @@ describe('DocumentService', () => {
     mockUpdateDocumentTypeByUid = jest.fn()
     ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
       fetchDocuments: mockFetchDocuments,
+      fetchOAYearDocuments: mockFetchOAYearDocuments,
       fetchDocumentById: mockfetchDocumentById,
       deleteConceptsFromDocument: mockDeleteConceptsFromDocument,
       addConceptsToDocument: mockAddConceptsToDocument,
@@ -197,6 +200,58 @@ describe('DocumentService', () => {
     delete (dbParams as Partial<typeof dbParams>).contributorType
 
     expect(mockFetchDocuments).toHaveBeenCalledWith(dbParams)
+  })
+
+  it('should return documents when documentsPerYear succeeds', async () => {
+    const mockResponse = {
+      documents: [
+        {
+          uid: 'doc-123',
+          oaStatus: 'GREEN',
+          publicationDate: '2022',
+          upwOAStatus: 'DIAMOND',
+        },
+      ],
+    }
+
+    const returnValue = {
+      publicationsPerYear: {
+        '2022': [
+          {
+            uid: 'doc-123',
+            oaStatus: 'GREEN',
+            publicationDate: '2022',
+            upwOAStatus: 'DIAMOND',
+          },
+        ],
+      },
+    }
+
+    mockFetchOAYearDocuments.mockResolvedValue(mockResponse)
+
+    const contributorUid = 'local-124'
+    const contributorType = 'person' as AgentType
+
+    await expect(
+      documentService.documentsPerYear(contributorUid, contributorType),
+    ).resolves.toEqual(returnValue)
+
+    const contributorUids = [contributorUid]
+    expect(mockFetchOAYearDocuments).toHaveBeenCalledWith(contributorUids)
+  })
+
+  it('should throw an error when fetchDocumentsFromDB fails', async () => {
+    mockFetchOAYearDocuments.mockRejectedValue(new Error('DB error'))
+
+    const contributorUid = 'local-124'
+    const contributorType = 'person' as AgentType
+
+    await expect(
+      documentService.documentsPerYear(contributorUid, contributorType),
+    ).rejects.toThrow('Error fetching documents from service')
+
+    const contributorUids = [contributorUid]
+    expect(mockFetchOAYearDocuments).toHaveBeenCalledWith(contributorUids)
   })
 
   it('should call deleteConceptsFromDocument with correct arguments', async () => {
