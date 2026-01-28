@@ -14,6 +14,7 @@ import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import { SourceContribution } from '@/types/SourceContribution'
 import { SourcePerson } from '@/types/SourcePerson'
 import { Journal } from '@/types/Journal'
+import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 
 describe('Document type', () => {
   it('should convert document type from string to the right DocumentType or to DocumentType.Document if unknown', async () => {
@@ -66,6 +67,14 @@ describe('Document type', () => {
       records: [
         {
           uid: 'hal-123',
+          sourceIdentifier: 'hal0001',
+          identifiers: [
+            {
+              uid: 'pubid003',
+              type: 'hal',
+              value: 'hal-0001',
+            },
+          ],
           contributions: [
             {
               role: LocRelator.AUTHOR,
@@ -113,6 +122,8 @@ describe('Document type', () => {
       [
         new DocumentRecord(
           'hal-123',
+          'hal0001',
+          [new PublicationIdentifier('pubid003', 'hal', 'hal-0001')],
           [
             new SourceContribution(
               LocRelator.AUTHOR,
@@ -188,6 +199,8 @@ describe('Document type', () => {
         {
           id: 1,
           uid: 'hal-123',
+          sourceIdentifier: 'hal0001',
+          identifiers: [],
           url: 'https://example.com',
           contributions: [],
           documentTypes: [DocumentType.Document, DocumentType.Book],
@@ -231,6 +244,8 @@ describe('Document type', () => {
       [
         new DocumentRecord(
           'hal-123',
+          'hal0001',
+          [],
           [],
           [DocumentType.Document, DocumentType.Book],
           new Date('2022-01-01T00:00:00.000Z'),

@@ -13,7 +13,7 @@ import { JournalIdentifier } from '@/types/JournalIdentifier'
 import { SourceContribution } from '@/types/SourceContribution'
 import { SourceJournal } from '@/types/SourceJournal'
 import { SourcePerson } from '@/types/SourcePerson'
-import { OAStatus } from '@prisma/client'
+import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 
 interface GraphSourcePersonResponse {
   uid: string
@@ -46,13 +46,21 @@ interface GraphSourceIssueResponse {
   source_identifier: string
 }
 
+interface GraphSourcePublicationIdentifierResponse {
+  uid: string
+  type: string
+  value: string | null
+}
+
 interface GraphDocumentRecordResponse {
   uid: string
   url: string | null
+  source_identifier: string
   document_types: string[]
   harvester: string
   has_contributions: Array<GraphSourceContributionResponse>
   issued: string | null
+  has_identifiers: Array<GraphSourcePublicationIdentifierResponse>
   published_in: GraphSourceIssueResponse
   titles: { language: string; value: string }[]
   hal_collection_codes?: string[] | null
@@ -209,6 +217,19 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
           acc.push(
             new DocumentRecord(
               recordData.uid,
+              recordData.source_identifier,
+              recordData.has_identifiers.reduce<PublicationIdentifier[]>(
+                (acc, identifier: PublicationIdentifier) => {
+                  const pubId = new PublicationIdentifier(
+                    identifier.uid,
+                    identifier.type,
+                    identifier.value,
+                  )
+                  acc.push(pubId)
+                  return acc
+                },
+                [],
+              ),
               recordData.has_contributions.reduce<SourceContribution[]>(
                 (
                   acc,

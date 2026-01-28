@@ -13,6 +13,7 @@ export const identifierComponentMap: Record<
   [PersonIdentifierType.LOCAL]: null,
   [PersonIdentifierType.ID_HAL_S]: HalControl,
   [PersonIdentifierType.ID_HAL_I]: null,
+  [PersonIdentifierType.HAL_LOGIN]: null,
   [PersonIdentifierType.SCOPUS_EID]: null,
   [PersonIdentifierType.EPPN]: null,
 }

@@ -1,5 +1,6 @@
 import {
   Document as DbDocument,
+  DocumentRecord as DbDocumentRecord,
   DocumentState,
   Journal as DbJournal,
   OAStatus,
@@ -26,6 +27,7 @@ import { JournalIdentifier } from '@/types/JournalIdentifier'
 import { SourceContribution } from '@/types/SourceContribution'
 import { SourcePerson } from '@/types/SourcePerson'
 import { SourceJournal } from '@/types/SourceJournal'
+import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
@@ -51,6 +53,9 @@ jest.mock('@prisma/client', () => {
     documentRecord: {
       upsert: jest.fn(),
       deleteMany: jest.fn(),
+    },
+    publicationIdentifier: {
+      upsert: jest.fn(),
     },
     journal: {
       upsert: jest.fn(),
@@ -186,6 +191,7 @@ describe('DocumentDAO', () => {
         abstracts: true,
         records: {
           include: {
+            identifiers: true,
             contributions: {
               include: {
                 person: true,
@@ -298,6 +304,8 @@ describe('DocumentDAO', () => {
       [
         new DocumentRecord(
           'hal-123',
+          'hal0001',
+          [new PublicationIdentifier('pubid003', 'hal', 'hal-0001')],
           [
             new SourceContribution(
               LocRelator.AUTHOR,
@@ -343,8 +351,16 @@ describe('DocumentDAO', () => {
       uid: 'doc-hal',
     } as DbDocument
 
+    const mockDbDocumentRecord = {
+      id: 89,
+      uid: 'hal-record',
+    } as DbDocumentRecord
+
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
     ;(mockPrisma.document.create as jest.Mock).mockResolvedValue(mockDbDocument)
+    ;(mockPrisma.documentRecord.upsert as jest.Mock).mockResolvedValue(
+      mockDbDocumentRecord,
+    )
     ;(mockPrisma.documentTitle.upsert as jest.Mock).mockResolvedValue(null)
     ;(mockPrisma.documentAbstract.upsert as jest.Mock).mockResolvedValue(null)
 
@@ -389,6 +405,7 @@ describe('DocumentDAO', () => {
             },
           ],
         },
+        sourceIdentifier: 'hal0001',
         documentTypes: ['Document', 'Book'],
         publicationDate: new Date('2022-01-01T00:00:00.000Z'),
         document: { connect: { id: 42 } },
@@ -450,6 +467,7 @@ describe('DocumentDAO', () => {
             },
           ],
         },
+        sourceIdentifier: 'hal0001',
         documentTypes: ['Document', 'Book'],
         publicationDate: new Date('2022-01-01T00:00:00.000Z'),
         platform: 'hal',
@@ -478,7 +496,20 @@ describe('DocumentDAO', () => {
         },
       },
     })
-
+    expect(mockPrisma.publicationIdentifier.upsert).toHaveBeenCalledWith({
+      where: { uid: 'pubid003' },
+      create: {
+        uid: 'pubid003',
+        type: 'hal',
+        value: 'hal-0001',
+        DocumentRecord: { connect: { id: 89 } },
+      },
+      update: {
+        type: 'hal',
+        value: 'hal-0001',
+        DocumentRecord: { connect: { id: 89 } },
+      },
+    })
     expect(dbDocument.uid).toBe('doc-hal')
   })
 
@@ -550,6 +581,8 @@ describe('DocumentDAO', () => {
         records: [
           {
             uid: '123456',
+            sourceIdentifier: 'hal-0001',
+            identifiers: [],
             contributions: [],
             documentTypes: [],
             platform: 'hal',
@@ -711,6 +744,7 @@ describe('DocumentDAO', () => {
         },
         records: {
           include: {
+            identifiers: true,
             contributions: {
               include: {
                 person: true,
@@ -808,6 +842,7 @@ describe('DocumentDAO', () => {
         },
         records: {
           include: {
+            identifiers: true,
             contributions: {
               include: {
                 person: true,
@@ -900,6 +935,7 @@ describe('DocumentDAO', () => {
         },
         records: {
           include: {
+            identifiers: true,
             contributions: {
               include: {
                 person: true,
@@ -996,6 +1032,7 @@ describe('DocumentDAO', () => {
         },
         records: {
           include: {
+            identifiers: true,
             contributions: {
               include: {
                 person: true,
@@ -1128,6 +1165,7 @@ describe('DocumentDAO', () => {
         },
         records: {
           include: {
+            identifiers: true,
             contributions: {
               include: {
                 person: true,
@@ -1214,6 +1252,7 @@ describe('DocumentDAO', () => {
           contributions: { include: { person: true } },
           records: {
             include: {
+              identifiers: true,
               contributions: {
                 include: {
                   person: true,
