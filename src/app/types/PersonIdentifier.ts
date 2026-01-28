@@ -25,6 +25,8 @@ export class PersonIdentifier {
       case DbPersonIdentifierType.ID_HAL_S:
       case DbPersonIdentifierType.ID_HAL_I:
         return 'HAL'
+      case DbPersonIdentifierType.HAL_LOGIN:
+        return 'HAL_LOGIN'
       case DbPersonIdentifierType.SCOPUS_EID:
         return 'Scopus'
       case DbPersonIdentifierType.EPPN:
@@ -44,6 +46,7 @@ export class PersonIdentifier {
         return '/icons/idref.png'
       case DbPersonIdentifierType.ID_HAL_S:
       case DbPersonIdentifierType.ID_HAL_I:
+      case DbPersonIdentifierType.HAL_LOGIN:
         return '/icons/hal.png'
       case DbPersonIdentifierType.SCOPUS_EID:
         return '/icons/scopus.png'
@@ -103,6 +106,8 @@ export class PersonIdentifier {
         return DbPersonIdentifierType.ID_HAL_S
       case 'id_hal_i':
         return DbPersonIdentifierType.ID_HAL_I
+      case 'hal_login':
+        return DbPersonIdentifierType.HAL_LOGIN
       case 'eppn':
         return DbPersonIdentifierType.EPPN
       default:
