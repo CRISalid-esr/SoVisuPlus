@@ -14,11 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:142
-msgid "document_details_page_identifiers_row_label"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/lib/websocket/WebSocketListener.tsx:102
 msgid "snackbar_document_created"
 msgstr "Nouvelle publication : "
@@ -94,6 +89,16 @@ msgid "documents_page_merge_selected_documents_button"
 msgstr "Fusionner les documents sélectionnés"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:675
+msgid "documents_page_refresh_list_alert_own_perspective"
+msgstr "La liste de vos publications a changé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:678
+msgid "documents_page_refresh_list_alert_other_perspective"
+msgstr "La liste des publications de {name} a changé"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/components/HalStatusCell.test.tsx:144
 #: src/app/[lang]/documents/components/HalStatusCell.test.tsx:207
 msgid "documents_page_hal_status_in_collection"
@@ -110,19 +115,14 @@ msgid "documents_page_hal_status_outside_hal"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:675
-msgid "documents_page_refresh_list_alert_own_perspective"
-msgstr "La liste de vos publications a changé"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:678
-msgid "documents_page_refresh_list_alert_other_perspective"
-msgstr "La liste des publications de {name} a changé"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
 msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:145
+msgid "documents_page_refresh_document_alert"
+msgstr "Les informations relatives à cette publication ont changé"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:173
@@ -133,11 +133,6 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/page.test.tsx:177
 msgid "document_details_keywords_tab"
 msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:145
-msgid "documents_page_refresh_document_alert"
-msgstr "Les informations relatives à cette publication ont changé"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
@@ -185,6 +180,44 @@ msgid "concept_chip_action_delete"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:252
+msgid "document_details_page_keywords_input_options_loading"
+msgstr "Chargement des données..."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:256
+msgid "document_details_page_keywords_input_options_fetch_error"
+msgstr "Chargement des données impossible"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
+msgid "document_details_page_keywords_input_default"
+msgstr "Veuillez entrer au minimum 3 caractères"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Veuillez sélectionner au moins un vocabulaire"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "Aucune option"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:291
+msgid "document_details_page_keywords_input_fetch_error_label"
+msgstr "Erreur lors du chargement des données"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Mot-clé ajouté à la publication."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:398
 msgid "document_details_page_source_tab_card_title"
 msgstr "Références bibliographiques sources"
@@ -206,47 +239,9 @@ msgid "document_details_page_source_tab_select_action_unmerge_label"
 msgstr "Dissocier"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
-msgid "document_details_page_keywords_input_default"
-msgstr "Veuillez entrer au minimum 3 caractères"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "Aucune option"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Mot-clé ajouté à la publication."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Veuillez sélectionner au moins un vocabulaire"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
 msgid "document_details_page_domains_tab_card_title"
 msgstr "Domaines"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:252
-msgid "document_details_page_keywords_input_options_loading"
-msgstr "Chargement des données..."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:256
-msgid "document_details_page_keywords_input_options_fetch_error"
-msgstr "Chargement des données impossible"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:291
-msgid "document_details_page_keywords_input_fetch_error_label"
-msgstr "Erreur lors du chargement des données"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:168
@@ -293,6 +288,11 @@ msgstr "Auteurs"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:138
 msgid "document_details_page_publication_date_row_label"
 msgstr "Date de publication"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:142
+msgid "document_details_page_identifiers_row_label"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:145
@@ -413,6 +413,24 @@ msgid "hal_button_provide_identifier"
 msgstr "Fournir mon identifiant Hal"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
+msgid "profile_affiliations_signature_label"
+msgstr "Ma signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:110
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:56
+msgid "profile_affiliations_signature_copied_message_confirmation"
+msgstr "Signature ajoutée au presse-papier."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
+msgid "profile_affiliations_laboratories_label"
+msgstr "Laboratoire(s)"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:75
 msgid "hal-authentication-success"
 msgstr "Authentification HAL réussie"
@@ -473,24 +491,6 @@ msgid "hal_control_helper"
 msgstr "En liant votre compte Hal à votre compte Sovisu+, vous fiabilisez votre identifiant Hal et vous pourrez aisément déposer sur Hal les publications manquantes."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
-msgid "profile_affiliations_signature_label"
-msgstr "Ma signature"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:110
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:56
-msgid "profile_affiliations_signature_copied_message_confirmation"
-msgstr "Signature ajoutée au presse-papier."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
-msgid "profile_affiliations_laboratories_label"
-msgstr "Laboratoire(s)"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Mes autorisations"
@@ -540,53 +540,54 @@ msgstr "Aucun acteur sélectionné"
 msgid "dashboard_page_main_title"
 msgstr "Tableau de bord"
 
-#: src/app/[lang]/dashboard/components/PublicationCard.tsx:330
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:378
 msgid "dashboard_page_publication_by_year_graph_end_year_selection_label"
 msgstr "à :"
 
-#: src/app/[lang]/dashboard/components/PublicationCard.tsx:219
-#: src/app/[lang]/dashboard/components/PublicationCard.tsx:250
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:233
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:285
 msgid "dashboard_page_publication_by_year_graph_legend_closed_access"
 msgstr "Accès Fermé"
 
-#: src/app/[lang]/dashboard/components/PublicationCard.tsx:218
 #: src/app/[lang]/dashboard/components/PublicationCard.tsx:232
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:247
 msgid "dashboard_page_publication_by_year_graph_legend_open_access"
 msgstr "Accès Ouvert"
 
-#: src/app/[lang]/dashboard/components/PublicationCard.tsx:253
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:234
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:266
 msgid "dashboard_page_publication_by_year_graph_legend_unknown"
 msgstr "Type d'accès inconnu"
 
-#: src/app/[lang]/dashboard/components/PublicationCard.tsx:194
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:202
 msgid "dashboard_page_publication_by_year_graph_open_access"
 msgstr "Accès Ouvert :"
 
-#: src/app/[lang]/dashboard/components/PublicationCard.tsx:297
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:345
 msgid "dashboard_page_publication_by_year_graph_start_year_selection_label"
 msgstr "De :"
 
-#: src/app/[lang]/dashboard/components/PublicationCard.tsx:165
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:173
 msgid "dashboard_page_publication_by_year_graph_title"
 msgstr "Nombre de publications par année et taux d'accès"
 
-#: src/app/[lang]/dashboard/components/PublicationCard.tsx:171
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:179
 msgid "dashboard_page_publication_by_year_graph_toolbox_save_as_image"
 msgstr "Télécharger en PNG"
 
-#: src/app/[lang]/dashboard/components/PublicationCard.tsx:190
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:198
 msgid "dashboard_page_publication_by_year_graph_tooltip_total"
 msgstr "Total :"
 
-#: src/app/[lang]/dashboard/components/PublicationCard.tsx:186
-msgid "dashboard_page_publication_by_year_graph_tooltip_year"
-msgstr "Année"
-
-#: src/app/[lang]/dashboard/components/PublicationCard.tsx:221
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:225
 msgid "dashboard_page_publication_by_year_graph_tooltip_unknown"
 msgstr "Accès inconnu"
 
-#: src/app/[lang]/dashboard/components/PublicationCard.tsx:363
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:194
+msgid "dashboard_page_publication_by_year_graph_tooltip_year"
+msgstr "Année"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:411
 msgid "dashboard_page_publication_by_year_no_publication_found"
 msgstr "Aucune publication trouvée"
 
