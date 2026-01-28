@@ -49,11 +49,26 @@ jest.mock('@/types/BibliographicPlatform', () => {
   return {
     ...actual,
     BibliographicPlatformMetadata: {
-      [actual.BibliographicPlatform.HAL]: { icon: '/icons/hal.png' },
-      [actual.BibliographicPlatform.SCANR]: { icon: '/icons/scanr.png' },
-      [actual.BibliographicPlatform.IDREF]: { icon: '/icons/idref.png' },
-      [actual.BibliographicPlatform.OPENALEX]: { icon: '/icons/openalex.png' },
-      [actual.BibliographicPlatform.SCOPUS]: { icon: '/icons/scopus.png' },
+      [actual.BibliographicPlatform.HAL]: {
+        name: 'HAL',
+        icon: '/icons/hal.png',
+      },
+      [actual.BibliographicPlatform.SCANR]: {
+        name: 'ScanR',
+        icon: '/icons/scanr.png',
+      },
+      [actual.BibliographicPlatform.IDREF]: {
+        name: 'IdRef',
+        icon: '/icons/idref.png',
+      },
+      [actual.BibliographicPlatform.OPENALEX]: {
+        name: 'OpenAlex',
+        icon: '/icons/openalex.png',
+      },
+      [actual.BibliographicPlatform.SCOPUS]: {
+        name: 'Scopus',
+        icon: '/icons/scopus.png',
+      },
     },
   }
 })
@@ -124,39 +139,39 @@ describe('Sources Component', () => {
   it('renders bibliographic sources as chips', () => {
     renderComponent()
 
-    expect(screen.getByText('hal')).toBeInTheDocument()
-    expect(screen.getByText('scanr')).toBeInTheDocument()
-    expect(screen.getByText('idref')).toBeInTheDocument()
-    expect(screen.getByText('openalex')).toBeInTheDocument()
-    expect(screen.getByText('scopus')).toBeInTheDocument()
+    expect(screen.getByText('HAL')).toBeInTheDocument()
+    expect(screen.getByText('ScanR')).toBeInTheDocument()
+    expect(screen.getByText('IdRef')).toBeInTheDocument()
+    expect(screen.getByText('OpenAlex')).toBeInTheDocument()
+    expect(screen.getByText('Scopus')).toBeInTheDocument()
   })
 
   it('opens source link on chip click', () => {
     renderComponent()
 
-    const halChip = screen.getByText('hal')
+    const halChip = screen.getByText('HAL')
     fireEvent.click(halChip)
     expect(global.open).toHaveBeenCalledWith(
       'https://hal.archives-ouvertes.fr',
       '_blank',
     )
 
-    const scanrChip = screen.getByText('scanr')
+    const scanrChip = screen.getByText('ScanR')
     fireEvent.click(scanrChip)
     expect(global.open).toHaveBeenCalledWith(
       'https://scanr.enseignementsup-recherche.gouv.fr',
       '_blank',
     )
 
-    const idrefChip = screen.getByText('idref')
+    const idrefChip = screen.getByText('IdRef')
     fireEvent.click(idrefChip)
     expect(global.open).toHaveBeenCalledWith('https://www.idref.fr', '_blank')
 
-    const openalexChip = screen.getByText('openalex')
+    const openalexChip = screen.getByText('OpenAlex')
     fireEvent.click(openalexChip)
     expect(global.open).toHaveBeenCalledWith('https://openalex.org', '_blank')
 
-    const scopusChip = screen.getByText('scopus')
+    const scopusChip = screen.getByText('Scopus')
     fireEvent.click(scopusChip)
     expect(global.open).toHaveBeenCalledWith('https://www.scopus.com', '_blank')
   })

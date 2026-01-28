@@ -64,7 +64,7 @@ describe('DocumentSyncDialog - Behavior', () => {
   it('toggles a platform and triggers harvesting only for selected platforms', async () => {
     renderComponent()
 
-    const halButton = screen.getByRole('button', { name: 'Hal' })
+    const halButton = screen.getByRole('button', { name: 'HAL' })
     const openAlexButton = screen.getByRole('button', { name: 'OpenAlex' })
 
     expect(halButton).toBeInTheDocument()
