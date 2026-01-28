@@ -18,7 +18,8 @@ Object.defineProperty(window, 'env', {
     ORCID_URL: process.env.ORCID_URL,
     ORCID_CLIENT_ID: process.env.ORCID_CLIENT_ID,
     ORCID_SCOPES: process.env.ORCID_SCOPES,
-    APP_URL: process.env.APP_URL,
+    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+    NEXT_PUBLIC_CAS_URL: process.env.NEXT_PUBLIC_CAS_URL,
   },
   writable: true,
 })

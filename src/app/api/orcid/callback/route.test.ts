@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { GET } from './route'
 
-const mockAddOrUpdateOrcidIdentifier = jest.fn()
+const mockAddOrUpdateIdentifier = jest.fn()
 const mockGetUserByPersonIdentifier = jest.fn()
 
 jest.mock('@/lib/services/UserService', () => ({
@@ -12,7 +12,7 @@ jest.mock('@/lib/services/UserService', () => ({
 
 jest.mock('@/lib/services/PersonService', () => ({
   PersonService: jest.fn().mockImplementation(() => ({
-    addOrUpdateOrcidIdentifier: mockAddOrUpdateOrcidIdentifier,
+    addOrUpdateIdentifier: mockAddOrUpdateIdentifier,
   })),
 }))
 
@@ -71,7 +71,7 @@ describe('GET /api/orcid/callback and add ORCID to DB', () => {
     const response = await GET(req)
 
     const redirectUrl = response.headers.get('location')
-    const expectedUrl = `${process.env.APP_URL}/fr/account?success=orcid-authentication-success`
+    const expectedUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/fr/account?success=orcid-authentication-success`
     expect(redirectUrl).toBe(expectedUrl)
 
     const body = (fetch as jest.Mock).mock.calls[0][1].body
@@ -94,8 +94,9 @@ describe('GET /api/orcid/callback and add ORCID to DB', () => {
       'https://sovisuplus.example.com/api/orcid/callback?lang=fr',
     )
 
-    expect(mockAddOrUpdateOrcidIdentifier).toHaveBeenCalledWith(
+    expect(mockAddOrUpdateIdentifier).toHaveBeenCalledWith(
       'person-uid',
+      'ORCID',
       '0000-0002-1825-0097',
     )
   })

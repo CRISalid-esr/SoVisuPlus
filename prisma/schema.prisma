@@ -306,6 +306,7 @@ enum PersonIdentifierType {
   IDREF      @map("idref")
   ID_HAL_S   @map("id_hal_s")
   ID_HAL_I   @map("id_hal_i")
+  HAL_LOGIN  @map("hal_login")
   SCOPUS_EID @map("scopus_eid")
   LOCAL      @map("local")
   EPPN       @map("eppn")

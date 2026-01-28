@@ -3,8 +3,6 @@ import * as process from 'node:process'
 import { getServerSession, Session } from 'next-auth'
 import authOptions from '@/app/auth/auth_options'
 import { UserService } from '@/lib/services/UserService'
-import { UserDAO } from '@/lib/daos/UserDAO'
-import { PersonDAO } from '@/lib/daos/PersonDAO'
 import {
   PersonIdentifier,
   PersonIdentifierType,
@@ -12,7 +10,7 @@ import {
 import { PersonService } from '@/lib/services/PersonService'
 
 export const GET = async (req: NextRequest) => {
-  const sovisuplusHost = process.env.APP_URL
+  const sovisuplusHost = process.env.NEXT_PUBLIC_BASE_URL
   const lang =
     req.nextUrl.searchParams.get('lang') ??
     process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0]
@@ -71,7 +69,11 @@ export const GET = async (req: NextRequest) => {
   const { orcid } = data
   const personService = new PersonService()
   try {
-    await personService.addOrUpdateOrcidIdentifier(user.person.uid, orcid)
+    await personService.addOrUpdateIdentifier(
+      user.person.uid,
+      PersonIdentifierType.ORCID,
+      orcid,
+    )
   } catch (error) {
     console.error('Error adding orcid identifier', error)
     return NextResponse.redirect(

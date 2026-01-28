@@ -38,13 +38,14 @@ const RootLayout = async ({ params, children }: Props) => {
         <EnvInjector
           env={{
             ORCID_URL: process.env.ORCID_URL,
-            APP_URL: process.env.APP_URL,
             ORCID_SCOPES: process.env.ORCID_SCOPES,
             ORCID_CLIENT_ID: process.env.ORCID_CLIENT_ID,
             WS_SCHEME: process.env.WS_SCHEME,
             WS_HOST: process.env.WS_HOST,
             WS_PORT: process.env.WS_PORT,
             WS_PATH: process.env.WS_PATH ?? '/',
+            NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+            NEXT_PUBLIC_CAS_URL: process.env.NEXT_PUBLIC_CAS_URL,
           }}
         />
         <Script src='/vendor/d3.v4.min.js' strategy='beforeInteractive' />
