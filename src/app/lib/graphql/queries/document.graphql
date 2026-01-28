@@ -81,6 +81,7 @@ query Documents($where: DocumentWhere) {
       uid
       url
       issued
+      source_identifier
       published_in {
         issued_by {
           uid
@@ -104,6 +105,11 @@ query Documents($where: DocumentWhere) {
           source
           source_identifier
         }
+      }
+      has_identifiers {
+        uid
+        type
+        value
       }
       titles {
         language

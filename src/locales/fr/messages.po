@@ -709,6 +709,22 @@ msgstr "Type de document"
 msgid "document_details_page_type_select_label"
 msgstr "Sélectionnez le type"
 
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation.tsx:70
+msgid "document_details_page_identifiers_row_label"
+msgstr "Identifiants"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:90
+msgid "document_details_page_identifiers_no_identifiers_message"
+msgstr "Aucun identifiant"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:105
+msgid "document_details_page_identifiers_copy_message"
+msgstr "copié dans le presse-papiers."
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:105
+msgid "document_details_page_identifiers_copy_default_message"
+msgstr "Identifiant copié dans le presse-papiers."
+
 #: src/app/[lang]/documents/[uid]/page.tsx:52
 msgid "document_details_sources_tab"
 msgstr "Sources"

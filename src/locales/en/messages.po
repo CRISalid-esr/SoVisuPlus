@@ -709,6 +709,22 @@ msgstr "Type of document"
 msgid "document_details_page_type_select_label"
 msgstr "Select a type"
 
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation.tsx:70
+msgid "document_details_page_identifiers_row_label"
+msgstr "Identifiers"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:90
+msgid "document_details_page_identifiers_no_identifiers_message"
+msgstr "No identifier"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:105
+msgid "document_details_page_identifiers_copy_message"
+msgstr "copy to clipboard."
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:105
+msgid "document_details_page_identifiers_copy_default_message"
+msgstr "Identifier copy to clipboard."
+
 #: src/app/[lang]/documents/[uid]/page.tsx:52
 msgid "document_details_sources_tab"
 msgstr "Sources"

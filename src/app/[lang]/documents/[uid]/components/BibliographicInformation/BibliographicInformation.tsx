@@ -21,11 +21,13 @@ import Type from './Type'
 import Journal from './Journal'
 import Abstracts from './Abstracts'
 import Row from './Row'
+import Identifiers from '@/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers'
 
 export type DocumentFieldKey =
   | 'titles'
   | 'type'
   | 'journal'
+  | 'identifiers'
   | 'authors'
   | 'date'
   | 'abstracts'
@@ -63,6 +65,11 @@ const BibliographicInformation = () => {
       title: t`document_details_page_journal_row_label`,
       component: selectedDocument?.journal ? Journal : null,
     },
+    identifiers: {
+      value: 'identifiers',
+      title: t`document_details_page_identifiers_row_label`,
+      component: Identifiers,
+    },
     authors: {
       value: 'authors',
       title: t`document_details_page_authors_row_label`,
@@ -91,6 +98,7 @@ const BibliographicInformation = () => {
     'titles',
     'type',
     'date',
+    'identifiers',
     'authors',
     'abstracts',
     'sources',

@@ -139,6 +139,9 @@ describe('BibliographicInformation Component', () => {
       ),
     ).toBeInTheDocument()
     expect(
+      screen.getByText(i18n.t('document_details_page_identifiers_row_label')),
+    ).toBeInTheDocument()
+    expect(
       screen.getByText(i18n.t('document_details_page_journal_row_label')),
     ).toBeInTheDocument()
     expect(

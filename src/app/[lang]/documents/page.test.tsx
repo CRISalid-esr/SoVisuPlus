@@ -71,6 +71,8 @@ const mockState = {
         [
           new DocumentRecord(
             'rec1',
+            'hal-001',
+            [],
             [],
             [],
             new Date('2024-01-01'),
@@ -83,6 +85,8 @@ const mockState = {
           ),
           new DocumentRecord(
             'rec2',
+            'hal-002',
+            [],
             [],
             [],
             new Date('2024-01-01'),
