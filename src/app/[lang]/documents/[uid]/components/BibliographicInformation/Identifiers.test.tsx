@@ -77,6 +77,7 @@ describe('Identifiers Component', () => {
                 ),
                 new PublicationIdentifier('pubid002', 'nnt', 'nnt-0001'),
               ],
+              platform: 'scanr',
             },
             {
               sourceIdentifier: 'hal0001',
@@ -88,6 +89,7 @@ describe('Identifiers Component', () => {
                 ),
                 new PublicationIdentifier('pubid003', 'hal', 'hal-0001'),
               ],
+              platform: 'hal',
             },
           ],
         },
@@ -142,6 +144,7 @@ describe('Identifiers Component', () => {
                 ),
                 new PublicationIdentifier('pubid002', 'nnt', null),
               ],
+              platform: 'scanr',
             },
             {
               sourceIdentifier: 'hal0001',
@@ -153,6 +156,7 @@ describe('Identifiers Component', () => {
                 ),
                 new PublicationIdentifier('pubid003', 'hal', 'hal-0001'),
               ],
+              platform: 'hal',
             },
           ],
         },
@@ -182,14 +186,22 @@ describe('Identifiers Component', () => {
             {
               sourceIdentifier: 'sudoc0001',
               identifiers: [],
+              platform: 'scanr',
             },
             {
               sourceIdentifier: 'hal0001',
               identifiers: [],
+              platform: 'hal',
             },
             {
               sourceIdentifier: 'sudoc0001',
               identifiers: [],
+              platform: 'scanr',
+            },
+            {
+              sourceIdentifier: 'sudoc0001',
+              identifiers: [],
+              platform: 'scopus',
             },
           ],
         },
@@ -202,11 +214,15 @@ describe('Identifiers Component', () => {
 
     renderComponent()
 
-    expect(screen.getByText('sudoc0001')).toBeInTheDocument()
+    expect(screen.getByText('ScanR : sudoc0001')).toBeInTheDocument()
 
-    expect(screen.getAllByText('sudoc0001')).toHaveLength(1)
+    expect(screen.getByText('Scopus : sudoc0001')).toBeInTheDocument()
 
-    expect(screen.getByText('hal0001')).toBeInTheDocument()
+    expect(screen.getAllByText('ScanR : sudoc0001')).toHaveLength(1)
+
+    expect(screen.getAllByText('Scopus : sudoc0001')).toHaveLength(1)
+
+    expect(screen.getByText('Hal : hal0001')).toBeInTheDocument()
 
     expect(
       screen.queryByText(
@@ -214,7 +230,7 @@ describe('Identifiers Component', () => {
       ),
     ).not.toBeInTheDocument()
 
-    const sudocButton = screen.getByText('sudoc0001')
+    const sudocButton = screen.getByText('ScanR : sudoc0001')
 
     fireEvent.click(sudocButton)
 

@@ -6,6 +6,10 @@ import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 import { CheckCircle, ContentCopy } from '@mui/icons-material'
 import { Trans } from '@lingui/react/macro'
 import { t } from '@lingui/core/macro'
+import {
+  BibliographicPlatform,
+  BibliographicPlatformMetadata,
+} from '@/types/BibliographicPlatform'
 
 const Identifiers = () => {
   const theme = useTheme()
@@ -14,29 +18,32 @@ const Identifiers = () => {
   const [copyIdType, setCopyIdType] = useState<string | null>(null)
   const [count, setCount] = useState(0)
 
-  const [identifiers, altIdentifiers]: [PublicationIdentifier[], string[]] =
-    useMemo(() => {
-      const uniqueIdentifiers: PublicationIdentifier[] = []
-      const altIdentifiers: string[] = []
-      selectedDocument?.records.map((record) => {
-        const sourceId = record.sourceIdentifier
-        if (sourceId) {
-          const exist = altIdentifiers.some((id) => id == sourceId)
-          if (!exist) {
-            altIdentifiers.push(sourceId)
-          }
+  const [identifiers, altIdentifiers]: [
+    PublicationIdentifier[],
+    { id: string; platform: BibliographicPlatform }[],
+  ] = useMemo(() => {
+    const uniqueIdentifiers: PublicationIdentifier[] = []
+    const altIdentifiers: { id: string; platform: BibliographicPlatform }[] = []
+    selectedDocument?.records.map((record) => {
+      const sourceId = record.sourceIdentifier
+      const platform = record.platform
+      if (sourceId) {
+        const exist = altIdentifiers.some(
+          (id) => id.id == sourceId && id.platform == platform,
+        )
+        if (!exist) {
+          altIdentifiers.push({ id: sourceId, platform: platform })
         }
-        record.identifiers.map((identifier) => {
-          const exist = uniqueIdentifiers.some(
-            (id) => id.uid === identifier.uid,
-          )
-          if (!exist) {
-            uniqueIdentifiers.push(identifier)
-          }
-        })
+      }
+      record.identifiers.map((identifier) => {
+        const exist = uniqueIdentifiers.some((id) => id.uid === identifier.uid)
+        if (!exist) {
+          uniqueIdentifiers.push(identifier)
+        }
       })
-      return [uniqueIdentifiers, altIdentifiers]
-    }, [selectedDocument])
+    })
+    return [uniqueIdentifiers, altIdentifiers]
+  }, [selectedDocument])
 
   const handleClick = (identifier: PublicationIdentifier | string) => {
     let id: string
@@ -104,7 +111,7 @@ const Identifiers = () => {
             key={index}
             clickable
             color='primary'
-            onClick={() => handleClick(identifier)}
+            onClick={() => handleClick(identifier.id)}
             sx={{
               borderRadius: theme.utils.pxToRem(4),
               backgroundColor: 'rgba(0, 106, 97, 0.10)',
@@ -116,7 +123,11 @@ const Identifiers = () => {
             }}
             variant='outlined'
             icon={<ContentCopy />}
-            label={identifier}
+            label={
+              BibliographicPlatformMetadata[identifier.platform].name +
+              ' : ' +
+              identifier.id
+            }
           />
         ))}
 
