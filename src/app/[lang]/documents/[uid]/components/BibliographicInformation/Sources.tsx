@@ -57,7 +57,7 @@ const Sources = () => {
               }}
               key={record.platform}
               avatar={<Avatar src={metadata?.icon || '/icons/default.png'} />}
-              label={record.platform}
+              label={BibliographicPlatformMetadata[record.platform].name}
               clickable
               color='primary'
               onClick={() => {

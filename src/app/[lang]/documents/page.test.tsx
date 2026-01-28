@@ -304,7 +304,7 @@ describe('DocumentsPage Component', () => {
       expect(screen.getByText('John Doe')).toBeInTheDocument()
       expect(screen.getByText('01-01-2024')).toBeInTheDocument()
       expect(screen.getByText('Test journal')).toBeInTheDocument()
-      expect(screen.getByRole('link', { name: 'Hal' })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: 'HAL' })).toHaveAttribute(
         'href',
         'https://url-to-record-1/',
       )

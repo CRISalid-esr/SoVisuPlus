@@ -12,7 +12,7 @@ export const BibliographicPlatformMetadata: Record<
   BibliographicPlatform,
   { name: string; icon: string }
 > = {
-  [BibliographicPlatform.HAL]: { name: 'Hal', icon: '/icons/hal.png' },
+  [BibliographicPlatform.HAL]: { name: 'HAL', icon: '/icons/hal.png' },
   [BibliographicPlatform.SCANR]: { name: 'ScanR', icon: '/icons/scanr.png' },
   [BibliographicPlatform.IDREF]: { name: 'IdRef', icon: '/icons/idref.png' },
   [BibliographicPlatform.OPENALEX]: {
