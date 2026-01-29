@@ -222,7 +222,7 @@ describe('Identifiers Component', () => {
 
     expect(screen.getAllByText('Scopus : sudoc0001')).toHaveLength(1)
 
-    expect(screen.getByText('Hal : hal0001')).toBeInTheDocument()
+    expect(screen.getByText('HAL : hal0001')).toBeInTheDocument()
 
     expect(
       screen.queryByText(

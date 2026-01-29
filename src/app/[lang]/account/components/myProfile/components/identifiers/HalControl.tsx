@@ -1,4 +1,3 @@
-// file: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx
 'use client'
 
 import useStore from '@/stores/global_store'

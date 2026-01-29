@@ -106,7 +106,14 @@ export async function GET(
   console.debug('[CAS] Ticket validated, attributes:', parsed.attributes)
 
   const email = parsed.attributes.email
+  const halLogin = parsed.attributes.userName
+
   if (!email) {
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=hal-auth-missing-data`,
+    )
+  }
+  if (!halLogin) {
     return NextResponse.redirect(
       `${userRedirectionUrl}?error=hal-auth-missing-data`,
     )
@@ -123,6 +130,7 @@ export async function GET(
       `${userRedirectionUrl}?error=hal-unavailable-data`,
     )
   }
+
   console.debug('[AureHAL] resolved idHalDoc', idHalDoc)
 
   if (!idHalDoc?.idHal_s && typeof idHalDoc?.idHal_i !== 'number') {
@@ -133,6 +141,12 @@ export async function GET(
 
   const personService = new PersonService()
   try {
+    await personService.addOrUpdateIdentifier(
+      user.person.uid,
+      PersonIdentifierType.HAL_LOGIN,
+      halLogin,
+    )
+
     if (idHalDoc.idHal_s) {
       await personService.addOrUpdateIdentifier(
         user.person.uid,
