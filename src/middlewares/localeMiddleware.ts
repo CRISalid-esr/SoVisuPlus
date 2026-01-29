@@ -19,7 +19,15 @@ export const localeMiddleware =
       )
     }
     const defaultLocale = supportedLocales[0]
-    const { pathname } = request.nextUrl
+    const { pathname, searchParams } = request.nextUrl
+    // CCSD cas returns users to //user/login?authType=ORCID&url=/ unfortunately
+    // if they choose to log in via ORCID. So we have to exclude this route from the redirection.
+    if (
+      pathname.startsWith('/user/login') &&
+      searchParams.get('authType') === 'ORCID'
+    ) {
+      return middleware(request, event, NextResponse.next())
+    }
     const response = NextResponse.next()
     const pathLocale = pathname.split('/')[1]
 

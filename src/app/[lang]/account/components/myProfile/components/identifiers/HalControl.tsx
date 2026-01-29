@@ -90,6 +90,8 @@ const HalControl = () => {
         return <Trans id='hal-missing-identifiers' />
       case 'hal-identifier-insert-failure':
         return <Trans id='hal-identifier-insert-failure' />
+      case 'hal-authentication-failure-wrong-protocol':
+        return <Trans id='hal-authentication-failure-wrong-protocol' />
       default:
         return null
     }
