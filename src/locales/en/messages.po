@@ -405,12 +405,12 @@ msgstr "No orcid identifier provided"
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:62
 msgid "hal_button_update_identifier"
-msgstr "Valider mon identifiant Hal"
+msgstr "Link my Hal identifier"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:64
 msgid "hal_button_provide_identifier"
-msgstr ""
+msgstr "Provide my Hal identifier"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
@@ -437,7 +437,7 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:79
 msgid "hal-authentication-failure-no-ticket"
-msgstr ""
+msgstr "HAL authentication failure : required information not returned by HAL"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:81

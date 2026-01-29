@@ -115,7 +115,7 @@ export async function GET(
   }
   if (!halLogin) {
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=hal-auth-missing-data`,
+      `${userRedirectionUrl}?error=hal-authentication-failure-no-ticket`,
     )
   }
 
