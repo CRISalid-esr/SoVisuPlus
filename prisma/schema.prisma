@@ -208,13 +208,37 @@ model SourceJournal {
   DocumentRecord DocumentRecord[]
 }
 
+enum PublicationIdentifierType {
+  HAL           @map("hal")
+  DOI           @map("doi")
+  OPENALEX      @map("open_alex")
+  URI           @map("uri")
+  SUDOCPPN      @map("sudoc_ppn")
+  NNT           @map("nnt")
+  PRODINRA      @map("prodinra")
+  WOS           @map("wos")
+  PMID          @map("pmid")
+  ARXIV         @map("arxiv")
+  PPN           @map("ppn")
+  PUBMED        @map("pubmed")
+  PII           @map("pii")
+  PUBMEDCENTRAL @map("pubmedcentral")
+  IRD           @map("ird")
+  SCIENCESPO    @map("sciencespo")
+  INERIS        @map("ineris")
+  UNKNOWN       @map("unknown")
+}
+
 model PublicationIdentifier {
-  id               Int            @id @default(autoincrement())
-  uid              String         @unique
-  type             String
+  id               Int                       @id @default(autoincrement())
+  type             PublicationIdentifierType
   value            String?
-  DocumentRecord   DocumentRecord @relation(fields: [documentRecordId], references: [id], onDelete: Cascade)
+  DocumentRecord   DocumentRecord            @relation(fields: [documentRecordId], references: [id], onDelete: Cascade)
   documentRecordId Int
+
+  @@unique([type, value]) // The same identifer should not be used twice
+  @@unique([documentRecordId, type]) // A document record should not have more than one identifier of the same type
+  @@index([documentRecordId])
 }
 
 model DocumentRecord {

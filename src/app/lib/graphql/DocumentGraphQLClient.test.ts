@@ -80,7 +80,6 @@ describe('DocumentGraphQLClient', () => {
               source_identifier: 'sudoc0001',
               has_identifiers: [
                 {
-                  uid: 'pubid001',
                   type: 'sudoc-ppn',
                   value: 'sudoc-ppn-0001',
                 },
@@ -185,13 +184,7 @@ describe('DocumentGraphQLClient', () => {
         new DocumentRecord(
           'record-001',
           'sudoc0001',
-          [
-            new PublicationIdentifier(
-              'pubid001',
-              'sudoc-ppn',
-              'sudoc-ppn-0001',
-            ),
-          ],
+          [new PublicationIdentifier('sudoc-ppn', 'sudoc-ppn-0001')],
           [new SourceContribution(LocRelator.AUTHOR, mockSourcePerson)],
           ['Book', 'Document'],
           new Date('2022-01-01'),
@@ -306,7 +299,6 @@ describe('DocumentGraphQLClient', () => {
               source_identifier: 'sudoc0001',
               has_identifiers: [
                 {
-                  uid: 'pubid001',
                   type: 'sudoc-ppn',
                   value: 'sudoc-ppn-0001',
                 },
@@ -352,7 +344,6 @@ describe('DocumentGraphQLClient', () => {
               source_identifier: 'hal0001',
               has_identifiers: [
                 {
-                  uid: 'pubid003',
                   type: 'hal',
                   value: 'hal-0001',
                 },

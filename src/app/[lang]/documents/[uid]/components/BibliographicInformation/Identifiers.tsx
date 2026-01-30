@@ -36,7 +36,9 @@ const Identifiers = () => {
         }
       }
       record.identifiers.map((identifier) => {
-        const exist = uniqueIdentifiers.some((id) => id.uid === identifier.uid)
+        const exist = uniqueIdentifiers.some(
+          (id) => id.type === identifier.type && id.value === identifier.value,
+        )
         if (!exist) {
           uniqueIdentifiers.push(identifier)
         }
