@@ -70,7 +70,6 @@ describe('Document type', () => {
           sourceIdentifier: 'hal0001',
           identifiers: [
             {
-              uid: 'pubid003',
               type: 'hal',
               value: 'hal-0001',
             },
@@ -123,7 +122,7 @@ describe('Document type', () => {
         new DocumentRecord(
           'hal-123',
           'hal0001',
-          [new PublicationIdentifier('pubid003', 'hal', 'hal-0001')],
+          [new PublicationIdentifier('hal', 'hal-0001')],
           [
             new SourceContribution(
               LocRelator.AUTHOR,

@@ -29,7 +29,6 @@ import {
   UserRole,
   UserRoleScope,
 } from '@prisma/client'
-import { PublicationIdentifierJson } from '@/types/PublicationIdentifier'
 
 const prisma = new PrismaClient()
 

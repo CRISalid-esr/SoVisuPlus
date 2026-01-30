@@ -6,7 +6,6 @@ import {
   BibliographicPlatform,
   BibliographicPlatformMetadata,
 } from '@/types/BibliographicPlatform'
-import { DocumentType } from '@/types/Document'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'

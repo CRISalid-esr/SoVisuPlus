@@ -212,7 +212,7 @@ describe('DocumentDAO Integration Tests', () => {
     const halRecord = new DocumentRecord(
       'hal-doc-001',
       'hal0001',
-      [new PublicationIdentifier('pubid003', 'hal', 'hal-0001')],
+      [new PublicationIdentifier('hal', 'hal-0001')],
       [
         new SourceContribution(
           LocRelator.AUTHOR,
@@ -280,7 +280,6 @@ describe('DocumentDAO Integration Tests', () => {
     expect(record.uid).toBe('hal-doc-001')
     expect(record.sourceIdentifier).toBe('hal0001')
     expect(record.identifiers).toHaveLength(1)
-    expect(record.identifiers[0].uid).toBe('pubid003')
     expect(record.identifiers[0].type).toBe('hal')
     expect(record.identifiers[0].value).toBe('hal-0001')
     expect(record.contributions).toHaveLength(1)

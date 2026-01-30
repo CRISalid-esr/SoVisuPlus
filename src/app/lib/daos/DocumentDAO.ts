@@ -4,6 +4,7 @@ import {
   DocumentState,
   OAStatus,
   Person as DbPerson,
+  PublicationIdentifierType as DbPublicationIdentifierType,
   Prisma,
 } from '@prisma/client'
 import { Document, DocumentType } from '@/types/Document'
@@ -18,6 +19,8 @@ import { ConceptJson } from '@/types/Concept'
 import { LocRelatorHelper } from '@/types/LocRelator'
 import { parseStrArrayEnvVar } from '@/utils/parseStrArrayEnvVar'
 import QueryMode = Prisma.QueryMode
+import { PublicationIdentifier } from '@/types/PublicationIdentifier'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
@@ -453,29 +456,13 @@ export class DocumentDAO extends AbstractDAO {
               document: { connect: { id: dbDocument.id } },
             },
           })
-          for (const identifier of record.identifiers) {
-            try {
-              await this.prismaClient.publicationIdentifier.upsert({
-                where: { uid: identifier.uid },
-                create: {
-                  uid: identifier.uid,
-                  type: identifier.type,
-                  value: identifier.value,
-                  DocumentRecord: { connect: { id: documentRecord.id } },
-                },
-                update: {
-                  type: identifier.type,
-                  value: identifier.value,
-                  DocumentRecord: { connect: { id: documentRecord.id } },
-                },
-              })
-            } catch (error) {
-              console.error(
-                `Failed to upsert document record identifier: ${identifier.uid}`,
-                error,
-              )
-            }
-          }
+
+          await this.handleIdentifierConflicts(
+            record.identifiers,
+            documentRecord.id,
+          )
+
+          await this.upsertIdentifiers(record.identifiers, documentRecord.id)
         } catch (error) {
           console.error(
             `Failed to upsert document record: ${record.uid}`,
@@ -1164,5 +1151,82 @@ export class DocumentDAO extends AbstractDAO {
         documentType,
       },
     })
+  }
+
+  /**
+   * Handle potential conflicts with existing PublicationIdentifiers
+   * @param identifiers - The list of identifiers to check
+   * @param currentDocumentRecordId - The ID of the current document record
+   */
+  private async handleIdentifierConflicts(
+    identifiers: PublicationIdentifier[],
+    currentDocumentRecordId: number,
+  ): Promise<void> {
+    const conflictingIdentifiers =
+      (await this.prismaClient.publicationIdentifier.findMany({
+        where: {
+          OR: identifiers.map((identifier) => ({
+            type: identifier.type.toUpperCase() as DbPublicationIdentifierType,
+            value: identifier.value,
+            documentRecordId: { not: currentDocumentRecordId },
+          })),
+        },
+      })) ?? []
+
+    if (conflictingIdentifiers.length > 0) {
+      throw new Error(
+        `Conflicting identifiers found: ${conflictingIdentifiers
+          .map((id) => `${id.type}:${id.value}`)
+          .join(', ')}`,
+      )
+    }
+  }
+
+  /**
+   * Upsert PublicationIdentifier for a given document record
+   * @param identifiers - The list of identifiers to upsert
+   * @param documentRecordId - The ID of the document record
+   * @param retries - The number of retries (to handle conflicts on upsert)
+   */
+  private async upsertIdentifiers(
+    identifiers: PublicationIdentifier[],
+    documentRecordId: number,
+    retries = 0,
+  ): Promise<void> {
+    try {
+      // Remove old identifiers
+      await this.prismaClient.publicationIdentifier.deleteMany({
+        where: { documentRecordId },
+      })
+      // Insert new identifiers
+      await this.prismaClient.publicationIdentifier.createMany({
+        data: identifiers.map((identifier) => ({
+          documentRecordId,
+          type: identifier.type.toUpperCase() as DbPublicationIdentifierType,
+          value: identifier.value,
+        })),
+      })
+    } catch (error: unknown) {
+      console.error('Error during identifier upsert:', error as Error)
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        if (retries < 3) {
+          console.warn('Retrying identifier upsert...')
+          await this.upsertIdentifiers(
+            identifiers,
+            documentRecordId,
+            retries + 1,
+          )
+        } else {
+          console.error('Failed to upsert identifiers after 3 retries')
+        }
+      } else {
+        throw new Error(
+          `Failed to upsert identifiers: ${(error as Error).message}`,
+        )
+      }
+    }
   }
 }

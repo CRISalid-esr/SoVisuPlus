@@ -70,24 +70,16 @@ describe('Identifiers Component', () => {
             {
               sourceIdentifier: 'sudoc0001',
               identifiers: [
-                new PublicationIdentifier(
-                  'pubid001',
-                  'sudoc-ppn',
-                  'sudoc-ppn-0001',
-                ),
-                new PublicationIdentifier('pubid002', 'nnt', 'nnt-0001'),
+                new PublicationIdentifier('sudoc-ppn', 'sudoc-ppn-0001'),
+                new PublicationIdentifier('nnt', 'nnt-0001'),
               ],
               platform: 'scanr',
             },
             {
               sourceIdentifier: 'hal0001',
               identifiers: [
-                new PublicationIdentifier(
-                  'pubid001',
-                  'sudoc-ppn',
-                  'sudoc-ppn-0001',
-                ),
-                new PublicationIdentifier('pubid003', 'hal', 'hal-0001'),
+                new PublicationIdentifier('sudoc-ppn', 'sudoc-ppn-0001'),
+                new PublicationIdentifier('hal', 'hal-0001'),
               ],
               platform: 'hal',
             },
@@ -137,24 +129,16 @@ describe('Identifiers Component', () => {
             {
               sourceIdentifier: 'sudoc0001',
               identifiers: [
-                new PublicationIdentifier(
-                  'pubid001',
-                  'sudoc-ppn',
-                  'sudoc-ppn-0001',
-                ),
-                new PublicationIdentifier('pubid002', 'nnt', null),
+                new PublicationIdentifier('sudoc-ppn', 'sudoc-ppn-0001'),
+                new PublicationIdentifier('nnt', null),
               ],
               platform: 'scanr',
             },
             {
               sourceIdentifier: 'hal0001',
               identifiers: [
-                new PublicationIdentifier(
-                  'pubid001',
-                  'sudoc-ppn',
-                  'sudoc-ppn-0001',
-                ),
-                new PublicationIdentifier('pubid003', 'hal', 'hal-0001'),
+                new PublicationIdentifier('sudoc-ppn', 'sudoc-ppn-0001'),
+                new PublicationIdentifier('hal', 'hal-0001'),
               ],
               platform: 'hal',
             },
@@ -222,7 +206,7 @@ describe('Identifiers Component', () => {
 
     expect(screen.getAllByText('Scopus : sudoc0001')).toHaveLength(1)
 
-    expect(screen.getByText('Hal : hal0001')).toBeInTheDocument()
+    expect(screen.getByText('HAL : hal0001')).toBeInTheDocument()
 
     expect(
       screen.queryByText(

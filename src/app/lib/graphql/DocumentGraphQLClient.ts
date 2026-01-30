@@ -47,7 +47,6 @@ interface GraphSourceIssueResponse {
 }
 
 interface GraphSourcePublicationIdentifierResponse {
-  uid: string
   type: string
   value: string | null
 }
@@ -221,7 +220,6 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
               recordData.has_identifiers.reduce<PublicationIdentifier[]>(
                 (acc, identifier: PublicationIdentifier) => {
                   const pubId = new PublicationIdentifier(
-                    identifier.uid,
                     identifier.type,
                     identifier.value,
                   )
