@@ -77,7 +77,7 @@ export async function GET(
   }
 
   // avoid double slashes
-  const service = `${sovisuplusHost.replace(/\/$/, '')}/api/cas/login`
+  const service = `${sovisuplusHost.replace(/\/$/, '')}/api/cas/login?lang=${lang}`
 
   const validateUrl =
     `${casBase.replace(/\/$/, '')}/serviceValidate` +
