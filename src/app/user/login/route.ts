@@ -16,12 +16,12 @@ export async function GET(req: NextRequest) {
   if (authType && authType.toUpperCase() !== 'CAS') {
     // e.g. ORCID chosen in CCSD CAS UI
     return NextResponse.redirect(
-      `${accountUrl}?error=hal-authentication-failure-wrong-protocol`,
+      `${accountUrl}?error=hal_authentication_failure_wrong_protocol`,
     )
   }
 
   // If someone hits /user/login without authType (??), treat as wrong flow too
   return NextResponse.redirect(
-    `${accountUrl}?error=hal-authentication-failure-wrong-protocol`,
+    `${accountUrl}?error=hal_authentication_failure_wrong_protocol`,
   )
 }

@@ -12,27 +12,29 @@ import {
 } from '@/types/PersonIdentifier'
 import { parseCasTicketValidationResult } from '@/app/utils/parseCasTicketValidationResult'
 
-const isLoginOrLogout = (client: string): client is 'login' | 'logout' =>
-  client === 'login' || client === 'logout'
+const isLoginOrLogout = (action: string): action is 'login' | 'logout' =>
+  action === 'login' || action === 'logout'
 
 export async function GET(
   req: NextRequest,
-  context: { params: Promise<{ client: string }> },
+  context: { params: Promise<{ action: string }> },
 ) {
   const sovisuplusHost = process.env.NEXT_PUBLIC_BASE_URL
   if (!sovisuplusHost) {
     return new NextResponse('NEXT_PUBLIC_BASE_URL is not set', { status: 500 })
   }
 
-  // Notice: hardcode fr for now
-  const userRedirectionUrl = `${sovisuplusHost}/fr/account`
+  const lang =
+    req.nextUrl.searchParams.get('lang') ??
+    process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0]
+  const userRedirectionUrl = `${sovisuplusHost}/${lang}/account`
 
-  const { client } = await context.params
-  if (!isLoginOrLogout(client))
+  const { action } = await context.params
+  if (!isLoginOrLogout(action))
     return new Response('Not found', { status: 404 })
 
   // If we implement logout later
-  if (client === 'logout') {
+  if (action === 'logout') {
     return NextResponse.redirect(
       `${userRedirectionUrl}?success=hal-logout-success`,
     )
@@ -41,7 +43,7 @@ export async function GET(
   const ticket = req.nextUrl.searchParams.get('ticket')
   if (!ticket) {
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=hal-authentication-failure-no-ticket`,
+      `${userRedirectionUrl}?error=hal_authentication_failure_no_ticket`,
     )
   }
 
@@ -51,7 +53,7 @@ export async function GET(
   }
   if (!session?.user?.id || !session?.user?.username) {
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=hal-authentication-failure-no-session`,
+      `${userRedirectionUrl}?error=hal_authentication_failure_no_session`,
     )
   }
 
@@ -62,7 +64,7 @@ export async function GET(
   )
   if (!user?.person) {
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=hal-authentication-failure-user-not-found`,
+      `${userRedirectionUrl}?error=hal_authentication_failure_user_not_found`,
     )
   }
 
@@ -70,7 +72,7 @@ export async function GET(
   const casBase = process.env.NEXT_PUBLIC_CAS_URL // e.g. https://cas.ccsd.cnrs.fr/cas
   if (!casBase) {
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=hal-authentication-failure-misconfig`,
+      `${userRedirectionUrl}?error=hal_authentication_failure_misconfig`,
     )
   }
 
@@ -99,7 +101,7 @@ export async function GET(
       validateUrl,
     })
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=hal-authentication-failure`,
+      `${userRedirectionUrl}?error=hal_authentication_failure`,
     )
   }
 
@@ -110,12 +112,12 @@ export async function GET(
 
   if (!uid) {
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=hal-auth-missing-data`,
+      `${userRedirectionUrl}?error=hal_auth_missing_data`,
     )
   }
   if (!halLogin) {
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=hal-auth-missing-data`,
+      `${userRedirectionUrl}?error=hal_auth_missing_data`,
     )
   }
 
@@ -127,7 +129,7 @@ export async function GET(
   } catch (e) {
     console.error('[AureHAL] lookup failed', e)
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=hal-unavailable-data`,
+      `${userRedirectionUrl}?error=hal_unavailable_data`,
     )
   }
 
@@ -135,7 +137,7 @@ export async function GET(
 
   if (!idHalDoc?.idHal_s && typeof idHalDoc?.idHal_i !== 'number') {
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=hal-missing-identifiers`,
+      `${userRedirectionUrl}?error=hal_missing_identifiers`,
     )
   }
 
@@ -163,11 +165,11 @@ export async function GET(
   } catch (e) {
     console.error('[HAL] DB write failed', e)
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=hal-identifier-insert-failure`,
+      `${userRedirectionUrl}?error=hal_identifier_insert_failure`,
     )
   }
 
   return NextResponse.redirect(
-    `${userRedirectionUrl}?success=hal-authentication-success`,
+    `${userRedirectionUrl}?success=hal_authentication_success`,
   )
 }

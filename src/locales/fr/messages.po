@@ -15,7 +15,7 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:94
-msgid "hal-authentication-failure-wrong-protocol"
+msgid "hal_authentication_failure_wrong_protocol"
 msgstr "Pour lier votre compte SoVisu+, n'utilisez pas l'option ORCID lors de l'authentification sur HAL"
 
 #. js-lingui-explicit-id
@@ -409,52 +409,52 @@ msgstr "Fournir mon identifiant ORCID"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:74
-msgid "hal-authentication-success"
+msgid "hal_authentication_success"
 msgstr "Authentification HAL réussie"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:76
-msgid "hal-authentication-failure"
+msgid "hal_authentication_failure"
 msgstr "Échec de l'authentification HAL"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:78
-msgid "hal-authentication-failure-no-ticket"
+msgid "hal_authentication_failure_no_ticket"
 msgstr "Échec de l'authentification HAL : information non retournée par HAL"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:80
-msgid "hal-authentication-failure-no-session"
+msgid "hal_authentication_failure_no_session"
 msgstr "Utilisateur non authentifié"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:82
-msgid "hal-authentication-failure-user-not-found"
+msgid "hal_authentication_failure_user_not_found"
 msgstr "Utilisateur non trouvé"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:84
-msgid "hal-authentication-failure-misconfig"
+msgid "hal_authentication_failure_misconfig"
 msgstr "Mauvaise configuration de l'authentification HAL"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:86
-msgid "hal-auth-missing-data"
+msgid "hal_auth_missing_data"
 msgstr "Données manquantes sur HAL"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:88
-msgid "hal-unavailable-data"
+msgid "hal_unavailable_data"
 msgstr "Données HAL indisponibles"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:90
-msgid "hal-missing-identifiers"
+msgid "hal_missing_identifiers"
 msgstr "Aucun identifiant HAL trouvé"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:92
-msgid "hal-identifier-insert-failure"
+msgid "hal_identifier_insert_failure"
 msgstr "Échec de l'insertion de l'identifiant HAL en base de données"
 
 #. js-lingui-explicit-id
