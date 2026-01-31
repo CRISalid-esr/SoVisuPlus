@@ -1,4 +1,3 @@
-// file: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx
 'use client'
 
 import useStore from '@/stores/global_store'
@@ -71,26 +70,28 @@ const HalControl = () => {
 
   const renderMessage = () => {
     switch (messageKey) {
-      case 'hal-authentication-success':
-        return <Trans id='hal-authentication-success' />
-      case 'hal-authentication-failure':
-        return <Trans id='hal-authentication-failure' />
-      case 'hal-authentication-failure-no-ticket':
-        return <Trans id='hal-authentication-failure-no-ticket' />
-      case 'hal-authentication-failure-no-session':
-        return <Trans id='hal-authentication-failure-no-session' />
-      case 'hal-authentication-failure-user-not-found':
-        return <Trans id='hal-authentication-failure-user-not-found' />
-      case 'hal-authentication-failure-misconfig':
-        return <Trans id='hal-authentication-failure-misconfig' />
-      case 'hal-auth-missing-data':
-        return <Trans id='hal-auth-missing-data' />
-      case 'hal-unavailable-data':
-        return <Trans id='hal-unavailable-data' />
-      case 'hal-missing-identifiers':
-        return <Trans id='hal-missing-identifiers' />
-      case 'hal-identifier-insert-failure':
-        return <Trans id='hal-identifier-insert-failure' />
+      case 'hal_authentication_success':
+        return <Trans id='hal_authentication_success' />
+      case 'hal_authentication_failure':
+        return <Trans id='hal_authentication_failure' />
+      case 'hal_authentication_failure_no_ticket':
+        return <Trans id='hal_authentication_failure_no_ticket' />
+      case 'hal_authentication_failure_no_session':
+        return <Trans id='hal_authentication_failure_no_session' />
+      case 'hal_authentication_failure_user_not_found':
+        return <Trans id='hal_authentication_failure_user_not_found' />
+      case 'hal_authentication_failure_misconfig':
+        return <Trans id='hal_authentication_failure_misconfig' />
+      case 'hal_auth_missing_data':
+        return <Trans id='hal_auth_missing_data' />
+      case 'hal_unavailable_data':
+        return <Trans id='hal_unavailable_data' />
+      case 'hal_missing_identifiers':
+        return <Trans id='hal_missing_identifiers' />
+      case 'hal_identifier_insert_failure':
+        return <Trans id='hal_identifier_insert_failure' />
+      case 'hal_authentication_failure_wrong_protocol':
+        return <Trans id='hal_authentication_failure_wrong_protocol' />
       default:
         return null
     }

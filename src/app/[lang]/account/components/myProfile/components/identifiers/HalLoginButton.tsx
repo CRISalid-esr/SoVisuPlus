@@ -5,6 +5,7 @@ import Image from 'next/image'
 import React from 'react'
 import { Trans } from '@lingui/react'
 import { getRuntimeEnv } from '@/utils/runtimeEnv'
+import * as Lingui from '@lingui/core'
 
 const buildCasLoginUrl = ({
   casUrl,
@@ -20,8 +21,8 @@ const buildCasLoginUrl = ({
 
   const normalizedCasUrl = casUrl.replace(/\/$/, '')
   const normalizedBaseUrl = baseUrl.replace(/\/$/, '')
-
-  const serviceUrl = `${normalizedBaseUrl}/api/cas/login`
+  const lang = Lingui.i18n.locale
+  const serviceUrl = `${normalizedBaseUrl}/api/cas/login?lang=${lang}`
 
   let loginUrl = `${normalizedCasUrl}/login?service=${encodeURIComponent(
     serviceUrl,
