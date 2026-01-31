@@ -105,25 +105,25 @@ export async function GET(
 
   console.debug('[CAS] Ticket validated, attributes:', parsed.attributes)
 
-  const email = parsed.attributes.email
+  const uid = parsed.attributes.uid
   const halLogin = parsed.attributes.userName
 
-  if (!email) {
+  if (!uid) {
     return NextResponse.redirect(
       `${userRedirectionUrl}?error=hal-auth-missing-data`,
     )
   }
   if (!halLogin) {
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=hal-authentication-failure-no-ticket`,
+      `${userRedirectionUrl}?error=hal-auth-missing-data`,
     )
   }
 
-  // Resolve idHal from AureHAL
+  // Resolve idHal from AureHAL using uid
   const aurehal = new AureHalAPIClient()
   let idHalDoc
   try {
-    idHalDoc = await aurehal.findAuthorByEmail(email)
+    idHalDoc = await aurehal.findAuthorByUid(uid)
   } catch (e) {
     console.error('[AureHAL] lookup failed', e)
     return NextResponse.redirect(
