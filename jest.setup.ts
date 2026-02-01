@@ -20,6 +20,7 @@ Object.defineProperty(window, 'env', {
     ORCID_SCOPES: process.env.ORCID_SCOPES,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
     NEXT_PUBLIC_CAS_URL: process.env.NEXT_PUBLIC_CAS_URL,
+    NEXT_PUBLIC_INSTITUTION_NAME: process.env.NEXT_PUBLIC_INSTITUTION_NAME,
   },
   writable: true,
 })

@@ -7,6 +7,7 @@ import {
   Link,
   Paper,
   Snackbar,
+  Stack,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -85,23 +86,26 @@ const OrcidControl = () => {
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 1,
+          gap: 1.5,
           p: 2,
           width: '100%',
           borderRadius: 2,
+          minWidth: 0,
         }}
       >
+        {/* Header row: label + linked icon */}
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: 2,
-            width: '100%',
+            gap: 1,
+            minWidth: 0,
           }}
         >
           <Typography variant='subtitle1' fontWeight='bold'>
             ORCID
           </Typography>
+
           {isLinked && (
             <Tooltip title={<Trans id='orcid_account_linked_tooltip' />} arrow>
               <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
@@ -109,25 +113,31 @@ const OrcidControl = () => {
               </Box>
             </Tooltip>
           )}
-          {orcid ? (
+        </Box>
+
+        {/* 1) PID row */}
+        {orcid ? (
+          <Box sx={{ minWidth: 0 }}>
             <PidComponent
               value={orcid}
               emphasizeComponent={true}
               className={styles['pid-components']}
             />
-          ) : (
-            <Typography variant='body2' color='text.secondary'>
-              <Trans id='orcid_identifier_no_orcid_provided' />
-            </Typography>
-          )}
+          </Box>
+        ) : (
+          <Typography variant='body2' color='text.secondary'>
+            <Trans id='orcid_identifier_no_orcid_provided' />
+          </Typography>
+        )}
 
-          <OrcidLoginButton
-            orcidProvided={!!orcid}
-            grantedScopes={orcidIdentifier?.oauth?.scope ?? null}
-            hasOauth={isLinked}
-          />
-        </Box>
+        {/* 2) + 3): authorisation text then button+checkboxes */}
+        <OrcidLoginButton
+          orcidProvided={!!orcid}
+          grantedScopes={orcidIdentifier?.oauth?.scope ?? null}
+          hasOauth={isLinked}
+        />
 
+        {/* Helper text */}
         <Typography variant='caption' color='text.secondary'>
           <Trans
             id='orcid_control_helper'

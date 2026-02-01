@@ -137,103 +137,120 @@ export function OrcidLoginButton({
       .map((s) => ({ scope: s, text: PERMISSION_TEXT_BY_SCOPE[s]! }))
   }, [grantedScopes])
 
-  return (
-    <Stack spacing={1.25}>
-      {/* Top row: button + checkboxes */}
-      <Stack
-        direction='row'
-        spacing={2}
-        alignItems='flex-start'
-        flexWrap='wrap'
-      >
-        <Button
-          variant='outlined'
-          href={authUrl}
-          startIcon={
-            <Image
-              src='/icons/orcid-logo.png'
-              alt='ORCID logo'
-              width={20}
-              height={20}
-            />
-          }
-          sx={{
-            borderColor: '#A6CE39',
-            color: '#2D3B45',
-            textTransform: 'none',
-            '&:hover': {
-              borderColor: '#A6CE39',
-              backgroundColor: 'rgba(166, 206, 57, 0.1)',
-            },
-          }}
-        >
-          {orcidProvided ? (
-            <Trans id='orcid_button_update_identifier' />
-          ) : (
-            <Trans id='orcid_button_provide_identifier' />
-          )}
-        </Button>
+  const PermissionsBox = (
+    <Box
+      sx={{
+        border: '1px solid',
+        borderColor: 'divider',
+        backgroundColor: 'action.hover',
+        borderRadius: 2,
+        px: 1.5,
+        py: 1,
+        maxWidth: '100%',
+        minWidth: 0,
+      }}
+    >
+      {hasOauth && grantedPermissionBullets.length > 0 ? (
+        <Stack spacing={0.5}>
+          <Typography variant='body2'>
+            <Trans id='orcid_permissions_intro' values={{ institutionName }} />
+          </Typography>
 
-        <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap'>
-          {optionalScopes.map((scope) => (
-            <Tooltip key={scope} title={scope}>
-              <FormControlLabel
-                sx={{ mr: 0.5 }}
-                control={
-                  <Checkbox
-                    checked={Boolean(selected[scope])}
-                    onChange={() => toggle(scope)}
-                    size='small'
-                    disabled={scope === READ_LIMITED && anyOtherChecked}
-                  />
-                }
-                label={HUMAN_LABELS[scope] ?? scope}
-              />
-            </Tooltip>
-          ))}
+          <List dense sx={{ py: 0, pl: 1.5 }}>
+            {grantedPermissionBullets.map((b) => (
+              <ListItem
+                key={b.scope}
+                sx={{ py: 0, display: 'list-item', listStyleType: 'disc' }}
+              >
+                <ListItemText primary={b.text} />
+              </ListItem>
+            ))}
+          </List>
         </Stack>
-      </Stack>
+      ) : (
+        <Typography variant='body2'>
+          <Trans id='orcid_permissions_none' values={{ institutionName }} />
+        </Typography>
+      )}
+    </Box>
+  )
 
-      {/* Permissions box */}
-      <Box
+  const ControlsRow = (
+    <Stack
+      direction='row'
+      spacing={2}
+      alignItems='flex-start'
+      flexWrap='wrap'
+      sx={{ minWidth: 0, maxWidth: '100%' }}
+    >
+      <Button
+        variant='outlined'
+        href={authUrl}
+        startIcon={
+          <Image
+            src='/icons/orcid-logo.png'
+            alt='ORCID logo'
+            width={20}
+            height={20}
+          />
+        }
         sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          backgroundColor: 'action.hover',
-          borderRadius: 2,
-          px: 1.5,
-          py: 1,
+          borderColor: '#A6CE39',
+          color: '#2D3B45',
+          textTransform: 'none',
+          '&:hover': {
+            borderColor: '#A6CE39',
+            backgroundColor: 'rgba(166, 206, 57, 0.1)',
+          },
         }}
       >
-        {hasOauth ? (
-          <Stack spacing={0.5}>
-            <Typography variant='body2'>
-              <Trans
-                id='orcid_permissions_intro'
-                values={{ institutionName }}
-              />
-            </Typography>
-
-            <List dense sx={{ py: 0, pl: 1.5 }}>
-              {grantedPermissionBullets.map((b) => (
-                <ListItem
-                  key={b.scope}
-                  sx={{ py: 0, display: 'list-item', listStyleType: 'disc' }}
-                >
-                  <ListItemText
-                    primaryTypographyProps={{ variant: 'body2' }}
-                    primary={b.text}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Stack>
+        {orcidProvided ? (
+          <Trans id='orcid_button_update_identifier' />
         ) : (
-          <Typography variant='body2'>
-            <Trans id='orcid_permissions_none' values={{ institutionName }} />
-          </Typography>
+          <Trans id='orcid_button_provide_identifier' />
         )}
-      </Box>
+      </Button>
+
+      <Stack
+        direction='row'
+        spacing={1}
+        alignItems='center'
+        flexWrap='wrap'
+        sx={{ minWidth: 0, maxWidth: '100%' }}
+      >
+        {optionalScopes.map((scope) => (
+          <Tooltip key={scope} title={scope}>
+            <FormControlLabel
+              sx={{
+                mr: 0.5,
+                maxWidth: '100%',
+                '& .MuiFormControlLabel-label': {
+                  whiteSpace: 'normal',
+                  overflowWrap: 'anywhere',
+                },
+              }}
+              control={
+                <Checkbox
+                  checked={Boolean(selected[scope])}
+                  onChange={() => toggle(scope)}
+                  size='small'
+                  disabled={scope === READ_LIMITED && anyOtherChecked}
+                />
+              }
+              label={HUMAN_LABELS[scope] ?? scope}
+            />
+          </Tooltip>
+        ))}
+      </Stack>
+    </Stack>
+  )
+
+  return (
+    <Stack spacing={1.25} sx={{ minWidth: 0, maxWidth: '100%' }}>
+      <>
+        {PermissionsBox}
+        {ControlsRow}
+      </>
     </Stack>
   )
 }
