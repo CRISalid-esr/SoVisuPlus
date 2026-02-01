@@ -1,20 +1,33 @@
 import useStore from '@/stores/global_store'
 import React, { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Alert, Box, Link, Paper, Snackbar, Typography } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Link,
+  Paper,
+  Snackbar,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { PidComponent } from '@kit-data-manager/react-pid-component'
 import styles from './OrcidControl.module.css'
 import { OrcidLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton'
 import { Trans } from '@lingui/react'
+import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
+import LinkIcon from '@mui/icons-material/Link'
 
 const OrcidControl = () => {
   const { connectedUser } = useStore((state) => state.user)
   const person = connectedUser?.person
   const identifiers = person?.getIdentifiers() ?? []
-  const orcid = identifiers.find(
-    (identifier) => identifier.type === PersonIdentifierType.ORCID,
-  )?.value
+  const orcidIdentifier = identifiers.find(
+    (i) => i.type === PersonIdentifierType.ORCID,
+  ) as ORCIDIdentifier | undefined
+
+  const orcid = orcidIdentifier?.value
+  const isLinked = Boolean(orcidIdentifier?.oauth)
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -89,7 +102,13 @@ const OrcidControl = () => {
           <Typography variant='subtitle1' fontWeight='bold'>
             ORCID
           </Typography>
-
+          {isLinked && (
+            <Tooltip title={<Trans id='orcid_account_linked_tooltip' />} arrow>
+              <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                <LinkIcon fontSize='small' />
+              </Box>
+            </Tooltip>
+          )}
           {orcid ? (
             <PidComponent
               value={orcid}
@@ -102,7 +121,11 @@ const OrcidControl = () => {
             </Typography>
           )}
 
-          <OrcidLoginButton orcidProvided={!!orcid} />
+          <OrcidLoginButton
+            orcidProvided={!!orcid}
+            grantedScopes={orcidIdentifier?.oauth?.scope ?? null}
+            hasOauth={isLinked}
+          />
         </Box>
 
         <Typography variant='caption' color='text.secondary'>

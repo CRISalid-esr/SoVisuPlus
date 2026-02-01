@@ -81,6 +81,7 @@ export const GET = async (req: NextRequest) => {
     !refreshToken ||
     !orcid ||
     !scopeStr ||
+    typeof orcid !== 'string' ||
     !expiresIn ||
     typeof expiresIn !== 'number'
   ) {
@@ -93,10 +94,7 @@ export const GET = async (req: NextRequest) => {
   const obtainedAt = new Date()
   const expiresAt = new Date(obtainedAt.getTime() + expiresIn * 1000)
 
-  const scopes =
-    typeof scopeStr === 'string'
-      ? ORCIDIdentifier.parseOrcidScope(scopeStr)
-      : null
+  const scopes = ORCIDIdentifier.parseOrcidScope(scopeStr)
 
   const orcidIdentifier = new ORCIDIdentifier(orcid, {
     accessToken,

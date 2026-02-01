@@ -340,15 +340,14 @@ export class PersonDAO extends AbstractDAO {
     }
 
     // Require minimum fields for persistence (callback should always provide these)
-    if (!oauth.accessToken || !oauth.refreshToken) {
+    if (!oauth.accessToken || !oauth.refreshToken || !oauth.scope) {
       throw new Error(
         `Missing accessToken/refreshToken for ORCID identifier (personIdentifierId=${personIdentifierId})`,
       )
     }
 
     // Serialize scopes
-    const scopeStr =
-      oauth.scope && oauth.scope.length > 0 ? oauth.scope.join(' ') : null
+    const scopeStr = oauth.scope.join(' ')
 
     const data = {
       id: personIdentifierId,

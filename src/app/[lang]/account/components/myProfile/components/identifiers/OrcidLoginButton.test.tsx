@@ -23,7 +23,7 @@ i18n.activate('en')
 const renderWithProviders = (props: { orcidProvided: boolean }) =>
   render(
     <I18nProvider i18n={i18n}>
-      <OrcidLoginButton {...props} />
+      <OrcidLoginButton {...props} hasOauth={false} grantedScopes={null} />
     </I18nProvider>,
   )
 

@@ -50,7 +50,22 @@ export class UserDAO extends AbstractDAO {
         include: {
           person: {
             include: {
-              identifiers: true,
+              identifiers: {
+                include: {
+                  orcidIdentifier: {
+                    select: {
+                      id: true,
+                      scope: true,
+                      tokenType: true,
+                      obtainedAt: true,
+                      expiresAt: true,
+                      createdAt: true,
+                      updatedAt: true,
+                      // !! don't expose tokens
+                    },
+                  },
+                },
+              },
               memberships: {
                 select: {
                   id: true,

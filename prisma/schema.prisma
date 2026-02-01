@@ -334,11 +334,11 @@ model OrcidIdentifier {
   // encrypt tokens !
   accessToken  String?
   refreshToken String?
-  scope        String?
+  scope        String
   tokenType    String?
 
-  obtainedAt DateTime  @default(now())
-  expiresAt  DateTime?
+  obtainedAt DateTime @default(now())
+  expiresAt  DateTime
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
