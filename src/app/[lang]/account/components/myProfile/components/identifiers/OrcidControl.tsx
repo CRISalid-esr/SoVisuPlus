@@ -1,7 +1,7 @@
 import useStore from '@/stores/global_store'
 import React, { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Alert, Paper, Snackbar, Typography } from '@mui/material'
+import { Alert, Box, Link, Paper, Snackbar, Typography } from '@mui/material'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { PidComponent } from '@kit-data-manager/react-pid-component'
 import styles from './OrcidControl.module.css'
@@ -48,18 +48,18 @@ const OrcidControl = () => {
 
   const renderMessage = () => {
     switch (messageKey) {
-      case 'orcid-authentication-success':
-        return <Trans id='orcid-authentication-success' />
-      case 'orcid-authentication-failure':
-        return <Trans id='orcid-authentication-failure' />
-      case 'orcid-authentication-failure-no-code':
-        return <Trans id={'orcid-authentication-failure-no-code'} />
-      case 'orcid-authentication-failure-no-session':
-        return <Trans id={'orcid-authentication-failure-no-session'} />
-      case 'orcid-authentication-failure-user-not-found':
-        return <Trans id={'orcid-authentication-failure-user-not-found'} />
-      case 'orcid-insert-failure':
-        return <Trans id={'orcid-insert-failure'} />
+      case 'orcid_authentication_success':
+        return <Trans id='orcid_authentication_success' />
+      case 'orcid_authentication_failure':
+        return <Trans id='orcid_authentication_failure' />
+      case 'orcid_authentication_failure_no_code':
+        return <Trans id={'orcid_authentication_failure_no_code'} />
+      case 'orcid_authentication_failure_no_session':
+        return <Trans id={'orcid_authentication_failure_no_session'} />
+      case 'orcid_authentication_failure_user_not_found':
+        return <Trans id={'orcid_authentication_failure_user_not_found'} />
+      case 'orcid_insert_failure':
+        return <Trans id={'orcid_insert_failure'} />
       default:
         return null
     }
@@ -71,37 +71,54 @@ const OrcidControl = () => {
         elevation={1}
         sx={{
           display: 'flex',
-          alignItems: 'center',
-          gap: 2,
+          flexDirection: 'column',
+          gap: 1,
           p: 2,
           width: '100%',
           borderRadius: 2,
         }}
       >
-        <Typography
-          variant='subtitle1'
-          fontWeight='bold'
-          sx={{ alignSelf: 'center' }}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            width: '100%',
+          }}
         >
-          ORCID
-        </Typography>
-        {orcid && (
-          <PidComponent
-            value={orcid}
-            emphasizeComponent={true}
-            className={styles['pid-components']}
-          />
-        )}
-        {!orcid && (
-          <Typography
-            variant='body2'
-            color='text.secondary'
-            sx={{ alignSelf: 'normal' }}
-          >
-            <Trans id='orcid_identifier_no_orcid_provided' />
+          <Typography variant='subtitle1' fontWeight='bold'>
+            ORCID
           </Typography>
-        )}
-        <OrcidLoginButton orcidProvided={!!orcid} />
+
+          {orcid ? (
+            <PidComponent
+              value={orcid}
+              emphasizeComponent={true}
+              className={styles['pid-components']}
+            />
+          ) : (
+            <Typography variant='body2' color='text.secondary'>
+              <Trans id='orcid_identifier_no_orcid_provided' />
+            </Typography>
+          )}
+
+          <OrcidLoginButton orcidProvided={!!orcid} />
+        </Box>
+
+        <Typography variant='caption' color='text.secondary'>
+          <Trans
+            id='orcid_control_helper'
+            components={[
+              <Link
+                key='orcid-link'
+                href='https://orcid.org'
+                target='_blank'
+                rel='noopener noreferrer'
+                underline='always'
+              />,
+            ]}
+          />
+        </Typography>
       </Paper>
 
       <Snackbar

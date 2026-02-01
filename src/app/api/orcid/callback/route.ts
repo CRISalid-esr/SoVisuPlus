@@ -18,7 +18,7 @@ export const GET = async (req: NextRequest) => {
   const code = req.nextUrl.searchParams.get('code')
   if (!code) {
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=orcid-authentication-failure-no-code`,
+      `${userRedirectionUrl}?error=orcid_authentication_failure_no_code`,
     )
   }
   const session = (await getServerSession(authOptions)) as Session & {
@@ -26,7 +26,7 @@ export const GET = async (req: NextRequest) => {
   }
   if (!session || !session?.user?.id || !session?.user?.username) {
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=orcid-authentication-failure-no-session`,
+      `${userRedirectionUrl}?error=orcid_authentication_failure_no_session`,
     )
   }
   const userService = new UserService()
@@ -36,7 +36,7 @@ export const GET = async (req: NextRequest) => {
   if (!user || !user.person) {
     console.error(`User not found for session ID: ${session?.user?.id}`)
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=orcid-authentication-failure-user-not-found`,
+      `${userRedirectionUrl}?error=orcid_authentication_failure_user_not_found`,
     )
   }
 
@@ -63,7 +63,7 @@ export const GET = async (req: NextRequest) => {
   if (!data.access_token) {
     console.error('OAuth error', data)
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=orcid-authentication-failure`,
+      `${userRedirectionUrl}?error=orcid_authentication_failure`,
     )
   }
   const { orcid } = data
@@ -77,11 +77,11 @@ export const GET = async (req: NextRequest) => {
   } catch (error) {
     console.error('Error adding orcid identifier', error)
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=orcid-insert-failure`,
+      `${userRedirectionUrl}?error=orcid_insert_failure`,
     )
   }
 
   return NextResponse.redirect(
-    `${userRedirectionUrl}?success=orcid-authentication-success`,
+    `${userRedirectionUrl}?success=orcid_authentication_success`,
   )
 }
