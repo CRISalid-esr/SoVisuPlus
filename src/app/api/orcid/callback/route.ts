@@ -8,6 +8,7 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { PersonService } from '@/lib/services/PersonService'
+import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 
 export const GET = async (req: NextRequest) => {
   const sovisuplusHost = process.env.NEXT_PUBLIC_BASE_URL
@@ -57,25 +58,63 @@ export const GET = async (req: NextRequest) => {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
   })
+  if (!response.ok) {
+    console.error('OAuth token request failed', await response.text())
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=orcid_authentication_failure_token_request`,
+    )
+  }
 
   const data = await response.json()
 
-  if (!data.access_token) {
-    console.error('OAuth error', data)
+  const {
+    access_token: accessToken,
+    refresh_token: refreshToken,
+    expires_in: expiresIn,
+    scope: scopeStr,
+    token_type: tokenType,
+    orcid,
+  } = data
+
+  if (
+    !accessToken ||
+    !refreshToken ||
+    !orcid ||
+    !scopeStr ||
+    !expiresIn ||
+    typeof expiresIn !== 'number'
+  ) {
+    console.error('OAuth token response missing fields', data)
     return NextResponse.redirect(
-      `${userRedirectionUrl}?error=orcid_authentication_failure`,
+      `${userRedirectionUrl}?error=orcid_authentication_failure_missing_data`,
     )
   }
-  const { orcid } = data
+
+  const obtainedAt = new Date()
+  const expiresAt = new Date(obtainedAt.getTime() + expiresIn * 1000)
+
+  const scopes =
+    typeof scopeStr === 'string'
+      ? ORCIDIdentifier.parseOrcidScope(scopeStr)
+      : null
+
+  const orcidIdentifier = new ORCIDIdentifier(orcid, {
+    accessToken,
+    refreshToken,
+    tokenType: tokenType ?? null,
+    scope: scopes,
+    obtainedAt,
+    expiresAt,
+  })
+
   const personService = new PersonService()
   try {
-    await personService.addOrUpdateIdentifier(
+    await personService.addOrUpdateOrcidIdentifier(
       user.person.uid,
-      PersonIdentifierType.ORCID,
-      orcid,
+      orcidIdentifier,
     )
   } catch (error) {
-    console.error('Error adding orcid identifier', error)
+    console.error('Error adding ORCID identifier / OAuth data', error)
     return NextResponse.redirect(
       `${userRedirectionUrl}?error=orcid_insert_failure`,
     )

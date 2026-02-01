@@ -1,6 +1,7 @@
 import slugify from 'slugify'
 import {
   Person as DbPerson,
+  PersonIdentifier as DbPersonIdentifier,
   PersonIdentifierType as DbPersonIdentifierType,
   Prisma,
 } from '@prisma/client'
@@ -11,6 +12,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
 import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
 import removeAccents from 'remove-accents'
+import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 
 /** PersonDAO: Handles operations related to Person and PersonIdentifiers */
 export class PersonDAO extends AbstractDAO {
@@ -250,21 +252,25 @@ export class PersonDAO extends AbstractDAO {
    * @param personUid - The UID of the person
    * @param retries - The number of retries (to handle conflicts on upsert)
    * @returns The created or updated PersonIdentifier record
-   * */
+   */
   public async upsertIdentifier(
     identifier: PersonIdentifier,
     personUid: string,
     retries = 0,
-  ): Promise<void> {
+  ): Promise<DbPersonIdentifier> {
     const person = await this.prismaClient.person.findUnique({
       where: { uid: personUid },
+      select: { id: true },
     })
+
     if (!person) {
       throw new Error(`Person with UID ${personUid} not found`)
     }
-    const personId: number = person.id
+
+    const personId = person.id
+
     try {
-      await this.prismaClient.personIdentifier.upsert({
+      return await this.prismaClient.personIdentifier.upsert({
         where: {
           personId_type: {
             personId,
@@ -287,16 +293,79 @@ export class PersonDAO extends AbstractDAO {
       ) {
         if (retries < 3) {
           console.warn('Retrying identifier upsert...')
-          await this.upsertIdentifier(identifier, personUid, retries + 1)
-        } else {
-          console.error('Failed to upsert identifiers after 3 retries')
+          // recursive call : return the retry result !
+          return this.upsertIdentifier(identifier, personUid, retries + 1)
         }
-      } else {
-        throw new Error(
-          `Failed to upsert identifiers: ${(error as Error).message}`,
-        )
+        throw new Error('Failed to upsert identifier after 3 retries (P2002)')
       }
+
+      throw new Error(
+        `Failed to upsert identifier: ${(error as Error).message}`,
+      )
     }
+  }
+
+  public async upsertOrcidIdentifierExtension(
+    personIdentifierId: number,
+    identifier: ORCIDIdentifier,
+  ): Promise<void> {
+    // Redundant check: idetifier type is hard coded in the ORCIDIdentifier class
+    if (identifier.type !== DbPersonIdentifierType.ORCID) {
+      throw new Error(
+        `upsertOrcidIdentifierExtension called with non-ORCID identifier type: ${identifier.type}`,
+      )
+    }
+
+    // The identifier itself should have been created in the service layer at previous step.
+    const base = await this.prismaClient.personIdentifier.findUnique({
+      where: { id: personIdentifierId },
+      select: { id: true, type: true },
+    })
+    if (!base) {
+      throw new Error(
+        `PersonIdentifier with id=${personIdentifierId} not found`,
+      )
+    }
+    if (base.type !== DbPersonIdentifierType.ORCID) {
+      throw new Error(
+        `PersonIdentifier id=${personIdentifierId} is not ORCID (found type=${base.type})`,
+      )
+    }
+
+    const oauth = identifier.oauth
+    if (!oauth) {
+      throw new Error(
+        `Missing OAuth data for ORCID identifier (personIdentifierId=${personIdentifierId})`,
+      )
+    }
+
+    // Require minimum fields for persistence (callback should always provide these)
+    if (!oauth.accessToken || !oauth.refreshToken) {
+      throw new Error(
+        `Missing accessToken/refreshToken for ORCID identifier (personIdentifierId=${personIdentifierId})`,
+      )
+    }
+
+    // Serialize scopes
+    const scopeStr =
+      oauth.scope && oauth.scope.length > 0 ? oauth.scope.join(' ') : null
+
+    const data = {
+      id: personIdentifierId,
+      accessToken: oauth.accessToken,
+      refreshToken: oauth.refreshToken,
+      scope: scopeStr,
+      tokenType: oauth.tokenType,
+      obtainedAt: oauth.obtainedAt,
+      expiresAt: oauth.expiresAt,
+    }
+
+    // Note that we could override the tokens with null values on update
+    await this.prismaClient.orcidIdentifier.upsert({
+      where: { id: personIdentifierId },
+      create: data,
+      update: data,
+    })
   }
 
   public fetchPeople = async (

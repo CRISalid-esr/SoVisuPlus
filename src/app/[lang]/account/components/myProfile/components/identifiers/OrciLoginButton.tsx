@@ -13,12 +13,7 @@ import { t } from '@lingui/core/macro'
 import { Trans } from '@lingui/react'
 import * as Lingui from '@lingui/core'
 import { getRuntimeEnv } from '@/utils/runtimeEnv'
-
-type Scope =
-  | '/read-limited'
-  | '/person/update'
-  | '/activities/update'
-  | '/authenticate'
+import { OrcidScope } from '@/types/OrcidIdentifier'
 
 export function OrcidLoginButton({
   orcidProvided,
@@ -36,9 +31,9 @@ export function OrcidLoginButton({
     '/activities/update': t`orcid_scope_activities_update`,
   }
 
-  const configuredScopes = useMemo<Scope[]>(() => {
+  const configuredScopes = useMemo<OrcidScope[]>(() => {
     const raw = (getRuntimeEnv().ORCID_SCOPES ?? '').split(',')
-    const list = raw.map((s) => s.trim()).filter(Boolean) as Scope[]
+    const list = raw.map((s) => s.trim()).filter(Boolean) as OrcidScope[]
     if (!list.includes('/authenticate')) list.unshift('/authenticate')
     return Array.from(new Set(list))
   }, [])
@@ -61,7 +56,7 @@ export function OrcidLoginButton({
     }, {}),
   )
 
-  const toggle = (scope: Scope) =>
+  const toggle = (scope: OrcidScope) =>
     setSelected((prev) => ({ ...prev, [scope]: !prev[scope] }))
 
   const redirectUri = React.useMemo(

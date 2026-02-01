@@ -7,6 +7,7 @@ import {
 import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
 import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 
 export class PersonService {
   private personDAO: PersonDAO
@@ -59,6 +60,36 @@ export class PersonService {
       })
     } catch (error) {
       const message = `Error adding/updating identifier (type=${type}, value=${value}, personUid=${personUid})`
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
+
+  async addOrUpdateOrcidIdentifier(
+    personUid: string,
+    identifier: ORCIDIdentifier,
+  ): Promise<void> {
+    try {
+      const persisted = await this.personDAO.upsertIdentifier(
+        identifier,
+        personUid,
+      )
+
+      await this.personDAO.upsertOrcidIdentifierExtension(
+        persisted.id,
+        identifier,
+      )
+
+      await this.actionDAO.createAction({
+        actionType: ActionType.ADD,
+        targetType: ActionTargetType.PERSON,
+        targetUid: personUid,
+        path: 'identifiers',
+        parameters: { identifier: identifier.toJson() },
+        personUid,
+      })
+    } catch (error) {
+      const message = `Error adding/updating ORCID identifier (personUid=${personUid}, value=${identifier.value})`
       console.error(message, error)
       throw new Error(message)
     }

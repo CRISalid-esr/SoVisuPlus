@@ -60,6 +60,7 @@ describe('GET /api/orcid/callback and add ORCID to DB', () => {
     mockGetUserByPersonIdentifier.mockResolvedValue(user)
     ;(fetch as jest.Mock).mockResolvedValue({
       json: async () => tokenResponse,
+      text: async () => tokenResponse,
     })
 
     const req: NextRequest = {
