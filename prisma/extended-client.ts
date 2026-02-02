@@ -12,6 +12,7 @@ import {
   JournalIdentifier,
   LabelType,
   Membership,
+  OrcidIdentifier,
   Permission,
   Person,
   PersonIdentifier,
@@ -29,7 +30,6 @@ import {
   UserRole,
   UserRoleScope,
 } from '@prisma/client'
-import { PublicationIdentifierJson } from '@/types/PublicationIdentifier'
 
 const prisma = new PrismaClient()
 
@@ -97,13 +97,17 @@ export type MembershipWithRelations = Membership & {
 }
 
 export type PersonWithRelations = Person & {
-  identifiers: PersonIdentifier[]
+  identifiers: PersonIdentifierWithRelations[]
   memberships: MembershipWithRelations[]
 }
 
 export type UserWithRelations = User & {
   person: PersonWithRelations | null
   roles: UserRoleWithRelations[]
+}
+
+export type PersonIdentifierWithRelations = PersonIdentifier & {
+  orcidIdentifier?: Omit<OrcidIdentifier, 'accessToken' | 'refreshToken'> | null
 }
 
 export default prisma

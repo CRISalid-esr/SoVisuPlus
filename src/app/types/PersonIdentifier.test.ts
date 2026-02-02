@@ -199,4 +199,21 @@ describe('PersonIdentifier', () => {
       ).toBeNull()
     })
   })
+  describe('fromDB', () => {
+    it('creates a PersonIdentifier from DB fields (type, value)', () => {
+      const dbIdentifier = {
+        type: PersonIdentifierType.IDREF,
+        value: ' 02725030X ',
+        // DB-only fields omitted by signature:
+        // id, personId, orcidIdentifier
+      }
+
+      const id = PersonIdentifier.fromDB(dbIdentifier)
+
+      expect(id).toBeInstanceOf(PersonIdentifier)
+      expect(id.type).toBe(PersonIdentifierType.IDREF)
+
+      expect(id.value).toBe('02725030X')
+    })
+  })
 })

@@ -1,5 +1,6 @@
 import prisma from '@/lib/daos/prisma'
 import { PersonService } from '@/lib/services/PersonService'
+import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 
 describe('PersonService Integration Tests', () => {
   let personService: PersonService
@@ -69,5 +70,143 @@ describe('PersonService Integration Tests', () => {
     expect(result.hasMore).toBe(false)
     expect(result.total).toBe(1)
     expect(result.people[0].uid).toBe(person.uid)
+  })
+
+  test('should add/update ORCID identifier and persist ORCID oauth extension', async () => {
+    // Arrange: create a person
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-orcid-1',
+        email: 'orciduser@example.com',
+        firstName: 'Orcid',
+        lastName: 'User',
+        normalizedName: 'orcid user',
+        external: false,
+      },
+    })
+
+    const obtainedAt = new Date('2026-01-01T00:00:00.000Z')
+    const expiresAt = new Date('2026-01-01T01:00:00.000Z')
+
+    const identifier = new ORCIDIdentifier('0000-0001-2345-6789', {
+      accessToken: 'access-token-xyz',
+      refreshToken: 'refresh-token-abc',
+      tokenType: 'bearer',
+      scope: ['/read-limited'],
+      obtainedAt,
+      expiresAt,
+    })
+
+    // Act
+    await personService.addOrUpdateOrcidIdentifier(person.uid, identifier)
+
+    // Assert: base identifier exists
+    const dbPerson = await prisma.person.findUnique({
+      where: { uid: person.uid },
+      include: {
+        identifiers: {
+          include: {
+            orcidIdentifier: true,
+          },
+        },
+      },
+    })
+
+    expect(dbPerson).not.toBeNull()
+
+    const orcidBase = dbPerson!.identifiers.find((i) => i.type === 'ORCID')
+    expect(orcidBase).toBeTruthy()
+    expect(orcidBase!.value).toBe('0000-0001-2345-6789')
+
+    // Assert: ORCID extension exists and matches
+    expect(orcidBase!.orcidIdentifier).toBeTruthy()
+    expect(orcidBase!.orcidIdentifier!.accessToken).toBe('access-token-xyz')
+    expect(orcidBase!.orcidIdentifier!.refreshToken).toBe('refresh-token-abc')
+    expect(orcidBase!.orcidIdentifier!.tokenType).toBe('bearer')
+    expect(orcidBase!.orcidIdentifier!.scope).toBe('/read-limited')
+    expect(orcidBase!.orcidIdentifier!.obtainedAt.toISOString()).toBe(
+      obtainedAt.toISOString(),
+    )
+    expect(orcidBase!.orcidIdentifier!.expiresAt!.toISOString()).toBe(
+      expiresAt.toISOString(),
+    )
+  })
+
+  test('should update ORCID oauth extension when called twice (same base identifier)', async () => {
+    // Arrange
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-orcid-2',
+        email: 'orciduser2@example.com',
+        firstName: 'Orcid2',
+        lastName: 'User2',
+        normalizedName: 'orcid2 user2',
+        external: false,
+      },
+    })
+
+    const first = new ORCIDIdentifier('0000-0001-2345-6789', {
+      accessToken: 'access-token-1',
+      refreshToken: 'refresh-token-1',
+      tokenType: 'bearer',
+      scope: ['/read-limited'],
+      obtainedAt: new Date('2026-01-01T00:00:00.000Z'),
+      expiresAt: new Date('2026-01-01T01:00:00.000Z'),
+    })
+
+    const second = new ORCIDIdentifier('0000-0001-2345-6789', {
+      accessToken: 'access-token-2',
+      refreshToken: 'refresh-token-2',
+      tokenType: 'bearer',
+      scope: ['/read-limited'],
+      obtainedAt: new Date('2026-01-02T00:00:00.000Z'),
+      expiresAt: new Date('2026-01-02T01:00:00.000Z'),
+    })
+
+    // Act
+    await personService.addOrUpdateOrcidIdentifier(person.uid, first)
+    await personService.addOrUpdateOrcidIdentifier(person.uid, second)
+
+    // Assert: still only one ORCID base identifier for that person
+    const dbPerson = await prisma.person.findUnique({
+      where: { uid: person.uid },
+      include: {
+        identifiers: {
+          include: {
+            orcidIdentifier: true,
+          },
+        },
+      },
+    })
+
+    const orcidIdentifiers = dbPerson!.identifiers.filter(
+      (i) => i.type === 'ORCID',
+    )
+    expect(orcidIdentifiers).toHaveLength(1)
+
+    const ext = orcidIdentifiers[0].orcidIdentifier
+    expect(ext).toBeTruthy()
+    expect(ext!.accessToken).toBe('access-token-2')
+    expect(ext!.refreshToken).toBe('refresh-token-2')
+    expect(ext!.obtainedAt.toISOString()).toBe('2026-01-02T00:00:00.000Z')
+  })
+
+  test('should throw if ORCID oauth data is missing', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-orcid-3',
+        email: 'orciduser3@example.com',
+        firstName: 'Orcid3',
+        lastName: 'User3',
+        normalizedName: 'orcid3 user3',
+        external: false,
+      },
+    })
+
+    const identifier = new ORCIDIdentifier('0000-0001-2345-6789') // no oauth
+
+    await expect(
+      personService.addOrUpdateOrcidIdentifier(person.uid, identifier),
+    ).rejects.toThrow(/Error adding\/updating ORCID identifier/i)
   })
 })

@@ -115,7 +115,21 @@ describe('UserDAO', () => {
       include: {
         person: {
           include: {
-            identifiers: true,
+            identifiers: {
+              include: {
+                orcidIdentifier: {
+                  select: {
+                    id: true,
+                    scope: true,
+                    tokenType: true,
+                    obtainedAt: true,
+                    expiresAt: true,
+                    createdAt: true,
+                    updatedAt: true,
+                  },
+                },
+              },
+            },
             memberships: {
               select: {
                 startDate: true,
@@ -195,7 +209,21 @@ describe('UserDAO', () => {
       include: {
         person: {
           include: {
-            identifiers: true,
+            identifiers: {
+              include: {
+                orcidIdentifier: {
+                  select: {
+                    id: true,
+                    scope: true,
+                    tokenType: true,
+                    obtainedAt: true,
+                    expiresAt: true,
+                    createdAt: true,
+                    updatedAt: true,
+                  },
+                },
+              },
+            },
             memberships: {
               select: {
                 startDate: true,

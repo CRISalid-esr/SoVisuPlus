@@ -1,4 +1,5 @@
 import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import { PersonIdentifierWithRelations as DBPersonIdentifier } from '@/prisma-schema/extended-client'
 
 export type PersonIdentifierJson = {
   type: DbPersonIdentifierType | string
@@ -121,6 +122,12 @@ export class PersonIdentifier {
         ? PersonIdentifier.typeFromString(json.type)
         : json.type
     return new PersonIdentifier(type, json.value)
+  }
+
+  static fromDB(
+    identifier: Omit<DBPersonIdentifier, 'id' | 'personId' | 'orcidIdentifier'>,
+  ): PersonIdentifier {
+    return new PersonIdentifier(identifier.type, identifier.value)
   }
 }
 

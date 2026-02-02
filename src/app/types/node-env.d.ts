@@ -25,5 +25,6 @@ declare namespace NodeJS {
     ORCID_SCOPES: string
     ORCID_CLIENT_ID: string
     ORCID_CLIENT_SECRET: string
+    NEXT_PUBLIC_INSTITUTION_NAME: string
   }
 }

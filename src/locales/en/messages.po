@@ -14,6 +14,36 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:111
+msgid "orcid_account_linked_tooltip"
+msgstr "Your ORCID account is linked to your SoVisu+ account"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:47
+msgid "orcid_permission_read_limited"
+msgstr "Read your information with visibility set to 'Trusted Organizations'"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
+msgid "orcid_permission_activities_update"
+msgstr "Create or update your research activities (publications, etc.)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:49
+msgid "orcid_permission_person_update"
+msgstr "Update your biographical information (name, affiliation, etc.)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:206
+msgid "orcid_permissions_intro"
+msgstr "Here are the permissions you are granting to {institutionName} on your ORCID profile:"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:219
+msgid "orcid_permissions_none"
+msgstr "You are not granting any permissions to {institutionName}."
+
+#. js-lingui-explicit-id
 #: src/app/lib/websocket/WebSocketListener.tsx:102
 msgid "snackbar_document_created"
 msgstr "New publication: "
@@ -89,16 +119,6 @@ msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:675
-msgid "documents_page_refresh_list_alert_own_perspective"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:678
-msgid "documents_page_refresh_list_alert_other_perspective"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/components/HalStatusCell.test.tsx:144
 #: src/app/[lang]/documents/components/HalStatusCell.test.tsx:207
 msgid "documents_page_hal_status_in_collection"
@@ -120,11 +140,6 @@ msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:145
-msgid "documents_page_refresh_document_alert"
-msgstr "Data concerning this publication has changed"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:173
 msgid "document_details_bibliographic_information_tab"
 msgstr ""
@@ -138,6 +153,11 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
 msgid "document_details_page_back_to_my_publications"
 msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:145
+msgid "documents_page_refresh_document_alert"
+msgstr "Data concerning this publication has changed"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:101
@@ -180,6 +200,44 @@ msgid "concept_chip_action_delete"
 msgstr "Delete"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:675
+msgid "documents_page_refresh_list_alert_own_perspective"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:678
+msgid "documents_page_refresh_list_alert_other_perspective"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
+msgid "document_details_page_keywords_input_default"
+msgstr "Please enter at least 3 characters"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "No options"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Keyword successfully added."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Please select one vocabulary at least"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:398
 msgid "document_details_page_source_tab_card_title"
 msgstr "Sources"
@@ -201,6 +259,11 @@ msgid "document_details_page_source_tab_select_action_unmerge_label"
 msgstr "Dissociate"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:183
+msgid "document_details_page_sources_row_update_source"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:252
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "Loading..."
@@ -211,41 +274,13 @@ msgid "document_details_page_keywords_input_options_fetch_error"
 msgstr "Unable to fetch suggestions"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
-msgid "document_details_page_keywords_input_default"
-msgstr "Please enter at least 3 characters"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Please select one vocabulary at least"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "No options"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:291
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Keyword successfully added."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:183
-msgid "document_details_page_sources_row_update_source"
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
+msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -266,11 +301,6 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:131
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:79
 msgid "document_details_page_type_row_label"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
-msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -350,57 +380,22 @@ msgid "profile_identifiers_card_title"
 msgstr "My researchers identifiers"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:101
-#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:31
-msgid "profile_affiliations_card_title"
-msgstr "My affiliations"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:36
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:179
 msgid "orcid_button_update_identifier"
 msgstr "Update ORCID authorizations"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:46
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:52
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:181
 msgid "orcid_button_provide_identifier"
 msgstr "Sign-in to ORCID"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:52
-msgid "orcid-authentication-success"
-msgstr "ORCID validation successful"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:54
-msgid "orcid-authentication-failure"
-msgstr "ORCID validation failed. Try again or contact support"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:56
-msgid "orcid-authentication-failure-no-code"
-msgstr "No authentication code delivered from ORCID. Please try again or contact support"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:58
-msgid "orcid-authentication-failure-no-session"
-msgstr "ORCID validation failure : no session. Please try again or contact support"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:60
-msgid "orcid-authentication-failure-user-not-found"
-msgstr "ORCID validation failure : user not found. Please try again or contact support"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:62
-msgid "orcid-insert-failure"
-msgstr "Unable to add ORCID to database. Please try again or contact support."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:101
-msgid "orcid_identifier_no_orcid_provided"
-msgstr "No orcid identifier provided"
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:101
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:31
+msgid "profile_affiliations_card_title"
+msgstr "My affiliations"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:34
@@ -425,6 +420,72 @@ msgstr "My signature"
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:56
 msgid "profile_affiliations_signature_copied_message_confirmation"
 msgstr "Signature added to clipboard."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
+msgid "profile_affiliations_laboratories_label"
+msgstr "Laboratory/ies"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:70
+msgid "orcid_authentication_success"
+msgstr "ORCID validation successful"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:72
+msgid "orcid_authentication_failure"
+msgstr "ORCID validation failed. Try again or contact support"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:74
+msgid "orcid_authentication_failure_no_code"
+msgstr "No authentication code delivered from ORCID. Please try again or contact support"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:76
+msgid "orcid_authentication_failure_no_session"
+msgstr "ORCID validation failure : no session. Please try again or contact support"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:78
+msgid "orcid_authentication_failure_user_not_found"
+msgstr "ORCID validation failure : user not found. Please try again or contact support"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:80
+msgid "orcid_insert_failure"
+msgstr "Unable to add ORCID to database. Please try again or contact support."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:125
+msgid "orcid_identifier_no_orcid_provided"
+msgstr "No orcid identifier provided"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:137
+msgid "orcid_control_helper"
+msgstr "ORCID is a free, unique, persistent identifier (PID) for individuals to use as they engage in research, scholarship, and innovation activities. It can also help you save time when you use your ORCID to sign into systems like this one. Link your ORCID iD to uniquely identify your research outputs and improve metadata quality. Learn more about how ORCID helps you spend more time conducting your research and less time managing it at <0>orcid.org</0>."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:28
+msgid "authorizations_page_authorizations_title"
+msgstr "Authorizations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:50
+msgid "authorizations_page_description"
+msgstr "I allow SoVisu+ to share my data with Idya application: "
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:54
+msgid "authorizations_page_list_publications"
+msgstr "Publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:58
+msgid "authorizations_page_my_expertise"
+msgstr "My expertise"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:168
@@ -493,32 +554,6 @@ msgstr "Your SoVisu+ account is linked to your HAL account"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:214
 msgid "hal_control_helper"
 msgstr "By linking your Hal account to your Sovisu+ account, you will make your Hal ID more reliable and you will be able to easily submit missing publications to Hal."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
-msgid "profile_affiliations_laboratories_label"
-msgstr "Laboratory/ies"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:28
-msgid "authorizations_page_authorizations_title"
-msgstr "Authorizations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:50
-msgid "authorizations_page_description"
-msgstr "I allow SoVisu+ to share my data with Idya application: "
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:54
-msgid "authorizations_page_list_publications"
-msgstr "Publications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:58
-msgid "authorizations_page_my_expertise"
-msgstr "My expertise"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: import { t } from '@lingui/core/macro' import { Trans } from '@lingui/react/macro' import { useRef, useState } from 'react' import useStore from '@/stores/global_store' import { Box, Button, Card, CardContent, ClickAwayListener, Grow, Link, Popper, Typography, } from '@mui/material' import { useTheme } from '@mui/material/styles' const Journal = () => { const titleRef = useRef(null) const [isPopperOpen, setIsPopperOpen] = useState(false) const theme = useTheme() const { selectedDocument = null } = useStore((state) => state.document) const journal = selectedDocument?.journal const title = journal?.title const handleClick = () => { setIsPopperOpen(!isPopperOpen) } const handleClickAway = () => { setIsPopperOpen(false) } return ( title && ( <ClickAwayListener onClickAway={handleClickAway}> <Box> <Button variant='text' ref={titleRef} onClick={handleClick} sx={{ p: 0 }} > {title} </Button> <Popper open={isPopperOpen} anchorEl={titleRef.current} placement='bottom-start' transition disablePortal sx={{ zIndex: 1, }} > {({ TransitionProps }) => ( <Grow {...TransitionProps} timeout={200}> <Card> <CardContent> <Typography gutterBottom variant='h6' sx={{ color: theme.palette.primary.main }} > {title} </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_issn'> <Link href={`https://portal.issn.org/resource/ISSN/${journal.issnL}`} target='_blank' rel='noopener noreferrer' > {journal.issnL} </Link> </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_source_type'> {t`document_details_page_journal_journal`} </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_publisher'> {journal.publisher} </Trans> </Typography> </CardContent> </Card> </Grow> )} </Popper> </Box> </ClickAwayListener> ) ) } export default Journal 
@@ -996,6 +1031,18 @@ msgstr "Notifications"
 #: src/app/[lang]/documents/page.tsx:212
 msgid "no_title_available"
 msgstr "no title available"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:44
+msgid "orcid_scope_activities_update"
+msgstr "Update my activities"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:43
+msgid "orcid_scope_person_update"
+msgstr "Update my biographical information"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:42
+msgid "orcid_scope_read_limited"
+msgstr "Read limited access to my ORCID record"
 
 #: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:51
 msgid "see_less_contributors"

@@ -69,6 +69,7 @@ describe('GET /api/route', () => {
             type: 'LOCAL',
             value: 'testuser',
             personId: 123,
+            orcidIdentifier: null,
           },
         ],
         memberships: [],

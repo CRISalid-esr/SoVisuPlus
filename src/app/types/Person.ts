@@ -1,7 +1,11 @@
 import {
   PersonIdentifier,
+  PersonIdentifierJson,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
+import { ORCIDIdentifier, ORCIDIdentifierJson } from '@/types/OrcidIdentifier'
+import { PersonIdentifierWithRelations } from '@/prisma-schema/extended-client'
+
 import { IAgent, IAgentJson } from '@/types/IAgent'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import {
@@ -20,9 +24,11 @@ interface PersonJson extends IAgentJson {
   displayName?: string
   firstName?: string
   lastName?: string
-  identifiers?: Array<{ type: PersonIdentifierType; value: string }>
+  identifiers?: Array<PersonIdentifierJson | ORCIDIdentifierJson>
   memberships?: PersonMembership[]
 }
+
+type IdentifierHydrationJson = PersonIdentifierJson | ORCIDIdentifierJson
 
 class Person implements IAgent, Authorizable {
   public normalizedName: string
@@ -115,13 +121,40 @@ class Person implements IAgent, Authorizable {
       person.lastName || '',
       ('identifiers' in person
         ? (person.identifiers as DbPersonIdentifier[]).map((x) =>
-            PersonIdentifier.fromJson(x),
+            Person.identifiersFromDB(x),
           )
         : []) as PersonIdentifier[],
       'memberships' in person ? (person.memberships as PersonMembership[]) : [],
       'person',
       person.slug,
     )
+  }
+
+  private static identifiersFromJson(
+    x: IdentifierHydrationJson,
+  ): PersonIdentifier {
+    if (ORCIDIdentifier.isOrcidIdentifierJson(x)) {
+      return ORCIDIdentifier.fromJson(x)
+    }
+
+    return PersonIdentifier.fromJson(x)
+  }
+
+  private static identifiersFromDB(
+    x: PersonIdentifierWithRelations | DbPersonIdentifier,
+  ): PersonIdentifier {
+    if (ORCIDIdentifier.isDbOrcidIdentifier(x)) {
+      return ORCIDIdentifier.fromDB({
+        type: x.type,
+        value: x.value,
+        orcidIdentifier: x.orcidIdentifier,
+      })
+    }
+
+    return PersonIdentifier.fromDB({
+      type: x.type,
+      value: x.value,
+    })
   }
 
   static fromJson(json: PersonJson): Person {
@@ -137,7 +170,7 @@ class Person implements IAgent, Authorizable {
       displayName,
       json.firstName ?? '',
       json.lastName ?? '',
-      (json.identifiers ?? []).map((x) => PersonIdentifier.fromJson(x)),
+      (json.identifiers ?? []).map((x) => Person.identifiersFromJson(x)),
       json.memberships ?? [],
       'person',
       json.slug ?? null,

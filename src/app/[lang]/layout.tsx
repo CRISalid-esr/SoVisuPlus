@@ -46,6 +46,8 @@ const RootLayout = async ({ params, children }: Props) => {
             WS_PATH: process.env.WS_PATH ?? '/',
             NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
             NEXT_PUBLIC_CAS_URL: process.env.NEXT_PUBLIC_CAS_URL,
+            NEXT_PUBLIC_INSTITUTION_NAME:
+              process.env.NEXT_PUBLIC_INSTITUTION_NAME,
           }}
         />
         <Script src='/vendor/d3.v4.min.js' strategy='beforeInteractive' />

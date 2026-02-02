@@ -49,6 +49,9 @@ const HalControl = () => {
     const success = searchParams.get('success')
     const error = searchParams.get('error')
 
+    if (success && !success.startsWith('hal_')) return
+    if (error && !error.startsWith('hal_')) return
+
     if (success) {
       setSeverity('success')
       setMessageKey(success)
@@ -108,17 +111,32 @@ const HalControl = () => {
           p: 2,
           width: '100%',
           borderRadius: 2,
+          paddingX: 1,
         }}
       >
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: 2,
+            gap: 1.5,
             width: '100%',
+            flexWrap: 'wrap',
+            rowGap: 1,
+            minWidth: 0,
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 1,
+              px: 1.25,
+              py: 0.5,
+              borderColor: 'divider',
+              maxWidth: '100%',
+              minWidth: 0,
+            }}
+          >
             <Typography variant='subtitle1' fontWeight='bold'>
               HAL
             </Typography>
@@ -144,6 +162,8 @@ const HalControl = () => {
                 border: '1px solid',
                 borderColor: 'divider',
                 backgroundColor: 'action.hover',
+                maxWidth: '100%',
+                minWidth: 0,
               }}
             >
               {halKind && (

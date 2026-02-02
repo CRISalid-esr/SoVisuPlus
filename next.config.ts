@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next'
 import * as path from 'node:path'
+import process from 'node:process'
 
 const nextConfig: NextConfig = {
   env: {
@@ -7,6 +8,7 @@ const nextConfig: NextConfig = {
     ORCID_URL: process.env.ORCID_URL,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
     NEXT_PUBLIC_CAS_URL: process.env.NEXT_PUBLIC_CAS_URL,
+    NEXT_PUBLIC_INSTITUTION_NAME: process.env.NEXT_PUBLIC_INSTITUTION_NAME,
     ORCID_SCOPES: process.env.ORCID_SCOPES,
     ORCID_CLIENT_ID: process.env.ORCID_CLIENT_ID,
   },

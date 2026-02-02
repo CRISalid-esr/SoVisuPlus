@@ -43,7 +43,7 @@ const Identifiers = () => {
       >
         <Box
           sx={{
-            padding: theme.spacing(2),
+            paddingX: theme.spacing(0),
             width: '100%',
           }}
         >
@@ -73,8 +73,8 @@ const Identifiers = () => {
                   <ListItem
                     disableGutters
                     sx={{
-                      paddingY: theme.spacing(2),
-                      paddingX: theme.spacing(2),
+                      paddingY: theme.spacing(4),
+                      paddingX: theme.spacing(0),
                       width: '100%',
                     }}
                   >

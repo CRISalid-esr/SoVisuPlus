@@ -1,6 +1,10 @@
+.pid-components {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .pid-components details {
   padding-bottom: 5px;
-}
-.pid-components {
-  margin-top: 0em;
 }

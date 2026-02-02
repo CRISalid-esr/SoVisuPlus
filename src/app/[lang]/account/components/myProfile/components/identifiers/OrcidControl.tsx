@@ -1,20 +1,33 @@
 import useStore from '@/stores/global_store'
 import React, { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Alert, Paper, Snackbar, Typography } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Link,
+  Paper,
+  Snackbar,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { PidComponent } from '@kit-data-manager/react-pid-component'
 import styles from './OrcidControl.module.css'
-import { OrcidLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton'
+import { OrcidLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton'
 import { Trans } from '@lingui/react'
+import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
+import LinkIcon from '@mui/icons-material/Link'
 
 const OrcidControl = () => {
   const { connectedUser } = useStore((state) => state.user)
   const person = connectedUser?.person
   const identifiers = person?.getIdentifiers() ?? []
-  const orcid = identifiers.find(
-    (identifier) => identifier.type === PersonIdentifierType.ORCID,
-  )?.value
+  const orcidIdentifier = identifiers.find(
+    (i) => i.type === PersonIdentifierType.ORCID,
+  ) as ORCIDIdentifier | undefined
+
+  const orcid = orcidIdentifier?.value
+  const isLinked = Boolean(orcidIdentifier?.oauth)
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -26,6 +39,9 @@ const OrcidControl = () => {
   useEffect(() => {
     const success = searchParams.get('success')
     const error = searchParams.get('error')
+
+    if (success && !success.startsWith('orcid_')) return
+    if (error && !error.startsWith('orcid_')) return
 
     if (success) {
       setSeverity('success')
@@ -48,18 +64,18 @@ const OrcidControl = () => {
 
   const renderMessage = () => {
     switch (messageKey) {
-      case 'orcid-authentication-success':
-        return <Trans id='orcid-authentication-success' />
-      case 'orcid-authentication-failure':
-        return <Trans id='orcid-authentication-failure' />
-      case 'orcid-authentication-failure-no-code':
-        return <Trans id={'orcid-authentication-failure-no-code'} />
-      case 'orcid-authentication-failure-no-session':
-        return <Trans id={'orcid-authentication-failure-no-session'} />
-      case 'orcid-authentication-failure-user-not-found':
-        return <Trans id={'orcid-authentication-failure-user-not-found'} />
-      case 'orcid-insert-failure':
-        return <Trans id={'orcid-insert-failure'} />
+      case 'orcid_authentication_success':
+        return <Trans id='orcid_authentication_success' />
+      case 'orcid_authentication_failure':
+        return <Trans id='orcid_authentication_failure' />
+      case 'orcid_authentication_failure_no_code':
+        return <Trans id={'orcid_authentication_failure_no_code'} />
+      case 'orcid_authentication_failure_no_session':
+        return <Trans id={'orcid_authentication_failure_no_session'} />
+      case 'orcid_authentication_failure_user_not_found':
+        return <Trans id={'orcid_authentication_failure_user_not_found'} />
+      case 'orcid_insert_failure':
+        return <Trans id={'orcid_insert_failure'} />
       default:
         return null
     }
@@ -71,37 +87,119 @@ const OrcidControl = () => {
         elevation={1}
         sx={{
           display: 'flex',
-          alignItems: 'center',
-          gap: 2,
+          flexDirection: 'column',
+          gap: 1.5,
           p: 2,
           width: '100%',
           borderRadius: 2,
+          minWidth: 0,
         }}
       >
-        <Typography
-          variant='subtitle1'
-          fontWeight='bold'
-          sx={{ alignSelf: 'center' }}
+        {/* Header row: label + linked icon */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            minWidth: 0,
+          }}
         >
-          ORCID
-        </Typography>
-        {orcid && (
-          <PidComponent
-            value={orcid}
-            emphasizeComponent={true}
-            className={styles['pid-components']}
-          />
-        )}
-        {!orcid && (
-          <Typography
-            variant='body2'
-            color='text.secondary'
-            sx={{ alignSelf: 'normal' }}
-          >
+          <Typography variant='subtitle1' fontWeight='bold'>
+            ORCID
+          </Typography>
+
+          {isLinked && (
+            <Tooltip title={<Trans id='orcid_account_linked_tooltip' />} arrow>
+              <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                <LinkIcon fontSize='small' />
+              </Box>
+            </Tooltip>
+          )}
+        </Box>
+
+        {/* 1) PID row */}
+        {orcid ? (
+          <>
+            {/* Mobile / tablet : hide PidComponent */}
+            <Box
+              sx={{
+                display: { xs: 'inline-flex', lg: 'none' },
+                alignItems: 'center',
+                gap: 1,
+                px: 1.25,
+                py: 0.5,
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'divider',
+                backgroundColor: 'action.hover',
+                maxWidth: '100%',
+                minWidth: 0,
+              }}
+            >
+              <Typography
+                variant='caption'
+                color='text.secondary'
+                sx={{ lineHeight: 1 }}
+              >
+                ORCID
+              </Typography>
+
+              <Typography
+                variant='body2'
+                sx={{
+                  fontFamily:
+                    'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                  overflowWrap: 'anywhere',
+                  wordBreak: 'break-word',
+                  minWidth: 0,
+                }}
+              >
+                {orcid}
+              </Typography>
+            </Box>
+
+            {/* Desktop : show PidComponent */}
+            <Box
+              sx={{
+                display: { xs: 'none', lg: 'block' },
+                minWidth: 0,
+              }}
+            >
+              <PidComponent
+                value={orcid}
+                emphasizeComponent={true}
+                className={styles['pid-components']}
+              />
+            </Box>
+          </>
+        ) : (
+          <Typography variant='body2' color='text.secondary'>
             <Trans id='orcid_identifier_no_orcid_provided' />
           </Typography>
         )}
-        <OrcidLoginButton orcidProvided={!!orcid} />
+
+        {/* 2) + 3): authorisation text then button+checkboxes */}
+        <OrcidLoginButton
+          orcidProvided={!!orcid}
+          grantedScopes={orcidIdentifier?.oauth?.scope ?? null}
+          hasOauth={isLinked}
+        />
+
+        {/* Helper text */}
+        <Typography variant='caption' color='text.secondary'>
+          <Trans
+            id='orcid_control_helper'
+            components={[
+              <Link
+                key='orcid-link'
+                href='https://orcid.org'
+                target='_blank'
+                rel='noopener noreferrer'
+                underline='always'
+              />,
+            ]}
+          />
+        </Typography>
       </Paper>
 
       <Snackbar
