@@ -8,6 +8,7 @@ import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
+import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 
 jest.mock('@prisma/client', () => {
   // avoid PersonIdentifierType to be mocked
@@ -27,11 +28,17 @@ jest.mock('@prisma/client', () => {
     person: {
       upsert: jest.fn(),
       findFirst: jest.fn(),
+      findUnique: jest.fn(),
     },
     personIdentifier: {
       findMany: jest.fn(),
       deleteMany: jest.fn(),
       createMany: jest.fn(),
+      findUnique: jest.fn(),
+      upsert: jest.fn(),
+    },
+    orcidIdentifier: {
+      upsert: jest.fn(),
     },
     membership: {
       upsert: jest.fn(),
@@ -176,6 +183,142 @@ describe('PersonDAO', () => {
         positionCode: undefined,
         startDate: undefined,
       },
+    })
+  })
+  describe('upsertOrcidIdentifierExtension', () => {
+    it('should upsert ORCID oauth extension when base identifier exists and oauth is present', async () => {
+      // base row exists and is ORCID
+      ;(mockPrisma.personIdentifier.findUnique as jest.Mock).mockResolvedValue({
+        id: 1841063,
+        type: 'ORCID',
+      })
+      ;(mockPrisma.orcidIdentifier.upsert as jest.Mock).mockResolvedValue({
+        id: 1841063,
+      })
+
+      const identifier = new ORCIDIdentifier('0000-0001-7990-9804', {
+        accessToken: 'dev-access-token-xyz',
+        refreshToken: 'dev-refresh-token-abc',
+        scope: ['/read-limited'],
+        tokenType: 'bearer',
+        obtainedAt: new Date('2026-02-01T12:34:28.632Z'),
+        expiresAt: new Date('2027-02-01T12:34:28.632Z'),
+      })
+
+      await personDAO.upsertOrcidIdentifierExtension(1841063, identifier)
+
+      expect(mockPrisma.personIdentifier.findUnique).toHaveBeenCalledWith({
+        where: { id: 1841063 },
+        select: { id: true, type: true },
+      })
+
+      expect(mockPrisma.orcidIdentifier.upsert).toHaveBeenCalledWith({
+        where: { id: 1841063 },
+        create: {
+          id: 1841063,
+          accessToken: 'dev-access-token-xyz',
+          refreshToken: 'dev-refresh-token-abc',
+          scope: '/read-limited',
+          tokenType: 'bearer',
+          obtainedAt: new Date('2026-02-01T12:34:28.632Z'),
+          expiresAt: new Date('2027-02-01T12:34:28.632Z'),
+        },
+        update: {
+          id: 1841063,
+          accessToken: 'dev-access-token-xyz',
+          refreshToken: 'dev-refresh-token-abc',
+          scope: '/read-limited',
+          tokenType: 'bearer',
+          obtainedAt: new Date('2026-02-01T12:34:28.632Z'),
+          expiresAt: new Date('2027-02-01T12:34:28.632Z'),
+        },
+      })
+    })
+
+    it('should throw if base identifier does not exist', async () => {
+      ;(mockPrisma.personIdentifier.findUnique as jest.Mock).mockResolvedValue(
+        null,
+      )
+
+      const identifier = new ORCIDIdentifier('0000-0001-7990-9804', {
+        accessToken: 'a',
+        refreshToken: 'r',
+        scope: ['/read-limited'],
+        tokenType: 'bearer',
+        obtainedAt: new Date(),
+        expiresAt: new Date(),
+      })
+
+      await expect(
+        personDAO.upsertOrcidIdentifierExtension(1841063, identifier),
+      ).rejects.toThrow('PersonIdentifier with id=1841063 not found')
+
+      expect(mockPrisma.orcidIdentifier.upsert).not.toHaveBeenCalled()
+    })
+
+    it('should throw if base identifier is not ORCID', async () => {
+      ;(mockPrisma.personIdentifier.findUnique as jest.Mock).mockResolvedValue({
+        id: 1841063,
+        type: 'LOCAL',
+      })
+
+      const identifier = new ORCIDIdentifier('0000-0001-7990-9804', {
+        accessToken: 'a',
+        refreshToken: 'r',
+        scope: ['/read-limited'],
+        tokenType: 'bearer',
+        obtainedAt: new Date(),
+        expiresAt: new Date(),
+      })
+
+      await expect(
+        personDAO.upsertOrcidIdentifierExtension(1841063, identifier),
+      ).rejects.toThrow(
+        'PersonIdentifier id=1841063 is not ORCID (found type=LOCAL)',
+      )
+
+      expect(mockPrisma.orcidIdentifier.upsert).not.toHaveBeenCalled()
+    })
+
+    it('should throw if oauth is missing', async () => {
+      ;(mockPrisma.personIdentifier.findUnique as jest.Mock).mockResolvedValue({
+        id: 1841063,
+        type: 'ORCID',
+      })
+
+      const identifier = new ORCIDIdentifier('0000-0001-7990-9804') // oauth missing
+
+      await expect(
+        personDAO.upsertOrcidIdentifierExtension(1841063, identifier),
+      ).rejects.toThrow(
+        'Missing OAuth data for ORCID identifier (personIdentifierId=1841063)',
+      )
+
+      expect(mockPrisma.orcidIdentifier.upsert).not.toHaveBeenCalled()
+    })
+
+    it('should throw if accessToken/refreshToken are missing', async () => {
+      ;(mockPrisma.personIdentifier.findUnique as jest.Mock).mockResolvedValue({
+        id: 1841063,
+        type: 'ORCID',
+      })
+
+      const identifier = new ORCIDIdentifier('0000-0001-7990-9804', {
+        // accessToken missing
+        refreshToken: 'r',
+        scope: ['/read-limited'],
+        tokenType: 'bearer',
+        obtainedAt: new Date(),
+        expiresAt: new Date(),
+      })
+
+      await expect(
+        personDAO.upsertOrcidIdentifierExtension(1841063, identifier),
+      ).rejects.toThrow(
+        'Missing accessToken/refreshToken for ORCID identifier (personIdentifierId=1841063)',
+      )
+
+      expect(mockPrisma.orcidIdentifier.upsert).not.toHaveBeenCalled()
     })
   })
 })
