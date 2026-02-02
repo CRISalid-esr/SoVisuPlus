@@ -107,7 +107,6 @@ query Documents($where: DocumentWhere) {
         }
       }
       has_identifiers {
-        uid
         type
         value
       }

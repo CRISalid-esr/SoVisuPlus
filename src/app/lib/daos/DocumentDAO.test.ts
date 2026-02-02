@@ -7,6 +7,8 @@ import {
   Person as DbPerson,
   Prisma,
   PrismaClient,
+  PublicationIdentifierType,
+  PublicationIdentifierType as DbPublicationIdentifierType,
 } from '@prisma/client'
 import { Document, DocumentType } from '@/types/Document'
 import { DocumentDAO } from './DocumentDAO'
@@ -55,7 +57,9 @@ jest.mock('@prisma/client', () => {
       deleteMany: jest.fn(),
     },
     publicationIdentifier: {
-      upsert: jest.fn(),
+      createMany: jest.fn(),
+      deleteMany: jest.fn(),
+      findMany: jest.fn(),
     },
     journal: {
       upsert: jest.fn(),
@@ -305,7 +309,7 @@ describe('DocumentDAO', () => {
         new DocumentRecord(
           'hal-123',
           'hal0001',
-          [new PublicationIdentifier('pubid003', 'hal', 'hal-0001')],
+          [new PublicationIdentifier('hal', 'hal-0001')],
           [
             new SourceContribution(
               LocRelator.AUTHOR,
@@ -496,19 +500,28 @@ describe('DocumentDAO', () => {
         },
       },
     })
-    expect(mockPrisma.publicationIdentifier.upsert).toHaveBeenCalledWith({
-      where: { uid: 'pubid003' },
-      create: {
-        uid: 'pubid003',
-        type: 'hal',
-        value: 'hal-0001',
-        DocumentRecord: { connect: { id: 89 } },
+    expect(mockPrisma.publicationIdentifier.findMany).toHaveBeenCalledWith({
+      where: {
+        OR: [
+          {
+            type: PublicationIdentifierType.HAL,
+            value: 'hal-0001',
+            documentRecordId: { not: 89 },
+          },
+        ],
       },
-      update: {
-        type: 'hal',
-        value: 'hal-0001',
-        DocumentRecord: { connect: { id: 89 } },
-      },
+    })
+    expect(mockPrisma.publicationIdentifier.deleteMany).toHaveBeenCalledWith({
+      where: { documentRecordId: 89 },
+    })
+    expect(mockPrisma.publicationIdentifier.createMany).toHaveBeenCalledWith({
+      data: [
+        {
+          documentRecordId: 89,
+          type: PublicationIdentifierType.HAL,
+          value: 'hal-0001',
+        },
+      ],
     })
     expect(dbDocument.uid).toBe('doc-hal')
   })
