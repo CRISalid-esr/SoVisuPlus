@@ -49,6 +49,9 @@ const HalControl = () => {
     const success = searchParams.get('success')
     const error = searchParams.get('error')
 
+    if (success && !success.startsWith('hal_')) return
+    if (error && !error.startsWith('hal_')) return
+
     if (success) {
       setSeverity('success')
       setMessageKey(success)

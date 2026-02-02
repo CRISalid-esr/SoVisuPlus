@@ -7,7 +7,6 @@ import {
   Link,
   Paper,
   Snackbar,
-  Stack,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -40,6 +39,9 @@ const OrcidControl = () => {
   useEffect(() => {
     const success = searchParams.get('success')
     const error = searchParams.get('error')
+
+    if (success && !success.startsWith('orcid_')) return
+    if (error && !error.startsWith('orcid_')) return
 
     if (success) {
       setSeverity('success')
@@ -117,13 +119,59 @@ const OrcidControl = () => {
 
         {/* 1) PID row */}
         {orcid ? (
-          <Box sx={{ minWidth: 0 }}>
-            <PidComponent
-              value={orcid}
-              emphasizeComponent={true}
-              className={styles['pid-components']}
-            />
-          </Box>
+          <>
+            {/* Mobile / tablet : hide PidComponent */}
+            <Box
+              sx={{
+                display: { xs: 'inline-flex', lg: 'none' },
+                alignItems: 'center',
+                gap: 1,
+                px: 1.25,
+                py: 0.5,
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'divider',
+                backgroundColor: 'action.hover',
+                maxWidth: '100%',
+                minWidth: 0,
+              }}
+            >
+              <Typography
+                variant='caption'
+                color='text.secondary'
+                sx={{ lineHeight: 1 }}
+              >
+                ORCID
+              </Typography>
+
+              <Typography
+                variant='body2'
+                sx={{
+                  fontFamily:
+                    'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                  overflowWrap: 'anywhere',
+                  wordBreak: 'break-word',
+                  minWidth: 0,
+                }}
+              >
+                {orcid}
+              </Typography>
+            </Box>
+
+            {/* Desktop : show PidComponent */}
+            <Box
+              sx={{
+                display: { xs: 'none', lg: 'block' },
+                minWidth: 0,
+              }}
+            >
+              <PidComponent
+                value={orcid}
+                emphasizeComponent={true}
+                className={styles['pid-components']}
+              />
+            </Box>
+          </>
         ) : (
           <Typography variant='body2' color='text.secondary'>
             <Trans id='orcid_identifier_no_orcid_provided' />
