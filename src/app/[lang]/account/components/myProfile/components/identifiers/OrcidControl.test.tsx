@@ -59,7 +59,7 @@ const mockOrcidLoginButton = jest.fn<JSX.Element, [OrcidLoginButtonProps]>(
 )
 
 jest.mock(
-  '@/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton',
+  '@/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton',
   () => ({
     __esModule: true,
     OrcidLoginButton: (props: OrcidLoginButtonProps) =>

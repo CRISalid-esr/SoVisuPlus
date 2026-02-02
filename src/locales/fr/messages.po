@@ -19,27 +19,27 @@ msgid "orcid_account_linked_tooltip"
 msgstr "Votre compte ORCID est lié à votre compte SoVisu+"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:47
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:47
 msgid "orcid_permission_read_limited"
 msgstr "Lire vos informations avec une visibilitée fixée sur «Organisations de confiance»"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:48
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
 msgid "orcid_permission_activities_update"
 msgstr "Créer ou mettre à jour vos activités scientifiques (publications, etc.)"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:49
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:49
 msgid "orcid_permission_person_update"
 msgstr "Mettre à jour vos informations biographiques (nom, affiliation, etc.)"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:206
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:206
 msgid "orcid_permissions_intro"
 msgstr "Voici les autorisations que vous accordez à {institutionName} sur votre profil ORCID :"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:219
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:219
 msgid "orcid_permissions_none"
 msgstr "Vous n’accordez aucune autorisation à {institutionName}."
 
@@ -381,13 +381,13 @@ msgstr "Mes identifiants chercheurs"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:36
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:179
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:179
 msgid "orcid_button_update_identifier"
 msgstr "Modifier mes autorisations ORCID"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:46
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:181
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:181
 msgid "orcid_button_provide_identifier"
 msgstr "Fournir mon identifiant ORCID"
 
@@ -1032,15 +1032,15 @@ msgstr "Notifications"
 msgid "no_title_available"
 msgstr "aucun titre disponible"
 
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:44
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:44
 msgid "orcid_scope_activities_update"
 msgstr "Mettre à jour mes activités"
 
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:43
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:43
 msgid "orcid_scope_person_update"
 msgstr "Mettre à jour mes informations personnelles"
 
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:42
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:42
 msgid "orcid_scope_read_limited"
 msgstr "Lire mes informations"
 

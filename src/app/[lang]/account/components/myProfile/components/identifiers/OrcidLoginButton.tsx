@@ -20,7 +20,7 @@ import * as Lingui from '@lingui/core'
 import { getRuntimeEnv } from '@/utils/runtimeEnv'
 import { OrcidScope } from '@/types/OrcidIdentifier'
 
-export function OrcidLoginButton({
+export const OrcidLoginButton = ({
   orcidProvided,
   grantedScopes,
   hasOauth,
@@ -28,7 +28,7 @@ export function OrcidLoginButton({
   orcidProvided: boolean
   grantedScopes: OrcidScope[] | null
   hasOauth: boolean
-}) {
+}) => {
   const clientId = getRuntimeEnv().ORCID_CLIENT_ID
   const orcidURL = getRuntimeEnv().ORCID_URL
   const sovisuplusHost = getRuntimeEnv().NEXT_PUBLIC_BASE_URL
@@ -48,6 +48,13 @@ export function OrcidLoginButton({
     '/read-limited': <Trans id='orcid_permission_read_limited' />,
     '/activities/update': <Trans id='orcid_permission_activities_update' />,
     '/person/update': <Trans id='orcid_permission_person_update' />,
+  }
+
+  const TOOLTIP_SCOPE_LABEL: Partial<Record<OrcidScope, string>> = {
+    '/read-limited': t`orcid_scope_read_limited_tooltip`,
+    '/activities/update': t`orcid_scope_person_update_tooltip`,
+    '/person/update': t`orcid_scope_activities_update_tooltip`,
+    '/authenticate': t`authenticate_tooltip`,
   }
 
   const configuredScopes = React.useMemo<OrcidScope[]>(() => {
@@ -219,7 +226,7 @@ export function OrcidLoginButton({
         sx={{ minWidth: 0, maxWidth: '100%' }}
       >
         {optionalScopes.map((scope) => (
-          <Tooltip key={scope} title={scope}>
+          <Tooltip key={scope} title={TOOLTIP_SCOPE_LABEL[scope] ?? scope}>
             <FormControlLabel
               sx={{
                 mr: 0.5,

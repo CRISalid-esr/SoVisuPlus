@@ -13,7 +13,7 @@ import {
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { PidComponent } from '@kit-data-manager/react-pid-component'
 import styles from './OrcidControl.module.css'
-import { OrcidLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton'
+import { OrcidLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton'
 import { Trans } from '@lingui/react'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import LinkIcon from '@mui/icons-material/Link'
