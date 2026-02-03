@@ -12,10 +12,14 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
 import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
 import removeAccents from 'remove-accents'
-import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
+import { ORCIDIdentifier, OrcidOAuthData } from '@/types/OrcidIdentifier'
+import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
+import { decryptString, encryptString } from '@/utils/crypto/fieldEncryption'
 
 /** PersonDAO: Handles operations related to Person and PersonIdentifiers */
 export class PersonDAO extends AbstractDAO {
+  static ORCID_IDENTIFIER_AAD_PREFIX = 'orcidIdentifier:id='
+
   /**
    * Create or update a Person record in the database
    * @param person - The Person object to upsert
@@ -346,13 +350,17 @@ export class PersonDAO extends AbstractDAO {
       )
     }
 
+    const keyring = loadKeyringFromEnv()
+    // aad is bound to the record being created/updated
+    const aad = PersonDAO.getORCIDIdentifierAad(personIdentifierId)
+
     // Serialize scopes
     const scopeStr = oauth.scope.join(' ')
 
     const data = {
       id: personIdentifierId,
-      accessToken: oauth.accessToken,
-      refreshToken: oauth.refreshToken,
+      accessToken: encryptString(oauth.accessToken, keyring, { aad }),
+      refreshToken: encryptString(oauth.refreshToken, keyring, { aad }),
       scope: scopeStr,
       tokenType: oauth.tokenType,
       obtainedAt: oauth.obtainedAt,
@@ -365,6 +373,44 @@ export class PersonDAO extends AbstractDAO {
       create: data,
       update: data,
     })
+  }
+
+  public static getORCIDIdentifierAad(personIdentifierId: number): string {
+    return `${PersonDAO.ORCID_IDENTIFIER_AAD_PREFIX}${personIdentifierId}`
+  }
+
+  public async getDecryptedOrcidTokens(
+    personIdentifierId: number,
+  ): Promise<OrcidOAuthData | null> {
+    const row = await this.prismaClient.orcidIdentifier.findUnique({
+      where: { id: personIdentifierId },
+      select: {
+        accessToken: true,
+        refreshToken: true,
+        scope: true,
+        tokenType: true,
+        obtainedAt: true,
+        expiresAt: true,
+      },
+    })
+
+    if (!row) return null
+
+    const keyring = loadKeyringFromEnv()
+    const aad = `orcidIdentifier:id=${personIdentifierId}`
+
+    return {
+      accessToken: row.accessToken
+        ? decryptString(row.accessToken, keyring, { aad })
+        : null,
+      refreshToken: row.refreshToken
+        ? decryptString(row.refreshToken, keyring, { aad })
+        : null,
+      scope: ORCIDIdentifier.parseOrcidScope(row.scope),
+      tokenType: row.tokenType,
+      obtainedAt: row.obtainedAt,
+      expiresAt: row.expiresAt,
+    }
   }
 
   public fetchPeople = async (

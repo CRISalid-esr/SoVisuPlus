@@ -1,6 +1,12 @@
 import prisma from '@/lib/daos/prisma'
 import { PersonService } from '@/lib/services/PersonService'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
+import {
+  decryptString,
+  isEncryptedString,
+} from '@/utils/crypto/fieldEncryption'
+import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
+import { PersonDAO } from '@/lib/daos/PersonDAO'
 
 describe('PersonService Integration Tests', () => {
   let personService: PersonService
@@ -115,21 +121,31 @@ describe('PersonService Integration Tests', () => {
     expect(dbPerson).not.toBeNull()
 
     const orcidBase = dbPerson!.identifiers.find((i) => i.type === 'ORCID')
-    expect(orcidBase).toBeTruthy()
-    expect(orcidBase!.value).toBe('0000-0001-2345-6789')
-
-    // Assert: ORCID extension exists and matches
+    // Assert: ORCID extension exists
     expect(orcidBase!.orcidIdentifier).toBeTruthy()
-    expect(orcidBase!.orcidIdentifier!.accessToken).toBe('access-token-xyz')
-    expect(orcidBase!.orcidIdentifier!.refreshToken).toBe('refresh-token-abc')
-    expect(orcidBase!.orcidIdentifier!.tokenType).toBe('bearer')
-    expect(orcidBase!.orcidIdentifier!.scope).toBe('/read-limited')
-    expect(orcidBase!.orcidIdentifier!.obtainedAt.toISOString()).toBe(
-      obtainedAt.toISOString(),
+
+    const ext = orcidBase!.orcidIdentifier!
+
+    // Tokens must be encrypted at rest
+    expect(isEncryptedString(ext.accessToken)).toBe(true)
+    expect(isEncryptedString(ext.refreshToken)).toBe(true)
+
+    // Round-trip decrypt to prove correctness
+    const keyring = loadKeyringFromEnv()
+    const aad = PersonDAO.getORCIDIdentifierAad(ext.id)
+
+    expect(decryptString(ext.accessToken!, keyring, { aad })).toBe(
+      'access-token-xyz',
     )
-    expect(orcidBase!.orcidIdentifier!.expiresAt!.toISOString()).toBe(
-      expiresAt.toISOString(),
+    expect(decryptString(ext.refreshToken!, keyring, { aad })).toBe(
+      'refresh-token-abc',
     )
+
+    // Non-secret fields remain directly comparable
+    expect(ext.tokenType).toBe('bearer')
+    expect(ext.scope).toBe('/read-limited')
+    expect(ext.obtainedAt.toISOString()).toBe(obtainedAt.toISOString())
+    expect(ext.expiresAt!.toISOString()).toBe(expiresAt.toISOString())
   })
 
   test('should update ORCID oauth extension when called twice (same base identifier)', async () => {
@@ -186,8 +202,19 @@ describe('PersonService Integration Tests', () => {
 
     const ext = orcidIdentifiers[0].orcidIdentifier
     expect(ext).toBeTruthy()
-    expect(ext!.accessToken).toBe('access-token-2')
-    expect(ext!.refreshToken).toBe('refresh-token-2')
+    expect(ext!.accessToken).toBeDefined()
+    expect(ext!.refreshToken).toBeDefined()
+    // check decrypted value
+    const keyring = loadKeyringFromEnv()
+    const aad = PersonDAO.getORCIDIdentifierAad(ext!.id)
+    expect(decryptString(ext!.accessToken!, keyring, { aad })).toBe(
+      'access-token-2',
+    )
+    expect(decryptString(ext!.refreshToken!, keyring, { aad })).toBe(
+      'refresh-token-2',
+    )
+    expect(ext!.tokenType).toBe('bearer')
+    expect(ext!.scope).toBe('/read-limited')
     expect(ext!.obtainedAt.toISOString()).toBe('2026-01-02T00:00:00.000Z')
   })
 

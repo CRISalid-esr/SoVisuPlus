@@ -9,6 +9,11 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
+import {
+  decryptString,
+  isEncryptedString,
+} from '@/utils/crypto/fieldEncryption'
+import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
 
 jest.mock('@prisma/client', () => {
   // avoid PersonIdentifierType to be mocked
@@ -187,13 +192,19 @@ describe('PersonDAO', () => {
   })
   describe('upsertOrcidIdentifierExtension', () => {
     it('should upsert ORCID oauth extension when base identifier exists and oauth is present', async () => {
-      // base row exists and is ORCID
       ;(mockPrisma.personIdentifier.findUnique as jest.Mock).mockResolvedValue({
         id: 1841063,
         type: 'ORCID',
       })
       ;(mockPrisma.orcidIdentifier.upsert as jest.Mock).mockResolvedValue({
         id: 1841063,
+      })
+
+      // Ensure env keys exist for the test
+      process.env.FIELD_ENC_PRIMARY_KID = 'k2026_02'
+      // IMPORTANT: 32 BYTES base64. Use a constant test key.
+      process.env.FIELD_ENC_KEYS_JSON = JSON.stringify({
+        k2026_02: Buffer.alloc(32, 7).toString('base64'),
       })
 
       const identifier = new ORCIDIdentifier('0000-0001-7990-9804', {
@@ -212,27 +223,60 @@ describe('PersonDAO', () => {
         select: { id: true, type: true },
       })
 
-      expect(mockPrisma.orcidIdentifier.upsert).toHaveBeenCalledWith({
-        where: { id: 1841063 },
+      // Grab the actual call payload
+      const calls = (mockPrisma.orcidIdentifier.upsert as jest.Mock).mock.calls
+      expect(calls).toHaveLength(1)
+
+      const arg = calls[0]?.[0] as {
+        where: { id: number }
         create: {
-          id: 1841063,
-          accessToken: 'dev-access-token-xyz',
-          refreshToken: 'dev-refresh-token-abc',
-          scope: '/read-limited',
-          tokenType: 'bearer',
-          obtainedAt: new Date('2026-02-01T12:34:28.632Z'),
-          expiresAt: new Date('2027-02-01T12:34:28.632Z'),
-        },
+          id: number
+          accessToken: string
+          refreshToken: string
+          scope: string
+          tokenType: string | null
+          obtainedAt: Date | null
+          expiresAt: Date | null
+        }
         update: {
-          id: 1841063,
-          accessToken: 'dev-access-token-xyz',
-          refreshToken: 'dev-refresh-token-abc',
-          scope: '/read-limited',
-          tokenType: 'bearer',
-          obtainedAt: new Date('2026-02-01T12:34:28.632Z'),
-          expiresAt: new Date('2027-02-01T12:34:28.632Z'),
-        },
-      })
+          id: number
+          accessToken: string
+          refreshToken: string
+          scope: string
+          tokenType: string | null
+          obtainedAt: Date | null
+          expiresAt: Date | null
+        }
+      }
+
+      expect(arg.where).toEqual({ id: 1841063 })
+
+      // Assert encryption happened (not plaintext)
+      expect(isEncryptedString(arg.create.accessToken)).toBe(true)
+      expect(isEncryptedString(arg.create.refreshToken)).toBe(true)
+
+      // Check other fields preserved
+      expect(arg.create.scope).toBe('/read-limited')
+      expect(arg.create.tokenType).toBe('bearer')
+      expect(arg.create.obtainedAt).toEqual(
+        new Date('2026-02-01T12:34:28.632Z'),
+      )
+      expect(arg.create.expiresAt).toEqual(new Date('2027-02-01T12:34:28.632Z'))
+
+      // Round-trip decrypt to prove correctness
+      const keyring = loadKeyringFromEnv()
+      const aad = PersonDAO.getORCIDIdentifierAad(1841063)
+
+      expect(decryptString(arg.create.accessToken, keyring, { aad })).toBe(
+        'dev-access-token-xyz',
+      )
+      expect(decryptString(arg.create.refreshToken, keyring, { aad })).toBe(
+        'dev-refresh-token-abc',
+      )
+
+      // And update should mirror create for tokens
+      expect(isEncryptedString(arg.update.accessToken)).toBe(true)
+      expect(isEncryptedString(arg.update.refreshToken)).toBe(true)
     })
 
     it('should throw if base identifier does not exist', async () => {

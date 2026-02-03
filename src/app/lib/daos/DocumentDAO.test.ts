@@ -7,7 +7,6 @@ import {
   Person as DbPerson,
   Prisma,
   PrismaClient,
-  PublicationIdentifierType,
   PublicationIdentifierType as DbPublicationIdentifierType,
 } from '@prisma/client'
 import { Document, DocumentType } from '@/types/Document'
@@ -504,7 +503,7 @@ describe('DocumentDAO', () => {
       where: {
         OR: [
           {
-            type: PublicationIdentifierType.HAL,
+            type: DbPublicationIdentifierType.HAL,
             value: 'hal-0001',
             documentRecordId: { not: 89 },
           },
@@ -518,7 +517,7 @@ describe('DocumentDAO', () => {
       data: [
         {
           documentRecordId: 89,
-          type: PublicationIdentifierType.HAL,
+          type: DbPublicationIdentifierType.HAL,
           value: 'hal-0001',
         },
       ],

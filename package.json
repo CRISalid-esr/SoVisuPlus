@@ -33,7 +33,9 @@
     "dispatch_actions": "ts-node --project tsconfig.listener.json src/scripts/dispatch_actions.ts",
     "dispatch_actions:js": "node dist-listener/src/scripts/dispatch_actions.js",
     "dispatch_action": "npm run dispatch_actions --",
-    "dispatch_action:js": "npm run dispatch_actions:js --"
+    "dispatch_action:js": "npm run dispatch_actions:js --",
+    "rotate-orcid-tokens": "ts-node --project tsconfig.listener.json src/scripts/rotate-orcid-tokens.ts",
+    "rotate-orcid-tokens:js": "node dist-listener/src/scripts/rotate-orcid-tokens.js"
   },
   "dependencies": {
     "@apollo/client": "^3.12.3",

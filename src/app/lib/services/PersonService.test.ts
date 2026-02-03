@@ -10,7 +10,7 @@ describe('PersonService', () => {
 
   beforeEach(() => {
     mockFetchPeople = jest.fn()
-    ;(PersonDAO as jest.Mock).mockImplementation(() => ({
+    ;(PersonDAO as unknown as jest.Mock).mockImplementation(() => ({
       fetchPeople: mockFetchPeople,
     }))
 
