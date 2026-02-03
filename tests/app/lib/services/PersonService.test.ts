@@ -202,8 +202,19 @@ describe('PersonService Integration Tests', () => {
 
     const ext = orcidIdentifiers[0].orcidIdentifier
     expect(ext).toBeTruthy()
-    expect(ext!.accessToken).toBe('access-token-2')
-    expect(ext!.refreshToken).toBe('refresh-token-2')
+    expect(ext!.accessToken).toBeDefined()
+    expect(ext!.refreshToken).toBeDefined()
+    // check decrypted value
+    const keyring = loadKeyringFromEnv()
+    const aad = PersonDAO.getORCIDIdentifierAad(ext!.id)
+    expect(decryptString(ext!.accessToken!, keyring, { aad })).toBe(
+      'access-token-2',
+    )
+    expect(decryptString(ext!.refreshToken!, keyring, { aad })).toBe(
+      'refresh-token-2',
+    )
+    expect(ext!.tokenType).toBe('bearer')
+    expect(ext!.scope).toBe('/read-limited')
     expect(ext!.obtainedAt.toISOString()).toBe('2026-01-02T00:00:00.000Z')
   })
 
