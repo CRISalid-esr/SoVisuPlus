@@ -50,14 +50,14 @@ Access Keycloak at `http://localhost:8080` and create :
 
 - a realm named from the organisation using SoVisu+ (e.g. `myuniversity`)
 - a sovisuplus client of type `openid-connect` with the following settings:
-    - Client ID: `sovisuplus`
-    - Valid Redirect URIs: `http://localhost:3000/*`
-    - Valid post logout redirect URIs: `http://localhost:3000/api/auth/signout`
-    - Web Origins: `http://localhost:3000`
-    - Client authentication: `On`
+  - Client ID: `sovisuplus`
+  - Valid Redirect URIs: `http://localhost:3000/*`
+  - Valid post logout redirect URIs: `http://localhost:3000/api/auth/signout`
+  - Web Origins: `http://localhost:3000`
+  - Client authentication: `On`
 - Add a credential to the client with the following settings:
-    - Client Authenticator : `Client Id and Secret`
-    - Client Secret: `credential_generated_by_keycloak_here`
+  - Client Authenticator : `Client Id and Secret`
+  - Client Secret: `credential_generated_by_keycloak_here`
 
 5. Create a `.env` file in the root directory of the project and fill it with the following content:
 
@@ -72,6 +72,50 @@ KEYCLOAK_PUBLIC_URL="http://localhost:8080/realms/my-keycloak-realm-here"
 NEXTAUTH_URL="http://localhost:3000/api/auth"
 NEXTAUTH_SECRET="[generate a secret with : openssl rand -base64 32]"
 ```
+
+Following table gives you detailed information on each environment variable :
+|Name | Description | secret ? | server/client | instance dependant | dev/prod |
+| :---------------------------: | :-----------------------------------: | :-----------: | :---------------: | :-------------------: | :-----------: |
+|NEXT_PUBLIC_SUPPORTED_LOCAL |Application available languages | No | server & client | No | prod |
+|WS_SCHEME |Web socket scheme for message listener | No | client | Yes(ws or wss) | prod |
+|WS_HOST |Web socket host for message listener | No | client | Yes | prod |
+|WS_PORT |Web socket port for message listener | No | client | Yes | prod |
+|WS_PATH |Web socket path for message listener | No | client | Yes | prod |
+|WS_INTERNAL_PORT |Web socket internal port listener | No | server | Yes | prod |
+|DATABASE_URL |Sovisuplus database url | No | server | Yes | prod |
+|DATABASE_URL_TEST |Sovisuplus test database url | No | server | Yes | dev |
+|ORCID_URL |Orcid connexion url | No | server & client | No | prod(orcid.org) dev(sandbox.orcid) |
+|ORCID_SCOPES |Orcid scopes authorizations | No | server & client | Yes | prod |
+|ORCID_CLIENT_ID |Orcid client institution id | No | server & client | Yes | prod |
+|ORCID_CLIENT_SECRET |Orcid institution client secret pwd | Yes | server | Yes | prod |
+|KEYCLOAK_CLIENT_ID |Keycloak client institution identifier | No | server | Yes | prod |
+|KEYCLOAK_CLIENT_SECRET |Keycloak institution client secret pwd | Yes | server | Yes | prod |
+|KEYCLOAK_ISSUER |Keycloak institution issuer url | No | server | Yes | prod |
+|KEYCLOAK_PUBLIC_URL |Keycloak institution base url | No | server | Yes | prod |
+|NEXTAUTH_URL |Api url for authentication (default to sovisuplus/api/auth)| No | server | No ? | prod |
+|NEXTAUTH_SECRET |Sovisuplus secret for authentication | Yes | server | Yes | prod |
+|AMQP_USER |App user name for connecting to AMQP | No | server | Yes | prod |
+|AMQP_PASSWORD |App password for connecting to AMQP bus| Yes | server | Yes | prod |
+|AMQP_HOST |AMQP bus host | No | server | Yes | prod |
+|AMQP_PORT |AMQP bus port | No | server | Yes | prod |
+|AMQP_QUEUE_NAME |AMQP bus queue name | No | server | Yes | prod |
+|AMQP_EXCHANGE_NAME |AMQP bus exchange name | No | server | Yes | prod |
+|GRAPHQL_ENDPOINT_ENABLED |Boolean value to enable or not queries to graph | No | server | Yes | prod |
+|GRAPHQL_ENDPOINT_URL |Neo4j url | No | server | Yes | prod |
+|GRAPHQL_API_KEY_ENABLED |Boolean value to enable or not key control for graph querying | No | server | Yes | prod |
+|GRAPH_API_KEY |Key value set for graph querying | Yes | server | Yes | prod |
+|PERSPECTIVE_ROLES_FILTER |User roles that are considered as relevant in user production | No | server | Yes | prod |
+|PUBLICATION_LIST_ROLES_FILTER |Contributor roles that are considered relevant in publication contributors list | No | server | Yes | prod |
+|VOCABS_URL |API URL for concept keyword | No | server | Yes ? | prod |
+|NEXT_PUBLIC_AVAILABLE_VOCABS |Concept vocabularies considered | No | server & client | Yes | prod |
+|DEFAULT_SELF_SCOPED_ROLES |Default scopes actions authorizations | No | server | Yes | prod |
+|NODE_TLS_REJECT_UNAUTHORIZED |For development with self-signed ssl certificates| No | nulle part | Yes | dev |
+|NEXT_PUBLIC_CAS_URL |CAS institution URL | No | server & client | Yes | prod |
+|NEXT_CAS_CLIENT_SAML_TOLERANCE |??? | No | ?(server?) | Yes | dev |
+|NEXT_CAS_CLIENT_SECRET |Sovisuplus secret for CAS connexion | Yes | ?(server?) | Yes | prod |
+|NEXT_PUBLIC_INSTITUTION_NAME |University Name | No | server & client | Yes | prod |
+|FIELD_ENC_PRIMARY_KID |For orcid token encrytion | No | server | Yes | prod |
+|FIELD_ENC_KEYS_JSON |For orcid token encrytion, JSON object with two fields containing secrets | Yes | server | Yes | prod |
 
 6. Run the Prisma migration with `npx prisma migrate dev --name init`.
 7. Run the development server with `npm run dev`.
@@ -106,7 +150,7 @@ SoVisu+ uses a role-based access control (RBAC) file to seed roles & permissions
 
    # or pass an explicit file path
    npm run init_roles -- --file ./rbac.roles.yaml
-   
+
    # or with compiled version
    npm run build:listener
    npm run init_roles:js ./rbac.roles.yaml
@@ -115,15 +159,14 @@ SoVisu+ uses a role-based access control (RBAC) file to seed roles & permissions
    This command is **idempotent**: run it any time you change the YAML file.
 
 4. **Create your first admin (recommended)**
-
-    * Sign in to the app once via Keycloak so your user is created in SoVisu+.
-    * Then grant yourself a global admin role (replace `local-yourusername` with your local person UID):
+   - Sign in to the app once via Keycloak so your user is created in SoVisu+.
+   - Then grant yourself a global admin role (replace `local-yourusername` with your local person UID):
 
    ```bash
    npm run assign_role -- \
      --role admin \
      --person-uid local-yourusername
-   
+
    # or with compiled version
 
    npm run build:listener
