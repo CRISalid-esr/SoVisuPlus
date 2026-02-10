@@ -76,7 +76,16 @@ export class DocumentDAO extends AbstractDAO {
             titles: true,
             abstracts: true,
             subjects: { include: { labels: true } },
-            contributions: { include: { person: true } },
+            contributions: {
+              include: {
+                affiliations: {
+                  include: {
+                    identifiers: true,
+                  },
+                },
+                person: true,
+              },
+            },
             records: {
               include: {
                 identifiers: true,
@@ -155,7 +164,25 @@ export class DocumentDAO extends AbstractDAO {
             titles: true,
             abstracts: true,
             subjects: { include: { labels: true } },
-            contributions: { include: { person: true } },
+            contributions: {
+              include: {
+                affiliations: {
+                  include: {
+                    identifiers: true,
+                  },
+                },
+                person: {
+                  include: {
+                    identifiers: true,
+                    memberships: {
+                      include: {
+                        researchStructure: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
             records: {
               include: {
                 identifiers: true,
@@ -886,13 +913,31 @@ export class DocumentDAO extends AbstractDAO {
         },
         contributions: {
           include: {
-            person: true,
+            affiliations: {
+              include: {
+                identifiers: true,
+              },
+            },
+            person: {
+              include: {
+                identifiers: true,
+                memberships: {
+                  include: {
+                    researchStructure: true,
+                  },
+                },
+              },
+            },
           },
         },
         records: {
           include: {
             identifiers: true,
-            contributions: { include: { person: true } },
+            contributions: {
+              include: {
+                person: true,
+              },
+            },
             journal: true,
           },
         },
@@ -994,6 +1039,11 @@ export class DocumentDAO extends AbstractDAO {
         abstracts: true,
         contributions: {
           include: {
+            affiliations: {
+              include: {
+                identifiers: true,
+              },
+            },
             person: {
               include: {
                 identifiers: true,

@@ -411,7 +411,7 @@ msgstr "Identifiant ORCID non fourni"
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:190
 msgid "orcid_control_helper"
-msgstr "ORCID est un identifiant unique, persistant et gratuit pour les chercheurs. Il vous permet de gagner du temps lorsque vous vous connectez à des systèmes comme celui-ci. En liant votre ORCID à votre compte SoVisu+, vous identifiez de manière unique vos productions de recherche et améliorez la qualité des métadonnées. En savoir plus sur la façon dont ORCID vous aide à passer plus de temps à faire de la recherche et moins de temps à la gérer sur <0>orcid.org</0>."
+msgstr "ORCID est un identifiant unique, pérenne et gratuit pour les chercheurs. Il vous permet de gagner du temps lorsque vous vous connectez à des systèmes comme celui-ci. En liant votre ORCID à votre compte SoVisu+, vous identifiez de manière unique vos productions de recherche et améliorez la qualité des métadonnées. En savoir plus sur la façon dont ORCID vous aide à passer plus de temps à faire de la recherche et moins de temps à la gérer sur <0>orcid.org</0>."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
@@ -812,6 +812,10 @@ msgstr "ORCID"
 #: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:91
 msgid "documents_details_page_authors_tab_scopus_column"
 msgstr "Scopus"
+
+#: src/app/[lang]/documents/components/ContributorIdentityCard.tsx:192
+msgid "contributor_identity_card_see_profile_button"
+msgstr "Voir Profile"
 
 #: src/app/[lang]/documents/page.tsx:807
 msgid "documents_page_action_column_details"
