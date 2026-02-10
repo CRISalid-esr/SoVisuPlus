@@ -15,7 +15,7 @@ import { Concept } from '@/types/Concept'
 import { SourcePerson } from '@/types/SourcePerson'
 import { SourceContribution } from '@/types/SourceContribution'
 import { SourceJournal } from '@/types/SourceJournal'
-import { OAStatus } from '@prisma/client'
+import { OAStatus, PublicationIdentifierType } from '@prisma/client'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 
 jest.mock('./AbstractGraphQLClient')
@@ -80,7 +80,7 @@ describe('DocumentGraphQLClient', () => {
               source_identifier: 'sudoc0001',
               has_identifiers: [
                 {
-                  type: 'sudoc-ppn',
+                  type: 'sudoc_ppn',
                   value: 'sudoc-ppn-0001',
                 },
               ],
@@ -184,7 +184,12 @@ describe('DocumentGraphQLClient', () => {
         new DocumentRecord(
           'record-001',
           'sudoc0001',
-          [new PublicationIdentifier('sudoc-ppn', 'sudoc-ppn-0001')],
+          [
+            new PublicationIdentifier(
+              PublicationIdentifierType.SUDOCPPN,
+              'sudoc-ppn-0001',
+            ),
+          ],
           [new SourceContribution(LocRelator.AUTHOR, mockSourcePerson)],
           ['Book', 'Document'],
           new Date('2022-01-01'),
@@ -299,7 +304,7 @@ describe('DocumentGraphQLClient', () => {
               source_identifier: 'sudoc0001',
               has_identifiers: [
                 {
-                  type: 'sudoc-ppn',
+                  type: 'sudoc_ppn',
                   value: 'sudoc-ppn-0001',
                 },
               ],

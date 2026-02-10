@@ -5,6 +5,7 @@ import {
   HalSubmitType,
   LabelType,
   OAStatus,
+  PublicationIdentifierType,
 } from '@prisma/client'
 import { Literal } from '@/types/Literal'
 import { Concept } from '@/types/Concept'
@@ -122,7 +123,12 @@ describe('Document type', () => {
         new DocumentRecord(
           'hal-123',
           'hal0001',
-          [new PublicationIdentifier('hal', 'hal-0001')],
+          [
+            new PublicationIdentifier(
+              PublicationIdentifierType.HAL,
+              'hal-0001',
+            ),
+          ],
           [
             new SourceContribution(
               LocRelator.AUTHOR,

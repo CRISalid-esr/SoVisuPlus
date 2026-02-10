@@ -217,16 +217,8 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
             new DocumentRecord(
               recordData.uid,
               recordData.source_identifier,
-              recordData.has_identifiers.reduce<PublicationIdentifier[]>(
-                (acc, identifier: PublicationIdentifier) => {
-                  const pubId = new PublicationIdentifier(
-                    identifier.type,
-                    identifier.value,
-                  )
-                  acc.push(pubId)
-                  return acc
-                },
-                [],
+              recordData.has_identifiers.map((identifier) =>
+                PublicationIdentifier.fromJSON(identifier),
               ),
               recordData.has_contributions.reduce<SourceContribution[]>(
                 (
