@@ -5,7 +5,7 @@ import {
 import AuthorityOrganizationIdentifierType = $Enums.AuthorityOrganizationIdentifierType
 
 export interface AuthorityOrganizationIdentifierJson {
-  type: AuthorityOrganizationIdentifierType
+  type: string
   value: string
 }
 export class AuthorityOrganizationIdentifier {
@@ -31,7 +31,10 @@ export class AuthorityOrganizationIdentifier {
   }
 
   static fromJson(json: AuthorityOrganizationIdentifierJson) {
-    return new AuthorityOrganizationIdentifier(json.type, json.value)
+    const type = this.authorityOrganizationIdentifierTypeFromString(json.type)
+    return type
+      ? new AuthorityOrganizationIdentifier(type, json.value)
+      : undefined
   }
 
   static fromDb(authorityOrganizationId: DbAuthorityOrganizationIdentifier) {

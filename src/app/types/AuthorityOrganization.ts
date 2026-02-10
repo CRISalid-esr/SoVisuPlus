@@ -20,9 +20,13 @@ export class AuthorityOrganization {
     return new AuthorityOrganization(
       json.uid,
       json.displayNames,
-      json.identifiers.map((id) =>
-        AuthorityOrganizationIdentifier.fromJson(id),
-      ),
+      json.identifiers.reduce<AuthorityOrganizationIdentifier[]>((acc, id) => {
+        const org = AuthorityOrganizationIdentifier.fromJson(id)
+        if (org) {
+          acc.push(org)
+        }
+        return acc
+      }, []),
     )
   }
 
