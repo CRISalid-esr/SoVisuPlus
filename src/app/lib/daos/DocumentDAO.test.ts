@@ -7,6 +7,7 @@ import {
   Person as DbPerson,
   Prisma,
   PrismaClient,
+  PublicationIdentifierType,
   PublicationIdentifierType as DbPublicationIdentifierType,
 } from '@prisma/client'
 import { Document, DocumentType } from '@/types/Document'
@@ -285,7 +286,6 @@ describe('DocumentDAO', () => {
           'http://example.com/concept/abc',
         ), // only concept-abc remains
       ],
-      [],
     )
 
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(
@@ -326,7 +326,12 @@ describe('DocumentDAO', () => {
         new DocumentRecord(
           'hal-123',
           'hal0001',
-          [new PublicationIdentifier('hal', 'hal-0001')],
+          [
+            new PublicationIdentifier(
+              PublicationIdentifierType.HAL,
+              'hal-0001',
+            ),
+          ],
           [
             new SourceContribution(
               LocRelator.AUTHOR,

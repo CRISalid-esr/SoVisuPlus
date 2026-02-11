@@ -1,4 +1,9 @@
-import { DocumentType, HalSubmitType, SourceRecordType } from '@prisma/client'
+import {
+  DocumentType,
+  HalSubmitType,
+  PublicationIdentifierType,
+  SourceRecordType,
+} from '@prisma/client'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import { LocRelator } from '@/types/LocRelator'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
@@ -49,7 +54,7 @@ describe('DocumentRecord type', () => {
     const mockDocument = new DocumentRecord(
       'hal-123',
       'hal0001',
-      [new PublicationIdentifier('hal', 'hal-0001')],
+      [new PublicationIdentifier(PublicationIdentifierType.HAL, 'hal-0001')],
       [
         new SourceContribution(
           LocRelator.AUTHOR,

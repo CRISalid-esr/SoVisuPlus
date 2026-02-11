@@ -12,7 +12,7 @@ import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import { SourceContribution } from '@/types/SourceContribution'
 import { SourcePerson } from '@/types/SourcePerson'
 import { SourceJournal } from '@/types/SourceJournal'
-import { OAStatus } from '@prisma/client'
+import { OAStatus, PublicationIdentifierType } from '@prisma/client'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 
 describe('DocumentDAO Integration Tests', () => {
@@ -212,7 +212,7 @@ describe('DocumentDAO Integration Tests', () => {
     const halRecord = new DocumentRecord(
       'hal-doc-001',
       'hal0001',
-      [new PublicationIdentifier('hal', 'hal-0001')],
+      [new PublicationIdentifier(PublicationIdentifierType.HAL, 'hal-0001')],
       [
         new SourceContribution(
           LocRelator.AUTHOR,
