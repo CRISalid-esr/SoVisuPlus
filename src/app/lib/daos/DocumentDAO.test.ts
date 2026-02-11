@@ -209,7 +209,25 @@ describe('DocumentDAO', () => {
             labels: true,
           },
         },
-        contributions: { include: { person: true } },
+        contributions: {
+          include: {
+            affiliations: {
+              include: {
+                identifiers: true,
+              },
+            },
+            person: {
+              include: {
+                identifiers: true,
+                memberships: {
+                  include: {
+                    researchStructure: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         journal: {
           include: {
             identifiers: true,
@@ -756,7 +774,21 @@ describe('DocumentDAO', () => {
         },
         contributions: {
           include: {
-            person: true,
+            affiliations: {
+              include: {
+                identifiers: true,
+              },
+            },
+            person: {
+              include: {
+                identifiers: true,
+                memberships: {
+                  include: {
+                    researchStructure: true,
+                  },
+                },
+              },
+            },
           },
         },
         records: {
@@ -854,7 +886,21 @@ describe('DocumentDAO', () => {
         },
         contributions: {
           include: {
-            person: true,
+            affiliations: {
+              include: {
+                identifiers: true,
+              },
+            },
+            person: {
+              include: {
+                identifiers: true,
+                memberships: {
+                  include: {
+                    researchStructure: true,
+                  },
+                },
+              },
+            },
           },
         },
         records: {
@@ -947,7 +993,21 @@ describe('DocumentDAO', () => {
         },
         contributions: {
           include: {
-            person: true,
+            affiliations: {
+              include: {
+                identifiers: true,
+              },
+            },
+            person: {
+              include: {
+                identifiers: true,
+                memberships: {
+                  include: {
+                    researchStructure: true,
+                  },
+                },
+              },
+            },
           },
         },
         records: {
@@ -1044,7 +1104,21 @@ describe('DocumentDAO', () => {
         },
         contributions: {
           include: {
-            person: true,
+            affiliations: {
+              include: {
+                identifiers: true,
+              },
+            },
+            person: {
+              include: {
+                identifiers: true,
+                memberships: {
+                  include: {
+                    researchStructure: true,
+                  },
+                },
+              },
+            },
           },
         },
         records: {
@@ -1172,10 +1246,19 @@ describe('DocumentDAO', () => {
         abstracts: true,
         contributions: {
           include: {
+            affiliations: {
+              include: {
+                identifiers: true,
+              },
+            },
             person: {
               include: {
                 identifiers: true,
-                memberships: { include: { researchStructure: true } },
+                memberships: {
+                  include: {
+                    researchStructure: true,
+                  },
+                },
               },
             },
           },
@@ -1266,7 +1349,25 @@ describe('DocumentDAO', () => {
           titles: true,
           abstracts: true,
           subjects: { include: { labels: true } },
-          contributions: { include: { person: true } },
+          contributions: {
+            include: {
+              affiliations: {
+                include: {
+                  identifiers: true,
+                },
+              },
+              person: {
+                include: {
+                  identifiers: true,
+                  memberships: {
+                    include: {
+                      researchStructure: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
           records: {
             include: {
               identifiers: true,

@@ -15,8 +15,10 @@ import { Concept } from '@/types/Concept'
 import { SourcePerson } from '@/types/SourcePerson'
 import { SourceContribution } from '@/types/SourceContribution'
 import { SourceJournal } from '@/types/SourceJournal'
-import { OAStatus, PublicationIdentifierType } from '@prisma/client'
+import { PublicationIdentifierType, AuthorityOrganizationIdentifierType, OAStatus } from '@prisma/client'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
+import { AuthorityOrganization } from '@/types/AuthorityOrganization'
+import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
 
 jest.mock('./AbstractGraphQLClient')
 jest.mock('./PersonGraphQLClient')
@@ -72,6 +74,16 @@ describe('DocumentGraphQLClient', () => {
             {
               roles: ['http://example.com/relator/author'],
               contributor: [{ uid: 'person-123', display_name: 'John Doe' }],
+              affiliations: [
+                {
+                  uid: 'some-org-001',
+                  display_names: ['Some Organization'],
+                  identifiers: [
+                    { type: 'openalex', value: '000054' },
+                    { type: 'Wikidata', value: '10.0004.BA34' },
+                  ],
+                },
+              ],
             },
           ],
           recorded_by: [
@@ -178,6 +190,22 @@ describe('DocumentGraphQLClient', () => {
           [
             LocRelatorHelper.fromURI('http://example.com/relator/author'),
           ].filter((role) => role !== null),
+          [
+            new AuthorityOrganization(
+              'some-org-001',
+              ['Some Organization'],
+              [
+                new AuthorityOrganizationIdentifier(
+                  AuthorityOrganizationIdentifierType.OPENALEX,
+                  '000054',
+                ),
+                new AuthorityOrganizationIdentifier(
+                  AuthorityOrganizationIdentifierType.WIKIDATA,
+                  '10.0004.BA34',
+                ),
+              ],
+            ),
+          ],
         ),
       ],
       [
