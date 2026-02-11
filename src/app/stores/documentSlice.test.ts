@@ -83,6 +83,7 @@ describe('addDocumentSlice', () => {
               normalizedName: 'jane doe',
             },
             roles: ['author'],
+            affiliations: [],
           },
         ],
         records: [],

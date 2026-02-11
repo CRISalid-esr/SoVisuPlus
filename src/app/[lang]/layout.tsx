@@ -37,13 +37,13 @@ const RootLayout = async ({ params, children }: Props) => {
       <body>
         <EnvInjector
           env={{
-            ORCID_URL: process.env.ORCID_URL,
-            ORCID_SCOPES: process.env.ORCID_SCOPES,
-            ORCID_CLIENT_ID: process.env.ORCID_CLIENT_ID,
-            WS_SCHEME: process.env.WS_SCHEME,
-            WS_HOST: process.env.WS_HOST,
-            WS_PORT: process.env.WS_PORT,
-            WS_PATH: process.env.WS_PATH ?? '/',
+            ORCID_URL: process.env.NEXT_PUBLIC_ORCID_URL,
+            ORCID_SCOPES: process.env.NEXT_PUBLIC_ORCID_SCOPES,
+            ORCID_CLIENT_ID: process.env.NEXT_PUBLIC_ORCID_CLIENT_ID,
+            WS_SCHEME: process.env.NEXT_PUBLIC_WS_SCHEME,
+            WS_HOST: process.env.NEXT_PUBLIC_WS_HOST,
+            WS_PORT: process.env.NEXT_PUBLIC_WS_PORT,
+            WS_PATH: process.env.NEXT_PUBLIC_WS_PATH ?? '/',
             NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
             NEXT_PUBLIC_CAS_URL: process.env.NEXT_PUBLIC_CAS_URL,
             NEXT_PUBLIC_INSTITUTION_NAME:

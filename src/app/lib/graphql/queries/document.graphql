@@ -28,6 +28,14 @@ query Documents($where: DocumentWhere) {
       }
     }
     has_contributions {
+      affiliations {
+        uid
+        display_names
+        identifiers {
+          type
+          value
+        }
+      }
       roles
       contributor {
         uid
