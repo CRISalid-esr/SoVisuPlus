@@ -54,8 +54,6 @@ import { SourceRecordType } from '@prisma/client'
 import { SourceRecordTypeLabels } from '@/app/[lang]/documents/components/SourceRecordTypeLabels'
 import { SourceRecordTypeIcons } from '@/app/[lang]/documents/components/SourceRecordTypeIcons'
 import { SourceRecordTypeService } from '@/lib/services/SourceRecordTypeService'
-import { Contribution } from '@/types/Contribution'
-import { SourceContribution } from '@/types/SourceContribution'
 
 const Sources = () => {
   const { selectedDocument = null } = useStore((state) => state.document)
@@ -198,17 +196,14 @@ const Sources = () => {
         Cell({
           cell,
           column,
-          row,
         }: {
           cell: MRT_Cell<DocumentRecord>
           column: MRT_Column<DocumentRecord>
-          row: { original: { contributions: Array<SourceContribution> } }
         }) {
           return (
             <HighlighterWithEllipsis
               searchWords={[globalFilter, column.getFilterValue() as string]}
               text={cell.getValue<string>()}
-              contributions={row.original.contributions}
             />
           )
         },
