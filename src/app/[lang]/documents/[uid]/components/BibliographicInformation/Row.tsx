@@ -1,4 +1,4 @@
-import { Box, TableCell, TableRow } from '@mui/material'
+import { Box, IconButton, TableCell, TableRow } from '@mui/material'
 import * as Lingui from '@lingui/core'
 import { useEffect, useState } from 'react'
 
@@ -11,11 +11,17 @@ import {
   DocumentField,
   DocumentLocalizableFieldKey,
 } from './BibliographicInformation'
+import EditIcon from '@mui/icons-material/Edit'
+import styles from './Row.module.css'
+import { useTheme } from '@mui/material/styles'
+import EditLocaleText from '@/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText'
 
 const Row = ({ field }: { field: DocumentField }) => {
+  const theme = useTheme()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const [selectedLang, setSelectedLang] = useState<string>(lang)
   const [content, setContent] = useState('')
+  const [displayEdit, setDisplayEdit] = useState(false)
   const { selectedDocument } = useStore((state) => state.document)
 
   useEffect(() => {
@@ -56,7 +62,7 @@ const Row = ({ field }: { field: DocumentField }) => {
         <Box sx={{ alignItems: 'center', display: 'flex', gap: '2rem' }}>
           <RowLabel>{field.title}</RowLabel>
 
-          {field.hasLanguageSelector && (
+          {field.hasLanguageSelector && !displayEdit && (
             <LanguageChips
               texts={
                 selectedDocument?.[
@@ -71,9 +77,27 @@ const Row = ({ field }: { field: DocumentField }) => {
         </Box>
       </TableCell>
 
-      <TableCell>
-        {field.component && (
+      <TableCell
+        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+        className={styles.cell}
+      >
+        {field.component && !displayEdit && (
           <field.component content={content}></field.component>
+        )}
+        {field.hasLanguageSelector && displayEdit ? (
+          <EditLocaleText
+            field={field}
+            callback={() => setDisplayEdit(false)}
+          />
+        ) : (
+          <IconButton
+            className={styles.editButton}
+            onClick={() => {
+              setDisplayEdit(true)
+            }}
+          >
+            <EditIcon />
+          </IconButton>
         )}
       </TableCell>
     </TableRow>
