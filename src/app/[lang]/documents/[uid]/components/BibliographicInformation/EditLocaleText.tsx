@@ -21,13 +21,11 @@ import {
 } from '@/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation'
 import { useEffect, useMemo, useState } from 'react'
 import EditLocaleField from '@/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleField'
-import { CheckIcon, CloseIcon } from '@storybook/icons'
+import { CheckIcon } from '@storybook/icons'
 import { Add, Close } from '@mui/icons-material'
 import { Trans } from '@lingui/react/macro'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import ISO6391, { LanguageCode } from 'iso-639-1'
-import { getRuntimeEnv } from '@/utils/runtimeEnv'
-import { LanguageChips } from '@/components/LanguageChips'
 import { Literal } from '@/types/Literal'
 import { useTheme } from '@mui/system'
 import { t } from '@lingui/core/macro'
@@ -59,8 +57,7 @@ const EditLocaleText = ({
   const [openLanguageMenu, setOpenLanguageMenu] = useState<null | HTMLElement>(
     null,
   )
-  const supportedLanguageCodes =
-    process.env.NEXT_PUBLIC_SUPPORTED_LOCALES.split(',')
+  const supportedLanguageCodes = ISO6391.getAllCodes()
   const remainingLanguages = useMemo(
     () =>
       supportedLanguageCodes.filter(
@@ -71,9 +68,18 @@ const EditLocaleText = ({
   const [error, setError] = useState<string | null>(null)
   const [openDialog, setOpenDialog] = useState<boolean>(false)
   const sendData = () => {
-    /**TODO**/
+    const valid = values.filter(
+      (l) =>
+        !texts.find(
+          (text) => text.language == l.language && text.value == l.value,
+        ),
+    )
     setError(null)
-    console.log('API call save')
+    if (valid.length > 0) {
+      /**TODO**/
+      console.log(valid)
+      console.log('API call save')
+    }
     callback()
   }
   const cancel = () => {
@@ -151,10 +157,12 @@ const EditLocaleText = ({
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'space-between',
                   gap: 1,
                   position: 'sticky',
                   top: 0,
                   zIndex: 1,
+                  padding: '0 5px 0 5px',
                 }}
               >
                 <Typography
@@ -177,7 +185,7 @@ const EditLocaleText = ({
                 }}
               >
                 {remainingLanguages.map((code) => {
-                  const language = ISO6391.getNativeName(code)
+                  const language = ISO6391.getName(code)
                   const languageCode = ISO6391.getCode(language)
                   return (
                     <MenuItem

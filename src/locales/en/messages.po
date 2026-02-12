@@ -790,6 +790,10 @@ msgid "edit_field_languages_menu_no_languages_message"
 msgstr "No other available language set by your institution"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:37
+msgid "edit_field_languages_menu_header"
+msgstr "Add Language"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:37
 msgid "edit_field_add_language_button_label"
 msgstr "Add Language"
 
