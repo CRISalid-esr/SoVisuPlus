@@ -21,14 +21,22 @@ const LanguageChips = ({
   const theme = useTheme()
   const hideUndeterminedLanguage = texts.length < 2
   return (
-    <Box sx={isInline ? { display: 'flex' } : {}}>
+    <Box
+      sx={
+        isInline
+          ? { display: 'flex', justifyContent: 'center', alignItems: 'center' }
+          : {}
+      }
+    >
       {texts
         .filter((text) => !(text.language == 'ul' && hideUndeterminedLanguage))
         .map((text, index) => (
           <Chip
             key={index}
             size='small'
-            sx={{ marginRight: theme.spacing(1) }}
+            sx={{
+              marginRight: index == texts.length - 1 ? 0 : theme.spacing(1),
+            }}
             clickable={text.language !== selectedLang}
             label={text.language == 'ul' ? 'n/a' : text.language}
             onClick={(e) => {
