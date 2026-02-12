@@ -1,8 +1,8 @@
 import {
   BibliographicPlatform,
   BibliographicPlatformMetadata,
-  getBibliographicPlatformByNameIgnoreCase,
   getBibliographicPlatformDbValue,
+  isValidBibliographicPlatformName,
 } from './BibliographicPlatform'
 import { BibliographicPlatform as DbBibliographicPlatform } from '@prisma/client'
 
@@ -16,32 +16,14 @@ describe('BibliographicPlatform', () => {
   })
 })
 
-describe('getBibliographicPlatformByNameIgnoreCase', () => {
-  it('should return the correct BibliographicPlatform for valid names (case insensitive)', () => {
-    expect(getBibliographicPlatformByNameIgnoreCase('HAL')).toBe(
-      BibliographicPlatform.HAL,
-    )
-    expect(getBibliographicPlatformByNameIgnoreCase('hal')).toBe(
-      BibliographicPlatform.HAL,
-    )
-    expect(getBibliographicPlatformByNameIgnoreCase('HaL')).toBe(
-      BibliographicPlatform.HAL,
-    )
-
-    expect(getBibliographicPlatformByNameIgnoreCase('SCANR')).toBe(
-      BibliographicPlatform.SCANR,
-    )
-    expect(getBibliographicPlatformByNameIgnoreCase('scanr')).toBe(
-      BibliographicPlatform.SCANR,
-    )
-  })
-
+describe('isValidBibliographicPlatformName', () => {
   it('should return null for an unknown platform', () => {
-    expect(getBibliographicPlatformByNameIgnoreCase('unknown')).toBeNull()
-    expect(getBibliographicPlatformByNameIgnoreCase('')).toBeNull()
-    expect(
-      getBibliographicPlatformByNameIgnoreCase('someRandomPlatform'),
-    ).toBeNull()
+    expect(isValidBibliographicPlatformName('hal')).toBe(
+      BibliographicPlatform.HAL,
+    )
+    expect(isValidBibliographicPlatformName('unknown')).toBeNull()
+    expect(isValidBibliographicPlatformName('')).toBeNull()
+    expect(isValidBibliographicPlatformName('someRandomPlatform')).toBeNull()
   })
 })
 

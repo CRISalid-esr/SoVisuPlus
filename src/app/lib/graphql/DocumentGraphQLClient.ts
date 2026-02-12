@@ -5,7 +5,7 @@ import { GraphPersonResponse, PersonGraphQLClient } from './PersonGraphQLClient'
 import { Literal } from '@/types/Literal'
 import { Contribution } from '@/types/Contribution'
 import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
-import { getBibliographicPlatformByNameIgnoreCase } from '@/types/BibliographicPlatform'
+import { isValidBibliographicPlatformName } from '@/types/BibliographicPlatform'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import { Concept } from '@/types/Concept'
 import { Journal } from '@/types/Journal'
@@ -16,7 +16,6 @@ import { SourcePerson } from '@/types/SourcePerson'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
 import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
-import { AuthorityOrganizationIdentifierType } from '@prisma/client'
 
 interface GraphSourcePersonResponse {
   uid: string
@@ -232,7 +231,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
       ),
       documentData.recorded_by.reduce<DocumentRecord[]>(
         (acc, recordData: GraphDocumentRecordResponse) => {
-          const platform = getBibliographicPlatformByNameIgnoreCase(
+          const platform = isValidBibliographicPlatformName(
             recordData.harvester,
           )
           if (!platform) {

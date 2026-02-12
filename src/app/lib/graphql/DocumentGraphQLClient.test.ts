@@ -7,7 +7,7 @@ import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import {
   BibliographicPlatform,
-  getBibliographicPlatformByNameIgnoreCase,
+  isValidBibliographicPlatformName,
 } from '@/types/BibliographicPlatform'
 import { Literal } from '@/types/Literal'
 import { Person } from '@/types/Person'
@@ -15,7 +15,11 @@ import { Concept } from '@/types/Concept'
 import { SourcePerson } from '@/types/SourcePerson'
 import { SourceContribution } from '@/types/SourceContribution'
 import { SourceJournal } from '@/types/SourceJournal'
-import { PublicationIdentifierType, AuthorityOrganizationIdentifierType, OAStatus } from '@prisma/client'
+import {
+  PublicationIdentifierType,
+  AuthorityOrganizationIdentifierType,
+  OAStatus,
+} from '@prisma/client'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
 import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
@@ -221,7 +225,7 @@ describe('DocumentGraphQLClient', () => {
           [new SourceContribution(LocRelator.AUTHOR, mockSourcePerson)],
           ['Book', 'Document'],
           new Date('2022-01-01'),
-          getBibliographicPlatformByNameIgnoreCase('idref') ??
+          isValidBibliographicPlatformName('idref') ??
             ({ name: 'idref' } as unknown as BibliographicPlatform),
           [Literal.fromObject({ language: 'en', value: 'Record Title' })],
           'http://platform.com/record/record-001',

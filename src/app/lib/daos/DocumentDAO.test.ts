@@ -22,7 +22,7 @@ import { AgentType } from '@/types/IAgent'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import {
   BibliographicPlatform,
-  getBibliographicPlatformByNameIgnoreCase,
+  isValidBibliographicPlatformName,
 } from '@/types/BibliographicPlatform'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
@@ -354,9 +354,7 @@ describe('DocumentDAO', () => {
           ],
           ['Document', 'Book'],
           new Date('2022-01-01T00:00:00.000Z'),
-          getBibliographicPlatformByNameIgnoreCase(
-            'hal',
-          ) as BibliographicPlatform,
+          isValidBibliographicPlatformName('hal') as BibliographicPlatform,
           [new Literal('HAL Record Title', 'fr')],
           'https://hal.science/hal-123',
           ['UNIV-NANTES', 'CNRS'],

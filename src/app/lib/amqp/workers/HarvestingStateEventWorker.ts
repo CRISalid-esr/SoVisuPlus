@@ -5,11 +5,11 @@ import {
   isHarvestingState,
 } from '@/types/HarvestingStateEvent'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
-import { getBibliographicPlatformByNameIgnoreCase } from '@/types/BibliographicPlatform'
 import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
+import { isValidBibliographicPlatformName } from '@/types/BibliographicPlatform'
 
 /**
  * Worker for processing harvesting state event messages
@@ -35,7 +35,7 @@ export class HarvestingStateEventWorker extends MessageProcessingWorker<AMQPHarv
       console.warn('No fields found in document message')
       return events
     }
-    const bibliographicPlatform = getBibliographicPlatformByNameIgnoreCase(
+    const bibliographicPlatform = isValidBibliographicPlatformName(
       this.message.fields.harvester,
     )
     if (!bibliographicPlatform) {
