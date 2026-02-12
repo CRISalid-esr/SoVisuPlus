@@ -14,6 +14,9 @@ import { SourceContribution } from '@/types/SourceContribution'
 import { SourceJournal } from '@/types/SourceJournal'
 import { SourcePerson } from '@/types/SourcePerson'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
+import { AuthorityOrganization } from '@/types/AuthorityOrganization'
+import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
+import { AuthorityOrganizationIdentifierType } from '@prisma/client'
 
 interface GraphSourcePersonResponse {
   uid: string
@@ -22,8 +25,18 @@ interface GraphSourcePersonResponse {
   source_identifier: string | null
 }
 
+interface GraphAuthorityOrganization {
+  uid: string
+  display_names: string[]
+  identifiers: {
+    type: string
+    value: string
+  }[]
+}
+
 interface GraphContributionResponse {
   roles: string[]
+  affiliations: Array<GraphAuthorityOrganization>
   contributor: Array<GraphPersonResponse>
 }
 
@@ -188,7 +201,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
         (acc, contributionData: GraphContributionResponse) => {
           const [contributor] = contributionData.contributor
           const person = new PersonGraphQLClient().hydrate(contributor)
-          const { roles } = contributionData
+          const { roles, affiliations } = contributionData
           const locRelators = roles.reduce<LocRelator[]>((roleAcc, role) => {
             const relator = LocRelatorHelper.fromURI(role)
             if (relator) {
@@ -196,8 +209,23 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
             }
             return roleAcc
           }, [])
+          const organizations = affiliations.map((org) => {
+            const ids = org.identifiers.reduce<
+              AuthorityOrganizationIdentifier[]
+            >((idsAcc, id) => {
+              const type =
+                AuthorityOrganizationIdentifier.authorityOrganizationIdentifierTypeFromString(
+                  id.type,
+                )
+              if (type) {
+                idsAcc.push(new AuthorityOrganizationIdentifier(type, id.value))
+              }
+              return idsAcc
+            }, [])
+            return new AuthorityOrganization(org.uid, org.display_names, ids)
+          })
 
-          acc.push(new Contribution(person, locRelators))
+          acc.push(new Contribution(person, locRelators, organizations))
           return acc
         },
         [],
@@ -217,16 +245,8 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
             new DocumentRecord(
               recordData.uid,
               recordData.source_identifier,
-              recordData.has_identifiers.reduce<PublicationIdentifier[]>(
-                (acc, identifier: PublicationIdentifier) => {
-                  const pubId = new PublicationIdentifier(
-                    identifier.type,
-                    identifier.value,
-                  )
-                  acc.push(pubId)
-                  return acc
-                },
-                [],
+              recordData.has_identifiers.map((identifier) =>
+                PublicationIdentifier.fromJSON(identifier),
               ),
               recordData.has_contributions.reduce<SourceContribution[]>(
                 (

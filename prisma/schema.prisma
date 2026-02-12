@@ -288,13 +288,44 @@ model DocumentAbstract {
   @@unique([documentId, language]) // Ensure no duplicate languages for the same document
 }
 
+enum AuthorityOrganizationIdentifierType {
+  OPENALEX @map("openalex")
+  ROR      @map("ror")
+  HAL      @map("hal")
+  IDREF    @map("IdRef")
+  ISNI     @map("isni")
+  NNS      @map("nns")
+  WIKIDATA @map("Wikidata")
+  VIAF     @map("viaf")
+}
+
+model AuthorityOrganizationIdentifier {
+  id             Int                                 @id @default(autoincrement())
+  type           AuthorityOrganizationIdentifierType
+  value          String
+  organization   AuthorityOrganization               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId Int
+
+  @@unique([type, value])
+  @@index([organizationId])
+}
+
+model AuthorityOrganization {
+  id            Int                               @id @default(autoincrement())
+  uid           String                            @unique
+  displayNames  String[]
+  identifiers   AuthorityOrganizationIdentifier[]
+  contributions Contribution[]
+}
+
 model Contribution {
-  id         Int      @id @default(autoincrement())
-  personId   Int
-  documentId Int
-  roles      String[]
-  person     Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
-  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  id           Int                     @id @default(autoincrement())
+  personId     Int
+  documentId   Int
+  roles        String[]
+  affiliations AuthorityOrganization[]
+  person       Person                  @relation(fields: [personId], references: [id], onDelete: Cascade)
+  document     Document                @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@unique([personId, documentId]) // Ensure unique person-document pair
   @@index([documentId])

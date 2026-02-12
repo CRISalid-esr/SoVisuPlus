@@ -8,6 +8,7 @@ import Authors from './Authors'
 import Identifiers from '@/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers'
 import clearAllMocks = jest.clearAllMocks
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
+import { PublicationIdentifierType } from '@prisma/client'
 
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
@@ -70,16 +71,28 @@ describe('Identifiers Component', () => {
             {
               sourceIdentifier: 'sudoc0001',
               identifiers: [
-                new PublicationIdentifier('sudoc-ppn', 'sudoc-ppn-0001'),
-                new PublicationIdentifier('nnt', 'nnt-0001'),
+                new PublicationIdentifier(
+                  PublicationIdentifierType.SUDOCPPN,
+                  'sudoc-ppn-0001',
+                ),
+                new PublicationIdentifier(
+                  PublicationIdentifierType.NNT,
+                  'nnt-0001',
+                ),
               ],
               platform: 'scanr',
             },
             {
               sourceIdentifier: 'hal0001',
               identifiers: [
-                new PublicationIdentifier('sudoc-ppn', 'sudoc-ppn-0001'),
-                new PublicationIdentifier('hal', 'hal-0001'),
+                new PublicationIdentifier(
+                  PublicationIdentifierType.SUDOCPPN,
+                  'sudoc-ppn-0001',
+                ),
+                new PublicationIdentifier(
+                  PublicationIdentifierType.HAL,
+                  'hal-0001',
+                ),
               ],
               platform: 'hal',
             },
@@ -129,16 +142,25 @@ describe('Identifiers Component', () => {
             {
               sourceIdentifier: 'sudoc0001',
               identifiers: [
-                new PublicationIdentifier('sudoc-ppn', 'sudoc-ppn-0001'),
-                new PublicationIdentifier('nnt', null),
+                new PublicationIdentifier(
+                  PublicationIdentifierType.SUDOCPPN,
+                  'sudoc-ppn-0001',
+                ),
+                new PublicationIdentifier(PublicationIdentifierType.NNT, null),
               ],
               platform: 'scanr',
             },
             {
               sourceIdentifier: 'hal0001',
               identifiers: [
-                new PublicationIdentifier('sudoc-ppn', 'sudoc-ppn-0001'),
-                new PublicationIdentifier('hal', 'hal-0001'),
+                new PublicationIdentifier(
+                  PublicationIdentifierType.SUDOCPPN,
+                  'sudoc-ppn-0001',
+                ),
+                new PublicationIdentifier(
+                  PublicationIdentifierType.HAL,
+                  'hal-0001',
+                ),
               ],
               platform: 'hal',
             },

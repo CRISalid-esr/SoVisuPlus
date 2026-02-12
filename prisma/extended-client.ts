@@ -1,4 +1,6 @@
 import {
+  AuthorityOrganization,
+  AuthorityOrganizationIdentifier,
   Concept,
   ConceptLabel,
   Contribution,
@@ -30,7 +32,6 @@ import {
   UserRole,
   UserRoleScope,
 } from '@prisma/client'
-
 const prisma = new PrismaClient()
 
 export type ResearchStructureWithRelations = ResearchStructure & {
@@ -40,6 +41,11 @@ export type ResearchStructureWithRelations = ResearchStructure & {
 
 export type ContributionWithRelations = Contribution & {
   person: Person
+  affiliations: AuthorityOrganizationWithRelations[]
+}
+
+export type AuthorityOrganizationWithRelations = AuthorityOrganization & {
+  identifiers: AuthorityOrganizationIdentifier[]
 }
 
 export type SourceContributionWithRelations = SourceContribution & {

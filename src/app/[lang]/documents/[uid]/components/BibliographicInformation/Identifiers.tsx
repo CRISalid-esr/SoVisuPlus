@@ -2,7 +2,10 @@ import { useTheme } from '@mui/material/styles'
 import useStore from '@/stores/global_store'
 import { Alert, Box, Chip, Snackbar, Typography } from '@mui/material'
 import { useMemo, useState } from 'react'
-import { PublicationIdentifier } from '@/types/PublicationIdentifier'
+import {
+  PublicationIdentifier,
+  publicationIdentifierTypeToString,
+} from '@/types/PublicationIdentifier'
 import { CheckCircle, ContentCopy } from '@mui/icons-material'
 import { Trans } from '@lingui/react/macro'
 import { t } from '@lingui/core/macro'
@@ -50,7 +53,7 @@ const Identifiers = () => {
   const handleClick = (identifier: PublicationIdentifier | string) => {
     let id: string
     if (identifier instanceof PublicationIdentifier) {
-      setCopyIdType(identifier.type.toUpperCase())
+      setCopyIdType(publicationIdentifierTypeToString[identifier.type])
       id = identifier.value ? identifier.value : ''
     } else {
       setCopyIdType(null)
@@ -101,7 +104,11 @@ const Identifiers = () => {
               }}
               variant='outlined'
               icon={<ContentCopy />}
-              label={identifier.type.toUpperCase() + ' : ' + identifier.value}
+              label={
+                publicationIdentifierTypeToString[identifier.type] +
+                ' : ' +
+                identifier.value
+              }
             />
           ),
       )}

@@ -7,6 +7,7 @@ import {
   Person as DbPerson,
   Prisma,
   PrismaClient,
+  PublicationIdentifierType,
   PublicationIdentifierType as DbPublicationIdentifierType,
 } from '@prisma/client'
 import { Document, DocumentType } from '@/types/Document'
@@ -208,7 +209,25 @@ describe('DocumentDAO', () => {
             labels: true,
           },
         },
-        contributions: { include: { person: true } },
+        contributions: {
+          include: {
+            affiliations: {
+              include: {
+                identifiers: true,
+              },
+            },
+            person: {
+              include: {
+                identifiers: true,
+                memberships: {
+                  include: {
+                    researchStructure: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         journal: {
           include: {
             identifiers: true,
@@ -267,7 +286,6 @@ describe('DocumentDAO', () => {
           'http://example.com/concept/abc',
         ), // only concept-abc remains
       ],
-      [],
     )
 
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(
@@ -308,7 +326,12 @@ describe('DocumentDAO', () => {
         new DocumentRecord(
           'hal-123',
           'hal0001',
-          [new PublicationIdentifier('hal', 'hal-0001')],
+          [
+            new PublicationIdentifier(
+              PublicationIdentifierType.HAL,
+              'hal-0001',
+            ),
+          ],
           [
             new SourceContribution(
               LocRelator.AUTHOR,
@@ -751,7 +774,21 @@ describe('DocumentDAO', () => {
         },
         contributions: {
           include: {
-            person: true,
+            affiliations: {
+              include: {
+                identifiers: true,
+              },
+            },
+            person: {
+              include: {
+                identifiers: true,
+                memberships: {
+                  include: {
+                    researchStructure: true,
+                  },
+                },
+              },
+            },
           },
         },
         records: {
@@ -849,7 +886,21 @@ describe('DocumentDAO', () => {
         },
         contributions: {
           include: {
-            person: true,
+            affiliations: {
+              include: {
+                identifiers: true,
+              },
+            },
+            person: {
+              include: {
+                identifiers: true,
+                memberships: {
+                  include: {
+                    researchStructure: true,
+                  },
+                },
+              },
+            },
           },
         },
         records: {
@@ -942,7 +993,21 @@ describe('DocumentDAO', () => {
         },
         contributions: {
           include: {
-            person: true,
+            affiliations: {
+              include: {
+                identifiers: true,
+              },
+            },
+            person: {
+              include: {
+                identifiers: true,
+                memberships: {
+                  include: {
+                    researchStructure: true,
+                  },
+                },
+              },
+            },
           },
         },
         records: {
@@ -1039,7 +1104,21 @@ describe('DocumentDAO', () => {
         },
         contributions: {
           include: {
-            person: true,
+            affiliations: {
+              include: {
+                identifiers: true,
+              },
+            },
+            person: {
+              include: {
+                identifiers: true,
+                memberships: {
+                  include: {
+                    researchStructure: true,
+                  },
+                },
+              },
+            },
           },
         },
         records: {
@@ -1167,10 +1246,19 @@ describe('DocumentDAO', () => {
         abstracts: true,
         contributions: {
           include: {
+            affiliations: {
+              include: {
+                identifiers: true,
+              },
+            },
             person: {
               include: {
                 identifiers: true,
-                memberships: { include: { researchStructure: true } },
+                memberships: {
+                  include: {
+                    researchStructure: true,
+                  },
+                },
               },
             },
           },
@@ -1261,7 +1349,25 @@ describe('DocumentDAO', () => {
           titles: true,
           abstracts: true,
           subjects: { include: { labels: true } },
-          contributions: { include: { person: true } },
+          contributions: {
+            include: {
+              affiliations: {
+                include: {
+                  identifiers: true,
+                },
+              },
+              person: {
+                include: {
+                  identifiers: true,
+                  memberships: {
+                    include: {
+                      researchStructure: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
           records: {
             include: {
               identifiers: true,
