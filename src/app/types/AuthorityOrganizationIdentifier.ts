@@ -2,7 +2,7 @@ import {
   $Enums,
   AuthorityOrganizationIdentifier as DbAuthorityOrganizationIdentifier,
 } from '.prisma/client'
-import AuthorityOrganizationIdentifierType = $Enums.AuthorityOrganizationIdentifierType
+import DbAuthorityOrganizationIdentifierType = $Enums.AuthorityOrganizationIdentifierType
 
 export interface AuthorityOrganizationIdentifierJson {
   type: string
@@ -10,7 +10,7 @@ export interface AuthorityOrganizationIdentifierJson {
 }
 export class AuthorityOrganizationIdentifier {
   constructor(
-    public type: AuthorityOrganizationIdentifierType,
+    public type: DbAuthorityOrganizationIdentifierType,
     public value: string,
   ) {}
 
@@ -21,12 +21,12 @@ export class AuthorityOrganizationIdentifier {
    */
   static authorityOrganizationIdentifierTypeFromString(
     typeString: string,
-  ): AuthorityOrganizationIdentifierType | null {
-    const convertedType = typeString.toUpperCase()
-    return (
-      Object.values(AuthorityOrganizationIdentifierType) as string[]
-    ).includes(convertedType)
-      ? (convertedType as AuthorityOrganizationIdentifierType)
+  ): DbAuthorityOrganizationIdentifierType | null {
+    const convertedType = typeString as DbAuthorityOrganizationIdentifierType
+    return Object.values(DbAuthorityOrganizationIdentifierType).includes(
+      convertedType,
+    )
+      ? convertedType
       : null
   }
 

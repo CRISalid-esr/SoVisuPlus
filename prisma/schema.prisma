@@ -299,14 +299,17 @@ model DocumentAbstract {
 }
 
 enum AuthorityOrganizationIdentifierType {
-  OPENALEX @map("openalex")
-  ROR      @map("ror")
-  HAL      @map("hal")
-  IDREF    @map("IdRef")
-  ISNI     @map("isni")
-  NNS      @map("nns")
-  WIKIDATA @map("Wikidata")
-  VIAF     @map("viaf")
+  fundref
+  grid
+  hal
+  idref
+  isni
+  nns
+  openalex
+  ror
+  scopus
+  viaf
+  wikidata
 }
 
 model AuthorityOrganizationIdentifier {

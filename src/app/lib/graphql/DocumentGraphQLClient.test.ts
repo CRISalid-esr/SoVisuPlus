@@ -84,7 +84,7 @@ describe('DocumentGraphQLClient', () => {
                   display_names: ['Some Organization'],
                   identifiers: [
                     { type: 'openalex', value: '000054' },
-                    { type: 'Wikidata', value: '10.0004.BA34' },
+                    { type: 'wikidata', value: '10.0004.BA34' },
                   ],
                 },
               ],
@@ -200,11 +200,11 @@ describe('DocumentGraphQLClient', () => {
               ['Some Organization'],
               [
                 new AuthorityOrganizationIdentifier(
-                  AuthorityOrganizationIdentifierType.OPENALEX,
+                  AuthorityOrganizationIdentifierType.openalex,
                   '000054',
                 ),
                 new AuthorityOrganizationIdentifier(
-                  AuthorityOrganizationIdentifierType.WIKIDATA,
+                  AuthorityOrganizationIdentifierType.wikidata,
                   '10.0004.BA34',
                 ),
               ],
