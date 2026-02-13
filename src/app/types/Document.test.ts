@@ -125,7 +125,7 @@ describe('Document type', () => {
           'hal0001',
           [
             new PublicationIdentifier(
-              PublicationIdentifierType.HAL,
+              PublicationIdentifierType.hal,
               'hal-0001',
             ),
           ],

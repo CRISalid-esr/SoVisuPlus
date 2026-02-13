@@ -328,7 +328,7 @@ describe('DocumentDAO', () => {
           'hal0001',
           [
             new PublicationIdentifier(
-              PublicationIdentifierType.HAL,
+              PublicationIdentifierType.hal,
               'hal-0001',
             ),
           ],
@@ -524,7 +524,7 @@ describe('DocumentDAO', () => {
       where: {
         OR: [
           {
-            type: DbPublicationIdentifierType.HAL,
+            type: DbPublicationIdentifierType.hal,
             value: 'hal-0001',
             documentRecordId: { not: 89 },
           },
@@ -538,7 +538,7 @@ describe('DocumentDAO', () => {
       data: [
         {
           documentRecordId: 89,
-          type: DbPublicationIdentifierType.HAL,
+          type: DbPublicationIdentifierType.hal,
           value: 'hal-0001',
         },
       ],

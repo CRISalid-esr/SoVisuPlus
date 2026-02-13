@@ -2,10 +2,7 @@ import { useTheme } from '@mui/material/styles'
 import useStore from '@/stores/global_store'
 import { Alert, Box, Chip, Snackbar, Typography } from '@mui/material'
 import { useMemo, useState } from 'react'
-import {
-  PublicationIdentifier,
-  publicationIdentifierTypeToString,
-} from '@/types/PublicationIdentifier'
+import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 import { CheckCircle, ContentCopy } from '@mui/icons-material'
 import { Trans } from '@lingui/react/macro'
 import { t } from '@lingui/core/macro'
@@ -53,7 +50,7 @@ const Identifiers = () => {
   const handleClick = (identifier: PublicationIdentifier | string) => {
     let id: string
     if (identifier instanceof PublicationIdentifier) {
-      setCopyIdType(publicationIdentifierTypeToString[identifier.type])
+      setCopyIdType(identifier.type)
       id = identifier.value ? identifier.value : ''
     } else {
       setCopyIdType(null)
@@ -104,11 +101,7 @@ const Identifiers = () => {
               }}
               variant='outlined'
               icon={<ContentCopy />}
-              label={
-                publicationIdentifierTypeToString[identifier.type] +
-                ' : ' +
-                identifier.value
-              }
+              label={identifier.type.toUpperCase() + ' : ' + identifier.value}
             />
           ),
       )}
@@ -161,7 +154,7 @@ const Identifiers = () => {
           sx={{ width: '100%', color: 'success.main', boxShadow: 2 }}
         >
           {copyIdType
-            ? copyIdType +
+            ? copyIdType.toUpperCase() +
               ' ' +
               t`document_details_page_identifiers_copy_message`
             : t`document_details_page_identifiers_copy_default_message`}

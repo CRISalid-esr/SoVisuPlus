@@ -209,24 +209,34 @@ model SourceJournal {
 }
 
 enum PublicationIdentifierType {
-  HAL           @map("hal")
-  DOI           @map("doi")
-  OPENALEX      @map("open_alex")
-  URI           @map("uri")
-  SUDOCPPN      @map("sudoc_ppn")
-  NNT           @map("nnt")
-  PRODINRA      @map("prodinra")
-  WOS           @map("wos")
-  PMID          @map("pmid")
-  ARXIV         @map("arxiv")
-  PPN           @map("ppn")
-  PUBMED        @map("pubmed")
-  PII           @map("pii")
-  PUBMEDCENTRAL @map("pubmedcentral")
-  IRD           @map("ird")
-  SCIENCESPO    @map("sciencespo")
-  INERIS        @map("ineris")
-  UNKNOWN       @map("unknown")
+  arxiv
+  bibcode
+  biorxiv
+  cern
+  chemrxiv
+  doi
+  ensam
+  hal
+  ineris
+  inspire
+  ird
+  irstea
+  irthesaurus
+  meditagri
+  nnt
+  oatao
+  okina
+  openalex
+  pii
+  pmid
+  ppn
+  prodinra
+  pubmedcentral
+  sciencespo
+  swhid
+  uri
+  wos
+  unknown
 }
 
 model PublicationIdentifier {

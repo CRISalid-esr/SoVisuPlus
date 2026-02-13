@@ -54,7 +54,7 @@ describe('DocumentRecord type', () => {
     const mockDocument = new DocumentRecord(
       'hal-123',
       'hal0001',
-      [new PublicationIdentifier(PublicationIdentifierType.HAL, 'hal-0001')],
+      [new PublicationIdentifier(PublicationIdentifierType.hal, 'hal-0001')],
       [
         new SourceContribution(
           LocRelator.AUTHOR,
