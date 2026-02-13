@@ -299,15 +299,17 @@ model DocumentAbstract {
 }
 
 enum AuthorityOrganizationIdentifierType {
-  fundref
-  grid
   hal
   idref
   isni
+  local
   nns
   openalex
   ror
   scopus
+  siren
+  siret
+  uai
   viaf
   wikidata
 }
@@ -456,15 +458,17 @@ model ResearchStructureIdentifier {
 }
 
 enum ResearchStructureIdentifierType {
-  fundref
-  grid
   hal
   idref
   isni
+  local
   nns
   openalex
   ror
   scopus
+  siren
+  siret
+  uai
   viaf
   wikidata
 }
