@@ -6,7 +6,7 @@ import { ExternalPerson } from '@/types/ExternalPerson'
 import { InternalPerson } from '@/types/InternalPerson'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { Literal } from '@/types/Literal'
-import { convertStringResearchStructureIdentifierType } from '@/types/ResearchStructureIdentifier'
+import { researchStructureIdentifierTypeFromString } from '@/types/ResearchStructureIdentifier'
 
 export interface GraphPersonIdentifier {
   type: string
@@ -168,7 +168,7 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
           [],
           edge.node.signature ?? null,
           edge.node.identifiers.map((identifier) => ({
-            type: convertStringResearchStructureIdentifierType(identifier.type),
+            type: researchStructureIdentifierTypeFromString(identifier.type),
             value: identifier.value,
           })),
           'research_structure',

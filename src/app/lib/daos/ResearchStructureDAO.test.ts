@@ -1,10 +1,10 @@
 import {
   PrismaClient,
   ResearchStructure as DbResearchStructure,
+  ResearchStructureIdentifierType as DbResearchStructureIdentifierType,
 } from '@prisma/client'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
-import { ResearchStructureIdentifierType } from '@/types/ResearchStructureIdentifier'
 import { Literal } from '@/types/Literal'
 
 jest.mock('@prisma/client', () => {
@@ -49,9 +49,9 @@ describe('ResearchStructureDAO', () => {
     [new Literal('A description for Research Structure 001', 'en')],
     'RS001_signature',
     [
-      { type: ResearchStructureIdentifierType.NNS, value: '001234567Z' },
+      { type: DbResearchStructureIdentifierType.nns, value: '001234567Z' },
       {
-        type: ResearchStructureIdentifierType.ROR,
+        type: DbResearchStructureIdentifierType.ror,
         value: 'https://ror.org/01',
       },
     ],
@@ -127,7 +127,7 @@ describe('ResearchStructureDAO', () => {
     expect(mockPrisma.researchStructureIdentifier.create).toHaveBeenCalledWith({
       data: {
         researchStructureId: 1,
-        type: ResearchStructureIdentifierType.NNS,
+        type: DbResearchStructureIdentifierType.nns,
         value: '001234567Z',
       },
     })
@@ -135,7 +135,7 @@ describe('ResearchStructureDAO', () => {
     expect(mockPrisma.researchStructureIdentifier.create).toHaveBeenCalledWith({
       data: {
         researchStructureId: 1,
-        type: ResearchStructureIdentifierType.ROR,
+        type: DbResearchStructureIdentifierType.ror,
         value: 'https://ror.org/01',
       },
     })

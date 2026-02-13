@@ -1,7 +1,7 @@
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { describe, expect, it } from '@jest/globals'
-import { ResearchStructureIdentifierType } from '@/types/ResearchStructureIdentifier'
 import { Literal } from '@/types/Literal'
+import { ResearchStructureIdentifierType } from '@prisma/client'
 
 describe('ResearchStructure', () => {
   it('should create a valid ResearchStructure object', () => {
@@ -12,8 +12,8 @@ describe('ResearchStructure', () => {
       [new Literal('Valid Description', 'en')],
       'ABC_signature',
       [
-        { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
-        { type: ResearchStructureIdentifierType.ROR, value: '67890' },
+        { type: ResearchStructureIdentifierType.nns, value: '12345' },
+        { type: ResearchStructureIdentifierType.ror, value: '67890' },
       ],
     )
 
@@ -35,8 +35,8 @@ describe('ResearchStructure', () => {
       },
     ])
     expect(validResearchStructure.identifiers).toEqual([
-      { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
-      { type: ResearchStructureIdentifierType.ROR, value: '67890' },
+      { type: ResearchStructureIdentifierType.nns, value: '12345' },
+      { type: ResearchStructureIdentifierType.ror, value: '67890' },
     ])
   })
 
@@ -99,8 +99,8 @@ describe('ResearchStructure', () => {
         },
       ],
       identifiers: [
-        { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
-        { type: ResearchStructureIdentifierType.NNS, value: '67890' },
+        { type: ResearchStructureIdentifierType.nns, value: '12345' },
+        { type: ResearchStructureIdentifierType.ror, value: '67890' },
       ],
     }
 
@@ -136,8 +136,8 @@ describe('ResearchStructure', () => {
       ]),
     )
     expect(result.identifiers).toEqual([
-      { type: ResearchStructureIdentifierType.LOCAL, value: '12345' },
-      { type: ResearchStructureIdentifierType.NNS, value: '67890' },
+      { type: ResearchStructureIdentifierType.nns, value: '12345' },
+      { type: ResearchStructureIdentifierType.ror, value: '67890' },
     ])
   })
 

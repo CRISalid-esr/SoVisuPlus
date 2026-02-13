@@ -1,31 +1,24 @@
 import { ResearchStructureIdentifierType as DbResearchStructureIdentifierType } from '@prisma/client'
 
-type ResearchStructureIdentifier = {
+export type ResearchStructureIdentifier = {
   type: DbResearchStructureIdentifierType
   value: string
 }
 
-const convertStringResearchStructureIdentifierType = (
-  value: string,
+/**
+ * Convert a string to a valid ResearchStructureIdentifierType or throw error if not valid
+ * @param typeString - The string representation of the research structure identifier type
+ * @returns A valid ResearchStructureIdentifierType
+ */
+export const researchStructureIdentifierTypeFromString = (
+  typeString: string,
 ): DbResearchStructureIdentifierType => {
-  switch (value.toLowerCase()) {
-    case 'nns':
-      return DbResearchStructureIdentifierType.NNS
-    case 'idref':
-      return DbResearchStructureIdentifierType.IDREF
-    case 'local':
-      return DbResearchStructureIdentifierType.LOCAL
-    case 'hal':
-      return DbResearchStructureIdentifierType.HAL
-    case 'ror':
-      return DbResearchStructureIdentifierType.ROR
-    case 'scopus_id':
-      return DbResearchStructureIdentifierType.SCOPUS_ID
-    default:
-      throw new Error(`Unsupported identifier type: ${value}`)
+  const convertedType = typeString as DbResearchStructureIdentifierType
+  const isValid = Object.values(DbResearchStructureIdentifierType).includes(
+    convertedType,
+  )
+  if (!isValid) {
+    throw new Error(`Unsupported identifier type: ${typeString}`)
   }
+  return convertedType
 }
-
-export type { ResearchStructureIdentifier }
-export { DbResearchStructureIdentifierType as ResearchStructureIdentifierType }
-export { convertStringResearchStructureIdentifierType }

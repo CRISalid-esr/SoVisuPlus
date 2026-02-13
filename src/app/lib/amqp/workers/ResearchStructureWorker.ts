@@ -3,8 +3,8 @@ import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
 import { MessageProcessingWorker } from '@/lib/amqp/workers/MessageProcessingWorker'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import {
-  convertStringResearchStructureIdentifierType,
   ResearchStructureIdentifier,
+  researchStructureIdentifierTypeFromString,
 } from '@/types/ResearchStructureIdentifier'
 import { Literal } from '@/types/Literal'
 import { DataEvent } from '@/types/DataEvent'
@@ -36,7 +36,7 @@ export class ResearchStructureWorker extends MessageProcessingWorker<AMQPResearc
     const transformedIdentifiers: ResearchStructureIdentifier[] =
       identifiers.map((identifier) => {
         return {
-          type: convertStringResearchStructureIdentifierType(identifier.type),
+          type: researchStructureIdentifierTypeFromString(identifier.type),
           value: identifier.value,
         }
       })

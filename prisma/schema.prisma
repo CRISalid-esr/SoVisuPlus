@@ -456,12 +456,17 @@ model ResearchStructureIdentifier {
 }
 
 enum ResearchStructureIdentifierType {
-  LOCAL     @map("local")
-  NNS       @map("nns")
-  IDREF     @map("idref")
-  ROR       @map("ror")
-  HAL       @map("hal")
-  SCOPUS_ID @map("scopus_id")
+  fundref
+  grid
+  hal
+  idref
+  isni
+  nns
+  openalex
+  ror
+  scopus
+  viaf
+  wikidata
 }
 
 enum ActionType {
