@@ -1,8 +1,10 @@
-import { EntityType, PrismaClient, User as DbUser } from '@prisma/client'
 import {
-  PersonIdentifier,
+  EntityType,
   PersonIdentifierType,
-} from '@/types/PersonIdentifier'
+  PrismaClient,
+  User as DbUser,
+} from '@prisma/client'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { User } from '@/types/User'
 
@@ -47,7 +49,7 @@ describe('UserDAO', () => {
   })
 
   const identifier: PersonIdentifier = new PersonIdentifier(
-    PersonIdentifierType.ORCID,
+    PersonIdentifierType.orcid,
     '0000-0001-2345-6789',
   )
 
@@ -106,7 +108,7 @@ describe('UserDAO', () => {
         person: {
           identifiers: {
             some: {
-              type: 'ORCID',
+              type: 'orcid',
               value: '0000-0001-2345-6789',
             },
           },
@@ -202,7 +204,7 @@ describe('UserDAO', () => {
       where: {
         person: {
           identifiers: {
-            some: { type: 'ORCID', value: '0000-0001-2345-6789' },
+            some: { type: 'orcid', value: '0000-0001-2345-6789' },
           },
         },
       },
@@ -356,13 +358,13 @@ describe('UserDAO', () => {
       id: 66,
     })
     const id = await userDAO.resolveUserId({
-      idType: 'ORCID',
+      idType: 'orcid',
       idValue: '0000-0001-2345-6789',
     })
     expect(id).toBe(66)
     expect(mockPrisma.person.findFirst).toHaveBeenCalledWith({
       where: {
-        identifiers: { some: { type: 'ORCID', value: '0000-0001-2345-6789' } },
+        identifiers: { some: { type: 'orcid', value: '0000-0001-2345-6789' } },
       },
       select: { id: true },
     })
@@ -375,7 +377,7 @@ describe('UserDAO', () => {
   it('resolveUserId: via identifier returns null when person not found', async () => {
     ;(mockPrisma.person.findFirst as jest.Mock).mockResolvedValue(null)
     const id = await userDAO.resolveUserId({
-      idType: 'ORCID',
+      idType: 'orcid',
       idValue: 'missing',
     })
     expect(id).toBeNull()
@@ -385,7 +387,7 @@ describe('UserDAO', () => {
     ;(mockPrisma.person.findFirst as jest.Mock).mockResolvedValue({ id: 4 })
     ;(mockPrisma.user.findUnique as jest.Mock).mockResolvedValueOnce(null)
     const id = await userDAO.resolveUserId({
-      idType: 'ORCID',
+      idType: 'orcid',
       idValue: '0000-0001-2345-6789',
     })
     expect(id).toBeNull()

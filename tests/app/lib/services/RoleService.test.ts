@@ -236,7 +236,7 @@ describe('RoleService Integration', () => {
       },
     })
     await prisma.personIdentifier.create({
-      data: { personId: person.id, type: 'LOCAL', value: 'local-alice' },
+      data: { personId: person.id, type: 'local', value: 'local-alice' },
     })
     const user = await prisma.user.create({ data: { personId: person.id } })
 
@@ -314,7 +314,7 @@ describe('RoleService Integration', () => {
     await prisma.personIdentifier.create({
       data: {
         personId: person.id,
-        type: 'ORCID',
+        type: 'orcid',
         value: '0000-0001-2345-6789',
       },
     })
@@ -390,7 +390,7 @@ describe('RoleService Integration', () => {
       },
     })
     await prisma.personIdentifier.create({
-      data: { personId: person.id, type: 'LOCAL', value: 'local-alice' },
+      data: { personId: person.id, type: 'local', value: 'local-alice' },
     })
     const user = await prisma.user.create({ data: { personId: person.id } })
 

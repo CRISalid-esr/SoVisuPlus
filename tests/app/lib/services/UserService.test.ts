@@ -32,7 +32,7 @@ describe('UserService Integration Tests', () => {
 
     await prisma.personIdentifier.create({
       data: {
-        type: 'LOCAL',
+        type: 'local',
         value: 'existing-test123',
         person: {
           connect: { id: person.id },

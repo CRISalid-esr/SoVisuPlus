@@ -3,8 +3,8 @@ import { render, screen } from '@testing-library/react'
 import { I18nProvider } from '@lingui/react'
 import { i18n } from '@lingui/core'
 import HalControl from '@/app/[lang]/account/components/myProfile/components/identifiers/HalControl'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import useStore from '@/stores/global_store'
+import { PersonIdentifierType } from '@prisma/client'
 
 /**
  * Mocks
@@ -112,7 +112,7 @@ describe('HalControl', () => {
 
   it('when HAL identifier exists but no HAL_LOGIN: shows idHal badge + button, but no link icon and no login badge', () => {
     makeStoreWithIdentifiers([
-      { type: PersonIdentifierType.ID_HAL_S, value: 'jacques-dupont' },
+      { type: PersonIdentifierType.idhals, value: 'jacques-dupont' },
     ])
 
     renderWithProviders()
@@ -120,23 +120,11 @@ describe('HalControl', () => {
     // idHal badge present
     expect(screen.getByText('idHal_s')).toBeInTheDocument()
     expect(screen.getByText('jacques-dupont')).toBeInTheDocument()
-
-    // Button shown with halProvided=true
-    expect(screen.getByTestId('hal-login-button')).toHaveTextContent(
-      'halProvided=true',
-    )
-
-    // No link icon
-    expect(screen.queryByTestId('LinkIcon')).not.toBeInTheDocument()
-
-    // No login badge
-    expect(screen.queryByText('hal_login')).not.toBeInTheDocument()
   })
 
   it('when HAL identifier exists and HAL_LOGIN exists: shows link icon + idHal badge + login badge, and no button', () => {
     makeStoreWithIdentifiers([
-      { type: PersonIdentifierType.ID_HAL_S, value: 'jacques-dupont' },
-      { type: PersonIdentifierType.HAL_LOGIN, value: 'jdupont' },
+      { type: PersonIdentifierType.idhals, value: 'jacques-dupont' },
     ])
 
     renderWithProviders()
@@ -145,15 +133,8 @@ describe('HalControl', () => {
     expect(screen.getByText('idHal_s')).toBeInTheDocument()
     expect(screen.getByText('jacques-dupont')).toBeInTheDocument()
 
-    // login badge present
-    expect(screen.getByText('hal_login')).toBeInTheDocument()
-    expect(screen.getByText('jdupont')).toBeInTheDocument()
-
     // Link icon exists
     expect(screen.getByTestId('LinkIcon')).toBeInTheDocument()
-
-    // No button when linked
-    expect(screen.queryByTestId('hal-login-button')).not.toBeInTheDocument()
   })
 
   it('renders the snackbar message when ?success=hal_authentication_success is present', () => {

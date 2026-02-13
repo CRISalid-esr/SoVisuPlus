@@ -120,7 +120,7 @@ describe('PersonService Integration Tests', () => {
 
     expect(dbPerson).not.toBeNull()
 
-    const orcidBase = dbPerson!.identifiers.find((i) => i.type === 'ORCID')
+    const orcidBase = dbPerson!.identifiers.find((i) => i.type === 'orcid')
     // Assert: ORCID extension exists
     expect(orcidBase!.orcidIdentifier).toBeTruthy()
 
@@ -196,7 +196,7 @@ describe('PersonService Integration Tests', () => {
     })
 
     const orcidIdentifiers = dbPerson!.identifiers.filter(
-      (i) => i.type === 'ORCID',
+      (i) => i.type === 'orcid',
     )
     expect(orcidIdentifiers).toHaveLength(1)
 

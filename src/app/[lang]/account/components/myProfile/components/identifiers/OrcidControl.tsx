@@ -10,20 +10,20 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { PidComponent } from '@kit-data-manager/react-pid-component'
 import styles from './OrcidControl.module.css'
 import { OrcidLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton'
 import { Trans } from '@lingui/react'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import LinkIcon from '@mui/icons-material/Link'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 const OrcidControl = () => {
   const { connectedUser } = useStore((state) => state.user)
   const person = connectedUser?.person
   const identifiers = person?.getIdentifiers() ?? []
   const orcidIdentifier = identifiers.find(
-    (i) => i.type === PersonIdentifierType.ORCID,
+    (i) => i.type === DbPersonIdentifierType.orcid,
   ) as ORCIDIdentifier | undefined
 
   const orcid = orcidIdentifier?.value

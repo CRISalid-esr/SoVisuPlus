@@ -4,7 +4,6 @@ import { Contribution } from '@/types/Contribution'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Localization } from '@/types/Localization'
 import { Person } from '@/types/Person'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import * as Lingui from '@lingui/core'
 import { Box, Paper, Typography } from '@mui/material'
 import {
@@ -13,6 +12,7 @@ import {
   useMaterialReactTable,
 } from 'material-react-table'
 import { ReactNode, useMemo } from 'react'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 const Authors = () => {
   const { selectedDocument = null } = useStore((state) => state.document)
@@ -39,7 +39,7 @@ const Authors = () => {
           return row.person
             .getIdentifiers()
             .find(
-              (identifier) => identifier.type === PersonIdentifierType.IDREF,
+              (identifier) => identifier.type === DbPersonIdentifierType.idref,
             )?.value
         },
         Cell({ renderedCellValue }: { renderedCellValue: ReactNode }) {
@@ -57,7 +57,7 @@ const Authors = () => {
           return row.person
             .getIdentifiers()
             .find(
-              (identifier) => identifier.type === PersonIdentifierType.ORCID,
+              (identifier) => identifier.type === DbPersonIdentifierType.orcid,
             )?.value
         },
         Cell({ renderedCellValue }: { renderedCellValue: ReactNode }) {
@@ -75,7 +75,7 @@ const Authors = () => {
           return row.person
             .getIdentifiers()
             .find(
-              (identifier) => identifier.type === PersonIdentifierType.ID_HAL_I,
+              (identifier) => identifier.type === DbPersonIdentifierType.idhali,
             )?.value
         },
         Cell({ renderedCellValue }: { renderedCellValue: ReactNode }) {
@@ -93,8 +93,7 @@ const Authors = () => {
           return row.person
             .getIdentifiers()
             .find(
-              (identifier) =>
-                identifier.type === PersonIdentifierType.SCOPUS_EID,
+              (identifier) => identifier.type === DbPersonIdentifierType.scopus,
             )?.value
         },
         Cell({ renderedCellValue }: { renderedCellValue: ReactNode }) {
