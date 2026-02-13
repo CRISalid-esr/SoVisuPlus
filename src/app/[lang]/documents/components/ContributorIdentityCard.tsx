@@ -46,21 +46,22 @@ const ContributorIdentityCard = ({
   }
   const theme = useTheme()
   const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const url = process.env.NEXT_PUBLIC_BASE_URL
   const lang = (Lingui.i18n.locale || 'ul') as ExtendedLanguageCode
   const displayName = person.getDisplayName(lang) || ''
 
   const navigateToPerspective = (slug: string) => {
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams()
     params.set('perspective', slug)
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    router.push(`${url}/${lang}/dashboard?${params.toString()}`, {
+      scroll: false,
+    })
   }
   const identifiersToDisplay = useMemo(() => {
     return person
       .getIdentifiers()
       .filter((id) => IDENTIFIERS_TO_SHOW.includes(id.type))
-  }, [person.getIdentifiers()])
+  }, [person])
 
   return (
     <Card

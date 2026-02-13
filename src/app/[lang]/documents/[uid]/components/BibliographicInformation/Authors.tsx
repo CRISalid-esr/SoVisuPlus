@@ -1,11 +1,12 @@
 import { Trans } from '@lingui/react/macro'
 import useStore from '@/stores/global_store'
 import EditIcon from '@mui/icons-material/Edit'
-import { Box, Button, Chip } from '@mui/material'
+import { Box, Button, Chip, Tooltip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Person } from '@/types/Person'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
+import ContributorIdentityCard from '@/app/[lang]/documents/components/ContributorIdentityCard'
 
 const Authors = () => {
   const theme = useTheme()
@@ -40,32 +41,46 @@ const Authors = () => {
       }}
     >
       {selectedDocument?.contributions.map((contribution, index) => (
-        <Chip
+        <Tooltip
           key={index}
-          onClick={() => {
-            if (!contribution.person.external) {
-              handleInternalAuthorClick(contribution.person)
-            }
-          }}
-          sx={{
-            borderRadius: theme.utils.pxToRem(4),
-            backgroundColor: contribution.person.external
-              ? theme.palette.lightSecondaryContainer
-              : theme.palette.primary.main,
-            letterSpacing: '0.1px',
-            lineHeight: theme.typography.lineHeight.lineHeight20px,
-            fontWeight: theme.typography.fontWeightRegular,
-            color: contribution.person.external
-              ? theme.palette.getContrastText(theme.palette.secondary.dark)
-              : theme.palette.primary.contrastText,
-            cursor: 'pointer',
-            '&:hover': {
-              opacity: 0.85,
+          title={<ContributorIdentityCard contributor={contribution} />}
+          slotProps={{
+            tooltip: {
+              sx: {
+                backgroundColor: 'transparent',
+                padding: 0,
+                border: 'none',
+              },
             },
-            fontSize: theme.utils.pxToRem(14),
           }}
-          label={contribution.person.displayName}
-        />
+        >
+          <Chip
+            key={index}
+            onClick={() => {
+              if (!contribution.person.external) {
+                handleInternalAuthorClick(contribution.person)
+              }
+            }}
+            sx={{
+              borderRadius: theme.utils.pxToRem(4),
+              backgroundColor: contribution.person.external
+                ? theme.palette.lightSecondaryContainer
+                : theme.palette.primary.main,
+              letterSpacing: '0.1px',
+              lineHeight: theme.typography.lineHeight.lineHeight20px,
+              fontWeight: theme.typography.fontWeightRegular,
+              color: contribution.person.external
+                ? theme.palette.getContrastText(theme.palette.secondary.dark)
+                : theme.palette.primary.contrastText,
+              cursor: 'pointer',
+              '&:hover': {
+                opacity: 0.85,
+              },
+              fontSize: theme.utils.pxToRem(14),
+            }}
+            label={contribution.person.displayName}
+          />
+        </Tooltip>
       ))}
       <Button
         variant='outlined'

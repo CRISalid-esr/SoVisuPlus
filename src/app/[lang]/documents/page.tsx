@@ -282,9 +282,8 @@ const DocumentsPage = () => {
 
           return (
             <HighlighterWithEllipsis
-              text={contributors}
               searchWords={[globalFilter, filterValue as string]}
-              contributions={row.original.contributions}
+              text={contributors}
             />
           )
         },
