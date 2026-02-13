@@ -2,7 +2,7 @@ import prisma from '@/lib/daos/prisma'
 import MessageProcessingService from '@/lib/amqp/services/MessageProcessingService'
 import { WebSocketNotifier } from '@/lib/websocket/WebSocketNotifier'
 import { AMQPHarvestingStateEventMessage } from '@/types/AMQPHarvestingStateEventMessage'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { PersonIdentifierType } from '@prisma/client'
 
 jest.mock('@/lib/websocket/WebSocketNotifier')
 
@@ -35,7 +35,7 @@ describe('MessageProcessingService Integration Test', () => {
         identifiers: {
           create: [
             {
-              type: PersonIdentifierType.LOCAL,
+              type: PersonIdentifierType.local,
               value: 'local-1234',
             },
           ],

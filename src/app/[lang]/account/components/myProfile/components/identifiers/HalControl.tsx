@@ -4,39 +4,32 @@ import useStore from '@/stores/global_store'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Alert, Box, Paper, Snackbar, Tooltip, Typography } from '@mui/material'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { Trans } from '@lingui/react'
 import { HalLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton'
 import LinkIcon from '@mui/icons-material/Link'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 const HalControl = () => {
   const { connectedUser } = useStore((state) => state.user)
   const person = connectedUser?.person
   const identifiers = person?.getIdentifiers() ?? []
 
-  const { halValue, halKind, halLogin } = useMemo(() => {
+  const { halValue, halKind } = useMemo(() => {
     const idHalS = identifiers.find(
-      (identifier) => identifier.type === PersonIdentifierType.ID_HAL_S,
+      (identifier) => identifier.type === DbPersonIdentifierType.idhals,
     )?.value
 
     const idHalI = identifiers.find(
-      (identifier) => identifier.type === PersonIdentifierType.ID_HAL_I,
-    )?.value
-
-    const halLogin = identifiers.find(
-      (identifier) => identifier.type === PersonIdentifierType.HAL_LOGIN,
+      (identifier) => identifier.type === DbPersonIdentifierType.idhali,
     )?.value
 
     return {
       halValue: idHalS ?? idHalI ?? null,
       halKind: idHalS ? 'idHal_s' : idHalI ? 'idHal_i' : null,
-      halLogin: halLogin ?? null,
     }
   }, [identifiers])
 
   const hasHalIdentifier = Boolean(halValue)
-  const hasHalLogin = Boolean(halLogin)
-  const isLinked = hasHalIdentifier && hasHalLogin
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -141,7 +134,7 @@ const HalControl = () => {
               HAL
             </Typography>
 
-            {isLinked && (
+            {hasHalIdentifier && (
               <Tooltip title={<Trans id='hal_account_linked_tooltip' />} arrow>
                 <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
                   <LinkIcon fontSize='small' />
@@ -188,46 +181,14 @@ const HalControl = () => {
             </Box>
           )}
 
-          {isLinked && (
-            <Box
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 1,
-                px: 1.25,
-                py: 0.5,
-                borderRadius: 2,
-                border: '1px solid',
-                borderColor: 'divider',
-                backgroundColor: 'action.hover',
-              }}
-            >
-              <Typography
-                variant='caption'
-                color='text.secondary'
-                sx={{ lineHeight: 1 }}
-              >
-                hal_login
-              </Typography>
-
-              <Typography
-                variant='body2'
-                sx={{
-                  fontFamily:
-                    'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-                }}
-              >
-                {halLogin}
-              </Typography>
-            </Box>
-          )}
-
           {/* Button rules:
               - If identifier present but no login => show button
               - If no identifier and no login => show button
               - If identifier + login => no button
           */}
-          {!isLinked && <HalLoginButton halProvided={hasHalIdentifier} />}
+          {!hasHalIdentifier && (
+            <HalLoginButton halProvided={hasHalIdentifier} />
+          )}
         </Box>
 
         <Typography variant='caption' color='text.secondary'>

@@ -45,7 +45,7 @@ describe('UserDAO Integration Tests', () => {
 
     await prisma.personIdentifier.create({
       data: {
-        type: PersonIdentifierType.ORCID,
+        type: PersonIdentifierType.orcid,
         value: '0000-0001-2345-6789',
         personId: person.id,
       },
@@ -56,7 +56,7 @@ describe('UserDAO Integration Tests', () => {
     })
 
     const dbUser = await userDAO.getUserByIdentifier(
-      new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0001-2345-6789'),
+      new PersonIdentifier(PersonIdentifierType.orcid, '0000-0001-2345-6789'),
     )
 
     expect(dbUser).not.toBeNull()
@@ -65,7 +65,7 @@ describe('UserDAO Integration Tests', () => {
 
   test('should return null if no user matches the identifier', async () => {
     const dbUser = await userDAO.getUserByIdentifier(
-      new PersonIdentifier(PersonIdentifierType.ORCID, 'non-existent-value'),
+      new PersonIdentifier(PersonIdentifierType.orcid, 'non-existent-value'),
     )
 
     expect(dbUser).toBeNull()

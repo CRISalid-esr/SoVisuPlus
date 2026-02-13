@@ -34,7 +34,7 @@ describe('DocumentService Integration Tests', () => {
     await prisma.personIdentifier.create({
       data: {
         personId: person.id,
-        type: 'LOCAL',
+        type: 'local',
         value: 'local-test-person',
       },
     })
@@ -124,7 +124,7 @@ describe('DocumentService Integration Tests', () => {
     await prisma.personIdentifier.create({
       data: {
         personId: person.id,
-        type: 'LOCAL',
+        type: 'local',
         value: 'local-test-person',
       },
     })

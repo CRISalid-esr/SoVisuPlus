@@ -1,10 +1,10 @@
 import {
   PersonIdentifier,
   PersonIdentifierJson,
-  PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 
 import { PersonIdentifierWithRelations as DBPersonIdentifier } from '@/prisma-schema/extended-client'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 export type OrcidScope =
   | '/read-limited'
@@ -40,7 +40,7 @@ export class ORCIDIdentifier extends PersonIdentifier {
   public oauth?: OrcidOAuthData
 
   constructor(orcid: string, oauth?: OrcidOAuthData) {
-    super(PersonIdentifierType.ORCID, ORCIDIdentifier.normalize(orcid))
+    super(DbPersonIdentifierType.orcid, ORCIDIdentifier.normalize(orcid))
     this.oauth = oauth
   }
 
@@ -66,7 +66,7 @@ export class ORCIDIdentifier extends PersonIdentifier {
     oauth: NonNullable<ORCIDIdentifierJson['oauth']>
   } {
     return (
-      identifier.type === PersonIdentifierType.ORCID &&
+      identifier.type === DbPersonIdentifierType.orcid &&
       'oauth' in identifier &&
       identifier.oauth !== null
     )
@@ -78,7 +78,7 @@ export class ORCIDIdentifier extends PersonIdentifier {
     orcidIdentifier: NonNullable<DBPersonIdentifier['orcidIdentifier']>
   } {
     return (
-      identifier.type === PersonIdentifierType.ORCID &&
+      identifier.type === DbPersonIdentifierType.orcid &&
       'orcidIdentifier' in identifier &&
       identifier.orcidIdentifier !== null
     )
@@ -106,7 +106,7 @@ export class ORCIDIdentifier extends PersonIdentifier {
         ? PersonIdentifier.typeFromString(json.type)
         : json.type
 
-    if (type !== PersonIdentifierType.ORCID) {
+    if (type !== DbPersonIdentifierType.orcid) {
       throw new Error(`ORCIDIdentifier.fromJson called with type=${type}`)
     }
 
@@ -126,7 +126,7 @@ export class ORCIDIdentifier extends PersonIdentifier {
   static fromDB(
     identifier: Omit<DBPersonIdentifier, 'id' | 'personId'>,
   ): ORCIDIdentifier {
-    if (identifier.type !== PersonIdentifierType.ORCID) {
+    if (identifier.type !== DbPersonIdentifierType.orcid) {
       throw new Error(
         `ORCIDIdentifier.fromDB called with type=${identifier.type}`,
       )

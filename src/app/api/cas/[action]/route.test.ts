@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { GET } from './route'
 import { parseCasTicketValidationResult } from '@/utils/parseCasTicketValidationResult'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 const mockAddOrUpdateIdentifier = jest.fn()
 const mockGetUserByPersonIdentifier = jest.fn()
@@ -112,17 +112,11 @@ describe('GET /api/cas/[action] stores HAL identifiers', () => {
     // AureHAL called by UID
     expect(mockFindAuthorByUid).toHaveBeenCalledWith('119773')
 
-    // Stored HAL login + idHal_s
+    // Stored idHal_s
     expect(mockAddOrUpdateIdentifier).toHaveBeenNthCalledWith(
       1,
       'person-uid',
-      PersonIdentifierType.HAL_LOGIN,
-      'jdupont',
-    )
-    expect(mockAddOrUpdateIdentifier).toHaveBeenNthCalledWith(
-      2,
-      'person-uid',
-      PersonIdentifierType.ID_HAL_S,
+      DbPersonIdentifierType.idhals,
       'jacques-dupont',
     )
   })

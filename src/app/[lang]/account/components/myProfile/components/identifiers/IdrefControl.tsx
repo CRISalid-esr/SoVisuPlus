@@ -1,13 +1,13 @@
 import { Link, Paper, Typography } from '@mui/material'
 import useStore from '@/stores/global_store'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 const IdrefControl = () => {
   const { connectedUser } = useStore((state) => state.user)
   const person = connectedUser?.person
   const identifiers = person?.getIdentifiers() ?? []
   const idref = identifiers.find(
-    (identifier) => identifier.type === PersonIdentifierType.IDREF,
+    (identifier) => identifier.type === DbPersonIdentifierType.idref,
   )?.value
 
   const idrefUrl = idref ? `https://www.idref.fr/${idref}` : null

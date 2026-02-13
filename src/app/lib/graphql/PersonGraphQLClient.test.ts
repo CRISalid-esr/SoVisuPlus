@@ -1,10 +1,8 @@
 import { PersonGraphQLClient } from './PersonGraphQLClient'
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
-import {
-  PersonIdentifier,
-  PersonIdentifierType,
-} from '@/types/PersonIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { Person } from '@/types/Person'
+import { PersonIdentifierType } from '@prisma/client'
 
 jest.mock('./AbstractGraphQLClient')
 
@@ -32,7 +30,7 @@ describe('PersonGraphQLClient', () => {
     mockQuery.mockResolvedValue({ people: [] })
 
     const personIdentifier: PersonIdentifier = new PersonIdentifier(
-      PersonIdentifierType.ORCID,
+      PersonIdentifierType.orcid,
       '12345',
     )
     const person = await client.getPersonByIdentifier(personIdentifier)
@@ -61,7 +59,7 @@ describe('PersonGraphQLClient', () => {
           display_name: 'John Doe',
           identifiers: [
             { type: 'orcid', value: '12345' },
-            { type: 'scopus_eid', value: '67890' },
+            { type: 'scopus', value: '67890' },
             { type: 'eppn', value: 'jdoe@univ.edu' },
           ],
           names: [
@@ -77,7 +75,7 @@ describe('PersonGraphQLClient', () => {
     mockQuery.mockResolvedValue(mockResponse)
 
     const personIdentifier: PersonIdentifier = new PersonIdentifier(
-      PersonIdentifierType.ORCID,
+      PersonIdentifierType.orcid,
       '12345',
     )
     const person = await client.getPersonByIdentifier(personIdentifier)
@@ -90,9 +88,9 @@ describe('PersonGraphQLClient', () => {
       'John',
       'Doe',
       [
-        new PersonIdentifier(PersonIdentifierType.ORCID, '12345'),
-        new PersonIdentifier(PersonIdentifierType.SCOPUS_EID, '67890'),
-        new PersonIdentifier(PersonIdentifierType.EPPN, 'jdoe@univ.edu'),
+        new PersonIdentifier(PersonIdentifierType.orcid, '12345'),
+        new PersonIdentifier(PersonIdentifierType.scopus, '67890'),
+        new PersonIdentifier(PersonIdentifierType.eppn, 'jdoe@univ.edu'),
       ],
     )
     expect(person).toEqual(expectedPerson)
@@ -134,7 +132,7 @@ describe('PersonGraphQLClient', () => {
     mockQuery.mockResolvedValue(mockResponse)
 
     const personIdentifier: PersonIdentifier = new PersonIdentifier(
-      PersonIdentifierType.ORCID,
+      PersonIdentifierType.orcid,
       '98765',
     )
     const person = await client.getPersonByIdentifier(personIdentifier)
@@ -146,7 +144,7 @@ describe('PersonGraphQLClient', () => {
       'Jane Smith',
       'Jane',
       'Smith',
-      [new PersonIdentifier(PersonIdentifierType.ORCID, '98765')],
+      [new PersonIdentifier(PersonIdentifierType.orcid, '98765')],
     )
     expect(person).toEqual(expectedPerson)
     expect(consoleWarnSpy).toHaveBeenCalledWith(

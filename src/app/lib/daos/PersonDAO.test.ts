@@ -1,13 +1,14 @@
-import { Person as DbPerson, PrismaClient } from '@prisma/client'
+import {
+  Person as DbPerson,
+  PersonIdentifierType,
+  PrismaClient,
+} from '@prisma/client'
 import { Person } from '@/types/Person'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { PersonMembership } from '@/types/PersonMembership'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { Literal } from '@/types/Literal'
-import {
-  PersonIdentifier,
-  PersonIdentifierType,
-} from '@/types/PersonIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import {
   decryptString,
@@ -73,7 +74,7 @@ describe('PersonDAO', () => {
     'John Doe',
     'John',
     'Doe',
-    [new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0001-2345-6789')],
+    [new PersonIdentifier(PersonIdentifierType.orcid, '0000-0001-2345-6789')],
     [
       new PersonMembership(
         new ResearchStructure(
@@ -125,7 +126,7 @@ describe('PersonDAO', () => {
       where: {
         OR: [
           {
-            type: 'ORCID',
+            type: 'orcid',
             value: '0000-0001-2345-6789',
             personId: { not: 1 },
           },
@@ -159,7 +160,7 @@ describe('PersonDAO', () => {
       data: [
         {
           personId: expect.any(Number),
-          type: 'ORCID',
+          type: 'orcid',
           value: '0000-0001-2345-6789',
         },
       ],
@@ -194,7 +195,7 @@ describe('PersonDAO', () => {
     it('should upsert ORCID oauth extension when base identifier exists and oauth is present', async () => {
       ;(mockPrisma.personIdentifier.findUnique as jest.Mock).mockResolvedValue({
         id: 1841063,
-        type: 'ORCID',
+        type: 'orcid',
       })
       ;(mockPrisma.orcidIdentifier.upsert as jest.Mock).mockResolvedValue({
         id: 1841063,
@@ -327,7 +328,7 @@ describe('PersonDAO', () => {
     it('should throw if oauth is missing', async () => {
       ;(mockPrisma.personIdentifier.findUnique as jest.Mock).mockResolvedValue({
         id: 1841063,
-        type: 'ORCID',
+        type: 'orcid',
       })
 
       const identifier = new ORCIDIdentifier('0000-0001-7990-9804') // oauth missing
@@ -344,7 +345,7 @@ describe('PersonDAO', () => {
     it('should throw if accessToken/refreshToken are missing', async () => {
       ;(mockPrisma.personIdentifier.findUnique as jest.Mock).mockResolvedValue({
         id: 1841063,
-        type: 'ORCID',
+        type: 'orcid',
       })
 
       const identifier = new ORCIDIdentifier('0000-0001-7990-9804', {

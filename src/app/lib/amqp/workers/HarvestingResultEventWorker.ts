@@ -3,10 +3,8 @@ import { AMQPHarvestingResultEventMessage } from '@/types/AMQPHarvestingResultEv
 import { HarvestingResultEvent } from '@/types/HarvestingResultEvent'
 import { isValidBibliographicPlatformName } from '@/types/BibliographicPlatform'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
-import {
-  PersonIdentifier,
-  PersonIdentifierType,
-} from '@/types/PersonIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 /**
  * Worker for processing harvesting result event messages
@@ -49,7 +47,7 @@ export class HarvestingResultEventWorker extends MessageProcessingWorker<AMQPHar
       return events
     }
     const person = await this.personDao.fetchPersonByIdentifier(
-      new PersonIdentifier(PersonIdentifierType.LOCAL, localIdentifier),
+      new PersonIdentifier(DbPersonIdentifierType.local, localIdentifier),
     )
     if (!person) {
       console.warn(`No person found for local identifier: ${localIdentifier}`)

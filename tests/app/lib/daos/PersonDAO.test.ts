@@ -22,7 +22,7 @@ describe('PersonDAO Integration Tests', () => {
     'John',
     'Doe',
     'John Doe',
-    [new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0001-2345-6789')],
+    [new PersonIdentifier(PersonIdentifierType.orcid, '0000-0001-2345-6789')],
     [
       new PersonMembership(
         new ResearchStructure(
@@ -53,7 +53,7 @@ describe('PersonDAO Integration Tests', () => {
 
     expect(savedIdentifiers).toHaveLength(1)
     expect(savedIdentifiers[0]).toMatchObject({
-      type: PersonIdentifierType.ORCID,
+      type: PersonIdentifierType.orcid,
       value: '0000-0001-2345-6789',
       personId: dbPerson.id,
     })
@@ -104,7 +104,7 @@ describe('PersonDAO Integration Tests', () => {
     await prisma.personIdentifier.createMany({
       data: [
         {
-          type: PersonIdentifierType.ORCID,
+          type: PersonIdentifierType.orcid,
           value: '0000-0001-1111-1111',
           personId: initialPerson.id,
         },
@@ -123,7 +123,7 @@ describe('PersonDAO Integration Tests', () => {
 
     expect(updatedIdentifiers).toHaveLength(1)
     expect(updatedIdentifiers[0]).toMatchObject({
-      type: PersonIdentifierType.ORCID,
+      type: PersonIdentifierType.orcid,
       value: '0000-0001-2345-6789',
     })
   })
@@ -140,7 +140,7 @@ describe('PersonDAO Integration Tests', () => {
 
     await prisma.personIdentifier.create({
       data: {
-        type: PersonIdentifierType.ORCID,
+        type: PersonIdentifierType.orcid,
         value: '0000-0001-2345-6789',
         personId: conflictingPerson.id,
       },
@@ -164,7 +164,7 @@ describe('PersonDAO Integration Tests', () => {
     await prisma.personIdentifier.createMany({
       data: [
         {
-          type: PersonIdentifierType.ORCID,
+          type: PersonIdentifierType.orcid,
           value: '0000-0001-1111-1111',
           personId: initialPerson.id,
         },
@@ -173,8 +173,8 @@ describe('PersonDAO Integration Tests', () => {
 
     const newPersonData = person
     newPersonData.setIdentifiers([
-      new PersonIdentifier(PersonIdentifierType.SCOPUS_EID, '1234-5678-9012'),
-      new PersonIdentifier(PersonIdentifierType.IDREF, 'AB-1234-5678'),
+      new PersonIdentifier(PersonIdentifierType.scopus, '1234-5678-9012'),
+      new PersonIdentifier(PersonIdentifierType.idref, 'AB-1234-5678'),
     ])
 
     const updatedPerson = await personDAO.createOrUpdatePerson(newPersonData)
@@ -187,11 +187,11 @@ describe('PersonDAO Integration Tests', () => {
     expect(updatedIdentifiers).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          type: PersonIdentifierType.SCOPUS_EID,
+          type: PersonIdentifierType.scopus,
           value: '1234-5678-9012',
         }),
         expect.objectContaining({
-          type: PersonIdentifierType.IDREF,
+          type: PersonIdentifierType.idref,
           value: 'AB-1234-5678',
         }),
       ]),
@@ -206,7 +206,7 @@ describe('PersonDAO Integration Tests', () => {
       'John Doe',
       'John',
       'Doe',
-      [new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0001-2345-6789')],
+      [new PersonIdentifier(PersonIdentifierType.orcid, '0000-0001-2345-6789')],
     )
 
     const person2 = new Person(
@@ -216,7 +216,7 @@ describe('PersonDAO Integration Tests', () => {
       'John Doe',
       'John',
       'Doe',
-      [new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0001-9876-5432')],
+      [new PersonIdentifier(PersonIdentifierType.orcid, '0000-0001-9876-5432')],
     )
 
     // Insert first person

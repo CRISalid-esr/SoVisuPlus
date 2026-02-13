@@ -2,12 +2,10 @@ import { HarvestingStateEventWorker } from '@/lib/amqp/workers/HarvestingStateEv
 import { AMQPHarvestingStateEventMessage } from '@/types/AMQPHarvestingStateEventMessage'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
-import {
-  PersonIdentifier,
-  PersonIdentifierType,
-} from '@/types/PersonIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { HarvestingStateEvent } from '@/types/HarvestingStateEvent'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 // Mocks
 jest.mock('@/lib/daos/PersonDAO')
@@ -45,8 +43,8 @@ describe('HarvestingStateEventWorker', () => {
       'John',
       'Doe',
       [
-        new PersonIdentifier(PersonIdentifierType.LOCAL, 'user-001'),
-        new PersonIdentifier(PersonIdentifierType.IDREF, '999999'),
+        new PersonIdentifier(DbPersonIdentifierType.local, 'user-001'),
+        new PersonIdentifier(DbPersonIdentifierType.idref, '999999'),
       ],
       [],
     )
@@ -63,7 +61,7 @@ describe('HarvestingStateEventWorker', () => {
     expect(events[0].state).toBe('running')
 
     expect(personDAO.fetchPersonByIdentifier).toHaveBeenCalledWith({
-      type: PersonIdentifierType.LOCAL,
+      type: DbPersonIdentifierType.local,
       value: 'user-001',
     })
   })

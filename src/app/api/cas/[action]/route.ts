@@ -6,11 +6,9 @@ import authOptions from '@/app/auth/auth_options'
 import { AureHalAPIClient } from '@/lib/services/AureHalAPIClient'
 import { PersonService } from '@/lib/services/PersonService'
 import { UserService } from '@/lib/services/UserService'
-import {
-  PersonIdentifier,
-  PersonIdentifierType,
-} from '@/types/PersonIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { parseCasTicketValidationResult } from '@/app/utils/parseCasTicketValidationResult'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 const isLoginOrLogout = (action: string): action is 'login' | 'logout' =>
   action === 'login' || action === 'logout'
@@ -60,7 +58,7 @@ export async function GET(
   // Find user/person in DB
   const userService = new UserService()
   const user = await userService.getUserByPersonIdentifier(
-    new PersonIdentifier(PersonIdentifierType.LOCAL, session.user.username),
+    new PersonIdentifier(DbPersonIdentifierType.local, session.user.username),
   )
   if (!user?.person) {
     return NextResponse.redirect(
@@ -143,22 +141,16 @@ export async function GET(
 
   const personService = new PersonService()
   try {
-    await personService.addOrUpdateIdentifier(
-      user.person.uid,
-      PersonIdentifierType.HAL_LOGIN,
-      halLogin,
-    )
-
     if (idHalDoc.idHal_s) {
       await personService.addOrUpdateIdentifier(
         user.person.uid,
-        PersonIdentifierType.ID_HAL_S,
+        DbPersonIdentifierType.idhals,
         idHalDoc.idHal_s,
       )
     } else {
       await personService.addOrUpdateIdentifier(
         user.person.uid,
-        PersonIdentifierType.ID_HAL_I,
+        DbPersonIdentifierType.idhali,
         String(idHalDoc.idHal_i),
       )
     }

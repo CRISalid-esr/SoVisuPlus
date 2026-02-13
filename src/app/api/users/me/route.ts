@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getServerSession, Session } from 'next-auth'
 import authOptions from '@/app/auth/auth_options'
-import {
-  PersonIdentifier,
-  PersonIdentifierType,
-} from '@/types/PersonIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { UserService } from '@/lib/services/UserService'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 export const GET = async () => {
   try {
@@ -25,12 +23,12 @@ export const GET = async () => {
 
     if (session?.user.username) {
       electedIdentifier = new PersonIdentifier(
-        PersonIdentifierType.LOCAL,
+        DbPersonIdentifierType.local,
         session?.user.username,
       )
     } else if (session?.user.orcid) {
       electedIdentifier = new PersonIdentifier(
-        PersonIdentifierType.ORCID,
+        DbPersonIdentifierType.orcid,
         session?.user.orcid,
       )
     }

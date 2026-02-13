@@ -4,13 +4,11 @@ import authOptions from '@/app/auth/auth_options'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
 import { UserDAO } from '@/lib/daos/UserDAO'
-import {
-  PersonIdentifier,
-  PersonIdentifierType,
-} from '@/types/PersonIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 export const POST = async (request: Request) => {
   const session = (await getServerSession(authOptions)) as Session & {
@@ -30,7 +28,7 @@ export const POST = async (request: Request) => {
   try {
     const userDAO = new UserDAO()
     const user = await userDAO.getUserByIdentifier(
-      new PersonIdentifier(PersonIdentifierType.LOCAL, session.user.username),
+      new PersonIdentifier(DbPersonIdentifierType.local, session.user.username),
     )
 
     if (!user?.person?.uid) {
