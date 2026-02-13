@@ -96,7 +96,7 @@ describe('DocumentGraphQLClient', () => {
               source_identifier: 'sudoc0001',
               has_identifiers: [
                 {
-                  type: 'sudoc_ppn',
+                  type: 'ppn',
                   value: 'sudoc-ppn-0001',
                 },
               ],
@@ -218,7 +218,7 @@ describe('DocumentGraphQLClient', () => {
           'sudoc0001',
           [
             new PublicationIdentifier(
-              PublicationIdentifierType.SUDOCPPN,
+              PublicationIdentifierType.ppn,
               'sudoc-ppn-0001',
             ),
           ],
@@ -336,7 +336,7 @@ describe('DocumentGraphQLClient', () => {
               source_identifier: 'sudoc0001',
               has_identifiers: [
                 {
-                  type: 'sudoc_ppn',
+                  type: 'ppn',
                   value: 'sudoc-ppn-0001',
                 },
               ],
