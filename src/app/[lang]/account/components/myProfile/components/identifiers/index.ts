@@ -14,4 +14,5 @@ export const identifierComponentMap: Record<
   [DbPersonIdentifierType.idhali]: null,
   [DbPersonIdentifierType.scopus]: null,
   [DbPersonIdentifierType.eppn]: null,
+  [DbPersonIdentifierType.hal_login]: null,
 }

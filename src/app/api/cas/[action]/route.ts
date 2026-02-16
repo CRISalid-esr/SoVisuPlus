@@ -8,7 +8,7 @@ import { PersonService } from '@/lib/services/PersonService'
 import { UserService } from '@/lib/services/UserService'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { parseCasTicketValidationResult } from '@/app/utils/parseCasTicketValidationResult'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import { PersonIdentifierType } from '@prisma/client'
 
 const isLoginOrLogout = (action: string): action is 'login' | 'logout' =>
   action === 'login' || action === 'logout'
@@ -58,7 +58,7 @@ export async function GET(
   // Find user/person in DB
   const userService = new UserService()
   const user = await userService.getUserByPersonIdentifier(
-    new PersonIdentifier(DbPersonIdentifierType.local, session.user.username),
+    new PersonIdentifier(PersonIdentifierType.local, session.user.username),
   )
   if (!user?.person) {
     return NextResponse.redirect(
@@ -141,16 +141,22 @@ export async function GET(
 
   const personService = new PersonService()
   try {
+    await personService.addOrUpdateIdentifier(
+      user.person.uid,
+      PersonIdentifierType.hal_login,
+      halLogin,
+    )
+
     if (idHalDoc.idHal_s) {
       await personService.addOrUpdateIdentifier(
         user.person.uid,
-        DbPersonIdentifierType.idhals,
+        PersonIdentifierType.idhals,
         idHalDoc.idHal_s,
       )
     } else {
       await personService.addOrUpdateIdentifier(
         user.person.uid,
-        DbPersonIdentifierType.idhali,
+        PersonIdentifierType.idhali,
         String(idHalDoc.idHal_i),
       )
     }

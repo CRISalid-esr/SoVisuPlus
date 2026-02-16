@@ -373,6 +373,7 @@ enum LabelType {
 
 enum PersonIdentifierType {
   eppn
+  hal_login
   idref
   idhals
   idhali

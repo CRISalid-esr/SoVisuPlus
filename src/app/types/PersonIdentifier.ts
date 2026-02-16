@@ -26,6 +26,8 @@ export class PersonIdentifier {
       case DbPersonIdentifierType.idhals:
       case DbPersonIdentifierType.idhali:
         return 'HAL'
+      case DbPersonIdentifierType.hal_login:
+        return 'HAL_LOGIN'
       case DbPersonIdentifierType.scopus:
         return 'Scopus'
       case DbPersonIdentifierType.eppn:
@@ -45,6 +47,7 @@ export class PersonIdentifier {
         return '/icons/idref.png'
       case DbPersonIdentifierType.idhals:
       case DbPersonIdentifierType.idhali:
+      case DbPersonIdentifierType.hal_login:
         return '/icons/hal.png'
       case DbPersonIdentifierType.scopus:
         return '/icons/scopus.png'
@@ -105,6 +108,8 @@ export class PersonIdentifier {
         return DbPersonIdentifierType.idhali
       case 'eppn':
         return DbPersonIdentifierType.eppn
+      case 'hal_login':
+        return DbPersonIdentifierType.hal_login
       default:
         throw new Error(`Unknown identifier type: ${type}`)
     }
@@ -124,3 +129,5 @@ export class PersonIdentifier {
     return new PersonIdentifier(identifier.type, identifier.value)
   }
 }
+
+export { DbPersonIdentifierType as PersonIdentifierType }
