@@ -584,7 +584,7 @@ msgstr ""
 
 #: src/app/[lang]/documents/components/ContributorIdentityCard.tsx:201
 msgid "contributor_identity_card_see_profile_button"
-msgstr "Voir Profile"
+msgstr "Voir Profil"
 
 #: src/app/[lang]/dashboard/components/AgentIdentityCard.tsx:30
 msgid "dashboard_page_agent_identity_card_no_agent_selected"
