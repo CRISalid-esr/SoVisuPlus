@@ -236,7 +236,7 @@ describe('RoleService Integration', () => {
       },
     })
     await prisma.personIdentifier.create({
-      data: { personId: person.id, type: 'LOCAL', value: 'local-alice' },
+      data: { personId: person.id, type: 'local', value: 'local-alice' },
     })
     const user = await prisma.user.create({ data: { personId: person.id } })
 
@@ -314,7 +314,7 @@ describe('RoleService Integration', () => {
     await prisma.personIdentifier.create({
       data: {
         personId: person.id,
-        type: 'ORCID',
+        type: 'orcid',
         value: '0000-0001-2345-6789',
       },
     })
@@ -324,7 +324,7 @@ describe('RoleService Integration', () => {
     await svc.assignRoleToUser({
       roleName: 'admin',
       scope: { entityType: 'Institution', entityUid: 'inst-1' },
-      user: { idType: 'ORCID', idValue: '0000-0001-2345-6789' },
+      user: { idType: 'orcid', idValue: '0000-0001-2345-6789' },
     })
     let userRoles = await prisma.userRole.findMany({
       where: { userId: user.id },
@@ -338,7 +338,7 @@ describe('RoleService Integration', () => {
     // now assign admin WITHOUT scope (global) -> should keep link & clear scopes
     await svc.assignRoleToUser({
       roleName: 'admin',
-      user: { idType: 'ORCID', idValue: '0000-0001-2345-6789' },
+      user: { idType: 'orcid', idValue: '0000-0001-2345-6789' },
     })
 
     userRoles = await prisma.userRole.findMany({ where: { userId: user.id } })
@@ -390,7 +390,7 @@ describe('RoleService Integration', () => {
       },
     })
     await prisma.personIdentifier.create({
-      data: { personId: person.id, type: 'LOCAL', value: 'local-alice' },
+      data: { personId: person.id, type: 'local', value: 'local-alice' },
     })
     const user = await prisma.user.create({ data: { personId: person.id } })
 

@@ -2,9 +2,9 @@
 import prisma from '@/lib/daos/prisma'
 import type { RolesFileSeed } from '@/lib/services/RoleConfigService'
 import { RoleService } from '@/lib/services/RoleService'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { EntityType } from '@/types/UserRoleScope'
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
 export const resetAuthzDb = async () => {
   await prisma.rolePermission.deleteMany()
@@ -62,7 +62,7 @@ export const createPersonWithUser = async (
       external: false,
       normalizedName: (opts?.displayName ?? 'john doe').toLowerCase(),
       identifiers: {
-        create: [{ type: 'LOCAL', value: personUid }],
+        create: [{ type: 'local', value: personUid }],
       },
     },
   })
@@ -127,7 +127,7 @@ export const assignRoleToPersonUid = async (
     roleName,
     scope: scope ?? null,
     user: {
-      idType: PersonIdentifierType.LOCAL,
+      idType: PersonIdentifierType.local,
       idValue: personUid,
     },
   })

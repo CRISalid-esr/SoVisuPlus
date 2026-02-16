@@ -4,16 +4,14 @@ import { render, screen } from '@testing-library/react'
 
 import AgentIdentityCard from './AgentIdentityCard'
 import { Person } from '@/types/Person'
-import {
-  PersonIdentifier,
-  PersonIdentifierType,
-} from '@/types/PersonIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import type { PersonMembership } from '@/types/PersonMembership'
 import type { Literal } from '@/types/Literal'
 import type { IAgent } from '@/types/IAgent'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
+import { PersonIdentifierType } from '@prisma/client'
 
 // Mock Lingui `t` function
 jest.mock('@lingui/macro', () => ({
@@ -42,7 +40,7 @@ jest.mock(
 
 const makePerson = (): Person => {
   const identifiers = [
-    new PersonIdentifier(PersonIdentifierType.ORCID, '0009-0005-6080-0215'),
+    new PersonIdentifier(PersonIdentifierType.orcid, '0009-0005-6080-0215'),
   ]
   const memberships: PersonMembership[] = []
   return new Person(

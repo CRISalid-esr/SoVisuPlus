@@ -1,10 +1,10 @@
 import { ResearchStructureWithRelations as DbResearchStructure } from '@/prisma-schema/extended-client'
-import {
-  Prisma,
-  ResearchStructureIdentifierType as DbResearchStructureIdentifierType,
-} from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { ResearchStructure } from '@/types/ResearchStructure'
-import { ResearchStructureIdentifier } from '@/types/ResearchStructureIdentifier'
+import {
+  ResearchStructureIdentifier,
+  researchStructureIdentifierTypeFromString,
+} from '@/types/ResearchStructureIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import slugify from 'slugify'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
@@ -99,7 +99,9 @@ export class ResearchStructureDAO extends AbstractDAO {
             await this.prismaClient.researchStructureIdentifier.create({
               data: {
                 researchStructureId: dbResearchStructure.id,
-                type: identifier.type.toUpperCase() as DbResearchStructureIdentifierType,
+                type: researchStructureIdentifierTypeFromString(
+                  identifier.type,
+                ),
                 value: identifier.value,
               },
             })
@@ -154,7 +156,7 @@ export class ResearchStructureDAO extends AbstractDAO {
     await this.prismaClient.researchStructureIdentifier.createMany({
       data: identifiers.map((identifier) => ({
         researchStructureId,
-        type: identifier.type.toUpperCase() as DbResearchStructureIdentifierType,
+        type: researchStructureIdentifierTypeFromString(identifier.type),
         value: identifier.value,
       })),
     })

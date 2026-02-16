@@ -3,8 +3,8 @@ import React from 'react'
 import { useTheme } from '@mui/material/styles'
 import { Trans } from '@lingui/react'
 import { CustomCard } from '@/components/Card'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { identifierComponentMap } from '@/app/[lang]/account/components/myProfile/components/identifiers/index'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 const Identifiers = () => {
   const theme = useTheme()
@@ -53,7 +53,7 @@ const Identifiers = () => {
               padding: 0,
             }}
           >
-            {Object.values(PersonIdentifierType).map((type, index, array) => {
+            {Object.values(DbPersonIdentifierType).map((type, index, array) => {
               const Control = identifierComponentMap[type]
               const isLast = index === array.length - 1
               if (!Control) {

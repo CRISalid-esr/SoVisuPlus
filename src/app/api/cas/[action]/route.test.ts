@@ -116,13 +116,13 @@ describe('GET /api/cas/[action] stores HAL identifiers', () => {
     expect(mockAddOrUpdateIdentifier).toHaveBeenNthCalledWith(
       1,
       'person-uid',
-      PersonIdentifierType.HAL_LOGIN,
+      PersonIdentifierType.hal_login,
       'jdupont',
     )
     expect(mockAddOrUpdateIdentifier).toHaveBeenNthCalledWith(
       2,
       'person-uid',
-      PersonIdentifierType.ID_HAL_S,
+      PersonIdentifierType.idhals,
       'jacques-dupont',
     )
   })

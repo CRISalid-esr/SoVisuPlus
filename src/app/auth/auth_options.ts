@@ -115,12 +115,12 @@ const authOptions: AuthOptions = {
       const userDAO = new UserDAO()
       const identifier = token.username
         ? new PersonIdentifier(
-            PersonIdentifierType.LOCAL,
+            PersonIdentifierType.local,
             String(token.username),
           )
         : token.orcid
           ? new PersonIdentifier(
-              PersonIdentifierType.ORCID,
+              PersonIdentifierType.orcid,
               String(token.orcid),
             )
           : null

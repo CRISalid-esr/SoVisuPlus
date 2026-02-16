@@ -1,7 +1,7 @@
 import process from 'node:process'
 import { RoleService } from '@/lib/services/RoleService'
 import { EntityType } from '@/types/UserRoleScope'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { PersonIdentifierType } from '../app/types/PersonIdentifier'
 
 type Args = {
   role: string

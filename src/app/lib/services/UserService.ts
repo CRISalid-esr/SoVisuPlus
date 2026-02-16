@@ -1,9 +1,8 @@
 import { PersonIdentifier } from '@/app/types/PersonIdentifier'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { User } from '@/types/User'
-
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 /**
  * Service for handling person-related operations
  */
@@ -23,12 +22,12 @@ export class UserService {
     let electedIdentifier: PersonIdentifier | null = null
     if (profile.username) {
       electedIdentifier = new PersonIdentifier(
-        PersonIdentifierType.LOCAL,
+        PersonIdentifierType.local,
         profile.username,
       )
     } else if (profile.orcid) {
       electedIdentifier = new PersonIdentifier(
-        PersonIdentifierType.ORCID,
+        PersonIdentifierType.orcid,
         profile.orcid,
       )
     }

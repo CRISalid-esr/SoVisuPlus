@@ -216,7 +216,7 @@ export class DocumentService {
   ): Promise<void> {
     try {
       const user = await this.userDAO.getUserByIdentifier(
-        new PersonIdentifier(PersonIdentifierType.LOCAL, userName),
+        new PersonIdentifier(PersonIdentifierType.local, userName),
       )
       if (!user?.person) {
         throw new Error(`User with username ${userName} not found`)
@@ -248,7 +248,7 @@ export class DocumentService {
   ): Promise<void> {
     try {
       const user = await this.userDAO.getUserByIdentifier(
-        new PersonIdentifier(PersonIdentifierType.LOCAL, userName),
+        new PersonIdentifier(PersonIdentifierType.local, userName),
       )
       if (!user?.person) {
         throw new Error(`User with username ${userName} not found`)
@@ -285,7 +285,7 @@ export class DocumentService {
     }
     try {
       const user = await this.userDAO.getUserByIdentifier(
-        new PersonIdentifier(PersonIdentifierType.LOCAL, userName),
+        new PersonIdentifier(PersonIdentifierType.local, userName),
       )
       if (!user?.person) {
         throw new Error(`User with username ${userName} not found`)
@@ -321,7 +321,7 @@ export class DocumentService {
   ): Promise<void> {
     try {
       const user = await this.userDAO.getUserByIdentifier(
-        new PersonIdentifier(PersonIdentifierType.LOCAL, userName),
+        new PersonIdentifier(PersonIdentifierType.local, userName),
       )
       if (!user?.person) {
         throw new Error(`User with username ${userName} not found`)

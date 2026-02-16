@@ -4,14 +4,14 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { ORCIDIdentifier, ORCIDIdentifierJson } from '@/types/OrcidIdentifier'
-import { PersonIdentifierWithRelations } from '@/prisma-schema/extended-client'
+import {
+  PersonIdentifierWithRelations,
+  PersonWithRelations,
+} from '@/prisma-schema/extended-client'
 
 import { IAgent, IAgentJson } from '@/types/IAgent'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import {
-  Person as DbPerson,
-  PersonIdentifier as DbPersonIdentifier,
-} from '@prisma/client'
+import { PersonIdentifier as DbPersonIdentifier } from '@prisma/client'
 import { PersonMembership } from '@/types/PersonMembership'
 import removeAccents from 'remove-accents'
 import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
@@ -106,7 +106,7 @@ class Person implements IAgent, Authorizable {
     return `${firstName ?? ''} ${lastName ?? ''}`.trim()
   }
 
-  static fromDbPerson(person: DbPerson): Person {
+  static fromDbPerson(person: PersonWithRelations): Person {
     const displayName = Person.computeDisplayName(
       person.firstName,
       person.lastName,
@@ -124,7 +124,11 @@ class Person implements IAgent, Authorizable {
             Person.identifiersFromDB(x),
           )
         : []) as PersonIdentifier[],
-      'memberships' in person ? (person.memberships as PersonMembership[]) : [],
+      'memberships' in person
+        ? person.memberships.map((membership) =>
+            PersonMembership.fromDbPersonMembership(membership),
+          )
+        : [],
       'person',
       person.slug,
     )

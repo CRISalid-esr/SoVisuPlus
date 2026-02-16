@@ -66,7 +66,7 @@ describe('GET /api/route', () => {
         identifiers: [
           {
             id: 0,
-            type: 'LOCAL',
+            type: 'local',
             value: 'testuser',
             personId: 123,
             orcidIdentifier: null,

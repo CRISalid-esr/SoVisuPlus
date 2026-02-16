@@ -22,13 +22,12 @@ export const BibliographicPlatformMetadata: Record<
   [BibliographicPlatform.SCOPUS]: { name: 'Scopus', icon: '/icons/scopus.png' },
 }
 
-export const getBibliographicPlatformByNameIgnoreCase = (
+export const isValidBibliographicPlatformName = (
   name: string,
 ): BibliographicPlatform | null => {
-  const lowerName = name.toLowerCase()
   return (
     Object.values(BibliographicPlatform).find(
-      (platform) => platform.toLowerCase() === lowerName,
+      (platform) => platform === name,
     ) || null
   )
 }

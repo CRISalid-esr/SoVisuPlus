@@ -60,7 +60,7 @@ export async function GET(
   // Find user/person in DB
   const userService = new UserService()
   const user = await userService.getUserByPersonIdentifier(
-    new PersonIdentifier(PersonIdentifierType.LOCAL, session.user.username),
+    new PersonIdentifier(PersonIdentifierType.local, session.user.username),
   )
   if (!user?.person) {
     return NextResponse.redirect(
@@ -145,20 +145,20 @@ export async function GET(
   try {
     await personService.addOrUpdateIdentifier(
       user.person.uid,
-      PersonIdentifierType.HAL_LOGIN,
+      PersonIdentifierType.hal_login,
       halLogin,
     )
 
     if (idHalDoc.idHal_s) {
       await personService.addOrUpdateIdentifier(
         user.person.uid,
-        PersonIdentifierType.ID_HAL_S,
+        PersonIdentifierType.idhals,
         idHalDoc.idHal_s,
       )
     } else {
       await personService.addOrUpdateIdentifier(
         user.person.uid,
-        PersonIdentifierType.ID_HAL_I,
+        PersonIdentifierType.idhali,
         String(idHalDoc.idHal_i),
       )
     }

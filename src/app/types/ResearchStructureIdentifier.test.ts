@@ -1,52 +1,29 @@
-import {
-  ResearchStructureIdentifierType,
-  convertStringResearchStructureIdentifierType,
-} from '@/types/ResearchStructureIdentifier'
+import { researchStructureIdentifierTypeFromString } from '@/types/ResearchStructureIdentifier'
 import { describe, expect, it } from '@jest/globals'
+import { ResearchStructureIdentifierType } from '@prisma/client'
 
 describe('ResearchStructureIdentifier', () => {
   it('should correctly map string values to ResearchStructureIdentifierType', () => {
-    expect(convertStringResearchStructureIdentifierType('nns')).toBe(
-      ResearchStructureIdentifierType.NNS,
+    expect(researchStructureIdentifierTypeFromString('nns')).toBe(
+      ResearchStructureIdentifierType.nns,
     )
-    expect(convertStringResearchStructureIdentifierType('idref')).toBe(
-      ResearchStructureIdentifierType.IDREF,
+    expect(researchStructureIdentifierTypeFromString('idref')).toBe(
+      ResearchStructureIdentifierType.idref,
     )
-    expect(convertStringResearchStructureIdentifierType('local')).toBe(
-      ResearchStructureIdentifierType.LOCAL,
+    expect(researchStructureIdentifierTypeFromString('hal')).toBe(
+      ResearchStructureIdentifierType.hal,
     )
-    expect(convertStringResearchStructureIdentifierType('hal')).toBe(
-      ResearchStructureIdentifierType.HAL,
-    )
-    expect(convertStringResearchStructureIdentifierType('ror')).toBe(
-      ResearchStructureIdentifierType.ROR,
-    )
-  })
-
-  it('should be case insensitive when mapping string values', () => {
-    expect(convertStringResearchStructureIdentifierType('NNS')).toBe(
-      ResearchStructureIdentifierType.NNS,
-    )
-    expect(convertStringResearchStructureIdentifierType('IDREF')).toBe(
-      ResearchStructureIdentifierType.IDREF,
-    )
-    expect(convertStringResearchStructureIdentifierType('LOCAL')).toBe(
-      ResearchStructureIdentifierType.LOCAL,
-    )
-    expect(convertStringResearchStructureIdentifierType('Hal')).toBe(
-      ResearchStructureIdentifierType.HAL,
-    )
-    expect(convertStringResearchStructureIdentifierType('ROR')).toBe(
-      ResearchStructureIdentifierType.ROR,
+    expect(researchStructureIdentifierTypeFromString('ror')).toBe(
+      ResearchStructureIdentifierType.ror,
     )
   })
 
   it('should throw an error for unsupported identifier types', () => {
     expect(() =>
-      convertStringResearchStructureIdentifierType('unsupported'),
+      researchStructureIdentifierTypeFromString('unsupported'),
     ).toThrowError(`Unsupported identifier type: unsupported`)
     expect(() =>
-      convertStringResearchStructureIdentifierType('random'),
+      researchStructureIdentifierTypeFromString('random'),
     ).toThrowError(`Unsupported identifier type: random`)
   })
 })

@@ -32,7 +32,7 @@ export const GET = async (req: NextRequest) => {
   }
   const userService = new UserService()
   const user = await userService.getUserByPersonIdentifier(
-    new PersonIdentifier(PersonIdentifierType.LOCAL, session.user.username),
+    new PersonIdentifier(PersonIdentifierType.local, session.user.username),
   )
   if (!user || !user.person) {
     console.error(`User not found for session ID: ${session?.user?.id}`)

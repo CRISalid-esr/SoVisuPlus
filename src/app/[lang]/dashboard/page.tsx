@@ -22,18 +22,18 @@ import { useLingui } from '@lingui/react'
 import React, { useEffect, useState } from 'react'
 import { WordstreamTopic } from '@/types/WordStream'
 import PublicationCard from '@/app/[lang]/dashboard/components/PublicationCard'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import AgentIdentityCard from '@/app/[lang]/dashboard/components/AgentIdentityCard'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 const DEFAULT_TOP_N = 10
 const DEFAULT_START_YEAR = 2010
 const DEFAULT_MIN_FONT = 15
 const DEFAULT_MAX_FONT = 30
 
-const IDENTIFIERS_TO_SHOW: PersonIdentifierType[] = [
-  PersonIdentifierType.ID_HAL_S,
-  PersonIdentifierType.ORCID,
-  PersonIdentifierType.IDREF,
+const IDENTIFIERS_TO_SHOW: DbPersonIdentifierType[] = [
+  DbPersonIdentifierType.idhals,
+  DbPersonIdentifierType.orcid,
+  DbPersonIdentifierType.idref,
 ]
 
 const DashboardPage = () => {

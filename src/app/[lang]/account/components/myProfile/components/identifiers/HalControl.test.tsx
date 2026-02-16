@@ -3,8 +3,8 @@ import { render, screen } from '@testing-library/react'
 import { I18nProvider } from '@lingui/react'
 import { i18n } from '@lingui/core'
 import HalControl from '@/app/[lang]/account/components/myProfile/components/identifiers/HalControl'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import useStore from '@/stores/global_store'
+import { PersonIdentifierType } from '@prisma/client'
 
 /**
  * Mocks
@@ -112,7 +112,7 @@ describe('HalControl', () => {
 
   it('when HAL identifier exists but no HAL_LOGIN: shows idHal badge + button, but no link icon and no login badge', () => {
     makeStoreWithIdentifiers([
-      { type: PersonIdentifierType.ID_HAL_S, value: 'jacques-dupont' },
+      { type: PersonIdentifierType.idhals, value: 'jacques-dupont' },
     ])
 
     renderWithProviders()
@@ -135,8 +135,8 @@ describe('HalControl', () => {
 
   it('when HAL identifier exists and HAL_LOGIN exists: shows link icon + idHal badge + login badge, and no button', () => {
     makeStoreWithIdentifiers([
-      { type: PersonIdentifierType.ID_HAL_S, value: 'jacques-dupont' },
-      { type: PersonIdentifierType.HAL_LOGIN, value: 'jdupont' },
+      { type: PersonIdentifierType.idhals, value: 'jacques-dupont' },
+      { type: PersonIdentifierType.hal_login, value: 'jdupont' },
     ])
 
     renderWithProviders()

@@ -4,10 +4,10 @@ import useStore from '@/stores/global_store'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Alert, Box, Paper, Snackbar, Tooltip, Typography } from '@mui/material'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { Trans } from '@lingui/react'
 import { HalLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton'
 import LinkIcon from '@mui/icons-material/Link'
+import { PersonIdentifierType } from '@prisma/client'
 
 const HalControl = () => {
   const { connectedUser } = useStore((state) => state.user)
@@ -16,15 +16,15 @@ const HalControl = () => {
 
   const { halValue, halKind, halLogin } = useMemo(() => {
     const idHalS = identifiers.find(
-      (identifier) => identifier.type === PersonIdentifierType.ID_HAL_S,
+      (identifier) => identifier.type === PersonIdentifierType.idhals,
     )?.value
 
     const idHalI = identifiers.find(
-      (identifier) => identifier.type === PersonIdentifierType.ID_HAL_I,
+      (identifier) => identifier.type === PersonIdentifierType.idhali,
     )?.value
 
     const halLogin = identifiers.find(
-      (identifier) => identifier.type === PersonIdentifierType.HAL_LOGIN,
+      (identifier) => identifier.type === PersonIdentifierType.hal_login,
     )?.value
 
     return {

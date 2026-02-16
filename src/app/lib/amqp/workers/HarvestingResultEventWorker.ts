@@ -1,7 +1,7 @@
 import { MessageProcessingWorker } from '@/lib/amqp/workers/MessageProcessingWorker'
 import { AMQPHarvestingResultEventMessage } from '@/types/AMQPHarvestingResultEventMessage'
 import { HarvestingResultEvent } from '@/types/HarvestingResultEvent'
-import { getBibliographicPlatformByNameIgnoreCase } from '@/types/BibliographicPlatform'
+import { isValidBibliographicPlatformName } from '@/types/BibliographicPlatform'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import {
   PersonIdentifier,
@@ -32,7 +32,7 @@ export class HarvestingResultEventWorker extends MessageProcessingWorker<AMQPHar
       console.warn('No fields found in document message')
       return events
     }
-    const bibliographicPlatform = getBibliographicPlatformByNameIgnoreCase(
+    const bibliographicPlatform = isValidBibliographicPlatformName(
       this.message.fields.reference_event.reference.harvester,
     )
     if (!bibliographicPlatform) {
@@ -49,7 +49,7 @@ export class HarvestingResultEventWorker extends MessageProcessingWorker<AMQPHar
       return events
     }
     const person = await this.personDao.fetchPersonByIdentifier(
-      new PersonIdentifier(PersonIdentifierType.LOCAL, localIdentifier),
+      new PersonIdentifier(PersonIdentifierType.local, localIdentifier),
     )
     if (!person) {
       console.warn(`No person found for local identifier: ${localIdentifier}`)

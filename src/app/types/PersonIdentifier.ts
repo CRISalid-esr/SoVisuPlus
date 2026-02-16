@@ -2,7 +2,7 @@ import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 import { PersonIdentifierWithRelations as DBPersonIdentifier } from '@/prisma-schema/extended-client'
 
 export type PersonIdentifierJson = {
-  type: DbPersonIdentifierType | string
+  type: string
   value: string
 }
 
@@ -19,20 +19,20 @@ export class PersonIdentifier {
 
   getLabel(): string {
     switch (this.type) {
-      case DbPersonIdentifierType.ORCID:
+      case DbPersonIdentifierType.orcid:
         return 'ORCID'
-      case DbPersonIdentifierType.IDREF:
+      case DbPersonIdentifierType.idref:
         return 'IdRef'
-      case DbPersonIdentifierType.ID_HAL_S:
-      case DbPersonIdentifierType.ID_HAL_I:
+      case DbPersonIdentifierType.idhals:
+      case DbPersonIdentifierType.idhali:
         return 'HAL'
-      case DbPersonIdentifierType.HAL_LOGIN:
+      case DbPersonIdentifierType.hal_login:
         return 'HAL_LOGIN'
-      case DbPersonIdentifierType.SCOPUS_EID:
+      case DbPersonIdentifierType.scopus:
         return 'Scopus'
-      case DbPersonIdentifierType.EPPN:
+      case DbPersonIdentifierType.eppn:
         return 'EPPN'
-      case DbPersonIdentifierType.LOCAL:
+      case DbPersonIdentifierType.local:
         return 'Local'
       default:
         return this.type
@@ -41,15 +41,15 @@ export class PersonIdentifier {
 
   getIcon(): string {
     switch (this.type) {
-      case DbPersonIdentifierType.ORCID:
+      case DbPersonIdentifierType.orcid:
         return '/icons/orcid.png'
-      case DbPersonIdentifierType.IDREF:
+      case DbPersonIdentifierType.idref:
         return '/icons/idref.png'
-      case DbPersonIdentifierType.ID_HAL_S:
-      case DbPersonIdentifierType.ID_HAL_I:
-      case DbPersonIdentifierType.HAL_LOGIN:
+      case DbPersonIdentifierType.idhals:
+      case DbPersonIdentifierType.idhali:
+      case DbPersonIdentifierType.hal_login:
         return '/icons/hal.png'
-      case DbPersonIdentifierType.SCOPUS_EID:
+      case DbPersonIdentifierType.scopus:
         return '/icons/scopus.png'
       default:
         return '/icons/id.png' // fallback icon
@@ -61,21 +61,21 @@ export class PersonIdentifier {
     if (!v) return null
 
     switch (this.type) {
-      case DbPersonIdentifierType.IDREF:
+      case DbPersonIdentifierType.idref:
         return `https://www.idref.fr/${encodeURIComponent(v)}`
 
-      case DbPersonIdentifierType.ORCID: {
+      case DbPersonIdentifierType.orcid: {
         // accept stored as full URL or plain ORCID
         const cleaned = v.replace(/^https?:\/\/orcid\.org\//i, '')
         return `https://orcid.org/${encodeURIComponent(cleaned)}`
       }
 
-      case DbPersonIdentifierType.ID_HAL_S:
+      case DbPersonIdentifierType.idhals:
         return `https://aurehal.archives-ouvertes.fr/person/browse?critere=${encodeURIComponent(
           `idHal_s:"${v}"`,
         )}`
 
-      case DbPersonIdentifierType.ID_HAL_I:
+      case DbPersonIdentifierType.idhali:
         return `https://aurehal.archives-ouvertes.fr/person/browse?critere=${encodeURIComponent(
           `idHal_i:"${v}"`,
         )}`
@@ -93,24 +93,23 @@ export class PersonIdentifier {
   }
 
   static typeFromString(type: string): DbPersonIdentifierType {
-    switch (type.trim().toLowerCase()) {
+    switch (type.trim()) {
       case 'local':
-        return DbPersonIdentifierType.LOCAL
+        return DbPersonIdentifierType.local
       case 'orcid':
-        return DbPersonIdentifierType.ORCID
+        return DbPersonIdentifierType.orcid
       case 'idref':
-        return DbPersonIdentifierType.IDREF
-      case 'scopus_eid':
-        return DbPersonIdentifierType.SCOPUS_EID
-      case 'id_hal':
-      case 'id_hal_s':
-        return DbPersonIdentifierType.ID_HAL_S
-      case 'id_hal_i':
-        return DbPersonIdentifierType.ID_HAL_I
-      case 'hal_login':
-        return DbPersonIdentifierType.HAL_LOGIN
+        return DbPersonIdentifierType.idref
+      case 'scopus':
+        return DbPersonIdentifierType.scopus
+      case 'idhals':
+        return DbPersonIdentifierType.idhals
+      case 'idhali':
+        return DbPersonIdentifierType.idhali
       case 'eppn':
-        return DbPersonIdentifierType.EPPN
+        return DbPersonIdentifierType.eppn
+      case 'hal_login':
+        return DbPersonIdentifierType.hal_login
       default:
         throw new Error(`Unknown identifier type: ${type}`)
     }

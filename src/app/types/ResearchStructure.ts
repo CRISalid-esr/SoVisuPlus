@@ -1,11 +1,9 @@
 import { ResearchStructureWithRelations as DbResearchStructure } from '@/prisma-schema/extended-client'
-import {
-  ResearchStructureIdentifier,
-  ResearchStructureIdentifierType,
-} from '@/types/ResearchStructureIdentifier'
+import { ResearchStructureIdentifier } from '@/types/ResearchStructureIdentifier'
 import { IAgent } from '@/types/IAgent'
 import { Literal } from '@/types/Literal'
 import { ExtendedLanguageCode } from './ExtendLanguageCode'
+import { ResearchStructureIdentifierType as DbResearchStructureIdentifierType } from '@prisma/client'
 
 interface ResearchStructureJson {
   uid: string
@@ -25,7 +23,7 @@ class ResearchStructure implements IAgent {
     public descriptions: Array<Literal>,
     public signature: string | null,
     private _identifiers: {
-      type: ResearchStructureIdentifierType
+      type: DbResearchStructureIdentifierType
       value: string
     }[] = [],
     public type: 'research_structure' = 'research_structure',
@@ -63,7 +61,7 @@ class ResearchStructure implements IAgent {
         throw new Error(`Identifier type is required`)
       }
       if (
-        !Object.values(ResearchStructureIdentifierType).includes(
+        !Object.values(DbResearchStructureIdentifierType).includes(
           identifier.type,
         )
       ) {

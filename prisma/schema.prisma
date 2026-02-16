@@ -209,24 +209,34 @@ model SourceJournal {
 }
 
 enum PublicationIdentifierType {
-  HAL           @map("hal")
-  DOI           @map("doi")
-  OPENALEX      @map("open_alex")
-  URI           @map("uri")
-  SUDOCPPN      @map("sudoc_ppn")
-  NNT           @map("nnt")
-  PRODINRA      @map("prodinra")
-  WOS           @map("wos")
-  PMID          @map("pmid")
-  ARXIV         @map("arxiv")
-  PPN           @map("ppn")
-  PUBMED        @map("pubmed")
-  PII           @map("pii")
-  PUBMEDCENTRAL @map("pubmedcentral")
-  IRD           @map("ird")
-  SCIENCESPO    @map("sciencespo")
-  INERIS        @map("ineris")
-  UNKNOWN       @map("unknown")
+  arxiv
+  bibcode
+  biorxiv
+  cern
+  chemrxiv
+  doi
+  ensam
+  hal
+  ineris
+  inspire
+  ird
+  irstea
+  irthesaurus
+  meditagri
+  nnt
+  oatao
+  okina
+  openalex
+  pii
+  pmid
+  ppn
+  prodinra
+  pubmedcentral
+  sciencespo
+  swhid
+  uri
+  wos
+  unknown
 }
 
 model PublicationIdentifier {
@@ -289,14 +299,19 @@ model DocumentAbstract {
 }
 
 enum AuthorityOrganizationIdentifierType {
-  OPENALEX @map("openalex")
-  ROR      @map("ror")
-  HAL      @map("hal")
-  IDREF    @map("IdRef")
-  ISNI     @map("isni")
-  NNS      @map("nns")
-  WIKIDATA @map("Wikidata")
-  VIAF     @map("viaf")
+  hal
+  idref
+  isni
+  local
+  nns
+  openalex
+  ror
+  scopus
+  siren
+  siret
+  uai
+  viaf
+  wikidata
 }
 
 model AuthorityOrganizationIdentifier {
@@ -357,14 +372,14 @@ enum LabelType {
 }
 
 enum PersonIdentifierType {
-  ORCID      @map("orcid")
-  IDREF      @map("idref")
-  ID_HAL_S   @map("id_hal_s")
-  ID_HAL_I   @map("id_hal_i")
-  HAL_LOGIN  @map("hal_login")
-  SCOPUS_EID @map("scopus_eid")
-  LOCAL      @map("local")
-  EPPN       @map("eppn")
+  eppn
+  hal_login
+  idref
+  idhals
+  idhali
+  local
+  orcid
+  scopus
 }
 
 model PersonIdentifier {
@@ -443,12 +458,19 @@ model ResearchStructureIdentifier {
 }
 
 enum ResearchStructureIdentifierType {
-  LOCAL     @map("local")
-  NNS       @map("nns")
-  IDREF     @map("idref")
-  ROR       @map("ror")
-  HAL       @map("hal")
-  SCOPUS_ID @map("scopus_id")
+  hal
+  idref
+  isni
+  local
+  nns
+  openalex
+  ror
+  scopus
+  siren
+  siret
+  uai
+  viaf
+  wikidata
 }
 
 enum ActionType {

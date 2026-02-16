@@ -4,7 +4,6 @@ import {
   DocumentState,
   OAStatus,
   Person as DbPerson,
-  PublicationIdentifierType as DbPublicationIdentifierType,
   Prisma,
 } from '@prisma/client'
 import { Document, DocumentType } from '@/types/Document'
@@ -83,7 +82,22 @@ export class DocumentDAO extends AbstractDAO {
                     identifiers: true,
                   },
                 },
-                person: true,
+                person: {
+                  include: {
+                    identifiers: true,
+                    memberships: {
+                      include: {
+                        researchStructure: {
+                          include: {
+                            names: true,
+                            identifiers: true,
+                            descriptions: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
               },
             },
             records: {
@@ -176,7 +190,13 @@ export class DocumentDAO extends AbstractDAO {
                     identifiers: true,
                     memberships: {
                       include: {
-                        researchStructure: true,
+                        researchStructure: {
+                          include: {
+                            names: true,
+                            identifiers: true,
+                            descriptions: true,
+                          },
+                        },
                       },
                     },
                   },
@@ -923,7 +943,13 @@ export class DocumentDAO extends AbstractDAO {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: true,
+                    researchStructure: {
+                      include: {
+                        names: true,
+                        identifiers: true,
+                        descriptions: true,
+                      },
+                    },
                   },
                 },
               },
@@ -1049,7 +1075,13 @@ export class DocumentDAO extends AbstractDAO {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: true,
+                    researchStructure: {
+                      include: {
+                        names: true,
+                        descriptions: true,
+                        identifiers: true,
+                      },
+                    },
                   },
                 },
               },
@@ -1216,7 +1248,9 @@ export class DocumentDAO extends AbstractDAO {
       (await this.prismaClient.publicationIdentifier.findMany({
         where: {
           OR: identifiers.map((identifier) => ({
-            type: identifier.type.toUpperCase() as DbPublicationIdentifierType,
+            type: PublicationIdentifier.publicationIdentifierTypeFromString(
+              identifier.type,
+            ),
             value: identifier.value,
             documentRecordId: { not: currentDocumentRecordId },
           })),
@@ -1252,7 +1286,9 @@ export class DocumentDAO extends AbstractDAO {
       await this.prismaClient.publicationIdentifier.createMany({
         data: identifiers.map((identifier) => ({
           documentRecordId,
-          type: identifier.type.toUpperCase() as DbPublicationIdentifierType,
+          type: PublicationIdentifier.publicationIdentifierTypeFromString(
+            identifier.type,
+          ),
           value: identifier.value,
         })),
       })

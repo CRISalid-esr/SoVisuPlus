@@ -30,7 +30,7 @@ export const POST = async (request: Request) => {
   try {
     const userDAO = new UserDAO()
     const user = await userDAO.getUserByIdentifier(
-      new PersonIdentifier(PersonIdentifierType.LOCAL, session.user.username),
+      new PersonIdentifier(PersonIdentifierType.local, session.user.username),
     )
 
     if (!user?.person?.uid) {

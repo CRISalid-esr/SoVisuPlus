@@ -1,7 +1,9 @@
 import { Person } from '@/types/Person'
-import { PersonIdentifierType } from '@prisma/client'
 import { describe, expect, it } from '@jest/globals'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 
 describe('Person', () => {
   it('should create a valid Person object', () => {
@@ -13,8 +15,8 @@ describe('Person', () => {
       'John',
       'Doe',
       [
-        new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0002-1825-0097'),
-        new PersonIdentifier(PersonIdentifierType.LOCAL, '12345'),
+        new PersonIdentifier(PersonIdentifierType.orcid, '0000-0002-1825-0097'),
+        new PersonIdentifier(PersonIdentifierType.local, '12345'),
       ],
     )
 
@@ -26,8 +28,8 @@ describe('Person', () => {
     expect(validPerson.firstName).toBe('John')
     expect(validPerson.lastName).toBe('Doe')
     expect(validPerson.getIdentifiers()).toEqual([
-      { type: PersonIdentifierType.ORCID, value: '0000-0002-1825-0097' },
-      { type: PersonIdentifierType.LOCAL, value: '12345' },
+      { type: PersonIdentifierType.orcid, value: '0000-0002-1825-0097' },
+      { type: PersonIdentifierType.local, value: '12345' },
     ])
   })
 
@@ -51,9 +53,20 @@ describe('Person', () => {
       normalizedName: 'john doe',
       lastName: 'Doe',
       identifiers: [
-        { type: PersonIdentifierType.ORCID, value: '0000-0002-1825-0097' },
-        { type: PersonIdentifierType.LOCAL, value: '12345' },
+        {
+          id: 1,
+          type: PersonIdentifierType.orcid,
+          value: '0000-0002-1825-0097',
+          personId: 1,
+        },
+        {
+          id: 2,
+          type: PersonIdentifierType.local,
+          value: '12345',
+          personId: 2,
+        },
       ],
+      memberships: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -69,8 +82,8 @@ describe('Person', () => {
     expect(result.lastName).toBe('Doe')
     expect(result.normalizedName).toBe('john doe')
     expect(result.getIdentifiers()).toEqual([
-      { type: PersonIdentifierType.ORCID, value: '0000-0002-1825-0097' },
-      { type: PersonIdentifierType.LOCAL, value: '12345' },
+      { type: PersonIdentifierType.orcid, value: '0000-0002-1825-0097' },
+      { type: PersonIdentifierType.local, value: '12345' },
     ])
   })
 
@@ -84,6 +97,8 @@ describe('Person', () => {
       displayName: 'Alice Smith',
       firstName: 'Alice',
       lastName: 'Smith',
+      identifiers: [],
+      memberships: [],
       normalizedName: 'alice smith',
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -110,7 +125,7 @@ describe('Person', () => {
       null,
       'John',
       'Doe',
-      [new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0002-1825-0097')],
+      [new PersonIdentifier(PersonIdentifierType.orcid, '0000-0002-1825-0097')],
     )
     expect(personWithNullDisplayName.displayName).toBe('John Doe')
     expect(personWithNullDisplayName.normalizedName).toBe('john doe')
@@ -123,7 +138,7 @@ describe('Person', () => {
       'John Doe Jr',
       'John',
       'Doe',
-      [new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0002-1825-0097')],
+      [new PersonIdentifier(PersonIdentifierType.orcid, '0000-0002-1825-0097')],
     )
     expect(personWithDisplayName.displayName).toBe('John Doe Jr')
     expect(personWithDisplayName.normalizedName).toBe('john doe jr')

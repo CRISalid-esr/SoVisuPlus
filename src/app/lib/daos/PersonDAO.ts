@@ -1,12 +1,10 @@
 import slugify from 'slugify'
-import {
-  Person as DbPerson,
-  PersonIdentifier as DbPersonIdentifier,
-  PersonIdentifierType as DbPersonIdentifierType,
-  Prisma,
-} from '@prisma/client'
+import { PersonIdentifier as DbPersonIdentifier, Prisma } from '@prisma/client'
 import { Person } from '@/types/Person'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
@@ -15,6 +13,7 @@ import removeAccents from 'remove-accents'
 import { ORCIDIdentifier, OrcidOAuthData } from '@/types/OrcidIdentifier'
 import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
 import { decryptString, encryptString } from '@/utils/crypto/fieldEncryption'
+import { PersonWithRelations as DbPerson } from '@/prisma-schema/extended-client'
 
 /** PersonDAO: Handles operations related to Person and PersonIdentifiers */
 export class PersonDAO extends AbstractDAO {
@@ -73,15 +72,36 @@ export class PersonDAO extends AbstractDAO {
               normalizedName: person.normalizedName,
             },
           })
+
           await this.handleIdentifierConflicts(
             person.getIdentifiers(),
             dbPerson?.id,
           )
+
           await this.upsertIdentifiers(person.getIdentifiers(), dbPerson.id)
 
           await this.upsertMemberships(person.memberships, dbPerson.id)
 
-          return dbPerson
+          const dbPersonWithRelations =
+            await this.prismaClient.person.findUniqueOrThrow({
+              where: { uid: person.uid },
+              include: {
+                identifiers: true,
+                memberships: {
+                  include: {
+                    researchStructure: {
+                      include: {
+                        names: true,
+                        identifiers: true,
+                        descriptions: true,
+                      },
+                    },
+                  },
+                },
+              },
+            })
+
+          return dbPersonWithRelations
         } catch (error) {
           if (
             error instanceof PrismaClientKnownRequestError &&
@@ -188,7 +208,7 @@ export class PersonDAO extends AbstractDAO {
       await this.prismaClient.personIdentifier.findMany({
         where: {
           OR: identifiers.map((identifier) => ({
-            type: identifier.type.toUpperCase() as DbPersonIdentifierType,
+            type: PersonIdentifier.typeFromString(identifier.type),
             value: identifier.value,
             personId: { not: currentPersonId },
           })),
@@ -226,7 +246,7 @@ export class PersonDAO extends AbstractDAO {
       await this.prismaClient.personIdentifier.createMany({
         data: identifiers.map((identifier) => ({
           personId,
-          type: identifier.type.toUpperCase() as DbPersonIdentifierType,
+          type: identifier.type as PersonIdentifierType,
           value: identifier.value,
         })),
       })
@@ -278,7 +298,7 @@ export class PersonDAO extends AbstractDAO {
         where: {
           personId_type: {
             personId,
-            type: identifier.type.toUpperCase() as DbPersonIdentifierType,
+            type: identifier.type as PersonIdentifierType,
           },
         },
         update: {
@@ -286,7 +306,7 @@ export class PersonDAO extends AbstractDAO {
         },
         create: {
           personId,
-          type: identifier.type.toUpperCase() as DbPersonIdentifierType,
+          type: identifier.type as PersonIdentifierType,
           value: identifier.value,
         },
       })
@@ -314,7 +334,7 @@ export class PersonDAO extends AbstractDAO {
     identifier: ORCIDIdentifier,
   ): Promise<void> {
     // Redundant check: idetifier type is hard coded in the ORCIDIdentifier class
-    if (identifier.type !== DbPersonIdentifierType.ORCID) {
+    if (identifier.type !== PersonIdentifierType.orcid) {
       throw new Error(
         `upsertOrcidIdentifierExtension called with non-ORCID identifier type: ${identifier.type}`,
       )
@@ -330,7 +350,7 @@ export class PersonDAO extends AbstractDAO {
         `PersonIdentifier with id=${personIdentifierId} not found`,
       )
     }
-    if (base.type !== DbPersonIdentifierType.ORCID) {
+    if (base.type !== PersonIdentifierType.orcid) {
       throw new Error(
         `PersonIdentifier id=${personIdentifierId} is not ORCID (found type=${base.type})`,
       )
@@ -448,18 +468,17 @@ export class PersonDAO extends AbstractDAO {
           },
         },
         memberships: {
-          select: {
-            startDate: true,
-            endDate: true,
+          include: {
             researchStructure: {
-              select: {
-                uid: true,
-                acronym: true,
-                slug: true,
+              include: {
+                names: true,
+                identifiers: true,
+                descriptions: true,
               },
             },
           },
         },
+        identifiers: true,
       },
       orderBy: {
         lastName: 'asc',
@@ -484,14 +503,12 @@ export class PersonDAO extends AbstractDAO {
         where: { slug },
         include: {
           memberships: {
-            select: {
-              startDate: true,
-              endDate: true,
+            include: {
               researchStructure: {
-                select: {
-                  uid: true,
-                  acronym: true,
-                  slug: true,
+                include: {
+                  names: true,
+                  identifiers: true,
+                  descriptions: true,
                 },
               },
             },
@@ -526,18 +543,17 @@ export class PersonDAO extends AbstractDAO {
       },
       include: {
         memberships: {
-          select: {
-            startDate: true,
-            endDate: true,
+          include: {
             researchStructure: {
-              select: {
-                uid: true,
-                acronym: true,
-                slug: true,
+              include: {
+                names: true,
+                identifiers: true,
+                descriptions: true,
               },
             },
           },
         },
+        identifiers: true,
       },
     })
 
@@ -550,18 +566,17 @@ export class PersonDAO extends AbstractDAO {
         where: { uid },
         include: {
           memberships: {
-            select: {
-              startDate: true,
-              endDate: true,
+            include: {
               researchStructure: {
-                select: {
-                  uid: true,
-                  acronym: true,
-                  slug: true,
+                include: {
+                  names: true,
+                  identifiers: true,
+                  descriptions: true,
                 },
               },
             },
           },
+          identifiers: true,
         },
       })
 
@@ -584,10 +599,24 @@ export class PersonDAO extends AbstractDAO {
         where: {
           identifiers: {
             some: {
-              type: identifier.type.toUpperCase() as DbPersonIdentifierType,
+              type: identifier.type as PersonIdentifierType,
               value: identifier.value,
             },
           },
+        },
+        include: {
+          memberships: {
+            include: {
+              researchStructure: {
+                include: {
+                  names: true,
+                  identifiers: true,
+                  descriptions: true,
+                },
+              },
+            },
+          },
+          identifiers: true,
         },
       })
 

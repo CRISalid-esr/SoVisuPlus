@@ -22,6 +22,8 @@ import {
   PublicationIdentifier,
   ResearchStructure,
   ResearchStructureDescription,
+  ResearchStructureIdentifier,
+  ResearchStructureIdentifierType,
   ResearchStructureName,
   Role,
   RolePermission,
@@ -34,13 +36,19 @@ import {
 } from '@prisma/client'
 const prisma = new PrismaClient()
 
+export type ResearchStructureIdentifierWithRelations =
+  ResearchStructureIdentifier & {
+    type: ResearchStructureIdentifierType
+  }
+
 export type ResearchStructureWithRelations = ResearchStructure & {
   names: ResearchStructureName[]
   descriptions: ResearchStructureDescription[]
+  identifiers: ResearchStructureIdentifierWithRelations[]
 }
 
 export type ContributionWithRelations = Contribution & {
-  person: Person
+  person: PersonWithRelations
   affiliations: AuthorityOrganizationWithRelations[]
 }
 

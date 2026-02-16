@@ -38,13 +38,13 @@ describe('PersonService.addOrUpdateIdentifier', () => {
 
     await service.addOrUpdateIdentifier(
       personUid,
-      PersonIdentifierType.ORCID,
+      PersonIdentifierType.orcid,
       orcid,
     )
 
     expect(mockUpsertIdentifier).toHaveBeenCalledTimes(1)
     expect(mockUpsertIdentifier).toHaveBeenCalledWith(
-      { type: 'ORCID', value: orcid },
+      { type: 'orcid', value: orcid },
       personUid,
     )
 
@@ -55,7 +55,7 @@ describe('PersonService.addOrUpdateIdentifier', () => {
         targetType: expect.anything(), // ActionTargetType.PERSON (enum value)
         targetUid: personUid,
         path: 'identifiers',
-        parameters: { identifier: { type: 'ORCID', value: orcid } },
+        parameters: { identifier: { type: 'orcid', value: orcid } },
         personUid,
       }),
     )
@@ -69,11 +69,11 @@ describe('PersonService.addOrUpdateIdentifier', () => {
     await expect(
       service.addOrUpdateIdentifier(
         personUid,
-        PersonIdentifierType.ORCID,
+        PersonIdentifierType.orcid,
         orcid,
       ),
     ).rejects.toThrow(
-      `Error adding/updating identifier (type=ORCID, value=${orcid}, personUid=${personUid})`,
+      `Error adding/updating identifier (type=orcid, value=${orcid}, personUid=${personUid})`,
     )
 
     expect(mockCreateAction).not.toHaveBeenCalled()

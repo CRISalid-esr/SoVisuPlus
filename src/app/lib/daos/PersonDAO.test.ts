@@ -34,6 +34,7 @@ jest.mock('@prisma/client', () => {
       upsert: jest.fn(),
       findFirst: jest.fn(),
       findUnique: jest.fn(),
+      findUniqueOrThrow: jest.fn(),
     },
     personIdentifier: {
       findMany: jest.fn(),
@@ -73,7 +74,7 @@ describe('PersonDAO', () => {
     'John Doe',
     'John',
     'Doe',
-    [new PersonIdentifier(PersonIdentifierType.ORCID, '0000-0001-2345-6789')],
+    [new PersonIdentifier(PersonIdentifierType.orcid, '0000-0001-2345-6789')],
     [
       new PersonMembership(
         new ResearchStructure(
@@ -95,6 +96,10 @@ describe('PersonDAO', () => {
     })
     ;(mockPrisma.person.findFirst as jest.Mock).mockResolvedValue(null)
     ;(mockPrisma.personIdentifier.findMany as jest.Mock).mockResolvedValue([])
+    ;(mockPrisma.person.findUniqueOrThrow as jest.Mock).mockResolvedValue({
+      ...person,
+      id: 1,
+    })
     const dbPerson: DbPerson = await personDAO.createOrUpdatePerson(person)
     expect(dbPerson.uid).toEqual('local-johndoe')
     expect(dbPerson.email).toEqual('johndoe@myuniversity.com')
@@ -120,29 +125,17 @@ describe('PersonDAO', () => {
         external: person.external,
       },
     })
-
-    expect(mockPrisma.personIdentifier.findMany).toHaveBeenCalledWith({
-      where: {
-        OR: [
-          {
-            type: 'ORCID',
-            value: '0000-0001-2345-6789',
-            personId: { not: 1 },
-          },
-        ],
-      },
-    })
   })
 
   it('should throw an error if conflicting identifiers are found', async () => {
     ;(mockPrisma.personIdentifier.findMany as jest.Mock).mockResolvedValue([
-      { type: 'ORCID', value: '0000-0001-2345-6789', personId: 999 },
+      { type: 'orcid', value: '0000-0001-2345-6789', personId: 999 },
     ])
     // for duplicate slug resolution
     ;(mockPrisma.person.findFirst as jest.Mock).mockResolvedValue(null)
 
     await expect(personDAO.createOrUpdatePerson(person)).rejects.toThrow(
-      'Conflicting identifiers found: ORCID:0000-0001-2345-6789',
+      'Conflicting identifiers found: orcid:0000-0001-2345-6789',
     )
   })
 
@@ -159,7 +152,7 @@ describe('PersonDAO', () => {
       data: [
         {
           personId: expect.any(Number),
-          type: 'ORCID',
+          type: 'orcid',
           value: '0000-0001-2345-6789',
         },
       ],
@@ -194,7 +187,7 @@ describe('PersonDAO', () => {
     it('should upsert ORCID oauth extension when base identifier exists and oauth is present', async () => {
       ;(mockPrisma.personIdentifier.findUnique as jest.Mock).mockResolvedValue({
         id: 1841063,
-        type: 'ORCID',
+        type: 'orcid',
       })
       ;(mockPrisma.orcidIdentifier.upsert as jest.Mock).mockResolvedValue({
         id: 1841063,
@@ -327,7 +320,7 @@ describe('PersonDAO', () => {
     it('should throw if oauth is missing', async () => {
       ;(mockPrisma.personIdentifier.findUnique as jest.Mock).mockResolvedValue({
         id: 1841063,
-        type: 'ORCID',
+        type: 'orcid',
       })
 
       const identifier = new ORCIDIdentifier('0000-0001-7990-9804') // oauth missing
@@ -344,7 +337,7 @@ describe('PersonDAO', () => {
     it('should throw if accessToken/refreshToken are missing', async () => {
       ;(mockPrisma.personIdentifier.findUnique as jest.Mock).mockResolvedValue({
         id: 1841063,
-        type: 'ORCID',
+        type: 'orcid',
       })
 
       const identifier = new ORCIDIdentifier('0000-0001-7990-9804', {

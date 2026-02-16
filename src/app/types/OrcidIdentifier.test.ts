@@ -1,6 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals'
 import { ORCIDIdentifier, OrcidScope } from '@/types/OrcidIdentifier'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 describe('ORCIDIdentifier', () => {
   describe('normalize', () => {
@@ -69,7 +69,7 @@ describe('ORCIDIdentifier', () => {
   describe('type guards', () => {
     it('isOrcidIdentifierJson returns true when type=ORCID and oauth is non-null', () => {
       const json = {
-        type: PersonIdentifierType.ORCID,
+        type: DbPersonIdentifierType.orcid,
         value: '0000-0001-7990-9804',
         oauth: {
           scope: ['/read-limited'] as OrcidScope[],
@@ -86,11 +86,11 @@ describe('ORCIDIdentifier', () => {
 
     it('isOrcidIdentifierJson returns false when oauth is missing or null', () => {
       const jsonMissingOauth = {
-        type: PersonIdentifierType.ORCID,
+        type: DbPersonIdentifierType.orcid,
         value: '0000-0001-7990-9804',
       }
       const jsonNullOauth = {
-        type: PersonIdentifierType.ORCID,
+        type: DbPersonIdentifierType.orcid,
         value: '0000-0001-7990-9804',
         oauth: null,
       }
@@ -105,7 +105,7 @@ describe('ORCIDIdentifier', () => {
   describe('fromJson', () => {
     it('builds ORCIDIdentifier with oauth populated and dates converted', () => {
       const id = ORCIDIdentifier.fromJson({
-        type: PersonIdentifierType.ORCID,
+        type: DbPersonIdentifierType.orcid,
         value: '0000-0001-7990-9804',
         oauth: {
           scope: ['/read-limited', '/authenticate'],
@@ -117,7 +117,7 @@ describe('ORCIDIdentifier', () => {
         },
       })
 
-      expect(id.type).toBe(PersonIdentifierType.ORCID)
+      expect(id.type).toBe(DbPersonIdentifierType.orcid)
       expect(id.value).toBe('0000-0001-7990-9804')
 
       expect(id.oauth).toBeTruthy()
@@ -133,7 +133,7 @@ describe('ORCIDIdentifier', () => {
     it('throws if called with non-ORCID type', () => {
       expect(() =>
         ORCIDIdentifier.fromJson({
-          type: PersonIdentifierType.IDREF,
+          type: DbPersonIdentifierType.idref,
           value: '02725030X',
           oauth: null,
         }),
@@ -144,7 +144,7 @@ describe('ORCIDIdentifier', () => {
   describe('fromDB', () => {
     it('builds ORCIDIdentifier from DB identifier + orcidIdentifier relation', () => {
       const db = {
-        type: PersonIdentifierType.ORCID,
+        type: DbPersonIdentifierType.orcid,
         value: '0000-0001-7990-9804',
         orcidIdentifier: {
           id: 1,
@@ -159,7 +159,7 @@ describe('ORCIDIdentifier', () => {
 
       const id = ORCIDIdentifier.fromDB(db)
 
-      expect(id.type).toBe(PersonIdentifierType.ORCID)
+      expect(id.type).toBe(DbPersonIdentifierType.orcid)
       expect(id.value).toBe('0000-0001-7990-9804')
 
       expect(id.oauth).toBeTruthy()
@@ -173,7 +173,7 @@ describe('ORCIDIdentifier', () => {
     it('throws if called with non-ORCID type', () => {
       expect(() =>
         ORCIDIdentifier.fromDB({
-          type: PersonIdentifierType.IDREF,
+          type: DbPersonIdentifierType.idref,
           value: '02725030X',
           orcidIdentifier: null,
         }),
@@ -183,7 +183,7 @@ describe('ORCIDIdentifier', () => {
     it('throws if ORCID db identifier has no orcidIdentifier relation', () => {
       expect(() =>
         ORCIDIdentifier.fromDB({
-          type: PersonIdentifierType.ORCID,
+          type: DbPersonIdentifierType.orcid,
           value: '0000-0001-7990-9804',
           orcidIdentifier: null,
         }),

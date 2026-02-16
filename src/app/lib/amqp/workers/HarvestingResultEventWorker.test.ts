@@ -66,8 +66,8 @@ describe('HarvestingResultEventWorker', () => {
       'John',
       'Doe',
       [
-        new PersonIdentifier(PersonIdentifierType.LOCAL, 'person-123'),
-        new PersonIdentifier(PersonIdentifierType.IDREF, '999999'),
+        new PersonIdentifier(PersonIdentifierType.local, 'person-123'),
+        new PersonIdentifier(PersonIdentifierType.idref, '999999'),
       ],
     )
 
@@ -85,7 +85,7 @@ describe('HarvestingResultEventWorker', () => {
     expect(event.status).toBe('updated')
 
     expect(personDAO.fetchPersonByIdentifier).toHaveBeenCalledWith({
-      type: PersonIdentifierType.LOCAL,
+      type: PersonIdentifierType.local,
       value: 'person-123',
     })
   })

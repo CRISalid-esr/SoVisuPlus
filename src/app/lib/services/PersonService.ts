@@ -6,7 +6,6 @@ import {
 } from '@/types/PersonIdentifier'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 
 export class PersonService {

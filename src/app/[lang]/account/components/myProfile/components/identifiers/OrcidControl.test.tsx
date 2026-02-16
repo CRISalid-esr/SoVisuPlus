@@ -6,11 +6,9 @@ import OrcidControl from './OrcidControl'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { Person } from '@/types/Person'
-import {
-  PersonIdentifier,
-  PersonIdentifierType,
-} from '@/types/PersonIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { ORCIDIdentifier, OrcidScope } from '@/types/OrcidIdentifier'
+import { PersonIdentifierType } from '@prisma/client'
 
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
@@ -110,7 +108,7 @@ describe('OrcidControl', () => {
       'John Doe',
       'John',
       'Doe',
-      [new PersonIdentifier(PersonIdentifierType.LOCAL, 'jd'), orcid],
+      [new PersonIdentifier(PersonIdentifierType.local, 'jd'), orcid],
       [],
     )
 
@@ -148,7 +146,7 @@ describe('OrcidControl', () => {
       'John Doe',
       'John',
       'Doe',
-      [new PersonIdentifier(PersonIdentifierType.LOCAL, 'jd')],
+      [new PersonIdentifier(PersonIdentifierType.local, 'jd')],
       [],
     )
 

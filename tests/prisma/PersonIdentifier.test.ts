@@ -1,5 +1,5 @@
 import prisma from '@/lib/daos/prisma'
-import { PersonIdentifierType } from '@prisma/client'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
 describe('PersonIdentifier Model Tests', () => {
   afterAll(async () => {
@@ -18,7 +18,7 @@ describe('PersonIdentifier Model Tests', () => {
 
     const personIdentifier = await prisma.personIdentifier.create({
       data: {
-        type: PersonIdentifierType.ORCID,
+        type: PersonIdentifierType.orcid,
         value: '12345',
         person: {
           connect: {
@@ -45,7 +45,7 @@ describe('PersonIdentifier Model Tests', () => {
 
     const personIdentifier = await prisma.personIdentifier.create({
       data: {
-        type: 'SCOPUS_EID',
+        type: 'scopus',
         value: '67890',
         person: {
           connect: {

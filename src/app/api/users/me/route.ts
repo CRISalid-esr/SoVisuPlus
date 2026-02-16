@@ -25,12 +25,12 @@ export const GET = async () => {
 
     if (session?.user.username) {
       electedIdentifier = new PersonIdentifier(
-        PersonIdentifierType.LOCAL,
+        PersonIdentifierType.local,
         session?.user.username,
       )
     } else if (session?.user.orcid) {
       electedIdentifier = new PersonIdentifier(
-        PersonIdentifierType.ORCID,
+        PersonIdentifierType.orcid,
         session?.user.orcid,
       )
     }

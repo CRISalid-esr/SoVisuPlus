@@ -5,12 +5,10 @@ import * as Lingui from '@lingui/core'
 
 import PersonIdentityCard from './PersonIdentityCard'
 import { Person } from '@/types/Person'
-import {
-  PersonIdentifier,
-  PersonIdentifierType,
-} from '@/types/PersonIdentifier'
+import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { PersonMembership } from '@/types/PersonMembership'
 import { IAgent } from '@/types/IAgent'
+import { PersonIdentifierType } from '@prisma/client'
 
 const pushMock = jest.fn()
 
@@ -65,13 +63,13 @@ jest.mock('@mui/material/styles', () => ({
 const mkPerson = (): Person => {
   const identifiers = [
     new PersonIdentifier(
-      PersonIdentifierType.ID_HAL_S,
+      PersonIdentifierType.idhals,
       'violaine-sebillotte-cuchet',
     ),
-    new PersonIdentifier(PersonIdentifierType.ORCID, '0009-0005-6080-0215'),
-    new PersonIdentifier(PersonIdentifierType.IDREF, '02725030X'),
+    new PersonIdentifier(PersonIdentifierType.orcid, '0009-0005-6080-0215'),
+    new PersonIdentifier(PersonIdentifierType.idref, '02725030X'),
     // not displayed
-    new PersonIdentifier(PersonIdentifierType.EPPN, 'john.doe@univ.fr'),
+    new PersonIdentifier(PersonIdentifierType.eppn, 'john.doe@univ.fr'),
   ]
 
   const memberships: PersonMembership[] = [

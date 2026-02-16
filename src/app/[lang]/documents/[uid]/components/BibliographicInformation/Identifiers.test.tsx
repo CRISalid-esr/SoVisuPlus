@@ -4,7 +4,6 @@ import { I18nProvider } from '@lingui/react'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import '@testing-library/jest-dom'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import Authors from './Authors'
 import Identifiers from '@/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers'
 import clearAllMocks = jest.clearAllMocks
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
@@ -72,11 +71,11 @@ describe('Identifiers Component', () => {
               sourceIdentifier: 'sudoc0001',
               identifiers: [
                 new PublicationIdentifier(
-                  PublicationIdentifierType.SUDOCPPN,
+                  PublicationIdentifierType.ppn,
                   'sudoc-ppn-0001',
                 ),
                 new PublicationIdentifier(
-                  PublicationIdentifierType.NNT,
+                  PublicationIdentifierType.nnt,
                   'nnt-0001',
                 ),
               ],
@@ -86,11 +85,11 @@ describe('Identifiers Component', () => {
               sourceIdentifier: 'hal0001',
               identifiers: [
                 new PublicationIdentifier(
-                  PublicationIdentifierType.SUDOCPPN,
+                  PublicationIdentifierType.ppn,
                   'sudoc-ppn-0001',
                 ),
                 new PublicationIdentifier(
-                  PublicationIdentifierType.HAL,
+                  PublicationIdentifierType.hal,
                   'hal-0001',
                 ),
               ],
@@ -107,25 +106,25 @@ describe('Identifiers Component', () => {
 
     renderComponent()
 
-    expect(screen.getByText('SUDOC-PPN : sudoc-ppn-0001')).toBeInTheDocument()
+    expect(screen.getByText('PPN : sudoc-ppn-0001')).toBeInTheDocument()
 
     expect(screen.getByText('NNT : nnt-0001')).toBeInTheDocument()
 
     expect(screen.getByText('HAL : hal-0001')).toBeInTheDocument()
 
-    expect(screen.getAllByText('SUDOC-PPN : sudoc-ppn-0001')).toHaveLength(1)
+    expect(screen.getAllByText('PPN : sudoc-ppn-0001')).toHaveLength(1)
 
     expect(
       screen.queryByText('document_details_page_identifiers_copy_message'),
     ).not.toBeInTheDocument()
 
-    const sudocButton = screen.getByText('SUDOC-PPN : sudoc-ppn-0001')
+    const sudocButton = screen.getByText('PPN : sudoc-ppn-0001')
 
     fireEvent.click(sudocButton)
 
     await waitFor(() => {
       const snackbar = screen.getByText(
-        'SUDOC-PPN ' + 'document_details_page_identifiers_copy_message',
+        'PPN ' + 'document_details_page_identifiers_copy_message',
       )
       expect(snackbar).toBeInTheDocument()
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
@@ -143,10 +142,10 @@ describe('Identifiers Component', () => {
               sourceIdentifier: 'sudoc0001',
               identifiers: [
                 new PublicationIdentifier(
-                  PublicationIdentifierType.SUDOCPPN,
+                  PublicationIdentifierType.ppn,
                   'sudoc-ppn-0001',
                 ),
-                new PublicationIdentifier(PublicationIdentifierType.NNT, null),
+                new PublicationIdentifier(PublicationIdentifierType.nnt, null),
               ],
               platform: 'scanr',
             },
@@ -154,11 +153,11 @@ describe('Identifiers Component', () => {
               sourceIdentifier: 'hal0001',
               identifiers: [
                 new PublicationIdentifier(
-                  PublicationIdentifierType.SUDOCPPN,
+                  PublicationIdentifierType.ppn,
                   'sudoc-ppn-0001',
                 ),
                 new PublicationIdentifier(
-                  PublicationIdentifierType.HAL,
+                  PublicationIdentifierType.hal,
                   'hal-0001',
                 ),
               ],
@@ -175,9 +174,9 @@ describe('Identifiers Component', () => {
 
     renderComponent()
 
-    expect(screen.getByText('SUDOC-PPN : sudoc-ppn-0001')).toBeInTheDocument()
+    expect(screen.getByText('PPN : sudoc-ppn-0001')).toBeInTheDocument()
 
-    expect(screen.getAllByText('SUDOC-PPN : sudoc-ppn-0001')).toHaveLength(1)
+    expect(screen.getAllByText('PPN : sudoc-ppn-0001')).toHaveLength(1)
 
     expect(screen.getByText('HAL : hal-0001')).toBeInTheDocument()
 

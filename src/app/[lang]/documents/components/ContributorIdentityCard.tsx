@@ -14,19 +14,17 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { isPerson } from '@/types/Person'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import { IAgent } from '@/types/IAgent'
-import { SourceContribution } from '@/types/SourceContribution'
 import { Contribution } from '@/types/Contribution'
 import { Trans } from '@lingui/react/macro'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
-const IDENTIFIERS_TO_SHOW: PersonIdentifierType[] = [
-  PersonIdentifierType.ID_HAL_S,
-  PersonIdentifierType.ORCID,
-  PersonIdentifierType.IDREF,
+const IDENTIFIERS_TO_SHOW: DbPersonIdentifierType[] = [
+  DbPersonIdentifierType.idhals,
+  DbPersonIdentifierType.orcid,
+  DbPersonIdentifierType.idref,
 ]
 
 const initialsFromDisplayName = (displayName: string): string => {

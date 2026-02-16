@@ -45,8 +45,8 @@ describe('HarvestingStateEventWorker', () => {
       'John',
       'Doe',
       [
-        new PersonIdentifier(PersonIdentifierType.LOCAL, 'user-001'),
-        new PersonIdentifier(PersonIdentifierType.IDREF, '999999'),
+        new PersonIdentifier(PersonIdentifierType.local, 'user-001'),
+        new PersonIdentifier(PersonIdentifierType.idref, '999999'),
       ],
       [],
     )
@@ -63,7 +63,7 @@ describe('HarvestingStateEventWorker', () => {
     expect(events[0].state).toBe('running')
 
     expect(personDAO.fetchPersonByIdentifier).toHaveBeenCalledWith({
-      type: PersonIdentifierType.LOCAL,
+      type: PersonIdentifierType.local,
       value: 'user-001',
     })
   })
