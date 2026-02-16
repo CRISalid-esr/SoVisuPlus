@@ -135,11 +135,6 @@ msgid "documents_page_refresh_document_alert"
 msgstr "Les informations relatives à cette publication ont changé"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
-msgid "document_details_page_back_to_my_publications"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:101
 msgid "document_details_page_keywords_tab_card_title"
 msgstr "Mots-clés"
@@ -153,6 +148,11 @@ msgstr "Aucun mot-clé"
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:134
 msgid "document_details_page_keywords_search_field_title"
 msgstr "Sélectionner un ou plusieurs vocabulaires contrôlés"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
+msgid "document_details_page_back_to_my_publications"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
@@ -201,34 +201,6 @@ msgid "document_details_page_source_tab_select_action_unmerge_label"
 msgstr "Dissocier"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr "Domaines"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
-msgid "document_details_page_keywords_input_default"
-msgstr "Veuillez entrer au minimum 3 caractères"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "Aucune option"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Mot-clé ajouté à la publication."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Veuillez sélectionner au moins un vocabulaire"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:252
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "Chargement des données..."
@@ -239,9 +211,37 @@ msgid "document_details_page_keywords_input_options_fetch_error"
 msgstr "Chargement des données impossible"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
+msgid "document_details_page_keywords_input_default"
+msgstr "Veuillez entrer au minimum 3 caractères"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Veuillez sélectionner au moins un vocabulaire"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "Aucune option"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:291
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Erreur lors du chargement des données"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Mot-clé ajouté à la publication."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr "Domaines"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:183
@@ -356,6 +356,19 @@ msgid "profile_affiliations_card_title"
 msgstr "Mes affiliations"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:59
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:215
+msgid "orcid_button_update_identifier"
+msgstr "Modifier mes autorisations ORCID"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:69
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:117
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
+msgid "orcid_button_provide_identifier"
+msgstr "Fournir mon identifiant ORCID"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:68
 msgid "orcid_authentication_success"
 msgstr "La validation de votre ORCID a réussi"
@@ -401,31 +414,6 @@ msgid "orcid_control_helper"
 msgstr "ORCID est un identifiant unique, pérenne et gratuit pour les chercheurs. Il vous permet de gagner du temps lorsque vous vous connectez à des systèmes comme celui-ci. En liant votre ORCID à votre compte SoVisu+, vous identifiez de manière unique vos productions de recherche et améliorez la qualité des métadonnées. En savoir plus sur la façon dont ORCID vous aide à passer plus de temps à faire de la recherche et moins de temps à la gérer sur <0>orcid.org</0>."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:59
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:215
-msgid "orcid_button_update_identifier"
-msgstr "Modifier mes autorisations ORCID"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:69
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:117
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
-msgid "orcid_button_provide_identifier"
-msgstr "Fournir mon identifiant ORCID"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:34
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
-msgid "hal_button_update_identifier"
-msgstr "Lier mon compte HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:44
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
-msgid "hal_button_provide_identifier"
-msgstr "Fournir mon identifiant Hal"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
 msgid "orcid_permission_read_limited"
 msgstr "Lire vos informations avec une visibilitée fixée sur «Organisations de confiance»"
@@ -451,6 +439,18 @@ msgid "orcid_permissions_none"
 msgstr "Vous n’accordez aucune autorisation à {institutionName}."
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:34
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
+msgid "hal_button_update_identifier"
+msgstr "Lier mon compte HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:44
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
+msgid "hal_button_provide_identifier"
+msgstr "Fournir mon identifiant Hal"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:89
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:234
 msgid "hal_control_helper"
@@ -467,18 +467,6 @@ msgstr "Authentification HAL réussie"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:97
 msgid "hal_authentication_failure_wrong_protocol"
 msgstr "Pour lier votre compte SoVisu+, n'utilisez pas l'option ORCID lors de l'authentification sur HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
-msgid "profile_affiliations_signature_label"
-msgstr "Ma signature"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:110
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:56
-msgid "profile_affiliations_signature_copied_message_confirmation"
-msgstr "Signature ajoutée au presse-papier."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:79
@@ -529,6 +517,18 @@ msgstr "Échec de l'insertion de l'identifiant HAL en base de données"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:145
 msgid "hal_account_linked_tooltip"
 msgstr "Votre compte SoVisu+ est lié à votre compte Hal"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
+msgid "profile_affiliations_signature_label"
+msgstr "Ma signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:110
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:56
+msgid "profile_affiliations_signature_copied_message_confirmation"
+msgstr "Signature ajoutée au presse-papier."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
@@ -582,7 +582,7 @@ msgstr "ISSN : <0>{0}</0>"
 msgid "authenticate_tooltip"
 msgstr ""
 
-#: src/app/[lang]/documents/components/ContributorIdentityCard.tsx:202
+#: src/app/[lang]/documents/components/ContributorIdentityCard.tsx:200
 msgid "contributor_identity_card_see_profile_button"
 msgstr "Voir Profil"
 
@@ -733,15 +733,15 @@ msgstr "Cette rubrique vous permettra de caractériser les domaines de recherche
 msgid "document_details_page_domains_tab_wip_title"
 msgstr "Domaines de recherche : implémentation en cours"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:167
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:160
 msgid "document_details_page_identifiers_copy_default_message"
 msgstr "Identifiant copié dans le presse-papiers."
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:166
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:159
 msgid "document_details_page_identifiers_copy_message"
 msgstr "copié dans le presse-papiers."
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:145
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:138
 msgid "document_details_page_identifiers_no_identifiers_message"
 msgstr "Aucun identifiant"
 
