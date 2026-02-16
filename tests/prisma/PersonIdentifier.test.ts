@@ -1,5 +1,5 @@
 import prisma from '@/lib/daos/prisma'
-import { PersonIdentifierType } from '@prisma/client'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
 describe('PersonIdentifier Model Tests', () => {
   afterAll(async () => {

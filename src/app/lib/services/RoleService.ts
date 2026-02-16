@@ -3,7 +3,7 @@ import { RoleDAO } from '@/lib/daos/RoleDAO'
 import { EntityType } from '@/types/UserRoleScope'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { PermissionAction, PermissionSubject } from '@/types/Permission'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
 type AssignRoleInput = {
   roleName: string
@@ -11,7 +11,7 @@ type AssignRoleInput = {
   user: {
     userId?: number
     personUid?: string
-    idType?: DbPersonIdentifierType | string
+    idType?: PersonIdentifierType | string
     idValue?: string
   }
 }
@@ -93,7 +93,7 @@ export class RoleService {
     const userId = await this.userDAO.resolveUserId({
       userId: input.user.userId,
       personUid: input.user.personUid,
-      idType: input.user.idType as DbPersonIdentifierType | undefined,
+      idType: input.user.idType as PersonIdentifierType | undefined,
       idValue: input.user.idValue,
     })
     if (!userId) {

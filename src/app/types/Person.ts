@@ -1,6 +1,7 @@
 import {
   PersonIdentifier,
   PersonIdentifierJson,
+  PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { ORCIDIdentifier, ORCIDIdentifierJson } from '@/types/OrcidIdentifier'
 import {
@@ -10,10 +11,7 @@ import {
 
 import { IAgent, IAgentJson } from '@/types/IAgent'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import {
-  PersonIdentifier as DbPersonIdentifier,
-  PersonIdentifierType as DbPersonIdentifierType,
-} from '@prisma/client'
+import { PersonIdentifier as DbPersonIdentifier } from '@prisma/client'
 import { PersonMembership } from '@/types/PersonMembership'
 import removeAccents from 'remove-accents'
 import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
@@ -88,7 +86,7 @@ class Person implements IAgent, Authorizable {
       if (!identifier.type) {
         throw new Error('Identifier type is required')
       }
-      if (!Object.values(DbPersonIdentifierType).includes(identifier.type)) {
+      if (!Object.values(PersonIdentifierType).includes(identifier.type)) {
         throw new Error(
           `${identifier.type} is not a valid PersonIdentifierType`,
         )

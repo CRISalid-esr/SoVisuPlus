@@ -1,13 +1,13 @@
 import process from 'node:process'
 import { RoleService } from '@/lib/services/RoleService'
 import { EntityType } from '@/types/UserRoleScope'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import { PersonIdentifierType } from '../app/types/PersonIdentifier'
 
 type Args = {
   role: string
   userId?: number
   personUid?: string
-  idType?: DbPersonIdentifierType
+  idType?: PersonIdentifierType
   idValue?: string
   scope?: string // "EntityType:entityUid"
 }
@@ -28,7 +28,7 @@ const parseArgs = (argv: string[]): Args => {
         out.personUid = String(next())
         break
       case '--id-type':
-        out.idType = String(next()) as DbPersonIdentifierType
+        out.idType = String(next()) as PersonIdentifierType
         break
       case '--id-value':
         out.idValue = String(next())

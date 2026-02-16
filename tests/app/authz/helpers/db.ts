@@ -4,7 +4,7 @@ import type { RolesFileSeed } from '@/lib/services/RoleConfigService'
 import { RoleService } from '@/lib/services/RoleService'
 import { EntityType } from '@/types/UserRoleScope'
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
 export const resetAuthzDb = async () => {
   await prisma.rolePermission.deleteMany()
@@ -127,7 +127,7 @@ export const assignRoleToPersonUid = async (
     roleName,
     scope: scope ?? null,
     user: {
-      idType: DbPersonIdentifierType.local,
+      idType: PersonIdentifierType.local,
       idValue: personUid,
     },
   })

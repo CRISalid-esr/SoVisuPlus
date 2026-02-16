@@ -3,10 +3,12 @@ import * as process from 'node:process'
 import { getServerSession, Session } from 'next-auth'
 import authOptions from '@/app/auth/auth_options'
 import { UserService } from '@/lib/services/UserService'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { PersonService } from '@/lib/services/PersonService'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 export const GET = async (req: NextRequest) => {
   const sovisuplusHost = process.env.NEXT_PUBLIC_BASE_URL
@@ -30,7 +32,7 @@ export const GET = async (req: NextRequest) => {
   }
   const userService = new UserService()
   const user = await userService.getUserByPersonIdentifier(
-    new PersonIdentifier(DbPersonIdentifierType.local, session.user.username),
+    new PersonIdentifier(PersonIdentifierType.local, session.user.username),
   )
   if (!user || !user.person) {
     console.error(`User not found for session ID: ${session?.user?.id}`)

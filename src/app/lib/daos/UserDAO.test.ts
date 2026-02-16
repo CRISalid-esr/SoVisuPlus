@@ -1,10 +1,8 @@
+import { EntityType, PrismaClient, User as DbUser } from '@prisma/client'
 import {
-  EntityType,
+  PersonIdentifier,
   PersonIdentifierType,
-  PrismaClient,
-  User as DbUser,
-} from '@prisma/client'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+} from '@/types/PersonIdentifier'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { User } from '@/types/User'
 

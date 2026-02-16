@@ -1,14 +1,13 @@
-import {
-  Person as DbPerson,
-  PersonIdentifierType,
-  PrismaClient,
-} from '@prisma/client'
+import { Person as DbPerson, PrismaClient } from '@prisma/client'
 import { Person } from '@/types/Person'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { PersonMembership } from '@/types/PersonMembership'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { Literal } from '@/types/Literal'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import {
   decryptString,

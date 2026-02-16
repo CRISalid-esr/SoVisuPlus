@@ -2,8 +2,7 @@ import { PersonIdentifier } from '@/app/types/PersonIdentifier'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 import { User } from '@/types/User'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
-
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 /**
  * Service for handling person-related operations
  */
@@ -23,12 +22,12 @@ export class UserService {
     let electedIdentifier: PersonIdentifier | null = null
     if (profile.username) {
       electedIdentifier = new PersonIdentifier(
-        DbPersonIdentifierType.local,
+        PersonIdentifierType.local,
         profile.username,
       )
     } else if (profile.orcid) {
       electedIdentifier = new PersonIdentifier(
-        DbPersonIdentifierType.orcid,
+        PersonIdentifierType.orcid,
         profile.orcid,
       )
     }

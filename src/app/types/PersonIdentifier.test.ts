@@ -1,7 +1,9 @@
 // file: src/app/types/__tests__/PersonIdentifier.test.ts
 import { describe, expect, it } from '@jest/globals'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
-import { PersonIdentifierType } from '@prisma/client'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 
 describe('PersonIdentifier', () => {
   describe('typeFromString', () => {

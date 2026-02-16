@@ -6,9 +6,11 @@ import authOptions from '@/app/auth/auth_options'
 import { AureHalAPIClient } from '@/lib/services/AureHalAPIClient'
 import { PersonService } from '@/lib/services/PersonService'
 import { UserService } from '@/lib/services/UserService'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { parseCasTicketValidationResult } from '@/app/utils/parseCasTicketValidationResult'
-import { PersonIdentifierType } from '@prisma/client'
 
 const isLoginOrLogout = (action: string): action is 'login' | 'logout' =>
   action === 'login' || action === 'logout'

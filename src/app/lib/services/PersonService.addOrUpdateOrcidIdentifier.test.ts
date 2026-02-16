@@ -1,5 +1,5 @@
 import { PersonService } from '@/lib/services/PersonService'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
 const mockFetchPeople = jest.fn()
 const mockUpsertIdentifier = jest.fn()
@@ -38,7 +38,7 @@ describe('PersonService.addOrUpdateIdentifier', () => {
 
     await service.addOrUpdateIdentifier(
       personUid,
-      DbPersonIdentifierType.orcid,
+      PersonIdentifierType.orcid,
       orcid,
     )
 
@@ -69,7 +69,7 @@ describe('PersonService.addOrUpdateIdentifier', () => {
     await expect(
       service.addOrUpdateIdentifier(
         personUid,
-        DbPersonIdentifierType.orcid,
+        PersonIdentifierType.orcid,
         orcid,
       ),
     ).rejects.toThrow(

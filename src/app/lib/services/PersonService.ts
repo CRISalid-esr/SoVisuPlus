@@ -1,9 +1,11 @@
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 
 export class PersonService {
@@ -41,7 +43,7 @@ export class PersonService {
 
   async addOrUpdateIdentifier(
     personUid: string,
-    type: DbPersonIdentifierType,
+    type: PersonIdentifierType,
     value: string,
   ): Promise<void> {
     try {

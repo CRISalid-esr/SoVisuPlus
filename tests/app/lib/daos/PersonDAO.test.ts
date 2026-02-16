@@ -1,4 +1,3 @@
-import { PersonIdentifierType } from '@prisma/client'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 import prisma from '@/lib/daos/prisma'
@@ -6,7 +5,10 @@ import { PersonMembership } from '@/types/PersonMembership'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import { Literal } from '@/types/Literal'
 import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 
 describe('PersonDAO Integration Tests', () => {
   let personDAO: PersonDAO

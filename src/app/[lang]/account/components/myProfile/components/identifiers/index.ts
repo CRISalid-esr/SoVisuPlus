@@ -1,18 +1,18 @@
 import IdrefControl from './IdrefControl'
 import OrcidControl from './OrcidControl'
 import HalControl from '@/app/[lang]/account/components/myProfile/components/identifiers/HalControl'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
 export const identifierComponentMap: Record<
-  DbPersonIdentifierType,
+  PersonIdentifierType,
   React.ComponentType | null
 > = {
-  [DbPersonIdentifierType.idref]: IdrefControl,
-  [DbPersonIdentifierType.orcid]: OrcidControl,
-  [DbPersonIdentifierType.local]: null,
-  [DbPersonIdentifierType.idhals]: HalControl,
-  [DbPersonIdentifierType.idhali]: null,
-  [DbPersonIdentifierType.scopus]: null,
-  [DbPersonIdentifierType.eppn]: null,
-  [DbPersonIdentifierType.hal_login]: null,
+  [PersonIdentifierType.idref]: IdrefControl,
+  [PersonIdentifierType.orcid]: OrcidControl,
+  [PersonIdentifierType.local]: null,
+  [PersonIdentifierType.idhals]: HalControl,
+  [PersonIdentifierType.idhali]: null,
+  [PersonIdentifierType.scopus]: null,
+  [PersonIdentifierType.eppn]: null,
+  [PersonIdentifierType.hal_login]: null,
 }

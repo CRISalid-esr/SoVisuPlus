@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { GET } from './route'
 import { parseCasTicketValidationResult } from '@/utils/parseCasTicketValidationResult'
-import { PersonIdentifierType } from '@prisma/client'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
 const mockAddOrUpdateIdentifier = jest.fn()
 const mockGetUserByPersonIdentifier = jest.fn()

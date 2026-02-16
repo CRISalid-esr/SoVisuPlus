@@ -1,8 +1,10 @@
 import { PersonGraphQLClient } from './PersonGraphQLClient'
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { Person } from '@/types/Person'
-import { PersonIdentifierType } from '@prisma/client'
 
 jest.mock('./AbstractGraphQLClient')
 

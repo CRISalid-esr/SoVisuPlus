@@ -1,7 +1,9 @@
 import { Person } from '@/types/Person'
-import { PersonIdentifierType } from '@prisma/client'
 import { describe, expect, it } from '@jest/globals'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 
 describe('Person', () => {
   it('should create a valid Person object', () => {

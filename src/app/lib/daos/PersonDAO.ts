@@ -1,12 +1,10 @@
 import slugify from 'slugify'
-import {
-  PersonIdentifier as DbPersonIdentifier,
-  PersonIdentifierType,
-  PersonIdentifierType as DbPersonIdentifierType,
-  Prisma,
-} from '@prisma/client'
+import { PersonIdentifier as DbPersonIdentifier, Prisma } from '@prisma/client'
 import { Person } from '@/types/Person'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
@@ -248,7 +246,7 @@ export class PersonDAO extends AbstractDAO {
       await this.prismaClient.personIdentifier.createMany({
         data: identifiers.map((identifier) => ({
           personId,
-          type: identifier.type as DbPersonIdentifierType,
+          type: identifier.type as PersonIdentifierType,
           value: identifier.value,
         })),
       })
@@ -300,7 +298,7 @@ export class PersonDAO extends AbstractDAO {
         where: {
           personId_type: {
             personId,
-            type: identifier.type as DbPersonIdentifierType,
+            type: identifier.type as PersonIdentifierType,
           },
         },
         update: {
@@ -308,7 +306,7 @@ export class PersonDAO extends AbstractDAO {
         },
         create: {
           personId,
-          type: identifier.type as DbPersonIdentifierType,
+          type: identifier.type as PersonIdentifierType,
           value: identifier.value,
         },
       })
@@ -336,7 +334,7 @@ export class PersonDAO extends AbstractDAO {
     identifier: ORCIDIdentifier,
   ): Promise<void> {
     // Redundant check: idetifier type is hard coded in the ORCIDIdentifier class
-    if (identifier.type !== DbPersonIdentifierType.orcid) {
+    if (identifier.type !== PersonIdentifierType.orcid) {
       throw new Error(
         `upsertOrcidIdentifierExtension called with non-ORCID identifier type: ${identifier.type}`,
       )
@@ -352,7 +350,7 @@ export class PersonDAO extends AbstractDAO {
         `PersonIdentifier with id=${personIdentifierId} not found`,
       )
     }
-    if (base.type !== DbPersonIdentifierType.orcid) {
+    if (base.type !== PersonIdentifierType.orcid) {
       throw new Error(
         `PersonIdentifier id=${personIdentifierId} is not ORCID (found type=${base.type})`,
       )
@@ -601,7 +599,7 @@ export class PersonDAO extends AbstractDAO {
         where: {
           identifiers: {
             some: {
-              type: identifier.type as DbPersonIdentifierType,
+              type: identifier.type as PersonIdentifierType,
               value: identifier.value,
             },
           },

@@ -4,16 +4,16 @@ import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
 import { UserDAO } from '@/lib/daos/UserDAO'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 import { DocumentType } from '@/types/Document'
 import { Concept, ConceptJson } from '@/types/Concept'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import dayjs from 'dayjs'
-import {
-  OAStatus,
-  PersonIdentifierType as DbPersonIdentifierType,
-} from '@prisma/client'
+import { OAStatus } from '@prisma/client'
 
 type ColumnFilter =
   | { id: 'date'; value: [string | null, string | null] }
@@ -216,7 +216,7 @@ export class DocumentService {
   ): Promise<void> {
     try {
       const user = await this.userDAO.getUserByIdentifier(
-        new PersonIdentifier(DbPersonIdentifierType.local, userName),
+        new PersonIdentifier(PersonIdentifierType.local, userName),
       )
       if (!user?.person) {
         throw new Error(`User with username ${userName} not found`)
@@ -248,7 +248,7 @@ export class DocumentService {
   ): Promise<void> {
     try {
       const user = await this.userDAO.getUserByIdentifier(
-        new PersonIdentifier(DbPersonIdentifierType.local, userName),
+        new PersonIdentifier(PersonIdentifierType.local, userName),
       )
       if (!user?.person) {
         throw new Error(`User with username ${userName} not found`)
@@ -285,7 +285,7 @@ export class DocumentService {
     }
     try {
       const user = await this.userDAO.getUserByIdentifier(
-        new PersonIdentifier(DbPersonIdentifierType.local, userName),
+        new PersonIdentifier(PersonIdentifierType.local, userName),
       )
       if (!user?.person) {
         throw new Error(`User with username ${userName} not found`)
@@ -321,7 +321,7 @@ export class DocumentService {
   ): Promise<void> {
     try {
       const user = await this.userDAO.getUserByIdentifier(
-        new PersonIdentifier(DbPersonIdentifierType.local, userName),
+        new PersonIdentifier(PersonIdentifierType.local, userName),
       )
       if (!user?.person) {
         throw new Error(`User with username ${userName} not found`)

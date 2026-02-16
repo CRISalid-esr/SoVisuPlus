@@ -1,8 +1,8 @@
+import { User as DbUser } from '@prisma/client'
 import {
-  PersonIdentifierType as DbPersonIdentifierType,
-  User as DbUser,
-} from '@prisma/client'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { User } from '@/types/User'
 import { EntityType } from '@/types/UserRoleScope'
@@ -140,7 +140,7 @@ export class UserDAO extends AbstractDAO {
   async resolveUserId(input: {
     userId?: number
     personUid?: string
-    idType?: DbPersonIdentifierType
+    idType?: PersonIdentifierType
     idValue?: string
   }): Promise<number | null> {
     if (input.userId != null) {

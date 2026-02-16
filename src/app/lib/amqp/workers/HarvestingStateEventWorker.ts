@@ -5,9 +5,11 @@ import {
   isHarvestingState,
 } from '@/types/HarvestingStateEvent'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { isValidBibliographicPlatformName } from '@/types/BibliographicPlatform'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 /**
  * Worker for processing harvesting state event messages
@@ -50,7 +52,7 @@ export class HarvestingStateEventWorker extends MessageProcessingWorker<AMQPHarv
       return events
     }
     const person = await this.personDAO.fetchPersonByIdentifier(
-      new PersonIdentifier(DbPersonIdentifierType.local, localIdentifier),
+      new PersonIdentifier(PersonIdentifierType.local, localIdentifier),
     )
     if (!person) {
       console.warn(`No person found for local identifier: ${localIdentifier}`)

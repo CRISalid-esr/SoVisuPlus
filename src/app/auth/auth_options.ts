@@ -12,9 +12,11 @@ import { UserDAO } from '@/lib/daos/UserDAO'
 import { JWT } from 'next-auth/jwt'
 import { Session } from '@auth/core/types'
 import { userToAuthzContext } from '@/app/auth/ability'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { AuthzContext } from '@/types/authz'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 declare module '@auth/core/types' {
   interface User {
@@ -113,12 +115,12 @@ const authOptions: AuthOptions = {
       const userDAO = new UserDAO()
       const identifier = token.username
         ? new PersonIdentifier(
-            DbPersonIdentifierType.local,
+            PersonIdentifierType.local,
             String(token.username),
           )
         : token.orcid
           ? new PersonIdentifier(
-              DbPersonIdentifierType.orcid,
+              PersonIdentifierType.orcid,
               String(token.orcid),
             )
           : null

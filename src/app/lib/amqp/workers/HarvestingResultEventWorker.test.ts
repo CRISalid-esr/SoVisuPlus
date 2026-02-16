@@ -1,11 +1,13 @@
 import { HarvestingResultEventWorker } from '@/lib/amqp/workers/HarvestingResultEventWorker'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
-import { PersonIdentifier } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { AMQPHarvestingResultEventMessage } from '@/types/AMQPHarvestingResultEventMessage'
 import { HarvestingResultEvent } from '@/types/HarvestingResultEvent'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
-import { PersonIdentifierType } from '@prisma/client'
 
 jest.mock('@/lib/daos/PersonDAO')
 
