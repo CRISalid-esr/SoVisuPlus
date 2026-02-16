@@ -120,11 +120,23 @@ describe('HalControl', () => {
     // idHal badge present
     expect(screen.getByText('idHal_s')).toBeInTheDocument()
     expect(screen.getByText('jacques-dupont')).toBeInTheDocument()
+
+    // Button shown with halProvided=true
+    expect(screen.getByTestId('hal-login-button')).toHaveTextContent(
+      'halProvided=true',
+    )
+
+    // No link icon
+    expect(screen.queryByTestId('LinkIcon')).not.toBeInTheDocument()
+
+    // No login badge
+    expect(screen.queryByText('hal_login')).not.toBeInTheDocument()
   })
 
   it('when HAL identifier exists and HAL_LOGIN exists: shows link icon + idHal badge + login badge, and no button', () => {
     makeStoreWithIdentifiers([
       { type: PersonIdentifierType.idhals, value: 'jacques-dupont' },
+      { type: PersonIdentifierType.hal_login, value: 'jdupont' },
     ])
 
     renderWithProviders()
@@ -133,8 +145,15 @@ describe('HalControl', () => {
     expect(screen.getByText('idHal_s')).toBeInTheDocument()
     expect(screen.getByText('jacques-dupont')).toBeInTheDocument()
 
+    // login badge present
+    expect(screen.getByText('hal_login')).toBeInTheDocument()
+    expect(screen.getByText('jdupont')).toBeInTheDocument()
+
     // Link icon exists
     expect(screen.getByTestId('LinkIcon')).toBeInTheDocument()
+
+    // No button when linked
+    expect(screen.queryByTestId('hal-login-button')).not.toBeInTheDocument()
   })
 
   it('renders the snackbar message when ?success=hal_authentication_success is present', () => {
