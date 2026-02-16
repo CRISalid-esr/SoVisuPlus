@@ -4,7 +4,6 @@ import {
   DocumentState,
   Journal as DbJournal,
   OAStatus,
-  Person as DbPerson,
   Prisma,
   PrismaClient,
   PublicationIdentifierType,
@@ -30,6 +29,7 @@ import { SourceContribution } from '@/types/SourceContribution'
 import { SourcePerson } from '@/types/SourcePerson'
 import { SourceJournal } from '@/types/SourceJournal'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
+import { PersonWithRelations as DbPerson } from '@/prisma-schema/extended-client'
 
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
@@ -221,7 +221,13 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: true,
+                    researchStructure: {
+                      include: {
+                        names: true,
+                        identifiers: true,
+                        descriptions: true,
+                      },
+                    },
                   },
                 },
               },
@@ -782,7 +788,13 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: true,
+                    researchStructure: {
+                      include: {
+                        names: true,
+                        identifiers: true,
+                        descriptions: true,
+                      },
+                    },
                   },
                 },
               },
@@ -894,7 +906,13 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: true,
+                    researchStructure: {
+                      include: {
+                        names: true,
+                        identifiers: true,
+                        descriptions: true,
+                      },
+                    },
                   },
                 },
               },
@@ -1001,7 +1019,13 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: true,
+                    researchStructure: {
+                      include: {
+                        names: true,
+                        identifiers: true,
+                        descriptions: true,
+                      },
+                    },
                   },
                 },
               },
@@ -1112,7 +1136,13 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: true,
+                    researchStructure: {
+                      include: {
+                        names: true,
+                        identifiers: true,
+                        descriptions: true,
+                      },
+                    },
                   },
                 },
               },
@@ -1254,7 +1284,13 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: true,
+                    researchStructure: {
+                      include: {
+                        names: true,
+                        identifiers: true,
+                        descriptions: true,
+                      },
+                    },
                   },
                 },
               },
@@ -1359,7 +1395,13 @@ describe('DocumentDAO', () => {
                   identifiers: true,
                   memberships: {
                     include: {
-                      researchStructure: true,
+                      researchStructure: {
+                        include: {
+                          names: true,
+                          identifiers: true,
+                          descriptions: true,
+                        },
+                      },
                     },
                   },
                 },

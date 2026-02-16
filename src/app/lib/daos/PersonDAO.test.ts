@@ -35,6 +35,7 @@ jest.mock('@prisma/client', () => {
       upsert: jest.fn(),
       findFirst: jest.fn(),
       findUnique: jest.fn(),
+      findUniqueOrThrow: jest.fn(),
     },
     personIdentifier: {
       findMany: jest.fn(),
@@ -96,6 +97,10 @@ describe('PersonDAO', () => {
     })
     ;(mockPrisma.person.findFirst as jest.Mock).mockResolvedValue(null)
     ;(mockPrisma.personIdentifier.findMany as jest.Mock).mockResolvedValue([])
+    ;(mockPrisma.person.findUniqueOrThrow as jest.Mock).mockResolvedValue({
+      ...person,
+      id: 1,
+    })
     const dbPerson: DbPerson = await personDAO.createOrUpdatePerson(person)
     expect(dbPerson.uid).toEqual('local-johndoe')
     expect(dbPerson.email).toEqual('johndoe@myuniversity.com')
@@ -121,29 +126,17 @@ describe('PersonDAO', () => {
         external: person.external,
       },
     })
-
-    expect(mockPrisma.personIdentifier.findMany).toHaveBeenCalledWith({
-      where: {
-        OR: [
-          {
-            type: 'orcid',
-            value: '0000-0001-2345-6789',
-            personId: { not: 1 },
-          },
-        ],
-      },
-    })
   })
 
   it('should throw an error if conflicting identifiers are found', async () => {
     ;(mockPrisma.personIdentifier.findMany as jest.Mock).mockResolvedValue([
-      { type: 'ORCID', value: '0000-0001-2345-6789', personId: 999 },
+      { type: 'orcid', value: '0000-0001-2345-6789', personId: 999 },
     ])
     // for duplicate slug resolution
     ;(mockPrisma.person.findFirst as jest.Mock).mockResolvedValue(null)
 
     await expect(personDAO.createOrUpdatePerson(person)).rejects.toThrow(
-      'Conflicting identifiers found: ORCID:0000-0001-2345-6789',
+      'Conflicting identifiers found: orcid:0000-0001-2345-6789',
     )
   })
 

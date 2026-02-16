@@ -83,6 +83,7 @@ export class UserDAO extends AbstractDAO {
                       slug: true,
                       names: true,
                       descriptions: true,
+                      identifiers: true,
                       external: true,
                     },
                   },

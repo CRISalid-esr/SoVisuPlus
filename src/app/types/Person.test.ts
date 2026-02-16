@@ -51,9 +51,20 @@ describe('Person', () => {
       normalizedName: 'john doe',
       lastName: 'Doe',
       identifiers: [
-        { type: PersonIdentifierType.orcid, value: '0000-0002-1825-0097' },
-        { type: PersonIdentifierType.local, value: '12345' },
+        {
+          id: 1,
+          type: PersonIdentifierType.orcid,
+          value: '0000-0002-1825-0097',
+          personId: 1,
+        },
+        {
+          id: 2,
+          type: PersonIdentifierType.local,
+          value: '12345',
+          personId: 2,
+        },
       ],
+      memberships: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -84,6 +95,8 @@ describe('Person', () => {
       displayName: 'Alice Smith',
       firstName: 'Alice',
       lastName: 'Smith',
+      identifiers: [],
+      memberships: [],
       normalizedName: 'alice smith',
       createdAt: new Date(),
       updatedAt: new Date(),

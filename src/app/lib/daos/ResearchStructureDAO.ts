@@ -1,8 +1,5 @@
 import { ResearchStructureWithRelations as DbResearchStructure } from '@/prisma-schema/extended-client'
-import {
-  Prisma,
-  ResearchStructureIdentifierType as DbResearchStructureIdentifierType,
-} from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { ResearchStructure } from '@/types/ResearchStructure'
 import {
   ResearchStructureIdentifier,

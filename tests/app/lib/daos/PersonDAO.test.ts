@@ -147,7 +147,7 @@ describe('PersonDAO Integration Tests', () => {
     })
 
     await expect(personDAO.createOrUpdatePerson(person)).rejects.toThrow(
-      'Failed to upsert person: Conflicting identifiers found: ORCID:0000-0001-2345-6789',
+      'Failed to upsert person: Conflicting identifiers found: orcid:0000-0001-2345-6789',
     )
   })
 

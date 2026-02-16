@@ -82,7 +82,22 @@ export class DocumentDAO extends AbstractDAO {
                     identifiers: true,
                   },
                 },
-                person: true,
+                person: {
+                  include: {
+                    identifiers: true,
+                    memberships: {
+                      include: {
+                        researchStructure: {
+                          include: {
+                            names: true,
+                            identifiers: true,
+                            descriptions: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
               },
             },
             records: {
@@ -175,7 +190,13 @@ export class DocumentDAO extends AbstractDAO {
                     identifiers: true,
                     memberships: {
                       include: {
-                        researchStructure: true,
+                        researchStructure: {
+                          include: {
+                            names: true,
+                            identifiers: true,
+                            descriptions: true,
+                          },
+                        },
                       },
                     },
                   },
@@ -922,7 +943,13 @@ export class DocumentDAO extends AbstractDAO {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: true,
+                    researchStructure: {
+                      include: {
+                        names: true,
+                        identifiers: true,
+                        descriptions: true,
+                      },
+                    },
                   },
                 },
               },
@@ -1048,7 +1075,13 @@ export class DocumentDAO extends AbstractDAO {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: true,
+                    researchStructure: {
+                      include: {
+                        names: true,
+                        descriptions: true,
+                        identifiers: true,
+                      },
+                    },
                   },
                 },
               },

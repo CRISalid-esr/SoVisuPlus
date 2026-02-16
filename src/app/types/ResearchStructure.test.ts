@@ -99,8 +99,18 @@ describe('ResearchStructure', () => {
         },
       ],
       identifiers: [
-        { type: ResearchStructureIdentifierType.nns, value: '12345' },
-        { type: ResearchStructureIdentifierType.ror, value: '67890' },
+        {
+          id: 1,
+          type: ResearchStructureIdentifierType.nns,
+          value: '12345',
+          researchStructureId: 1,
+        },
+        {
+          id: 1,
+          type: ResearchStructureIdentifierType.ror,
+          value: '67890',
+          researchStructureId: 1,
+        },
       ],
     }
 
@@ -136,8 +146,18 @@ describe('ResearchStructure', () => {
       ]),
     )
     expect(result.identifiers).toEqual([
-      { type: ResearchStructureIdentifierType.nns, value: '12345' },
-      { type: ResearchStructureIdentifierType.ror, value: '67890' },
+      {
+        id: 1,
+        type: ResearchStructureIdentifierType.nns,
+        value: '12345',
+        researchStructureId: 1,
+      },
+      {
+        id: 1,
+        type: ResearchStructureIdentifierType.ror,
+        value: '67890',
+        researchStructureId: 1,
+      },
     ])
   })
 
@@ -166,6 +186,7 @@ describe('ResearchStructure', () => {
           researchStructureId: 2,
         },
       ],
+      identifiers: [],
     }
 
     const result =
