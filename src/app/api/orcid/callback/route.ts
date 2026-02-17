@@ -52,7 +52,7 @@ export const GET = async (req: NextRequest) => {
     code,
     redirect_uri: redirectUri,
   })
-  const orcidUrl = process.env.ORCID_URL!
+  const orcidUrl = process.env.NEXT_PUBLIC_ORCID_URL!
   const response = await fetch(`${orcidUrl}/oauth/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
