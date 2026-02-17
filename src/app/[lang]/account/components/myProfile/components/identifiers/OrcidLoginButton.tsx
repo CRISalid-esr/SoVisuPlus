@@ -29,8 +29,8 @@ export const OrcidLoginButton = ({
   grantedScopes: OrcidScope[] | null
   hasOauth: boolean
 }) => {
-  const clientId = getRuntimeEnv().ORCID_CLIENT_ID
-  const orcidURL = getRuntimeEnv().ORCID_URL
+  const clientId = getRuntimeEnv().NEXT_PUBLIC_ORCID_CLIENT_ID
+  const orcidURL = getRuntimeEnv().NEXT_PUBLIC_ORCID_URL
   const sovisuplusHost = getRuntimeEnv().NEXT_PUBLIC_BASE_URL
   const institutionName = getRuntimeEnv().NEXT_PUBLIC_INSTITUTION_NAME
   const lang = Lingui.i18n.locale
@@ -58,7 +58,7 @@ export const OrcidLoginButton = ({
   }
 
   const configuredScopes = React.useMemo<OrcidScope[]>(() => {
-    const raw = (getRuntimeEnv().ORCID_SCOPES ?? '').split(',')
+    const raw = (getRuntimeEnv().NEXT_PUBLIC_ORCID_SCOPES ?? '').split(',')
     const list = raw.map((s) => s.trim()).filter(Boolean) as OrcidScope[]
     // Always include /authenticate
     if (!list.includes('/authenticate')) list.unshift('/authenticate')

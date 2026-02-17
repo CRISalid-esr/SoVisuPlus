@@ -50,32 +50,22 @@ Access Keycloak at `http://localhost:8080` and create :
 
 - a realm named from the organisation using SoVisu+ (e.g. `myuniversity`)
 - a sovisuplus client of type `openid-connect` with the following settings:
-    - Client ID: `sovisuplus`
-    - Valid Redirect URIs: `http://localhost:3000/*`
-    - Valid post logout redirect URIs: `http://localhost:3000/api/auth/signout`
-    - Web Origins: `http://localhost:3000`
-    - Client authentication: `On`
+  - Client ID: `sovisuplus`
+  - Valid Redirect URIs: `http://localhost:3000/*`
+  - Valid post logout redirect URIs: `http://localhost:3000/api/auth/signout`
+  - Web Origins: `http://localhost:3000`
+  - Client authentication: `On`
 - Add a credential to the client with the following settings:
-    - Client Authenticator : `Client Id and Secret`
-    - Client Secret: `credential_generated_by_keycloak_here`
+  - Client Authenticator : `Client Id and Secret`
+  - Client Secret: `credential_generated_by_keycloak_here`
 
-5. Create a `.env` file in the root directory of the project and fill it with the following content:
-
-```env
-DATABASE_URL="postgresql://sovisuplus:**************@localhost:5432/sovisuplus"
-
-KEYCLOAK_CLIENT_ID="sovisuplus"
-KEYCLOAK_CLIENT_SECRET="credential_generated_by_keycloak_here"
-KEYCLOAK_ISSUER="http://localhost:8080/realms/my-keycloak-realm-here" # e.g. myuniversity
-KEYCLOAK_PUBLIC_URL="http://localhost:8080/realms/my-keycloak-realm-here"
-
-NEXTAUTH_SECRET="[generate a secret with : openssl rand -base64 32]"
-```
+5. Create a `.env` file in the root directory of the project and fill it with the same content as the `.env.sample` file.
+   Adapt the values to your local configuration needs.
 
 Following table gives detailed information on each environment variable:
 
 | Name                          | Description                                                  | Secret? | Server / Client | Instance dependant | Dev / Prod                             | Transpilation time |
-|-------------------------------|--------------------------------------------------------------|---------|-----------------|--------------------|----------------------------------------|--------------------|
+| ----------------------------- | ------------------------------------------------------------ | ------- | --------------- | ------------------ | -------------------------------------- | ------------------ |
 | NEXT_PUBLIC_SUPPORTED_LOCALES | Application available languages                              | n       | server & client | n                  | prod                                   | y                  |
 | NEXT_PUBLIC_BASE_URL          | Base URL for the application (e.g. http://localhost:3000)    | n       | client          | y                  | prod                                   | n                  |
 | NEXT_PUBLIC_WS_SCHEME         | Web socket scheme for message listener                       | n       | client          | y (ws or wss)      | prod                                   | n                  |
@@ -112,8 +102,8 @@ Following table gives detailed information on each environment variable:
 | NODE_TLS_REJECT_UNAUTHORIZED  | For dev with self-signed SSL                                 | n       | —               | y                  | dev                                    | n                  |
 | NEXT_PUBLIC_CAS_URL           | CAS institution URL                                          | n       | server & client | n                  | prod                                   | y                  |
 | NEXT_PUBLIC_INSTITUTION_NAME  | University name                                              | n       | server & client | y                  | prod                                   | n                  |
-| FIELD_ENC_PRIMARY_KID         | Orcid token encryption key ID                                | n       | server          | Yes                | prod                                   | n                  |
-| FIELD_ENC_KEYS_JSON           | Orcid token encryption keys                                  | y       | server          | Yes                | prod                                   | n                  |
+| FIELD_ENC_PRIMARY_KID         | Orcid token encryption key ID                                | n       | server          | y                  | prod                                   | n                  |
+| FIELD_ENC_KEYS_JSON           | Orcid token encryption keys                                  | y       | server          | y                  | prod                                   | n                  |
 
 6. Run the Prisma migration with `npx prisma migrate dev --name init`.
 7. Run the development server with `npm run dev`.
@@ -157,8 +147,8 @@ SoVisu+ uses a role-based access control (RBAC) file to seed roles & permissions
    This command is **idempotent**: run it any time you change the YAML file.
 
 4. **Create your first admin (recommended)**
-    - Sign in to the app once via Keycloak so your user is created in SoVisu+.
-    - Then grant yourself a global admin role (replace `local-yourusername` with your local person UID):
+   - Sign in to the app once via Keycloak so your user is created in SoVisu+.
+   - Then grant yourself a global admin role (replace `local-yourusername` with your local person UID):
 
    ```bash
    npm run assign_role -- \
