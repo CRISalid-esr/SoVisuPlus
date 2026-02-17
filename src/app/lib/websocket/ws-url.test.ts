@@ -1,12 +1,6 @@
 import { jest } from '@jest/globals'
 import { buildWebSocketURL } from './ws-url'
 
-// using .env.test
-// WS_SCHEME=ws
-// WS_HOST=sovisuplus.example.com
-// WS_PORT=3001
-// WS_PATH=/
-
 describe('ws-url helpers', () => {
   const OLD_ENV = process.env
 
