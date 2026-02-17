@@ -4,6 +4,7 @@ import { toQueryString } from '@/utils/query'
 import { BaseQuery } from '@/types/BaseQuery'
 import { AgentType } from '@/types/IAgent'
 import { Concept } from '@/types/Concept'
+import { Literal } from '@/types/Literal'
 
 export interface DocumentQuery extends BaseQuery {
   searchTerm: string
@@ -57,6 +58,8 @@ export interface DocumentSlice {
     mergeDocuments: (documentUids: string[]) => Promise<void>
     addConcepts: (concepts: Concept[]) => Promise<void>
     removeConcepts: (conceptUids: string[]) => Promise<void>
+    modifyTitles: (titles: Literal[]) => Promise<void>
+    modifyAbstracts: (abstracts: Literal[]) => Promise<void>
     updateDocumentType: (type: DocumentType) => Promise<void>
   }
 }
@@ -382,6 +385,97 @@ export const addDocumentSlice: StateCreator<
             Object.create(Object.getPrototypeOf(doc)),
             doc,
             { subjects: updatedSubjects },
+          )
+
+          return {
+            document: {
+              ...state.document,
+              selectedDocument: updatedDocument,
+            },
+          }
+        })
+      } catch (error) {
+        set((state) => ({
+          document: {
+            ...state.document,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        }))
+      }
+    },
+    modifyTitles: async (titles: Literal[]) => {
+      const documentUid = get().document.selectedDocument?.uid
+      if (!documentUid) {
+        console.error('Cannot modify titles: no selected document')
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/documents/${documentUid}/titles`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            titles: titles,
+          }),
+        })
+
+        if (!response.ok) throw new Error('Failed to modify titles')
+
+        set((state) => {
+          const doc = state.document.selectedDocument
+          if (!doc) return state
+
+          const updatedDocument = Object.assign(
+            Object.create(Object.getPrototypeOf(doc)),
+            doc,
+            { titles: titles },
+          )
+
+          return {
+            document: {
+              ...state.document,
+              selectedDocument: updatedDocument,
+            },
+          }
+        })
+      } catch (error) {
+        set((state) => ({
+          document: {
+            ...state.document,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        }))
+      }
+    },
+    modifyAbstracts: async (abstracts: Literal[]) => {
+      const documentUid = get().document.selectedDocument?.uid
+      if (!documentUid) {
+        console.error('Cannot modify titles: no selected document')
+        return
+      }
+
+      try {
+        const response = await fetch(
+          `/api/documents/${documentUid}/abstracts`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              abstracts: abstracts,
+            }),
+          },
+        )
+
+        if (!response.ok) throw new Error('Failed to modify abstracts')
+
+        set((state) => {
+          const doc = state.document.selectedDocument
+          if (!doc) return state
+
+          const updatedDocument = Object.assign(
+            Object.create(Object.getPrototypeOf(doc)),
+            doc,
+            { abstracts: abstracts },
           )
 
           return {

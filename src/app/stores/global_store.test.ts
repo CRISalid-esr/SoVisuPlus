@@ -22,6 +22,8 @@ describe('Zustand Global Store - useStore with DocumentSlice', () => {
         fetchDocumentById: jest.fn(),
         removeConcepts: jest.fn(),
         addConcepts: jest.fn(),
+        modifyTitles: jest.fn(),
+        modifyAbstracts: jest.fn(),
         listHasChanged: false,
         selectedDocumentHasChanged: false,
         setSelectedDocumentHasChanged: jest.fn(),

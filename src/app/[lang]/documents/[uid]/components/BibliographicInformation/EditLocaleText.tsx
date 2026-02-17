@@ -39,6 +39,8 @@ const EditLocaleText = ({
 }) => {
   const theme = useTheme()
   const { selectedDocument } = useStore((state) => state.document)
+  const modifyTitles = useStore((state) => state.document.modifyTitles)
+  const modifyAbstracts = useStore((state) => state.document.modifyAbstracts)
   const texts = useMemo(
     () => selectedDocument?.[field.value as DocumentLocalizableFieldKey] ?? [],
     [selectedDocument, field],
@@ -67,18 +69,23 @@ const EditLocaleText = ({
   )
   const [error, setError] = useState<string | null>(null)
   const [openDialog, setOpenDialog] = useState<boolean>(false)
-  const sendData = () => {
-    const valid = values.filter(
-      (l) =>
-        !texts.find(
-          (text) => text.language == l.language && text.value == l.value,
-        ),
-    )
+  const sendData = async () => {
+    const valid = values
+      .filter((l) => !(l.value == ''))
+      .map((l) => {
+        l.value = l.value.trim()
+        return l
+      })
     setError(null)
     if (valid.length > 0) {
-      /**TODO**/
-      console.log(valid)
-      console.log('API call save')
+      switch (field.value) {
+        case 'titles':
+          await modifyTitles(valid)
+          break
+        case 'abstracts':
+          await modifyAbstracts(valid)
+          break
+      }
     }
     callback()
   }

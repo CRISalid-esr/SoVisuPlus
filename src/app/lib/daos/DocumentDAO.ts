@@ -20,6 +20,7 @@ import { parseStrArrayEnvVar } from '@/utils/parseStrArrayEnvVar'
 import QueryMode = Prisma.QueryMode
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import { Literal, LiteralJson } from '@/types/Literal'
 
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
@@ -1152,6 +1153,67 @@ export class DocumentDAO extends AbstractDAO {
       data: {
         subjects: {
           connect: concepts.map((concept) => ({ uid: concept.uid })),
+        },
+      },
+    })
+  }
+
+  async modifyTitles(documentUid: string, titles: Literal[]): Promise<void> {
+    const document = await this.prismaClient.document.findUnique({
+      where: { uid: documentUid },
+      select: { id: true },
+    })
+
+    if (!document) {
+      throw new Error(`Document with UID ${documentUid} not found`)
+    }
+
+    await this.prismaClient.documentTitle.deleteMany({
+      where: { documentId: document.id },
+    })
+
+    await this.prismaClient.document.update({
+      where: { id: document.id },
+      data: {
+        titles: {
+          createMany: {
+            data: titles.map((title) => ({
+              language: title.language,
+              value: title.value,
+            })),
+          },
+        },
+      },
+    })
+  }
+
+  async modifyAbstracts(
+    documentUid: string,
+    abstracts: Literal[],
+  ): Promise<void> {
+    const document = await this.prismaClient.document.findUnique({
+      where: { uid: documentUid },
+      select: { id: true },
+    })
+
+    if (!document) {
+      throw new Error(`Document with UID ${documentUid} not found`)
+    }
+
+    await this.prismaClient.documentAbstract.deleteMany({
+      where: { documentId: document.id },
+    })
+
+    await this.prismaClient.document.update({
+      where: { id: document.id },
+      data: {
+        abstracts: {
+          createMany: {
+            data: abstracts.map((abstract) => ({
+              language: abstract.language,
+              value: abstract.value,
+            })),
+          },
         },
       },
     })

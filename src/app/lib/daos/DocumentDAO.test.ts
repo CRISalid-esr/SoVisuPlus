@@ -45,9 +45,13 @@ jest.mock('@prisma/client', () => {
     },
     documentTitle: {
       upsert: jest.fn(),
+      deleteMany: jest.fn(),
+      createMany: jest.fn(),
     },
     documentAbstract: {
       upsert: jest.fn(),
+      deleteMany: jest.fn(),
+      createMany: jest.fn(),
     },
     contribution: {
       upsert: jest.fn(),
@@ -104,8 +108,11 @@ describe('DocumentDAO', () => {
     new Date('2022-01-01T00:00:00.000Z'),
     new Date('2022-12-31T23:59:59.000Z'),
     OAStatus.DIAMOND,
-    [new Literal('Sample Document Title', 'en')],
-    [new Literal('Sample Abstract', 'en')],
+    [
+      new Literal('Sample Document Title', 'en'),
+      new Literal('Sample Second Title', 'fr'),
+    ],
+    [new Literal('Sample Abstract', 'fr')],
     [
       new Concept(
         'concept-123',
@@ -183,7 +190,7 @@ describe('DocumentDAO', () => {
         documentType: 'Document',
         oaStatus: 'GREEN',
         title_locale_0: 'Sample Document Title',
-        title_locale_1: 'Sample Document Title',
+        title_locale_1: 'Sample Second Title',
         title_locale_2: '',
         publicationDate: '2022',
         publicationDateStart: '2022-01-01T00:00:00.000Z',
@@ -1524,6 +1531,120 @@ describe('DocumentDAO', () => {
 
     await expect(
       documentDAO.deleteConceptsFromDocument(documentUid, conceptUids),
+    ).rejects.toThrow(`Document with UID ${documentUid} not found`)
+
+    expect(mockPrisma.document.update).not.toHaveBeenCalled()
+  })
+
+  it('should remove old titles and add new ones to a document', async () => {
+    const mockDocId = 42
+
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue({
+      id: mockDocId,
+    })
+    ;(mockPrisma.documentTitle.deleteMany as jest.Mock).mockResolvedValue({})
+    ;(mockPrisma.document.update as jest.Mock).mockResolvedValue({})
+
+    const documentUid = 'doc-uid-to-add'
+    const titles = [
+      new Literal('El nuevo titulo', 'es'),
+      new Literal('Le nouveau titre', 'fr'),
+    ]
+
+    await documentDAO.modifyTitles(documentUid, titles)
+
+    expect(mockPrisma.document.findUnique).toHaveBeenCalledWith({
+      where: { uid: documentUid },
+      select: { id: true },
+    })
+
+    expect(mockPrisma.documentTitle.deleteMany).toHaveBeenCalledWith({
+      where: { documentId: mockDocId },
+    })
+
+    expect(mockPrisma.document.update).toHaveBeenCalledWith({
+      where: { id: mockDocId },
+      data: {
+        titles: {
+          createMany: {
+            data: [
+              { language: 'es', value: 'El nuevo titulo' },
+              { language: 'fr', value: 'Le nouveau titre' },
+            ],
+          },
+        },
+      },
+    })
+  })
+
+  it('should throw an error if document is not found when modifying titles', async () => {
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
+
+    const documentUid = 'missing-doc'
+    const titles = [
+      new Literal('El nuevo titulo', 'es'),
+      new Literal('Le nouveau titre', 'fr'),
+    ]
+
+    await expect(documentDAO.modifyTitles(documentUid, titles)).rejects.toThrow(
+      `Document with UID ${documentUid} not found`,
+    )
+
+    expect(mockPrisma.document.update).not.toHaveBeenCalled()
+  })
+
+  it('should remove old abstracts and add new ones to a document', async () => {
+    const mockDocId = 42
+
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue({
+      id: mockDocId,
+    })
+    ;(mockPrisma.documentAbstract.deleteMany as jest.Mock).mockResolvedValue({})
+    ;(mockPrisma.document.update as jest.Mock).mockResolvedValue({})
+
+    const documentUid = 'doc-uid-to-add'
+    const abstracts = [
+      new Literal('El nuevo abstract', 'es'),
+      new Literal('Le nouveau abstract', 'fr'),
+    ]
+
+    await documentDAO.modifyAbstracts(documentUid, abstracts)
+
+    expect(mockPrisma.document.findUnique).toHaveBeenCalledWith({
+      where: { uid: documentUid },
+      select: { id: true },
+    })
+
+    expect(mockPrisma.documentAbstract.deleteMany).toHaveBeenCalledWith({
+      where: { documentId: mockDocId },
+    })
+
+    expect(mockPrisma.document.update).toHaveBeenCalledWith({
+      where: { id: mockDocId },
+      data: {
+        abstracts: {
+          createMany: {
+            data: [
+              { language: 'es', value: 'El nuevo abstract' },
+              { language: 'fr', value: 'Le nouveau abstract' },
+            ],
+          },
+        },
+      },
+    })
+  })
+
+  it('should throw an error if document is not found when modifying abstracts', async () => {
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
+
+    const documentUid = 'missing-doc'
+    const abstracts = [
+      new Literal('El nuevo abstract', 'es'),
+      new Literal('Le nouveau abstract', 'fr'),
+    ]
+
+    await expect(
+      documentDAO.modifyAbstracts(documentUid, abstracts),
     ).rejects.toThrow(`Document with UID ${documentUid} not found`)
 
     expect(mockPrisma.document.update).not.toHaveBeenCalled()
