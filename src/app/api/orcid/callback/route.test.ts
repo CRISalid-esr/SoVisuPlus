@@ -45,9 +45,9 @@ describe('GET /api/orcid/callback', () => {
 
     process.env.NEXT_PUBLIC_BASE_URL = 'https://sovisuplus.example.com'
     process.env.NEXT_PUBLIC_SUPPORTED_LOCALES = 'fr,en'
-    process.env.ORCID_CLIENT_ID = 'client-id'
+    process.env.NEXT_PUBLIC_ORCID_CLIENT_ID = 'client-id'
     process.env.ORCID_CLIENT_SECRET = 'secret'
-    process.env.ORCID_URL = 'https://orcid.org'
+    process.env.NEXT_PUBLIC_ORCID_URL = 'https://orcid.org'
   })
 
   const makeReq = (url: string) =>

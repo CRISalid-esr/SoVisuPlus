@@ -42,7 +42,7 @@ const RootLayout = async ({ params, children }: Props) => {
             NEXT_PUBLIC_ORCID_URL: process.env.NEXT_PUBLIC_ORCID_URL,
             NEXT_PUBLIC_ORCID_SCOPES: process.env.NEXT_PUBLIC_ORCID_SCOPES,
             NEXT_PUBLIC_ORCID_CLIENT_ID:
-              process.env.NEXT_PUBLIC_ORCID_ORCID_CLIENT_ID,
+              process.env.NEXT_PUBLIC_ORCID_CLIENT_ID,
             NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
             NEXT_PUBLIC_WS_SCHEME: process.env.NEXT_PUBLIC_WS_SCHEME,
             NEXT_PUBLIC_WS_HOST: process.env.NEXT_PUBLIC_WS_HOST,
