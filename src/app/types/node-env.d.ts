@@ -25,5 +25,6 @@ declare namespace NodeJS {
     NEXT_PUBLIC_BASE_URL: string
     NEXT_PUBLIC_CAS_URL: string
     ORCID_SCOPES: string
+    NEXT_PUBLIC_INSTITUTION_NAME: string
   }
 }
