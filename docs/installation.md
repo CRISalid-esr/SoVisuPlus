@@ -111,8 +111,6 @@ Following table gives detailed information on each environment variable:
 | DEFAULT_SELF_SCOPED_ROLES      | Default roles for people on their own data                   | n       | server          | y                  | prod                                   | n                  |
 | NODE_TLS_REJECT_UNAUTHORIZED   | For dev with self-signed SSL                                 | n       | —               | y                  | dev                                    | n                  |
 | NEXT_PUBLIC_CAS_URL            | CAS institution URL                                          | n       | server & client | n                  | prod                                   | y                  |
-| NEXT_CAS_CLIENT_SAML_TOLERANCE | SAML tolerance                                               | n       | server          | Yes                | dev                                    |                    |
-| NEXT_CAS_CLIENT_SECRET         | CAS client secret                                            | Yes     | server          | Yes                | prod                                   |                    |
 | NEXT_PUBLIC_INSTITUTION_NAME   | University name                                              | No      | server & client | Yes                | prod                                   |                    |
 | FIELD_ENC_PRIMARY_KID          | Orcid token encryption key ID                                | No      | server          | Yes                | prod                                   |                    |
 | FIELD_ENC_KEYS_JSON            | Orcid token encryption keys JSON                             | Yes     | server          | Yes                | prod                                   |                    |
