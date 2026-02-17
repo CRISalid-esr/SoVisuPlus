@@ -39,14 +39,15 @@ const RootLayout = async ({ params, children }: Props) => {
           env={{
             NEXT_PUBLIC_SUPPORTED_LOCALES:
               process.env.NEXT_PUBLIC_SUPPORTED_LOCALES,
-            ORCID_URL: process.env.NEXT_PUBLIC_ORCID_URL,
-            ORCID_SCOPES: process.env.NEXT_PUBLIC_ORCID_SCOPES,
-            ORCID_CLIENT_ID: process.env.NEXT_PUBLIC_ORCID_ORCID_CLIENT_ID,
-            WS_SCHEME: process.env.NEXT_PUBLIC_WS_SCHEME,
-            WS_HOST: process.env.NEXT_PUBLIC_WS_HOST,
-            WS_PORT: process.env.NEXT_PUBLIC_WS_PORT,
-            WS_PATH: process.env.NEXT_PUBLIC_WS_PATH ?? '/',
+            NEXT_PUBLIC_ORCID_URL: process.env.NEXT_PUBLIC_ORCID_URL,
+            NEXT_PUBLIC_ORCID_SCOPES: process.env.NEXT_PUBLIC_ORCID_SCOPES,
+            NEXT_PUBLIC_ORCID_CLIENT_ID:
+              process.env.NEXT_PUBLIC_ORCID_ORCID_CLIENT_ID,
             NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+            NEXT_PUBLIC_WS_SCHEME: process.env.NEXT_PUBLIC_WS_SCHEME,
+            NEXT_PUBLIC_WS_HOST: process.env.NEXT_PUBLIC_WS_HOST,
+            NEXT_PUBLIC_WS_PORT: process.env.NEXT_PUBLIC_WS_PORT,
+            NEXT_PUBLIC_WS_PATH: process.env.NEXT_PUBLIC_WS_PATH ?? '/',
             NEXT_PUBLIC_CAS_URL: process.env.NEXT_PUBLIC_CAS_URL,
             NEXT_PUBLIC_INSTITUTION_NAME:
               process.env.NEXT_PUBLIC_INSTITUTION_NAME,

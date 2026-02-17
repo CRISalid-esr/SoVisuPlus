@@ -12,9 +12,9 @@ export const OrcidLoginButton = ({
 }: {
   orcidProvided: boolean
 }) => {
-  const clientId = getRuntimeEnv().ORCID_CLIENT_ID
-  const orcidURL = getRuntimeEnv().ORCID_URL
-  const orcidScopes = getRuntimeEnv().ORCID_SCOPES
+  const clientId = getRuntimeEnv().NEXT_PUBLIC_ORCID_CLIENT_ID
+  const orcidURL = getRuntimeEnv().NEXT_PUBLIC_ORCID_URL
+  const orcidScopes = getRuntimeEnv().NEXT_PUBLIC_ORCID_SCOPES
   const sovisuplusHost = getRuntimeEnv().NEXT_PUBLIC_BASE_URL
   const lang = Lingui.i18n.locale
   const redirectUri = encodeURIComponent(

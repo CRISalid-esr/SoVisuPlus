@@ -5,9 +5,9 @@ import { OrcidLoginButton } from '@/app/[lang]/account/components/myProfile/comp
 
 jest.mock('@/utils/runtimeEnv', () => ({
   getRuntimeEnv: () => ({
-    ORCID_CLIENT_ID: 'client-id',
-    ORCID_URL: 'https://orcid.org',
-    ORCID_SCOPES: '/authenticate',
+    NEXT_PUBLIC_ORCID_CLIENT_ID: 'client-id',
+    NEXT_PUBLIC_ORCID_URL: 'https://orcid.org',
+    NEXT_PUBLIC_ORCID_SCOPES: '/authenticate',
     NEXT_PUBLIC_BASE_URL: 'https://example.com',
   }),
 }))

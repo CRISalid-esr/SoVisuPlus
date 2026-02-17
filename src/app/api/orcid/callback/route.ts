@@ -40,7 +40,7 @@ export const GET = async (req: NextRequest) => {
     )
   }
 
-  const clientId = process.env.ORCID_CLIENT_ID!
+  const clientId = process.env.NEXT_PUBLIC_ORCID_CLIENT_ID!
   const clientSecret = process.env.ORCID_CLIENT_SECRET!
   const redirectUri = `${sovisuplusHost}/api/orcid/callback?lang=${lang}`
 

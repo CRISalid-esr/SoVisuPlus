@@ -69,53 +69,53 @@ KEYCLOAK_CLIENT_SECRET="credential_generated_by_keycloak_here"
 KEYCLOAK_ISSUER="http://localhost:8080/realms/my-keycloak-realm-here" # e.g. myuniversity
 KEYCLOAK_PUBLIC_URL="http://localhost:8080/realms/my-keycloak-realm-here"
 
-NEXTAUTH_URL="http://localhost:3000/api/auth"
 NEXTAUTH_SECRET="[generate a secret with : openssl rand -base64 32]"
 ```
 
-Following table gives you detailed information on each environment variable :
-|Name | Description | secret ? | server/client | instance dependant | dev/prod |
-| :---------------------------: | :-----------------------------------: | :-----------: | :---------------: | :-------------------: | :-----------: |
-|NEXT_PUBLIC_SUPPORTED_LOCAL |Application available languages | No | server & client | No | prod |
-|WS_SCHEME |Web socket scheme for message listener | No | client | Yes(ws or wss) | prod |
-|WS_HOST |Web socket host for message listener | No | client | Yes | prod |
-|WS_PORT |Web socket port for message listener | No | client | Yes | prod |
-|WS_PATH |Web socket path for message listener | No | client | Yes | prod |
-|WS_INTERNAL_PORT |Web socket internal port listener | No | server | Yes | prod |
-|DATABASE_URL |Sovisuplus database url | No | server | Yes | prod |
-|DATABASE_URL_TEST |Sovisuplus test database url | No | server | Yes | dev |
-|ORCID_URL |Orcid connexion url | No | server & client | No | prod(orcid.org) dev(sandbox.orcid) |
-|ORCID_SCOPES |Orcid scopes authorizations | No | server & client | Yes | prod |
-|ORCID_CLIENT_ID |Orcid client institution id | No | server & client | Yes | prod |
-|ORCID_CLIENT_SECRET |Orcid institution client secret pwd | Yes | server | Yes | prod |
-|KEYCLOAK_CLIENT_ID |Keycloak client institution identifier | No | server | Yes | prod |
-|KEYCLOAK_CLIENT_SECRET |Keycloak institution client secret pwd | Yes | server | Yes | prod |
-|KEYCLOAK_ISSUER |Keycloak institution issuer url | No | server | Yes | prod |
-|KEYCLOAK_PUBLIC_URL |Keycloak institution base url | No | server | Yes | prod |
-|NEXTAUTH_URL |Api url for authentication (default to sovisuplus/api/auth)| No | server | No ? | prod |
-|NEXTAUTH_SECRET |Sovisuplus secret for authentication | Yes | server | Yes | prod |
-|AMQP_USER |App user name for connecting to AMQP | No | server | Yes | prod |
-|AMQP_PASSWORD |App password for connecting to AMQP bus| Yes | server | Yes | prod |
-|AMQP_HOST |AMQP bus host | No | server | Yes | prod |
-|AMQP_PORT |AMQP bus port | No | server | Yes | prod |
-|AMQP_QUEUE_NAME |AMQP bus queue name | No | server | Yes | prod |
-|AMQP_EXCHANGE_NAME |AMQP bus exchange name | No | server | Yes | prod |
-|GRAPHQL_ENDPOINT_ENABLED |Boolean value to enable or not queries to graph | No | server | Yes | prod |
-|GRAPHQL_ENDPOINT_URL |Neo4j url | No | server | Yes | prod |
-|GRAPHQL_API_KEY_ENABLED |Boolean value to enable or not key control for graph querying | No | server | Yes | prod |
-|GRAPH_API_KEY |Key value set for graph querying | Yes | server | Yes | prod |
-|PERSPECTIVE_ROLES_FILTER |User roles that are considered as relevant in user production | No | server | Yes | prod |
-|PUBLICATION_LIST_ROLES_FILTER |Contributor roles that are considered relevant in publication contributors list | No | server | Yes | prod |
-|VOCABS_URL |API URL for concept keyword | No | server | Yes ? | prod |
-|NEXT_PUBLIC_AVAILABLE_VOCABS |Concept vocabularies considered | No | server & client | Yes | prod |
-|DEFAULT_SELF_SCOPED_ROLES |Default scopes actions authorizations | No | server | Yes | prod |
-|NODE_TLS_REJECT_UNAUTHORIZED |For development with self-signed ssl certificates| No | nulle part | Yes | dev |
-|NEXT_PUBLIC_CAS_URL |CAS institution URL | No | server & client | Yes | prod |
-|NEXT_CAS_CLIENT_SAML_TOLERANCE |??? | No | ?(server?) | Yes | dev |
-|NEXT_CAS_CLIENT_SECRET |Sovisuplus secret for CAS connexion | Yes | ?(server?) | Yes | prod |
-|NEXT_PUBLIC_INSTITUTION_NAME |University Name | No | server & client | Yes | prod |
-|FIELD_ENC_PRIMARY_KID |For orcid token encrytion | No | server | Yes | prod |
-|FIELD_ENC_KEYS_JSON |For orcid token encrytion, JSON object with two fields containing secrets | Yes | server | Yes | prod |
+Following table gives detailed information on each environment variable:
+
+| Name                           | Description                                                  | Secret? | Server / Client | Instance dependant | Dev / Prod                             | Transpilation time |
+| ------------------------------ | ------------------------------------------------------------ | ------- | --------------- | ------------------ | -------------------------------------- | ------------------ |
+| NEXT_PUBLIC_SUPPORTED_LOCALES  | Application available languages                              | n       | server & client | n                  | prod                                   | y                  |
+| NEXT_PUBLIC_BASE_URL           | Base URL for the application (e.g. http://localhost:3000)    | n       | client          | y                  | prod                                   | n                  |
+| NEXT_PUBLIC_WS_SCHEME          | Web socket scheme for message listener                       | n       | client          | y (ws or wss)      | prod                                   | n                  |
+| NEXT_PUBLIC_WS_HOST            | Web socket host for message listener                         | n       | client          | y                  | prod                                   | n                  |
+| NEXT_PUBLIC_WS_PORT            | Web socket port for message listener (client side listening) | n       | client          | y                  | prod                                   | n                  |
+| NEXT_PUBLIC_WS_PATH            | Web socket path for message listener                         | n       | client          | y                  | prod                                   | n                  |
+| WS_INTERNAL_PORT               | Web socket internal port listener (server side emission)     | n       | server          | y                  | prod                                   | n                  |
+| DATABASE_URL                   | Sovisuplus database url                                      | y       | server          | y                  | prod                                   | n                  |
+| DATABASE_URL_TEST              | Sovisuplus test database url                                 | n       | server          | y                  | dev                                    | n                  |
+| NEXT_PUBLIC_ORCID_URL          | Orcid connexion url                                          | n       | server & client | y                  | prod (orcid.org) / dev (sandbox.orcid) | n                  |
+| NEXT_PUBLIC_ORCID_SCOPES       | Orcid scopes authorizations                                  | n       | server & client | y                  | prod                                   | n                  |
+| NEXT_PUBLIC_ORCID_CLIENT_ID    | Orcid client institution id                                  | n       | server & client | y                  | prod                                   | n                  |
+| ORCID_CLIENT_SECRET            | Orcid institution client secret pwd                          | y       | server          | y                  | prod                                   | n                  |
+| KEYCLOAK_CLIENT_ID             | Keycloak client institution identifier                       | n       | server          | y                  | prod                                   | n                  |
+| KEYCLOAK_CLIENT_SECRET         | Keycloak institution client secret pwd                       | y       | server          | y                  | prod                                   | n                  |
+| KEYCLOAK_ISSUER                | Keycloak institution issuer url                              | y       | server          | y                  | prod                                   | n                  |
+| KEYCLOAK_PUBLIC_URL            | Keycloak institution base url                                | n       | server          | y                  | prod                                   | n                  |
+| NEXTAUTH_SECRET                | Sovisuplus secret for authentication                         | y       | server          | y                  | prod                                   | n                  |
+| AMQP_USER                      | App user name for connecting to AMQP                         | y       | server          | y                  | prod                                   | n                  |
+| AMQP_PASSWORD                  | App password for connecting to AMQP bus                      | y       | server          | y                  | prod                                   | n                  |
+| AMQP_HOST                      | AMQP bus host                                                | y       | server          | y                  | prod                                   | n                  |
+| AMQP_PORT                      | AMQP bus port                                                | y       | server          | y                  | prod                                   | n                  |
+| AMQP_QUEUE_NAME                | AMQP bus queue name                                          | n       | server          | y                  | prod                                   | n                  |
+| AMQP_EXCHANGE_NAME             | AMQP bus exchange name                                       | n       | server          | y                  | prod                                   | n                  |
+| GRAPHQL_ENDPOINT_ENABLED       | Enable/disable GraphQL queries                               | n       | server          | y                  | prod                                   | n                  |
+| GRAPHQL_ENDPOINT_URL           | GraphQL API url                                              | y       | server          | y                  | prod                                   | n                  |
+| GRAPHQL_API_KEY_ENABLED        | Enable/disable key for GraphQL API authentication            | y       | server          | y                  | prod                                   | n                  |
+| GRAPHQL_API_KEY                | GraphQL API key                                              | y       | server          | y                  | prod                                   | n                  |
+| PERSPECTIVE_ROLES_FILTER       | Relevant user roles                                          | n       | server          | y                  | prod                                   | n                  |
+| PUBLICATION_LIST_ROLES_FILTER  | Relevant contributor roles                                   | n       | server          | y                  | prod                                   | n                  |
+| VOCABS_URL                     | API URL for concept keyword                                  | y       | server          | y                  | prod                                   | n                  |
+| NEXT_PUBLIC_AVAILABLE_VOCABS   | Available concept vocabularies                               | n       | server & client | y                  | prod                                   | n                  |
+| DEFAULT_SELF_SCOPED_ROLES      | Default roles for people on their own data                   | n       | server          | y                  | prod                                   | n                  |
+| NODE_TLS_REJECT_UNAUTHORIZED   | For dev with self-signed SSL                                 | n       | —               | y                  | dev                                    | n                  |
+| NEXT_PUBLIC_CAS_URL            | CAS institution URL                                          | n       | server & client | n                  | prod                                   | y                  |
+| NEXT_CAS_CLIENT_SAML_TOLERANCE | SAML tolerance                                               | n       | server          | Yes                | dev                                    |                    |
+| NEXT_CAS_CLIENT_SECRET         | CAS client secret                                            | Yes     | server          | Yes                | prod                                   |                    |
+| NEXT_PUBLIC_INSTITUTION_NAME   | University name                                              | No      | server & client | Yes                | prod                                   |                    |
+| FIELD_ENC_PRIMARY_KID          | Orcid token encryption key ID                                | No      | server          | Yes                | prod                                   |                    |
+| FIELD_ENC_KEYS_JSON            | Orcid token encryption keys JSON                             | Yes     | server          | Yes                | prod                                   |                    |
 
 6. Run the Prisma migration with `npx prisma migrate dev --name init`.
 7. Run the development server with `npm run dev`.
