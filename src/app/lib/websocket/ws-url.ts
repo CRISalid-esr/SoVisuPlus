@@ -5,13 +5,15 @@ import { getRuntimeEnv } from '@/utils/runtimeEnv'
  * (injected by EnvInjector component at runtime)
  */
 export const buildWebSocketURL = (): string => {
-  const scheme = getRuntimeEnv().WS_SCHEME
-  const host = getRuntimeEnv().WS_HOST
-  const port = getRuntimeEnv().WS_PORT
-  const path = getRuntimeEnv().WS_PATH || '/'
+  const scheme = getRuntimeEnv().NEXT_PUBLIC_WS_SCHEME
+  const host = getRuntimeEnv().NEXT_PUBLIC_WS_HOST
+  const port = getRuntimeEnv().NEXT_PUBLIC_WS_PORT
+  const path = getRuntimeEnv().NEXT_PUBLIC_WS_PATH || '/'
 
   if (!scheme || !host) {
-    throw new Error('WS env missing: WS_SCHEME, WS_HOST are required')
+    throw new Error(
+      'WS env missing: NEXT_PUBLIC_WS_SCHEME and NEXT_PUBLIC_WS_HOST are required',
+    )
   }
 
   // If scheme is ws, and port is 80, omit the port

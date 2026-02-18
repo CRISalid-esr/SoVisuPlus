@@ -58,7 +58,7 @@ export const OrcidLoginButton = ({
   }
 
   const configuredScopes = React.useMemo<OrcidScope[]>(() => {
-    const raw = (getRuntimeEnv().NEXT_PUBLIC_ORCID_SCOPES ?? '').split(',')
+    const raw = (getRuntimeEnv().ORCID_SCOPES ?? '').split(',')
     const list = raw.map((s) => s.trim()).filter(Boolean) as OrcidScope[]
     // Always include /authenticate
     if (!list.includes('/authenticate')) list.unshift('/authenticate')

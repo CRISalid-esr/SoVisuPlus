@@ -15,6 +15,7 @@ import { LocRelator } from '@/types/LocRelator'
 import { SnackbarProvider, useSnackbar } from 'notistack'
 import * as React from 'react'
 import { OAStatus } from '@prisma/client'
+import MainLayout from '@/app/[lang]/layouts/MainLayout'
 
 jest.mock('notistack', () => {
   const originalModule = jest.requireActual('notistack')
