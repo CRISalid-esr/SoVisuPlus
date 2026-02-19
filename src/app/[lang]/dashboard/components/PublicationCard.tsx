@@ -32,7 +32,12 @@ type ChartOption = ComposeOption<
   | ToolboxComponentOption
 >
 
-const PublicationCard = () => {
+type PublicationCardProps = {
+  yearRange: [number, number]
+  setYearRange: (range: [number, number]) => void
+}
+
+const PublicationCard = ({ yearRange, setYearRange }: PublicationCardProps) => {
   const { currentPerspective } = useStore((state) => state.user)
   const [data, setData] = useState<
     Record<
@@ -57,16 +62,11 @@ const PublicationCard = () => {
 
   const currentYear = useMemo(() => dayjs().year(), [])
 
-  const [yearRange, setYearRange] = useState({
-    start: currentYear,
-    end: currentYear,
-  })
-
   const filteredData = useMemo(() => {
     setLoading(true)
     const processedData = Object.entries(data)
       .map(([year, docs]) => {
-        if (Number(year) >= yearRange.start && Number(year) <= yearRange.end) {
+        if (Number(year) >= yearRange[0] && Number(year) <= yearRange[1]) {
           return {
             year: Number(year),
             total: docs.length,
@@ -149,14 +149,12 @@ const PublicationCard = () => {
           .map(Number)
           .filter((year) => !Number.isNaN(year))
         const oldestYear = years.length == 0 ? null : Math.min(...years)
-        setYearRange({
-          start: oldestYear
-            ? oldestYear <= currentYear - 5
-              ? currentYear - 5
-              : oldestYear
-            : currentYear,
-          end: currentYear,
-        })
+        const start = oldestYear
+          ? oldestYear <= currentYear - 5
+            ? currentYear - 5
+            : oldestYear
+          : currentYear
+        setYearRange([start, currentYear])
         setData(documents)
       } catch (error) {
         console.error('Error while fetching documents per year', error)
@@ -177,7 +175,7 @@ const PublicationCard = () => {
         feature: {
           saveAsImage: {
             title: t`dashboard_page_publication_by_year_graph_toolbox_save_as_image`,
-            name: `Publications_OA_${yearRange.start}_${yearRange.end}`,
+            name: `Publications_OA_${yearRange[0]}_${yearRange[1]}`,
           },
         },
         right: 10,
@@ -325,77 +323,6 @@ const PublicationCard = () => {
             gap: 3,
           }}
         >
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              gap: 2,
-            }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 1,
-              }}
-            >
-              <Typography>{t`dashboard_page_publication_by_year_graph_start_year_selection_label`}</Typography>
-              <Select
-                value={yearRange.start}
-                onChange={(event) =>
-                  setYearRange({
-                    start: event.target.value as number,
-                    end: yearRange.end,
-                  })
-                }
-              >
-                {Array.from(
-                  {
-                    length: oldestYear
-                      ? currentYear - oldestYear + 1
-                      : currentYear - (currentYear - 5) + 1,
-                  },
-                  (_, i) => (oldestYear ? oldestYear + i : currentYear - 5 + i),
-                ).map((year) => (
-                  <MenuItem key={year} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Box>
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 1,
-              }}
-            >
-              <Typography>{t`dashboard_page_publication_by_year_graph_end_year_selection_label`}</Typography>
-              <Select
-                value={yearRange.end}
-                onChange={(event) =>
-                  setYearRange({
-                    start: yearRange.start,
-                    end: event.target.value as number,
-                  })
-                }
-              >
-                {Array.from(
-                  { length: currentYear - yearRange.start + 1 },
-                  (_, i) => yearRange.start + i,
-                ).map((year) => (
-                  <MenuItem key={year} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Box>
-          </Box>
           {filteredData.length == 0 ? (
             <Box
               sx={{
