@@ -120,11 +120,6 @@ msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:145
-msgid "documents_page_refresh_document_alert"
-msgstr "Les informations relatives à cette publication ont changé"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:173
 msgid "document_details_bibliographic_information_tab"
 msgstr ""
@@ -133,6 +128,11 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/page.test.tsx:177
 msgid "document_details_keywords_tab"
 msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:145
+msgid "documents_page_refresh_document_alert"
+msgstr "Les informations relatives à cette publication ont changé"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
@@ -153,27 +153,6 @@ msgstr "Aucun mot-clé"
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:134
 msgid "document_details_page_keywords_search_field_title"
 msgstr "Sélectionner un ou plusieurs vocabulaires contrôlés"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:397
-msgid "document_details_page_source_tab_card_title"
-msgstr "Références bibliographiques sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:430
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:439
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "Actions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:456
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalider"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:474
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissocier"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
@@ -201,9 +180,25 @@ msgid "concept_chip_action_delete"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr "Domaines"
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:397
+msgid "document_details_page_source_tab_card_title"
+msgstr "Références bibliographiques sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:430
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:439
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "Actions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:456
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalider"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:474
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissocier"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
@@ -227,6 +222,11 @@ msgstr "Mot-clé ajouté à la publication."
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
 msgid "document_details_page_keywords_input_options_no_vocabs"
 msgstr "Veuillez sélectionner au moins un vocabulaire"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr "Domaines"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:252
@@ -345,15 +345,15 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "Une nouvelle expertise est en attente de validation"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
-msgid "profile_identifiers_card_title"
-msgstr "Mes identifiants chercheurs"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:101
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:31
 msgid "profile_affiliations_card_title"
 msgstr "Mes affiliations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
+msgid "profile_identifiers_card_title"
+msgstr "Mes identifiants chercheurs"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:59
@@ -789,50 +789,6 @@ msgstr "Comparer les sources"
 msgid "document_details_page_titles_row_label"
 msgstr "Titre"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleField.tsx:14
-msgid "edit_field_delete_button_tooltip"
-msgstr "Supprimer la langue"
-
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:55
-msgid "edit_field_languages_menu_no_languages_message"
-msgstr "Votre institution n'a pas activé d'autres langues"
-
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:55
-msgid "edit_field_languages_menu_header"
-msgstr "Ajouter une langue"
-
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:69
-msgid "edit_field_add_language_button_label"
-msgstr "Ajouter une langue"
-
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:73
-msgid "edit_field_cancel_button_label"
-msgstr "Annuler"
-
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
-msgid "edit_field_save_button_label"
-msgstr "Enregistrer"
-
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
-msgid "edit_field_no_values_save"
-msgstr "Vous devez avoir au moins un champs remplis"
-
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
-msgid "edit_field_only_empty_fields_saved"
-msgstr "Impossible d'enregistrer que des champs vides"
-
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
-msgid "edit_field_dialog_title"
-msgstr "Confirmation"
-
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
-msgid "edit_field_dialog_text"
-msgstr "Vous n'avez pas remplis certains champs, ceux-ci ne seront pas pris en compte lors de l'enregistrement. Voulez-vous continuer ?"
-
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
-msgid "edit_field_continue_button_label"
-msgstr "Continuer"
-
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:142
 msgid "document_details_page_type_edit_button"
 msgstr "Modifier"
@@ -1047,6 +1003,51 @@ msgstr "Titre"
 #: src/app/[lang]/documents/page.tsx:172
 msgid "documents_page_type_column"
 msgstr "Type"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:144
+msgid "edit_field_add_language_button_label"
+msgstr "Ajouter une langue"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:234
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:259
+msgid "edit_field_cancel_button_label"
+msgstr "Annuler"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:262
+msgid "edit_field_continue_button_label"
+msgstr "Continuer"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleField.tsx:39
+msgid "edit_field_delete_button_tooltip"
+msgstr "Supprimer la langue"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:254
+msgid "edit_field_dialog_text"
+msgstr "Vous n'avez pas remplis certains champs, ceux-ci ne seront pas pris en compte lors de l'enregistrement. Voulez-vous continuer ?"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:250
+msgid "edit_field_dialog_title"
+msgstr "Confirmation"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:180
+msgid "edit_field_languages_menu_header"
+msgstr "Ajouter une langue"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:133
+msgid "edit_field_languages_menu_no_languages_message"
+msgstr "Votre institution n'a pas activé d'autres langues"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:98
+msgid "edit_field_no_values_save"
+msgstr "Vous devez avoir au moins un champs remplis"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:102
+msgid "edit_field_only_empty_fields_saved"
+msgstr "Impossible d'enregistrer que des champs vides"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:242
+msgid "edit_field_save_button_label"
+msgstr "Enregistrer"
 
 #: src/app/[lang]/expertise/page.tsx:20
 msgid "expertise_page_main_title"
