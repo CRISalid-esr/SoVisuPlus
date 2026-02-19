@@ -789,6 +789,50 @@ msgstr "Comparer les sources"
 msgid "document_details_page_titles_row_label"
 msgstr "Titre"
 
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleField.tsx:14
+msgid "edit_field_delete_button_tooltip"
+msgstr "Supprimer la langue"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:55
+msgid "edit_field_languages_menu_no_languages_message"
+msgstr "Votre institution n'a pas activé d'autres langues"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:55
+msgid "edit_field_languages_menu_header"
+msgstr "Ajouter une langue"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:69
+msgid "edit_field_add_language_button_label"
+msgstr "Ajouter une langue"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:73
+msgid "edit_field_cancel_button_label"
+msgstr "Annuler"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
+msgid "edit_field_save_button_label"
+msgstr "Enregistrer"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
+msgid "edit_field_no_values_save"
+msgstr "Vous devez avoir au moins un champs remplis"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
+msgid "edit_field_only_empty_fields_saved"
+msgstr "Impossible d'enregistrer que des champs vides"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
+msgid "edit_field_dialog_title"
+msgstr "Confirmation"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
+msgid "edit_field_dialog_text"
+msgstr "Vous n'avez pas remplis certains champs, ceux-ci ne seront pas pris en compte lors de l'enregistrement. Voulez-vous continuer ?"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
+msgid "edit_field_continue_button_label"
+msgstr "Continuer"
+
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:142
 msgid "document_details_page_type_edit_button"
 msgstr "Modifier"

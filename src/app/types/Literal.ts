@@ -1,6 +1,11 @@
 import ISO6391 from 'iso-639-1'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 
+export type LiteralJson = {
+  value: string
+  language: string | null
+}
+
 class Literal {
   constructor(
     public value: string,

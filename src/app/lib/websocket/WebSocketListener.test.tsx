@@ -125,6 +125,8 @@ describe('WebSocketListener', () => {
         fetchDocumentById: jest.fn(),
         removeConcepts: jest.fn(),
         addConcepts: jest.fn(),
+        modifyTitles: jest.fn(),
+        modifyAbstracts: jest.fn(),
         mergeDocuments: jest.fn(),
         updateDocumentType: jest.fn(),
         error: null,

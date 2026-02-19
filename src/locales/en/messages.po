@@ -789,6 +789,50 @@ msgstr "Compare sources"
 msgid "document_details_page_titles_row_label"
 msgstr "Title"
 
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleField.tsx:14
+msgid "edit_field_delete_button_tooltip"
+msgstr "Delete language"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:55
+msgid "edit_field_languages_menu_no_languages_message"
+msgstr "No other available language set by your institution"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:37
+msgid "edit_field_languages_menu_header"
+msgstr "Add Language"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:37
+msgid "edit_field_add_language_button_label"
+msgstr "Add Language"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:39
+msgid "edit_field_cancel_button_label"
+msgstr "Cancel"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:40
+msgid "edit_field_save_button_label"
+msgstr "Save"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
+msgid "edit_field_no_values_save"
+msgstr "You should fill one field at least"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
+msgid "edit_field_only_empty_fields_saved"
+msgstr "Impossible to save empty fields only"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
+msgid "edit_field_dialog_title"
+msgstr "Confirmation"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
+msgid "edit_field_dialog_text"
+msgstr "Some fields are empty. They will be ignored during saving. Are you sure you want to pursue ?"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:74
+msgid "edit_field_continue_button_label"
+msgstr "Continue"
+
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:142
 msgid "document_details_page_type_edit_button"
 msgstr "Modify"

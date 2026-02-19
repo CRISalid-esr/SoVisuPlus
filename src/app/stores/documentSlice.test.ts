@@ -35,7 +35,7 @@ const makeDoc = (
     new Date('2024-01-01'),
     OAStatus.DIAMOND,
     [new Literal(`Title ${uid}`, 'en')],
-    [],
+    [new Literal(`Abstract ${uid}`, 'en')],
     [], // subjects
     [], // contributions
     [], // records

@@ -9,11 +9,12 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
-import { DocumentType } from '@/types/Document'
+import { DocumentType, Document } from '@/types/Document'
 import { Concept, ConceptJson } from '@/types/Concept'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import dayjs from 'dayjs'
 import { OAStatus } from '@prisma/client'
+import { Literal, LiteralJson } from '@/types/Literal'
 
 type ColumnFilter =
   | { id: 'date'; value: [string | null, string | null] }
@@ -274,6 +275,108 @@ export class DocumentService {
       )
     } catch (error) {
       const message = 'Error adding concepts to document'
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
+
+  async modifyTitles(
+    document: Document,
+    titles: LiteralJson[],
+    userName: string,
+  ): Promise<void> {
+    try {
+      const user = await this.userDAO.getUserByIdentifier(
+        new PersonIdentifier(PersonIdentifierType.local, userName),
+      )
+      if (!user?.person) {
+        throw new Error(`User with username ${userName} not found`)
+      }
+
+      const oldTitles = document.titles
+      const convertedTitles = titles.map((title) => Literal.fromObject(title))
+
+      await this.documentDAO.modifyTitles(document.uid, convertedTitles)
+
+      await Promise.all(
+        oldTitles.map((title) =>
+          this.actionDAO.createAction({
+            actionType: ActionType.REMOVE,
+            targetType: ActionTargetType.DOCUMENT,
+            targetUid: document.uid,
+            path: 'titles',
+            parameters: JSON.stringify(title),
+            personUid: user.person?.uid || '',
+          }),
+        ),
+      )
+
+      await Promise.all(
+        convertedTitles.map((title) =>
+          this.actionDAO.createAction({
+            actionType: ActionType.ADD,
+            targetType: ActionTargetType.DOCUMENT,
+            targetUid: document.uid,
+            path: 'titles',
+            parameters: JSON.stringify(title),
+            personUid: user.person?.uid || '',
+          }),
+        ),
+      )
+    } catch (error) {
+      const message = 'Error modifying titles of document'
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
+
+  async modifyAbstracts(
+    document: Document,
+    abstracts: LiteralJson[],
+    userName: string,
+  ): Promise<void> {
+    try {
+      const user = await this.userDAO.getUserByIdentifier(
+        new PersonIdentifier(PersonIdentifierType.local, userName),
+      )
+      if (!user?.person) {
+        throw new Error(`User with username ${userName} not found`)
+      }
+
+      const oldAbstracts = document.abstracts
+      const convertedAbstracts = abstracts.map((abstract) =>
+        Literal.fromObject(abstract),
+      )
+
+      await this.documentDAO.modifyAbstracts(document.uid, convertedAbstracts)
+
+      await Promise.all(
+        oldAbstracts.map((abstract) =>
+          this.actionDAO.createAction({
+            actionType: ActionType.REMOVE,
+            targetType: ActionTargetType.DOCUMENT,
+            targetUid: document.uid,
+            path: 'abstracts',
+            parameters: JSON.stringify(abstract),
+            personUid: user.person?.uid || '',
+          }),
+        ),
+      )
+
+      await Promise.all(
+        convertedAbstracts.map((abstract) =>
+          this.actionDAO.createAction({
+            actionType: ActionType.ADD,
+            targetType: ActionTargetType.DOCUMENT,
+            targetUid: document.uid,
+            path: 'abstracts',
+            parameters: JSON.stringify(abstract),
+            personUid: user.person?.uid || '',
+          }),
+        ),
+      )
+    } catch (error) {
+      const message = 'Error modifying abstracts of document'
       console.error(message, error)
       throw new Error(message)
     }

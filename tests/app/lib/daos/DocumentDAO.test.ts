@@ -350,4 +350,117 @@ describe('DocumentDAO Integration Tests', () => {
     expect(subjects?.subjects).toHaveLength(1)
     expect(subjects?.subjects[0].uid).toBe('concept-delete-2')
   })
+
+  test('should modify titles from a document', async () => {
+    // Create a document and create titles
+    await prisma.document.create({
+      data: {
+        uid: 'doc-with-titles',
+        documentType: 'JournalArticle',
+        publicationDate: '2022',
+        publicationDateStart: new Date('2022-01-01'),
+        publicationDateEnd: new Date('2022-12-31'),
+        titles: {
+          createMany: {
+            data: [
+              {
+                language: 'en',
+                value: 'Sample Document Title',
+              },
+              {
+                language: 'fr',
+                value: 'Sample Second Title',
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    // Ensure both titles are created and linked
+    let titles = await prisma.document.findUnique({
+      where: { uid: 'doc-with-titles' },
+      include: { titles: true },
+    })
+    expect(titles?.titles).toHaveLength(2)
+
+    // Modify titles of the document
+    const dao = new DocumentDAO()
+    await dao.modifyTitles('doc-with-titles', [
+      new Literal('El nuevo titulo', 'es'),
+      new Literal('Le nouveau titre', 'fr'),
+    ])
+
+    // Verify that old titles have been deleted and new ones have been added
+    titles = await prisma.document.findUnique({
+      where: { uid: 'doc-with-titles' },
+      include: { titles: true },
+    })
+    expect(titles?.titles).toHaveLength(2)
+    expect(titles?.titles.map((title) => title.value)).not.toContain(
+      'Sample Document Title',
+    )
+    expect(titles?.titles.map((title) => title.value)).not.toContain(
+      'Sample Second Title',
+    )
+    expect(titles?.titles.map((title) => title.value)).toContain(
+      'El nuevo titulo',
+    )
+    expect(titles?.titles.map((title) => title.value)).toContain(
+      'Le nouveau titre',
+    )
+  })
+
+  test('should modify abstracts from a document', async () => {
+    // Create a document and create abstracts
+    await prisma.document.create({
+      data: {
+        uid: 'doc-with-abstracts',
+        documentType: 'JournalArticle',
+        publicationDate: '2022',
+        publicationDateStart: new Date('2022-01-01'),
+        publicationDateEnd: new Date('2022-12-31'),
+        abstracts: {
+          createMany: {
+            data: [
+              {
+                language: 'fr',
+                value: 'Sample Abstract',
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    // Ensure both titles are created and linked
+    let abstracts = await prisma.document.findUnique({
+      where: { uid: 'doc-with-abstracts' },
+      include: { abstracts: true },
+    })
+    expect(abstracts?.abstracts).toHaveLength(1)
+
+    // Modify titles of the document
+    const dao = new DocumentDAO()
+    await dao.modifyAbstracts('doc-with-abstracts', [
+      new Literal('El nuevo abstract', 'es'),
+      new Literal('Le nouveau abstract', 'fr'),
+    ])
+
+    // Verify that old titles have been deleted and new ones have been added
+    abstracts = await prisma.document.findUnique({
+      where: { uid: 'doc-with-abstracts' },
+      include: { abstracts: true },
+    })
+    expect(abstracts?.abstracts).toHaveLength(2)
+    expect(abstracts?.abstracts.map((title) => title.value)).not.toContain(
+      'Sample Abstract',
+    )
+    expect(abstracts?.abstracts.map((title) => title.value)).toContain(
+      'El nuevo abstract',
+    )
+    expect(abstracts?.abstracts.map((title) => title.value)).toContain(
+      'Le nouveau abstract',
+    )
+  })
 })
