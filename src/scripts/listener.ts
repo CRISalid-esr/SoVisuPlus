@@ -11,9 +11,7 @@ dotenv.config()
   const semaphore = new Sema(1)
 
   try {
-    const websocketPort = process.env.WS_INTERNAL_PORT
-      ? parseInt(process.env.WS_INTERNAL_PORT, 10)
-      : 3001
+    const websocketPort = 3001
     console.log(`Starting WebSocket server on port ${websocketPort}...`)
     startWebSocketServer(websocketPort)
 

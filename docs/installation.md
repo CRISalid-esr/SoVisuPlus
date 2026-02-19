@@ -72,7 +72,6 @@ Following table gives detailed information on each environment variable:
 | NEXT_PUBLIC_WS_HOST           | Web socket host for message listener                         | n       | client          | y                  | prod                                   | n                  |
 | NEXT_PUBLIC_WS_PORT           | Web socket port for message listener (client side listening) | n       | client          | y                  | prod                                   | n                  |
 | NEXT_PUBLIC_WS_PATH           | Web socket path for message listener                         | n       | client          | y                  | prod                                   | n                  |
-| WS_INTERNAL_PORT              | Web socket internal port listener (server side emission)     | n       | server          | y                  | prod                                   | n                  |
 | DATABASE_URL                  | Sovisuplus database url                                      | y       | server          | y                  | prod                                   | n                  |
 | DATABASE_URL_TEST             | Sovisuplus test database url                                 | n       | server          | y                  | dev                                    | n                  |
 | NEXT_PUBLIC_ORCID_URL         | Orcid connexion url                                          | n       | server & client | y                  | prod (orcid.org) / dev (sandbox.orcid) | n                  |
