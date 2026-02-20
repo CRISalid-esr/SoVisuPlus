@@ -122,7 +122,7 @@ const fetchWrapper = async (
   value: string,
   vocabs = Vocab.getVocabs(),
 ): Promise<SuggestedKeywordsData[]> => {
-  if (value) {
+  if (value && vocabs) {
     const results = await Promise.all(
       vocabs.map((vocab) => getData(value, vocab, 0)),
     )

@@ -143,7 +143,7 @@ const Keywords = () => {
                   width: '100%',
                 }}
               >
-                {Vocab.getVocabs().map(
+                {Vocab.getVocabs()?.map(
                   (vocab) =>
                     Object.keys(VOCABS).includes(vocab.toUpperCase()) && (
                       <Paper
