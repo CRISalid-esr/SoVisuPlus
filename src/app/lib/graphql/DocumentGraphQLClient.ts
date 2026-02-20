@@ -49,7 +49,7 @@ interface GraphSourceJournalResponse {
   source: string
   source_identifier: string
   titles: string[]
-  publisher: string
+  publisher?: string
 }
 
 interface GraphSourceIssueResponse {

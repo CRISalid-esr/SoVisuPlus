@@ -60,7 +60,7 @@ interface GraphMembershipConnection {
 
 export interface GraphPersonResponse {
   uid: string
-  display_name: string
+  display_name: string | null
   external: boolean
   identifiers: GraphPersonIdentifier[]
   names: GraphPersonName[]
