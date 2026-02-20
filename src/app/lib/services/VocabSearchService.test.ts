@@ -9,6 +9,12 @@ jest.mock('@/lib/services/VocabSearchClient', () => ({
   })),
 }))
 
+jest.mock('@/utils/runtimeEnv', () => ({
+  getRuntimeEnv: () => ({
+    NEXT_PUBLIC_AVAILABLE_VOCABS: 'jel,aat,acm,mesh',
+  }),
+}))
+
 describe('VocabSearchService class test', () => {
   let service: VocabSearchService
 

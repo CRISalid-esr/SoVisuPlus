@@ -2,6 +2,12 @@ import { VocabSearchClient } from '@/lib/services/VocabSearchClient'
 import { Vocab } from '@/types/Vocab'
 import { ZodError } from 'zod'
 
+jest.mock('@/utils/runtimeEnv', () => ({
+  getRuntimeEnv: () => ({
+    NEXT_PUBLIC_AVAILABLE_VOCABS: 'jel,aat,acm,mesh',
+  }),
+}))
+
 describe('VocabSearchClient class test', () => {
   const client = new VocabSearchClient()
 
