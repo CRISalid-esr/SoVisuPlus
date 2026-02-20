@@ -1,6 +1,12 @@
 import { Vocab } from '@/types/Vocab'
 import { VOCABS } from '@/lib/services/Vocabs'
 
+jest.mock('@/utils/runtimeEnv', () => ({
+  getRuntimeEnv: () => ({
+    NEXT_PUBLIC_AVAILABLE_VOCABS: 'jel,aat,acm,mesh',
+  }),
+}))
+
 describe('Vocab type test', () => {
   it('Vocab.fromString test with known vocab', () => {
     const v = 'jel'

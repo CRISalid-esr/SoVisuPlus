@@ -1,7 +1,8 @@
 import { VOCABS } from '@/lib/services/Vocabs'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
 
 export class Vocab {
-  private static vocabs = Vocab.init()
+  private static vocabs: string[] | null = null
 
   private readonly value: string
 
@@ -14,7 +15,10 @@ export class Vocab {
   }
 
   private static init() {
-    return process.env.NEXT_PUBLIC_AVAILABLE_VOCABS?.split(',') || []
+    if (this.vocabs === null) {
+      const env = getRuntimeEnv().NEXT_PUBLIC_AVAILABLE_VOCABS
+      this.vocabs = env?.split(',').map((v) => v.toLowerCase()) || []
+    }
   }
 
   public static getVocabs() {
@@ -24,7 +28,7 @@ export class Vocab {
 
   public static has(name: string) {
     this.init()
-    const vocab = Vocab.vocabs.find((vocab) => vocab === name.toLowerCase())
+    const vocab = Vocab.vocabs?.find((vocab) => vocab === name.toLowerCase())
     return vocab !== undefined
   }
 
