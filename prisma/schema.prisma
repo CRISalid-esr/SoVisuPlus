@@ -240,15 +240,12 @@ enum PublicationIdentifierType {
 }
 
 model PublicationIdentifier {
-  id               Int                       @id @default(autoincrement())
-  type             PublicationIdentifierType
-  value            String?
-  DocumentRecord   DocumentRecord            @relation(fields: [documentRecordId], references: [id], onDelete: Cascade)
-  documentRecordId Int
+  id             Int                       @id @default(autoincrement())
+  type           PublicationIdentifierType
+  value          String?
+  DocumentRecord DocumentRecord[]
 
   @@unique([type, value]) // The same identifer should not be used twice
-  @@unique([documentRecordId, type]) // A document record should not have more than one identifier of the same type
-  @@index([documentRecordId])
 }
 
 model DocumentRecord {
