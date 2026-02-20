@@ -58,11 +58,11 @@ jest.mock('@prisma/client', () => {
     },
     documentRecord: {
       upsert: jest.fn(),
+      update: jest.fn(),
       deleteMany: jest.fn(),
     },
     publicationIdentifier: {
-      createMany: jest.fn(),
-      deleteMany: jest.fn(),
+      createManyAndReturn: jest.fn(),
       findMany: jest.fn(),
     },
     journal: {
@@ -393,6 +393,12 @@ describe('DocumentDAO', () => {
       uid: 'hal-record',
     } as DbDocumentRecord
 
+    const mockPublicationIdentifier = {
+      id: 77,
+      type: DbPublicationIdentifierType.hal,
+      value: 'hal-0001',
+    }
+
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
     ;(mockPrisma.document.create as jest.Mock).mockResolvedValue(mockDbDocument)
     ;(mockPrisma.documentRecord.upsert as jest.Mock).mockResolvedValue(
@@ -400,6 +406,9 @@ describe('DocumentDAO', () => {
     )
     ;(mockPrisma.documentTitle.upsert as jest.Mock).mockResolvedValue(null)
     ;(mockPrisma.documentAbstract.upsert as jest.Mock).mockResolvedValue(null)
+    ;(
+      mockPrisma.publicationIdentifier.createManyAndReturn as jest.Mock
+    ).mockResolvedValue(mockPublicationIdentifier)
 
     const dbDocument = await documentDAO.createOrUpdateDocument(documentWithHal)
     expect(mockPrisma.documentRecord.upsert).toHaveBeenCalledWith({
@@ -451,6 +460,9 @@ describe('DocumentDAO', () => {
         url: 'https://hal.science/hal-123',
         halCollectionCodes: ['UNIV-NANTES', 'CNRS'],
         halSubmitType: 'notice',
+        identifiers: {
+          set: [],
+        },
         journal: {
           connectOrCreate: {
             create: {
@@ -539,22 +551,33 @@ describe('DocumentDAO', () => {
           {
             type: DbPublicationIdentifierType.hal,
             value: 'hal-0001',
-            documentRecordId: { not: 89 },
           },
         ],
       },
     })
-    expect(mockPrisma.publicationIdentifier.deleteMany).toHaveBeenCalledWith({
-      where: { documentRecordId: 89 },
-    })
-    expect(mockPrisma.publicationIdentifier.createMany).toHaveBeenCalledWith({
+
+    expect(
+      mockPrisma.publicationIdentifier.createManyAndReturn,
+    ).toHaveBeenCalledWith({
       data: [
         {
-          documentRecordId: 89,
           type: DbPublicationIdentifierType.hal,
           value: 'hal-0001',
         },
       ],
+    })
+
+    expect(mockPrisma.documentRecord.update).toHaveBeenCalledWith({
+      where: { id: 89 },
+      data: {
+        identifiers: {
+          connect: [
+            {
+              id: 77,
+            },
+          ],
+        },
+      },
     })
     expect(dbDocument.uid).toBe('doc-hal')
   })

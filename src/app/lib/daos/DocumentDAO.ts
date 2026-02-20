@@ -458,6 +458,9 @@ export class DocumentDAO extends AbstractDAO {
                   },
                 })),
               },
+              identifiers: {
+                set: [],
+              },
               document: { connect: { id: dbDocument.id } },
               platform: {
                 set: getBibliographicPlatformDbValue(record.platform),
@@ -504,11 +507,6 @@ export class DocumentDAO extends AbstractDAO {
               document: { connect: { id: dbDocument.id } },
             },
           })
-
-          await this.handleIdentifierConflicts(
-            record.identifiers,
-            documentRecord.id,
-          )
 
           await this.upsertIdentifiers(record.identifiers, documentRecord.id)
         } catch (error) {
@@ -1340,19 +1338,54 @@ export class DocumentDAO extends AbstractDAO {
     retries = 0,
   ): Promise<void> {
     try {
-      // Remove old identifiers
-      await this.prismaClient.publicationIdentifier.deleteMany({
-        where: { documentRecordId },
-      })
+      // Get existing identifiers
+      const identifiersWithIds =
+        (await this.prismaClient.publicationIdentifier.findMany({
+          where: {
+            OR: identifiers.map((identifier) => ({
+              type: PublicationIdentifier.publicationIdentifierTypeFromString(
+                identifier.type,
+              ),
+              value: identifier.value,
+            })),
+          },
+        })) || []
+
+      //Get unexisting identifiers
+      const identifiersToCreate =
+        identifiers.filter(
+          (identifier) =>
+            !identifiersWithIds.find(
+              (id) =>
+                id.type == identifier.type && id.value == identifier.value,
+            ),
+        ) || []
+
       // Insert new identifiers
-      await this.prismaClient.publicationIdentifier.createMany({
-        data: identifiers.map((identifier) => ({
-          documentRecordId,
-          type: PublicationIdentifier.publicationIdentifierTypeFromString(
-            identifier.type,
-          ),
-          value: identifier.value,
-        })),
+      const newIdentifiers =
+        await this.prismaClient.publicationIdentifier.createManyAndReturn({
+          data: identifiersToCreate.map((identifier) => ({
+            type: PublicationIdentifier.publicationIdentifierTypeFromString(
+              identifier.type,
+            ),
+            value: identifier.value,
+          })),
+        })
+
+      const identifiersIds = identifiersWithIds
+        .concat(newIdentifiers)
+        .map((identifier) => {
+          return { id: identifier?.id }
+        })
+
+      // Insert new identifiers
+      await this.prismaClient.documentRecord.update({
+        where: { id: documentRecordId },
+        data: {
+          identifiers: {
+            connect: identifiersIds,
+          },
+        },
       })
     } catch (error: unknown) {
       console.error('Error during identifier upsert:', error as Error)
