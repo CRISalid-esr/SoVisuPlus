@@ -44,7 +44,7 @@ export class DocumentRecord {
 
   constructor(
     public uid: string,
-    public sourceIdentifier: string | null,
+    public sourceIdentifier: string,
     public identifiers: PublicationIdentifier[],
     public contributions: Array<SourceContribution> = [],
     public documentTypes: SourceRecordType[],

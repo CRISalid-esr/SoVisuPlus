@@ -6,7 +6,7 @@ class InternalPerson extends Person {
   constructor(
     uid: string,
     email: string | null,
-    displayName: string,
+    displayName: string | null,
     firstName: string,
     lastName: string,
     identifiers: PersonIdentifier[] = [],

@@ -255,7 +255,7 @@ model DocumentRecord {
   id                 Int                     @id @default(autoincrement())
   uid                String                  @unique
   url                String?
-  sourceIdentifier   String?
+  sourceIdentifier   String
   identifiers        PublicationIdentifier[]
   contributions      SourceContribution[]
   documentTypes      SourceRecordType[]
