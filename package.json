@@ -35,7 +35,8 @@
     "dispatch_action": "npm run dispatch_actions --",
     "dispatch_action:js": "npm run dispatch_actions:js --",
     "rotate-orcid-tokens": "ts-node --project tsconfig.listener.json src/scripts/rotate-orcid-tokens.ts",
-    "rotate-orcid-tokens:js": "node dist-listener/src/scripts/rotate-orcid-tokens.js"
+    "rotate-orcid-tokens:js": "node dist-listener/src/scripts/rotate-orcid-tokens.js",
+    "generate-hal-domains": "ts-node --project tsconfig.listener.json src/scripts/generate_hal_domains.ts"
   },
   "dependencies": {
     "@apollo/client": "^3.12.3",
