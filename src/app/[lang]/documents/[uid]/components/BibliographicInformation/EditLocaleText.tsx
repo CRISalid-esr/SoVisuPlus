@@ -21,8 +21,7 @@ import {
 } from '@/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation'
 import { useEffect, useMemo, useState } from 'react'
 import EditLocaleField from '@/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleField'
-import { CheckIcon } from '@storybook/icons'
-import { Add, Close } from '@mui/icons-material'
+import { Add, Check, Close } from '@mui/icons-material'
 import { Trans } from '@lingui/react/macro'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import ISO6391, { LanguageCode } from 'iso-639-1'
@@ -236,7 +235,7 @@ const EditLocaleText = ({
           <Button
             variant={'contained'}
             disableElevation
-            startIcon={<CheckIcon />}
+            startIcon={<Check />}
             onClick={save}
           >
             <Trans>edit_field_save_button_label</Trans>

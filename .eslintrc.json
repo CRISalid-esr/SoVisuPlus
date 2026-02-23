@@ -9,8 +9,7 @@
     "plugin:react-hooks/recommended",
     "prettier",
     "next/core-web-vitals",
-    "next/typescript",
-    "plugin:storybook/recommended"
+    "next/typescript"
   ],
   "plugins": [
     "@typescript-eslint",
