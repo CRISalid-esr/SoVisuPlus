@@ -1,7 +1,7 @@
 # syntax=docker.io/docker/dockerfile:1
 
 
-FROM node:22-alpine AS base
+FROM node:24-alpine AS base
 
 
 FROM base AS deps
@@ -28,12 +28,7 @@ RUN npm run build:listener
 
 FROM base AS runner
 
-RUN set -ex; \
-    apk update; \
-    apk add --no-cache \
-    openssl; \
-    apk add --no-cache  \
-    git
+RUN apk add --no-cache openssl git
 
 WORKDIR /app
 
@@ -42,8 +37,8 @@ ENV NODE_ENV=production
 ARG GIT_COMMIT
 ARG GIT_BRANCH
 
-ENV GIT_COMMIT=${GIT_COMMIT}
-ENV GIT_BRANCH=${GIT_BRANCH}
+ENV GIT_COMMIT=${GIT_COMMIT} \
+    GIT_BRANCH=${GIT_BRANCH}
 
 ENV NODE_ENV=production
 
