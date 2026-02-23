@@ -76,6 +76,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
+          no-cache: true
           tags: |
             crisalidesr/sovisuplus:latest
             crisalidesr/sovisuplus:v0.43-dev
