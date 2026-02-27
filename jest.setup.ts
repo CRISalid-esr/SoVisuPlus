@@ -21,6 +21,7 @@ Object.defineProperty(window, 'env', {
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
     NEXT_PUBLIC_CAS_URL: process.env.NEXT_PUBLIC_CAS_URL,
     NEXT_PUBLIC_INSTITUTION_NAME: process.env.NEXT_PUBLIC_INSTITUTION_NAME,
+    NEXT_PUBLIC_HAL_CREATE_ID_URL: process.env.NEXT_PUBLIC_HAL_CREATE_ID_URL,
   },
   writable: true,
 })

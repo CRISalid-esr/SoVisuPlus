@@ -22,3 +22,5 @@ export const researchStructureIdentifierTypeFromString = (
   }
   return convertedType
 }
+
+export { DbResearchStructureIdentifierType as ResearchStructureIdentifierType }

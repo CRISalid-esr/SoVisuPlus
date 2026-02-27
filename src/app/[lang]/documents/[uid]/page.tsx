@@ -24,6 +24,9 @@ import {
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Trans } from '@lingui/react'
+import { BibliographicPlatform } from '@/types/BibliographicPlatform'
+import UpdateInHAL from '@/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL'
+import AddInHAL from '@/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL'
 
 const DocumentDetailsPage = () => {
   const theme = useTheme()
@@ -70,6 +73,24 @@ const DocumentDetailsPage = () => {
     setHasFetched,
   } = useStore((state) => state.document)
 
+  if (selectedDocument?.hasBeenUpdated()) {
+    tabs.push({
+      label: t`document_details_update_in_hal_tab`,
+      value: 'update_in_hal',
+      color: theme.palette.primary.main,
+    })
+  }
+  const halRecord = selectedDocument?.records.find(
+    (record) => record.platform === BibliographicPlatform.HAL,
+  )
+  if (!halRecord) {
+    tabs.push({
+      label: t`document_details_add_in_hal_tab`,
+      value: 'add_in_hal',
+      color: theme.palette.primary.main,
+    })
+  }
+
   useEffect(() => {
     if (selectedDocument?.uid == uid && hasFetched) {
       return
@@ -77,7 +98,7 @@ const DocumentDetailsPage = () => {
     if (uid) {
       fetchDocumentById(uid)
     }
-  }, [uid, fetchDocumentById, hasFetched])
+  }, [uid, fetchDocumentById, hasFetched, selectedDocument])
 
   useEffect(() => {
     const tab = searchParams.get('tab')
@@ -125,6 +146,10 @@ const DocumentDetailsPage = () => {
         return <Keywords />
       case 'domains':
         return <Domains />
+      case 'update_in_hal':
+        return <UpdateInHAL />
+      case 'add_in_hal':
+        return <AddInHAL />
       default:
         return <BibliographicInformation />
     }

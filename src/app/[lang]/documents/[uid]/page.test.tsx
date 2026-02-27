@@ -12,6 +12,8 @@ import { Contribution } from '@/types/Contribution'
 import { Person } from '@/types/Person'
 import { LocRelator } from '@/types/LocRelator'
 import { OAStatus } from '@prisma/client'
+import { DocumentRecord } from '@/types/DocumentRecord'
+import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 
 // Mock Zustand store
 jest.mock('@/stores/global_store', () => ({
@@ -84,6 +86,22 @@ const document: Document = new Document(
       [LocRelator.AUTHOR_OF_INTRODUCTION__ETC_],
     ),
   ],
+  [
+    new DocumentRecord(
+      'rec1',
+      'hal-001',
+      [],
+      [],
+      [],
+      new Date('2024-01-01'),
+      BibliographicPlatform.HAL,
+      [new Literal('Record Title 1', 'en')],
+      'https://url-to-record-1',
+      [],
+      null,
+      undefined,
+    ),
+  ],
 )
 
 const mockState = {
@@ -100,6 +118,10 @@ describe('DocumentDetailsPage Component', () => {
       selector(mockState),
     )
     jest.clearAllMocks()
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   const theme = createTheme({
@@ -142,6 +164,7 @@ describe('DocumentDetailsPage Component', () => {
   })
 
   it('renders DocumentDetailsHeader and BibliographicInformation when document is found', () => {
+    jest.spyOn(document, 'hasBeenUpdated').mockReturnValue(false)
     ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
       selector({
         document: { ...mockState.document, loading: false, hasFetched: true },
@@ -179,5 +202,59 @@ describe('DocumentDetailsPage Component', () => {
     expect(screen.getByText('document_details_domains_tab')).toBeInTheDocument()
     expect(screen.getByText('document_details_authors_tab')).toBeInTheDocument()
     expect(screen.getByText('document_details_sources_tab')).toBeInTheDocument()
+    expect(
+      screen.queryByText('document_details_update_in_hal_tab'),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('document_details_add_in_hal_tab'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('renders add and update in hal tabs conditionally', () => {
+    jest.spyOn(document, 'hasBeenUpdated').mockReturnValue(true)
+    mockState.document.selectedDocument.records = []
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({
+        document: { ...mockState.document, loading: false, hasFetched: true },
+        user: {
+          currentPerspective: {
+            person: {
+              id: '1',
+              firstName: 'John',
+              lastName: 'Doe',
+              type: 'people',
+              slug: 'person:john-doe',
+            },
+          },
+          connectedUser: {
+            person: {
+              id: '1',
+              firstName: 'John',
+              lastName: 'Doe',
+              type: 'people',
+              slug: 'person:john-doe',
+            },
+          },
+        },
+      }),
+    )
+    renderComponent()
+
+    const elements = screen.getAllByText(
+      i18n.t('document_details_bibliographic_information_tab'),
+    )
+    expect(elements).toHaveLength(1)
+    expect(
+      screen.getByText(i18n.t('document_details_keywords_tab')),
+    ).toBeInTheDocument()
+    expect(screen.getByText('document_details_domains_tab')).toBeInTheDocument()
+    expect(screen.getByText('document_details_authors_tab')).toBeInTheDocument()
+    expect(screen.getByText('document_details_sources_tab')).toBeInTheDocument()
+    expect(
+      screen.getByText('document_details_update_in_hal_tab'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('document_details_add_in_hal_tab'),
+    ).toBeInTheDocument()
   })
 })

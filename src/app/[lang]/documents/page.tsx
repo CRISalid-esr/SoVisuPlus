@@ -78,7 +78,7 @@ import {
   readInitialPagination,
   readInitialSorting,
 } from '@/app/[lang]/documents/components/DocumentTable'
-import { OAStatus } from '@prisma/client'
+import { HalSubmitType, OAStatus } from '@prisma/client'
 import OAStatusCellBadge from '@/app/[lang]/documents/components/OAStatusCellBadge'
 
 dayjs.extend(utc)
@@ -357,6 +357,9 @@ const DocumentsPage = () => {
             label: (
               <HalStatusCellBadge
                 type={HalStatusCellType.InCollection}
+                acronyms={[]}
+                halSubmitType={HalSubmitType.file}
+                halUrl={''}
                 isSingleLine
               />
             ),
@@ -366,9 +369,14 @@ const DocumentsPage = () => {
             // @ts-expect-error: so that label accepts an Element
             label: (
               <HalStatusCellBadge
-                type={HalStatusCellType.OutOfCollection}
-                acronyms={acronyms}
+                type={HalStatusCellType.NotInSyncWithCollection}
+                halSubmitType={HalSubmitType.file}
+                acronyms={[]}
+                halUrl={''}
+                hasBeenUpdated={false}
+                isOutOfCollection={false}
                 isSingleLine
+                documentUid={''}
               />
             ),
             value: 'out_of_collection',
@@ -379,6 +387,7 @@ const DocumentsPage = () => {
               <HalStatusCellBadge
                 type={HalStatusCellType.OutsideHal}
                 isSingleLine
+                documentUid={''}
               />
             ),
             value: 'outside_hal',

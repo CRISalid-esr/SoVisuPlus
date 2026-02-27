@@ -1,5 +1,8 @@
 import { ResearchStructureWithRelations as DbResearchStructure } from '@/prisma-schema/extended-client'
-import { ResearchStructureIdentifier } from '@/types/ResearchStructureIdentifier'
+import {
+  ResearchStructureIdentifier,
+  ResearchStructureIdentifierType,
+} from '@/types/ResearchStructureIdentifier'
 import { IAgent } from '@/types/IAgent'
 import { Literal } from '@/types/Literal'
 import { ExtendedLanguageCode } from './ExtendLanguageCode'
@@ -23,7 +26,7 @@ class ResearchStructure implements IAgent {
     public descriptions: Array<Literal>,
     public signature: string | null,
     private _identifiers: {
-      type: DbResearchStructureIdentifierType
+      type: ResearchStructureIdentifierType
       value: string
     }[] = [],
     public type: 'research_structure' = 'research_structure',
@@ -79,6 +82,12 @@ class ResearchStructure implements IAgent {
     return this._identifiers
   }
 
+  hasIdHAL(): boolean {
+    return this.identifiers.some(
+      (id) => id.type == ResearchStructureIdentifierType.hal,
+    )
+  }
+
   static fromDbResearchStructure(
     researchStructure: DbResearchStructure,
   ): ResearchStructure {
@@ -110,5 +119,8 @@ class ResearchStructure implements IAgent {
   }
 }
 
-export { ResearchStructure }
+const isResearchStructure = (agent: IAgent | null | undefined): boolean =>
+  !!agent && agent.type === 'research_structure'
+
+export { ResearchStructure, isResearchStructure }
 export type { ResearchStructureJson }
