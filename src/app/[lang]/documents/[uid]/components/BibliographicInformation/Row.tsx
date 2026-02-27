@@ -84,21 +84,23 @@ const Row = ({ field }: { field: DocumentField }) => {
         {field.component && !displayEdit && (
           <field.component content={content}></field.component>
         )}
-        {field.hasLanguageSelector && displayEdit ? (
-          <EditLocaleText
-            field={field}
-            callback={() => setDisplayEdit(false)}
-          />
-        ) : (
-          <IconButton
-            className={styles.editButton}
-            onClick={() => {
-              setDisplayEdit(true)
-            }}
-          >
-            <EditIcon />
-          </IconButton>
-        )}
+        {field.hasLanguageSelector ? (
+          displayEdit ? (
+            <EditLocaleText
+              field={field}
+              callback={() => setDisplayEdit(false)}
+            />
+          ) : (
+            <IconButton
+              className={styles.editButton}
+              onClick={() => {
+                setDisplayEdit(true)
+              }}
+            >
+              <EditIcon />
+            </IconButton>
+          )
+        ) : null}
       </TableCell>
     </TableRow>
   )
