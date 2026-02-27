@@ -5,7 +5,7 @@ import { Card, CardContent, Stack, Typography } from '@mui/material'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { IAgent } from '@/types/IAgent'
-import { isResearchStructure } from '@/types/Person'
+import { isResearchStructure } from '@/types/ResearchStructure'
 
 const ResearchStructureIdentityCard = ({
   researchStructure,

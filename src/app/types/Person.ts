@@ -97,6 +97,10 @@ class Person implements IAgent, Authorizable {
     })
   }
 
+  hasIdHAL(): boolean {
+    return this.identifiers.some((id) => id.type == PersonIdentifierType.idhals)
+  }
+
   private static computeDisplayName(
     firstName?: string | null,
     lastName?: string | null,
@@ -199,8 +203,5 @@ class Person implements IAgent, Authorizable {
 const isPerson = (agent: IAgent | null | undefined): agent is Person =>
   !!agent && agent.type === 'person'
 
-const isResearchStructure = (agent: IAgent | null | undefined): boolean =>
-  !!agent && agent.type === 'research_structure'
-
-export { Person, isPerson, isResearchStructure }
+export { Person, isPerson }
 export type { PersonJson }

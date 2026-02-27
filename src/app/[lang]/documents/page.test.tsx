@@ -114,6 +114,7 @@ const mockState = {
     currentPerspective: {
       type: 'person',
       getDisplayName: () => 'John Doe',
+      hasIdHAL: () => true,
       memberships: [],
       membershipAcronyms: ['ABC', 'DEF'],
     },

@@ -96,29 +96,36 @@ export class DocumentRecord {
       : SourceRecordType.Document
   }
 
-  isResearchStructureInCollectionCodes(perspective: IAgent | null): boolean {
+  isResearchStructureInCollectionCodes(
+    perspective: IAgent | null,
+  ): string[] | null {
     if (!perspective) {
-      return false
+      return null
     }
 
     switch (perspective.type) {
       case 'person': {
         const { memberships } = perspective as Person
 
-        return memberships
+        const collections = memberships
           .map(({ researchStructure: { acronym } }) => acronym)
-          .some((acronym) =>
+          .filter((acronym) =>
             acronym ? this.halCollectionCodes.includes(acronym) : false,
           )
+          .filter((acronym) => acronym != null)
+
+        return collections.length > 0 ? collections : null
       }
       case 'research_structure': {
         const { acronym } = perspective as ResearchStructure
 
-        return acronym ? this.halCollectionCodes.includes(acronym) : false
+        return acronym && this.halCollectionCodes.includes(acronym)
+          ? [acronym]
+          : null
       }
       case 'institution':
       default:
-        return false
+        return null
     }
   }
 

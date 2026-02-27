@@ -244,6 +244,21 @@ msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Erreur lors du chargement des données"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
+msgid "document_details_page_add_in_hal_tab_card_title"
+msgstr "Déposer dans HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
+msgid "document_details_page_update_in_hal_tab_card_title"
+msgstr "Mettre à jour dans HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Mot-clé ajouté à la publication."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:183
 msgid "document_details_page_sources_row_update_source"
 msgstr ""
@@ -575,10 +590,6 @@ msgstr "Type de source : {0}"
 msgid "document_details_page_journal_publisher"
 msgstr "Éditeur : {0}"
 
-#: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:59
-msgid "{numberOfAcronyms, plural, one {documents_page_hal_status_out_of_collection {formattedAcronyms}} other {documents_page_hal_status_out_of_collections {formattedAcronyms}}}"
-msgstr "{numberOfAcronyms, plural, one {Dans HAL mais hors de la collection {formattedAcronyms}} other {Dans HAL mais hors des collections {formattedAcronyms}}}"
-
 #. js-lingui-explicit-id
 #. placeholder {0}: journal.issnL
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:72
@@ -697,6 +708,14 @@ msgstr "Domaines"
 msgid "document_details_keywords_tab"
 msgstr "Mots-clés"
 
+#: src/app/[lang]/documents/[uid]/page.tsx:88
+msgid "document_details_add_in_hal_tab"
+msgstr "Déposer dans HAL"
+
+#: src/app/[lang]/documents/[uid]/page.tsx:78
+msgid "document_details_update_in_hal_tab"
+msgstr "Mettre à jour dans HAL"
+
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:85
 msgid "document_details_page_abstracts_row_label"
 msgstr "Résumé"
@@ -732,6 +751,22 @@ msgstr "Cette rubrique vous permettra de caractériser les domaines de recherche
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:37
 msgid "document_details_page_domains_tab_wip_title"
 msgstr "Domaines de recherche : implémentation en cours"
+
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:38
+msgid "document_details_page_add_in_hal_tab_wip_description"
+msgstr "Cette rubrique vous permettra de déposer cette publication dans HAL."
+
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:37
+msgid "document_details_page_add_in_hal_tab_wip_title"
+msgstr "Dépôt dans HAL : implémentation en cours"
+
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:38
+msgid "document_details_page_update_in_hal_tab_wip_description"
+msgstr "Cette rubrique vous permettra de mettre à jour cette publication dans HAL."
+
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:37
+msgid "document_details_page_update_in_hal_tab_wip_title"
+msgstr "Mettre à jour dans HAL : implémentation en cours"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:160
 msgid "document_details_page_identifiers_copy_default_message"
@@ -863,8 +898,8 @@ msgid "documents_page_document_icon_label"
 msgstr "Document"
 
 #: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:76
-msgid "documents_page_hal_status_in_collection"
-msgstr "Dans la collection"
+msgid "documents_page_hal_status_in_hal"
+msgstr "Dans HAL"
 
 #: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:44
 msgid "documents_page_hal_status_outside_hal"
@@ -877,6 +912,90 @@ msgstr "Statut HAL"
 #: src/app/[lang]/documents/page.tsx:538
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "Dépôt HAL incomplet"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.tsx:22
+msgid "hal_submit_type_annex"
+msgstr "Annexe"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.tsx:24
+msgid "hal_submit_type_file"
+msgstr "Fichier"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.tsx:26
+msgid "hal_submit_type_notice"
+msgstr "Notice"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.tsx:67
+msgid "{numberOfAcronyms, plural, one {{halSubmitTypeStr} documents_page_hal_status_badge_in_hal_collection_tooltip_card_file_collection_label {formattedAcronyms}} other {{halSubmitTypeStr} documents_page_hal_status_badge_in_hal_collection_tooltip_card_file_collections_label {formattedAcronyms}}}"
+msgstr "{numberOfAcronyms, plural, one {{halSubmitTypeStr} déposé(e) dans la collection HAL du {formattedAcronyms}} other {{halSubmitTypeStr} déposé(e) dans les collections HAL de {formattedAcronyms}}}"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.tsx:93
+msgid "documents_page_hal_status_badge_tooltip_card_see_file"
+msgstr "Voir le document sur HAL"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:62
+msgid "{numberOfAcronyms, plural, one {documents_page_hal_status_badge_outside_collection_tooltip_card_info_box_header} other {documents_page_hal_status_badge_outside_collections_tooltip_card_info_box_header}}"
+msgstr "{numberOfAcronyms, plural, one {Absent de la collection} other {Absent des collections}}"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:65
+msgid "{numberOfAcronyms, plural, one {{halSubmitTypeStr} documents_page_hal_status_badge_outside_collection_tooltip_card_info_box_message {formattedAcronyms}} other {{halSubmitTypeStr} documents_page_hal_status_badge_outside_collections_tooltip_card_info_box_message {formattedAcronyms}}}"
+msgstr "{numberOfAcronyms, plural, one {{halSubmitTypeStr} absent(e) de la collection HAL du {formattedAcronyms}. Si vous étiez déjà au {formattedAcronyms} au moment de la publication de ce document, vérifiez l\u0027} other {{halSubmitTypeStr} absent(e) des collections HAL de {formattedAcronyms} . Si vous étiez déjà dans une de ces organisations au moment de la publication de ce document, vérifiez l\u0027}}"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:72
+msgid "documents_page_hal_status_badge_outside_collection_tooltip_card_info_box_link"
+msgstr "affiliation"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:75
+msgid "documents_page_hal_status_badge_not_in_sync_with_hal_tooltip_card_info_box_header"
+msgstr "Mise à jour disponible"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:76
+msgid "documents_page_hal_status_badge_not_in_sync_with_hal_tooltip_card_info_box_message"
+msgstr "Des différences ont été détectées entre SoVisu+ et HAL."
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:78
+msgid "documents_page_hal_status_badge_not_in_sync_with_hal_tooltip_card_update_button"
+msgstr "Mettre à jour sur HAL"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalCard.tsx:62
+msgid "documents_page_hal_status_badge_not_in_hal_tooltip_card_info_box_header"
+msgstr "Publication absente de votre HAL"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalCard.tsx:65
+msgid "documents_page_hal_status_badge_tooltip_card_not_in_hal_label"
+msgstr "Votre IdHAL est bien configuré, mais cette publication n'a pas été détectée sur votre profil HAL."
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalCard.tsx:72
+msgid "documents_page_hal_status_badge_not_in_hal_tooltip_card_download_button"
+msgstr "Déposer la publication dans HAL"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalCard.tsx:75
+msgid "documents_page_hal_status_badge_tooltip_card_not_in_hal_go_to_profile_label"
+msgstr "Un doute ? Vérifiez votre "
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalCard.tsx:76
+msgid "documents_page_hal_status_badge_tooltip_card_not_in_hal_go_to_profile_link"
+msgstr "IdHAL dans Mon Compte"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalMissingIdCard.tsx:62
+msgid "documents_page_hal_status_badge_missing_id_hal_tooltip_card_info_box_header"
+msgstr "Identifiant IdHAL manquant"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalMissingIdCard.tsx:65
+msgid "documents_page_hal_status_badge_tooltip_card_missing_id_label"
+msgstr "Votre IdHAL n'est pas renseigné dans votre profil SoVisu+. Sans lui, nous ne pouvons pas synchroniser vos publications."
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalMissingIdCard.tsx:72
+msgid "documents_page_hal_status_badge_missing_id_tooltip_card_add_id_button"
+msgstr "Saisir mon IdHAL dans Mon Compte"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalMissingIdCard.tsx:75
+msgid "documents_page_hal_status_badge_tooltip_card_missing_id_create_id_label"
+msgstr "Pas encore d'IdHAL ? "
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalMissingIdCard.tsx:76
+msgid "documents_page_hal_status_badge_tooltip_card_missing_id_create_id_link"
+msgstr "Créer un IdHAL"
 
 #: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:9
 msgid "documents_page_journal_article_icon_label"

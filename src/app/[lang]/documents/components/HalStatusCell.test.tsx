@@ -3,17 +3,30 @@ import { render, screen, act } from '@testing-library/react'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { HalSubmitType as DbHalSubmitType, OAStatus } from '@prisma/client'
-
 import { Document, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import HalStatusCell from './HalStatusCell'
+import HalStatusCellBadge, {
+  HalStatusCellType,
+} from '@/app/[lang]/documents/components/HalStatusCellBadge'
 
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
+
+jest.mock('./HalStatusCellBadge', () => {
+  const actual = jest.requireActual('./HalStatusCellBadge')
+  return {
+    __esModule: true,
+    ...actual,
+    default: jest.fn(actual.default),
+  }
+})
+
+const mockedHalStatusCellBadge = HalStatusCellBadge as jest.Mock
 
 const mockState = {
   user: {
@@ -56,6 +69,7 @@ const mockState = {
         },
       ],
       membershipAcronyms: ['ABC', 'DEF'],
+      hasIdHAL: () => true,
     },
   },
 }
@@ -121,8 +135,185 @@ beforeEach(() => {
   })
 })
 
+afterEach(() => {
+  jest.clearAllMocks()
+})
+
 describe('HalStatusCell Component', () => {
-  it('displays the in collection status', async () => {
+  it('displays the outside Hal status when currentPerspective is person with IdHal', async () => {
+    const document = createDocument(false)
+
+    render(
+      <I18nProvider i18n={i18n}>
+        <HalStatusCell row={{ original: document }} />
+      </I18nProvider>,
+    )
+
+    expect(screen.queryByTestId('AttachFileIcon')).not.toBeInTheDocument()
+    expect(
+      screen.getByText(i18n.t('documents_page_hal_status_outside_hal')),
+    ).toBeInTheDocument()
+    expect(mockedHalStatusCellBadge).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HalStatusCellType.OutsideHal,
+        documentUid: 'doc1',
+      }),
+      {},
+    )
+  })
+
+  it('displays the outside Hal missing id status when currentPerspective is person without IdHal', async () => {
+    const document = createDocument(false)
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({
+        ...mockState,
+        user: {
+          ...mockState.user,
+          currentPerspective: {
+            ...mockState.user.currentPerspective,
+            hasIdHAL: () => false,
+          },
+        },
+      }),
+    )
+
+    render(
+      <I18nProvider i18n={i18n}>
+        <HalStatusCell row={{ original: document }} />
+      </I18nProvider>,
+    )
+
+    expect(screen.queryByTestId('AttachFileIcon')).not.toBeInTheDocument()
+    expect(
+      screen.getByText(i18n.t('documents_page_hal_status_outside_hal')),
+    ).toBeInTheDocument()
+    expect(mockedHalStatusCellBadge).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HalStatusCellType.OutsideHalMissingId,
+      }),
+      {},
+    )
+  })
+
+  it('displays the outside Hal status when currentPerspective is research structure with IdHal', async () => {
+    const document = createDocument(false)
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({
+        ...mockState,
+        user: {
+          ...mockState.user,
+          currentPerspective: {
+            id: '1',
+            uid: '12345',
+            acronym: 'ABC',
+            external: false,
+            slug: 'research-structure:abc',
+            type: 'research_structure',
+            names: [],
+            hasIdHAL: () => true,
+          },
+        },
+      }),
+    )
+
+    render(
+      <I18nProvider i18n={i18n}>
+        <HalStatusCell row={{ original: document }} />
+      </I18nProvider>,
+    )
+
+    expect(screen.queryByTestId('AttachFileIcon')).not.toBeInTheDocument()
+    expect(
+      screen.getByText(i18n.t('documents_page_hal_status_outside_hal')),
+    ).toBeInTheDocument()
+    expect(mockedHalStatusCellBadge).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HalStatusCellType.OutsideHal,
+        documentUid: 'doc1',
+      }),
+      {},
+    )
+  })
+
+  it('displays the outside Hal missing id status when currentPerspective is research structure without IdHal', async () => {
+    const document = createDocument(false)
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({
+        ...mockState,
+        user: {
+          ...mockState.user,
+          currentPerspective: {
+            id: '1',
+            uid: '12345',
+            acronym: 'ABC',
+            external: false,
+            slug: 'research-structure:abc',
+            type: 'research_structure',
+            names: [],
+            hasIdHAL: () => false,
+          },
+        },
+      }),
+    )
+
+    render(
+      <I18nProvider i18n={i18n}>
+        <HalStatusCell row={{ original: document }} />
+      </I18nProvider>,
+    )
+
+    expect(screen.queryByTestId('AttachFileIcon')).not.toBeInTheDocument()
+    expect(
+      screen.getByText(i18n.t('documents_page_hal_status_outside_hal')),
+    ).toBeInTheDocument()
+    expect(mockedHalStatusCellBadge).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HalStatusCellType.OutsideHalMissingId,
+      }),
+      {},
+    )
+  })
+
+  it('displays the outside Hal status when currentPerspective is not a research structure or person', async () => {
+    const document = createDocument(false)
+    jest.mock('@/types/Person', () => {
+      const actual = jest.requireActual('@/types/Person')
+      return {
+        __esModule: true,
+        ...actual,
+        isPerson: () => false,
+      }
+    })
+    jest.mock('@/types/ResearchStructure', () => {
+      const actual = jest.requireActual('@/types/ResearchStructure')
+      return {
+        __esModule: true,
+        ...actual,
+        isResearchStructure: () => false,
+      }
+    })
+
+    render(
+      <I18nProvider i18n={i18n}>
+        <HalStatusCell row={{ original: document }} />
+      </I18nProvider>,
+    )
+
+    expect(screen.queryByTestId('AttachFileIcon')).not.toBeInTheDocument()
+    expect(
+      screen.getByText(i18n.t('documents_page_hal_status_outside_hal')),
+    ).toBeInTheDocument()
+    expect(mockedHalStatusCellBadge).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HalStatusCellType.OutsideHal,
+        documentUid: 'doc1',
+      }),
+      {},
+    )
+  })
+
+  it("displays the in collection status when hal record in collection and document hasn't been updated", async () => {
+    jest.spyOn(Document.prototype, 'hasBeenUpdated').mockReturnValue(false)
     const document = createDocument(
       true,
       [
@@ -141,11 +332,19 @@ describe('HalStatusCell Component', () => {
     expect(screen.getByTestId('AttachFileIcon')).toBeInTheDocument()
     expect(screen.queryByTestId('AttachFileOffIcon')).not.toBeInTheDocument()
     expect(
-      screen.getByText(i18n.t('documents_page_hal_status_in_collection')),
+      screen.getByText(i18n.t('documents_page_hal_status_in_hal')),
     ).toBeInTheDocument()
+    expect(mockedHalStatusCellBadge).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HalStatusCellType.InCollection,
+        halSubmitType: 'file',
+        halUrl: 'https://url-to-record-1/',
+      }),
+      {},
+    )
   })
 
-  it('displays the out of collection status', async () => {
+  it("displays the not in sync with collection status if hal record isn't in collection", async () => {
     const document = createDocument(true, ['SOME_OTHER_CODE'], 'file')
 
     render(
@@ -157,22 +356,32 @@ describe('HalStatusCell Component', () => {
     expect(screen.getByTestId('AttachFileIcon')).toBeInTheDocument()
     expect(screen.queryByTestId('AttachFileOffIcon')).not.toBeInTheDocument()
     expect(
-      screen.getByText(i18n.t('documents_page_hal_status_out_of_collection'), {
-        exact: false,
+      screen.getByText(i18n.t('documents_page_hal_status_in_hal')),
+    ).toBeInTheDocument()
+    expect(mockedHalStatusCellBadge).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HalStatusCellType.NotInSyncWithCollection,
+        acronyms: ['ABC', 'DEF'],
+        documentUid: 'doc1',
+        halUrl: 'https://url-to-record-1/',
+        isOutOfCollection: true,
+        hasBeenUpdated: false,
+        halSubmitType: 'file',
       }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText(
-        mockState.user.currentPerspective.membershipAcronyms.join(', '),
-        {
-          exact: false,
-        },
-      ),
-    ).toBeInTheDocument()
+      {},
+    )
   })
 
-  it('displays the outside Hal status', async () => {
-    const document = createDocument(false)
+  it('displays the not in sync with collection status if document has been updated', async () => {
+    jest.spyOn(Document.prototype, 'hasBeenUpdated').mockReturnValue(true)
+    const document = createDocument(
+      true,
+      [
+        mockState.user.currentPerspective.memberships[0].researchStructure
+          .acronym,
+      ],
+      'file',
+    )
 
     render(
       <I18nProvider i18n={i18n}>
@@ -180,10 +389,23 @@ describe('HalStatusCell Component', () => {
       </I18nProvider>,
     )
 
-    expect(screen.queryByTestId('AttachFileIcon')).not.toBeInTheDocument()
+    expect(screen.getByTestId('AttachFileIcon')).toBeInTheDocument()
+    expect(screen.queryByTestId('AttachFileOffIcon')).not.toBeInTheDocument()
     expect(
-      screen.getByText(i18n.t('documents_page_hal_status_outside_hal')),
+      screen.getByText(i18n.t('documents_page_hal_status_in_hal')),
     ).toBeInTheDocument()
+    expect(mockedHalStatusCellBadge).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: HalStatusCellType.NotInSyncWithCollection,
+        acronyms: ['ABC', 'DEF'],
+        documentUid: 'doc1',
+        halUrl: 'https://url-to-record-1/',
+        isOutOfCollection: false,
+        hasBeenUpdated: true,
+        halSubmitType: 'file',
+      }),
+      {},
+    )
   })
 
   it('displays the alternate icon', async () => {
@@ -204,7 +426,7 @@ describe('HalStatusCell Component', () => {
 
     expect(screen.getByTestId('AttachFileOffIcon')).toBeInTheDocument()
     expect(
-      screen.getByText(i18n.t('documents_page_hal_status_in_collection')),
+      screen.getByText(i18n.t('documents_page_hal_status_in_hal')),
     ).toBeInTheDocument()
   })
 })

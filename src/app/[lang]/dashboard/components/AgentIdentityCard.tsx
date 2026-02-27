@@ -3,11 +3,14 @@
 import React from 'react'
 import { Card, CardContent, Typography } from '@mui/material'
 import type { IAgent } from '@/types/IAgent'
-import { isPerson, isResearchStructure, Person } from '@/types/Person'
+import { isPerson, Person } from '@/types/Person'
 
 import PersonIdentityCard from '@/app/[lang]/dashboard/components/PersonIdentityCard'
 import ResearchStructureIdentityCard from '@/app/[lang]/dashboard/components/ResearchStructureIdentityCard'
-import { ResearchStructure } from '@/types/ResearchStructure'
+import {
+  isResearchStructure,
+  ResearchStructure,
+} from '@/types/ResearchStructure'
 import { Trans } from '@lingui/react/macro'
 
 const AgentIdentityCard = ({ agent }: { agent: IAgent | null | undefined }) => {

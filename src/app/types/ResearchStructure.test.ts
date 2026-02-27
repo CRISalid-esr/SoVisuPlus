@@ -204,4 +204,34 @@ describe('ResearchStructure', () => {
     ])
     expect(result.identifiers).toEqual([])
   })
+
+  it('hasIdHAL test', () => {
+    const researchStructureWithIdHal = new ResearchStructure(
+      'RS123',
+      'ABC',
+      [new Literal('Valid Research Structure', 'en')],
+      [new Literal('Valid Description', 'en')],
+      'ABC_signature',
+      [
+        { type: ResearchStructureIdentifierType.hal, value: '12345' },
+        { type: ResearchStructureIdentifierType.ror, value: '67890' },
+      ],
+    )
+
+    expect(researchStructureWithIdHal.hasIdHAL()).toBe(true)
+
+    const researchStructureWithoutIdHal = new ResearchStructure(
+      'RS123',
+      'ABC',
+      [new Literal('Valid Research Structure', 'en')],
+      [new Literal('Valid Description', 'en')],
+      'ABC_signature',
+      [
+        { type: ResearchStructureIdentifierType.nns, value: '12345' },
+        { type: ResearchStructureIdentifierType.ror, value: '67890' },
+      ],
+    )
+
+    expect(researchStructureWithoutIdHal.hasIdHAL()).toBe(false)
+  })
 })
