@@ -8,6 +8,8 @@ import {
   Button,
   CardContent,
   Grid2 as Grid,
+  MenuItem,
+  Select,
   Slider,
   Stack,
   Typography,
@@ -109,10 +111,87 @@ const DashboardPage = () => {
 
   return (
     <Box>
-      <DocumentHeader
-        perspectiveName={displayName}
-        pageName={t`dashboard_page_main_title`}
-      />
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}
+      >
+        <DocumentHeader
+          perspectiveName={displayName}
+          pageName={t`dashboard_page_main_title`}
+        />
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            gap: 2,
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1,
+            }}
+          >
+            <Typography>{t`dashboard_page_publication_by_year_graph_start_year_selection_label`}</Typography>
+            <Select
+              value={pendingWSYearRange[0]}
+              onChange={(event) =>
+                setPendingWSYearRange([
+                  event.target.value as number,
+                  pendingWSYearRange[1],
+                ])
+              }
+            >
+              {Array.from(
+                {
+                  length: currentYear - 1990 + 1,
+                },
+                (_, i) => 1990 + i,
+              ).map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1,
+            }}
+          >
+            <Typography>{t`dashboard_page_publication_by_year_graph_end_year_selection_label`}</Typography>
+            <Select
+              value={pendingWSYearRange[1]}
+              onChange={(event) =>
+                setPendingWSYearRange([
+                  pendingWSYearRange[0],
+                  event.target.value as number,
+                ])
+              }
+            >
+              {Array.from(
+                { length: currentYear - pendingWSYearRange[0] + 1 },
+                (_, i) => pendingWSYearRange[0] + i,
+              ).map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </Box>
+        </Box>
+      </Box>
 
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid size={{ xs: 12, md: 3 }} sx={{ display: 'flex' }}>
@@ -136,7 +215,10 @@ const DashboardPage = () => {
             }
           >
             <CardContent>
-              <PublicationCard />
+              <PublicationCard
+                yearRange={pendingWSYearRange}
+                setYearRange={setPendingWSYearRange}
+              />
             </CardContent>
           </CustomCard>
         </Grid>
@@ -165,8 +247,8 @@ const DashboardPage = () => {
                   entityType={entityType!}
                   lang={lang}
                   topics={[WordstreamTopic.Concepts, WordstreamTopic.CoAuthors]}
-                  fromYear={appliedWSYearRange[0]}
-                  toYear={appliedWSYearRange[1]}
+                  fromYear={pendingWSYearRange[0]}
+                  toYear={pendingWSYearRange[1]}
                   topN={appliedWSTopN}
                   minFont={appliedWSFontRange[0]}
                   maxFont={appliedWSFontRange[1]}
@@ -232,27 +314,6 @@ const DashboardPage = () => {
                   step={1}
                   valueLabelDisplay='auto'
                   aria-label={t`dashboard_page_wordstream_font_range_a11y`}
-                />
-              </Box>
-
-              <Box sx={{ minWidth: 300, flex: 1 }}>
-                <Typography
-                  variant='caption'
-                  sx={{ display: 'block', mb: 0.5 }}
-                >
-                  {t`dashboard_page_wordstream_year_range_label`}
-                </Typography>
-                <Slider
-                  value={pendingWSYearRange}
-                  onChange={(_, v) =>
-                    setPendingWSYearRange(v as [number, number])
-                  }
-                  min={1990}
-                  max={currentYear}
-                  step={1}
-                  valueLabelDisplay='auto'
-                  getAriaLabel={() => 'Year range'}
-                  aria-label={t`dashboard_page_wordstream_year_range_a11y`}
                 />
               </Box>
 
