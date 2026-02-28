@@ -2,10 +2,10 @@ name: Pull Request CI/CD
 
 on:
   pull_request:
-    branches: [ '*' ]
+    branches: ['*']
 
 env:
-  NODE_VERSION: '22.9.0'
+  NODE_VERSION: '24.14.0'
 
 jobs:
   unit-tests:
@@ -54,7 +54,7 @@ jobs:
             -e POSTGRES_DB=sovisuplus_test \
             -p 5433:5432 \
             postgres:latest &
-          
+
           # Wait for PostgreSQL to be ready
           until docker exec postgres_test_service pg_isready -U sovisuplus_test; do
             echo "Waiting for PostgreSQL to be ready..."
