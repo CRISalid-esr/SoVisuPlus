@@ -51,6 +51,43 @@ declare module 'next-auth/jwt' {
   }
 }
 
+const DEFAULT_JWT_EXP_HOURS = 12
+const MIN_JWT_EXP_HOURS = 1
+const MAX_JWT_EXP_HOURS = 24 * 7 // 7 days
+
+function parseIntStrict(value: string | undefined): number | null {
+  if (value === undefined) return null
+  // Only digits allowed
+  if (!/^\d+$/.test(value)) return null
+  const n = Number(value)
+  return Number.isSafeInteger(n) ? n : null
+}
+
+export function getJwtMaxAgeSeconds(): number {
+  const raw = process.env.JWT_TOKEN_EXPIRATION_HOURS
+  const hours = parseIntStrict(raw) ?? DEFAULT_JWT_EXP_HOURS
+
+  const restrictedHours = Math.min(
+    MAX_JWT_EXP_HOURS,
+    Math.max(MIN_JWT_EXP_HOURS, hours),
+  )
+
+  if (raw !== undefined) {
+    const parsed = parseIntStrict(raw)
+    if (parsed === null) {
+      console.warn(
+        `[auth] Invalid JWT_TOKEN_EXPIRATION_HOURS="${raw}". Using default=${DEFAULT_JWT_EXP_HOURS}h`,
+      )
+    } else if (parsed !== restrictedHours) {
+      console.warn(
+        `[auth] JWT_TOKEN_EXPIRATION_HOURS=${parsed}h out of range. Clamped to ${restrictedHours}h`,
+      )
+    }
+  }
+
+  return restrictedHours * 60 * 60
+}
+
 // utility function to strip domain if username is an eppn (temporary)
 const stripDomainFromEppn = (username: string): string => {
   const atIndex = username.indexOf('@')
@@ -68,6 +105,7 @@ const authOptions: AuthOptions = {
   ],
   session: {
     strategy: 'jwt',
+    maxAge: getJwtMaxAgeSeconds(),
   },
   callbacks: {
     async signIn({
