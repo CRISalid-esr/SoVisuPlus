@@ -83,6 +83,7 @@ Following table gives detailed information on each environment variable:
 | KEYCLOAK_ISSUER               | Keycloak institution issuer url                              | y       | server          | y                  | prod                                   | n                  |
 | KEYCLOAK_PUBLIC_URL           | Keycloak institution base url                                | n       | server          | y                  | prod                                   | n                  |
 | NEXTAUTH_SECRET               | Sovisuplus secret for authentication                         | y       | server          | y                  | prod                                   | n                  |
+| JWT_TOKEN_EXPIRATION_HOURS    | Expiration time for JWT tokens (in hours)                    | n       | server          | y                  | prod                                   | n                  |
 | AMQP_USER                     | App user name for connecting to AMQP                         | y       | server          | y                  | prod                                   | n                  |
 | AMQP_PASSWORD                 | App password for connecting to AMQP bus                      | y       | server          | y                  | prod                                   | n                  |
 | AMQP_HOST                     | AMQP bus host                                                | y       | server          | y                  | prod                                   | n                  |
