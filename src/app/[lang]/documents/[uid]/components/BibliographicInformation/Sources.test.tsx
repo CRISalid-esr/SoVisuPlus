@@ -1,0 +1,210 @@
+import useStore from '@/stores/global_store'
+import { BibliographicPlatform } from '@/types/BibliographicPlatform' // Ensure import
+import { i18n } from '@lingui/core'
+import { I18nProvider } from '@lingui/react'
+import { createTheme, ThemeProvider } from '@mui/material/styles'
+import '@testing-library/jest-dom'
+import { fireEvent, render, screen } from '@testing-library/react'
+import Sources from './Sources'
+
+// Mock Zustand store
+jest.mock('@/stores/global_store', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+
+// Mock MUI Theme
+jest.mock('@mui/material/styles', () => ({
+  ...jest.requireActual('@mui/material/styles'),
+  useTheme: () => ({
+    palette: {
+      primary: { main: '#1976d2' },
+    },
+    spacing: (factor: number) => `${factor * 8}px`,
+    utils: { pxToRem: (value: number) => `${value / 16}rem` },
+    typography: {
+      fontWeightRegular: 400,
+      fontWeightMedium: 500,
+      lineHeight: { lineHeight20px: '20px' },
+    },
+  }),
+}))
+
+const mockRouter = {
+  push: jest.fn(),
+}
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => mockRouter,
+  useSearchParams: jest.fn(() => new URLSearchParams()),
+  useParams: jest.fn(() => ({ uid: '123' })),
+}))
+
+// Mock window.open to test external link clicks
+global.open = jest.fn()
+
+// Mock bibliographic metadata inside jest.mock()
+jest.mock('@/types/BibliographicPlatform', () => {
+  const actual = jest.requireActual('@/types/BibliographicPlatform') // Preserve actual enum
+  return {
+    ...actual,
+    BibliographicPlatformMetadata: {
+      [actual.BibliographicPlatform.HAL]: {
+        name: 'HAL',
+        icon: '/icons/hal.png',
+      },
+      [actual.BibliographicPlatform.SCANR]: {
+        name: 'ScanR',
+        icon: '/icons/scanr.png',
+      },
+      [actual.BibliographicPlatform.IDREF]: {
+        name: 'IdRef',
+        icon: '/icons/idref.png',
+      },
+      [actual.BibliographicPlatform.OPENALEX]: {
+        name: 'OpenAlex',
+        icon: '/icons/openalex.png',
+      },
+      [actual.BibliographicPlatform.SCOPUS]: {
+        name: 'Scopus',
+        icon: '/icons/scopus.png',
+      },
+    },
+  }
+})
+
+// Mock document data
+const mockState = {
+  document: {
+    selectedDocument: {
+      records: [
+        {
+          platform: BibliographicPlatform.HAL,
+          url: 'https://hal.archives-ouvertes.fr',
+        },
+        {
+          platform: BibliographicPlatform.SCANR,
+          url: 'https://scanr.enseignementsup-recherche.gouv.fr',
+        },
+        { platform: BibliographicPlatform.IDREF, url: 'https://www.idref.fr' },
+        {
+          platform: BibliographicPlatform.OPENALEX,
+          url: 'https://openalex.org',
+        },
+        {
+          platform: BibliographicPlatform.SCOPUS,
+          url: 'https://www.scopus.com',
+        },
+      ],
+    },
+  },
+}
+
+describe('Sources Component', () => {
+  beforeEach(() => {
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector(mockState),
+    )
+    jest.clearAllMocks()
+  })
+
+  const theme = createTheme({
+    typography: {
+      fontWeightRegular: 400,
+      fontWeightMedium: 500,
+    },
+    palette: {
+      primary: { main: '#1976d2' },
+    },
+    utils: { pxToRem: (value: number) => `${value / 16}rem` },
+  })
+
+  const renderComponent = () =>
+    render(
+      <ThemeProvider theme={theme}>
+        <I18nProvider i18n={i18n}>
+          <Sources />
+        </I18nProvider>
+      </ThemeProvider>,
+    )
+
+  it('renders sources edit button', () => {
+    renderComponent()
+
+    expect(
+      screen.getByText('document_details_page_sources_row_update_source'),
+    ).toBeInTheDocument()
+  })
+
+  it('renders bibliographic sources as chips', () => {
+    renderComponent()
+
+    expect(screen.getByText('HAL')).toBeInTheDocument()
+    expect(screen.getByText('ScanR')).toBeInTheDocument()
+    expect(screen.getByText('IdRef')).toBeInTheDocument()
+    expect(screen.getByText('OpenAlex')).toBeInTheDocument()
+    expect(screen.getByText('Scopus')).toBeInTheDocument()
+  })
+
+  it('opens source link on chip click', () => {
+    renderComponent()
+
+    const halChip = screen.getByText('HAL')
+    fireEvent.click(halChip)
+    expect(global.open).toHaveBeenCalledWith(
+      'https://hal.archives-ouvertes.fr',
+      '_blank',
+    )
+
+    const scanrChip = screen.getByText('ScanR')
+    fireEvent.click(scanrChip)
+    expect(global.open).toHaveBeenCalledWith(
+      'https://scanr.enseignementsup-recherche.gouv.fr',
+      '_blank',
+    )
+
+    const idrefChip = screen.getByText('IdRef')
+    fireEvent.click(idrefChip)
+    expect(global.open).toHaveBeenCalledWith('https://www.idref.fr', '_blank')
+
+    const openalexChip = screen.getByText('OpenAlex')
+    fireEvent.click(openalexChip)
+    expect(global.open).toHaveBeenCalledWith('https://openalex.org', '_blank')
+
+    const scopusChip = screen.getByText('Scopus')
+    fireEvent.click(scopusChip)
+    expect(global.open).toHaveBeenCalledWith('https://www.scopus.com', '_blank')
+  })
+
+  it('renders the edit button and handles click', () => {
+    renderComponent()
+
+    const editButton = screen.getByText(
+      i18n.t('document_details_page_sources_row_update_source'),
+    )
+    expect(editButton).toBeInTheDocument()
+
+    fireEvent.click(editButton)
+
+    // No specific event expected, but ensures the button is clickable
+    expect(editButton).toBeInTheDocument()
+  })
+
+  it('navigates to the sources tab when clicking the edit button', () => {
+    i18n.activate('en')
+
+    renderComponent()
+
+    const editButton = screen.getByRole('button', {
+      name: 'document_details_page_sources_row_update_source',
+    })
+
+    fireEvent.click(editButton)
+
+    expect(mockRouter.push).toHaveBeenCalledTimes(1)
+    const pushedUrl = (mockRouter.push as jest.Mock).mock.calls[0][0] as string
+
+    expect(pushedUrl).toContain('/en/documents/123')
+    expect(pushedUrl).toContain('tab=sources')
+  })
+})

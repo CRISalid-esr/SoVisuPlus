@@ -15,10 +15,12 @@
 
 # next.js
 /.next/
+/.swc/
 /out/
 
 # production
 /build
+/dist-listener
 
 # misc
 .DS_Store
@@ -30,7 +32,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # env files (can opt-in for commiting if needed)
-.env*
+.env
+.env.production
 
 # vercel
 .vercel
@@ -40,3 +43,9 @@ yarn-error.log*
 next-env.d.ts
 
 .idea
+.run
+
+.vscode/launch.json
+
+# RBAC (env-specific)
+rbac.roles.yaml

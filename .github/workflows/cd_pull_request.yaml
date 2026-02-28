@@ -1,0 +1,105 @@
+name: Pull Request CI/CD
+
+on:
+  pull_request:
+    branches: ['*']
+
+env:
+  NODE_VERSION: '24.14.0'
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Copy .env.test to .env
+        run: cp .env.test .env
+
+      - name: Run Jest tests
+        run: npm test
+  integration-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Copy .env.sample to .env
+        run: cp .env.sample .env
+
+      - name: Start PostgreSQL in Docker
+        run: |
+          docker run -dit --rm --name postgres_test_service \
+            -e POSTGRES_USER=sovisuplus_test \
+            -e POSTGRES_PASSWORD=sovisuplus_test \
+            -e POSTGRES_DB=sovisuplus_test \
+            -p 5433:5432 \
+            postgres:latest &
+
+          # Wait for PostgreSQL to be ready
+          until docker exec postgres_test_service pg_isready -U sovisuplus_test; do
+            echo "Waiting for PostgreSQL to be ready..."
+            sleep 5
+          done
+        shell: bash
+
+      - name: Run Tests
+        env:
+          DATABASE_URL: postgres://sovisuplus_test:sovisuplus_test@localhost:5433/sovisuplus_test
+        run: |
+          npx prisma generate
+          npx prisma db push
+          npm run test:integration
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Run ESLint
+        run: npm run lint
+  type-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Run TypeScript compilation
+        run: npm run type-check

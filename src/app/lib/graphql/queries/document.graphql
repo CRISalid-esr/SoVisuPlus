@@ -1,0 +1,127 @@
+query Documents($where: DocumentWhere) {
+  documents(where: $where) {
+    uid
+    document_type
+    oa_status
+    publication_date
+    publication_date_start
+    publication_date_end
+    upw_oa_status
+    titles {
+      language
+      value
+    }
+    abstracts {
+      language
+      value
+    }
+    has_subjects {
+      uri
+      uid
+      alt_labels {
+        language
+        value
+      }
+      pref_labels {
+        language
+        value
+      }
+    }
+    has_contributions {
+      affiliations {
+        uid
+        display_names
+        identifiers {
+          type
+          value
+        }
+      }
+      roles
+      contributor {
+        uid
+        display_name
+        external
+        identifiers {
+          type
+          value
+        }
+        names {
+          first_names {
+            language
+            value
+          }
+          last_names {
+            language
+            value
+          }
+        }
+        memberships {
+          uid
+          acronym
+          names {
+            language
+            value
+          }
+          types
+        }
+      }
+    }
+    publishedInConnection {
+      edges {
+        properties {
+          volume
+          issue
+          pages
+        }
+        node {
+          issn_l
+          publisher
+          titles
+          identifiers {
+            type
+            value
+            format
+          }
+        }
+      }
+    }
+    recorded_by {
+      uid
+      url
+      issued
+      source_identifier
+      published_in {
+        issued_by {
+          uid
+          titles
+          publisher
+          source
+          source_identifier
+        }
+        source
+        source_identifier
+      }
+      document_types
+      harvester
+      hal_collection_codes
+      hal_submit_type
+      has_contributions {
+        role
+        contributor {
+          uid
+          name
+          source
+          source_identifier
+        }
+      }
+      has_identifiers {
+        type
+        value
+      }
+      titles {
+        language
+        value
+      }
+    }
+  }
+}

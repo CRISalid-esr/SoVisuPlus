@@ -1,0 +1,66 @@
+query PeopleQuery($where: PersonWhere) {
+  people(where: $where) {
+    uid
+    display_name
+    external
+    identifiers {
+      type
+      value
+    }
+    names {
+      first_names {
+        language
+        value
+      }
+      last_names {
+        language
+        value
+      }
+    }
+
+    membershipsConnection {
+      edges {
+        properties {
+          start_date
+          end_date
+          position_code
+        }
+        node {
+          acronym
+          identifiers {
+            type
+            value
+          }
+          names {
+            language
+            value
+          }
+          types
+          uid
+        }
+      }
+    }
+    employmentsConnection {
+      edges {
+        properties {
+          start_date
+          end_date
+          position_code
+        }
+        node {
+          acronym
+          identifiers {
+            type
+            value
+          }
+          names {
+            language
+            value
+          }
+          types
+          uid
+        }
+      }
+    }
+  }
+}

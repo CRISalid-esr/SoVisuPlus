@@ -1,0 +1,592 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["debian-openssl-1.1.x", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x", "darwin-arm64"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  personId Int?    @unique
+  person   Person? @relation(fields: [personId], references: [id], onDelete: SetNull)
+
+  roles UserRole[]
+}
+
+model Person {
+  id             Int                @id @default(autoincrement())
+  uid            String             @unique
+  slug           String?            @unique
+  email          String?            @unique
+  displayName    String?
+  firstName      String?
+  lastName       String?
+  normalizedName String?
+  identifiers    PersonIdentifier[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  external       Boolean            @default(false)
+  user           User?
+  contributions  Contribution[]
+  memberships    Membership[]
+}
+
+model Membership {
+  id                  Int               @id @default(autoincrement())
+  personId            Int
+  researchStructureId Int
+  startDate           DateTime?
+  endDate             DateTime?
+  positionCode        String?
+  person              Person            @relation(fields: [personId], references: [id], onDelete: Cascade)
+  researchStructure   ResearchStructure @relation(fields: [researchStructureId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, researchStructureId])
+  @@index([researchStructureId])
+  @@index([personId])
+}
+
+enum DocumentState {
+  default
+  waiting_for_update
+}
+
+enum OAStatus {
+  GREEN   @map("green")
+  DIAMOND @map("diamond")
+  GOLD    @map("gold")
+  BRONZE  @map("bronze")
+  HYBRID  @map("hybrid")
+  OTHER   @map("other")
+  CLOSED  @map("closed")
+}
+
+model Document {
+  id                   Int                @id @default(autoincrement())
+  uid                  String             @unique
+  documentType         DocumentType       @default(Document)
+  oaStatus             OAStatus?
+  publicationDate      String?
+  publicationDateStart DateTime?
+  publicationDateEnd   DateTime?
+  upwOAStatus          OAStatus?
+  titles               DocumentTitle[]
+  abstracts            DocumentAbstract[]
+  contributions        Contribution[]
+  subjects             Concept[]
+  title_locale_0       String?
+  title_locale_1       String?
+  title_locale_2       String?
+  records              DocumentRecord[]
+  state                DocumentState      @default(default)
+
+  journalId Int?
+  journal   Journal? @relation(fields: [journalId], references: [id], onDelete: SetNull)
+  volume    String?
+  issue     String?
+  pages     String?
+}
+
+model Journal {
+  id          Int                 @id @default(autoincrement())
+  issnL       String              @unique
+  publisher   String
+  title       String
+  identifiers JournalIdentifier[]
+  documents   Document[]
+}
+
+model JournalIdentifier {
+  id        Int     @id @default(autoincrement())
+  type      String
+  value     String
+  format    String?
+  journalId Int
+  journal   Journal @relation(fields: [journalId], references: [id], onDelete: Cascade)
+}
+
+enum DocumentType {
+  Document
+  ScholarlyPublication
+  Presentation
+  Article
+  ConferenceAbstract
+  Preface
+  Comment
+  JournalArticle
+  Book
+  Monograph
+  BookChapter
+  BookOfChapters
+  ConferenceArticle
+  Proceedings
+}
+
+enum SourceRecordType {
+  Article
+  AudiovisualDocument
+  Book
+  Chapter
+  Document
+  Excerpt
+  Letter
+  Manual
+  Map
+  Note
+  Patent
+  Proceedings
+  Standard
+  Thesis
+  BlogPost
+  ConferenceOutput
+  DataPaper
+  Lecture
+  MasterThesis
+  Other
+  PeerReview
+  Report
+  ResearchReport
+  Software
+  TechnicalReport
+  BookReview
+  ConferencePaper
+  ConferencePoster
+  DataManagementPlan
+  Dataset
+  Editorial
+  Erratum
+  Image
+  MetadataDocument
+  Preprint
+  ReferenceBook
+  ReviewArticle
+  ReviewPaper
+  StillImage
+  WorkingPaper
+  Grant
+  Work
+  Unknown
+}
+
+enum HalSubmitType {
+  file
+  notice
+  annex
+}
+
+model SourcePerson {
+  id                 Int                  @id @default(autoincrement())
+  uid                String               @unique
+  name               String
+  source             String
+  sourceId           String?
+  SourceContribution SourceContribution[]
+}
+
+model SourceContribution {
+  id               Int            @id @default(autoincrement())
+  role             String
+  person           SourcePerson   @relation(fields: [sourcePersonId], references: [id], onDelete: Cascade)
+  sourcePersonId   Int
+  DocumentRecord   DocumentRecord @relation(fields: [documentRecordId], references: [id], onDelete: Cascade)
+  documentRecordId Int
+}
+
+model SourceJournal {
+  id             Int              @id @default(autoincrement())
+  uid            String           @unique
+  source         String
+  sourceId       String
+  publisher      String?
+  titles         String[]
+  DocumentRecord DocumentRecord[]
+}
+
+enum PublicationIdentifierType {
+  arxiv
+  bibcode
+  biorxiv
+  cern
+  chemrxiv
+  doi
+  ensam
+  hal
+  ineris
+  inspire
+  ird
+  irstea
+  irthesaurus
+  meditagri
+  nnt
+  oatao
+  okina
+  openalex
+  pii
+  pmid
+  ppn
+  prodinra
+  pubmedcentral
+  sciencespo
+  swhid
+  uri
+  wos
+  unknown
+}
+
+model PublicationIdentifier {
+  id             Int                       @id @default(autoincrement())
+  type           PublicationIdentifierType
+  value          String?
+  DocumentRecord DocumentRecord[]
+
+  @@unique([type, value]) // The same identifer should not be used twice
+}
+
+model DocumentRecord {
+  id                 Int                     @id @default(autoincrement())
+  uid                String                  @unique
+  url                String?
+  sourceIdentifier   String
+  identifiers        PublicationIdentifier[]
+  contributions      SourceContribution[]
+  documentTypes      SourceRecordType[]
+  sourceJournalId    Int?
+  journal            SourceJournal?          @relation(fields: [sourceJournalId], references: [id])
+  publicationDate    DateTime?
+  platform           BibliographicPlatform
+  titles             Json
+  halCollectionCodes String[]
+  halSubmitType      HalSubmitType?
+  documentId         Int
+  document           Document                @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+enum BibliographicPlatform {
+  hal
+  scanr
+  idref
+  openalex
+  scopus
+}
+
+model DocumentTitle {
+  id         Int      @id @default(autoincrement())
+  documentId Int
+  language   String // ISO 639-1 code (e.g., 'en', 'fr')
+  value      String   @db.VarChar(2000)
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, language]) // Ensure no duplicate languages for the same document
+}
+
+model DocumentAbstract {
+  id         Int      @id @default(autoincrement())
+  documentId Int
+  language   String // ISO 639-1 code (e.g., 'en', 'fr')
+  value      String   @db.Text
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, language]) // Ensure no duplicate languages for the same document
+}
+
+enum AuthorityOrganizationIdentifierType {
+  hal
+  idref
+  isni
+  local
+  nns
+  openalex
+  ror
+  scopus
+  siren
+  siret
+  uai
+  viaf
+  wikidata
+}
+
+model AuthorityOrganizationIdentifier {
+  id             Int                                 @id @default(autoincrement())
+  type           AuthorityOrganizationIdentifierType
+  value          String
+  organization   AuthorityOrganization               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId Int
+
+  @@unique([type, value])
+  @@index([organizationId])
+}
+
+model AuthorityOrganization {
+  id            Int                               @id @default(autoincrement())
+  uid           String                            @unique
+  displayNames  String[]
+  identifiers   AuthorityOrganizationIdentifier[]
+  contributions Contribution[]
+}
+
+model Contribution {
+  id           Int                     @id @default(autoincrement())
+  personId     Int
+  documentId   Int
+  roles        String[]
+  affiliations AuthorityOrganization[]
+  person       Person                  @relation(fields: [personId], references: [id], onDelete: Cascade)
+  document     Document                @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, documentId]) // Ensure unique person-document pair
+  @@index([documentId])
+}
+
+model Concept {
+  id        Int            @id @default(autoincrement())
+  uid       String         @unique
+  uri       String?
+  labels    ConceptLabel[]
+  documents Document[]
+}
+
+model ConceptLabel {
+  id        Int       @id @default(autoincrement())
+  conceptId Int
+  concept   Concept   @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  language  String // ISO 639-1 code
+  value     String
+  type      LabelType
+
+  @@unique([conceptId, language, type, value])
+  @@index([conceptId])
+}
+
+enum LabelType {
+  PREF
+  ALT
+}
+
+enum PersonIdentifierType {
+  eppn
+  hal_login
+  idref
+  idhals
+  idhali
+  local
+  orcid
+  scopus
+}
+
+model PersonIdentifier {
+  id       Int                  @id @default(autoincrement())
+  type     PersonIdentifierType
+  value    String
+  person   Person               @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId Int
+
+  orcidIdentifier OrcidIdentifier?
+
+  @@unique([type, value]) // The same identifer should not be used twice
+  @@unique([personId, type]) // A person should not have more than one identifier of the same type
+  @@index([personId])
+}
+
+model OrcidIdentifier {
+  // same primary key as base row (1–1)
+  id         Int              @id
+  identifier PersonIdentifier @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  // encrypt tokens !
+  accessToken  String?
+  refreshToken String?
+  scope        String
+  tokenType    String?
+
+  obtainedAt DateTime @default(now())
+  expiresAt  DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ResearchStructure {
+  id           Int                            @id @default(autoincrement())
+  uid          String                         @unique
+  acronym      String?
+  names        ResearchStructureName[]
+  descriptions ResearchStructureDescription[]
+  signature    String?
+  identifiers  ResearchStructureIdentifier[]
+  external     Boolean                        @default(false)
+  slug         String?                        @unique
+  memberships  Membership[]
+}
+
+model ResearchStructureName {
+  id                  Int               @id @default(autoincrement())
+  researchStructureId Int
+  language            String // ISO 639-1 code
+  value               String            @db.VarChar(255)
+  researchStructure   ResearchStructure @relation(fields: [researchStructureId], references: [id], onDelete: Cascade)
+
+  @@unique([researchStructureId, language])
+}
+
+model ResearchStructureDescription {
+  id                  Int               @id @default(autoincrement())
+  researchStructureId Int
+  language            String // ISO 639-1 code
+  value               String            @db.VarChar(2000)
+  researchStructure   ResearchStructure @relation(fields: [researchStructureId], references: [id], onDelete: Cascade)
+
+  @@unique([researchStructureId, language])
+}
+
+model ResearchStructureIdentifier {
+  id                  Int                             @id @default(autoincrement())
+  type                ResearchStructureIdentifierType
+  value               String
+  researchStructure   ResearchStructure               @relation(fields: [researchStructureId], references: [id], onDelete: Cascade)
+  researchStructureId Int
+
+  @@unique([type, value])
+}
+
+enum ResearchStructureIdentifierType {
+  hal
+  idref
+  isni
+  local
+  nns
+  openalex
+  ror
+  scopus
+  siren
+  siret
+  uai
+  viaf
+  wikidata
+}
+
+enum ActionType {
+  ADD
+  REMOVE
+  UPDATE
+  FETCH
+  MERGE
+}
+
+enum ActionTargetType {
+  DOCUMENT
+  PERSON
+  HARVESTING
+}
+
+model Action {
+  id         String           @id @default(uuid())
+  actionType ActionType
+  targetType ActionTargetType
+  targetUid  String
+  path       String?
+  parameters Json
+  timestamp  DateTime         @default(now())
+  dispatched Boolean          @default(false)
+  personUid  String
+
+  @@index([actionType])
+  @@index([targetType])
+  @@index([targetUid])
+  @@index([timestamp])
+}
+
+enum PermissionAction {
+  manage
+  read
+  create
+  update
+  delete
+  merge
+  unmerge
+  fetch_documents
+}
+
+enum PermissionSubject {
+  all
+  Document
+  DocumentRecord
+  Person
+  ResearchStructure
+  Membership
+  Institution
+  InstitutionDivision
+}
+
+enum EntityType {
+  Person
+  ResearchStructure
+  Institution
+  InstitutionDivision
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  system      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          Int               @id @default(autoincrement())
+  action      PermissionAction
+  subject     PermissionSubject
+  fields      String[]          @default([])
+  inverted    Boolean           @default(false)
+  conditions  Json?
+  description String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model UserRole {
+  userId Int
+  roleId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  scopes UserRoleScope[]
+
+  @@id([userId, roleId])
+  @@index([roleId])
+}
+
+model UserRoleScope {
+  id         Int        @id @default(autoincrement())
+  userId     Int
+  roleId     Int
+  entityType EntityType
+  entityUid  String
+
+  userRole UserRole @relation(fields: [userId, roleId], references: [userId, roleId], onDelete: Cascade)
+
+  @@unique([userId, roleId, entityType, entityUid])
+  @@index([entityType, entityUid])
+}

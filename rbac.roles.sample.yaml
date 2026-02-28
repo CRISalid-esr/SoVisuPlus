@@ -1,0 +1,29 @@
+roles:
+  - name: admin
+    system: true
+    description: Full access
+    permissions:
+      - action: manage
+        subject: all
+
+  - name: document_editor
+    description: Edit document metadata
+    permissions:
+      - action: update
+        subject: Document
+        fields:
+          [titles, abstracts, contributors, identifiers, documentType, subjects]
+
+  - name: document_merger
+    description: Merge / unmerge documents and source records
+    permissions:
+      - action: merge
+        subject: Document
+      - action: unmerge
+        subject: DocumentRecord
+
+  - name: document_fetcher
+    description: Fetch documents from external sources
+    permissions:
+      - action: fetch_documents
+        subject: Person

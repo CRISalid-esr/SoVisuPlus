@@ -1,0 +1,260 @@
+import useStore from '@/stores/global_store'
+import { i18n } from '@lingui/core'
+import { I18nProvider } from '@lingui/react'
+import { createTheme, ThemeProvider } from '@mui/material/styles'
+import '@testing-library/jest-dom'
+import { render, screen } from '@testing-library/react'
+import DocumentDetailsPage from './page'
+import { notFound } from 'next/navigation'
+import { Document, DocumentType } from '@/types/Document'
+import { Literal } from '@/types/Literal'
+import { Contribution } from '@/types/Contribution'
+import { Person } from '@/types/Person'
+import { LocRelator } from '@/types/LocRelator'
+import { OAStatus } from '@prisma/client'
+import { DocumentRecord } from '@/types/DocumentRecord'
+import { BibliographicPlatform } from '@/types/BibliographicPlatform'
+
+// Mock Zustand store
+jest.mock('@/stores/global_store', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+
+// Mock MUI Theme
+jest.mock('@mui/material/styles', () => ({
+  ...jest.requireActual('@mui/material/styles'),
+  useTheme: () => ({
+    palette: { primary: { main: '#1976d2' }, grey: { 300: '#f5f5f5' } },
+    spacing: (factor: number) => `${factor * 8}px`,
+    utils: { pxToRem: (value: number) => `${value / 16}rem` },
+    typography: {
+      fontWeightRegular: 400,
+      fontWeightMedium: 500,
+      lineHeight: {
+        lineHeight20px: '20px',
+      },
+    },
+  }),
+}))
+
+// Mock next/navigation
+jest.mock('next/navigation', () => ({
+  useParams: jest.fn(() => ({ uid: '123' })),
+  useSearchParams: jest.fn(
+    () => new URLSearchParams('?tab=bibliographic_information'),
+  ),
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+    back: jest.fn(),
+  })),
+  notFound: jest.fn(),
+}))
+
+jest.mock('next-auth/react', () => ({
+  __esModule: true,
+  useSession: () => ({ data: { user: { authz: { roleAssignments: [] } } } }),
+}))
+
+const document: Document = new Document(
+  'doc-123',
+  DocumentType.Document,
+  OAStatus.GREEN,
+  '2022',
+  new Date('2022-01-01T00:00:00.000Z'),
+  new Date('2022-12-31T23:59:59.000Z'),
+  OAStatus.DIAMOND,
+  [
+    new Literal('Sample Document Title', 'en'),
+    new Literal('Sample Abstract', 'fr'),
+  ],
+  [new Literal('Sample Abstract', 'fr')],
+  [], // empty subjects
+  [
+    new Contribution(
+      new Person(
+        'person-1',
+        false,
+        'john@example.com',
+        'John Doe',
+        'John',
+        'Doe',
+        [],
+      ),
+      [LocRelator.AUTHOR_OF_INTRODUCTION__ETC_],
+    ),
+  ],
+  [
+    new DocumentRecord(
+      'rec1',
+      'hal-001',
+      [],
+      [],
+      [],
+      new Date('2024-01-01'),
+      BibliographicPlatform.HAL,
+      [new Literal('Record Title 1', 'en')],
+      'https://url-to-record-1',
+      [],
+      null,
+      undefined,
+    ),
+  ],
+)
+
+const mockState = {
+  document: {
+    fetchDocumentById: jest.fn(),
+    loading: false,
+    selectedDocument: document,
+  },
+}
+
+describe('DocumentDetailsPage Component', () => {
+  beforeEach(() => {
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector(mockState),
+    )
+    jest.clearAllMocks()
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  const theme = createTheme({
+    typography: { fontWeightRegular: 400, fontWeightMedium: 500 },
+    palette: { primary: { main: '#1976d2' } },
+    utils: { pxToRem: (value: number) => `${value / 16}rem` },
+  })
+
+  const renderComponent = () =>
+    render(
+      <ThemeProvider theme={theme}>
+        <I18nProvider i18n={i18n}>
+          <DocumentDetailsPage />
+        </I18nProvider>
+      </ThemeProvider>,
+    )
+
+  it('renders loading state', () => {
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({ document: { ...mockState.document, loading: true } }),
+    )
+
+    renderComponent()
+    expect(screen.getByRole('progressbar')).toBeInTheDocument() // CircularProgress should be visible
+  })
+
+  it('calls notFound if document is missing', () => {
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({
+        document: {
+          ...mockState.document,
+          selectedDocument: null,
+          hasFetched: true,
+        },
+      }),
+    )
+
+    renderComponent()
+    expect(notFound).toHaveBeenCalled()
+  })
+
+  it('renders DocumentDetailsHeader and BibliographicInformation when document is found', () => {
+    jest.spyOn(document, 'hasBeenUpdated').mockReturnValue(false)
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({
+        document: { ...mockState.document, loading: false, hasFetched: true },
+        user: {
+          currentPerspective: {
+            person: {
+              id: '1',
+              firstName: 'John',
+              lastName: 'Doe',
+              type: 'people',
+              slug: 'person:john-doe',
+            },
+          },
+          connectedUser: {
+            person: {
+              id: '1',
+              firstName: 'John',
+              lastName: 'Doe',
+              type: 'people',
+              slug: 'person:john-doe',
+            },
+          },
+        },
+      }),
+    )
+    renderComponent()
+
+    const elements = screen.getAllByText(
+      i18n.t('document_details_bibliographic_information_tab'),
+    )
+    expect(elements).toHaveLength(1)
+    expect(
+      screen.getByText(i18n.t('document_details_keywords_tab')),
+    ).toBeInTheDocument()
+    expect(screen.getByText('document_details_domains_tab')).toBeInTheDocument()
+    expect(screen.getByText('document_details_authors_tab')).toBeInTheDocument()
+    expect(screen.getByText('document_details_sources_tab')).toBeInTheDocument()
+    expect(
+      screen.queryByText('document_details_update_in_hal_tab'),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('document_details_add_in_hal_tab'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('renders add and update in hal tabs conditionally', () => {
+    jest.spyOn(document, 'hasBeenUpdated').mockReturnValue(true)
+    mockState.document.selectedDocument.records = []
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({
+        document: { ...mockState.document, loading: false, hasFetched: true },
+        user: {
+          currentPerspective: {
+            person: {
+              id: '1',
+              firstName: 'John',
+              lastName: 'Doe',
+              type: 'people',
+              slug: 'person:john-doe',
+            },
+          },
+          connectedUser: {
+            person: {
+              id: '1',
+              firstName: 'John',
+              lastName: 'Doe',
+              type: 'people',
+              slug: 'person:john-doe',
+            },
+          },
+        },
+      }),
+    )
+    renderComponent()
+
+    const elements = screen.getAllByText(
+      i18n.t('document_details_bibliographic_information_tab'),
+    )
+    expect(elements).toHaveLength(1)
+    expect(
+      screen.getByText(i18n.t('document_details_keywords_tab')),
+    ).toBeInTheDocument()
+    expect(screen.getByText('document_details_domains_tab')).toBeInTheDocument()
+    expect(screen.getByText('document_details_authors_tab')).toBeInTheDocument()
+    expect(screen.getByText('document_details_sources_tab')).toBeInTheDocument()
+    expect(
+      screen.getByText('document_details_update_in_hal_tab'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('document_details_add_in_hal_tab'),
+    ).toBeInTheDocument()
+  })
+})

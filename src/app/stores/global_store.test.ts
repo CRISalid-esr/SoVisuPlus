@@ -1,0 +1,50 @@
+import useStore from './global_store'
+
+describe('Zustand Global Store - useStore with DocumentSlice', () => {
+  beforeEach(() => {
+    // Reset Zustand state before each test to avoid state pollution
+    useStore.setState({
+      document: {
+        selectedDocument: null,
+        documents: [],
+        count: {
+          loading: true,
+          error: null,
+          allItems: 0,
+          incompleteHalRepositoryItems: 0,
+        },
+        loading: true,
+        error: null,
+        fetchDocuments: jest.fn(),
+        hasFetched: false,
+        setHasFetched: jest.fn(),
+        countDocuments: jest.fn(),
+        fetchDocumentById: jest.fn(),
+        removeConcepts: jest.fn(),
+        addConcepts: jest.fn(),
+        modifyTitles: jest.fn(),
+        modifyAbstracts: jest.fn(),
+        listHasChanged: false,
+        selectedDocumentHasChanged: false,
+        setSelectedDocumentHasChanged: jest.fn(),
+        setListHasChanged: jest.fn(),
+        mergeDocuments: jest.fn(),
+        updateDocumentType: jest.fn(),
+      },
+    })
+  })
+
+  it('should initialize with default state', () => {
+    const state = useStore.getState()
+
+    expect(state.document.documents).toEqual([])
+    expect(state.document.loading).toBe(true)
+    expect(state.document.error).toBeNull()
+  })
+
+  it('should have the fetchDocuments method defined', () => {
+    const state = useStore.getState()
+    expect(state.document.fetchDocuments).toBeDefined()
+    expect(typeof state.document.fetchDocuments).toBe('function')
+  })
+})

@@ -1,0 +1,43 @@
+.ellipsisGlobalContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.ellipsisTextContainer {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: max-height 0.3s ease-in-out;
+  max-height: 4em;
+  box-sizing: content-box;
+  padding-bottom: 10px;
+}
+
+.ellipsisExpanded {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  gap: 0.5rem;
+  -webkit-line-clamp: unset;
+  white-space: normal;
+  max-height: 500px; /* Arbitrary large value to allow expansion */
+}
+
+.ellipsisCollapsed {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  gap: 0.5rem;
+  -webkit-line-clamp: 3; /* Adjust */
+  -webkit-box-orient: vertical;
+  max-height: 3em; /* Adjust */
+  opacity: 1;
+}
+
+.ellipsisExpandButton {
+  cursor: pointer;
+  margin-left: 5px;
+}

@@ -1,0 +1,17 @@
+Dockerfile
+dist-listener
+.dockerignore
+node_modules
+npm-debug.log
+README.md
+.next
+docker
+.git
+postgres-data
+.env
+.env.dev*
+jest.*
+coverage
+.idea
+.prettierrc
+.swc

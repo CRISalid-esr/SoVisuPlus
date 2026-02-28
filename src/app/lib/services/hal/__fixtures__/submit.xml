@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:hal="http://hal.archives-ouvertes.fr/">
+    <text>
+        <body>
+            <listBibl>
+                <biblFull>
+                    <titleStmt>
+                        <title xml:lang="en">Absence of absolutely continuous spectrum for random scattering zippers</title>
+                        <author role="aut">
+                            <persName>
+                                <forename type="first">Laurent</forename>
+                                <surname>Marin</surname>
+                            </persName>
+                            <email>lrnt.marin@gmail.com</email>
+                            <affiliation ref="#struct-21"/>
+                        </author>
+                        <funder>GDR DYNQUA.</funder>
+                    </titleStmt>
+                    <editionStmt>
+                        <edition>
+                            <date type="whenWritten">2013-03-12</date>
+                            <ref type="src" target="paper.doc" subtype="author" n="1"/>
+                        </edition>
+                    </editionStmt>
+                    <publicationStmt>
+                        <availability>
+                            <licence target="http://creativecommons.org/licenses/by-nc-sa/"/>
+                        </availability>
+                    </publicationStmt>
+                    <notesStmt>
+                        <note type="commentary">11 pages.</note>
+                    </notesStmt>
+                    <sourceDesc>
+                        <biblStruct>
+                            <analytic>
+                                <title xml:lang="en">Absence of absolutely continuous spectrum for random scattering zippers</title>
+                                <author role="aut">
+                                    <persName>
+                                        <forename type="first">Laurent</forename>
+                                        <surname>Marin</surname>
+                                    </persName>
+                                    <email>lrnt.marin@gmail.com</email>
+                                    <affiliation ref="#struct-21"/>
+                                </author>
+                            </analytic>
+                        </biblStruct>
+                    </sourceDesc>
+                    <profileDesc>
+                        <langUsage>
+                            <language ident="en"/>
+                        </langUsage>
+                        <textClass>
+                            <keywords scheme="author">
+                                <term xml:lang="en">Lyapunov exponents </term>
+                                <term xml:lang="en">random operators </term>
+                                <term xml:lang="en">scattering zippers </term>
+                                <term xml:lang="en">Kotani theory</term>
+                            </keywords>
+                            <classCode scheme="classification">34D08, 34L40, 34L05, 47B80, 82B44</classCode>
+                            <classCode scheme="halDomain" n="math.math-mp"/>
+                            <classCode scheme="halDomain" n="math.math-sp"/>
+                            <classCode scheme="halDomain" n="math.math-ds"/>
+                            <classCode scheme="halTypology" n="UNDEFINED"/>
+                        </textClass>
+                        <abstract xml:lang="en">A scattering zipper is a system obtained by concatenation of scattering events with equal even number of incoming and out going channels. The associated scattering zipper operator is the unitary equivalent of Jacobi matrices with matrix entries. For infinite identical events and random phases, Lyapunov exponents positivity is proved and yields to the absence of absolutely continuous spectrum.</abstract>
+                    </profileDesc>
+                </biblFull>
+            </listBibl>
+        </body>
+        <back>
+            <listOrg type="structures">
+                <org type="laboratory" xml:id="struct-78"/>
+                <org type="laboratory" xml:id="struct-21"/>
+            </listOrg>
+        </back>
+    </text>
+</TEI>

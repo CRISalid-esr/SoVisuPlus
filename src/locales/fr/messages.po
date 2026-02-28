@@ -1,0 +1,1550 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: SoVisu+\n"
+"Language: fr\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/WebSocketListener.tsx:102
+msgid "snackbar_document_created"
+msgstr "Nouvelle publication : "
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/WebSocketListener.tsx:105
+msgid "snackbar_document_updated"
+msgstr "Publication mise à jour : "
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/WebSocketListener.tsx:108
+msgid "snackbar_document_deleted"
+msgstr "Publication supprimée : "
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/WebSocketListener.tsx:111
+msgid "snackbar_document_unchanged"
+msgstr "Publication inchangée : "
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/WebSocketListener.tsx:121
+msgid "snackbar_view_document"
+msgstr "Voir la publication"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:43
+msgid "notfound_page_back_home"
+msgstr "Retour à la page d'accueil"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:108
+msgid "notfound_page_description"
+msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:43
+msgid "forbidden_page_back_home"
+msgstr "Retour"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:108
+msgid "forbidden_page_description"
+msgstr "Vous n'êtes pas autorisé à accéder à cette ressource. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:198
+#: src/app/[lang]/documents/page.test.tsx:221
+msgid "documents_page_main_title_first_person"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:202
+#: src/app/[lang]/documents/page.tsx:732
+msgid "documents_page_synchronize_button"
+msgstr "Mettre à jour les publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:240
+msgid "documents_page_main_title"
+msgstr "Publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:292
+msgid "documents_page_incomplete_hal_repository_filter"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:375
+#: src/app/[lang]/documents/page.test.tsx:387
+#: src/app/[lang]/documents/page.test.tsx:396
+#: src/app/[lang]/documents/page.test.tsx:453
+msgid "documents_page_merge_selected_documents_button"
+msgstr "Fusionner les documents sélectionnés"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:684
+msgid "documents_page_refresh_list_alert_own_perspective"
+msgstr "La liste de vos publications a changé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:687
+msgid "documents_page_refresh_list_alert_other_perspective"
+msgstr "La liste des publications de {name} a changé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:154
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:188
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:227
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:267
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:304
+#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:64
+#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:90
+#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:118
+#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:144
+msgid "documents_page_hal_status_outside_hal"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:335
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:359
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:395
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:429
+#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:182
+#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:217
+#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:250
+#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:282
+msgid "documents_page_hal_status_in_hal"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
+msgid "documents_page_synchronize_modal_synchronize_button"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:170
+msgid "documents_page_refresh_document_alert"
+msgstr "Les informations relatives à cette publication ont changé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.test.tsx:196
+#: src/app/[lang]/documents/[uid]/page.test.tsx:244
+msgid "document_details_bibliographic_information_tab"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.test.tsx:200
+#: src/app/[lang]/documents/[uid]/page.test.tsx:248
+msgid "document_details_keywords_tab"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
+msgid "document_details_page_back_to_my_publications"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:101
+msgid "document_details_page_keywords_tab_card_title"
+msgstr "Mots-clés"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:120
+msgid "document_details_page_keywords_tab_card_empty_content"
+msgstr "Aucun mot-clé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:134
+msgid "document_details_page_keywords_search_field_title"
+msgstr "Sélectionner un ou plusieurs vocabulaires contrôlés"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:225
+msgid "concept_chips_free_keyword"
+msgstr "Mot-clé libre"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:68
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:242
+msgid "concept_chips_pref_label"
+msgstr "Formes principales"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:71
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:271
+msgid "concept_chips_alt_label"
+msgstr "Formes alternatives"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:86
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:122
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:343
+msgid "concept_chip_action_delete"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:252
+msgid "document_details_page_keywords_input_options_loading"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:256
+msgid "document_details_page_keywords_input_options_fetch_error"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:258
+msgid "document_details_page_keywords_input_default"
+msgstr "Veuillez entrer au minimum 3 caractères"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:260
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Veuillez sélectionner au moins un vocabulaire"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:262
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "Aucune option"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:291
+msgid "document_details_page_keywords_input_fetch_error_label"
+msgstr "Erreur lors du chargement des données"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Mot-clé ajouté à la publication."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:397
+msgid "document_details_page_source_tab_card_title"
+msgstr "Références bibliographiques sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:430
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:439
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "Actions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:456
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalider"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:474
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissocier"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
+msgid "document_details_page_update_in_hal_tab_card_title"
+msgstr "Mettre à jour dans HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
+msgid "document_details_page_add_in_hal_tab_card_title"
+msgstr "Déposer dans HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr "Domaines"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:183
+msgid "document_details_page_sources_row_update_source"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:128
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:58
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:102
+msgid "document_details_page_titles_row_label"
+msgstr "Titre"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:59
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:80
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:125
+msgid "document_details_page_no_title_available"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:131
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:79
+msgid "document_details_page_type_row_label"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
+msgid "documents_page_publication_date_column_no_date_available"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:120
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:151
+msgid "document_details_page_card_title"
+msgstr "Informations bibliographiques"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:134
+msgid "document_details_page_authors_row_label"
+msgstr "Auteurs"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:138
+msgid "document_details_page_publication_date_row_label"
+msgstr "Date de publication"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:142
+msgid "document_details_page_identifiers_row_label"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:145
+msgid "document_details_page_journal_row_label"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:148
+msgid "document_details_page_abstracts_row_label"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:151
+msgid "document_details_page_sources_row_label"
+msgstr "Sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:114
+msgid "document_details_page_authors_row_update_author"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/ErrorFallback.tsx:38
+msgid "internal_server_page_back_home"
+msgstr "Retour à la page d'accueil"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/ErrorFallback.tsx:103
+msgid "internal_server_page_description"
+msgstr "Le serveur a détecté une erreur interne et n'a  pas pu traiter votre demande. Réessayez un peu plus tard !"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/notification/index.tsx:27
+msgid "notification_page_notification_title"
+msgstr "Notifications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/notification/index.tsx:49
+msgid "notification_page_description"
+msgstr "Sélectionnez les activités pour lesquelles vous souhaitez recevoir une notification par e-mail ou une notification push."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/notification/index.tsx:53
+msgid "notification_page_new_publication_referenced"
+msgstr "Une nouvelle publication est référencée"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/notification/index.tsx:58
+msgid "notification_page_new_expertise_awaiting_validation"
+msgstr "Une nouvelle expertise est en attente de validation"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
+msgid "profile_identifiers_card_title"
+msgstr "Mes identifiants chercheurs"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:101
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:31
+msgid "profile_affiliations_card_title"
+msgstr "Mes affiliations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:59
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:215
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:215
+msgid "orcid_button_update_identifier"
+msgstr "Modifier mes autorisations ORCID"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:69
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:117
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:217
+msgid "orcid_button_provide_identifier"
+msgstr "Fournir mon identifiant ORCID"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:48
+msgid "orcid_permission_read_limited"
+msgstr "Lire vos informations avec une visibilitée fixée sur «Organisations de confiance»"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:49
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:49
+msgid "orcid_permission_activities_update"
+msgstr "Créer ou mettre à jour vos activités scientifiques (publications, etc.)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
+msgid "orcid_permission_person_update"
+msgstr "Mettre à jour vos informations biographiques (nom, affiliation, etc.)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:163
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:163
+msgid "orcid_permissions_intro"
+msgstr "Voici les autorisations que vous accordez à {institutionName} sur votre profil ORCID :"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:179
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:179
+msgid "orcid_permissions_none"
+msgstr "Vous n’accordez aucune autorisation à {institutionName}."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:68
+msgid "orcid_authentication_success"
+msgstr "La validation de votre ORCID a réussi"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:70
+msgid "orcid_authentication_failure"
+msgstr "La validation de votre ORCID a échoué. Veuillez réessayer ou contacter le support."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:72
+msgid "orcid_authentication_failure_no_code"
+msgstr "ORCID n'a pas délivré de code d'authentification. Veuillez réessayer ou contacter le support."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:74
+msgid "orcid_authentication_failure_no_session"
+msgstr "Échec de la validation de l'ORCID : pas de session. Veuillez réessayer ou contacter le support."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:76
+msgid "orcid_authentication_failure_user_not_found"
+msgstr "Échec de la validation de l'ORCID : utilisateur non trouvé. Veuillez réessayer ou contacter le support."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:78
+msgid "orcid_insert_failure"
+msgstr "Échec de l'insertion de l'ORCID en base de données. Veuillez réessayer ou contacter le support."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:112
+msgid "orcid_account_linked_tooltip"
+msgstr "Votre compte ORCID est lié à votre compte SoVisu+"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:177
+msgid "orcid_identifier_no_orcid_provided"
+msgstr "Identifiant ORCID non fourni"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:190
+msgid "orcid_control_helper"
+msgstr "ORCID est un identifiant unique, pérenne et gratuit pour les chercheurs. Il vous permet de gagner du temps lorsque vous vous connectez à des systèmes comme celui-ci. En liant votre ORCID à votre compte SoVisu+, vous identifiez de manière unique vos productions de recherche et améliorez la qualité des métadonnées. En savoir plus sur la façon dont ORCID vous aide à passer plus de temps à faire de la recherche et moins de temps à la gérer sur <0>orcid.org</0>."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:34
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
+msgid "hal_button_update_identifier"
+msgstr "Lier mon compte HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:44
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
+msgid "hal_button_provide_identifier"
+msgstr "Fournir mon identifiant Hal"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:89
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:234
+msgid "hal_control_helper"
+msgstr "En liant votre compte Hal à votre compte Sovisu+, vous fiabilisez votre identifiant Hal et vous pourrez aisément déposer sur Hal les publications manquantes."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:168
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:77
+msgid "hal_authentication_success"
+msgstr "Authentification HAL réussie"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:183
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:97
+msgid "hal_authentication_failure_wrong_protocol"
+msgstr "Pour lier votre compte SoVisu+, n'utilisez pas l'option ORCID lors de l'authentification sur HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:79
+msgid "hal_authentication_failure"
+msgstr "Échec de l'authentification HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:81
+msgid "hal_authentication_failure_no_ticket"
+msgstr "Échec de l'authentification HAL : information non retournée par HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:83
+msgid "hal_authentication_failure_no_session"
+msgstr "Utilisateur non authentifié"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:85
+msgid "hal_authentication_failure_user_not_found"
+msgstr "Utilisateur non trouvé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:87
+msgid "hal_authentication_failure_misconfig"
+msgstr "Mauvaise configuration de l'authentification HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:89
+msgid "hal_auth_missing_data"
+msgstr "Données manquantes sur HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:91
+msgid "hal_unavailable_data"
+msgstr "Données HAL indisponibles"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:93
+msgid "hal_missing_identifiers"
+msgstr "Aucun identifiant HAL trouvé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:95
+msgid "hal_identifier_insert_failure"
+msgstr "Échec de l'insertion de l'identifiant HAL en base de données"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:145
+msgid "hal_account_linked_tooltip"
+msgstr "Votre compte SoVisu+ est lié à votre compte Hal"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
+msgid "profile_affiliations_signature_label"
+msgstr "Ma signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:110
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:56
+msgid "profile_affiliations_signature_copied_message_confirmation"
+msgstr "Signature ajoutée au presse-papier."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
+#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
+msgid "profile_affiliations_laboratories_label"
+msgstr "Laboratoire(s)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:28
+msgid "authorizations_page_authorizations_title"
+msgstr "Mes autorisations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:50
+msgid "authorizations_page_description"
+msgstr "J’autorise l’application SoVisu+ à transmettre ces informations à l’application Idya : "
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:54
+msgid "authorizations_page_list_publications"
+msgstr "Liste de mes publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:58
+msgid "authorizations_page_my_expertise"
+msgstr "Mes expertises"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: import { t } from '@lingui/core/macro' import { Trans } from '@lingui/react/macro' import { useRef, useState } from 'react' import useStore from '@/stores/global_store' import { Box, Button, Card, CardContent, ClickAwayListener, Grow, Link, Popper, Typography, } from '@mui/material' import { useTheme } from '@mui/material/styles' const Journal = () => { const titleRef = useRef(null) const [isPopperOpen, setIsPopperOpen] = useState(false) const theme = useTheme() const { selectedDocument = null } = useStore((state) => state.document) const journal = selectedDocument?.journal const title = journal?.title const handleClick = () => { setIsPopperOpen(!isPopperOpen) } const handleClickAway = () => { setIsPopperOpen(false) } return ( title && ( <ClickAwayListener onClickAway={handleClickAway}> <Box> <Button variant='text' ref={titleRef} onClick={handleClick} sx={{ p: 0 }} > {title} </Button> <Popper open={isPopperOpen} anchorEl={titleRef.current} placement='bottom-start' transition disablePortal sx={{ zIndex: 1, }} > {({ TransitionProps }) => ( <Grow {...TransitionProps} timeout={200}> <Card> <CardContent> <Typography gutterBottom variant='h6' sx={{ color: theme.palette.primary.main }} > {title} </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_issn'> <Link href={`https://portal.issn.org/resource/ISSN/${journal.issnL}`} target='_blank' rel='noopener noreferrer' > {journal.issnL} </Link> </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_source_type'> {t`document_details_page_journal_journal`} </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_publisher'> {journal.publisher} </Trans> </Typography> </CardContent> </Card> </Grow> )} </Popper> </Box> </ClickAwayListener> ) ) } export default Journal 
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:85
+msgid "document_details_page_journal_source_type"
+msgstr "Type de source : {0}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: journal.publisher
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:92
+msgid "document_details_page_journal_publisher"
+msgstr "Éditeur : {0}"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.tsx:93
+msgid "{numberOfAcronyms, plural, one {{halSubmitTypeStr} documents_page_hal_status_badge_in_hal_collection_tooltip_card_file_collection_label {formattedAcronyms}} other {{halSubmitTypeStr} documents_page_hal_status_badge_in_hal_collection_tooltip_card_file_collections_label {formattedAcronyms}}}"
+msgstr "{numberOfAcronyms, plural, one {{halSubmitTypeStr} déposé(e) dans la collection HAL du {formattedAcronyms}} other {{halSubmitTypeStr} déposé(e) dans les collections HAL de {formattedAcronyms}}}"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:143
+msgid "{numberOfAcronyms, plural, one {{halSubmitTypeStr} documents_page_hal_status_badge_outside_collection_tooltip_card_info_box_message {formattedAcronyms}} other {{halSubmitTypeStr} documents_page_hal_status_badge_outside_collections_tooltip_card_info_box_message {formattedAcronyms}}}"
+msgstr "{numberOfAcronyms, plural, one {{halSubmitTypeStr} absent(e) de la collection HAL du {formattedAcronyms}. Si vous étiez déjà au {formattedAcronyms} au moment de la publication de ce document, vérifiez l\\u0027} other {{halSubmitTypeStr} absent(e) des collections HAL de {formattedAcronyms} . Si vous étiez déjà dans une de ces organisations au moment de la publication de ce document, vérifiez l\\u0027}}"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:136
+msgid "{numberOfAcronyms, plural, one {documents_page_hal_status_badge_outside_collection_tooltip_card_info_box_header} other {documents_page_hal_status_badge_outside_collections_tooltip_card_info_box_header}}"
+msgstr "{numberOfAcronyms, plural, one {Absent de la collection} other {Absent des collections}}"
+
+#. js-lingui-explicit-id
+#. placeholder {0}: journal.issnL
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:72
+msgid "document_details_page_journal_issn"
+msgstr "ISSN : <0>{0}</0>"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:57
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:57
+msgid "authenticate_tooltip"
+msgstr ""
+
+#: src/app/[lang]/documents/components/ContributorIdentityCard.tsx:200
+msgid "contributor_identity_card_see_profile_button"
+msgstr "Voir Profil"
+
+#: src/app/[lang]/dashboard/components/AgentIdentityCard.tsx:33
+msgid "dashboard_page_agent_identity_card_no_agent_selected"
+msgstr "Aucun acteur sélectionné"
+
+#: src/app/[lang]/dashboard/page.tsx:123
+msgid "dashboard_page_main_title"
+msgstr "Tableau de bord"
+
+#: src/app/[lang]/dashboard/page.tsx:173
+msgid "dashboard_page_publication_by_year_graph_end_year_selection_label"
+msgstr "à :"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:231
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:283
+msgid "dashboard_page_publication_by_year_graph_legend_closed_access"
+msgstr "Accès Fermé"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:230
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:245
+msgid "dashboard_page_publication_by_year_graph_legend_open_access"
+msgstr "Accès Ouvert"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:232
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:264
+msgid "dashboard_page_publication_by_year_graph_legend_unknown"
+msgstr "Type d'accès inconnu"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:200
+msgid "dashboard_page_publication_by_year_graph_open_access"
+msgstr "Accès Ouvert :"
+
+#: src/app/[lang]/dashboard/page.tsx:142
+msgid "dashboard_page_publication_by_year_graph_start_year_selection_label"
+msgstr "De :"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:171
+msgid "dashboard_page_publication_by_year_graph_title"
+msgstr "Nombre de publications par année et taux d'accès"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:177
+msgid "dashboard_page_publication_by_year_graph_toolbox_save_as_image"
+msgstr "Télécharger en PNG"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:196
+msgid "dashboard_page_publication_by_year_graph_tooltip_total"
+msgstr "Total :"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:223
+msgid "dashboard_page_publication_by_year_graph_tooltip_unknown"
+msgstr "Accès inconnu"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:192
+msgid "dashboard_page_publication_by_year_graph_tooltip_year"
+msgstr "Année"
+
+#: src/app/[lang]/dashboard/components/PublicationCard.tsx:338
+msgid "dashboard_page_publication_by_year_no_publication_found"
+msgstr "Aucune publication trouvée"
+
+#: src/app/[lang]/dashboard/page.tsx:212
+msgid "dashboard_page_publication_by_year_title"
+msgstr "Publications scientifiques"
+
+#: src/app/[lang]/dashboard/page.tsx:316
+msgid "dashboard_page_wordstream_font_range_a11y"
+msgstr "Police min ↔ max"
+
+#: src/app/[lang]/dashboard/page.tsx:305
+msgid "dashboard_page_wordstream_font_range_label"
+msgstr "Police min ↔ max"
+
+#: src/app/[lang]/dashboard/page.tsx:237
+msgid "dashboard_page_wordstream_title"
+msgstr "Mots-clés et collaborations"
+
+#: src/app/[lang]/dashboard/page.tsx:296
+msgid "dashboard_page_wordstream_topN_a11y"
+msgstr "Max. occurrences / an"
+
+#: src/app/[lang]/dashboard/page.tsx:287
+msgid "dashboard_page_wordstream_topN_label"
+msgstr "Max. occurrences / an"
+
+#: src/app/[lang]/dashboard/page.tsx:326
+msgid "dashboard_page_wordstream_validate_button_label"
+msgstr "Mettre à jour"
+
+#: src/app/[lang]/documents/[uid]/page.tsx:88
+msgid "document_details_add_in_hal_tab"
+msgstr "Déposer dans HAL"
+
+#: src/app/[lang]/documents/[uid]/page.tsx:60
+msgid "document_details_authors_tab"
+msgstr "Auteurs"
+
+#: src/app/[lang]/documents/[uid]/page.tsx:40
+msgid "document_details_bibliographic_information_tab"
+msgstr "Informations bibliographiques"
+
+#: src/app/[lang]/documents/[uid]/page.tsx:50
+msgid "document_details_domains_tab"
+msgstr "Domaines"
+
+#: src/app/[lang]/documents/[uid]/page.tsx:45
+msgid "document_details_keywords_tab"
+msgstr "Mots-clés"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:85
+msgid "document_details_page_abstracts_row_label"
+msgstr "Résumé"
+
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:38
+msgid "document_details_page_add_in_hal_tab_wip_description"
+msgstr "Cette rubrique vous permettra de déposer cette publication dans HAL."
+
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:37
+msgid "document_details_page_add_in_hal_tab_wip_title"
+msgstr "Dépôt dans HAL : implémentation en cours"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:194
+msgid "document_details_page_apply_button"
+msgstr "Appliquer"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:75
+msgid "document_details_page_authors_row_label"
+msgstr "Auteurs"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:90
+msgid "document_details_page_authors_row_update_author"
+msgstr "Modifier les auteurs"
+
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.tsx:43
+msgid "document_details_page_back_to_my_publications"
+msgstr "Retour à mes publications"
+
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.tsx:39
+msgid "document_details_page_back_to_publications"
+msgstr "Retour aux publications"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:187
+msgid "document_details_page_cancel_button"
+msgstr "Annuler"
+
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:38
+msgid "document_details_page_domains_tab_wip_description"
+msgstr "Cette rubrique vous permettra de caractériser les domaines de recherche associés à cette publication."
+
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:37
+msgid "document_details_page_domains_tab_wip_title"
+msgstr "Domaines de recherche : implémentation en cours"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:160
+msgid "document_details_page_identifiers_copy_default_message"
+msgstr "Identifiant copié dans le presse-papiers."
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:159
+msgid "document_details_page_identifiers_copy_message"
+msgstr "copié dans le presse-papiers."
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers.tsx:138
+msgid "document_details_page_identifiers_no_identifiers_message"
+msgstr "Aucun identifiant"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:70
+msgid "document_details_page_identifiers_row_label"
+msgstr "Identifiants"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:86
+msgid "document_details_page_journal_journal"
+msgstr "journal"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:65
+msgid "document_details_page_journal_row_label"
+msgstr "Publié dans"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:86
+msgid "document_details_page_no_abstract_available"
+msgstr "Aucun résumé disponible"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:54
+msgid "document_details_page_no_title_available"
+msgstr "Aucun titre disponible"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:80
+msgid "document_details_page_publication_date_row_label"
+msgstr "Date de publication"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:92
+msgid "document_details_page_sources_row_label"
+msgstr "Sources"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.tsx:79
+msgid "document_details_page_sources_row_update_source"
+msgstr "Comparer les sources"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:53
+msgid "document_details_page_titles_row_label"
+msgstr "Titre"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:142
+msgid "document_details_page_type_edit_button"
+msgstr "Modifier"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:60
+msgid "document_details_page_type_row_label"
+msgstr "Type de document"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:159
+msgid "document_details_page_type_select_label"
+msgstr "Sélectionnez le type"
+
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:38
+msgid "document_details_page_update_in_hal_tab_wip_description"
+msgstr "Cette rubrique vous permettra de mettre à jour cette publication dans HAL."
+
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:37
+msgid "document_details_page_update_in_hal_tab_wip_title"
+msgstr "Mettre à jour dans HAL : implémentation en cours"
+
+#: src/app/[lang]/documents/[uid]/page.tsx:55
+msgid "document_details_sources_tab"
+msgstr "Sources"
+
+#: src/app/[lang]/documents/[uid]/page.tsx:78
+msgid "document_details_update_in_hal_tab"
+msgstr "Mettre à jour dans HAL"
+
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:73
+msgid "documents_details_page_authors_tab_idhal_column"
+msgstr "IdHal"
+
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:37
+msgid "documents_details_page_authors_tab_idref_column"
+msgstr "IdRef"
+
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:24
+msgid "documents_details_page_authors_tab_name_column"
+msgstr "Nom"
+
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:55
+msgid "documents_details_page_authors_tab_orcid_column"
+msgstr "ORCID"
+
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:91
+msgid "documents_details_page_authors_tab_scopus_column"
+msgstr "Scopus"
+
+#: src/app/[lang]/documents/page.tsx:816
+msgid "documents_page_action_column_details"
+msgstr "Détails"
+
+#: src/app/[lang]/documents/page.tsx:541
+msgid "documents_page_all_documents_filter"
+msgstr "Tous les documents"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:8
+msgid "documents_page_article_icon_label"
+msgstr "Article"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:14
+msgid "documents_page_book_chapter_icon_label"
+msgstr "Chapitre de livre"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:10
+msgid "documents_page_book_icon_label"
+msgstr "Livre"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:11
+msgid "documents_page_book_of_chapters_icon_label"
+msgstr "Recueil d'articles"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:19
+msgid "documents_page_comment_icon_label"
+msgstr "Commentaire"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:17
+msgid "documents_page_conference_abstract_icon_label"
+msgstr "Résumé de conférence"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:15
+msgid "documents_page_conference_article_icon_label"
+msgstr "Article de conférence"
+
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:195
+#: src/app/[lang]/documents/page.tsx:261
+msgid "documents_page_contributors_column"
+msgstr "Auteurs"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:6
+msgid "documents_page_document_icon_label"
+msgstr "Document"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalMissingIdCard.tsx:85
+msgid "documents_page_hal_status_badge_missing_id_hal_tooltip_card_info_box_header"
+msgstr "Identifiant IdHAL manquant"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalMissingIdCard.tsx:95
+msgid "documents_page_hal_status_badge_missing_id_tooltip_card_add_id_button"
+msgstr "Saisir mon IdHAL dans Mon Compte"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalCard.tsx:105
+msgid "documents_page_hal_status_badge_not_in_hal_tooltip_card_download_button"
+msgstr "Déposer la publication dans HAL"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalCard.tsx:94
+msgid "documents_page_hal_status_badge_not_in_hal_tooltip_card_info_box_header"
+msgstr "Publication absente de votre HAL"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:163
+msgid "documents_page_hal_status_badge_not_in_sync_with_hal_tooltip_card_info_box_header"
+msgstr "Mise à jour disponible"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:164
+msgid "documents_page_hal_status_badge_not_in_sync_with_hal_tooltip_card_info_box_message"
+msgstr "Des différences ont été détectées entre SoVisu+ et HAL."
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:172
+msgid "documents_page_hal_status_badge_not_in_sync_with_hal_tooltip_card_update_button"
+msgstr "Mettre à jour sur HAL"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:148
+msgid "documents_page_hal_status_badge_outside_collection_tooltip_card_info_box_link"
+msgstr "affiliation"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalMissingIdCard.tsx:102
+msgid "documents_page_hal_status_badge_tooltip_card_missing_id_create_id_label"
+msgstr "Pas encore d'IdHAL ? "
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalMissingIdCard.tsx:109
+msgid "documents_page_hal_status_badge_tooltip_card_missing_id_create_id_link"
+msgstr "Créer un IdHAL"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalMissingIdCard.tsx:88
+msgid "documents_page_hal_status_badge_tooltip_card_missing_id_label"
+msgstr "Votre IdHAL n'est pas renseigné dans votre profil SoVisu+. Sans lui, nous ne pouvons pas synchroniser vos publications."
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalCard.tsx:112
+msgid "documents_page_hal_status_badge_tooltip_card_not_in_hal_go_to_profile_label"
+msgstr "Un doute ? Vérifiez votre "
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalCard.tsx:117
+msgid "documents_page_hal_status_badge_tooltip_card_not_in_hal_go_to_profile_link"
+msgstr "IdHAL dans Mon Compte"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalCard.tsx:97
+msgid "documents_page_hal_status_badge_tooltip_card_not_in_hal_label"
+msgstr "Votre IdHAL est bien configuré, mais cette publication n'a pas été détectée sur votre profil HAL."
+
+#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.tsx:107
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:186
+msgid "documents_page_hal_status_badge_tooltip_card_see_file"
+msgstr "Voir le document sur HAL"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.tsx:80
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:109
+#: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:202
+#: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:242
+msgid "documents_page_hal_status_in_hal"
+msgstr "Dans HAL"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalCard.tsx:73
+#: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalMissingIdCard.tsx:64
+#: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:126
+#: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:159
+msgid "documents_page_hal_status_outside_hal"
+msgstr "Hors HAL"
+
+#: src/app/[lang]/documents/page.tsx:349
+msgid "documents_page_halStatus_column"
+msgstr "Statut HAL"
+
+#: src/app/[lang]/documents/page.tsx:547
+msgid "documents_page_incomplete_hal_repository_filter"
+msgstr "Dépôt HAL incomplet"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:9
+msgid "documents_page_journal_article_icon_label"
+msgstr "Article de revue"
+
+#: src/app/[lang]/documents/page.tsx:672
+msgid "documents_page_main_title"
+msgstr "Publications"
+
+#: src/app/[lang]/documents/page.tsx:671
+msgid "documents_page_main_title_first_person"
+msgstr "Mes publications"
+
+#: src/app/[lang]/documents/page.tsx:803
+msgid "documents_page_merge_selected_documents_button"
+msgstr "Fusionner les documents sélectionnés"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:12
+msgid "documents_page_monograph_icon_label"
+msgstr "Monographie"
+
+#: src/app/[lang]/documents/page.tsx:406
+msgid "documents_page_oaStatus_column"
+msgstr "Statut Open Access"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:18
+msgid "documents_page_preface_icon_label"
+msgstr "Préface"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:13
+msgid "documents_page_presentation_icon_label"
+msgstr "Présentation"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:16
+msgid "documents_page_proceedings_icon_label"
+msgstr "Actes"
+
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:214
+#: src/app/[lang]/documents/page.tsx:294
+msgid "documents_page_publication_date_column"
+msgstr "Date de publication"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:13
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:230
+#: src/app/[lang]/documents/page.tsx:298
+msgid "documents_page_publication_date_column_no_date_available"
+msgstr "Aucune date"
+
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:271
+#: src/app/[lang]/documents/page.tsx:329
+msgid "documents_page_publishedIn_column"
+msgstr "Paru dans"
+
+#: src/app/[lang]/documents/[uid]/page.tsx:181
+msgid "documents_page_refresh_document"
+msgstr "Mettre à jour l'affichage"
+
+#: src/app/[lang]/documents/page.tsx:707
+msgid "documents_page_refresh_list"
+msgstr "Mettre à jour l'affichage"
+
+#: src/app/[lang]/documents/components/DocumentTypeLabels.tsx:7
+msgid "documents_page_scholarly_publication_icon_label"
+msgstr "Publication scientifique"
+
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:289
+#: src/app/[lang]/documents/page.tsx:429
+msgid "documents_page_source_column"
+msgstr "Sources"
+
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.tsx:191
+msgid "documents_page_synchronize_modal_cancel_button"
+msgstr "Annuler"
+
+#: src/app/[lang]/documents/components/documentsSyncModal/HarvestingDetails.tsx:46
+msgid "documents_page_synchronize_modal_details_total"
+msgstr "Total"
+
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.tsx:189
+msgid "documents_page_synchronize_modal_hide_button"
+msgstr "Masquer"
+
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.tsx:200
+msgid "documents_page_synchronize_modal_synchronize_button"
+msgstr "Synchroniser"
+
+#: src/app/[lang]/documents/components/documentsSyncModal/HarvestingDetails.tsx:60
+#: src/app/[lang]/documents/components/documentsSyncModal/PlatformChangesList.tsx:67
+msgid "documents_page_synchronize_modal_synchronize_details_created"
+msgstr "Créées"
+
+#: src/app/[lang]/documents/components/documentsSyncModal/HarvestingDetails.tsx:78
+#: src/app/[lang]/documents/components/documentsSyncModal/PlatformChangesList.tsx:123
+msgid "documents_page_synchronize_modal_synchronize_details_deleted"
+msgstr "Supprimées"
+
+#: src/app/[lang]/documents/components/documentsSyncModal/HarvestingDetails.tsx:51
+msgid "documents_page_synchronize_modal_synchronize_details_unchanged"
+msgstr "Inchangées"
+
+#: src/app/[lang]/documents/components/documentsSyncModal/HarvestingDetails.tsx:69
+#: src/app/[lang]/documents/components/documentsSyncModal/PlatformChangesList.tsx:95
+msgid "documents_page_synchronize_modal_synchronize_details_updated"
+msgstr "Modifiées"
+
+#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.tsx:85
+msgid "documents_page_synchronize_modal_title"
+msgstr "Sources à synchroniser"
+
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:146
+#: src/app/[lang]/documents/page.tsx:191
+msgid "documents_page_title_column"
+msgstr "Titre"
+
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:101
+#: src/app/[lang]/documents/page.tsx:172
+msgid "documents_page_type_column"
+msgstr "Type"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:143
+msgid "edit_field_add_language_button_label"
+msgstr "Ajouter une langue"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:233
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:258
+msgid "edit_field_cancel_button_label"
+msgstr "Annuler"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:261
+msgid "edit_field_continue_button_label"
+msgstr "Continuer"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleField.tsx:39
+msgid "edit_field_delete_button_tooltip"
+msgstr "Supprimer la langue"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:253
+msgid "edit_field_dialog_text"
+msgstr "Vous n'avez pas remplis certains champs, ceux-ci ne seront pas pris en compte lors de l'enregistrement. Voulez-vous continuer ?"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:249
+msgid "edit_field_dialog_title"
+msgstr "Confirmation"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:179
+msgid "edit_field_languages_menu_header"
+msgstr "Ajouter une langue"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:132
+msgid "edit_field_languages_menu_no_languages_message"
+msgstr "Votre institution n'a pas activé d'autres langues"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:97
+msgid "edit_field_no_values_save"
+msgstr "Vous devez avoir au moins un champs remplis"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:101
+msgid "edit_field_only_empty_fields_saved"
+msgstr "Impossible d'enregistrer que des champs vides"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:241
+msgid "edit_field_save_button_label"
+msgstr "Enregistrer"
+
+#: src/app/[lang]/expertise/page.tsx:20
+msgid "expertise_page_main_title"
+msgstr "Expertises"
+
+#: src/app/[lang]/expertise/page.tsx:24
+msgid "expertise_page_wip_description"
+msgstr "Cette page vous permettra de caractériser vos objets de recherche afin d'optimiser la rcherche d'expertises."
+
+#: src/app/[lang]/expertise/page.tsx:23
+msgid "expertise_page_wip_title"
+msgstr "Objets de recherche : implémentation en cours"
+
+#: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:14
+msgid "hal_submit_type_annex"
+msgstr "Annexe"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.test.tsx:45
+#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.test.tsx:105
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.test.tsx:57
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.test.tsx:140
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.test.tsx:166
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.test.tsx:202
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.test.tsx:233
+#: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:16
+msgid "hal_submit_type_file"
+msgstr "Fichier"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.test.tsx:84
+#: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:18
+msgid "hal_submit_type_notice"
+msgstr "Notice"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/LanguageProvider.test.tsx:13
+#: src/app/[lang]/LanguageProvider.test.tsx:29
+msgid "hello"
+msgstr "Bonjour"
+
+#: src/app/[lang]/components/LanguageSwitcher/LanguageSwitcher.tsx:32
+msgid "language_en"
+msgstr "Anglais"
+
+#: src/app/[lang]/components/LanguageSwitcher/LanguageSwitcher.tsx:33
+msgid "language_fr"
+msgstr "Français"
+
+#: src/app/[lang]/account/page.tsx:25
+msgid "my_account_page_authorizations_tab"
+msgstr "Autorisations"
+
+#: src/app/[lang]/account/page.tsx:21
+msgid "my_account_page_my_profile_tab"
+msgstr "Mon profil"
+
+#: src/app/[lang]/account/page.tsx:29
+msgid "my_account_page_notification_tab"
+msgstr "Notifications"
+
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:16
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:141
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:161
+#: src/app/[lang]/documents/page.tsx:212
+msgid "no_title_available"
+msgstr "aucun titre disponible"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:43
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:43
+msgid "orcid_scope_activities_update"
+msgstr "Mettre à jour mes activités"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:56
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:56
+msgid "orcid_scope_activities_update_tooltip"
+msgstr ""
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:42
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:42
+msgid "orcid_scope_person_update"
+msgstr "Mettre à jour mes informations personnelles"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:55
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:55
+msgid "orcid_scope_person_update_tooltip"
+msgstr ""
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:41
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:41
+msgid "orcid_scope_read_limited"
+msgstr "Lire mes informations"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:54
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:54
+msgid "orcid_scope_read_limited_tooltip"
+msgstr ""
+
+#: src/app/[lang]/documents/components/HighlighterWithChipsEllipsis.tsx:169
+#: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:51
+msgid "see_less_contributors"
+msgstr "Voir moins"
+
+#: src/app/[lang]/documents/components/HighlighterWithChipsEllipsis.tsx:161
+#: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:43
+msgid "see_more_contributors"
+msgstr "Voir plus"
+
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:411
+msgid "side_bar_dashboard"
+msgstr "Tableau de bord"
+
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:460
+msgid "side_bar_documents"
+msgstr "Publications"
+
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:509
+msgid "side_bar_expertise"
+msgstr "Expertises"
+
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:620
+#: src/app/[lang]/institutions/page.tsx:9
+msgid "side_bar_institutions"
+msgstr "Institutions"
+
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:670
+#: src/app/[lang]/laboratories/page.tsx:9
+msgid "side_bar_laboratories"
+msgstr "Laboratoires"
+
+#: src/app/[lang]/account/page.tsx:80
+msgid "side_bar_my_account"
+msgstr "Mon compte"
+
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:570
+#: src/app/[lang]/groups/page.tsx:9
+msgid "side_bar_my_groups"
+msgstr "Groupes"
+
+#: src/app/[lang]/research-activities/page.tsx:9
+msgid "side_bar_my_research_activities"
+msgstr "Activités de recherche"
+
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:434
+msgid "sidebar_back_to_my_perspective"
+msgstr "Retour à mon profil"
+
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:114
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:191
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:210
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:44
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:141
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:251
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:354
+msgid "sidebar_search_people"
+msgstr "Chercheurs"
+
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:125
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:383
+msgid "sidebar_search_placeholder"
+msgstr "Chercher"
+
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:116
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:157
+#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:213
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:46
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:151
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:356
+msgid "sidebar_search_research_structures"
+msgstr "Unités de recherche"
+
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:208
+msgid "sidebar_search_unknown_label"
+msgstr "label inconnu"
+
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:110
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:133
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:747
+msgid "sidebar_theme_dark"
+msgstr "Thème sombre"
+
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:87
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:728
+msgid "sidebar_theme_light"
+msgstr "Thème clair"
+
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:766
+msgid "sidebar_theme_system"
+msgstr "Thème automatique"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:9
+msgid "sources_page_article_icon_label"
+msgstr "Article"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:10
+msgid "sources_page_audiovisual_document_icon_label"
+msgstr "Document audiovisuel"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:23
+msgid "sources_page_blog_post_icon_label"
+msgstr "Article de blog"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:11
+msgid "sources_page_book_icon_label"
+msgstr "Livre"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:34
+msgid "sources_page_book_review_icon_label"
+msgstr "Relecture de livre"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:12
+msgid "sources_page_chapter_icon_label"
+msgstr "Chapitre"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:24
+msgid "sources_page_conference_output_icon_label"
+msgstr "Document de conférence"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:35
+msgid "sources_page_conference_paper_icon_label"
+msgstr "Journal de conférence"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:36
+msgid "sources_page_conference_poster_icon_label"
+msgstr "Poster de conférence"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:37
+msgid "sources_page_data_management_plan_icon_label"
+msgstr "Fiche de gestion des données"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:25
+msgid "sources_page_data_paper_icon_label"
+msgstr "Article de données"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:38
+msgid "sources_page_dataset_icon_label"
+msgstr "Données de recherche"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:13
+msgid "sources_page_document_icon_label"
+msgstr "Document"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:39
+msgid "sources_page_editorial_icon_label"
+msgstr "Editorial"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:40
+msgid "sources_page_erratum_icon_label"
+msgstr "Erratum"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:14
+msgid "sources_page_excerpt_icon_label"
+msgstr "Extrait"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:49
+msgid "sources_page_grant_icon_label"
+msgstr "Reconnaissance"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:41
+msgid "sources_page_image_icon_label"
+msgstr "Image"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:26
+msgid "sources_page_lecture_icon_label"
+msgstr "Cours"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:15
+msgid "sources_page_letter_icon_label"
+msgstr "Lettre"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:16
+msgid "sources_page_manual_icon_label"
+msgstr "Manuel"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:17
+msgid "sources_page_map_icon_label"
+msgstr "Carte"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:27
+msgid "sources_page_master_thesis_icon_label"
+msgstr "Mémoire"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:42
+msgid "sources_page_metadata_document_icon_label"
+msgstr "Document de métadonnées"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:18
+msgid "sources_page_note_icon_label"
+msgstr "Note"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:28
+msgid "sources_page_other_icon_label"
+msgstr "Autre"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:19
+msgid "sources_page_patent_icon_label"
+msgstr "Brevet"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:29
+msgid "sources_page_peer_review_icon_label"
+msgstr "Comité de lecture"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:43
+msgid "sources_page_preprint_icon_label"
+msgstr "Ouvrage en cours d'édition'"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:20
+msgid "sources_page_proceedings_icon_label"
+msgstr "Compte rendu de conférence"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:44
+msgid "sources_page_reference_book_icon_label"
+msgstr "Livre de référence"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:30
+msgid "sources_page_report_icon_label"
+msgstr "Rapport"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:31
+msgid "sources_page_research_report_icon_label"
+msgstr "Rapport de recherche"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:45
+msgid "sources_page_review_article_icon_label"
+msgstr "Relecture d'article"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:46
+msgid "sources_page_review_paper_icon_label"
+msgstr "Etat de l'art"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:32
+msgid "sources_page_software_icon_label"
+msgstr "Logiciel"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:21
+msgid "sources_page_standard_icon_label"
+msgstr "Standard"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:47
+msgid "sources_page_still_image_icon_label"
+msgstr "Image fixe"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:33
+msgid "sources_page_technical_report_icon_label"
+msgstr "Rapport technique"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:22
+msgid "sources_page_thesis_icon_label"
+msgstr "Thèse"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:51
+msgid "sources_page_unknown_icon_label"
+msgstr "Inconnu"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:50
+msgid "sources_page_work_icon_label"
+msgstr "Oeuvre"
+
+#: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:48
+msgid "sources_page_working_paper_icon_label"
+msgstr "Manuscrit"
+
+#: src/app/[lang]/splash.tsx:146
+msgid "splash.about"
+msgstr "À propos"
+
+#: src/app/[lang]/splash.tsx:152
+msgid "splash.accessibility"
+msgstr "Accessibilité"
+
+#: src/app/[lang]/splash.tsx:155
+msgid "splash.community"
+msgstr "Communauté"
+
+#: src/app/[lang]/splash.tsx:149
+msgid "splash.legal_mentions"
+msgstr "Mentions légales"
+
+#: src/app/[lang]/splash.tsx:118
+msgid "splash.login"
+msgstr "Connectez-vous"
+
+#: src/app/[lang]/components/WorkInProgress/WorkInProgress.tsx:100
+msgid "wip_component_coming_soon"
+msgstr "C'est bientôt prêt !"
+
+#: src/app/[lang]/components/WordStream/WordStream.tsx:133
+#: src/app/[lang]/components/WordStream/WordStream.tsx:187
+msgid "wordstream_no_data_to_display"
+msgstr "Aucune donnée à afficher"
