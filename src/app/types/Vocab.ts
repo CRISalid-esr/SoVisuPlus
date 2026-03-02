@@ -16,7 +16,7 @@ export class Vocab {
 
   private static init() {
     if (this.vocabs === null) {
-      const env = getRuntimeEnv().NEXT_PUBLIC_AVAILABLE_VOCABS
+      const env = process.env.NEXT_PUBLIC_AVAILABLE_VOCABS
       this.vocabs = env?.split(',').map((v) => v.toLowerCase()) || []
     }
   }

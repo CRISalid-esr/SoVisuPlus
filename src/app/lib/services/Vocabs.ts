@@ -1,3 +1,12 @@
+/**The configuration metadata file for controlled vocabularies handled in the application
+ * key : vocabulary acronym
+ * value:
+ *  iriPatterns: array of vocabulary iri pattern. Should include a named group identifier.
+ *  icon : icon path
+ *  name : Full vocabulary name
+ *  org : organization name maintained the vocabulary
+ *  url : url of the vocabulary
+ * Currently supported : AAT, ABES, ACM, IDREF, JEL, WIKIDATA **/
 export const VOCABS: Record<
   string,
   {
