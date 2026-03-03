@@ -219,12 +219,12 @@ msgstr "Update in HAL"
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:252
 msgid "document_details_page_keywords_input_options_loading"
-msgstr ""
+msgstr "Loading..."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:256
 msgid "document_details_page_keywords_input_options_fetch_error"
-msgstr ""
+msgstr "An error occurs"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140

@@ -43,7 +43,7 @@ export class VocabSearchClient {
     const vocabsUrl = process.env.VOCABS_URL!
     const params = new URLSearchParams({
       q: q,
-      vocabs: vocabs.map((vocab) => vocab.getValue()).join(),
+      vocabs: vocabs.map((vocab) => vocab.getValue()).join(','),
       limit: limit.toString(),
       offset: offset.toString(),
       display_langs: display_langs,
