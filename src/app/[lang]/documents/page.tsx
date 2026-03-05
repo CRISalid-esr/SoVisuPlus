@@ -80,6 +80,8 @@ import {
 } from '@/app/[lang]/documents/components/DocumentTable'
 import { HalSubmitType, OAStatus } from '@prisma/client'
 import OAStatusCellBadge from '@/app/[lang]/documents/components/OAStatusCellBadge'
+import NextLink, { LinkProps } from 'next/link'
+import { ParsedUrlQueryInput } from 'node:querystring'
 
 dayjs.extend(utc)
 
@@ -133,12 +135,21 @@ const DocumentsPage = () => {
   const searchParams = useSearchParams()
 
   const navigateToDetailsPage = useCallback(
-    (documentUid: string) => {
+    (documentUid: string): LinkProps['href'] => {
       const params = new URLSearchParams(searchParams.toString())
       params.set('tab', 'bibliographic_information')
-      router.push(`/${lang}/documents/${documentUid}?${params.toString()}`)
+      const query: ParsedUrlQueryInput = {}
+
+      params.forEach((value, key) => {
+        query[key] = value
+      })
+
+      return {
+        pathname: `/${lang}/documents/${documentUid}`,
+        query,
+      }
     },
-    [lang, router, searchParams],
+    [lang, searchParams],
   )
 
   const columns = useMemo<
@@ -214,11 +225,8 @@ const DocumentsPage = () => {
           return (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Box
-                onClick={() => {
-                  if (isWaiting) return
-                  const documentUid = row.original.uid
-                  navigateToDetailsPage(documentUid)
-                }}
+                component={NextLink}
+                href={navigateToDetailsPage(row.original.uid)}
                 sx={{
                   cursor: isWaiting ? 'progress' : 'pointer',
                   color: 'primary.main',
@@ -810,15 +818,20 @@ const DocumentsPage = () => {
           if (isWaiting) return []
           return [
             <Box sx={{ display: 'flex' }} key={row.original.uid}>
-              <MRT_ActionMenuItem
-                icon={<InfoIcon />}
-                key='edit'
-                label={t`documents_page_action_column_details`}
-                onClick={() => {
-                  navigateToDetailsPage(row.original.uid)
-                }}
-                table={table}
-              />
+              <Link
+                component={NextLink}
+                href={navigateToDetailsPage(row.original.uid)}
+                underline='none'
+                color='inherit'
+                sx={{ display: 'block', width: '100%' }}
+              >
+                <MRT_ActionMenuItem
+                  icon={<InfoIcon />}
+                  key='edit'
+                  label={t`documents_page_action_column_details`}
+                  table={table}
+                />
+              </Link>
             </Box>,
           ]
         }}
