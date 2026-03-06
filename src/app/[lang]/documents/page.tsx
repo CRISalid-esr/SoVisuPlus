@@ -297,7 +297,6 @@ const DocumentsPage = () => {
           if (!dateStr) {
             return t`documents_page_publication_date_column_no_date_available`
           }
-          const dateFormat = LocaleDateFormats['lang'] || 'MM-DD-YYYY'
           if (!dayjs(dateStr, 'YYYY-MM-DD').isValid()) {
             return (
               <Highlighter
@@ -308,6 +307,7 @@ const DocumentsPage = () => {
               />
             )
           }
+          const dateFormat = LocaleDateFormats[lang] || 'MM-DD-YYYY'
           const localizedDate = dayjs(dateStr, 'YYYY-MM-DD').format(dateFormat)
 
           return (
