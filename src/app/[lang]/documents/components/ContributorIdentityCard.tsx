@@ -20,6 +20,7 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Contribution } from '@/types/Contribution'
 import { Trans } from '@lingui/react/macro'
 import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
 
 const IDENTIFIERS_TO_SHOW: DbPersonIdentifierType[] = [
   DbPersonIdentifierType.idhals,
@@ -44,7 +45,7 @@ const ContributorIdentityCard = ({
   }
   const theme = useTheme()
   const router = useRouter()
-  const url = process.env.NEXT_PUBLIC_BASE_URL
+  const url = getRuntimeEnv().NEXT_PUBLIC_BASE_URL
   const lang = (Lingui.i18n.locale || 'ul') as ExtendedLanguageCode
   const displayName = person.getDisplayName(lang) || ''
 
