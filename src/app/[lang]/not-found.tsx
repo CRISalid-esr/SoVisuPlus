@@ -108,8 +108,7 @@ const NotFound = () => {
                 <Trans
                   id='notfound_page_description'
                   components={{
-                    0: <Link href={`/${lang}/faq`} passHref />,
-                    1: <Link href={`/${lang}/community`} passHref />,
+                    0: <Link href={`mailto:sinr@univ-paris1.fr`} passHref />,
                   }}
                 />
               </Typography>

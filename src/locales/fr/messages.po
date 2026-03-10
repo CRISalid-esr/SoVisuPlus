@@ -46,7 +46,7 @@ msgstr "Retour à la page d'accueil"
 #. js-lingui-explicit-id
 #: src/app/[lang]/not-found.tsx:108
 msgid "notfound_page_description"
-msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
+msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Contactez-nous à cette <0>adresse mail</0> si cela vous semble anormal."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/forbidden.tsx:43
