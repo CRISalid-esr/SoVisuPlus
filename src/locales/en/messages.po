@@ -497,6 +497,12 @@ msgid "hal_authentication_failure_wrong_protocol"
 msgstr "To link your SoVisu+ account, do not use the ORCID option when authenticating on HAL"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:183
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:97
+msgid "hal_authentication_failure_account_creation"
+msgstr "HAL account must be created on HAL portal before be linked to your SoVisu+ account"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:79
 msgid "hal_authentication_failure"
 msgstr ""
