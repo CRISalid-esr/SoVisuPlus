@@ -277,7 +277,13 @@ const SearchInput: React.FC = () => {
               onClick={() => handleTagClick(tag.value)}
               color={tag.selected ? 'primary' : 'default'}
               sx={{ cursor: 'pointer' }}
-              icon={tag.selected ? <DoneIcon /> : <></>}
+              icon={
+                <DoneIcon
+                  sx={
+                    tag.selected ? { display: 'inherit' } : { display: 'none' }
+                  }
+                />
+              }
             />
           ))}
         </Box>
