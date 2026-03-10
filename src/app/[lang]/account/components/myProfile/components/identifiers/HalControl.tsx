@@ -95,6 +95,8 @@ const HalControl = () => {
         return <Trans id='hal_identifier_insert_failure' />
       case 'hal_authentication_failure_wrong_protocol':
         return <Trans id='hal_authentication_failure_wrong_protocol' />
+      case 'hal_authentication_failure_account_creation':
+        return <Trans id='hal_authentication_failure_account_creation' />
       default:
         return null
     }
