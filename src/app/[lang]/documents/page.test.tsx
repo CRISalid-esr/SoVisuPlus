@@ -20,6 +20,8 @@ import { makeMockSession } from '@/app/auth/makeMockSession'
 import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
 import { PermissionAction, PermissionSubject } from '@/types/Permission'
 import { OAStatus } from '@prisma/client'
+import React from 'react'
+import { UrlObject } from 'node:url'
 
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
@@ -39,6 +41,31 @@ jest.mock('next/navigation', () => ({
     prefetch: jest.fn(),
     back: jest.fn(),
   })),
+}))
+
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: ({
+    href,
+    children,
+    ...rest
+  }: {
+    href: UrlObject
+    children: React.ReactNode
+  }) => {
+    const query = href.query || {}
+    const params = new URLSearchParams(
+      Object.entries(query as Record<string, string>).map(([k, v]) => [
+        k,
+        String(v),
+      ]),
+    ).toString()
+    return (
+      <a href={`${href.pathname}?${params}`} {...rest}>
+        {children}
+      </a>
+    )
+  },
 }))
 
 const mockFetchDocuments = jest.fn()
@@ -319,12 +346,13 @@ describe('DocumentsPage Component', () => {
   it('navigate to the document page if the user clicks on the title', async () => {
     renderComponent()
 
+    let link
     await waitFor(() => {
-      expect(screen.getByText('Test Title')).toBeInTheDocument()
-      fireEvent.click(screen.getByText('Test Title'))
+      link = screen.getByText('Test Title').closest('a')
+      expect(link).toBeInTheDocument()
     })
-    expect(pushMock).toHaveBeenCalledTimes(1)
-    expect(pushMock).toHaveBeenCalledWith(
+    expect(link).toHaveAttribute(
+      'href',
       expect.stringContaining(
         '/documents/doc1?perspective=person%3Ajohn-doe&tab=bibliographic_information',
       ),
