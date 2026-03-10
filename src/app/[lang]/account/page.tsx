@@ -20,7 +20,7 @@ const MyAccountPage = () => {
     {
       label: t`my_account_page_my_profile_tab`,
       value: 'my_profile',
-    },
+    } /*,
     {
       label: t`my_account_page_authorizations_tab`,
       value: 'authorizations',
@@ -28,7 +28,7 @@ const MyAccountPage = () => {
     {
       label: t`my_account_page_notification_tab`,
       value: 'notification',
-    },
+    },*/,
   ]
 
   // Get the initial tab from the URL, defaulting to the first tab

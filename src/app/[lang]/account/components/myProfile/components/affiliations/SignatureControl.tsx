@@ -1,5 +1,5 @@
 'use client'
-import { IconButton, Paper, Snackbar, Typography } from '@mui/material'
+import { Box, IconButton, Paper, Snackbar, Typography } from '@mui/material'
 import useStore from '@/stores/global_store'
 import { Trans } from '@lingui/react'
 import { useState } from 'react'
@@ -43,12 +43,27 @@ const SignatureControl = () => {
       <Typography variant='subtitle1' fontWeight='bold'>
         <Trans id='profile_affiliations_signature_label' />
       </Typography>
-      <Typography key='signatures' variant='body2' color='text.secondary'>
-        {signatures.join()}
-      </Typography>
-      <IconButton onClick={handleCopy} disabled={signatures.length == 0}>
-        <ContentCopy sx={open ? { color: 'black' } : { color: 'inherit' }} />
-      </IconButton>
+      {signatures.length > 0 ? (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography key='signatures' variant='body2' color='text.secondary'>
+            {signatures.join()}
+          </Typography>
+          <IconButton onClick={handleCopy} disabled={signatures.length == 0}>
+            <ContentCopy
+              sx={open ? { color: 'black' } : { color: 'inherit' }}
+            />
+          </IconButton>
+        </Box>
+      ) : (
+        <Typography
+          key='signatures'
+          variant='body2'
+          color='text.secondary'
+          fontStyle={'italic'}
+        >
+          <Trans id={'profile_affiliations_no_signature_message'} />
+        </Typography>
+      )}
       <Snackbar
         open={open}
         autoHideDuration={3000}

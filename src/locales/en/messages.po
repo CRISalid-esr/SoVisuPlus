@@ -555,14 +555,25 @@ msgstr "My signature"
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:110
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:56
+msgid "profile_affiliations_no_signature_message"
+msgstr "No signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:110
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:56
 msgid "profile_affiliations_signature_copied_message_confirmation"
 msgstr "Signature added to clipboard."
 
+#: src/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl.test.tsx:82
+#: src/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl.tsx:23
+msgid "{nbStructures, plural, zero {profile_affiliations_structure_label} one {profile_affiliations_structure_label} other {profile_affiliations_structures_label}}"
+msgstr "{nbStructures, plural, zero {Research structure} one {Research structure} other {Research structures}}"
+
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.test.tsx:82
-#: src/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl.tsx:23
-msgid "profile_affiliations_laboratories_label"
-msgstr "Laboratory/ies"
+#: src/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl.test.tsx:82
+#: src/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl.tsx:23
+msgid "profile_affiliations_no_structures"
+msgstr "No related research structure"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
