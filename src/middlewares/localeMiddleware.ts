@@ -28,6 +28,9 @@ export const localeMiddleware =
     ) {
       return middleware(request, event, NextResponse.next())
     }
+    if (pathname.startsWith('/user/create')) {
+      return middleware(request, event, NextResponse.next())
+    }
     const response = NextResponse.next()
     const pathLocale = pathname.split('/')[1]
 
