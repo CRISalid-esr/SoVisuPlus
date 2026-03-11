@@ -113,7 +113,7 @@ describe('SignatureControl Component', () => {
     })
   })
 
-  it('signature copy button disabled if no signature', async () => {
+  it('signature copy button removed and message displayed if no signature', async () => {
     const mockStateWithNoSignature = {
       user: {
         connectedUser: {
@@ -173,7 +173,11 @@ describe('SignatureControl Component', () => {
         <SignatureControl />
       </I18nProvider>,
     )
-    const copyButton = screen.getByRole('button')
-    expect(copyButton).toBeDisabled()
+    const copyButton = screen.queryByRole('button')
+    expect(copyButton).not.toBeInTheDocument()
+
+    expect(
+      screen.getByText(i18n.t('profile_affiliations_no_signature_message')),
+    ).toBeInTheDocument()
   })
 })

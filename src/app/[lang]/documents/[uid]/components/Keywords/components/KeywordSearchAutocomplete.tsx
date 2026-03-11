@@ -113,7 +113,7 @@ const getData = async (
     }
   } else {
     throw new Error(
-      'Fail while fetching keywords suggestion : ' + response.statusText,
+      'Failed while fetching keywords suggestion : ' + response.statusText,
     )
   }
 }
@@ -138,7 +138,6 @@ export type KeywordSearchAutocompleteProps = {
     vocabs?: string[],
   ) => Promise<SuggestedKeywordsData[]>
   selectedVocabs?: string[]
-  authorization?: boolean
 }
 
 const KeywordSearchAutocomplete = ({
@@ -160,9 +159,7 @@ const KeywordSearchAutocomplete = ({
     [session?.user?.authz],
   )
 
-  const { selectedDocument = null, error = null } = useStore(
-    (state) => state.document,
-  )
+  const { selectedDocument = null } = useStore((state) => state.document)
 
   const updateKeywords = async (vocab: string, page: number) => {
     const pageItems = await getData(keywordInput, vocab, (page - 1) * 5)
@@ -308,47 +305,51 @@ const KeywordSearchAutocomplete = ({
         renderGroup={(params) => {
           const group = keywords.find((group) => group.vocab === params.group)
           return (
-            <Box
-              key={params.key}
-              sx={{
-                marginLeft: '20px',
-                marginTop: '10px',
-                marginBottom: '30px',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Image
-                  src={
-                    group
-                      ? VOCABS[group?.vocab.toUpperCase()].icon
-                      : '/icons/default.png'
-                  }
-                  alt={(group ? group.vocab.toUpperCase() : 'Vocab') + ' icon'}
-                  width={24}
-                  height={24}
-                />
-                <Typography sx={{ marginLeft: '15px', fontWeight: 'bold' }}>
-                  {group
-                    ? VOCABS[group?.vocab.toUpperCase()].org +
-                      ' - ' +
-                      VOCABS[group?.vocab.toUpperCase()].name
-                    : ''}
-                </Typography>
+            group && (
+              <Box
+                key={params.key}
+                sx={{
+                  marginLeft: '20px',
+                  marginTop: '10px',
+                  marginBottom: '30px',
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Image
+                    src={
+                      group
+                        ? VOCABS[group?.vocab.toUpperCase()].icon
+                        : '/icons/default.png'
+                    }
+                    alt={
+                      (group ? group.vocab.toUpperCase() : 'Vocab') + ' icon'
+                    }
+                    width={24}
+                    height={24}
+                  />
+                  <Typography sx={{ marginLeft: '15px', fontWeight: 'bold' }}>
+                    {group
+                      ? VOCABS[group?.vocab.toUpperCase()].org +
+                        ' - ' +
+                        VOCABS[group?.vocab.toUpperCase()].name
+                      : ''}
+                  </Typography>
+                </Box>
+                <Box sx={{ marginTop: '10px', marginBottom: '10px' }}>
+                  {params.children}
+                </Box>
+                {group && group.total > group.items.length ? (
+                  <Pagination
+                    count={Math.ceil(group.total / 5)}
+                    onChange={async (event, page) =>
+                      await updateKeywords(group.vocab.toLowerCase(), page)
+                    }
+                    sx={{ marginBottom: '20px' }}
+                  />
+                ) : null}
+                <Divider />
               </Box>
-              <Box sx={{ marginTop: '10px', marginBottom: '10px' }}>
-                {params.children}
-              </Box>
-              {group && group.total > group.items.length ? (
-                <Pagination
-                  count={Math.ceil(group.total / 5)}
-                  onChange={async (event, page) =>
-                    await updateKeywords(group.vocab.toLowerCase(), page)
-                  }
-                  sx={{ marginBottom: '20px' }}
-                />
-              ) : null}
-              <Divider />
-            </Box>
+            )
           )
         }}
         renderOption={(props, option, state, ownerState) => {

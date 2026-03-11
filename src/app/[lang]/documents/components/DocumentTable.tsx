@@ -13,26 +13,16 @@ import {
   MRT_ToggleGlobalFilterButton,
   MRT_VisibilityState,
 } from 'material-react-table'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box, IconButton } from '@mui/material'
 import { FilterAltOff } from '@mui/icons-material'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Localization } from '@/types/Localization'
-import { Document, DocumentType } from '@/types/Document'
-import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
-import { DocumentTypeLabels } from '@/app/[lang]/documents/components/DocumentTypeLabels'
-import {
-  ColumnFilter,
-  ColumnFiltersState,
-  ColumnSort,
-} from '@tanstack/table-core'
 import { toUTCISOString } from '@/utils/toUTCISOString'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
-import { useSession } from 'next-auth/react'
-import { useLingui } from '@lingui/react'
-import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { ColumnFilter } from '@tanstack/table-core'
 
 dayjs.extend(utc)
 
@@ -64,7 +54,19 @@ export const readInitialPagination = (): typeof DEFAULT_PAGINATION => {
 export const readInitialColumnFilters = (): MRT_ColumnFiltersState => {
   try {
     const raw = sessionStorage.getItem('mrt_columnFilters_publication_table')
-    return raw ? JSON.parse(raw) : []
+    if (!raw) return []
+
+    const parsed = JSON.parse(raw)
+
+    return parsed.map((filter: ColumnFilter) => {
+      if (filter.id === 'date' && Array.isArray(filter.value)) {
+        return {
+          ...filter,
+          value: filter.value.map((v: string | null) => (v ? dayjs(v) : null)),
+        }
+      }
+      return filter
+    })
   } catch {
     return []
   }
