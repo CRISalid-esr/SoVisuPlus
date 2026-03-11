@@ -100,6 +100,10 @@ export class DocumentService {
       contributorType,
     )
 
+    if (contributorUids.length == 0) {
+      return { documents: [], totalItems: 0 }
+    }
+
     const expandedColumnFilters = this.expandedColumnFilters(columnFilters)
 
     try {
@@ -182,6 +186,10 @@ export class DocumentService {
       contributorUid,
       contributorType,
     )
+
+    if (contributorUids.length == 0) {
+      return { allItems: 0, incompleteHalRepositoryItems: 0 }
+    }
 
     const expandedColumnFilters = this.expandedColumnFilters(columnFilters)
 
