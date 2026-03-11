@@ -2,7 +2,7 @@ import useStore from '@/stores/global_store'
 import { act, render, screen } from '@testing-library/react'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
-import LaboratoriesControl from '@/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl'
+import StructuresControl from '@/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl'
 
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
@@ -71,20 +71,50 @@ beforeEach(() => {
   })
 })
 
-describe('LaboratoriesControl Component', () => {
+describe('StructuresControl Component', () => {
   it('displays memberships acronym', async () => {
     render(
       <I18nProvider i18n={i18n}>
-        <LaboratoriesControl />
+        <StructuresControl />
       </I18nProvider>,
     )
     expect(
-      screen.getByText(i18n.t('profile_affiliations_laboratories_label')),
+      screen.getByText(i18n.t('profile_affiliations_structures_label')),
     ).toBeInTheDocument()
     expect(
       screen.getByText(
         mockState.user.connectedUser.person.membershipAcronyms.join(),
       ),
+    ).toBeInTheDocument()
+  })
+
+  it('displays message if no membership', async () => {
+    const mockStateWithoutStructures = {
+      ...mockState,
+      user: {
+        ...mockState.user,
+        connectedUser: {
+          ...mockState.user.connectedUser,
+          person: {
+            ...mockState.user.connectedUser.person,
+            memberships: [],
+            membershipAcronyms: [],
+          },
+        },
+      },
+    }
+
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector(mockStateWithoutStructures),
+    )
+
+    render(
+      <I18nProvider i18n={i18n}>
+        <StructuresControl />
+      </I18nProvider>,
+    )
+    expect(
+      screen.getByText(i18n.t('profile_affiliations_no_structures')),
     ).toBeInTheDocument()
   })
 })

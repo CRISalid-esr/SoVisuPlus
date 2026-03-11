@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles'
 import { Trans } from '@lingui/react'
 import { CustomCard } from '@/components/Card'
 import SignatureControl from '@/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl'
-import LaboratoriesControl from '@/app/[lang]/account/components/myProfile/components/affiliations/LaboratoriesControl'
+import StructuresControl from '@/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl'
 
 const Affiliations = () => {
   const theme = useTheme()
@@ -68,7 +68,7 @@ const Affiliations = () => {
                   width: '100%',
                 }}
               >
-                <LaboratoriesControl />
+                <StructuresControl />
               </ListItem>
             </Box>
             <Box
