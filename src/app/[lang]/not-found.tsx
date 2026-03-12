@@ -10,11 +10,13 @@ import Link from 'next/link'
 import { Trans } from '@lingui/react'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
 
 const NotFound = () => {
   const pathname = usePathname() // Get the current path
   const lang = pathname.split('/')[1] // Extract the `lang` dynamic segment
   const router = useRouter()
+  const support = getRuntimeEnv().NEXT_PUBLIC_SUPPORT_SERVICE_EMAIL_ADDR
 
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -108,8 +110,7 @@ const NotFound = () => {
                 <Trans
                   id='notfound_page_description'
                   components={{
-                    0: <Link href={`/${lang}/faq`} passHref />,
-                    1: <Link href={`/${lang}/community`} passHref />,
+                    0: <Link href={`mailto:${support}`} passHref />,
                   }}
                 />
               </Typography>

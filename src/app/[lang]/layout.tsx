@@ -55,6 +55,8 @@ const RootLayout = async ({ params, children }: Props) => {
               process.env.NEXT_PUBLIC_AVAILABLE_VOCABS,
             NEXT_PUBLIC_HAL_CREATE_ID_URL:
               process.env.NEXT_PUBLIC_HAL_CREATE_ID_URL,
+            NEXT_PUBLIC_SUPPORT_SERVICE_EMAIL_ADDR:
+              process.env.NEXT_PUBLIC_SUPPORT_SERVICE_EMAIL_ADDR,
           }}
         />
         <Script src='/vendor/d3.v4.min.js' strategy='beforeInteractive' />
