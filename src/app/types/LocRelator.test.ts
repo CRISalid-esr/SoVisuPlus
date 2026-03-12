@@ -39,4 +39,33 @@ describe('LocRelator', () => {
   it('should return null when converting an unknown enum to URI', () => {
     expect(LocRelatorHelper.toUri('UNKNOWN_ROLE' as LocRelator)).toBeNull()
   })
+
+  it('should convert correctly particular key label', () => {
+    expect(LocRelatorHelper.convertValue('AUTHOR_OF_INTRODUCTION')).toBe(
+      'AUTHOR_OF_INTRODUCTION__ETC_',
+    )
+    expect(LocRelatorHelper.convertValue('AUTHOR_OF_AFTERWORD')).toBe(
+      'AUTHOR_OF_AFTERWORD__COLOPHON__ETC_',
+    )
+    expect(LocRelatorHelper.convertValue('AUTHOR_OF_COLOPHON')).toBe(
+      'AUTHOR_OF_AFTERWORD__COLOPHON__ETC_',
+    )
+    expect(LocRelatorHelper.convertValue('OTHER')).toBe('OTHER')
+  })
+
+  it('should return corresponding LocRelator for key label and null if unknown', () => {
+    expect(LocRelatorHelper.getRelatorFromKey('THESIS_ADVISOR')).toBe(
+      LocRelator.THESIS_ADVISOR,
+    )
+    expect(LocRelatorHelper.getRelatorFromKey('AUTHOR_OF_INTRODUCTION')).toBe(
+      LocRelator.AUTHOR_OF_INTRODUCTION__ETC_,
+    )
+    expect(LocRelatorHelper.getRelatorFromKey('AUTHOR_OF_AFTERWORD')).toBe(
+      LocRelator.AUTHOR_OF_AFTERWORD__COLOPHON__ETC_,
+    )
+    expect(LocRelatorHelper.getRelatorFromKey('AUTHOR_OF_COLOPHON')).toBe(
+      LocRelator.AUTHOR_OF_AFTERWORD__COLOPHON__ETC_,
+    )
+    expect(LocRelatorHelper.getRelatorFromKey('UNKNOWN_ROLE')).toBeNull()
+  })
 })

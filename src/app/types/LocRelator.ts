@@ -1641,4 +1641,25 @@ export class LocRelatorHelper {
   static toUri(relator: LocRelator): string | null {
     return LocRelatorHelper.relatorToUriMap[relator] || null
   }
+
+  static convertValue(value: string) {
+    switch (value) {
+      case 'AUTHOR_OF_INTRODUCTION':
+        return 'AUTHOR_OF_INTRODUCTION__ETC_'
+      case 'AUTHOR_OF_AFTERWORD':
+      case 'AUTHOR_OF_COLOPHON':
+        return 'AUTHOR_OF_AFTERWORD__COLOPHON__ETC_'
+      default:
+        return value
+    }
+  }
+
+  static getRelatorFromKey(value: string) {
+    const convertedValue = LocRelatorHelper.convertValue(value)
+    if (convertedValue in LocRelator) {
+      return LocRelator[convertedValue as keyof typeof LocRelator]
+    } else {
+      return null
+    }
+  }
 }
