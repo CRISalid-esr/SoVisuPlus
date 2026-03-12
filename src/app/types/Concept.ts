@@ -66,9 +66,12 @@ class Concept {
 
     const vocab = this.getVocabulary()
     if (!vocab || vocab == 'UNKNOWN') return ''
-    return (
-      this.uri.match(VOCABS[vocab].iriPatterns[0])?.groups?.identifier ?? ''
-    )
+    const identifier = this.uri.match(VOCABS[vocab].iriPatterns[0])?.groups
+      ?.identifier
+    if (vocab == 'ELSST') {
+      return identifier ? 'urn:ddi:int.cessda.elsst:' + identifier + ':6' : ''
+    }
+    return identifier ?? ''
   }
 }
 

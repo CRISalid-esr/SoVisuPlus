@@ -65,6 +65,9 @@ export class Vocab {
       )
       if (iriPattern) {
         const identifier = iri.match(iriPattern)?.groups?.identifier ?? ''
+        if (vocab.toUpperCase() == 'ELSST') {
+          return 'urn:ddi:int.cessda.elsst:' + identifier + ':6'
+        }
         return identifier.replace(/\./g, ' - ')
       } else {
         const identifier = iri.match(RegExp('[A-Z0-9]+$'))

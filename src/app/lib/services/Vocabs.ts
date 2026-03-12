@@ -48,6 +48,28 @@ export const VOCABS: Record<
     org: 'Association for Computing Machinery',
     url: 'https://dl.acm.org/ccs',
   },
+  ['ELSST']: {
+    iriPatterns: [
+      RegExp(
+        '^https://elsst\\.cessda\\.eu/id/6/(?<identifier>[a-z0-9]+(-[a-z0-9]+)*)?$',
+      ),
+    ],
+    icon: '/icons/elsst-vocab.svg',
+    name: 'European Language Social Science Thesaurus',
+    org: 'CESSDA : Consortium of European Social Science Data Archives',
+    url: 'https://elsst.cessda.eu/',
+  },
+  ['EUROSCIVOC']: {
+    iriPatterns: [
+      RegExp(
+        '^http://data\\.europa\\.eu/8mn/euroscivoc/(?<identifier>[a-z0-9]+(-[a-z0-9]+)*)?$',
+      ),
+    ],
+    icon: '/icons/euroscivoc-vocab.svg',
+    name: 'European Science Vocabulary',
+    org: 'Publications Office of the European Union',
+    url: 'https://op.europa.eu/fr/web/eu-vocabularies/euroscivoc',
+  },
   ['IDREF']: {
     iriPatterns: [
       RegExp('^http://www\\.idref\\.fr(?:/(?<identifier>[A-Z0-9]+))?(?:/.*)*$'),
@@ -67,6 +89,17 @@ export const VOCABS: Record<
     name: 'Journal of Economic Literature',
     org: 'American Economic Association',
     url: 'https://www.aeaweb.org/jel/guide/jel.php',
+  },
+  ['PACTOLS']: {
+    iriPatterns: [
+      RegExp(
+        '^https://ark\\.frantiq\\.fr/ark:/(?<identifier>[0-9]+/[a-zA-Z0-9]+)?$',
+      ),
+    ],
+    icon: '/icons/pactols-vocab.jpeg',
+    name: 'Pactols',
+    org: "Frantiq : Fédération et Ressources sur l'Antiquité",
+    url: 'https://www.frantiq.fr/pactols/le-thesaurus/',
   },
   ['WIKIDATA']: {
     iriPatterns: [
