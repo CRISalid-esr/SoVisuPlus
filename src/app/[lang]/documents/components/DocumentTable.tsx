@@ -185,6 +185,7 @@ export const DocumentTable = <T extends MRT_RowData>({
       columns={columns}
       enableColumnFilters
       enableColumnResizing
+      enableStickyHeader
       enablePagination
       enableToolbarInternalActions
       getRowId={(row) => {
