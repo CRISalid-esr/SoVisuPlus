@@ -39,14 +39,14 @@ msgid "snackbar_view_document"
 msgstr "Voir la publication"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:43
+#: src/app/[lang]/not-found.tsx:45
 msgid "notfound_page_back_home"
 msgstr "Retour à la page d'accueil"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:108
+#: src/app/[lang]/not-found.tsx:110
 msgid "notfound_page_description"
-msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Notre <0>faq</0> ou notre <1>communauté</1> pourront peut-être vous aider."
+msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Contactez-nous à cette <0>adresse mail</0> si cela vous semble anormal."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/forbidden.tsx:43
@@ -129,6 +129,11 @@ msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:170
+msgid "documents_page_refresh_document_alert"
+msgstr "Les informations relatives à cette publication ont changé"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:196
 #: src/app/[lang]/documents/[uid]/page.test.tsx:244
 msgid "document_details_bibliographic_information_tab"
@@ -139,11 +144,6 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/page.test.tsx:248
 msgid "document_details_keywords_tab"
 msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:170
-msgid "documents_page_refresh_document_alert"
-msgstr "Les informations relatives à cette publication ont changé"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
@@ -212,11 +212,6 @@ msgid "document_details_page_source_tab_select_action_unmerge_label"
 msgstr "Dissocier"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
-msgid "document_details_page_update_in_hal_tab_card_title"
-msgstr "Mettre à jour dans HAL"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:249
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "En cours de chargement..."
@@ -250,19 +245,24 @@ msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Erreur lors du chargement des données"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
+msgid "document_details_page_update_in_hal_tab_card_title"
+msgstr "Mettre à jour dans HAL"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
 msgid "document_details_page_add_in_hal_tab_card_title"
 msgstr "Déposer dans HAL"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Mot-clé ajouté à la publication."
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
 msgid "document_details_page_domains_tab_card_title"
 msgstr "Domaines"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Mot-clé ajouté à la publication."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:183
@@ -344,26 +344,6 @@ msgstr "Retour à la page d'accueil"
 #: src/app/[lang]/components/ErrorFallback.tsx:103
 msgid "internal_server_page_description"
 msgstr "Le serveur a détecté une erreur interne et n'a  pas pu traiter votre demande. Réessayez un peu plus tard !"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/notification/index.tsx:27
-msgid "notification_page_notification_title"
-msgstr "Notifications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/notification/index.tsx:49
-msgid "notification_page_description"
-msgstr "Sélectionnez les activités pour lesquelles vous souhaitez recevoir une notification par e-mail ou une notification push."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/notification/index.tsx:53
-msgid "notification_page_new_publication_referenced"
-msgstr "Une nouvelle publication est référencée"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/notification/index.tsx:58
-msgid "notification_page_new_expertise_awaiting_validation"
-msgstr "Une nouvelle expertise est en attente de validation"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
@@ -467,6 +447,26 @@ msgid "orcid_control_helper"
 msgstr "ORCID est un identifiant unique, pérenne et gratuit pour les chercheurs. Il vous permet de gagner du temps lorsque vous vous connectez à des systèmes comme celui-ci. En liant votre ORCID à votre compte SoVisu+, vous identifiez de manière unique vos productions de recherche et améliorez la qualité des métadonnées. En savoir plus sur la façon dont ORCID vous aide à passer plus de temps à faire de la recherche et moins de temps à la gérer sur <0>orcid.org</0>."
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/notification/index.tsx:27
+msgid "notification_page_notification_title"
+msgstr "Notifications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/notification/index.tsx:49
+msgid "notification_page_description"
+msgstr "Sélectionnez les activités pour lesquelles vous souhaitez recevoir une notification par e-mail ou une notification push."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/notification/index.tsx:53
+msgid "notification_page_new_publication_referenced"
+msgstr "Une nouvelle publication est référencée"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/notification/index.tsx:58
+msgid "notification_page_new_expertise_awaiting_validation"
+msgstr "Une nouvelle expertise est en attente de validation"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:34
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
 msgid "hal_button_update_identifier"
@@ -477,12 +477,6 @@ msgstr "Lier mon compte HAL"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
 msgid "hal_button_provide_identifier"
 msgstr "Fournir mon identifiant Hal"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl.test.tsx:117
-#: src/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl.tsx:44
-msgid "profile_affiliations_no_structures"
-msgstr "Pas de structure(s) de recherche associée(s)"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:89
@@ -501,6 +495,17 @@ msgstr "Authentification HAL réussie"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:97
 msgid "hal_authentication_failure_wrong_protocol"
 msgstr "Pour lier votre compte SoVisu+, n'utilisez pas l'option ORCID lors de l'authentification sur HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl.test.tsx:82
+msgid "profile_affiliations_structures_label"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl.test.tsx:117
+#: src/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl.tsx:44
+msgid "profile_affiliations_no_structures"
+msgstr "Pas de structure(s) de recherche associée(s)"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:79
@@ -556,11 +561,6 @@ msgstr "Veuillez vous rendre sur le site de HAL pour d'abord créer votre compte
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:147
 msgid "hal_account_linked_tooltip"
 msgstr "Votre compte SoVisu+ est lié à votre compte Hal"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl.test.tsx:82
-msgid "profile_affiliations_structures_label"
-msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
