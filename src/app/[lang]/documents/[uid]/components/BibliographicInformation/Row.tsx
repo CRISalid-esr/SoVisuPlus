@@ -81,26 +81,14 @@ const Row = ({ field }: { field: DocumentField }) => {
         sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
         className={styles.cell}
       >
-        {field.component && !displayEdit && (
-          <field.component content={content}></field.component>
+        {field.component && (
+          <field.component
+            content={content}
+            field={field}
+            edit={displayEdit}
+            setEdit={setDisplayEdit}
+          ></field.component>
         )}
-        {field.hasLanguageSelector ? (
-          displayEdit ? (
-            <EditLocaleText
-              field={field}
-              callback={() => setDisplayEdit(false)}
-            />
-          ) : (
-            <IconButton
-              className={styles.editButton}
-              onClick={() => {
-                setDisplayEdit(true)
-              }}
-            >
-              <EditIcon />
-            </IconButton>
-          )
-        ) : null}
       </TableCell>
     </TableRow>
   )

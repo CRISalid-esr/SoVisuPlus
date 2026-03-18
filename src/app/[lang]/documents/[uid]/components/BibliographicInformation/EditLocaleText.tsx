@@ -1,7 +1,10 @@
 import {
+  Alert,
+  Autocomplete,
   Avatar,
   Box,
   Button,
+  ClickAwayListener,
   Dialog,
   DialogActions,
   DialogContent,
@@ -9,8 +12,10 @@ import {
   DialogTitle,
   Divider,
   IconButton,
-  Menu,
   MenuItem,
+  Paper,
+  Popper,
+  TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -23,18 +28,30 @@ import { useEffect, useMemo, useState } from 'react'
 import EditLocaleField from '@/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleField'
 import { Add, Check, Close } from '@mui/icons-material'
 import { Trans } from '@lingui/react/macro'
+import { Trans as TransNode } from '@lingui/react'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import ISO6391, { LanguageCode } from 'iso-639-1'
 import { Literal } from '@/types/Literal'
 import { useTheme } from '@mui/system'
 import { t } from '@lingui/core/macro'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
 
 const EditLocaleText = ({
   field,
   callback,
+  setAlert,
 }: {
   field: DocumentField
   callback: () => void
+  setAlert: ({
+    open,
+    success,
+    message,
+  }: {
+    open: boolean
+    success: boolean
+    message: React.ReactNode
+  }) => void
 }) => {
   const theme = useTheme()
   const { selectedDocument } = useStore((state) => state.document)
@@ -58,6 +75,7 @@ const EditLocaleText = ({
   const [openLanguageMenu, setOpenLanguageMenu] = useState<null | HTMLElement>(
     null,
   )
+  const appLanguages = getRuntimeEnv().NEXT_PUBLIC_SUPPORTED_LOCALES
   const supportedLanguageCodes = ISO6391.getAllCodes()
   const remainingLanguages = useMemo(
     () =>
@@ -66,6 +84,14 @@ const EditLocaleText = ({
       ),
     [supportedLanguageCodes, values],
   )
+  const sortedLanguages = useMemo(() => {
+    const preferred: LanguageCode[] = []
+    const other: LanguageCode[] = []
+    remainingLanguages.map((lang) =>
+      appLanguages.includes(lang) ? preferred.push(lang) : other.push(lang),
+    )
+    return preferred.concat(other)
+  }, [remainingLanguages, appLanguages])
   const [error, setError] = useState<string | null>(null)
   const [openDialog, setOpenDialog] = useState<boolean>(false)
   const sendData = async () => {
@@ -77,16 +103,52 @@ const EditLocaleText = ({
       })
     setError(null)
     if (valid.length > 0) {
+      let response
       switch (field.value) {
         case 'titles':
-          await modifyTitles(valid)
+          response = await modifyTitles(valid)
           break
         case 'abstracts':
-          await modifyAbstracts(valid)
+          response = await modifyAbstracts(valid)
           break
       }
+      if (response?.success) {
+        setAlert({
+          open: true,
+          success: true,
+          message: (
+            <TransNode
+              id='bibliographic_information_update_success'
+              values={{ field: field.value as DocumentLocalizableFieldKey }}
+            />
+          ),
+        })
+        callback()
+      } else {
+        setAlert({
+          open: true,
+          success: false,
+          message: (
+            <TransNode
+              id='bibliographic_information_update_failure'
+              values={{ field: field.value as DocumentLocalizableFieldKey }}
+            />
+          ),
+        })
+      }
+    } else {
+      setAlert({
+        open: true,
+        success: true,
+        message: (
+          <TransNode
+            id='bibliographic_information_update_success'
+            values={{ field: field.value as DocumentLocalizableFieldKey }}
+          />
+        ),
+      })
+      callback()
     }
-    callback()
   }
   const cancel = () => {
     setValues(texts)
@@ -145,87 +207,134 @@ const EditLocaleText = ({
           </span>
         </Tooltip>
         {remainingLanguages.length > 0 && (
-          <Menu
+          <Popper
             open={!!openLanguageMenu}
             anchorEl={openLanguageMenu}
-            anchorOrigin={{ vertical: 'center', horizontal: 'right' }}
-            transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-            slotProps={{ paper: { sx: { overflow: 'hidden' } } }}
+            modifiers={[
+              {
+                name: 'offset',
+                options: {
+                  offset: [0, 4],
+                },
+              },
+            ]}
+            placement={'bottom-start'}
           >
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                maxHeight: '700px',
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 1,
-                  position: 'sticky',
-                  top: 0,
-                  zIndex: 1,
-                  padding: '0 5px 0 5px',
-                }}
-              >
-                <Typography
-                  variant={'h6'}
-                  fontSize={'15px'}
-                  sx={{ pl: '10px' }}
-                >
-                  <Trans>edit_field_languages_menu_header</Trans>
-                </Typography>
-                <IconButton onClick={() => setOpenLanguageMenu(null)}>
-                  <Close />
-                </IconButton>
-              </Box>
-              <Divider />
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  overflowY: 'auto',
-                }}
-              >
-                {remainingLanguages.map((code) => {
-                  const language = ISO6391.getName(code)
-                  const languageCode = ISO6391.getCode(language)
-                  return (
-                    <MenuItem
-                      key={code}
-                      sx={{ display: 'flex', gap: 2 }}
-                      onClick={() => {
-                        if (languageCode == '') {
-                          console.error('Unknown code language : ' + code)
-                        } else {
-                          addValue(languageCode)
-                          setOpenLanguageMenu(null)
-                          setError(null)
-                        }
+            <ClickAwayListener onClickAway={() => setOpenLanguageMenu(null)}>
+              <Paper sx={{ overflow: 'hidden', width: '300px' }}>
+                <Autocomplete
+                  disablePortal
+                  fullWidth
+                  getOptionLabel={(option) => ISO6391.getName(option)}
+                  groupBy={(option) =>
+                    appLanguages.includes(option)
+                      ? 'Preferred'
+                      : 'Other languages'
+                  }
+                  open
+                  options={sortedLanguages}
+                  popupIcon={null}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder={t`edit_field_languages_menu_header`}
+                      slotProps={{
+                        input: {
+                          ...params.InputProps,
+                          endAdornment: (
+                            <IconButton
+                              onClick={() => setOpenLanguageMenu(null)}
+                              sx={{ marginRight: '5px' }}
+                            >
+                              <Close />
+                            </IconButton>
+                          ),
+                        },
                       }}
+                      sx={{
+                        border: 'none',
+                        width: '100%',
+                        '& .MuiAutocomplete-inputRoot': {
+                          paddingRight: '0 !important',
+                        },
+                      }}
+                    />
+                  )}
+                  renderGroup={(params) => (
+                    <Box
+                      key={params.key}
+                      sx={{ display: 'flex', flexDirection: 'column' }}
                     >
-                      <Avatar
-                        variant={'rounded'}
+                      <Box
                         sx={{
-                          width: '24px',
-                          height: '24px',
-                          fontSize: '14px',
-                          backgroundColor: theme.palette.surfaceContainer,
-                          color: theme.palette.primary.main,
+                          backgroundColor: theme.palette.inverseOnSurface,
+                          padding: '8px 0 8px 0',
                         }}
                       >
-                        {code}
-                      </Avatar>
-                      <Typography>{language}</Typography>
-                    </MenuItem>
-                  )
-                })}
-              </Box>
-            </Box>
-          </Menu>
+                        <Typography
+                          sx={{
+                            marginLeft: '15px',
+                            fontWeight: 'bold',
+                            color: theme.palette.outline,
+                          }}
+                        >
+                          {params.group}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ padding: '5px 0 6px 0' }}>
+                        {params.children}
+                      </Box>
+                    </Box>
+                  )}
+                  renderOption={(props, option) => {
+                    const language = ISO6391.getName(option)
+                    const languageCode = ISO6391.getCode(language)
+                    return (
+                      <MenuItem
+                        key={option}
+                        sx={{ display: 'flex', gap: 2 }}
+                        onClick={() => {
+                          if (languageCode == '') {
+                            console.error('Unknown code language : ' + option)
+                          } else {
+                            addValue(languageCode)
+                            setOpenLanguageMenu(null)
+                            setError(null)
+                          }
+                        }}
+                      >
+                        <Avatar
+                          variant={'rounded'}
+                          sx={{
+                            width: '24px',
+                            height: '24px',
+                            fontSize: '14px',
+                            backgroundColor: theme.palette.surfaceContainer,
+                            color: theme.palette.primary.main,
+                          }}
+                        >
+                          {option}
+                        </Avatar>
+                        <Typography>{language}</Typography>
+                      </MenuItem>
+                    )
+                  }}
+                  slotProps={{
+                    paper: {
+                      sx: {
+                        overflow: 'hidden',
+                      },
+                    },
+                    listbox: {
+                      sx: {
+                        pt: '1px',
+                      },
+                    },
+                  }}
+                />
+              </Paper>
+            </ClickAwayListener>
+          </Popper>
         )}
         <Typography color={'error'}>{error}</Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
@@ -257,7 +366,12 @@ const EditLocaleText = ({
             <Button onClick={() => setOpenDialog(false)}>
               <Trans>edit_field_cancel_button_label</Trans>
             </Button>
-            <Button onClick={sendData}>
+            <Button
+              onClick={() => {
+                setOpenDialog(false)
+                sendData()
+              }}
+            >
               <Trans>edit_field_continue_button_label</Trans>
             </Button>
           </DialogActions>
