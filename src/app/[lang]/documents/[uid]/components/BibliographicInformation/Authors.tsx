@@ -86,6 +86,7 @@ const Authors = () => {
         variant='outlined'
         startIcon={<EditIcon />}
         onClick={goToAuthorsTab}
+        sx={{ minWidth: 'fit-content' }}
       >
         <Trans>document_details_page_authors_row_update_author</Trans>
       </Button>

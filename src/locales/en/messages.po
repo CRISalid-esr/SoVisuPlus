@@ -754,6 +754,10 @@ msgstr "Keywords"
 msgid "document_details_page_abstracts_row_label"
 msgstr "Summary"
 
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Abstracts.tsx:20
+msgid "document_details_page_abstracts_row_edit_button"
+msgstr "Edit abstract"
+
 #: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:38
 msgid "document_details_page_add_in_hal_tab_wip_description"
 msgstr "This section will allow you to add this publication in HAL."
@@ -841,6 +845,10 @@ msgstr "Compare sources"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:53
 msgid "document_details_page_titles_row_label"
 msgstr "Title"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Titles.tsx:20
+msgid "document_details_page_titles_row_edit_button"
+msgstr "Edit title"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:142
 msgid "document_details_page_type_edit_button"
@@ -1180,6 +1188,14 @@ msgstr "Impossible to save empty fields only"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:241
 msgid "edit_field_save_button_label"
 msgstr "Save"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:243
+msgid "bibliographic_information_update_success"
+msgstr "{isSingle, select, true {Changes on {field, select, titles {title} abstracts {summary}} have been successfully saved.} false {Changes on {field, select, titles {titles} abstracts {summaries}} have been successfully saved.}}"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:244
+msgid "bibliographic_information_update_failure"
+msgstr "{isSingle, select, true {Changes on {field, select, titles {title} abstracts {summary}} haven't been saved. Please retry.} false {Changes on {field, select,titles {titles} abstracts {summaries}} haven't been saved. Please retry.}}"
 
 #: src/app/[lang]/expertise/page.tsx:20
 msgid "expertise_page_main_title"

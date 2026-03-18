@@ -58,8 +58,8 @@ export interface DocumentSlice {
     mergeDocuments: (documentUids: string[]) => Promise<void>
     addConcepts: (concepts: Concept[]) => Promise<void>
     removeConcepts: (conceptUids: string[]) => Promise<void>
-    modifyTitles: (titles: Literal[]) => Promise<void>
-    modifyAbstracts: (abstracts: Literal[]) => Promise<void>
+    modifyTitles: (titles: Literal[]) => Promise<{ success: boolean }>
+    modifyAbstracts: (abstracts: Literal[]) => Promise<{ success: boolean }>
     updateDocumentType: (type: DocumentType) => Promise<void>
   }
 }
@@ -404,13 +404,13 @@ export const addDocumentSlice: StateCreator<
       }
     },
     modifyTitles: async (titles: Literal[]) => {
-      const documentUid = get().document.selectedDocument?.uid
-      if (!documentUid) {
-        console.error('Cannot modify titles: no selected document')
-        return
-      }
-
       try {
+        const documentUid = get().document.selectedDocument?.uid
+
+        if (!documentUid) {
+          throw new Error('Cannot modify titles: no selected document')
+        }
+
         const response = await fetch(`/api/documents/${documentUid}/titles`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -438,6 +438,7 @@ export const addDocumentSlice: StateCreator<
             },
           }
         })
+        return { success: true }
       } catch (error) {
         set((state) => ({
           document: {
@@ -445,16 +446,17 @@ export const addDocumentSlice: StateCreator<
             error: error instanceof Error ? error.message : 'Unknown error',
           },
         }))
+        return { success: false }
       }
     },
     modifyAbstracts: async (abstracts: Literal[]) => {
-      const documentUid = get().document.selectedDocument?.uid
-      if (!documentUid) {
-        console.error('Cannot modify titles: no selected document')
-        return
-      }
-
       try {
+        const documentUid = get().document.selectedDocument?.uid
+
+        if (!documentUid) {
+          throw new Error('Cannot modify abstracts: no selected document')
+        }
+
         const response = await fetch(
           `/api/documents/${documentUid}/abstracts`,
           {
@@ -485,6 +487,7 @@ export const addDocumentSlice: StateCreator<
             },
           }
         })
+        return { success: true }
       } catch (error) {
         set((state) => ({
           document: {
@@ -492,6 +495,7 @@ export const addDocumentSlice: StateCreator<
             error: error instanceof Error ? error.message : 'Unknown error',
           },
         }))
+        return { success: false }
       }
     },
     updateDocumentType: async (type: DocumentType) => {

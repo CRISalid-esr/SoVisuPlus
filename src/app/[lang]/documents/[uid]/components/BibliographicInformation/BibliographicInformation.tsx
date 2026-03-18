@@ -3,8 +3,10 @@ import { CustomCard } from '@/components/Card'
 import useStore from '@/stores/global_store'
 import { Trans } from '@lingui/react'
 import {
+  Alert,
   Box,
   CardContent,
+  Snackbar,
   Table,
   TableBody,
   TableContainer,
@@ -22,6 +24,7 @@ import Journal from './Journal'
 import Abstracts from './Abstracts'
 import Row from './Row'
 import Identifiers from '@/app/[lang]/documents/[uid]/components/BibliographicInformation/Identifiers'
+import { Dispatch, SetStateAction, useState } from 'react'
 
 export type DocumentFieldKey =
   | 'titles'
@@ -39,20 +42,44 @@ export interface DocumentField {
   value: DocumentFieldKey
   title: string
   noContentAvailableMessage?: string
-  component: React.ComponentType<{ content: string }> | null
+  component: React.ComponentType<{
+    content: string
+    field?: DocumentField
+    edit?: boolean
+    setEdit?: Dispatch<SetStateAction<boolean>>
+  }> | null
   hasLanguageSelector?: boolean
 }
 
 const BibliographicInformation = () => {
   const { selectedDocument = null } = useStore((state) => state.document)
   const theme = useTheme()
+  const [alert, setAlert] = useState<{
+    open: boolean
+    success: boolean
+    message: React.ReactNode
+  }>({ open: false, success: true, message: <Trans id={''} /> })
+  const handleAlertClose = () => {
+    setAlert({ open: false, success: true, message: <Trans id={''} /> })
+  }
 
   const documentFields: Record<DocumentFieldKey, DocumentField> = {
     titles: {
       value: 'titles',
       title: t`document_details_page_titles_row_label`,
       noContentAvailableMessage: t`document_details_page_no_title_available`,
-      component: selectedDocument?.titles ? Titles : null,
+      component: selectedDocument?.titles
+        ? (props) => (
+            <Titles
+              {...props}
+              content={props.content}
+              field={props.field!}
+              edit={props.edit!}
+              setEdit={props.setEdit!}
+              setAlert={setAlert}
+            />
+          )
+        : null,
       hasLanguageSelector: true,
     },
     type: {
@@ -84,7 +111,18 @@ const BibliographicInformation = () => {
       value: 'abstracts',
       title: t`document_details_page_abstracts_row_label`,
       noContentAvailableMessage: t`document_details_page_no_abstract_available`,
-      component: selectedDocument?.abstracts ? Abstracts : null,
+      component: selectedDocument?.abstracts
+        ? (props) => (
+            <Abstracts
+              {...props}
+              content={props.content}
+              field={props.field!}
+              edit={props.edit!}
+              setEdit={props.setEdit!}
+              setAlert={setAlert}
+            />
+          )
+        : null,
       hasLanguageSelector: true,
     },
     sources: {
@@ -130,54 +168,70 @@ const BibliographicInformation = () => {
       : []
 
   return (
-    <CustomCard
-      header={
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Typography
+    <>
+      <CustomCard
+        header={
+          <Box
             sx={{
-              color: theme.palette.primary.main,
-              fontSize: theme.utils.pxToRem(20),
-              fontStyle: 'normal',
-              fontWeight: theme.typography.fontWeightRegular,
-              lineHeight: 'normal',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
             }}
           >
-            <Trans id='document_details_page_card_title' />
-          </Typography>
-        </Box>
-      }
-    >
-      <CardContent
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          gap: theme.spacing(4),
-        }}
+            <Typography
+              sx={{
+                color: theme.palette.primary.main,
+                fontSize: theme.utils.pxToRem(20),
+                fontStyle: 'normal',
+                fontWeight: theme.typography.fontWeightRegular,
+                lineHeight: 'normal',
+              }}
+            >
+              <Trans id='document_details_page_card_title' />
+            </Typography>
+          </Box>
+        }
       >
-        <TableContainer>
-          <Table sx={{ minWidth: 300 }}>
-            <TableBody>
-              {fieldsToDisplay.map((fieldKey) => {
-                const field = documentFields[fieldKey]
+        <CardContent
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: theme.spacing(4),
+          }}
+        >
+          <TableContainer>
+            <Table sx={{ minWidth: 300 }}>
+              <TableBody>
+                {fieldsToDisplay.map((fieldKey) => {
+                  const field = documentFields[fieldKey]
 
-                if (!field.component) {
-                  return null
-                }
+                  if (!field.component) {
+                    return null
+                  }
 
-                return <Row key={fieldKey} field={field}></Row>
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </CardContent>
-    </CustomCard>
+                  return <Row key={fieldKey} field={field}></Row>
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
+      </CustomCard>
+      <Snackbar
+        open={alert.open}
+        autoHideDuration={6000}
+        onClose={handleAlertClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          severity={alert.success ? 'success' : 'error'}
+          onClose={handleAlertClose}
+          sx={{ width: '100%' }}
+        >
+          {alert.message}
+        </Alert>
+      </Snackbar>
+    </>
   )
 }
 
