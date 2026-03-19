@@ -36,4 +36,12 @@ export class SourceContribution {
       SourcePerson.fromDbSourcePerson(contribution.person),
     )
   }
+
+  static getRelatorFromKey(value: string) {
+    if (value in LocRelator) {
+      return LocRelator[value as keyof typeof LocRelator]
+    } else {
+      return null
+    }
+  }
 }
