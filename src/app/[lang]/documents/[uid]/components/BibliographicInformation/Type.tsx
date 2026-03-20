@@ -138,6 +138,7 @@ const Type = () => {
               startIcon={<EditIcon />}
               onClick={handleOpen}
               disabled={!allowed}
+              sx={{ minWidth: 'fit-content' }}
             >
               <Trans>document_details_page_type_edit_button</Trans>
             </Button>

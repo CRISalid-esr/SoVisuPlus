@@ -754,6 +754,10 @@ msgstr "Mots-clés"
 msgid "document_details_page_abstracts_row_label"
 msgstr "Résumé"
 
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Abstracts.tsx:20
+msgid "document_details_page_abstracts_row_edit_button"
+msgstr "Modifier le résumé"
+
 #: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:38
 msgid "document_details_page_add_in_hal_tab_wip_description"
 msgstr "Cette rubrique vous permettra de déposer cette publication dans HAL."
@@ -841,6 +845,10 @@ msgstr "Comparer les sources"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:53
 msgid "document_details_page_titles_row_label"
 msgstr "Titre"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Titles.tsx:20
+msgid "document_details_page_titles_row_edit_button"
+msgstr "Modifier le titre"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:142
 msgid "document_details_page_type_edit_button"
@@ -1180,6 +1188,14 @@ msgstr "Impossible d'enregistrer que des champs vides"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:241
 msgid "edit_field_save_button_label"
 msgstr "Enregistrer"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:243
+msgid "bibliographic_information_update_success"
+msgstr "{isSingle, select,true {Modification du {field, select, titles {titre} abstracts {résumé}} enregistrée.} false {Modifications des {field, select, titles {titres} abstracts {résumés}} enregistrées.}}"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:244
+msgid "bibliographic_information_update_failure"
+msgstr "{isSingle, select,true {La modification du {field, select,titles {titre} abstracts {résumé}} n'a pas pu être enregistrée. Veuillez réessayer.} false {Les modifications des {field, select, titles {titres} abstracts {résumés}} n'ont pas pu être enregistrées. Veuillez réessayer.}}"
 
 #: src/app/[lang]/expertise/page.tsx:20
 msgid "expertise_page_main_title"

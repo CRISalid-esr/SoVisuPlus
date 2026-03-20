@@ -8,7 +8,7 @@ import DateProvider from '@/components/DateProvider'
 import useStore from '@/stores/global_store'
 import { Document, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
-import { DocumentFieldKey } from './BibliographicInformation'
+import { DocumentField, DocumentFieldKey } from './BibliographicInformation'
 import Row from './Row'
 import Titles from './Titles'
 import { OAStatus } from '@prisma/client'
@@ -53,13 +53,22 @@ describe('Row Component', () => {
 
   i18n.activate('en')
 
-  const titleField = {
+  const titleField: DocumentField = {
     value: 'titles' as DocumentFieldKey,
     title: i18n.t('document_details_page_titles_row_label'),
     noContentAvailableMessage: i18n.t(
       'document_details_page_no_title_available',
     ),
-    component: Titles,
+    component: (props) => (
+      <Titles
+        {...props}
+        content={props.content}
+        field={props.field!}
+        edit={props.edit!}
+        setEdit={props.setEdit!}
+        setAlert={() => {}}
+      />
+    ),
     hasLanguageSelector: true,
   }
 
@@ -74,13 +83,22 @@ describe('Row Component', () => {
       </ThemeProvider>,
     )
 
-  const typeField = {
+  const typeField: DocumentField = {
     value: 'type' as DocumentFieldKey,
     title: i18n.t('document_details_page_type_row_label'),
     noContentAvailableMessage: i18n.t(
       'document_details_page_no_title_available',
     ),
-    component: Titles,
+    component: (props) => (
+      <Titles
+        {...props}
+        content={props.content}
+        field={props.field!}
+        edit={props.edit!}
+        setEdit={props.setEdit!}
+        setAlert={() => {}}
+      />
+    ),
     hasLanguageSelector: true,
   }
 
