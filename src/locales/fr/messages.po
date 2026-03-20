@@ -14,6 +14,17 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
+msgid "bibliographic_information_update_success"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
+msgid "bibliographic_information_update_failure"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/lib/websocket/WebSocketListener.tsx:102
 msgid "snackbar_document_created"
 msgstr "Nouvelle publication : "
@@ -212,9 +223,37 @@ msgid "document_details_page_source_tab_select_action_unmerge_label"
 msgstr "Dissocier"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:255
+msgid "document_details_page_keywords_input_default"
+msgstr "Veuillez entrer au minimum 3 caractères"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:259
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "Aucune option"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Mot-clé ajouté à la publication."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Veuillez sélectionner au moins un vocabulaire"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
 msgid "document_details_page_update_in_hal_tab_card_title"
 msgstr "Mettre à jour dans HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr "Domaines"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:249
@@ -227,24 +266,6 @@ msgid "document_details_page_keywords_input_options_fetch_error"
 msgstr "Une erreur est survenue lors du chargement."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:255
-msgid "document_details_page_keywords_input_default"
-msgstr "Veuillez entrer au minimum 3 caractères"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Veuillez sélectionner au moins un vocabulaire"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:259
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "Aucune option"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:288
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Erreur lors du chargement des données"
@@ -253,16 +274,6 @@ msgstr "Erreur lors du chargement des données"
 #: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
 msgid "document_details_page_add_in_hal_tab_card_title"
 msgstr "Déposer dans HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr "Domaines"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Mot-clé ajouté à la publication."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:183
@@ -277,26 +288,26 @@ msgstr ""
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:128
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:58
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:102
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:120
 msgid "document_details_page_titles_row_label"
 msgstr "Titre"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:59
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:80
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:125
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:89
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:143
 msgid "document_details_page_no_title_available"
 msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:131
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:79
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:88
 msgid "document_details_page_type_row_label"
 msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:120
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:151
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
 msgid "document_details_page_card_title"
 msgstr "Informations bibliographiques"
 
@@ -366,15 +377,15 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "Une nouvelle expertise est en attente de validation"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
+msgid "profile_identifiers_card_title"
+msgstr "Mes identifiants chercheurs"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:101
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:31
 msgid "profile_affiliations_card_title"
 msgstr "Mes affiliations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
-msgid "profile_identifiers_card_title"
-msgstr "Mes identifiants chercheurs"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:59
@@ -437,18 +448,6 @@ msgid "orcid_control_helper"
 msgstr "ORCID est un identifiant unique, pérenne et gratuit pour les chercheurs. Il vous permet de gagner du temps lorsque vous vous connectez à des systèmes comme celui-ci. En liant votre ORCID à votre compte SoVisu+, vous identifiez de manière unique vos productions de recherche et améliorez la qualité des métadonnées. En savoir plus sur la façon dont ORCID vous aide à passer plus de temps à faire de la recherche et moins de temps à la gérer sur <0>orcid.org</0>."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:34
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
-msgid "hal_button_update_identifier"
-msgstr "Lier mon compte HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:44
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
-msgid "hal_button_provide_identifier"
-msgstr "Fournir mon identifiant Hal"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:48
 msgid "orcid_permission_read_limited"
@@ -477,6 +476,18 @@ msgstr "Voici les autorisations que vous accordez à {institutionName} sur votre
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:179
 msgid "orcid_permissions_none"
 msgstr "Vous n’accordez aucune autorisation à {institutionName}."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:34
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
+msgid "hal_button_update_identifier"
+msgstr "Lier mon compte HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:44
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
+msgid "hal_button_provide_identifier"
+msgstr "Fournir mon identifiant Hal"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:168
@@ -750,13 +761,13 @@ msgstr "Domaines"
 msgid "document_details_keywords_tab"
 msgstr "Mots-clés"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:85
-msgid "document_details_page_abstracts_row_label"
-msgstr "Résumé"
-
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Abstracts.tsx:20
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Abstracts.tsx:38
 msgid "document_details_page_abstracts_row_edit_button"
 msgstr "Modifier le résumé"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:112
+msgid "document_details_page_abstracts_row_label"
+msgstr "Résumé"
 
 #: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:38
 msgid "document_details_page_add_in_hal_tab_wip_description"
@@ -766,15 +777,15 @@ msgstr "Cette rubrique vous permettra de déposer cette publication dans HAL."
 msgid "document_details_page_add_in_hal_tab_wip_title"
 msgstr "Dépôt dans HAL : implémentation en cours"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:194
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:195
 msgid "document_details_page_apply_button"
 msgstr "Appliquer"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:75
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:102
 msgid "document_details_page_authors_row_label"
 msgstr "Auteurs"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:90
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:91
 msgid "document_details_page_authors_row_update_author"
 msgstr "Modifier les auteurs"
 
@@ -786,7 +797,7 @@ msgstr "Retour à mes publications"
 msgid "document_details_page_back_to_publications"
 msgstr "Retour aux publications"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:187
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:188
 msgid "document_details_page_cancel_button"
 msgstr "Annuler"
 
@@ -810,7 +821,7 @@ msgstr "copié dans le presse-papiers."
 msgid "document_details_page_identifiers_no_identifiers_message"
 msgstr "Aucun identifiant"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:70
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:97
 msgid "document_details_page_identifiers_row_label"
 msgstr "Identifiants"
 
@@ -818,47 +829,47 @@ msgstr "Identifiants"
 msgid "document_details_page_journal_journal"
 msgstr "journal"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:65
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:92
 msgid "document_details_page_journal_row_label"
 msgstr "Publié dans"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:86
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:113
 msgid "document_details_page_no_abstract_available"
 msgstr "Aucun résumé disponible"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:54
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:70
 msgid "document_details_page_no_title_available"
 msgstr "Aucun titre disponible"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:80
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:107
 msgid "document_details_page_publication_date_row_label"
 msgstr "Date de publication"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:92
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:130
 msgid "document_details_page_sources_row_label"
 msgstr "Sources"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.tsx:79
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.tsx:80
 msgid "document_details_page_sources_row_update_source"
 msgstr "Comparer les sources"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:53
-msgid "document_details_page_titles_row_label"
-msgstr "Titre"
-
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Titles.tsx:20
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Titles.tsx:38
 msgid "document_details_page_titles_row_edit_button"
 msgstr "Modifier le titre"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:142
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:69
+msgid "document_details_page_titles_row_label"
+msgstr "Titre"
+
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:143
 msgid "document_details_page_type_edit_button"
 msgstr "Modifier"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:60
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:87
 msgid "document_details_page_type_row_label"
 msgstr "Type de document"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:159
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Type.tsx:160
 msgid "document_details_page_type_select_label"
 msgstr "Sélectionnez le type"
 
@@ -1144,16 +1155,16 @@ msgstr "Titre"
 msgid "documents_page_type_column"
 msgstr "Type"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:143
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:217
 msgid "edit_field_add_language_button_label"
 msgstr "Ajouter une langue"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:233
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:258
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:354
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:379
 msgid "edit_field_cancel_button_label"
 msgstr "Annuler"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:261
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:387
 msgid "edit_field_continue_button_label"
 msgstr "Continuer"
 
@@ -1161,41 +1172,33 @@ msgstr "Continuer"
 msgid "edit_field_delete_button_tooltip"
 msgstr "Supprimer la langue"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:253
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:374
 msgid "edit_field_dialog_text"
 msgstr "Vous n'avez pas remplis certains champs, ceux-ci ne seront pas pris en compte lors de l'enregistrement. Voulez-vous continuer ?"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:249
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:370
 msgid "edit_field_dialog_title"
 msgstr "Confirmation"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:179
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:252
 msgid "edit_field_languages_menu_header"
 msgstr "Ajouter une langue"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:132
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:206
 msgid "edit_field_languages_menu_no_languages_message"
 msgstr "Votre institution n'a pas activé d'autres langues"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:97
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:171
 msgid "edit_field_no_values_save"
 msgstr "Vous devez avoir au moins un champs remplis"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:101
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:175
 msgid "edit_field_only_empty_fields_saved"
 msgstr "Impossible d'enregistrer que des champs vides"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:241
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:362
 msgid "edit_field_save_button_label"
 msgstr "Enregistrer"
-
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:243
-msgid "bibliographic_information_update_success"
-msgstr "{isSingle, select,true {Modification du {field, select, titles {titre} abstracts {résumé}} enregistrée.} false {Modifications des {field, select, titles {titres} abstracts {résumés}} enregistrées.}}"
-
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:244
-msgid "bibliographic_information_update_failure"
-msgstr "{isSingle, select,true {La modification du {field, select,titles {titre} abstracts {résumé}} n'a pas pu être enregistrée. Veuillez réessayer.} false {Les modifications des {field, select, titles {titres} abstracts {résumés}} n'ont pas pu être enregistrées. Veuillez réessayer.}}"
 
 #: src/app/[lang]/expertise/page.tsx:20
 msgid "expertise_page_main_title"
