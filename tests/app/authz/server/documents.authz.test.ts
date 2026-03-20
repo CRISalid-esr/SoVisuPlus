@@ -4,7 +4,7 @@ import {
   assignRoleToPersonUid,
   createDocumentWithContributors,
   createPersonWithUser,
-  createResearchStructure,
+  createResearchUnit,
   resetAuthzDb,
   seedRoles,
 } from '../helpers/db'
@@ -49,7 +49,7 @@ describe('AuthZ (Document) – integration', () => {
   })
 
   test('person-scoped merger can merge in-scope document, not out-of-scope', async () => {
-    const rs = await createResearchStructure('RS-1', 'RS ONE')
+    const rs = await createResearchUnit('RS-1', 'RS ONE')
     const { person: alice } = await createPersonWithUser('local-alice')
     const { person: bob } = await createPersonWithUser('local-bob')
 
@@ -73,7 +73,7 @@ describe('AuthZ (Document) – integration', () => {
   })
 
   test('RS-scoped merger can merge any doc that involves that RS', async () => {
-    const rs = await createResearchStructure('RS-42', 'RS FortyTwo')
+    const rs = await createResearchUnit('RS-42', 'RS FortyTwo')
 
     const { person: p1 } = await createPersonWithUser('local-p1')
     const { person: p2 } = await createPersonWithUser('local-p2')
@@ -83,9 +83,9 @@ describe('AuthZ (Document) – integration', () => {
     const docIn = await createDocumentWithContributors('doc-in', [p1.id])
     const docOut = await createDocumentWithContributors('doc-out', [p2.id])
 
-    // Role assigned to p1 but scoped to ResearchStructure:RS-42
+    // Role assigned to p1 but scoped to ResearchUnit:RS-42
     await assignRoleToPersonUid('document_merger', 'local-p1', {
-      entityType: EntityType.ResearchStructure,
+      entityType: EntityType.ResearchUnit,
       entityUid: 'RS-42',
     })
 
@@ -150,18 +150,18 @@ describe('AuthZ (Document) – integration', () => {
   })
   test('multi-type scopes work as OR across rules', async () => {
     const { person: a } = await createPersonWithUser('local-a')
-    const rs = await createResearchStructure('RS-X', 'RS X')
+    const rs = await createResearchUnit('RS-X', 'RS X')
     await addMembership(a.id, rs.id)
 
     const docByA = await createDocumentWithContributors('doc-a', [a.id])
 
-    // Assign role with 2 scope entries (Person + ResearchStructure)
+    // Assign role with 2 scope entries (Person + ResearchUnit)
     await assignRoleToPersonUid('document_merger', 'local-a', {
       entityType: EntityType.Person,
       entityUid: 'local-a',
     })
     await assignRoleToPersonUid('document_merger', 'local-a', {
-      entityType: EntityType.ResearchStructure,
+      entityType: EntityType.ResearchUnit,
       entityUid: 'RS-X',
     })
 

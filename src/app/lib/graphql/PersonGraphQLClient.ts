@@ -4,9 +4,9 @@ import { Person } from '@/types/Person'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
 import { ExternalPerson } from '@/types/ExternalPerson'
 import { InternalPerson } from '@/types/InternalPerson'
-import { ResearchStructure } from '@/types/ResearchStructure'
+import { ResearchUnit } from '@/types/ResearchUnit'
 import { Literal } from '@/types/Literal'
-import { researchStructureIdentifierTypeFromString } from '@/types/ResearchStructureIdentifier'
+import { researchUnitIdentifierTypeFromString } from '@/types/ResearchUnitIdentifier'
 
 export interface GraphPersonIdentifier {
   type: string
@@ -156,7 +156,7 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
         })
         .filter((identifier) => identifier !== null), // Remove null entries
       personData.membershipsConnection?.edges?.map((edge) => ({
-        researchStructure: new ResearchStructure(
+        researchUnit: new ResearchUnit(
           edge.node.uid,
           edge.node.acronym ?? null,
           edge.node.names.map((name) =>
@@ -168,10 +168,10 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
           [],
           edge.node.signature ?? null,
           edge.node.identifiers.map((identifier) => ({
-            type: researchStructureIdentifierTypeFromString(identifier.type),
+            type: researchUnitIdentifierTypeFromString(identifier.type),
             value: identifier.value,
           })),
-          'research_structure',
+          'research_unit',
         ),
         startDate: edge.properties.start_date ?? null,
         endDate: edge.properties.end_date ?? null,

@@ -88,7 +88,7 @@ describe('UserDAO', () => {
           },
           scopes: [
             {
-              entityType: 'ResearchStructure',
+              entityType: 'ResearchUnit',
               entityUid: 'rs-uid-1',
             },
             { entityType: 'Institution', entityUid: 'inst-uid-42' },
@@ -137,8 +137,8 @@ describe('UserDAO', () => {
                 positionCode: true,
                 id: true,
                 personId: true,
-                researchStructureId: true,
-                researchStructure: {
+                researchUnitId: true,
+                researchUnit: {
                   select: {
                     uid: true,
                     acronym: true,
@@ -232,8 +232,8 @@ describe('UserDAO', () => {
                 id: true,
                 personId: true,
                 positionCode: true,
-                researchStructureId: true,
-                researchStructure: {
+                researchUnitId: true,
+                researchUnit: {
                   select: {
                     uid: true,
                     id: true,
@@ -411,13 +411,13 @@ describe('UserDAO', () => {
       id: 1,
       userId: 7,
       roleId: 3,
-      entityType: 'ResearchStructure',
+      entityType: 'ResearchUnit',
       entityUid: 'rs-uid-1',
     })
     await userDAO.createUserRoleScopeIfNotExists(
       7,
       3,
-      'ResearchStructure' as EntityType,
+      'ResearchUnit' as EntityType,
       'rs-uid-1',
     )
     expect(mockPrisma.userRoleScope.upsert).toHaveBeenCalledWith({
@@ -425,7 +425,7 @@ describe('UserDAO', () => {
         userId_roleId_entityType_entityUid: {
           userId: 7,
           roleId: 3,
-          entityType: 'ResearchStructure',
+          entityType: 'ResearchUnit',
           entityUid: 'rs-uid-1',
         },
       },
@@ -433,7 +433,7 @@ describe('UserDAO', () => {
       create: {
         userId: 7,
         roleId: 3,
-        entityType: 'ResearchStructure',
+        entityType: 'ResearchUnit',
         entityUid: 'rs-uid-1',
       },
     })

@@ -1,11 +1,11 @@
 import prisma from '@/lib/daos/prisma'
 
-describe('ResearchStructure Model Tests', () => {
+describe('ResearchUnit Model Tests', () => {
   beforeEach(async () => {
     // Clear the database before each test
-    await prisma.researchStructure.deleteMany()
-    await prisma.researchStructureName.deleteMany()
-    await prisma.researchStructureDescription.deleteMany()
+    await prisma.researchUnit.deleteMany()
+    await prisma.researchUnitName.deleteMany()
+    await prisma.researchUnitDescription.deleteMany()
   })
 
   afterAll(async () => {
@@ -13,8 +13,8 @@ describe('ResearchStructure Model Tests', () => {
     await prisma.$disconnect()
   })
 
-  test('should create a new research structure with names and descriptions', async () => {
-    const researchStructure = await prisma.researchStructure.create({
+  test('should create a new research unit with names and descriptions', async () => {
+    const researchUnit = await prisma.researchUnit.create({
       data: {
         uid: 'rs-123',
         acronym: 'ABC',
@@ -35,11 +35,11 @@ describe('ResearchStructure Model Tests', () => {
       include: { names: true, descriptions: true },
     })
 
-    expect(researchStructure).toHaveProperty('id')
-    expect(researchStructure.uid).toBe('rs-123')
-    expect(researchStructure.acronym).toBe('ABC')
-    expect(researchStructure.signature).toBe('ABC_signature')
-    expect(researchStructure.names).toEqual(
+    expect(researchUnit).toHaveProperty('id')
+    expect(researchUnit.uid).toBe('rs-123')
+    expect(researchUnit.acronym).toBe('ABC')
+    expect(researchUnit.signature).toBe('ABC_signature')
+    expect(researchUnit.names).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           value: 'International Research Center',
@@ -51,7 +51,7 @@ describe('ResearchStructure Model Tests', () => {
         }),
       ]),
     )
-    expect(researchStructure.descriptions).toEqual(
+    expect(researchUnit.descriptions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           value: 'A leading research center.',
@@ -65,8 +65,8 @@ describe('ResearchStructure Model Tests', () => {
     )
   })
 
-  test('should find a research structure by UID with names and descriptions', async () => {
-    await prisma.researchStructure.create({
+  test('should find a research unit by UID with names and descriptions', async () => {
+    await prisma.researchUnit.create({
       data: {
         uid: 'rs-456',
         acronym: 'XYZ',
@@ -92,16 +92,16 @@ describe('ResearchStructure Model Tests', () => {
       },
     })
 
-    const foundStructure = await prisma.researchStructure.findUnique({
+    const foundUnit = await prisma.researchUnit.findUnique({
       where: { uid: 'rs-456' },
       include: { names: true, descriptions: true },
     })
 
-    expect(foundStructure).not.toBeNull()
-    expect(foundStructure?.uid).toBe('rs-456')
-    expect(foundStructure?.acronym).toBe('XYZ')
-    expect(foundStructure?.signature).toBe('XYZ_signature')
-    expect(foundStructure?.names).toEqual(
+    expect(foundUnit).not.toBeNull()
+    expect(foundUnit?.uid).toBe('rs-456')
+    expect(foundUnit?.acronym).toBe('XYZ')
+    expect(foundUnit?.signature).toBe('XYZ_signature')
+    expect(foundUnit?.names).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           value: 'Space Research Lab',
@@ -113,7 +113,7 @@ describe('ResearchStructure Model Tests', () => {
         }),
       ]),
     )
-    expect(foundStructure?.descriptions).toEqual(
+    expect(foundUnit?.descriptions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           value: 'Research lab focusing on space exploration.',

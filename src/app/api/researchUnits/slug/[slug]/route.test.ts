@@ -1,25 +1,25 @@
 import { NextRequest } from 'next/server'
 import { GET } from './route'
-import { ResearchStructure } from '@/types/ResearchStructure'
+import { ResearchUnit } from '@/types/ResearchUnit'
 import { Literal } from '@/types/Literal' // Adjust path if necessary
 
-jest.mock('@/lib/services/ResearchStructureService', () => ({
-  ResearchStructureService: jest.fn().mockImplementation(() => ({
-    fetchResearchStructureBySlug: jest.fn().mockImplementation((slug) => {
-      if (slug === 'research-structure-abcd') {
+jest.mock('@/lib/services/ResearchUnitService', () => ({
+  ResearchUnitService: jest.fn().mockImplementation(() => ({
+    fetchResearchUnitBySlug: jest.fn().mockImplementation((slug) => {
+      if (slug === 'research-unit-abcd') {
         return Promise.resolve(
-          new ResearchStructure(
+          new ResearchUnit(
             '12345',
             'ABCD',
             [
-              new Literal('ABCD Research Structure', 'en'),
-              new Literal('Structure de recherche ABCD', 'fr'),
+              new Literal('ABCD Research Unit', 'en'),
+              new Literal('Unité de recherche ABCD', 'fr'),
             ],
             [],
             'ABCD_signature',
             [],
-            'research_structure',
-            'research-structure-abcd',
+            'research_unit',
+            'research-unit-abcd',
           ),
         )
       }
@@ -38,16 +38,16 @@ jest.mock('next/server', () => ({
   },
 }))
 
-describe('GET /api/research-structure/slug/[slug]', () => {
+describe('GET /api/research-unit/slug/[slug]', () => {
   let req: NextRequest
   let params: { slug: string }
 
   beforeEach(() => {
-    params = { slug: 'research-structure-abcd' }
+    params = { slug: 'research-unit-abcd' }
     req = {} as unknown as NextRequest
   })
 
-  it('should return a research structure when found', async () => {
+  it('should return a research unit when found', async () => {
     const response = await GET(req, {
       params: Promise.resolve(params),
     })
@@ -56,24 +56,24 @@ describe('GET /api/research-structure/slug/[slug]', () => {
     const jsonResponse = await response.json()
 
     expect(jsonResponse).toEqual(
-      new ResearchStructure(
+      new ResearchUnit(
         '12345',
         'ABCD',
         [
-          new Literal('ABCD Research Structure', 'en'),
-          new Literal('Structure de recherche ABCD', 'fr'),
+          new Literal('ABCD Research Unit', 'en'),
+          new Literal('Unité de recherche ABCD', 'fr'),
         ],
         [],
         'ABCD_signature',
         [],
-        'research_structure',
-        'research-structure-abcd',
+        'research_unit',
+        'research-unit-abcd',
       ),
     )
   })
 
-  it('should return 404 when research structure is not found', async () => {
-    params = { slug: 'research-structure-efgh' }
+  it('should return 404 when research unit is not found', async () => {
+    params = { slug: 'research-unit-efgh' }
     const response = await GET(req, {
       params: Promise.resolve(params),
     })
@@ -82,7 +82,7 @@ describe('GET /api/research-structure/slug/[slug]', () => {
     const jsonResponse = await response.json()
 
     expect(jsonResponse).toEqual({
-      error: 'ResearchStructure with slug research-structure-efgh not found',
+      error: 'ResearchUnit with slug research-unit-efgh not found',
     })
   })
 })

@@ -69,12 +69,12 @@ export class UserDAO extends AbstractDAO {
               memberships: {
                 select: {
                   id: true,
-                  researchStructureId: true,
+                  researchUnitId: true,
                   personId: true,
                   startDate: true,
                   endDate: true,
                   positionCode: true,
-                  researchStructure: {
+                  researchUnit: {
                     select: {
                       id: true,
                       uid: true,

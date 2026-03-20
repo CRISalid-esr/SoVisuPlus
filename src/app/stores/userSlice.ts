@@ -2,7 +2,7 @@ import { StateCreator } from 'zustand'
 import { User } from '@/types/User'
 import { IAgent, IAgentClass } from '@/types/IAgent'
 import { Person } from '@/types/Person'
-import { ResearchStructure } from '@/types/ResearchStructure'
+import { ResearchUnit } from '@/types/ResearchUnit'
 
 export interface UserSlice {
   user: {
@@ -71,9 +71,9 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
         if (slug.startsWith('person:')) {
           endpoint = `/api/person/slug/${slug}`
           EntityClass = Person
-        } else if (slug.startsWith('research-structure:')) {
-          endpoint = `/api/researchStructures/slug/${slug}`
-          EntityClass = ResearchStructure
+        } else if (slug.startsWith('research-unit:')) {
+          endpoint = `/api/researchUnits/slug/${slug}`
+          EntityClass = ResearchUnit
         } else {
           throw new Error(`Unknown slug type: ${slug}`)
         }

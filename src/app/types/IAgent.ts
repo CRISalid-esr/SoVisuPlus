@@ -6,10 +6,10 @@ export interface IAgentJson {
   slug: string | null
 }
 
-export type AgentType = 'person' | 'research_structure' | 'institution'
+export type AgentType = 'person' | 'research_unit' | 'institution'
 const AGENT_TYPE_VALUES = new Set<AgentType>([
   'person',
-  'research_structure',
+  'research_unit',
   'institution',
 ])
 

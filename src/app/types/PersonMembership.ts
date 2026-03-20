@@ -1,9 +1,9 @@
-import { ResearchStructure } from '@/types/ResearchStructure'
+import { ResearchUnit } from '@/types/ResearchUnit'
 import { MembershipWithRelations } from '@/prisma-schema/extended-client'
 
 class PersonMembership {
   constructor(
-    public researchStructure: ResearchStructure,
+    public researchUnit: ResearchUnit,
     public startDate?: string | null,
     public endDate?: string | null,
     public positionCode?: string | null,
@@ -13,7 +13,7 @@ class PersonMembership {
     membership: MembershipWithRelations,
   ): PersonMembership {
     return new PersonMembership(
-      ResearchStructure.fromDbResearchStructure(membership.researchStructure),
+      ResearchUnit.fromDbResearchUnit(membership.researchUnit),
       membership.startDate?.toDateString(),
       membership.endDate?.toDateString(),
       membership.positionCode,

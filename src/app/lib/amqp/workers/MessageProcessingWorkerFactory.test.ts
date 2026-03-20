@@ -1,8 +1,8 @@
 import { MessageProcessingWorkerFactory } from '@/lib/amqp/workers/MessageProcessingWorkerFactory'
 import { PersonWorker } from '@/lib/amqp/workers/PersonWorker'
-import { ResearchStructureWorker } from '@/lib/amqp/workers/ResearchStructureWorker'
+import { ResearchUnitWorker } from '@/lib/amqp/workers/ResearchUnitWorker'
 import { AMQPPersonMessage } from '@/types/AMQPPersonMessage'
-import { AMQPResearchStructureMessage } from '@/types/AMQPResearchStructureMessage'
+import { AMQPResearchUnitMessage } from '@/types/AMQPResearchUnitMessage'
 import { DocumentWorker } from '@/lib/amqp/workers/DocumentWorker'
 import { HarvestingStateEventWorker } from '@/lib/amqp/workers/HarvestingStateEventWorker'
 import { HarvestingResultEventWorker } from '@/lib/amqp/workers/HarvestingResultEventWorker'
@@ -39,15 +39,15 @@ describe('MessageProcessingWorkerFactory', () => {
     expect(worker).toBeInstanceOf(PersonWorker)
   })
 
-  it('should create a ResearchStructureWorker for research_structure messages', () => {
-    const message: AMQPResearchStructureMessage = {
-      type: 'research_structure',
+  it('should create a ResearchUnitWorker for research_unit messages', () => {
+    const message: AMQPResearchUnitMessage = {
+      type: 'research_unit',
       event: 'updated',
       fields: {
         uid: 'rs-123',
         acronym: 'RS',
         signature: 'RS_Signature',
-        names: [{ value: 'Research Structure', language: 'en' }],
+        names: [{ value: 'Research Unit', language: 'en' }],
         descriptions: [{ value: 'A description', language: 'en' }],
         identifiers: [{ type: 'NNS', value: '12345' }],
       },
@@ -55,7 +55,7 @@ describe('MessageProcessingWorkerFactory', () => {
 
     const worker = factory.createWorker(message)
 
-    expect(worker).toBeInstanceOf(ResearchStructureWorker)
+    expect(worker).toBeInstanceOf(ResearchUnitWorker)
   })
 
   it('should create a DocumentWorker for document messages', () => {

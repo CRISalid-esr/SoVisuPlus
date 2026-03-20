@@ -2,7 +2,7 @@ import useStore from '@/stores/global_store'
 import { act, render, screen } from '@testing-library/react'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
-import StructuresControl from '@/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl'
+import UnitsControl from '@/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl'
 
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
@@ -23,33 +23,33 @@ const mockState = {
           {
             id: 1,
             personId: 1,
-            researchStructureId: 1,
+            researchUnitId: 1,
             startDate: null,
             endDate: null,
             positionCode: null,
-            researchStructure: {
+            researchUnit: {
               id: 1,
               uid: '12345',
               acronym: 'ABC',
               signature: 'ABC_Signature',
               external: false,
-              slug: 'research-structure:abc',
+              slug: 'research-unit:abc',
             },
           },
           {
             id: 2,
             personId: 1,
-            researchStructureId: 2,
+            researchUnitId: 2,
             startDate: null,
             endDate: null,
             positionCode: null,
-            researchStructure: {
+            researchUnit: {
               id: 2,
               uid: '67890',
               acronym: 'DEF',
               signature: 'DEF_Signature',
               external: false,
-              slug: 'research-structure:def',
+              slug: 'research-unit:def',
             },
           },
         ],
@@ -71,15 +71,15 @@ beforeEach(() => {
   })
 })
 
-describe('StructuresControl Component', () => {
+describe('UnitsControl Component', () => {
   it('displays memberships acronym', async () => {
     render(
       <I18nProvider i18n={i18n}>
-        <StructuresControl />
+        <UnitsControl />
       </I18nProvider>,
     )
     expect(
-      screen.getByText(i18n.t('profile_affiliations_structures_label')),
+      screen.getByText(i18n.t('profile_affiliations_units_label')),
     ).toBeInTheDocument()
     expect(
       screen.getByText(
@@ -89,7 +89,7 @@ describe('StructuresControl Component', () => {
   })
 
   it('displays message if no membership', async () => {
-    const mockStateWithoutStructures = {
+    const mockStateWithoutUnits = {
       ...mockState,
       user: {
         ...mockState.user,
@@ -105,16 +105,16 @@ describe('StructuresControl Component', () => {
     }
 
     ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
-      selector(mockStateWithoutStructures),
+      selector(mockStateWithoutUnits),
     )
 
     render(
       <I18nProvider i18n={i18n}>
-        <StructuresControl />
+        <UnitsControl />
       </I18nProvider>,
     )
     expect(
-      screen.getByText(i18n.t('profile_affiliations_no_structures')),
+      screen.getByText(i18n.t('profile_affiliations_no_units')),
     ).toBeInTheDocument()
   })
 })

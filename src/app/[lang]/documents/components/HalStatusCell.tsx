@@ -6,10 +6,7 @@ import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import HalStatusCellBadge, { HalStatusCellType } from './HalStatusCellBadge'
 import AttachFileOffIcon from '@/app/theme/icons/AttachFileOffIcon'
 import { isPerson, Person } from '@/types/Person'
-import {
-  isResearchStructure,
-  ResearchStructure,
-} from '@/types/ResearchStructure'
+import { isResearchUnit, ResearchUnit } from '@/types/ResearchUnit'
 
 const halSubmitTypeToHalSubmitTypeIcon = (halSubmitType: string | null) => {
   switch (halSubmitType) {
@@ -42,9 +39,9 @@ const HalStatusCell = ({ row }: { row: { original: Document } }) => {
         <HalStatusCellBadge type={HalStatusCellType.OutsideHalMissingId} />
       )
     }
-    if (isResearchStructure(currentPerspective)) {
-      const structure = currentPerspective as ResearchStructure
-      return structure.hasIdHAL() ? (
+    if (isResearchUnit(currentPerspective)) {
+      const unit = currentPerspective as ResearchUnit
+      return unit.hasIdHAL() ? (
         <HalStatusCellBadge
           type={HalStatusCellType.OutsideHal}
           documentUid={row.original.uid}
@@ -65,7 +62,7 @@ const HalStatusCell = ({ row }: { row: { original: Document } }) => {
   const halSubmitTypeIcon = halSubmitTypeToHalSubmitTypeIcon(halSubmitType)
 
   const collections =
-    halRecord.isResearchStructureInCollectionCodes(currentPerspective)
+    halRecord.isResearchUnitInCollectionCodes(currentPerspective)
 
   const hasBeenUpdated = row.original.hasBeenUpdated()
 

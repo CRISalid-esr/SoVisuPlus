@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react'
 import AgentIdentityCard from './AgentIdentityCard'
 import { Person } from '@/types/Person'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
-import { ResearchStructure } from '@/types/ResearchStructure'
+import { ResearchUnit } from '@/types/ResearchUnit'
 import type { PersonMembership } from '@/types/PersonMembership'
 import type { Literal } from '@/types/Literal'
 import type { IAgent } from '@/types/IAgent'
@@ -26,17 +26,12 @@ jest.mock('@/[lang]/dashboard/components/PersonIdentityCard', () => ({
   ),
 }))
 
-jest.mock(
-  '@/[lang]/dashboard/components/ResearchStructureIdentityCard',
-  () => ({
-    __esModule: true,
-    default: ({
-      researchStructure,
-    }: {
-      researchStructure: ResearchStructure
-    }) => <div data-testid='rs-identity-card'>{researchStructure.uid}</div>,
-  }),
-)
+jest.mock('@/[lang]/dashboard/components/ResearchUnitIdentityCard', () => ({
+  __esModule: true,
+  default: ({ researchUnit }: { researchUnit: ResearchUnit }) => (
+    <div data-testid='rs-identity-card'>{researchUnit.uid}</div>
+  ),
+}))
 
 const makePerson = (): Person => {
   const identifiers = [
@@ -57,24 +52,24 @@ const makePerson = (): Person => {
   )
 }
 
-const makeResearchStructure = (): ResearchStructure => {
+const makeResearchUnit = (): ResearchUnit => {
   const names: Literal[] = []
   const descriptions: Literal[] = []
-  return new ResearchStructure(
+  return new ResearchUnit(
     'rs1',
     'IRJS',
     names,
     descriptions,
     'Institut de Recherche Juridique de la Sorbonne',
     [],
-    'research_structure',
+    'research_unit',
     'irjs',
     false,
   )
 }
 
 const makeUnsupportedAgent = (): IAgent => {
-  // minimal IAgent instance (not a Person nor ResearchStructure)
+  // minimal IAgent instance (not a Person nor ResearchUnit)
   return {
     uid: 'inst1',
     slug: 'univ-x',
@@ -100,8 +95,8 @@ describe('AgentIdentityCard', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('renders ResearchStructureIdentityCard when agent is a ResearchStructure', () => {
-    const rs = makeResearchStructure()
+  it('renders ResearchUnitIdentityCard when agent is a ResearchUnit', () => {
+    const rs = makeResearchUnit()
 
     render(<AgentIdentityCard agent={rs} />)
 

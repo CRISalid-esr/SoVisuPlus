@@ -33,7 +33,7 @@ jest.mock('next/navigation', () => ({
 
 describe('SearchInput Component', () => {
   const mockFetchPeopleByName = jest.fn()
-  const mockFetchResearchStructuresByName = jest.fn()
+  const mockFetchResearchUnitsByName = jest.fn()
   ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
 
   const mockState = {
@@ -52,15 +52,15 @@ describe('SearchInput Component', () => {
       hasMore: true,
       total: 1,
     },
-    researchStructure: {
-      fetchResearchStructuresByName: mockFetchResearchStructuresByName,
+    researchUnit: {
+      fetchResearchUnitsByName: mockFetchResearchUnitsByName,
       loading: false,
-      researchStructures: [
+      researchUnits: [
         {
           id: '2',
           names: [{ value: 'Lab X', language: 'en', slug: 'lab-x' }],
-          type: 'researchStructures',
-          slug: 'research-structure:lab-x',
+          type: 'researchUnits',
+          slug: 'research-unit:lab-x',
         },
       ],
       hasMore: true,
@@ -113,7 +113,7 @@ describe('SearchInput Component', () => {
 
     expect(screen.getByText(t`sidebar_search_people`)).toBeInTheDocument()
     expect(
-      screen.getByText(t`sidebar_search_research_structures`),
+      screen.getByText(t`sidebar_search_research_units`),
     ).toBeInTheDocument()
   })
 
@@ -126,7 +126,7 @@ describe('SearchInput Component', () => {
     )
     await waitFor(
       () =>
-        expect(mockFetchResearchStructuresByName).toHaveBeenCalledWith({
+        expect(mockFetchResearchUnitsByName).toHaveBeenCalledWith({
           searchTerm: '',
           page: 1,
         }),
@@ -144,7 +144,7 @@ describe('SearchInput Component', () => {
     )
   }, 10000)
 
-  it('fetches research structures when scrolled to bottom', async () => {
+  it('fetches research units when scrolled to bottom', async () => {
     ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
     renderComponent()
     const searchInput = screen.getByPlaceholderText(
@@ -154,7 +154,7 @@ describe('SearchInput Component', () => {
     fireEvent.change(searchInput, { target: { value: 'Lab X' } })
 
     const researchGroup = screen
-      .getByText(`${t`sidebar_search_research_structures`} (1)`)
+      .getByText(`${t`sidebar_search_research_units`} (1)`)
       .closest('li')
 
     Object.defineProperty(researchGroup, 'scrollHeight', {
@@ -171,7 +171,7 @@ describe('SearchInput Component', () => {
 
     await waitFor(
       () =>
-        expect(mockFetchResearchStructuresByName).toHaveBeenCalledWith({
+        expect(mockFetchResearchUnitsByName).toHaveBeenCalledWith({
           searchTerm: 'Lab X',
           page: 1,
         }),
@@ -210,7 +210,7 @@ describe('SearchInput Component', () => {
       screen.getByText(`${t`sidebar_search_people`} (1)`),
     ).toBeInTheDocument()
     expect(
-      screen.getByText(`${t`sidebar_search_research_structures`} (1)`),
+      screen.getByText(`${t`sidebar_search_research_units`} (1)`),
     ).toBeInTheDocument()
 
     // Check for options
@@ -237,7 +237,7 @@ describe('SearchInput Component', () => {
     )
   })
 
-  it('sets perspective to research structure on selecting a research structure menu item', () => {
+  it('sets perspective to research unit on selecting a research unit menu item', () => {
     ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
     renderComponent()
     const searchInput = screen.getByPlaceholderText(
@@ -246,12 +246,12 @@ describe('SearchInput Component', () => {
     expect(searchInput).toBeInTheDocument()
     fireEvent.change(searchInput, { target: { value: 'Lab X' } })
 
-    const researchStructureItem = screen.getByText('Lab X')
-    fireEvent.click(researchStructureItem)
+    const researchUnitItem = screen.getByText('Lab X')
+    fireEvent.click(researchUnitItem)
     // check if perpective param is set
     expect(pushMock).toHaveBeenCalledTimes(1)
     expect(pushMock).toHaveBeenCalledWith(
-      expect.stringContaining('perspective=research-structure%3Alab-x'),
+      expect.stringContaining('perspective=research-unit%3Alab-x'),
       { scroll: false },
     )
   })

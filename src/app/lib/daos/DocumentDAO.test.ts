@@ -228,7 +228,7 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: {
+                    researchUnit: {
                       include: {
                         names: true,
                         identifiers: true,
@@ -818,7 +818,7 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: {
+                    researchUnit: {
                       include: {
                         names: true,
                         identifiers: true,
@@ -936,7 +936,7 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: {
+                    researchUnit: {
                       include: {
                         names: true,
                         identifiers: true,
@@ -1049,7 +1049,7 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: {
+                    researchUnit: {
                       include: {
                         names: true,
                         identifiers: true,
@@ -1166,7 +1166,7 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: {
+                    researchUnit: {
                       include: {
                         names: true,
                         identifiers: true,
@@ -1314,7 +1314,7 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: {
+                    researchUnit: {
                       include: {
                         names: true,
                         identifiers: true,
@@ -1425,7 +1425,7 @@ describe('DocumentDAO', () => {
                   identifiers: true,
                   memberships: {
                     include: {
-                      researchStructure: {
+                      researchUnit: {
                         include: {
                           names: true,
                           identifiers: true,

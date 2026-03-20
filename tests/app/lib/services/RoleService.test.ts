@@ -242,7 +242,7 @@ describe('RoleService Integration', () => {
 
     await svc.assignRoleToUser({
       roleName: 'document_editor',
-      scope: { entityType: 'ResearchStructure', entityUid: 'rs-uid-1' },
+      scope: { entityType: 'ResearchUnit', entityUid: 'rs-uid-1' },
       user: { personUid: 'local-alice' },
     })
 
@@ -256,14 +256,14 @@ describe('RoleService Integration', () => {
     })
     expect(scopes).toHaveLength(1)
     expect(scopes[0]).toMatchObject({
-      entityType: 'ResearchStructure',
+      entityType: 'ResearchUnit',
       entityUid: 'rs-uid-1',
     })
 
     // run again with the SAME scope (idempotent)
     await svc.assignRoleToUser({
       roleName: 'document_editor',
-      scope: { entityType: 'ResearchStructure', entityUid: 'rs-uid-1' },
+      scope: { entityType: 'ResearchUnit', entityUid: 'rs-uid-1' },
       user: { personUid: 'local-alice' },
     })
     scopes = await prisma.userRoleScope.findMany({
@@ -285,7 +285,7 @@ describe('RoleService Integration', () => {
       scopes.map((s) => `${s.entityType}:${s.entityUid}`),
     )
     expect(scopeSet).toEqual(
-      new Set(['ResearchStructure:rs-uid-1', 'Institution:inst-42']),
+      new Set(['ResearchUnit:rs-uid-1', 'Institution:inst-42']),
     )
   })
 

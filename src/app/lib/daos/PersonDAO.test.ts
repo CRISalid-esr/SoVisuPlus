@@ -2,7 +2,7 @@ import { Person as DbPerson, PrismaClient } from '@prisma/client'
 import { Person } from '@/types/Person'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { PersonMembership } from '@/types/PersonMembership'
-import { ResearchStructure } from '@/types/ResearchStructure'
+import { ResearchUnit } from '@/types/ResearchUnit'
 import { Literal } from '@/types/Literal'
 import {
   PersonIdentifier,
@@ -19,11 +19,11 @@ jest.mock('@prisma/client', () => {
   // avoid PersonIdentifierType to be mocked
   const actualPrismaClient: PrismaClient = jest.requireActual('@prisma/client')
 
-  const mockResearchStructureFindUnique = jest.fn()
+  const mockResearchUnitFindUnique = jest.fn()
 
-  mockResearchStructureFindUnique.mockResolvedValue({
+  mockResearchUnitFindUnique.mockResolvedValue({
     id: 1,
-    slug: 'local-structure',
+    slug: 'local-unit',
     type: 'ACR',
     names: [{ value: 'JD Laboratory', language: 'en' }],
     descriptions: [{ value: 'Laboratory of John Doe', language: 'en' }],
@@ -49,8 +49,8 @@ jest.mock('@prisma/client', () => {
     membership: {
       upsert: jest.fn(),
     },
-    researchStructure: {
-      findUnique: mockResearchStructureFindUnique,
+    researchUnit: {
+      findUnique: mockResearchUnitFindUnique,
     },
   }
 
@@ -77,8 +77,8 @@ describe('PersonDAO', () => {
     [new PersonIdentifier(PersonIdentifierType.orcid, '0000-0001-2345-6789')],
     [
       new PersonMembership(
-        new ResearchStructure(
-          'local-structure',
+        new ResearchUnit(
+          'local-unit',
           'ACR',
           [new Literal('JD Laboratory', 'en')],
           [new Literal('Laboratory of John Doe', 'en')],
@@ -164,9 +164,9 @@ describe('PersonDAO', () => {
 
     expect(mockPrisma.membership.upsert).toHaveBeenCalledWith({
       where: {
-        personId_researchStructureId: {
+        personId_researchUnitId: {
           personId: 1,
-          researchStructureId: 1,
+          researchUnitId: 1,
         },
       },
       update: {
@@ -176,7 +176,7 @@ describe('PersonDAO', () => {
       },
       create: {
         personId: 1,
-        researchStructureId: 1,
+        researchUnitId: 1,
         endDate: undefined,
         positionCode: undefined,
         startDate: undefined,

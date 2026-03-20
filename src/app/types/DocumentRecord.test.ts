@@ -2,7 +2,7 @@ import {
   DocumentType,
   HalSubmitType,
   PublicationIdentifierType,
-  ResearchStructureIdentifierType,
+  ResearchUnitIdentifierType,
   SourceRecordType,
 } from '@prisma/client'
 import { DocumentRecord } from '@/types/DocumentRecord'
@@ -17,7 +17,7 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { PersonMembership } from '@/types/PersonMembership'
-import { ResearchStructure } from '@/types/ResearchStructure'
+import { ResearchUnit } from '@/types/ResearchUnit'
 import { Literal } from '@/types/Literal'
 
 describe('DocumentRecord type', () => {
@@ -120,7 +120,7 @@ describe('DocumentRecord type', () => {
     )
   })
 
-  it('DocumentRecord isResearchStructureInCollectionCodes function', async () => {
+  it('DocumentRecord isResearchUnitInCollectionCodes function', async () => {
     const mockDocument = new DocumentRecord(
       'hal-123',
       'hal0001',
@@ -135,9 +135,7 @@ describe('DocumentRecord type', () => {
       HalSubmitType.file,
     )
 
-    expect(mockDocument.isResearchStructureInCollectionCodes(null)).toEqual(
-      null,
-    )
+    expect(mockDocument.isResearchUnitInCollectionCodes(null)).toEqual(null)
 
     const mockPerson1 = new Person(
       'P123',
@@ -152,28 +150,28 @@ describe('DocumentRecord type', () => {
       ],
       [
         new PersonMembership(
-          new ResearchStructure(
+          new ResearchUnit(
             'RS123',
             'ABC',
-            [new Literal('Valid Research Structure', 'en')],
+            [new Literal('Valid Research Unit', 'en')],
             [new Literal('Valid Description', 'en')],
             'ABC_signature',
             [
-              { type: ResearchStructureIdentifierType.hal, value: '12345' },
-              { type: ResearchStructureIdentifierType.ror, value: '67890' },
+              { type: ResearchUnitIdentifierType.hal, value: '12345' },
+              { type: ResearchUnitIdentifierType.ror, value: '67890' },
             ],
           ),
         ),
         new PersonMembership(
-          new ResearchStructure(
+          new ResearchUnit(
             'RS123',
             'DEF',
-            [new Literal('Valid Research Structure', 'en')],
+            [new Literal('Valid Research Unit', 'en')],
             [new Literal('Valid Description', 'en')],
             'DEF_signature',
             [
-              { type: ResearchStructureIdentifierType.hal, value: '12345' },
-              { type: ResearchStructureIdentifierType.ror, value: '67890' },
+              { type: ResearchUnitIdentifierType.hal, value: '12345' },
+              { type: ResearchUnitIdentifierType.ror, value: '67890' },
             ],
           ),
         ),
@@ -193,57 +191,58 @@ describe('DocumentRecord type', () => {
       ],
       [
         new PersonMembership(
-          new ResearchStructure(
+          new ResearchUnit(
             'RS123',
             'GHI',
-            [new Literal('Valid Research Structure', 'en')],
+            [new Literal('Valid Research Unit', 'en')],
             [new Literal('Valid Description', 'en')],
             'GHI_signature',
             [
-              { type: ResearchStructureIdentifierType.hal, value: '12345' },
-              { type: ResearchStructureIdentifierType.ror, value: '67890' },
+              { type: ResearchUnitIdentifierType.hal, value: '12345' },
+              { type: ResearchUnitIdentifierType.ror, value: '67890' },
             ],
           ),
         ),
       ],
     )
 
-    expect(
-      mockDocument.isResearchStructureInCollectionCodes(mockPerson1),
-    ).toEqual(['ABC', 'DEF'])
-    expect(
-      mockDocument.isResearchStructureInCollectionCodes(mockPerson2),
-    ).toEqual(null)
+    expect(mockDocument.isResearchUnitInCollectionCodes(mockPerson1)).toEqual([
+      'ABC',
+      'DEF',
+    ])
+    expect(mockDocument.isResearchUnitInCollectionCodes(mockPerson2)).toEqual(
+      null,
+    )
 
-    const mockResearchStructure1 = new ResearchStructure(
+    const mockResearchUnit1 = new ResearchUnit(
       'RS123',
       'DEF',
-      [new Literal('Valid Research Structure', 'en')],
+      [new Literal('Valid Research Unit', 'en')],
       [new Literal('Valid Description', 'en')],
       'DEF_signature',
       [
-        { type: ResearchStructureIdentifierType.hal, value: '12345' },
-        { type: ResearchStructureIdentifierType.ror, value: '67890' },
+        { type: ResearchUnitIdentifierType.hal, value: '12345' },
+        { type: ResearchUnitIdentifierType.ror, value: '67890' },
       ],
     )
 
-    const mockResearchStructure2 = new ResearchStructure(
+    const mockResearchUnit2 = new ResearchUnit(
       'RS123',
       'GHI',
-      [new Literal('Valid Research Structure', 'en')],
+      [new Literal('Valid Research Unit', 'en')],
       [new Literal('Valid Description', 'en')],
       'GHI_signature',
       [
-        { type: ResearchStructureIdentifierType.hal, value: '12345' },
-        { type: ResearchStructureIdentifierType.ror, value: '67890' },
+        { type: ResearchUnitIdentifierType.hal, value: '12345' },
+        { type: ResearchUnitIdentifierType.ror, value: '67890' },
       ],
     )
 
     expect(
-      mockDocument.isResearchStructureInCollectionCodes(mockResearchStructure1),
+      mockDocument.isResearchUnitInCollectionCodes(mockResearchUnit1),
     ).toEqual(['DEF'])
     expect(
-      mockDocument.isResearchStructureInCollectionCodes(mockResearchStructure2),
+      mockDocument.isResearchUnitInCollectionCodes(mockResearchUnit2),
     ).toEqual(null)
   })
 })

@@ -2,9 +2,9 @@ import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 import prisma from '@/lib/daos/prisma'
 import { PersonMembership } from '@/types/PersonMembership'
-import { ResearchStructure } from '@/types/ResearchStructure'
+import { ResearchUnit } from '@/types/ResearchUnit'
 import { Literal } from '@/types/Literal'
-import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
+import { ResearchUnitDAO } from '@/lib/daos/ResearchUnitDAO'
 import {
   PersonIdentifier,
   PersonIdentifierType,
@@ -27,8 +27,8 @@ describe('PersonDAO Integration Tests', () => {
     [new PersonIdentifier(PersonIdentifierType.orcid, '0000-0001-2345-6789')],
     [
       new PersonMembership(
-        new ResearchStructure(
-          'local-structure',
+        new ResearchUnit(
+          'local-unit',
           'ACR',
           [new Literal('JD Laboratory', 'en')],
           [new Literal('Laboratory of John Doe', 'en')],
@@ -62,18 +62,17 @@ describe('PersonDAO Integration Tests', () => {
   })
 
   test('should create a new person with memberships', async () => {
-    const researchStructureDAO = new ResearchStructureDAO()
-    const researchStructure =
-      await researchStructureDAO.createOrUpdateResearchStructure(
-        new ResearchStructure(
-          'local-structure',
-          'ACR',
-          [new Literal('JD Laboratory', 'en')],
-          [new Literal('Laboratory of John Doe', 'en')],
-          'ACR_signature',
-          [],
-        ),
-      )
+    const researchUnitDAO = new ResearchUnitDAO()
+    const researchUnit = await researchUnitDAO.createOrUpdateResearchUnit(
+      new ResearchUnit(
+        'local-unit',
+        'ACR',
+        [new Literal('JD Laboratory', 'en')],
+        [new Literal('Laboratory of John Doe', 'en')],
+        'ACR_signature',
+        [],
+      ),
+    )
     const dbPerson = await personDAO.createOrUpdatePerson(person)
 
     expect(dbPerson).toHaveProperty('id')
@@ -82,13 +81,13 @@ describe('PersonDAO Integration Tests', () => {
 
     const savedMemberships = await prisma.membership.findMany({
       where: { personId: dbPerson.id },
-      include: { researchStructure: true },
+      include: { researchUnit: true },
     })
 
     expect(savedMemberships).toHaveLength(1)
     expect(savedMemberships[0]).toMatchObject({
       personId: dbPerson.id,
-      researchStructureId: researchStructure.id,
+      researchUnitId: researchUnit.id,
       positionCode: 'MCF',
     })
   })
