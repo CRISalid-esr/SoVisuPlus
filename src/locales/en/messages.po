@@ -14,17 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
-msgid "bibliographic_information_update_success"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
-msgid "bibliographic_information_update_failure"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/lib/websocket/WebSocketListener.tsx:102
 msgid "snackbar_document_created"
 msgstr "New publication: "
@@ -123,10 +112,10 @@ msgid "documents_page_hal_status_outside_hal"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:335
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:359
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:395
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:429
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:332
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:356
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:389
+#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:420
 #: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:182
 #: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:217
 #: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:250
@@ -140,11 +129,6 @@ msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:170
-msgid "documents_page_refresh_document_alert"
-msgstr "Data concerning this publication has changed"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:196
 #: src/app/[lang]/documents/[uid]/page.test.tsx:244
 msgid "document_details_bibliographic_information_tab"
@@ -155,6 +139,11 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/page.test.tsx:248
 msgid "document_details_keywords_tab"
 msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:170
+msgid "documents_page_refresh_document_alert"
+msgstr "Data concerning this publication has changed"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
@@ -223,37 +212,14 @@ msgid "document_details_page_source_tab_select_action_unmerge_label"
 msgstr "Dissociate"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:255
-msgid "document_details_page_keywords_input_default"
-msgstr "Please enter at least 3 characters"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:259
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "No options"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Keyword successfully added."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Please select one vocabulary at least"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
 msgid "document_details_page_update_in_hal_tab_card_title"
 msgstr "Update in HAL"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr ""
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
+msgid "document_details_page_add_in_hal_tab_card_title"
+msgstr "Add in HAL"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:249
@@ -266,23 +232,41 @@ msgid "document_details_page_keywords_input_options_fetch_error"
 msgstr "An error occurs"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:255
+msgid "document_details_page_keywords_input_default"
+msgstr "Please enter at least 3 characters"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Please select one vocabulary at least"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:259
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "No options"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:288
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
-msgid "document_details_page_add_in_hal_tab_card_title"
-msgstr "Add in HAL"
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Keyword successfully added."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:183
 msgid "document_details_page_sources_row_update_source"
-msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
-msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -303,6 +287,22 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:131
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:88
 msgid "document_details_page_type_row_label"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
+msgid "documents_page_publication_date_column_no_date_available"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
+msgid "bibliographic_information_update_success"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
+msgid "bibliographic_information_update_failure"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -569,11 +569,6 @@ msgid "profile_affiliations_no_units"
 msgstr "No related research unit"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
-msgid "profile_affiliations_units_label"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
 msgid "profile_affiliations_signature_label"
@@ -590,6 +585,11 @@ msgstr "No signature"
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
 msgid "profile_affiliations_signature_copied_message_confirmation"
 msgstr "Signature added to clipboard."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
+msgid "profile_affiliations_units_label"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
@@ -654,7 +654,7 @@ msgstr ""
 msgid "contributor_identity_card_see_profile_button"
 msgstr "See Profile"
 
-#: src/app/[lang]/dashboard/components/AgentIdentityCard.tsx:33
+#: src/app/[lang]/dashboard/components/AgentIdentityCard.tsx:26
 msgid "dashboard_page_agent_identity_card_no_agent_selected"
 msgstr "No actor selected"
 
@@ -909,7 +909,7 @@ msgstr "ORCID"
 msgid "documents_details_page_authors_tab_scopus_column"
 msgstr "Scopus"
 
-#: src/app/[lang]/documents/page.tsx:831
+#: src/app/[lang]/documents/page.tsx:823
 msgid "documents_page_action_column_details"
 msgstr "Details"
 
@@ -1049,7 +1049,7 @@ msgstr "Publications"
 msgid "documents_page_main_title_first_person"
 msgstr "My publications"
 
-#: src/app/[lang]/documents/page.tsx:811
+#: src/app/[lang]/documents/page.tsx:803
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
 
@@ -1332,7 +1332,7 @@ msgstr "Groups"
 msgid "side_bar_my_research_activities"
 msgstr "Research activities"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:440
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:432
 msgid "sidebar_back_to_my_perspective"
 msgstr "Back to my page"
 
@@ -1340,14 +1340,14 @@ msgstr "Back to my page"
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:191
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:210
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:44
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:141
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:251
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:360
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:136
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:243
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:352
 msgid "sidebar_search_people"
 msgstr "Researchers"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:125
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:389
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:381
 msgid "sidebar_search_placeholder"
 msgstr "Search"
 
@@ -1355,12 +1355,12 @@ msgstr "Search"
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:157
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:213
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:46
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:151
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:362
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:146
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:354
 msgid "sidebar_search_research_units"
 msgstr "Research units"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:208
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:200
 msgid "sidebar_search_unknown_label"
 msgstr "N/C"
 
