@@ -66,12 +66,10 @@ export class DocumentService {
       case 'person':
         contributorUids = contributorUid ? [contributorUid] : []
         break
-      case 'research_structure':
+      case 'research_unit':
         contributorUids = (
           contributorUid
-            ? await this.personDAO.fetchPeopleByResearchStructureUid(
-                contributorUid,
-              )
+            ? await this.personDAO.fetchPeopleByResearchUnitUid(contributorUid)
             : []
         ).map((person) => person.uid)
         break

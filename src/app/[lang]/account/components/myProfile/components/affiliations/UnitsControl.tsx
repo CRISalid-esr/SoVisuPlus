@@ -4,11 +4,11 @@ import { Trans } from '@lingui/react'
 import { Plural } from '@lingui/react/macro'
 import React from 'react'
 
-const StructuresControl = () => {
+const UnitsControl = () => {
   const { connectedUser } = useStore((state) => state.user)
   const person = connectedUser?.person
-  const structures = person?.membershipAcronyms ?? []
-  const nbStructures = structures?.length || 0
+  const units = person?.membershipAcronyms ?? []
+  const nbUnits = units?.length || 0
 
   return (
     <Paper
@@ -24,27 +24,27 @@ const StructuresControl = () => {
     >
       <Typography variant='subtitle1' fontWeight='bold'>
         <Plural
-          value={nbStructures}
-          zero={`profile_affiliations_structure_label`}
-          one={`profile_affiliations_structure_label`}
-          other={`profile_affiliations_structures_label`}
+          value={nbUnits}
+          zero={`profile_affiliations_unit_label`}
+          one={`profile_affiliations_unit_label`}
+          other={`profile_affiliations_units_label`}
         />
       </Typography>
-      {nbStructures > 0 ? (
-        <Typography key='structures' variant='body2' color='text.secondary'>
-          {structures.join()}
+      {nbUnits > 0 ? (
+        <Typography key='units' variant='body2' color='text.secondary'>
+          {units.join()}
         </Typography>
       ) : (
         <Typography
-          key='structures'
+          key='units'
           variant='body2'
           color='text.secondary'
           fontStyle={'italic'}
         >
-          <Trans id='profile_affiliations_no_structures' />
+          <Trans id='profile_affiliations_no_units' />
         </Typography>
       )}
     </Paper>
   )
 }
-export default StructuresControl
+export default UnitsControl

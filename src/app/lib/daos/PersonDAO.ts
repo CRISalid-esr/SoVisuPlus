@@ -8,7 +8,7 @@ import {
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
-import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
+import { ResearchUnitDAO } from '@/lib/daos/ResearchUnitDAO'
 import removeAccents from 'remove-accents'
 import { ORCIDIdentifier, OrcidOAuthData } from '@/types/OrcidIdentifier'
 import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
@@ -89,7 +89,7 @@ export class PersonDAO extends AbstractDAO {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: {
+                    researchUnit: {
                       include: {
                         names: true,
                         identifiers: true,
@@ -142,23 +142,22 @@ export class PersonDAO extends AbstractDAO {
     memberships: PersonMembership[],
     personId: number,
   ): Promise<void> {
-    const researchStructureDAO = new ResearchStructureDAO()
+    const researchUnitDAO = new ResearchUnitDAO()
     for (const membership of memberships) {
-      const dbResearchStructure =
-        await researchStructureDAO.getResearchStructureByUid(
-          membership.researchStructure.uid,
-        )
-      if (!dbResearchStructure) {
+      const dbResearchUnit = await researchUnitDAO.getResearchUnitByUid(
+        membership.researchUnit.uid,
+      )
+      if (!dbResearchUnit) {
         console.error(
-          `Research structure not found for UID: ${membership.researchStructure.uid}`,
+          `Research unit not found for UID: ${membership.researchUnit.uid}`,
         )
         continue
       }
       await this.prismaClient.membership.upsert({
         where: {
-          personId_researchStructureId: {
+          personId_researchUnitId: {
             personId,
-            researchStructureId: dbResearchStructure.id,
+            researchUnitId: dbResearchUnit.id,
           },
         },
         update: {
@@ -168,7 +167,7 @@ export class PersonDAO extends AbstractDAO {
         },
         create: {
           personId,
-          researchStructureId: dbResearchStructure.id,
+          researchUnitId: dbResearchUnit.id,
           startDate: membership.startDate,
           endDate: membership.endDate,
           positionCode: membership.positionCode,
@@ -469,7 +468,7 @@ export class PersonDAO extends AbstractDAO {
         },
         memberships: {
           include: {
-            researchStructure: {
+            researchUnit: {
               include: {
                 names: true,
                 identifiers: true,
@@ -504,7 +503,7 @@ export class PersonDAO extends AbstractDAO {
         include: {
           memberships: {
             include: {
-              researchStructure: {
+              researchUnit: {
                 include: {
                   names: true,
                   identifiers: true,
@@ -528,15 +527,15 @@ export class PersonDAO extends AbstractDAO {
     }
   }
 
-  fetchPeopleByResearchStructureUid = async (
-    researchStructureUid: string,
+  fetchPeopleByResearchUnitUid = async (
+    researchUnitUid: string,
   ): Promise<Person[]> => {
     const people = await this.prismaClient.person.findMany({
       where: {
         memberships: {
           some: {
-            researchStructure: {
-              uid: researchStructureUid,
+            researchUnit: {
+              uid: researchUnitUid,
             },
           },
         },
@@ -544,7 +543,7 @@ export class PersonDAO extends AbstractDAO {
       include: {
         memberships: {
           include: {
-            researchStructure: {
+            researchUnit: {
               include: {
                 names: true,
                 identifiers: true,
@@ -567,7 +566,7 @@ export class PersonDAO extends AbstractDAO {
         include: {
           memberships: {
             include: {
-              researchStructure: {
+              researchUnit: {
                 include: {
                   names: true,
                   identifiers: true,
@@ -607,7 +606,7 @@ export class PersonDAO extends AbstractDAO {
         include: {
           memberships: {
             include: {
-              researchStructure: {
+              researchUnit: {
                 include: {
                   names: true,
                   identifiers: true,

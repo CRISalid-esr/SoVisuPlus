@@ -51,13 +51,13 @@ class Person implements IAgent, Authorizable {
 
   get membershipAcronyms(): string[] {
     return this.memberships
-      .map(({ researchStructure: { acronym } }) => acronym)
+      .map(({ researchUnit: { acronym } }) => acronym)
       .filter((acronym) => acronym !== null)
   }
 
   get membershipSignatures(): string[] {
     return this.memberships
-      .map(({ researchStructure: { signature } }) => signature)
+      .map(({ researchUnit: { signature } }) => signature)
       .filter((signature) => signature !== null)
   }
 
@@ -188,13 +188,13 @@ class Person implements IAgent, Authorizable {
   get authzProperties(): AuthorizationProperties {
     const rs =
       this.memberships
-        ?.map((m) => m.researchStructure?.uid)
+        ?.map((m) => m.researchUnit?.uid)
         .filter((x): x is string => !!x) ?? []
     return {
       __type: 'Person',
       perimeter: {
         Person: [this.uid],
-        ResearchStructure: Array.from(new Set(rs)),
+        ResearchUnit: Array.from(new Set(rs)),
       },
     }
   }

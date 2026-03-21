@@ -14,7 +14,7 @@ const makeAuthzPerson = (uid: string, rsUids: string[] = []) => ({
     __type: PermissionSubject.Person,
     perimeter: {
       Person: [uid],
-      ResearchStructure: rsUids,
+      ResearchUnit: rsUids,
     },
   },
 })
@@ -87,7 +87,7 @@ describe('<Can /> + CASL on Person (fetch_documents)', () => {
               subject: PermissionSubject.Person,
             },
           ],
-          [{ entityType: 'ResearchStructure', entityUid: 'RS-42' }],
+          [{ entityType: 'ResearchUnit', entityUid: 'RS-42' }],
         ),
       ],
     })

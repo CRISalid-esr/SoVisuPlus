@@ -18,7 +18,7 @@ import Highlighter from 'react-highlight-words'
 import DoneIcon from '@mui/icons-material/Done'
 import { IAgent } from '@/types/IAgent'
 import { Person } from '@/types/Person'
-import { ResearchStructure } from '@/types/ResearchStructure'
+import { ResearchUnit } from '@/types/ResearchUnit'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
 import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn'
@@ -38,13 +38,13 @@ interface IAutoCompleteOption<T extends IAgent> {
 
 const SearchInput: React.FC = () => {
   const [peoplePage, setPeoplePage] = useState(1)
-  const [researchStructuresPage, setResearchStructuresPage] = useState(1)
+  const [researchUnitsPage, setResearchUnitsPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
   const [searchTags, setSearchTags] = useState<IAutoCompleteGroupTag[]>([
     { label: t`sidebar_search_people`, value: 'people', selected: true },
     {
-      label: t`sidebar_search_research_structures`,
-      value: 'researchStructures',
+      label: t`sidebar_search_research_units`,
+      value: 'researchUnits',
       selected: true,
     },
   ])
@@ -66,12 +66,12 @@ const SearchInput: React.FC = () => {
   } = useStore((state) => state.person)
 
   const {
-    fetchResearchStructuresByName,
-    loading: researchStructuresLoading,
-    researchStructures = [],
-    hasMore: hasMoreResearchStructures,
-    total: totalResearchStructures,
-  } = useStore((state) => state.researchStructure)
+    fetchResearchUnitsByName,
+    loading: researchUnitsLoading,
+    researchUnits = [],
+    hasMore: hasMoreResearchUnits,
+    total: totalResearchUnits,
+  } = useStore((state) => state.researchUnit)
 
   const { currentPerspective, connectedUser } = useStore((state) => state.user)
 
@@ -102,17 +102,17 @@ const SearchInput: React.FC = () => {
       const fetchData = async () => {
         if (
           searchTags.some(
-            (tag) => tag.selected && tag.value === 'researchStructures',
+            (tag) => tag.selected && tag.value === 'researchUnits',
           )
         ) {
-          if (fetchResearchStructuresByName) {
+          if (fetchResearchUnitsByName) {
             try {
-              await fetchResearchStructuresByName({
+              await fetchResearchUnitsByName({
                 searchTerm,
-                page: researchStructuresPage,
+                page: researchUnitsPage,
               })
             } catch (error) {
-              console.error('Error fetching research structures:', error)
+              console.error('Error fetching research units:', error)
             }
           }
         }
@@ -122,12 +122,7 @@ const SearchInput: React.FC = () => {
       })
     }, 500)
     return () => clearTimeout(handler) // Clear timeout if input changes before 2 seconds
-  }, [
-    fetchResearchStructuresByName,
-    researchStructuresPage,
-    searchTerm,
-    searchTags,
-  ])
+  }, [fetchResearchUnitsByName, researchUnitsPage, searchTerm, searchTags])
 
   const handleScroll = (e: React.UIEvent<HTMLLIElement>, group: string) => {
     const target = e.target as HTMLLIElement
@@ -144,13 +139,13 @@ const SearchInput: React.FC = () => {
       }
       if (
         searchTags.some(
-          (tag) => tag.selected && tag.value === 'researchStructures',
+          (tag) => tag.selected && tag.value === 'researchUnits',
         ) &&
-        hasMoreResearchStructures &&
-        !researchStructuresLoading &&
-        group === t`sidebar_search_research_structures`
+        hasMoreResearchUnits &&
+        !researchUnitsLoading &&
+        group === t`sidebar_search_research_units`
       ) {
-        setResearchStructuresPage((prevPage) => prevPage + 1)
+        setResearchUnitsPage((prevPage) => prevPage + 1)
       }
     }
   }
@@ -163,10 +158,9 @@ const SearchInput: React.FC = () => {
     )
   }
 
-  const mergedOptions: IAutoCompleteOption<Person | ResearchStructure>[] =
+  const mergedOptions: IAutoCompleteOption<Person | ResearchUnit>[] =
     useMemo(() => {
-      const mergedOptions: IAutoCompleteOption<Person | ResearchStructure>[] =
-        []
+      const mergedOptions: IAutoCompleteOption<Person | ResearchUnit>[] = []
       if (searchTags.some((tag) => tag.selected && tag.value === 'people')) {
         const peopleOptions = people
           .map((person) => {
@@ -183,42 +177,40 @@ const SearchInput: React.FC = () => {
               agent: person,
             }
           })
-          .filter(Boolean) as IAutoCompleteOption<Person | ResearchStructure>[]
+          .filter(Boolean) as IAutoCompleteOption<Person | ResearchUnit>[]
         mergedOptions.push(...peopleOptions)
       }
       if (
-        searchTags.some(
-          (tag) => tag.selected && tag.value === 'researchStructures',
-        )
+        searchTags.some((tag) => tag.selected && tag.value === 'researchUnits')
       ) {
-        const researchStructureOptions: IAutoCompleteOption<ResearchStructure>[] =
-          researchStructures
-            .map((researchStructure) => {
-              if (!researchStructure.slug) {
+        const researchUnitOptions: IAutoCompleteOption<ResearchUnit>[] =
+          researchUnits
+            .map((researchUnit) => {
+              if (!researchUnit.slug) {
                 console.log(
-                  `Research structure ${researchStructure.uid} is not selectable as it does not have a slug`,
+                  `Research unit ${researchUnit.uid} is not selectable as it does not have a slug`,
                 )
                 return null
               }
               const label: string =
-                researchStructure.names.find((name) => name.language === lang)
+                researchUnit.names.find((name) => name.language === lang)
                   ?.value ||
-                researchStructure.names[0]?.value ||
-                researchStructure.acronym ||
+                researchUnit.names[0]?.value ||
+                researchUnit.acronym ||
                 t`sidebar_search_unknown_label`
               return {
-                type: 'researchStructures',
-                id: researchStructure.slug,
+                type: 'researchUnits',
+                id: researchUnit.slug,
                 label: label,
-                agent: researchStructure,
+                agent: researchUnit,
               }
             })
-            .filter(Boolean) as IAutoCompleteOption<ResearchStructure>[]
-        mergedOptions.push(...researchStructureOptions)
+            .filter(Boolean) as IAutoCompleteOption<ResearchUnit>[]
+        mergedOptions.push(...researchUnitOptions)
       }
 
       return mergedOptions
-    }, [people, researchStructures, searchTags, lang])
+    }, [people, researchUnits, searchTags, lang])
 
   const renderGroup = (params: AutocompleteRenderGroupParams) => {
     const { key, ...rest } = params
@@ -250,7 +242,7 @@ const SearchInput: React.FC = () => {
             {params.group} (
             {params.group === t`sidebar_search_people`
               ? totalPeople
-              : totalResearchStructures}
+              : totalResearchUnits}
             )
           </Typography>
         </Box>
@@ -298,7 +290,7 @@ const SearchInput: React.FC = () => {
 
   const handlePerspectiveSelection = (
     _: React.SyntheticEvent,
-    value: IAutoCompleteOption<Person | ResearchStructure> | null,
+    value: IAutoCompleteOption<Person | ResearchUnit> | null,
   ) => {
     if (value) {
       const params = new URLSearchParams(searchParams.toString())
@@ -352,14 +344,14 @@ const SearchInput: React.FC = () => {
         disableCloseOnSelect={true}
         options={mergedOptions}
         getOptionLabel={(
-          option: IAutoCompleteOption<Person | ResearchStructure>,
+          option: IAutoCompleteOption<Person | ResearchUnit>,
         ) => {
           return option.label
         }}
-        groupBy={(option: IAutoCompleteOption<Person | ResearchStructure>) => {
+        groupBy={(option: IAutoCompleteOption<Person | ResearchUnit>) => {
           if (option.type == 'people') return t`sidebar_search_people`
-          else if (option.type == 'researchStructures')
-            return t`sidebar_search_research_structures`
+          else if (option.type == 'researchUnits')
+            return t`sidebar_search_research_units`
           return ''
         }}
         renderInput={(params) => (
@@ -402,7 +394,7 @@ const SearchInput: React.FC = () => {
             setSearchTerm(newInputValue)
           }
           setPeoplePage(1)
-          setResearchStructuresPage(1)
+          setResearchUnitsPage(1)
         }}
         filterOptions={(x) => x} // Disables filtering
         renderOption={(props, option, { inputValue }) => {
@@ -418,7 +410,7 @@ const SearchInput: React.FC = () => {
           )
         }}
         sx={{ mb: 2 }}
-        loading={peopleLoading || researchStructuresLoading} // Display loading when data is being fetched
+        loading={peopleLoading || researchUnitsLoading} // Display loading when data is being fetched
         loadingText={<CircularProgress size={24} />} // Show spinner when loading
       />
       {connectedUser?.person?.uid !== currentPerspective?.uid && (

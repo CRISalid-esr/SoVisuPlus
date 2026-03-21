@@ -20,11 +20,11 @@ import {
   PersonIdentifier,
   PrismaClient,
   PublicationIdentifier,
-  ResearchStructure,
-  ResearchStructureDescription,
-  ResearchStructureIdentifier,
-  ResearchStructureIdentifierType,
-  ResearchStructureName,
+  ResearchUnit,
+  ResearchUnitDescription,
+  ResearchUnitIdentifier,
+  ResearchUnitIdentifierType,
+  ResearchUnitName,
   Role,
   RolePermission,
   SourceContribution,
@@ -36,15 +36,14 @@ import {
 } from '@prisma/client'
 const prisma = new PrismaClient()
 
-export type ResearchStructureIdentifierWithRelations =
-  ResearchStructureIdentifier & {
-    type: ResearchStructureIdentifierType
-  }
+export type ResearchUnitIdentifierWithRelations = ResearchUnitIdentifier & {
+  type: ResearchUnitIdentifierType
+}
 
-export type ResearchStructureWithRelations = ResearchStructure & {
-  names: ResearchStructureName[]
-  descriptions: ResearchStructureDescription[]
-  identifiers: ResearchStructureIdentifierWithRelations[]
+export type ResearchUnitWithRelations = ResearchUnit & {
+  names: ResearchUnitName[]
+  descriptions: ResearchUnitDescription[]
+  identifiers: ResearchUnitIdentifierWithRelations[]
 }
 
 export type ContributionWithRelations = Contribution & {
@@ -107,7 +106,7 @@ export type UserRoleWithRelations = UserRole & {
 }
 
 export type MembershipWithRelations = Membership & {
-  researchStructure: ResearchStructureWithRelations
+  researchUnit: ResearchUnitWithRelations
 }
 
 export type PersonWithRelations = Person & {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ResearchStructureService } from '@/lib/services/ResearchStructureService'
+import { ResearchUnitService } from '@/lib/services/ResearchUnitService'
 
-const researchStructureService = new ResearchStructureService()
+const researchUnitService = new ResearchUnitService()
 
 export const GET = async (req: NextRequest) => {
   const urlParams = req.nextUrl.searchParams
@@ -11,20 +11,21 @@ export const GET = async (req: NextRequest) => {
   const itemsPerPage = 10
 
   try {
-    const { researchStructures, total } =
-      await researchStructureService.getResearchStructures({
+    const { researchUnits, total } = await researchUnitService.getResearchUnits(
+      {
         searchTerm,
         pageNumber,
         itemsPerPage,
-      })
+      },
+    )
 
     return NextResponse.json({
-      researchStructures,
+      researchUnits: researchUnits,
       total,
       hasMore: total > pageNumber * itemsPerPage,
     })
   } catch (error) {
-    console.error('Error fetching research structures:', error)
+    console.error('Error fetching research units:', error)
     return NextResponse.json({ error: 'An error occurred' }, { status: 500 })
   }
 }

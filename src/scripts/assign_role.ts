@@ -63,7 +63,7 @@ const parseScope = (
 
   const allowed: EntityType[] = [
     'Person',
-    'ResearchStructure',
+    'ResearchUnit',
     'Institution',
     'InstitutionDivision',
   ]

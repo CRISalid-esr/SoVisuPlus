@@ -13,7 +13,7 @@ const makeAuthzDoc = (
     __type: 'Document',
     perimeter: {
       Person: people,
-      ResearchStructure: rs,
+      ResearchUnit: rs,
     },
     ...extras,
   },
@@ -68,7 +68,7 @@ describe('Ability on Document (unit, no DB)', () => {
     expect(ability.can(PermissionAction.merge, docOutOfScope)).toBe(false)
   })
 
-  test('merge allowed when scope intersects ResearchStructure perimeter', () => {
+  test('merge allowed when scope intersects ResearchUnit perimeter', () => {
     const ctx: AuthzContext = {
       userId: 'u-2',
       personUid: null,
@@ -81,13 +81,13 @@ describe('Ability on Document (unit, no DB)', () => {
               subject: PermissionSubject.Document,
             },
           ],
-          [{ entityType: 'ResearchStructure', entityUid: 'RS-123' }],
+          [{ entityType: 'ResearchUnit', entityUid: 'RS-123' }],
         ),
       ],
       roles: ['document_merger'],
       scopes: [
         {
-          entityType: 'ResearchStructure',
+          entityType: 'ResearchUnit',
           entityUid: 'RS-123',
           role: 'document_merger',
         },

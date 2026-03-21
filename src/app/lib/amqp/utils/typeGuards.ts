@@ -1,16 +1,16 @@
 import { AMQPMessage } from '@/types/AMQPMessage'
 import { AMQPPersonMessage } from '@/types/AMQPPersonMessage'
 import { AMQPDocumentMessage } from '@/types/AMQPDocumentMessage'
-import { AMQPResearchStructureMessage } from '@/types/AMQPResearchStructureMessage'
+import { AMQPResearchUnitMessage } from '@/types/AMQPResearchUnitMessage'
 import { AMQPHarvestingStateEventMessage } from '@/types/AMQPHarvestingStateEventMessage'
 import { AMQPHarvestingResultEventMessage } from '@/types/AMQPHarvestingResultEventMessage'
 
 export const isPersonMessage = (msg: AMQPMessage): msg is AMQPPersonMessage =>
   msg.type === 'person'
 
-export const isResearchStructureMessage = (
+export const isResearchUnitMessage = (
   msg: AMQPMessage,
-): msg is AMQPResearchStructureMessage => msg.type === 'research_structure'
+): msg is AMQPResearchUnitMessage => msg.type === 'research_unit'
 
 export const isDocumentMessage = (
   msg: AMQPMessage,

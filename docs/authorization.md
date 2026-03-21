@@ -2,7 +2,7 @@
 
 SoVisu+ comes with a flexible, scope-aware RBAC system powered by [CASL](https://casl.js.org/).
 You define **roles** and their **permissions** in a YAML file, seed them into the database,
-and then **assign roles to users** with optional **scopes** (Person, ResearchStructure, Institution,
+and then **assign roles to users** with optional **scopes** (Person, ResearchUnit, Institution,
 InstitutionDivision).
 
 ---
@@ -16,7 +16,7 @@ Create a `rbac.roles.yaml` at the root of your instance. Each role has:
 - `description` (optional)
 - `permissions`: list of rules, each with
   - `action`: one of your domain actions (e.g. `manage`, `read`, `update`, `delete`, `merge`, `unmerge`...)
-  - `subject`: the domain entity (`Document`, `DocumentRecord`, `Person`, `ResearchStructure`, or `all`)
+  - `subject`: the domain entity (`Document`, `DocumentRecord`, `Person`, `ResearchUnit`, or `all`)
   - `fields` (optional): field-level permissions for `update` (e.g. `titles`, `abstracts`)
 
 ```yaml
@@ -56,7 +56,7 @@ roles:
 
 - We created a small set of roles and rely on **polymorphic scopes** when assigning them:
   - Scope to a **Person** → “this user can edit/merge documents to which this person is a contributor”
-  - Scope to a **ResearchStructure** → “this user can edit/merge documents that involve members of that structure as
+  - Scope to a **ResearchUnit** → “this user can edit/merge documents that involve members of that structure as
     contributors”
   - Scope to an **Institution** or **InstitutionDivision** → similar idea, broader perimeters
 
@@ -102,7 +102,7 @@ npm run assign_role -- \
 ### Scope (optional)
 
 - `--scope Person:local-jdupont`
-- `--scope ResearchStructure:local-lpnc`
+- `--scope ResearchUnit:local-lpnc`
 - `--scope Institution:my-institution`
 - `--scope InstitutionDivision:division-123`
 - Omit `--scope` for a **global** role (applies everywhere)
@@ -128,7 +128,7 @@ Make **J. Durand** an editor for **all publications involving LPNC**:
 ```bash
 npm run assign_role -- \
   --role document_editor \
-  --scope ResearchStructure:local-lpnc \
+  --scope ResearchUnit:local-lpnc \
   --person-uid local-jdurand
 ```
 
@@ -272,7 +272,7 @@ const ability = useMemo(
 )
 ```
 
-Wrap your button with `<Can>` using the current perspective as subject (it's a Person or a ResearchStructure instance):
+Wrap your button with `<Can>` using the current perspective as subject (it's a Person or a ResearchUnit instance):
 
 ```tsx
 {
@@ -388,7 +388,7 @@ const authz = makeAuthzContext({
     uid: 'abc',
     authzProperties: {
       __type: 'Person',
-      perimeter: { Person: ['abc'], ResearchStructure: [] },
+      perimeter: { Person: ['abc'], ResearchUnit: [] },
     },
   }),
 }))

@@ -563,14 +563,14 @@ msgid "hal_control_helper"
 msgstr "By linking your Hal account to your Sovisu+ account, you will make your Hal ID more reliable and you will be able to easily submit missing publications to Hal."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl.test.tsx:117
-#: src/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl.tsx:44
-msgid "profile_affiliations_no_structures"
-msgstr "No related research structure"
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:117
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
+msgid "profile_affiliations_no_units"
+msgstr "No related research unit"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl.test.tsx:82
-msgid "profile_affiliations_structures_label"
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
+msgid "profile_affiliations_units_label"
 msgstr ""
 
 #. js-lingui-explicit-id
@@ -623,9 +623,9 @@ msgstr "Source type: {0}"
 msgid "document_details_page_journal_publisher"
 msgstr "Publisher: {0}"
 
-#: src/app/[lang]/account/components/myProfile/components/affiliations/StructuresControl.tsx:26
-msgid "{nbStructures, plural, zero {profile_affiliations_structure_label} one {profile_affiliations_structure_label} other {profile_affiliations_structures_label}}"
-msgstr "{nbStructures, plural, zero {Research structure} one {Research structure} other {Research structures}}"
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:26
+msgid "{nbUnits, plural, zero {profile_affiliations_unit_label} one {profile_affiliations_unit_label} other {profile_affiliations_units_label}}"
+msgstr "{nbUnits, plural, zero {Research unit} one {Research unit} other {Research units}}"
 
 #: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.tsx:93
 msgid "{numberOfAcronyms, plural, one {{halSubmitTypeStr} documents_page_hal_status_badge_in_hal_collection_tooltip_card_file_collection_label {formattedAcronyms}} other {{halSubmitTypeStr} documents_page_hal_status_badge_in_hal_collection_tooltip_card_file_collections_label {formattedAcronyms}}}"
@@ -1357,8 +1357,8 @@ msgstr "Search"
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:46
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:151
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:362
-msgid "sidebar_search_research_structures"
-msgstr "Research structures"
+msgid "sidebar_search_research_units"
+msgstr "Research units"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:208
 msgid "sidebar_search_unknown_label"
