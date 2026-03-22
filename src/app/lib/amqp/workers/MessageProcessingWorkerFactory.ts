@@ -5,18 +5,18 @@ import {
   isHarvestingResultEventMessage,
   isHarvestingStateEventMessage,
   isPersonMessage,
-  isResearchStructureMessage,
+  isResearchUnitMessage,
 } from '@/lib/amqp/utils/typeGuards'
 
 import { MessageProcessingWorker } from '@/lib/amqp/workers/MessageProcessingWorker'
 import { PersonWorker } from '@/lib/amqp/workers/PersonWorker'
-import { ResearchStructureWorker } from '@/lib/amqp/workers/ResearchStructureWorker'
+import { ResearchUnitWorker } from '@/lib/amqp/workers/ResearchUnitWorker'
 import { DocumentWorker } from '@/lib/amqp/workers/DocumentWorker'
 import { HarvestingStateEventWorker } from '@/lib/amqp/workers/HarvestingStateEventWorker'
 import { HarvestingResultEventWorker } from '@/lib/amqp/workers/HarvestingResultEventWorker'
 
 import { PersonDAO } from '@/lib/daos/PersonDAO'
-import { ResearchStructureDAO } from '@/lib/daos/ResearchStructureDAO'
+import { ResearchUnitDAO } from '@/lib/daos/ResearchUnitDAO'
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { UserDAO } from '@/lib/daos/UserDAO'
 
@@ -34,8 +34,8 @@ export class MessageProcessingWorkerFactory {
       )
     }
 
-    if (isResearchStructureMessage(message)) {
-      return new ResearchStructureWorker(message, new ResearchStructureDAO())
+    if (isResearchUnitMessage(message)) {
+      return new ResearchUnitWorker(message, new ResearchUnitDAO())
     }
 
     if (isDocumentMessage(message)) {

@@ -260,9 +260,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
                     contributor.source_identifier,
                   )
                   const { role } = sourceContributionData
-                  const locRelator = LocRelatorHelper.fromLabel(
-                    role.toLowerCase(),
-                  )
+                  const locRelator = SourceContribution.getRelatorFromKey(role)
                   if (!locRelator) {
                     console.error(
                       `Unknown role label ${role} for document record ${recordData.uid}`,

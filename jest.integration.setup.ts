@@ -21,8 +21,8 @@ const clearDatabase = async () => {
       "PersonIdentifier", 
       "User", 
       "Person",
-      "ResearchStructure",
-      "ResearchStructureIdentifier"
+      "ResearchUnit",
+      "ResearchUnitIdentifier"
     RESTART IDENTITY CASCADE;
   `)
   console.log('****Database cleared')

@@ -6,7 +6,7 @@ import {
 import { Literal } from '@/types/Literal'
 import { IAgent } from '@/types/IAgent'
 import { Person } from '@/types/Person'
-import { ResearchStructure } from '@/types/ResearchStructure'
+import { ResearchUnit } from '@/types/ResearchUnit'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 import {
   SourceRecordType,
@@ -96,9 +96,7 @@ export class DocumentRecord {
       : SourceRecordType.Document
   }
 
-  isResearchStructureInCollectionCodes(
-    perspective: IAgent | null,
-  ): string[] | null {
+  isResearchUnitInCollectionCodes(perspective: IAgent | null): string[] | null {
     if (!perspective) {
       return null
     }
@@ -108,7 +106,7 @@ export class DocumentRecord {
         const { memberships } = perspective as Person
 
         const collections = memberships
-          .map(({ researchStructure: { acronym } }) => acronym)
+          .map(({ researchUnit: { acronym } }) => acronym)
           .filter((acronym) =>
             acronym ? this.halCollectionCodes.includes(acronym) : false,
           )
@@ -116,8 +114,8 @@ export class DocumentRecord {
 
         return collections.length > 0 ? collections : null
       }
-      case 'research_structure': {
-        const { acronym } = perspective as ResearchStructure
+      case 'research_unit': {
+        const { acronym } = perspective as ResearchUnit
 
         return acronym && this.halCollectionCodes.includes(acronym)
           ? [acronym]

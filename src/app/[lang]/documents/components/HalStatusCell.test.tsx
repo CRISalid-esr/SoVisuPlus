@@ -40,31 +40,31 @@ const mockState = {
         {
           id: 1,
           personId: 1,
-          researchStructureId: 1,
+          researchUnitId: 1,
           startDate: null,
           endDate: null,
           positionCode: null,
-          researchStructure: {
+          researchUnit: {
             id: 1,
             uid: '12345',
             acronym: 'ABC',
             external: false,
-            slug: 'research-structure:abc',
+            slug: 'research-unit:abc',
           },
         },
         {
           id: 2,
           personId: 1,
-          researchStructureId: 2,
+          researchUnitId: 2,
           startDate: null,
           endDate: null,
           positionCode: null,
-          researchStructure: {
+          researchUnit: {
             id: 2,
             uid: '67890',
             acronym: 'DEF',
             external: false,
-            slug: 'research-structure:def',
+            slug: 'research-unit:def',
           },
         },
       ],
@@ -195,7 +195,7 @@ describe('HalStatusCell Component', () => {
     )
   })
 
-  it('displays the outside Hal status when currentPerspective is research structure with IdHal', async () => {
+  it('displays the outside Hal status when currentPerspective is research unit with IdHal', async () => {
     const document = createDocument(false)
     ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
       selector({
@@ -207,8 +207,8 @@ describe('HalStatusCell Component', () => {
             uid: '12345',
             acronym: 'ABC',
             external: false,
-            slug: 'research-structure:abc',
-            type: 'research_structure',
+            slug: 'research-unit:abc',
+            type: 'research_unit',
             names: [],
             hasIdHAL: () => true,
           },
@@ -235,7 +235,7 @@ describe('HalStatusCell Component', () => {
     )
   })
 
-  it('displays the outside Hal missing id status when currentPerspective is research structure without IdHal', async () => {
+  it('displays the outside Hal missing id status when currentPerspective is research unit without IdHal', async () => {
     const document = createDocument(false)
     ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
       selector({
@@ -247,8 +247,8 @@ describe('HalStatusCell Component', () => {
             uid: '12345',
             acronym: 'ABC',
             external: false,
-            slug: 'research-structure:abc',
-            type: 'research_structure',
+            slug: 'research-unit:abc',
+            type: 'research_unit',
             names: [],
             hasIdHAL: () => false,
           },
@@ -274,7 +274,7 @@ describe('HalStatusCell Component', () => {
     )
   })
 
-  it('displays the outside Hal status when currentPerspective is not a research structure or person', async () => {
+  it('displays the outside Hal status when currentPerspective is not a research unit or person', async () => {
     const document = createDocument(false)
     jest.mock('@/types/Person', () => {
       const actual = jest.requireActual('@/types/Person')
@@ -284,12 +284,12 @@ describe('HalStatusCell Component', () => {
         isPerson: () => false,
       }
     })
-    jest.mock('@/types/ResearchStructure', () => {
-      const actual = jest.requireActual('@/types/ResearchStructure')
+    jest.mock('@/types/ResearchUnit', () => {
+      const actual = jest.requireActual('@/types/ResearchUnit')
       return {
         __esModule: true,
         ...actual,
-        isResearchStructure: () => false,
+        isResearchUnit: () => false,
       }
     })
 
@@ -316,10 +316,7 @@ describe('HalStatusCell Component', () => {
     jest.spyOn(Document.prototype, 'hasBeenUpdated').mockReturnValue(false)
     const document = createDocument(
       true,
-      [
-        mockState.user.currentPerspective.memberships[0].researchStructure
-          .acronym,
-      ],
+      [mockState.user.currentPerspective.memberships[0].researchUnit.acronym],
       'file',
     )
 
@@ -376,10 +373,7 @@ describe('HalStatusCell Component', () => {
     jest.spyOn(Document.prototype, 'hasBeenUpdated').mockReturnValue(true)
     const document = createDocument(
       true,
-      [
-        mockState.user.currentPerspective.memberships[0].researchStructure
-          .acronym,
-      ],
+      [mockState.user.currentPerspective.memberships[0].researchUnit.acronym],
       'file',
     )
 
@@ -411,10 +405,7 @@ describe('HalStatusCell Component', () => {
   it('displays the alternate icon', async () => {
     const document = createDocument(
       true,
-      [
-        mockState.user.currentPerspective.memberships[0].researchStructure
-          .acronym,
-      ],
+      [mockState.user.currentPerspective.memberships[0].researchUnit.acronym],
       'notice',
     )
 

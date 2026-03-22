@@ -7,7 +7,7 @@ export interface AMQPPersonData extends AMQPEntityData {
   external: boolean
   memberships: Array<{
     entity_uid: string
-    research_structure: {
+    research_unit: {
       names: string[]
       identifiers: Array<{ type: string; value: string }>
     }

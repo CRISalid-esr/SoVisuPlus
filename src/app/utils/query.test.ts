@@ -1,7 +1,7 @@
 import { toQueryString } from '@/app/utils/query'
 import { BaseQuery } from '@/types/BaseQuery'
 
-interface ResearchStructuresByNameQuery extends BaseQuery {
+interface ResearchUnitsByNameQuery extends BaseQuery {
   searchLang: string
 }
 
@@ -17,8 +17,8 @@ describe('toQueryString utility', () => {
     expect(result).toBe('searchTerm=example&page=1')
   })
 
-  it('should convert ResearchStructuresByNameQuery to a query string', () => {
-    const researchQuery: ResearchStructuresByNameQuery = {
+  it('should convert ResearchUnitsByNameQuery to a query string', () => {
+    const researchQuery: ResearchUnitsByNameQuery = {
       searchTerm: 'example',
       searchLang: 'en',
       page: 2,

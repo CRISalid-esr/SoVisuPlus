@@ -21,10 +21,10 @@ export const resetAuthzDb = async () => {
   await prisma.personIdentifier.deleteMany()
   await prisma.user.deleteMany()
   await prisma.person.deleteMany()
-  await prisma.researchStructureIdentifier.deleteMany()
-  await prisma.researchStructureName.deleteMany()
-  await prisma.researchStructureDescription.deleteMany()
-  await prisma.researchStructure.deleteMany()
+  await prisma.researchUnitIdentifier.deleteMany()
+  await prisma.researchUnitName.deleteMany()
+  await prisma.researchUnitDescription.deleteMany()
+  await prisma.researchUnit.deleteMany()
 }
 
 export const seedRoles = async (payload: RolesFileSeed) => {
@@ -32,8 +32,8 @@ export const seedRoles = async (payload: RolesFileSeed) => {
   await svc.reset(payload)
 }
 
-export const createResearchStructure = async (uid: string, acronym?: string) =>
-  prisma.researchStructure.create({
+export const createResearchUnit = async (uid: string, acronym?: string) =>
+  prisma.researchUnit.create({
     data: {
       uid,
       acronym: acronym ?? null,
@@ -78,7 +78,7 @@ export const addMembership = async (personId: number, rsId: number) =>
   prisma.membership.create({
     data: {
       personId,
-      researchStructureId: rsId,
+      researchUnitId: rsId,
       startDate: new Date('2020-01-01'),
       positionCode: 'RES',
     },

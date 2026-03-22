@@ -58,7 +58,7 @@ describe('POST /api/documents/harvestings', () => {
         uid: 'abc',
         authzProperties: {
           __type: 'Person',
-          perimeter: { Person: ['abc'], ResearchStructure: [] },
+          perimeter: { Person: ['abc'], ResearchUnit: [] },
         },
       }),
     }))

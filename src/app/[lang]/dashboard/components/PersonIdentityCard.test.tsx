@@ -74,7 +74,7 @@ const mkPerson = (): Person => {
 
   const memberships: PersonMembership[] = [
     {
-      researchStructure: {
+      researchUnit: {
         uid: 'rs1',
         acronym: 'IRJS',
         slug: 'irjs',
@@ -112,7 +112,7 @@ describe('PersonIdentityCard', () => {
     expect(screen.getByText('Pascal Renard')).toBeInTheDocument()
   })
 
-  it('renders research structure acronym and navigates on click', () => {
+  it('renders research unit acronym and navigates on click', () => {
     const person = mkPerson()
 
     render(<PersonIdentityCard person={person} />)

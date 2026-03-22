@@ -785,14 +785,6 @@ const DocumentsPage = () => {
         onPaginationChange={setPagination}
         onSortingChange={setSorting}
         positionActionsColumn='last'
-        rowCount={totalItems}
-        state={{
-          columnFilters,
-          globalFilter,
-          isLoading: loading,
-          pagination,
-          sorting: sorting || DEFAULT_SORTING,
-        }}
         renderTopToolbarCustomActions={({ table }) => (
           <Box sx={{ display: 'flex', gap: '1rem', p: '4px' }}>
             <Button
@@ -834,6 +826,14 @@ const DocumentsPage = () => {
               </Link>
             </Box>,
           ]
+        }}
+        rowCount={totalItems}
+        state={{
+          columnFilters,
+          globalFilter,
+          isLoading: loading,
+          pagination,
+          sorting: sorting || DEFAULT_SORTING,
         }}
       />
     </Box>

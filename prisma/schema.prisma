@@ -38,17 +38,17 @@ model Person {
 }
 
 model Membership {
-  id                  Int               @id @default(autoincrement())
-  personId            Int
-  researchStructureId Int
-  startDate           DateTime?
-  endDate             DateTime?
-  positionCode        String?
-  person              Person            @relation(fields: [personId], references: [id], onDelete: Cascade)
-  researchStructure   ResearchStructure @relation(fields: [researchStructureId], references: [id], onDelete: Cascade)
+  id             Int          @id @default(autoincrement())
+  personId       Int
+  researchUnitId Int
+  startDate      DateTime?
+  endDate        DateTime?
+  positionCode   String?
+  person         Person       @relation(fields: [personId], references: [id], onDelete: Cascade)
+  researchUnit   ResearchUnit @relation(fields: [researchUnitId], references: [id], onDelete: Cascade)
 
-  @@unique([personId, researchStructureId])
-  @@index([researchStructureId])
+  @@unique([personId, researchUnitId])
+  @@index([researchUnitId])
   @@index([personId])
 }
 
@@ -411,50 +411,50 @@ model OrcidIdentifier {
   updatedAt DateTime @updatedAt
 }
 
-model ResearchStructure {
-  id           Int                            @id @default(autoincrement())
-  uid          String                         @unique
+model ResearchUnit {
+  id           Int                       @id @default(autoincrement())
+  uid          String                    @unique
   acronym      String?
-  names        ResearchStructureName[]
-  descriptions ResearchStructureDescription[]
+  names        ResearchUnitName[]
+  descriptions ResearchUnitDescription[]
   signature    String?
-  identifiers  ResearchStructureIdentifier[]
-  external     Boolean                        @default(false)
-  slug         String?                        @unique
+  identifiers  ResearchUnitIdentifier[]
+  external     Boolean                   @default(false)
+  slug         String?                   @unique
   memberships  Membership[]
 }
 
-model ResearchStructureName {
-  id                  Int               @id @default(autoincrement())
-  researchStructureId Int
-  language            String // ISO 639-1 code
-  value               String            @db.VarChar(255)
-  researchStructure   ResearchStructure @relation(fields: [researchStructureId], references: [id], onDelete: Cascade)
+model ResearchUnitName {
+  id             Int          @id @default(autoincrement())
+  researchUnitId Int
+  language       String // ISO 639-1 code
+  value          String       @db.VarChar(255)
+  researchUnit   ResearchUnit @relation(fields: [researchUnitId], references: [id], onDelete: Cascade)
 
-  @@unique([researchStructureId, language])
+  @@unique([researchUnitId, language])
 }
 
-model ResearchStructureDescription {
-  id                  Int               @id @default(autoincrement())
-  researchStructureId Int
-  language            String // ISO 639-1 code
-  value               String            @db.VarChar(2000)
-  researchStructure   ResearchStructure @relation(fields: [researchStructureId], references: [id], onDelete: Cascade)
+model ResearchUnitDescription {
+  id             Int          @id @default(autoincrement())
+  researchUnitId Int
+  language       String // ISO 639-1 code
+  value          String       @db.VarChar(2000)
+  researchUnit   ResearchUnit @relation(fields: [researchUnitId], references: [id], onDelete: Cascade)
 
-  @@unique([researchStructureId, language])
+  @@unique([researchUnitId, language])
 }
 
-model ResearchStructureIdentifier {
-  id                  Int                             @id @default(autoincrement())
-  type                ResearchStructureIdentifierType
-  value               String
-  researchStructure   ResearchStructure               @relation(fields: [researchStructureId], references: [id], onDelete: Cascade)
-  researchStructureId Int
+model ResearchUnitIdentifier {
+  id             Int                        @id @default(autoincrement())
+  type           ResearchUnitIdentifierType
+  value          String
+  researchUnit   ResearchUnit               @relation(fields: [researchUnitId], references: [id], onDelete: Cascade)
+  researchUnitId Int
 
   @@unique([type, value])
 }
 
-enum ResearchStructureIdentifierType {
+enum ResearchUnitIdentifierType {
   hal
   idref
   isni
@@ -517,7 +517,7 @@ enum PermissionSubject {
   Document
   DocumentRecord
   Person
-  ResearchStructure
+  ResearchUnit
   Membership
   Institution
   InstitutionDivision
@@ -525,7 +525,7 @@ enum PermissionSubject {
 
 enum EntityType {
   Person
-  ResearchStructure
+  ResearchUnit
   Institution
   InstitutionDivision
 }

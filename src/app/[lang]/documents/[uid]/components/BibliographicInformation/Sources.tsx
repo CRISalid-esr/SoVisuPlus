@@ -75,6 +75,7 @@ const Sources = () => {
         variant='outlined'
         startIcon={<EditIcon />}
         onClick={goToSourcesTab}
+        sx={{ minWidth: 'fit-content' }}
       >
         <Trans>document_details_page_sources_row_update_source</Trans>
       </Button>

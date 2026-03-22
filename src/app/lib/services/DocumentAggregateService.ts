@@ -25,7 +25,7 @@ export class DocumentAggregateService {
    * Compute wordstream rows for a given contributor (person or org), aggregated per year.
    *
    * @param agentUid - person UID or organization UID (depending on contributorType)
-   * @param agentType - 'person' | 'research_structure' | 'institution'
+   * @param agentType - 'person' | 'research_unit' | 'institution'
    * @param preferredLanguage - language preference to pick concept labels
    * @param topics - which streams to compute (Concepts, CoAuthors)
    * @param opts - optional options

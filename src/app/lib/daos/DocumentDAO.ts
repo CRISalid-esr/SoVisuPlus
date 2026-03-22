@@ -88,7 +88,7 @@ export class DocumentDAO extends AbstractDAO {
                     identifiers: true,
                     memberships: {
                       include: {
-                        researchStructure: {
+                        researchUnit: {
                           include: {
                             names: true,
                             identifiers: true,
@@ -191,7 +191,7 @@ export class DocumentDAO extends AbstractDAO {
                     identifiers: true,
                     memberships: {
                       include: {
-                        researchStructure: {
+                        researchUnit: {
                           include: {
                             names: true,
                             identifiers: true,
@@ -942,7 +942,7 @@ export class DocumentDAO extends AbstractDAO {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: {
+                    researchUnit: {
                       include: {
                         names: true,
                         identifiers: true,
@@ -1074,7 +1074,7 @@ export class DocumentDAO extends AbstractDAO {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchStructure: {
+                    researchUnit: {
                       include: {
                         names: true,
                         descriptions: true,
