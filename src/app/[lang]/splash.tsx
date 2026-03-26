@@ -8,6 +8,8 @@ import { useTheme } from '@mui/material/styles'
 import { Link } from '@mui/material'
 import * as Lingui from '@lingui/core'
 import { ThemeLocales } from '@/types/ThemeLocales'
+import { useRouter } from 'next/navigation'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
 
 export type Props = {
   images: {
@@ -18,8 +20,11 @@ export type Props = {
 
 const Splash = ({ images }: Props) => {
   const lang = Lingui.i18n.locale || 'fr'
+  const router = useRouter()
   const [locales, setLocales] = useState<ThemeLocales>()
   const theme = useTheme()
+  const aboutUrl = getRuntimeEnv().NEXT_PUBLIC_ABOUT_PAGE_URL || ''
+  const communityUrl = getRuntimeEnv().NEXT_PUBLIC_COMMUNITY_PAGE_URL || ''
 
   useEffect(() => {
     const importLocales = async () => {
@@ -142,16 +147,31 @@ const Splash = ({ images }: Props) => {
               flexDirection={{ xs: 'column', lg: 'row' }}
               textAlign='right'
             >
-              <Link href='#' underline='none' fontWeight='bold'>
+              <Link
+                href={aboutUrl}
+                target='_blank'
+                rel='noopener noreferrer'
+                underline='none'
+                fontWeight='bold'
+              >
                 {t`splash.about`}
               </Link>
-              <Link href='#' underline='none' fontWeight='bold'>
-                {t`splash.legal_mentions`}
+              <Link
+                underline='none'
+                fontWeight='bold'
+                onClick={() => {
+                  router.push(`/${lang}/terms`)
+                }}
+              >
+                {t`splash.terms`}
               </Link>
-              <Link href='#' underline='none' fontWeight='bold'>
-                {t`splash.accessibility`}
-              </Link>
-              <Link href='#' underline='none' fontWeight='bold'>
+              <Link
+                href={communityUrl}
+                target='_blank'
+                rel='noopener noreferrer'
+                underline='none'
+                fontWeight='bold'
+              >
                 {t`splash.community`}
               </Link>
             </Box>
