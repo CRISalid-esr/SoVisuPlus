@@ -7,6 +7,11 @@ import { Person } from '@/types/Person'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
 import ContributorIdentityCard from '@/app/[lang]/documents/components/ContributorIdentityCard'
+import { PermissionAction } from '@/types/Permission'
+import { Can } from '@casl/react'
+import { useSession } from 'next-auth/react'
+import { useMemo } from 'react'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
 
 const Authors = () => {
   const theme = useTheme()
@@ -16,6 +21,12 @@ const Authors = () => {
   const searchParams = useSearchParams()
   const { uid } = useParams<{ uid: string }>()
   const lang = Lingui.i18n.locale
+
+  const { data: session } = useSession()
+  const ability = useMemo(
+    () => abilityFromAuthzContext(session?.user.authz),
+    [session?.user?.authz],
+  )
 
   const goToAuthorsTab = () => {
     const params = new URLSearchParams(searchParams.toString())
@@ -82,14 +93,25 @@ const Authors = () => {
           />
         </Tooltip>
       ))}
-      <Button
-        variant='outlined'
-        startIcon={<EditIcon />}
-        onClick={goToAuthorsTab}
-        sx={{ minWidth: 'fit-content' }}
+      <Can
+        I={PermissionAction.update}
+        a={selectedDocument}
+        field='contributors'
+        ability={ability}
+        passThrough
       >
-        <Trans>document_details_page_authors_row_update_author</Trans>
-      </Button>
+        {(allowed: boolean) => (
+          <Button
+            disabled={!allowed}
+            variant='outlined'
+            startIcon={<EditIcon />}
+            onClick={goToAuthorsTab}
+            sx={{ minWidth: 'fit-content' }}
+          >
+            <Trans>document_details_page_authors_row_update_author</Trans>
+          </Button>
+        )}
+      </Can>
     </Box>
   )
 }
