@@ -12,11 +12,44 @@ import { DocumentField, DocumentFieldKey } from './BibliographicInformation'
 import Row from './Row'
 import Titles from './Titles'
 import { OAStatus } from '@prisma/client'
+import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
+import { PermissionAction, PermissionSubject } from '@/types/Permission'
+import { Contribution } from '@/types/Contribution'
+import { InternalPerson } from '@/types/InternalPerson'
+import { LocRelator } from '@/types/LocRelator'
+import { useSession } from 'next-auth/react'
 
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
+
+jest.mock('next-auth/react', () => ({
+  __esModule: true,
+  useSession: jest.fn(),
+}))
+
+const authz = makeAuthzContext({
+  roleAssignments: [
+    makeAssignment(
+      'document_editor',
+      [
+        {
+          action: PermissionAction.update,
+          subject: PermissionSubject.Document,
+          fields: [
+            'titles',
+            'abstracts',
+            'contributors',
+            'identifiers',
+            'documentType',
+          ],
+        },
+      ],
+      [{ entityType: 'Person', entityUid: 'local-me' }],
+    ),
+  ],
+})
 
 const document: Document = new Document(
   'doc-123',
@@ -32,6 +65,12 @@ const document: Document = new Document(
   ],
   [],
   [],
+  [
+    new Contribution(
+      new InternalPerson('local-me', null, 'local-me', 'First', 'Last', []),
+      [LocRelator.AUTHOR],
+    ),
+  ],
 )
 
 describe('Row Component', () => {
@@ -42,9 +81,13 @@ describe('Row Component', () => {
   }
 
   beforeEach(() => {
+    jest.clearAllMocks()
     ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
       selector(mockState),
     )
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { authz: authz } },
+    })
   })
 
   const theme = createTheme({
