@@ -1564,7 +1564,7 @@ msgid "splash.community"
 msgstr "Communauté"
 
 #: src/app/[lang]/splash.tsx:149
-msgid "splash.legal_mentions"
+msgid "splash.terms"
 msgstr "Mentions légales"
 
 #: src/app/[lang]/splash.tsx:118
