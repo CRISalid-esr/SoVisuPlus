@@ -166,27 +166,6 @@ msgid "document_details_page_keywords_search_field_title"
 msgstr "Sélectionner un ou plusieurs vocabulaires contrôlés"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:397
-msgid "document_details_page_source_tab_card_title"
-msgstr "Références bibliographiques sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:430
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:439
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "Actions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:456
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalider"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:474
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissocier"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:225
 msgid "concept_chips_free_keyword"
@@ -210,6 +189,27 @@ msgstr "Formes alternatives"
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:343
 msgid "concept_chip_action_delete"
 msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:397
+msgid "document_details_page_source_tab_card_title"
+msgstr "Références bibliographiques sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:430
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:439
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "Actions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:456
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalider"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:474
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissocier"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
@@ -271,21 +271,21 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:128
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:58
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:120
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:101
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:163
 msgid "document_details_page_titles_row_label"
 msgstr "Titre"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:59
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:89
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:143
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:102
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:132
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:186
 msgid "document_details_page_no_title_available"
 msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:131
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:88
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:131
 msgid "document_details_page_type_row_label"
 msgstr ""
 
@@ -293,12 +293,6 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr ""
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:120
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
-msgid "document_details_page_card_title"
-msgstr "Informations bibliographiques"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
@@ -310,6 +304,12 @@ msgstr ""
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
 msgid "bibliographic_information_update_failure"
 msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:120
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
+msgid "document_details_page_card_title"
+msgstr "Informations bibliographiques"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:134
@@ -342,7 +342,7 @@ msgid "document_details_page_sources_row_label"
 msgstr "Sources"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:114
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:148
 msgid "document_details_page_authors_row_update_author"
 msgstr ""
 
@@ -377,15 +377,15 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "Une nouvelle expertise est en attente de validation"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
-msgid "profile_identifiers_card_title"
-msgstr "Mes identifiants chercheurs"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:101
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:31
 msgid "profile_affiliations_card_title"
 msgstr "Mes affiliations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:31
+msgid "profile_identifiers_card_title"
+msgstr "Mes identifiants chercheurs"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:59
@@ -761,7 +761,7 @@ msgstr "Domaines"
 msgid "document_details_keywords_tab"
 msgstr "Mots-clés"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Abstracts.tsx:38
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Abstracts.tsx:58
 msgid "document_details_page_abstracts_row_edit_button"
 msgstr "Modifier le résumé"
 
@@ -785,7 +785,7 @@ msgstr "Appliquer"
 msgid "document_details_page_authors_row_label"
 msgstr "Auteurs"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:91
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:111
 msgid "document_details_page_authors_row_update_author"
 msgstr "Modifier les auteurs"
 
@@ -853,7 +853,7 @@ msgstr "Sources"
 msgid "document_details_page_sources_row_update_source"
 msgstr "Comparer les sources"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Titles.tsx:38
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Titles.tsx:58
 msgid "document_details_page_titles_row_edit_button"
 msgstr "Modifier le titre"
 
