@@ -1,4 +1,7 @@
-import { DocumentWithRelations as DbDocument } from '@/prisma-schema/extended-client'
+import {
+  AuthorityOrganizationWithRelations as DbAuthorityOrganization,
+  DocumentWithRelations as DbDocument,
+} from '@/prisma-schema/extended-client'
 import {
   Concept as DbConcept,
   DocumentState,
@@ -21,6 +24,7 @@ import QueryMode = Prisma.QueryMode
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { Literal, LiteralJson } from '@/types/Literal'
+import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
 
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
@@ -283,7 +287,16 @@ export class DocumentDAO extends AbstractDAO {
             titles: true,
             abstracts: true,
             subjects: { include: { labels: true } },
-            contributions: { include: { person: true } },
+            contributions: {
+              include: {
+                affiliations: {
+                  include: {
+                    identifiers: true,
+                  },
+                },
+                person: true
+              }
+            },
             records: {
               include: {
                 identifiers: true,
@@ -379,6 +392,42 @@ export class DocumentDAO extends AbstractDAO {
 
         const { id: personId } = person
         const { id: documentId } = dbDocument
+
+        for(const affiliation of contribution.affiliations) {
+          let authorityOrganization: DbAuthorityOrganization
+          try {
+            authorityOrganization =
+              await new AuthorityOrganizationDAO().createOrUpdateAuthorityOrganization(
+                affiliation,
+              )
+            const {id: authorityId} = authorityOrganization
+            try{
+              await this.prismaClient.contribution.update({
+                where: {
+                  personId_documentId: {
+                    personId,
+                    documentId,
+                  },
+                },
+                data :{
+                  affiliations: {
+                    connect: { id: authorityId},
+                  }
+                }
+              })
+            }catch(error){
+              console.error(
+                `Failed to upsert contribution affiliation for authority organization ID: ${authorityId} and contribution document ID: ${documentId} and person ID: ${personId}`,
+                error,
+              )
+            }
+          } catch (error) {
+            console.error(
+              `Failed to create or update authority organization for contribution: ${contribution}`,
+              error,
+            )
+          }
+        }
 
         try {
           await this.prismaClient.contribution.upsert({
@@ -990,6 +1039,21 @@ export class DocumentDAO extends AbstractDAO {
       oaStatus: OAStatus | null
       publicationDate: string | null
       upwOAStatus: OAStatus | null
+      contributions : {
+        person : {
+          uid :string,
+          firstName : string | null,
+          lastName : string | null,
+        },
+        affiliations : {
+          uid :string,
+          displayNames : string[],
+          places : {
+            latitude : number,
+            longitude : number,
+          }[]
+        }[]
+      }[]
     }[]
   }> {
     const perspectiveRolesFilter: string[] = parseStrArrayEnvVar(
@@ -1002,6 +1066,24 @@ export class DocumentDAO extends AbstractDAO {
         oaStatus: true,
         publicationDate: true,
         upwOAStatus: true,
+        contributions: {
+          select:{
+            person: {
+              select: {
+                uid:true,
+                firstName:true,
+                lastName:true
+              }
+            },
+            affiliations: {
+              select:{
+                uid:true,
+                displayNames: true,
+                places: true
+              }
+            }
+          }
+        }
       },
       where: {
         publicationDate: { not: null },
@@ -1024,7 +1106,22 @@ export class DocumentDAO extends AbstractDAO {
     })
 
     return {
-      documents: dbDocuments,
+      documents: dbDocuments.map((doc)=> {
+        return {
+          ...doc,
+          contributions: doc.contributions.map((contribution) => {
+            return {
+              ...contribution,
+              affiliations: contribution.affiliations.map((affiliation) => {
+                return {
+                  ...affiliation,
+                  places: (affiliation.places as {latitude:number, longitude:number}[])
+                }
+              })
+            }
+          })
+        }
+      }),
     }
   }
 

@@ -25,7 +25,11 @@ import React, { useEffect, useState } from 'react'
 import { WordstreamTopic } from '@/types/WordStream'
 import PublicationCard from '@/app/[lang]/dashboard/components/PublicationCard'
 import AgentIdentityCard from '@/app/[lang]/dashboard/components/AgentIdentityCard'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import {
+  OAStatus,
+  PersonIdentifierType as DbPersonIdentifierType,
+} from '@prisma/client'
+import MapCollaborations from '@/app/[lang]/dashboard/components/MapCollaborations'
 
 const DEFAULT_TOP_N = 10
 const DEFAULT_START_YEAR = 2010
@@ -42,6 +46,33 @@ const DashboardPage = () => {
   const theme = useTheme()
   const { _ } = useLingui()
   const { currentPerspective } = useStore((state) => state.user)
+  const [documents, setDocuments] = useState<
+    Record<
+      number,
+      {
+        uid: string
+        oaStatus: OAStatus | null
+        publicationDate: string | null
+        upwOAStatus: OAStatus | null
+        contributions : {
+          person : {
+            uid :string,
+            firstName : string | null,
+            lastName : string | null,
+          },
+          affiliations : {
+            uid :string,
+            displayNames : string[],
+            places : {
+              latitude : number,
+              longitude : number,
+            }[]
+          }[]
+        }[]
+      }[]
+    >
+  >([])
+  const [loading, setLoading] = useState(false)
   const lang = (Lingui.i18n.locale || 'ul') as ExtendedLanguageCode
   const entityType = currentPerspective?.type
   const uid = currentPerspective?.uid
@@ -74,6 +105,63 @@ const DashboardPage = () => {
     setAppliedWSFontRange([DEFAULT_MIN_FONT, DEFAULT_MAX_FONT])
     setAppliedWSYearRange([DEFAULT_START_YEAR, currentYear])
   }, [uid, entityType, currentYear])
+
+  useEffect(() => {
+    const contributorUid = currentPerspective?.uid
+    const contributorType = currentPerspective?.type
+    if (!contributorType || !contributorUid) return
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch(
+          `/api/documents/dataviz?contributorUid=${contributorUid}&contributorType=${contributorType}`,
+        )
+        if (!response.ok) {
+          throw new Error('Failed to fetch documents per year')
+        }
+        const res = await response.json()
+        const documents: Record<
+          number,
+          {
+            uid: string
+            oaStatus: OAStatus | null
+            publicationDate: string | null
+            upwOAStatus: OAStatus | null
+            contributions : {
+              person : {
+                uid :string,
+                firstName : string | null,
+                lastName : string | null,
+              },
+              affiliations : {
+                uid :string,
+                displayNames : string[],
+                places : {
+                  latitude : number,
+                  longitude : number,
+                }[]
+              }[]
+            }[]
+          }[]
+        > = res.documents
+        const years = Object.keys(documents)
+          .map(Number)
+          .filter((year) => !Number.isNaN(year))
+        const oldestYear = years.length == 0 ? null : Math.min(...years)
+        const start = oldestYear
+          ? oldestYear <= currentYear - 5
+            ? currentYear - 5
+            : oldestYear
+          : currentYear
+        setPendingWSYearRange([start, currentYear])
+        setDocuments(documents)
+      } catch (error) {
+        console.error('Error while fetching documents per year', error)
+      }
+      setLoading(false)
+    }
+    fetchData()
+  }, [currentPerspective, currentYear])
 
   const wsSliderHaveChanges = !(
     pendingWSTopN === appliedWSTopN &&
@@ -217,7 +305,8 @@ const DashboardPage = () => {
             <CardContent>
               <PublicationCard
                 yearRange={pendingWSYearRange}
-                setYearRange={setPendingWSYearRange}
+                data={documents}
+                loading={loading}
               />
             </CardContent>
           </CustomCard>
@@ -328,6 +417,31 @@ const DashboardPage = () => {
               </Box>
             </Stack>
           </Box>
+        </CustomCard>
+      </Grid>
+      <Grid>
+        <CustomCard
+          header={
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <DashboardHeaderTitle
+                i18nMessage={defineMessage`dashboard_page_map_title`}
+              />
+            </Box>
+          }
+        >
+          <CardContent sx={{height: 'fit-content'}}>
+            <MapCollaborations
+              yearRange={pendingWSYearRange}
+              data={documents}
+              loading={loading}
+            />
+          </CardContent>
         </CustomCard>
       </Grid>
     </Box>

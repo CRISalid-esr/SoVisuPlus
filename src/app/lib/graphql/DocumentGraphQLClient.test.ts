@@ -82,6 +82,12 @@ describe('DocumentGraphQLClient', () => {
                 {
                   uid: 'some-org-001',
                   display_names: ['Some Organization'],
+                  places: [
+                    {
+                      latitude:1.23456,
+                      longitude: 98.7654
+                    }
+                  ],
                   identifiers: [
                     { type: 'openalex', value: '000054' },
                     { type: 'wikidata', value: '10.0004.BA34' },
@@ -198,6 +204,12 @@ describe('DocumentGraphQLClient', () => {
             new AuthorityOrganization(
               'some-org-001',
               ['Some Organization'],
+              [
+                {
+                  latitude:1.23456,
+                  longitude: 98.7654
+                }
+              ],
               [
                 new AuthorityOrganizationIdentifier(
                   AuthorityOrganizationIdentifierType.openalex,

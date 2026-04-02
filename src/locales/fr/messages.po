@@ -741,6 +741,22 @@ msgstr "Max. occurrences / an"
 msgid "dashboard_page_wordstream_validate_button_label"
 msgstr "Mettre à jour"
 
+#: src/app/[lang]/dashboard/page.tsx:326
+msgid "dashboard_page_map_title"
+msgstr "Collaborations internationales"
+
+#: src/app/[lang]/dashboard/components/MapCollaborations.tsx:326
+msgid "map_collaborations_tooltip_remaining_orgs"
+msgstr "Autres institutions : "
+
+#: src/app/[lang]/dashboard/components/MapCollaborations.tsx:326
+msgid "map_collaborations_tooltip_unknown_contributors"
+msgstr "Collaborateurs non répertoriés : "
+
+#: src/app/[lang]/dashboard/components/MapCollaborations.tsx:326
+msgid "map_collaborations_tooltip_other_contributors"
+msgstr "Autres collaborateurs : "
+
 #: src/app/[lang]/documents/[uid]/page.tsx:88
 msgid "document_details_add_in_hal_tab"
 msgstr "Déposer dans HAL"

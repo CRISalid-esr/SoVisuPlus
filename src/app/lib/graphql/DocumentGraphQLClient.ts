@@ -27,6 +27,10 @@ interface GraphSourcePersonResponse {
 interface GraphAuthorityOrganization {
   uid: string
   display_names: string[]
+  places: {
+    latitude: number,
+    longitude: number
+  }[]
   identifiers: {
     type: string
     value: string
@@ -221,7 +225,7 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
               }
               return idsAcc
             }, [])
-            return new AuthorityOrganization(org.uid, org.display_names, ids)
+            return new AuthorityOrganization(org.uid, org.display_names, org.places, ids)
           })
 
           acc.push(new Contribution(person, locRelators, organizations))

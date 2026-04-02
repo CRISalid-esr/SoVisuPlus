@@ -1,8 +1,6 @@
 import {
   Box,
   CircularProgress,
-  MenuItem,
-  Select,
   Typography,
 } from '@mui/material'
 import { t } from '@lingui/core/macro'
@@ -16,9 +14,7 @@ import {
   ToolboxComponentOption,
   TooltipComponentOption,
 } from 'echarts/components'
-import useStore from '@/stores/global_store'
-import { useEffect, useMemo, useState } from 'react'
-import dayjs from 'dayjs'
+import { useMemo } from 'react'
 import BlockIcon from '@mui/icons-material/Block'
 import { OAStatus } from '@prisma/client'
 import { OAStatusProperties } from '@/app/[lang]/documents/components/OAStatusProperties'
@@ -34,23 +30,34 @@ type ChartOption = ComposeOption<
 
 type PublicationCardProps = {
   yearRange: [number, number]
-  setYearRange: (range: [number, number]) => void
+  loading: boolean
+  data: Record<
+    number,
+    {
+      uid: string
+      oaStatus: OAStatus | null
+      publicationDate: string | null
+      upwOAStatus: OAStatus | null
+      contributions : {
+        person : {
+          uid :string,
+          firstName : string | null,
+          lastName : string | null,
+        },
+        affiliations : {
+          uid :string,
+          displayNames : string[],
+          places : {
+            latitude : number,
+            longitude : number,
+          }[]
+        }[]
+      }[]
+    }[]
+  >
 }
 
-const PublicationCard = ({ yearRange, setYearRange }: PublicationCardProps) => {
-  const { currentPerspective } = useStore((state) => state.user)
-  const [data, setData] = useState<
-    Record<
-      number,
-      {
-        uid: string
-        oaStatus: OAStatus | null
-        publicationDate: string | null
-        upwOAStatus: OAStatus | null
-      }[]
-    >
-  >([])
-  const [loading, setLoading] = useState(false)
+const PublicationCard = ({ yearRange, data = [], loading = false }: PublicationCardProps) => {
 
   const oldestYear = useMemo(() => {
     const years = Object.keys(data)
@@ -60,10 +67,7 @@ const PublicationCard = ({ yearRange, setYearRange }: PublicationCardProps) => {
     return Math.min(...years)
   }, [data])
 
-  const currentYear = useMemo(() => dayjs().year(), [])
-
   const filteredData = useMemo(() => {
-    setLoading(true)
     const processedData = Object.entries(data)
       .map(([year, docs]) => {
         if (Number(year) >= yearRange[0] && Number(year) <= yearRange[1]) {
@@ -118,51 +122,8 @@ const PublicationCard = ({ yearRange, setYearRange }: PublicationCardProps) => {
         }
       })
       .filter((value) => value !== undefined)
-    setLoading(false)
     return processedData
   }, [data, yearRange])
-
-  useEffect(() => {
-    const contributorUid = currentPerspective?.uid
-    const contributorType = currentPerspective?.type
-    if (!contributorType || !contributorUid) return
-    const fetchData = async () => {
-      setLoading(true)
-      try {
-        const response = await fetch(
-          `/api/documents/dataviz?contributorUid=${contributorUid}&contributorType=${contributorType}`,
-        )
-        if (!response.ok) {
-          throw new Error('Failed to fetch documents per year')
-        }
-        const res = await response.json()
-        const documents: Record<
-          number,
-          {
-            uid: string
-            oaStatus: OAStatus | null
-            publicationDate: string | null
-            upwOAStatus: OAStatus | null
-          }[]
-        > = res.documents
-        const years = Object.keys(documents)
-          .map(Number)
-          .filter((year) => !Number.isNaN(year))
-        const oldestYear = years.length == 0 ? null : Math.min(...years)
-        const start = oldestYear
-          ? oldestYear <= currentYear - 5
-            ? currentYear - 5
-            : oldestYear
-          : currentYear
-        setYearRange([start, currentYear])
-        setData(documents)
-      } catch (error) {
-        console.error('Error while fetching documents per year', error)
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [currentPerspective, currentYear])
 
   const option = useMemo<ChartOption | null>(() => {
     if (filteredData.length == 0) return null
