@@ -54,18 +54,17 @@ const DashboardPage = () => {
         oaStatus: OAStatus | null
         publicationDate: string | null
         upwOAStatus: OAStatus | null
-        contributions : {
-          person : {
-            uid :string,
-            firstName : string | null,
-            lastName : string | null,
-          },
-          affiliations : {
-            uid :string,
-            displayNames : string[],
-            places : {
-              latitude : number,
-              longitude : number,
+        contributions: {
+          person: {
+            uid: string
+            displayName: string | null
+          }
+          affiliations: {
+            uid: string
+            displayNames: string[]
+            places: {
+              latitude: number
+              longitude: number
             }[]
           }[]
         }[]
@@ -127,18 +126,17 @@ const DashboardPage = () => {
             oaStatus: OAStatus | null
             publicationDate: string | null
             upwOAStatus: OAStatus | null
-            contributions : {
-              person : {
-                uid :string,
-                firstName : string | null,
-                lastName : string | null,
-              },
-              affiliations : {
-                uid :string,
-                displayNames : string[],
-                places : {
-                  latitude : number,
-                  longitude : number,
+            contributions: {
+              person: {
+                uid: string
+                displayName: string | null
+              }
+              affiliations: {
+                uid: string
+                displayNames: string[]
+                places: {
+                  latitude: number
+                  longitude: number
                 }[]
               }[]
             }[]
@@ -435,7 +433,7 @@ const DashboardPage = () => {
             </Box>
           }
         >
-          <CardContent sx={{height: 'fit-content'}}>
+          <CardContent sx={{ height: 'fit-content' }}>
             <MapCollaborations
               yearRange={pendingWSYearRange}
               data={documents}

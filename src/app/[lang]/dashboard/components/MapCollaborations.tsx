@@ -25,26 +25,18 @@ type ChartOption = ComposeOption<
   | TooltipComponentOption
 >
 
-type Contributor = {
-  firstName: string | null
-  lastName: string | null
-}
-
 type AffiliationData = {
   longitude: number
   latitude: number
   name: string
-  persons: Record<string, Contributor>
+  persons: Record<string, string | null>
 }
 
 type Point = {
   longitude: number
   latitude: number
   count: number
-  data: Record<
-    string,
-    Record<string, Contributor>
-  >
+  data: Record<string, Record<string, string | null>>
 }
 
 const BASE_GRID_SIZE = 60
@@ -63,8 +55,7 @@ type MapCollaborationsProps = {
       contributions: {
         person: {
           uid: string
-          firstName: string | null
-          lastName: string | null
+          displayName: string | null
         }
         affiliations: {
           uid: string
@@ -98,12 +89,9 @@ const MapCollaborations = ({
    * name : name of organization,
    * persons : set of collaborators in the organization record by their uid
    */
-  const filteredData : AffiliationData[] = useMemo(() => {
+  const filteredData: AffiliationData[] = useMemo(() => {
     const processedData = Object.entries(data).reduce<
-      Record<
-        string,
-        AffiliationData
-      >
+      Record<string, AffiliationData>
     >((acc, [year, docs]) => {
       if (Number(year) >= yearRange[0] && Number(year) <= yearRange[1]) {
         docs.map((doc) => {
@@ -121,10 +109,8 @@ const MapCollaborations = ({
                     name: affiliation.displayNames[0],
                     persons: {},
                   }
-                  acc[affiliation.uid].persons[contributor.uid] ??= {
-                    firstName: contributor.firstName,
-                    lastName: contributor.lastName,
-                  }
+                  acc[affiliation.uid].persons[contributor.uid] ??=
+                    contributor.displayName
                 }
               })
             }
@@ -141,34 +127,37 @@ const MapCollaborations = ({
    * Return set of data indexed by country id from geoJson object
    */
   const countryPoints = useMemo(() => {
-    return geoJson.features.reduce<
-      Record<
-        string,
-        AffiliationData[]
-      >
-    >((acc, feature) => {
-      const country: Polygon | MultiPolygon | Feature<Polygon | MultiPolygon> =
-        feature.geometry as
+    return geoJson.features.reduce<Record<string, AffiliationData[]>>(
+      (acc, feature) => {
+        const country:
+          | Polygon
+          | MultiPolygon
+          | Feature<Polygon | MultiPolygon> = feature.geometry as
           | Polygon
           | MultiPolygon
           | Feature<Polygon | MultiPolygon>
-      acc[feature.id] = filteredData.filter((data) => {
-        const point: { type: 'Point'; coordinates: number[] } = {
-          type: 'Point',
-          coordinates: [data.longitude, data.latitude],
-        }
-        return booleanPointInPolygon(point, country)
-      })
-      return acc
-    }, {})
+        acc[feature.id] = filteredData.filter((data) => {
+          const point: { type: 'Point'; coordinates: number[] } = {
+            type: 'Point',
+            coordinates: [data.longitude, data.latitude],
+          }
+          return booleanPointInPolygon(point, country)
+        })
+        return acc
+      },
+      {},
+    )
   }, [filteredData])
 
   /**
    * Process points by country to merge ones that are closed depending on map zoom
    */
   const mergedPoints = useCallback(
-    (map: ECharts, zoom?: number) : Point[] => {
-      const gridSize = Math.max(8, Math.min(80, BASE_GRID_SIZE / Math.pow(zoom ? zoom : 1, 0.6)))
+    (map: ECharts, zoom?: number): Point[] => {
+      const gridSize = Math.max(
+        8,
+        Math.min(80, BASE_GRID_SIZE / Math.pow(zoom ? zoom : 1, 0.6)),
+      )
       return Object.entries(countryPoints)
         .map(([countryId, points]) => {
           const grid: Record<
@@ -176,13 +165,7 @@ const MapCollaborations = ({
             {
               coordinates: [number, number]
               count: number
-              data: Record<
-                string,
-                Record<
-                  string,
-                  { firstName: string | null; lastName: string | null }
-                >
-              >
+              data: Record<string, Record<string, string | null>>
             }
           > = {}
           points.forEach((point) => {
@@ -308,13 +291,13 @@ const MapCollaborations = ({
     const map = chartRef.current?.getEchartsInstance() as EChartsOption & {
       geo?: GeoComponentOption
     }
-    if (!map) return;
+    if (!map) return
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const zoom = map.getOption()?.geo?.[0]?.zoom || 1;
+        const zoom = map.getOption()?.geo?.[0]?.zoom || 1
 
-        const points = mergedFnRef.current(map, zoom);
+        const points = mergedFnRef.current(map, zoom)
 
         map.setOption({
           series: [
@@ -328,10 +311,10 @@ const MapCollaborations = ({
               ]),
             },
           ],
-        });
-      });
-    });
-  }, [countryPoints]);
+        })
+      })
+    })
+  }, [countryPoints])
 
   /**
    * Zoom in or out action perform by custom toolbox zoom buttons
@@ -353,145 +336,152 @@ const MapCollaborations = ({
     }
   }
 
-  const option: ChartOption = useMemo(() => ({
-    geo: {
-      map: 'world',
-      roam: true,
-      zoom: 1.15,
-      center: ['50%', '58%'],
-      scaleLimit: {
-        min: 1,
-        max: 100,
+  const option: ChartOption = useMemo(
+    () => ({
+      geo: {
+        map: 'world',
+        roam: true,
+        zoom: 1.15,
+        center: ['50%', '58%'],
+        scaleLimit: {
+          min: 1,
+          max: 100,
+        },
+        left: '10%',
+        top: '0%',
+        bottom: '0%',
+        right: '10%',
+        preserveAspect: true,
       },
-      left: '10%',
-      top: '0%',
-      bottom: '0%',
-      right: '10%',
-      preserveAspect: true,
-    },
-    tooltip: {
-      show: false,
-    },
-    toolbox: {
-      feature: {
-        myZoomIn: {
-          show: true,
-          title: 'Zoom In',
-          icon: `path://M21.974 23.827l-8.34-8.34q-.993.795-2.283 1.258t-2.747.463q-3.607 0-6.105-2.498T0 8.604 2.499 2.5 8.604 0t6.106 2.499 2.498 6.105q0 1.456-.463 2.747t-1.258 2.283l8.34 8.34zM8.604 14.56q2.482 0 4.22-1.737t1.737-4.22-1.737-4.22-4.22-1.737-4.22 1.738-1.737 4.22 1.738 4.219 4.22 1.737M7.28 12.575V9.928H4.633V7.28H7.28V4.633h2.648V7.28h2.647v2.648H9.928v2.647z`,
-          onclick: () => {
-            zoomInOut(false)
+      tooltip: {
+        show: false,
+      },
+      toolbox: {
+        feature: {
+          myZoomIn: {
+            show: true,
+            title: 'Zoom In',
+            icon: `path://M21.974 23.827l-8.34-8.34q-.993.795-2.283 1.258t-2.747.463q-3.607 0-6.105-2.498T0 8.604 2.499 2.5 8.604 0t6.106 2.499 2.498 6.105q0 1.456-.463 2.747t-1.258 2.283l8.34 8.34zM8.604 14.56q2.482 0 4.22-1.737t1.737-4.22-1.737-4.22-4.22-1.737-4.22 1.738-1.737 4.22 1.738 4.219 4.22 1.737M7.28 12.575V9.928H4.633V7.28H7.28V4.633h2.648V7.28h2.647v2.648H9.928v2.647z`,
+            onclick: () => {
+              zoomInOut(false)
+            },
           },
-        },
-        myZoomOut: {
-          show: true,
-          title: 'Zoom Out',
-          icon: `path://M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400ZM280-540v-80h200v80H280Z`,
-          onclick: () => {
-            zoomInOut(true)
+          myZoomOut: {
+            show: true,
+            title: 'Zoom Out',
+            icon: `path://M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400ZM280-540v-80h200v80H280Z`,
+            onclick: () => {
+              zoomInOut(true)
+            },
           },
-        },
-        saveAsImage: {
-          type: 'png',
-          name: t`dashboard_page_map_title`,
-          show: true,
-        },
-        iconStyle: {
-          color: '#404040',
+          saveAsImage: {
+            type: 'png',
+            name: t`dashboard_page_map_title`,
+            show: true,
+          },
+          iconStyle: {
+            color: '#404040',
+          },
         },
       },
-    },
-    series: [
-      {
-        id: 'collaborations',
-        type: 'scatter',
-        coordinateSystem: 'geo',
-        geoIndex: 0,
-        encode: {
-          tooltip: 2,
-          label: 2,
-        },
-        data: [], //mergedPoints(1.15).map((point)=> [point.longitude,point.latitude,point.count]),
-        symbolSize: (point: number[]) => {
-          const count = point[2] || 1
-          return Math.min(11 + Math.log(count) * 10, 50)
-        },
-        label: {
-          show: true,
-          formatter: (params) => {
-            const count = Array.isArray(params.value) ? params.value[2] : 1
-            return count as string
+      series: [
+        {
+          id: 'collaborations',
+          type: 'scatter',
+          coordinateSystem: 'geo',
+          geoIndex: 0,
+          encode: {
+            tooltip: 2,
+            label: 2,
           },
-          color: theme.palette.primary.light,
-          fontWeight: 'bold',
-        },
-        itemStyle: {
-          color: theme.palette.primary.dark,
-          borderWidth: 1,
-          borderColor: theme.palette.primary.main,
-        },
-        tooltip: {
-          show: true,
-          padding: [18, 30],
-          textStyle: {
-            lineHeight: 14,
+          data: [], //mergedPoints(1.15).map((point)=> [point.longitude,point.latitude,point.count]),
+          symbolSize: (point: number[]) => {
+            const count = point[2] || 1
+            return Math.min(11 + Math.log(count) * 10, 50)
           },
-          extraCssText: `
+          label: {
+            show: true,
+            formatter: (params) => {
+              const count = Array.isArray(params.value) ? params.value[2] : 1
+              return count as string
+            },
+            color: theme.palette.primary.light,
+            fontWeight: 'bold',
+          },
+          itemStyle: {
+            color: theme.palette.primary.dark,
+            borderWidth: 1,
+            borderColor: theme.palette.primary.main,
+          },
+          tooltip: {
+            show: true,
+            padding: [18, 30],
+            textStyle: {
+              lineHeight: 14,
+            },
+            extraCssText: `
             max-width: 300px;
             white-space: normal;
             word-break: break-word;
           `,
-          formatter: (params) => {
-            const item = params.data as [number, number, number, Record<string, Record<string, Contributor>>]
-            let html = `<div style="margin:0; padding: 0"><ul style="padding:0; margin: 0">`
-            const orgs = Object.entries(item[3])
-            const expandedDisplay = orgs.length < 5
-            orgs.some((org, index) => {
-              //stop iteration after reaching 5th element of list and display number of remaining organization
-              if(index==4){
-                html += `<p>${t`map_collaborations_tooltip_remaining_orgs` + (orgs.length-index)}</p>`
-                return true
-              }
-              const name = org[0]
-              html += `<li>${name}`
-              if(expandedDisplay){
-                html += `<ul style="padding:0 0 0 20px; margin: 6px 0 0 0">`
-                const persons = Object.entries(org[1])
-                let noName = 0
-                let hasName = 0
-                persons.forEach((person, index) => {
-                  const personData = person[1]
-                  if (personData.firstName && personData.lastName) {
-                    if(hasName<5){
-                      html += `<li style="margin: 0 0 3px 0">${personData.firstName + ' ' + personData.lastName}</li>`
+            formatter: (params) => {
+              const item = params.data as [
+                number,
+                number,
+                number,
+                Record<string, Record<string, string>>,
+              ]
+              let html = `<div style="margin:0; padding: 0"><ul style="padding:0; margin: 0">`
+              const orgs = Object.entries(item[3])
+              const expandedDisplay = orgs.length < 5
+              orgs.some((org, index) => {
+                //stop iteration after reaching 5th element of list and display number of remaining organization
+                if (index == 4) {
+                  html += `<p>${t`map_collaborations_tooltip_remaining_orgs` + (orgs.length - index)}</p>`
+                  return true
+                }
+                const name = org[0]
+                html += `<li>${name}`
+                if (expandedDisplay) {
+                  html += `<ul style="padding:0 0 0 20px; margin: 6px 0 0 0">`
+                  const persons = Object.entries(org[1])
+                  let noName = 0
+                  let hasName = 0
+                  persons.forEach((person, index) => {
+                    const name = person[1]
+                    if (name) {
+                      if (hasName < 5) {
+                        html += `<li style="margin: 0 0 3px 0">${name}</li>`
+                      }
+                      hasName += 1
+                    } else {
+                      noName += 1
                     }
-                    hasName += 1
-                  } else {
-                    noName += 1
+                  })
+                  if (noName > 0) {
+                    html += `<li style="margin: 0 0 3px 0">${t`map_collaborations_tooltip_unknown_contributors` + noName}</li>`
                   }
-                })
-                if (noName > 0) {
-                  html += `<li style="margin: 0 0 3px 0">${t`map_collaborations_tooltip_unknown_contributors` + noName}</li>`
+                  if (hasName > 4) {
+                    const remainingPersons = persons.length - 4 - noName
+                    html += `<li style="margin: 0 0 3px 0">${t`map_collaborations_tooltip_other_contributors` + remainingPersons}</li>`
+                  }
+                  html += `</ul>`
                 }
-                if(hasName>4){
-                  const remainingPersons = persons.length - 4 - noName
-                  html += `<li style="margin: 0 0 3px 0">${t`map_collaborations_tooltip_other_contributors` + remainingPersons}</li>`
-                }
-                html += `</ul>`
-              }
-              html += `</li>`
-              if (index !== orgs.length - 1) html += `</br>`
-              return false
-            })
-            html += `</ul></div>`
-            return html
+                html += `</li>`
+                if (index !== orgs.length - 1) html += `</br>`
+                return false
+              })
+              html += `</ul></div>`
+              return html
+            },
           },
+          animation: false,
         },
-        animation: false,
-      },
-    ],
-    lazyUpdate: true,
-  }),[])
-
+      ],
+      lazyUpdate: true,
+    }),
+    [theme],
+  )
 
   return (
     <Box>

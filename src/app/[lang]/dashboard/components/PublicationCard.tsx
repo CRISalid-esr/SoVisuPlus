@@ -1,8 +1,4 @@
-import {
-  Box,
-  CircularProgress,
-  Typography,
-} from '@mui/material'
+import { Box, CircularProgress, Typography } from '@mui/material'
 import { t } from '@lingui/core/macro'
 import ReactEcharts from 'echarts-for-react'
 import { ComposeOption } from 'echarts/core'
@@ -38,18 +34,17 @@ type PublicationCardProps = {
       oaStatus: OAStatus | null
       publicationDate: string | null
       upwOAStatus: OAStatus | null
-      contributions : {
-        person : {
-          uid :string,
-          firstName : string | null,
-          lastName : string | null,
-        },
-        affiliations : {
-          uid :string,
-          displayNames : string[],
-          places : {
-            latitude : number,
-            longitude : number,
+      contributions: {
+        person: {
+          uid: string
+          displayName: string | null
+        }
+        affiliations: {
+          uid: string
+          displayNames: string[]
+          places: {
+            latitude: number
+            longitude: number
           }[]
         }[]
       }[]
@@ -57,8 +52,11 @@ type PublicationCardProps = {
   >
 }
 
-const PublicationCard = ({ yearRange, data = [], loading = false }: PublicationCardProps) => {
-
+const PublicationCard = ({
+  yearRange,
+  data = [],
+  loading = false,
+}: PublicationCardProps) => {
   const oldestYear = useMemo(() => {
     const years = Object.keys(data)
       .map(Number)

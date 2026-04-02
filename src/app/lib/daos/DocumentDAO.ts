@@ -294,8 +294,8 @@ export class DocumentDAO extends AbstractDAO {
                     identifiers: true,
                   },
                 },
-                person: true
-              }
+                person: true,
+              },
             },
             records: {
               include: {
@@ -393,15 +393,15 @@ export class DocumentDAO extends AbstractDAO {
         const { id: personId } = person
         const { id: documentId } = dbDocument
 
-        for(const affiliation of contribution.affiliations) {
+        for (const affiliation of contribution.affiliations) {
           let authorityOrganization: DbAuthorityOrganization
           try {
             authorityOrganization =
               await new AuthorityOrganizationDAO().createOrUpdateAuthorityOrganization(
                 affiliation,
               )
-            const {id: authorityId} = authorityOrganization
-            try{
+            const { id: authorityId } = authorityOrganization
+            try {
               await this.prismaClient.contribution.update({
                 where: {
                   personId_documentId: {
@@ -409,13 +409,13 @@ export class DocumentDAO extends AbstractDAO {
                     documentId,
                   },
                 },
-                data :{
+                data: {
                   affiliations: {
-                    connect: { id: authorityId},
-                  }
-                }
+                    connect: { id: authorityId },
+                  },
+                },
               })
-            }catch(error){
+            } catch (error) {
               console.error(
                 `Failed to upsert contribution affiliation for authority organization ID: ${authorityId} and contribution document ID: ${documentId} and person ID: ${personId}`,
                 error,
@@ -1039,18 +1039,17 @@ export class DocumentDAO extends AbstractDAO {
       oaStatus: OAStatus | null
       publicationDate: string | null
       upwOAStatus: OAStatus | null
-      contributions : {
-        person : {
-          uid :string,
-          firstName : string | null,
-          lastName : string | null,
-        },
-        affiliations : {
-          uid :string,
-          displayNames : string[],
-          places : {
-            latitude : number,
-            longitude : number,
+      contributions: {
+        person: {
+          uid: string
+          displayName: string | null
+        }
+        affiliations: {
+          uid: string
+          displayNames: string[]
+          places: {
+            latitude: number
+            longitude: number
           }[]
         }[]
       }[]
@@ -1067,23 +1066,22 @@ export class DocumentDAO extends AbstractDAO {
         publicationDate: true,
         upwOAStatus: true,
         contributions: {
-          select:{
+          select: {
             person: {
               select: {
-                uid:true,
-                firstName:true,
-                lastName:true
-              }
+                uid: true,
+                displayName: true,
+              },
             },
             affiliations: {
-              select:{
-                uid:true,
+              select: {
+                uid: true,
                 displayNames: true,
-                places: true
-              }
-            }
-          }
-        }
+                places: true,
+              },
+            },
+          },
+        },
       },
       where: {
         publicationDate: { not: null },
@@ -1106,7 +1104,7 @@ export class DocumentDAO extends AbstractDAO {
     })
 
     return {
-      documents: dbDocuments.map((doc)=> {
+      documents: dbDocuments.map((doc) => {
         return {
           ...doc,
           contributions: doc.contributions.map((contribution) => {
@@ -1115,11 +1113,14 @@ export class DocumentDAO extends AbstractDAO {
               affiliations: contribution.affiliations.map((affiliation) => {
                 return {
                   ...affiliation,
-                  places: (affiliation.places as {latitude:number, longitude:number}[])
+                  places: affiliation.places as {
+                    latitude: number
+                    longitude: number
+                  }[],
                 }
-              })
+              }),
             }
-          })
+          }),
         }
       }),
     }
