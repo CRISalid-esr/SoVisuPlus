@@ -393,6 +393,30 @@ export class DocumentDAO extends AbstractDAO {
         const { id: personId } = person
         const { id: documentId } = dbDocument
 
+        try {
+          await this.prismaClient.contribution.upsert({
+            where: {
+              personId_documentId: {
+                personId,
+                documentId,
+              },
+            },
+            update: {
+              roles: { set: contribution.getRoleLabels() },
+            },
+            create: {
+              personId,
+              documentId,
+              roles: { set: contribution.getRoleLabels() },
+            },
+          })
+        } catch (error) {
+          console.error(
+            `Failed to upsert contribution for person ID: ${personId} and document ID: ${documentId}`,
+            error,
+          )
+        }
+
         for (const affiliation of contribution.affiliations) {
           let authorityOrganization: DbAuthorityOrganization
           try {
@@ -427,30 +451,6 @@ export class DocumentDAO extends AbstractDAO {
               error,
             )
           }
-        }
-
-        try {
-          await this.prismaClient.contribution.upsert({
-            where: {
-              personId_documentId: {
-                personId,
-                documentId,
-              },
-            },
-            update: {
-              roles: { set: contribution.getRoleLabels() },
-            },
-            create: {
-              personId,
-              documentId,
-              roles: { set: contribution.getRoleLabels() },
-            },
-          })
-        } catch (error) {
-          console.error(
-            `Failed to upsert contribution for person ID: ${personId} and document ID: ${documentId}`,
-            error,
-          )
         }
       }
 

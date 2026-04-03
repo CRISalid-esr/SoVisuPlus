@@ -221,6 +221,26 @@ describe('DocumentService', () => {
           oaStatus: 'GREEN',
           publicationDate: '2022',
           upwOAStatus: 'DIAMOND',
+          contributions: [
+            {
+              person: {
+                uid: 'local-124',
+                displayName: 'John Doe',
+              },
+              affiliations: [
+                {
+                  uid: 'organization-1',
+                  displayNames: ['Some Organization'],
+                  places: [
+                    {
+                      latitude: 14,
+                      longitude: 53,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     }
@@ -233,6 +253,26 @@ describe('DocumentService', () => {
             oaStatus: 'GREEN',
             publicationDate: '2022',
             upwOAStatus: 'DIAMOND',
+            contributions: [
+              {
+                person: {
+                  uid: 'local-124',
+                  displayName: 'John Doe',
+                },
+                affiliations: [
+                  {
+                    uid: 'organization-1',
+                    displayNames: ['Some Organization'],
+                    places: [
+                      {
+                        latitude: 14,
+                        longitude: 53,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       },
@@ -251,7 +291,7 @@ describe('DocumentService', () => {
     expect(mockFetchOAYearDocuments).toHaveBeenCalledWith(contributorUids)
   })
 
-  it('should throw an error when fetchDocumentsFromDB fails', async () => {
+  it('should throw an error when documentsPerYear fails', async () => {
     mockFetchOAYearDocuments.mockRejectedValue(new Error('DB error'))
 
     const contributorUid = 'local-124'
