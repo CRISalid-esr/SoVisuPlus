@@ -1379,6 +1379,10 @@ msgstr "Thème clair"
 msgid "sidebar_theme_system"
 msgstr "Thème automatique"
 
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:766
+msgid "sidebar_help_button"
+msgstr "Assistance"
+
 #: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:9
 msgid "sources_page_article_icon_label"
 msgstr "Article"
