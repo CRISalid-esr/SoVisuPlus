@@ -1559,7 +1559,11 @@ msgstr "About"
 msgid "splash.community"
 msgstr "Community"
 
-#: src/app/[lang]/splash.tsx:123
+#: src/app/[lang]/splash.tsx:149
+msgid "splash.terms"
+msgstr "Terms"
+
+#: src/app/[lang]/splash.tsx:118
 msgid "splash.login"
 msgstr "Login"
 
