@@ -9,6 +9,7 @@ import SystemMode from '@/public/icons/system_mode.svg'
 import { User } from '@/types/User'
 import {
   Backdrop,
+  Button,
   Drawer,
   IconButton,
   List,
@@ -43,6 +44,8 @@ import { signOut } from 'next-auth/react'
 import { institutionalConfig } from '@/configs/index'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import LanguageSwitcher from '@/components/LanguageSwitcher/LanguageSwitcher'
+import { HelpOutline } from '@mui/icons-material'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
 
 interface SidebarProps {
   handleToggleDrawerAction: () => void
@@ -58,6 +61,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const router = useRouter()
   const searchParams = useSearchParams()
+  const helpUrl = getRuntimeEnv().NEXT_PUBLIC_HELP_URL
 
   const handleThemeChange = (event: SelectChangeEvent) => {
     setTheme(event.target.value as 'light' | 'dark' | 'system')
@@ -82,7 +86,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
               sx={{
                 color: theme.palette.primaryContainer,
               }}
-              ml={1}
+              ml={'14px'}
             >
               <Trans>sidebar_theme_light</Trans>
             </Typography>
@@ -105,7 +109,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
               sx={{
                 color: theme.palette.primaryContainer,
               }}
-              ml={1}
+              ml={'14px'}
             >
               <Trans>sidebar_theme_dark</Trans>
             </Typography>
@@ -172,9 +176,13 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
 
   const renderInstitutionalLogo = () => {
     if (currentTheme === ThemeMode.light) {
-      return institutionalConfig.logos.lightSideBarLogo
+      return open
+        ? institutionalConfig.logos.lightSideBarLogo
+        : institutionalConfig.logos.lightSideBarLogoMinimize
     }
-    return institutionalConfig.logos.darkSideBarLogo
+    return open
+      ? institutionalConfig.logos.darkSideBarLogo
+      : institutionalConfig.logos.darkSideBarLogoMinimize
   }
 
   return (
@@ -289,29 +297,30 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                   margin: '0 auto',
                 }}
               >
-                {
-                  <IconButton
-                    onClick={handleToggleDrawerAction}
-                    sx={{
-                      zIndex: 1201,
-                    }}
-                  >
-                    <Avatar
-                      src='/icons/showSidePanel.svg'
-                      alt='sidepanel'
-                      sx={{ width: 24, height: 24 }}
-                    />
-                  </IconButton>
-                }
                 <Image
                   src={renderInstitutionalLogo()}
                   alt='logo'
                   width={0}
                   height={0}
                   sizes='100vw'
-                  style={{ width: '100%', height: 'auto' }} // optional
+                  style={{
+                    width: theme.utils.pxToRem(46),
+                    height: theme.utils.pxToRem(46),
+                  }} // optional
                   priority
                 />
+                <IconButton
+                  onClick={handleToggleDrawerAction}
+                  sx={{
+                    zIndex: 1201,
+                  }}
+                >
+                  <Avatar
+                    src='/icons/showSidePanel.svg'
+                    alt='sidepanel'
+                    sx={{ width: 24, height: 24 }}
+                  />
+                </IconButton>
               </Box>
             )}
           </Box>
@@ -843,6 +852,52 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                     </ListItemIcon>
                   </ListItem>
                 )}
+              </Box>
+              <Box>
+                <ListItem
+                  sx={{
+                    paddingLeft: '14px',
+                    marginBottom: theme.utils.pxToRem(4),
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    color: theme.palette.primaryContainer,
+                    '&:hover': {
+                      backgroundColor: theme.palette.sidebarItemHover,
+                      borderRadius: theme.utils.pxToRem(8),
+                      color: theme.palette.primaryContainer,
+                    },
+                  }}
+                  component={Link}
+                  href={helpUrl}
+                  onClick={() => isMobile && handleToggleDrawerAction()}
+                >
+                  <ListItemIcon
+                    sx={{
+                      height: theme.utils.pxToRem(24),
+                      width: theme.utils.pxToRem(24),
+                      minWidth: 'unset',
+                      marginRight: open ? theme.utils.pxToRem(12) : 0,
+                      color: 'inherit',
+                    }}
+                  >
+                    <HelpOutline />
+                  </ListItemIcon>
+                  {open && (
+                    <ListItemText
+                      sx={{
+                        '& .MuiTypography-root': {
+                          fontFamily: 'Inter, Roboto, sans-serif',
+                          fontSize: theme.utils.pxToRem(16),
+                          fontWeight: theme.typography.fontWeightRegular,
+                          lineHeight:
+                            theme.typography.lineHeight.lineHeight24px,
+                        },
+                      }}
+                      primary={<Trans>sidebar_help_button</Trans>}
+                    />
+                  )}
+                </ListItem>
               </Box>
             </Box>
           </Box>
