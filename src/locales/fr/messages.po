@@ -14,11 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
-msgid "profile_affiliations_units_label"
-msgstr ""
-
-#. js-lingui-explicit-id
 #: src/app/lib/websocket/WebSocketListener.tsx:102
 msgid "snackbar_document_created"
 msgstr "Nouvelle publication : "
@@ -134,6 +129,11 @@ msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr ""
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:170
+msgid "documents_page_refresh_document_alert"
+msgstr "Les informations relatives à cette publication ont changé"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:196
 #: src/app/[lang]/documents/[uid]/page.test.tsx:244
 msgid "document_details_bibliographic_information_tab"
@@ -146,14 +146,30 @@ msgid "document_details_keywords_tab"
 msgstr ""
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:170
-msgid "documents_page_refresh_document_alert"
-msgstr "Les informations relatives à cette publication ont changé"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
 msgid "document_details_page_back_to_my_publications"
 msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:397
+msgid "document_details_page_source_tab_card_title"
+msgstr "Références bibliographiques sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:430
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:439
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "Actions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:456
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalider"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:474
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissocier"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:101
@@ -196,37 +212,6 @@ msgid "concept_chip_action_delete"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:397
-msgid "document_details_page_source_tab_card_title"
-msgstr "Références bibliographiques sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:430
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:439
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "Actions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:456
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalider"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:474
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissocier"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
-msgid "document_details_page_update_in_hal_tab_card_title"
-msgstr "Mettre à jour dans HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
-msgid "document_details_page_add_in_hal_tab_card_title"
-msgstr "Déposer dans HAL"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:249
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "En cours de chargement..."
@@ -260,6 +245,16 @@ msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Erreur lors du chargement des données"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
+msgid "document_details_page_update_in_hal_tab_card_title"
+msgstr "Mettre à jour dans HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
+msgid "document_details_page_add_in_hal_tab_card_title"
+msgstr "Déposer dans HAL"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
 msgid "document_details_page_domains_tab_card_title"
 msgstr "Domaines"
@@ -276,21 +271,21 @@ msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:128
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:58
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:120
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:101
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:163
 msgid "document_details_page_titles_row_label"
 msgstr "Titre"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:59
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:89
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:143
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:102
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:132
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:186
 msgid "document_details_page_no_title_available"
 msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:131
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:88
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:131
 msgid "document_details_page_type_row_label"
 msgstr ""
 
@@ -347,7 +342,7 @@ msgid "document_details_page_sources_row_label"
 msgstr "Sources"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:114
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:148
 msgid "document_details_page_authors_row_update_author"
 msgstr ""
 
@@ -408,6 +403,36 @@ msgid "orcid_button_provide_identifier"
 msgstr "Fournir mon identifiant ORCID"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:48
+msgid "orcid_permission_read_limited"
+msgstr "Lire vos informations avec une visibilitée fixée sur «Organisations de confiance»"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:49
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:49
+msgid "orcid_permission_activities_update"
+msgstr "Créer ou mettre à jour vos activités scientifiques (publications, etc.)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
+msgid "orcid_permission_person_update"
+msgstr "Mettre à jour vos informations biographiques (nom, affiliation, etc.)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:163
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:163
+msgid "orcid_permissions_intro"
+msgstr "Voici les autorisations que vous accordez à {institutionName} sur votre profil ORCID :"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:179
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:179
+msgid "orcid_permissions_none"
+msgstr "Vous n’accordez aucune autorisation à {institutionName}."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:68
 msgid "orcid_authentication_success"
 msgstr "La validation de votre ORCID a réussi"
@@ -453,36 +478,6 @@ msgid "orcid_control_helper"
 msgstr "ORCID est un identifiant unique, pérenne et gratuit pour les chercheurs. Il vous permet de gagner du temps lorsque vous vous connectez à des systèmes comme celui-ci. En liant votre ORCID à votre compte SoVisu+, vous identifiez de manière unique vos productions de recherche et améliorez la qualité des métadonnées. En savoir plus sur la façon dont ORCID vous aide à passer plus de temps à faire de la recherche et moins de temps à la gérer sur <0>orcid.org</0>."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:48
-msgid "orcid_permission_read_limited"
-msgstr "Lire vos informations avec une visibilitée fixée sur «Organisations de confiance»"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:49
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:49
-msgid "orcid_permission_activities_update"
-msgstr "Créer ou mettre à jour vos activités scientifiques (publications, etc.)"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
-msgid "orcid_permission_person_update"
-msgstr "Mettre à jour vos informations biographiques (nom, affiliation, etc.)"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:163
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:163
-msgid "orcid_permissions_intro"
-msgstr "Voici les autorisations que vous accordez à {institutionName} sur votre profil ORCID :"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:179
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:179
-msgid "orcid_permissions_none"
-msgstr "Vous n’accordez aucune autorisation à {institutionName}."
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:34
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
 msgid "hal_button_update_identifier"
@@ -495,10 +490,22 @@ msgid "hal_button_provide_identifier"
 msgstr "Fournir mon identifiant Hal"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:89
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:236
+msgid "hal_control_helper"
+msgstr "En liant votre compte Hal à votre compte Sovisu+, vous fiabilisez votre identifiant Hal et vous pourrez aisément déposer sur Hal les publications manquantes."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:168
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:77
 msgid "hal_authentication_success"
 msgstr "Authentification HAL réussie"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:183
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:97
+msgid "hal_authentication_failure_wrong_protocol"
+msgstr "Pour lier votre compte SoVisu+, n'utilisez pas l'option ORCID lors de l'authentification sur HAL"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:79
@@ -546,12 +553,6 @@ msgid "hal_identifier_insert_failure"
 msgstr "Échec de l'insertion de l'identifiant HAL en base de données"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:183
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:97
-msgid "hal_authentication_failure_wrong_protocol"
-msgstr "Pour lier votre compte SoVisu+, n'utilisez pas l'option ORCID lors de l'authentification sur HAL"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:99
 msgid "hal_authentication_failure_account_creation"
 msgstr "Veuillez vous rendre sur le site de HAL pour d'abord créer votre compte, puis revenez ici pour le lier à SoVisu+"
@@ -562,10 +563,9 @@ msgid "hal_account_linked_tooltip"
 msgstr "Votre compte SoVisu+ est lié à votre compte Hal"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:89
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:236
-msgid "hal_control_helper"
-msgstr "En liant votre compte Hal à votre compte Sovisu+, vous fiabilisez votre identifiant Hal et vous pourrez aisément déposer sur Hal les publications manquantes."
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
+msgid "profile_affiliations_units_label"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:117
@@ -761,7 +761,7 @@ msgstr "Domaines"
 msgid "document_details_keywords_tab"
 msgstr "Mots-clés"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Abstracts.tsx:38
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Abstracts.tsx:58
 msgid "document_details_page_abstracts_row_edit_button"
 msgstr "Modifier le résumé"
 
@@ -785,7 +785,7 @@ msgstr "Appliquer"
 msgid "document_details_page_authors_row_label"
 msgstr "Auteurs"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:91
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.tsx:111
 msgid "document_details_page_authors_row_update_author"
 msgstr "Modifier les auteurs"
 
@@ -853,7 +853,7 @@ msgstr "Sources"
 msgid "document_details_page_sources_row_update_source"
 msgstr "Comparer les sources"
 
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Titles.tsx:38
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Titles.tsx:58
 msgid "document_details_page_titles_row_edit_button"
 msgstr "Modifier le titre"
 
@@ -1551,15 +1551,11 @@ msgstr "Oeuvre"
 msgid "sources_page_working_paper_icon_label"
 msgstr "Manuscrit"
 
-#: src/app/[lang]/splash.tsx:146
+#: src/app/[lang]/splash.tsx:159
 msgid "splash.about"
 msgstr "À propos"
 
-#: src/app/[lang]/splash.tsx:152
-msgid "splash.accessibility"
-msgstr "Accessibilité"
-
-#: src/app/[lang]/splash.tsx:155
+#: src/app/[lang]/splash.tsx:181
 msgid "splash.community"
 msgstr "Communauté"
 
@@ -1570,6 +1566,10 @@ msgstr "Mentions légales"
 #: src/app/[lang]/splash.tsx:118
 msgid "splash.login"
 msgstr "Connectez-vous"
+
+#: src/app/[lang]/splash.tsx:170
+msgid "splash.terms"
+msgstr "Mentions légales"
 
 #: src/app/[lang]/components/WorkInProgress/WorkInProgress.tsx:100
 msgid "wip_component_coming_soon"
