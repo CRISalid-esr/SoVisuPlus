@@ -199,6 +199,64 @@ describe('PersonDAO Integration Tests', () => {
     )
   })
 
+  test('should delete an idref identifier without touching other identifiers on the same person', async () => {
+    const dbPerson = await prisma.person.create({
+      data: {
+        uid: 'local-deletetest',
+        email: 'deletetest@example.com',
+        firstName: 'Test',
+        lastName: 'Delete',
+        identifiers: {
+          createMany: {
+            data: [
+              { type: PersonIdentifierType.idref, value: '127220747' },
+              {
+                type: PersonIdentifierType.orcid,
+                value: '0000-0001-9999-9999',
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    await personDAO.deleteIdentifier(dbPerson.uid, PersonIdentifierType.idref)
+
+    const remaining = await prisma.personIdentifier.findMany({
+      where: { personId: dbPerson.id },
+    })
+
+    expect(remaining).toHaveLength(1)
+    expect(remaining[0].type).toBe(PersonIdentifierType.orcid)
+  })
+
+  test('deleteIdentifier is a no-op when the identifier does not exist', async () => {
+    const dbPerson = await prisma.person.create({
+      data: {
+        uid: 'local-nodelete',
+        email: 'nodelete@example.com',
+        firstName: 'No',
+        lastName: 'Delete',
+      },
+    })
+
+    // idref was never created — deleteMany returns count 0, no throw
+    await expect(
+      personDAO.deleteIdentifier(dbPerson.uid, PersonIdentifierType.idref),
+    ).resolves.toBeUndefined()
+
+    const remaining = await prisma.personIdentifier.findMany({
+      where: { personId: dbPerson.id },
+    })
+    expect(remaining).toHaveLength(0)
+  })
+
+  test('should throw when deleteIdentifier is called with an unknown person uid', async () => {
+    await expect(
+      personDAO.deleteIdentifier('nonexistent-uid', PersonIdentifierType.idref),
+    ).rejects.toThrow('Person with UID nonexistent-uid not found')
+  })
+
   test('should append -1 to the slug when a second person with the same name is added', async () => {
     const person1 = new Person(
       'local-johndoe-1',

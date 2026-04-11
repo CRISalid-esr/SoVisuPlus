@@ -27,3 +27,10 @@ roles:
     permissions:
       - action: fetch_documents
         subject: Person
+
+  - name: library_staff
+    description: Manage person identifiers on behalf of users
+    permissions:
+      - action: update
+        subject: Person
+        fields: [identifiers]

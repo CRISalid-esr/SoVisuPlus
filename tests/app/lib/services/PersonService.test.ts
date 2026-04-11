@@ -7,6 +7,8 @@ import {
 } from '@/utils/crypto/fieldEncryption'
 import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { ActionType, ActionTargetType } from '@/types/Action'
 
 describe('PersonService Integration Tests', () => {
   let personService: PersonService
@@ -16,6 +18,7 @@ describe('PersonService Integration Tests', () => {
   })
 
   afterEach(async () => {
+    await prisma.action.deleteMany()
     await prisma.person.deleteMany()
   })
 
@@ -216,6 +219,178 @@ describe('PersonService Integration Tests', () => {
     expect(ext!.tokenType).toBe('bearer')
     expect(ext!.scope).toBe('/read-limited')
     expect(ext!.obtainedAt.toISOString()).toBe('2026-01-02T00:00:00.000Z')
+  })
+
+  test('should add an idref identifier and write an ADD action', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-idref-1',
+        email: 'idrefuser@example.com',
+        firstName: 'Marie',
+        lastName: 'Dupont',
+        normalizedName: 'marie dupont',
+        external: false,
+      },
+    })
+
+    await personService.addOrUpdateIdentifier(
+      person.uid,
+      PersonIdentifierType.idref,
+      '127220747',
+    )
+
+    const identifier = await prisma.personIdentifier.findFirst({
+      where: { personId: person.id, type: PersonIdentifierType.idref },
+    })
+    expect(identifier).not.toBeNull()
+    expect(identifier!.value).toBe('127220747')
+
+    const action = await prisma.action.findFirst({
+      where: { targetUid: person.uid, path: 'identifiers' },
+    })
+    expect(action).not.toBeNull()
+    expect(action!.actionType).toBe(ActionType.ADD)
+    expect(action!.targetType).toBe(ActionTargetType.PERSON)
+  })
+
+  test('should update an existing idref identifier in place', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-idref-2',
+        email: 'idrefuser2@example.com',
+        firstName: 'Paul',
+        lastName: 'Martin',
+        normalizedName: 'paul martin',
+        external: false,
+      },
+    })
+
+    await personService.addOrUpdateIdentifier(
+      person.uid,
+      PersonIdentifierType.idref,
+      '111111111',
+    )
+    await personService.addOrUpdateIdentifier(
+      person.uid,
+      PersonIdentifierType.idref,
+      '127220747',
+    )
+
+    const identifiers = await prisma.personIdentifier.findMany({
+      where: { personId: person.id, type: PersonIdentifierType.idref },
+    })
+    expect(identifiers).toHaveLength(1)
+    expect(identifiers[0].value).toBe('127220747')
+  })
+
+  test('should remove an idref identifier and write a REMOVE action', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-idref-3',
+        email: 'idrefuser3@example.com',
+        firstName: 'Lucie',
+        lastName: 'Bernard',
+        normalizedName: 'lucie bernard',
+        external: false,
+        identifiers: {
+          create: { type: PersonIdentifierType.idref, value: '127220747' },
+        },
+      },
+    })
+
+    await personService.removeIdentifier(person.uid, PersonIdentifierType.idref)
+
+    const identifier = await prisma.personIdentifier.findFirst({
+      where: { personId: person.id, type: PersonIdentifierType.idref },
+    })
+    expect(identifier).toBeNull()
+
+    const action = await prisma.action.findFirst({
+      where: { targetUid: person.uid, path: 'identifiers' },
+    })
+    expect(action).not.toBeNull()
+    expect(action!.actionType).toBe(ActionType.REMOVE)
+    expect(action!.targetType).toBe(ActionTargetType.PERSON)
+  })
+
+  test('ADD action parameters contain the serialized identifier', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-idref-params-1',
+        email: 'params1@example.com',
+        firstName: 'Test',
+        lastName: 'Params',
+        normalizedName: 'test params',
+        external: false,
+      },
+    })
+
+    await personService.addOrUpdateIdentifier(
+      person.uid,
+      PersonIdentifierType.idref,
+      '127220747',
+    )
+
+    const action = await prisma.action.findFirst({
+      where: { targetUid: person.uid, actionType: ActionType.ADD },
+    })
+    expect(action).not.toBeNull()
+    const params = action!.parameters as {
+      identifier: { type: string; value: string }
+    }
+    expect(params.identifier).toMatchObject({
+      type: PersonIdentifierType.idref,
+      value: '127220747',
+    })
+  })
+
+  test('REMOVE action parameters contain the identifier type', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-idref-params-2',
+        email: 'params2@example.com',
+        firstName: 'Test',
+        lastName: 'Params',
+        normalizedName: 'test params',
+        external: false,
+        identifiers: {
+          create: { type: PersonIdentifierType.idref, value: '127220747' },
+        },
+      },
+    })
+
+    await personService.removeIdentifier(person.uid, PersonIdentifierType.idref)
+
+    const action = await prisma.action.findFirst({
+      where: { targetUid: person.uid, actionType: ActionType.REMOVE },
+    })
+    expect(action).not.toBeNull()
+    const params = action!.parameters as { type: string }
+    expect(params.type).toBe(PersonIdentifierType.idref)
+  })
+
+  test('removeIdentifier is a no-op when the identifier does not exist', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-idref-noop',
+        email: 'noop@example.com',
+        firstName: 'Test',
+        lastName: 'Noop',
+        normalizedName: 'test noop',
+        external: false,
+      },
+    })
+
+    // No idref was ever added — should not throw
+    await expect(
+      personService.removeIdentifier(person.uid, PersonIdentifierType.idref),
+    ).resolves.toBeUndefined()
+
+    // A REMOVE action is still written (service always records intent)
+    const action = await prisma.action.findFirst({
+      where: { targetUid: person.uid, actionType: ActionType.REMOVE },
+    })
+    expect(action).not.toBeNull()
   })
 
   test('should throw if ORCID oauth data is missing', async () => {

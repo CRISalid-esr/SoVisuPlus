@@ -94,6 +94,27 @@ export class PersonService {
     }
   }
 
+  async removeIdentifier(
+    personUid: string,
+    type: PersonIdentifierType,
+  ): Promise<void> {
+    try {
+      await this.personDAO.deleteIdentifier(personUid, type)
+      await this.actionDAO.createAction({
+        actionType: ActionType.REMOVE,
+        targetType: ActionTargetType.PERSON,
+        targetUid: personUid,
+        path: 'identifiers',
+        parameters: { type },
+        personUid,
+      })
+    } catch (error) {
+      const message = `Error removing identifier (type=${type}, personUid=${personUid})`
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
+
   async fetchPersonBySlug(slug: string): Promise<Person | null> {
     try {
       const person = await this.personDAO.fetchPersonBySlug(slug)
