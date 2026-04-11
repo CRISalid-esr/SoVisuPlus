@@ -97,8 +97,8 @@ class Person implements IAgent, Authorizable {
     })
   }
 
-  hasIdHAL(): boolean {
-    return this.identifiers.some((id) => id.type == PersonIdentifierType.idhals)
+  hasIdentifier(type: PersonIdentifierType): boolean {
+    return this.identifiers.some((id) => id.type === type)
   }
 
   private static computeDisplayName(

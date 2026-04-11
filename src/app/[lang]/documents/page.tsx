@@ -7,6 +7,11 @@ import {
   BibliographicPlatform,
   BibliographicPlatformMetadata,
 } from '@/types/BibliographicPlatform'
+import { isPerson } from '@/types/Person'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 import { Contribution } from '@/types/Contribution'
 import {
   Document,
@@ -129,6 +134,21 @@ const DocumentsPage = () => {
   const isAnyHarvestingRunning = Object.values(
     currentPerspectiveHarvesting || {},
   ).some((h) => h?.status === 'running')
+
+  const warnMissingIdentifierTypes = (
+    process.env.NEXT_PUBLIC_WARN_MISSING_IDENTIFIER_TYPES ?? ''
+  )
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean) as PersonIdentifierType[]
+
+  const missingIdentifiers =
+    ownPerspective && isPerson(currentPerspective)
+      ? warnMissingIdentifierTypes
+          .filter((type) => !currentPerspective.hasIdentifier(type))
+          .map((type) => PersonIdentifier.getLabelForType(type))
+          .join(` ${_({ id: 'common_and_or', message: 'and/or' })} `) || null
+      : null
 
   const theme = useTheme()
   const router = useRouter()
@@ -743,6 +763,23 @@ const DocumentsPage = () => {
           </Can>
         )}
       </DocumentHeader>
+      {missingIdentifiers && (
+        <Alert severity='warning' sx={{ mb: 2 }}>
+          <Trans id='documents_page_missing_identifiers_warning_prefix' />{' '}
+          <Link
+            component={NextLink}
+            href={`/${lang}/account`}
+            underline='always'
+            color='inherit'
+          >
+            <Trans id='documents_page_missing_identifiers_account_page' />
+          </Link>{' '}
+          <Trans
+            id='documents_page_missing_identifiers_warning_suffix'
+            values={{ identifiers: missingIdentifiers }}
+          />
+        </Alert>
+      )}
       <TabFilter
         tabsData={tabs}
         selectedValue={selectedTab}

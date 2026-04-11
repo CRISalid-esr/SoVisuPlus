@@ -99,6 +99,26 @@ msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr "La liste des publications de {name} a changé"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx
+msgid "documents_page_missing_identifiers_warning_prefix"
+msgstr "Vos listes de publications sont sans doute incomplètes. Veuillez vous rendre sur la page"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx
+msgid "documents_page_missing_identifiers_account_page"
+msgstr "Mon compte"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx
+msgid "documents_page_missing_identifiers_warning_suffix"
+msgstr "pour renseigner vos identifiants {identifiers}."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx
+msgid "common_and_or"
+msgstr "et/ou"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/components/HalStatusCell.test.tsx:154
 #: src/app/[lang]/documents/components/HalStatusCell.test.tsx:188
 #: src/app/[lang]/documents/components/HalStatusCell.test.tsx:227
