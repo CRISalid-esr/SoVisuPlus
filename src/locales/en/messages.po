@@ -1594,3 +1594,78 @@ msgstr "Coming soon !"
 #: src/app/[lang]/components/WordStream/WordStream.tsx:187
 msgid "wordstream_no_data_to_display"
 msgstr "No data to display"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx
+msgid "idref_control_not_available"
+msgstr "No IdRef identifier registered"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx
+msgid "idref_control_edit_button"
+msgstr "Edit"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx
+msgid "idref_control_input_label"
+msgstr "IdRef identifier"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx
+msgid "idref_control_invalid_format"
+msgstr "Invalid format. The IdRef identifier must be 8 digits followed by a digit or the letter X."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx
+msgid "idref_control_update_success"
+msgstr "The IdRef identifier has been updated."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx
+msgid "idref_control_update_failure"
+msgstr "An error occurred while updating the IdRef identifier."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx
+msgid "idref_control_remove_button"
+msgstr "Remove"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx
+msgid "idref_control_remove_success"
+msgstr "The IdRef identifier has been removed."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx
+msgid "idref_control_remove_failure"
+msgstr "An error occurred while removing the IdRef identifier."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx
+msgid "idref_control_remove_dialog_title"
+msgstr "Remove IdRef identifier?"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx
+msgid "idref_control_remove_dialog_text"
+msgstr "Are you sure you want to remove the IdRef identifier for this person? This action is reversible."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx
+msgid "idref_control_remove_dialog_confirm"
+msgstr "Remove"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx
+msgid "idref_info_box_title"
+msgstr "IdRef Information"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx
+msgid "idref_info_box_not_found"
+msgstr "Person not found in IdRef directory"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx
+msgid "idref_info_box_error"
+msgstr "Error loading IdRef information"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx
+msgid "idref_info_box_other_identifiers"
+msgstr "Other identifiers"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx
+msgid "idref_info_box_publications"
+msgstr "Recent publications"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx
+msgid "idref_control_verify_button"
+msgstr "Verify"
+
+msgid "idref_control_confirm_save"
+msgstr "Confirm"
