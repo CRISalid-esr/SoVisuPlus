@@ -17,8 +17,8 @@ export class PersonIdentifier {
     }
   }
 
-  getLabel(): string {
-    switch (this.type) {
+  static getLabelForType(type: DbPersonIdentifierType): string {
+    switch (type) {
       case DbPersonIdentifierType.orcid:
         return 'ORCID'
       case DbPersonIdentifierType.idref:
@@ -35,8 +35,12 @@ export class PersonIdentifier {
       case DbPersonIdentifierType.local:
         return 'Local'
       default:
-        return this.type
+        return type
     }
+  }
+
+  getLabel(): string {
+    return PersonIdentifier.getLabelForType(this.type)
   }
 
   getIcon(): string {

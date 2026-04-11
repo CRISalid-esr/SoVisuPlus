@@ -4,7 +4,14 @@ import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles'
 import '@testing-library/jest-dom'
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import { Document, DocumentState, DocumentType } from '@/types/Document'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
@@ -141,7 +148,7 @@ const mockState = {
     currentPerspective: {
       type: 'person',
       getDisplayName: () => 'John Doe',
-      hasIdHAL: () => true,
+      hasIdentifier: () => true,
       memberships: [],
       membershipAcronyms: ['ABC', 'DEF'],
     },
@@ -424,6 +431,98 @@ describe('DocumentsPage Component', () => {
         name: i18n.t('documents_page_merge_selected_documents_button'),
       })
       expect(mergeBtn).toBeEnabled()
+    })
+  })
+
+  describe('missing identifiers warning', () => {
+    const originalEnv = process.env
+
+    beforeEach(() => {
+      process.env = {
+        ...originalEnv,
+        NEXT_PUBLIC_WARN_MISSING_IDENTIFIER_TYPES: 'idhals,orcid',
+      }
+    })
+
+    afterEach(() => {
+      process.env = originalEnv
+    })
+
+    it('does not show a warning when all required identifiers are present', () => {
+      // default mockState: hasIdentifier: () => true for every type
+      renderComponent()
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    })
+
+    it('shows a warning when the HAL identifier is missing', () => {
+      ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+        selector({
+          ...mockState,
+          user: {
+            ...mockState.user,
+            currentPerspective: {
+              ...mockState.user.currentPerspective,
+              hasIdentifier: (type: string) => type !== 'idhals',
+            },
+          },
+        }),
+      )
+      renderComponent()
+      expect(screen.getByRole('alert')).toBeInTheDocument()
+    })
+
+    it('shows a warning when the ORCID identifier is missing', () => {
+      ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+        selector({
+          ...mockState,
+          user: {
+            ...mockState.user,
+            currentPerspective: {
+              ...mockState.user.currentPerspective,
+              hasIdentifier: (type: string) => type !== 'orcid',
+            },
+          },
+        }),
+      )
+      renderComponent()
+      expect(screen.getByRole('alert')).toBeInTheDocument()
+    })
+
+    it('shows a warning with a link to the account page when identifiers are missing', () => {
+      ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+        selector({
+          ...mockState,
+          user: {
+            ...mockState.user,
+            currentPerspective: {
+              ...mockState.user.currentPerspective,
+              hasIdentifier: () => false,
+            },
+          },
+        }),
+      )
+      renderComponent()
+      const alert = screen.getByRole('alert')
+      expect(alert).toBeInTheDocument()
+      expect(within(alert).getByRole('link')).toBeInTheDocument()
+    })
+
+    it("does not show a warning when viewing another person's perspective", () => {
+      ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+        selector({
+          ...mockState,
+          user: {
+            ...mockState.user,
+            currentPerspective: {
+              ...mockState.user.currentPerspective,
+              hasIdentifier: () => false,
+            },
+            ownPerspective: false,
+          },
+        }),
+      )
+      renderComponent()
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     })
   })
 
