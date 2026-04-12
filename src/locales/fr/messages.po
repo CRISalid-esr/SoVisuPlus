@@ -397,6 +397,18 @@ msgid "profile_affiliations_card_title"
 msgstr "Mes affiliations"
 
 #. js-lingui-explicit-id
+msgid "profile_affiliations_card_title_other"
+msgstr "Affiliations"
+
+#. js-lingui-explicit-id
+msgid "profile_identifiers_card_title"
+msgstr "Mes identifiants"
+
+#. js-lingui-explicit-id
+msgid "profile_identifiers_card_title_other"
+msgstr "Identifiants"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:59
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:215
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:215
@@ -1264,11 +1276,11 @@ msgstr ""
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdentifierPill.tsx:160
 msgid "identifier_pill_copied"
-msgstr ""
+msgstr "Copié"
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdentifierPill.tsx:160
 msgid "identifier_pill_copy"
-msgstr ""
+msgstr "Copier"
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdentifierPill.tsx:66
 msgid "identifier_pill_expand"
