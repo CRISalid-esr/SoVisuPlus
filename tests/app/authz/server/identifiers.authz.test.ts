@@ -14,8 +14,8 @@ import { PersonDAO } from '@/lib/daos/PersonDAO'
 const ROLES_SEED: RolesFileSeed = {
   roles: [
     {
-      name: 'library_staff',
-      description: 'Manage person identifiers on behalf of users',
+      name: 'account_editor',
+      description: 'Edit person identifiers (scope determines reach)',
       system: false,
       permissions: [
         { action: 'update', subject: 'Person', fields: ['identifiers'] },
@@ -44,12 +44,12 @@ describe('AuthZ (Person identifiers) – integration', () => {
     await prisma.$disconnect()
   })
 
-  test('global library_staff can update identifiers for any person', async () => {
+  test('global account_editor can update identifiers for any person', async () => {
     await createPersonWithUser('local-librarian')
     const { person: alice } = await createPersonWithUser('local-alice')
     const { person: bob } = await createPersonWithUser('local-bob')
 
-    await assignRoleToPersonUid('library_staff', 'local-librarian', null)
+    await assignRoleToPersonUid('account_editor', 'local-librarian', null)
 
     const { ability } = await abilityForPersonUid('local-librarian')
 
@@ -64,11 +64,11 @@ describe('AuthZ (Person identifiers) – integration', () => {
     ).toBe(true)
   })
 
-  test('person-scoped library_staff can update own person, not another', async () => {
+  test('person-scoped account_editor can update own person, not another', async () => {
     const { person: alice } = await createPersonWithUser('local-alice')
     const { person: bob } = await createPersonWithUser('local-bob')
 
-    await assignRoleToPersonUid('library_staff', 'local-alice', {
+    await assignRoleToPersonUid('account_editor', 'local-alice', {
       entityType: EntityType.Person,
       entityUid: 'local-alice',
     })
@@ -116,11 +116,11 @@ describe('AuthZ (Person identifiers) – integration', () => {
     ).toBe(true)
   })
 
-  test('person-scoped library_staff cannot update an out-of-scope person', async () => {
+  test('person-scoped account_editor cannot update an out-of-scope person', async () => {
     await createPersonWithUser('local-alice')
     const { person: charlie } = await createPersonWithUser('local-charlie')
 
-    await assignRoleToPersonUid('library_staff', 'local-alice', {
+    await assignRoleToPersonUid('account_editor', 'local-alice', {
       entityType: EntityType.Person,
       entityUid: 'local-alice',
     })

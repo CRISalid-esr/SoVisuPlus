@@ -10,7 +10,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Link,
   Paper,
   Snackbar,
   TextField,
@@ -22,24 +21,36 @@ import { useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
+import { isPerson } from '@/types/Person'
 import { Can } from '@casl/react'
 import EditIcon from '@mui/icons-material/Edit'
 import { Trans } from '@lingui/react/macro'
 import { t } from '@lingui/core/macro'
 import IdRefInfoBox from './IdRefInfoBox'
+import IdentifierPill from './IdentifierPill'
 
 const IDREF_REGEX = /^\d{8}[\dX]$/i
 
 const IdrefControl = () => {
-  const { connectedUser, updatePersonIdentifier, removePersonIdentifier } =
-    useStore((s) => s.user)
+  const {
+    connectedUser,
+    currentPerspective,
+    ownPerspective,
+    updatePersonIdentifier,
+    removePersonIdentifier,
+  } = useStore((s) => s.user)
   const { data: session } = useSession()
   const ability = useMemo(
     () => abilityFromAuthzContext(session?.user?.authz),
     [session?.user?.authz],
   )
 
-  const person = connectedUser?.person
+  // When viewing another person's account, use that person as the subject
+  const person =
+    ownPerspective || !currentPerspective || !isPerson(currentPerspective)
+      ? connectedUser?.person
+      : currentPerspective
+
   const idref = person
     ?.getIdentifiers()
     .find((i) => i.type === PersonIdentifierType.idref)
@@ -155,44 +166,49 @@ const IdrefControl = () => {
 
         {!edit ? (
           <>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+                flexWrap: 'wrap',
+              }}
+            >
               {idref && idrefUrl ? (
-                <Link
+                <IdentifierPill
+                  value={idref.value}
+                  iconLabel='iD'
+                  iconColor='#007A99'
                   href={idrefUrl}
-                  target='_blank'
-                  rel='noopener'
-                  underline='hover'
-                >
-                  {idref.value}
-                </Link>
+                />
               ) : (
                 <Typography variant='body2' color='text.secondary'>
                   <Trans>idref_control_not_available</Trans>
                 </Typography>
               )}
-              {person && (
-                <Can
-                  I={PermissionAction.update}
-                  a={person}
-                  field='identifiers'
-                  ability={ability}
-                  passThrough
-                >
-                  {(allowed: boolean) => (
-                    <Button
-                      disabled={!allowed}
-                      variant='outlined'
-                      startIcon={<EditIcon />}
-                      onClick={startEdit}
-                      sx={{ minWidth: 'fit-content' }}
-                    >
-                      <Trans>idref_control_edit_button</Trans>
-                    </Button>
-                  )}
-                </Can>
-              )}
             </Box>
             {idref && <IdRefInfoBox idrefId={idref.value} />}
+            {person && (
+              <Can
+                I={PermissionAction.update}
+                a={person}
+                field='identifiers'
+                ability={ability}
+                passThrough
+              >
+                {(allowed: boolean) => (
+                  <Button
+                    disabled={!allowed}
+                    variant='outlined'
+                    startIcon={<EditIcon />}
+                    onClick={startEdit}
+                    sx={{ minWidth: 'fit-content', alignSelf: 'flex-start' }}
+                  >
+                    <Trans>idref_control_edit_button</Trans>
+                  </Button>
+                )}
+              </Can>
+            )}
           </>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

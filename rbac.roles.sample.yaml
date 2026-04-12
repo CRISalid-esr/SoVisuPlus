@@ -28,8 +28,8 @@ roles:
       - action: fetch_documents
         subject: Person
 
-  - name: library_staff
-    description: Manage person identifiers on behalf of users
+  - name: account_editor
+    description: Edit own person identifiers (self-scoped by default)
     permissions:
       - action: update
         subject: Person
