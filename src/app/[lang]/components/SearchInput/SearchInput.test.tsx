@@ -20,6 +20,10 @@ jest.mock('@lingui/macro', () => {
 
 const pushMock = jest.fn()
 
+jest.mock('next-auth/react', () => ({
+  useSession: jest.fn(() => ({ data: null })),
+}))
+
 jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(() => new URLSearchParams()),
   usePathname: jest.fn(),

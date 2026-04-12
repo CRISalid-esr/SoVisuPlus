@@ -12,6 +12,7 @@ jest.mock('@/stores/global_store', () => ({
 
 const mockState = {
   user: {
+    ownPerspective: true,
     connectedUser: {
       id: '1',
       person: {
