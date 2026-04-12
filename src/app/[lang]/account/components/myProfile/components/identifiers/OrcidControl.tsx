@@ -1,5 +1,5 @@
 import useStore from '@/stores/global_store'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Alert,
@@ -18,6 +18,9 @@ import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import LinkIcon from '@mui/icons-material/Link'
 import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 import { isPerson } from '@/types/Person'
+import { useSession } from 'next-auth/react'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
 
 const OrcidControl = () => {
   const { connectedUser, currentPerspective, ownPerspective } = useStore(
@@ -25,6 +28,22 @@ const OrcidControl = () => {
   )
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { data: session } = useSession()
+  const ability = useMemo(
+    () => abilityFromAuthzContext(session?.user?.authz),
+    [session?.user?.authz],
+  )
+
+  // Auth controls (OrcidLoginButton) are shown only when the user is viewing their
+  // own account AND holds an identifier-update permission on their own person.
+  // Wide-scoped editors viewing other people's accounts always get the read-only view.
+  const canAuthenticate = useMemo(
+    () =>
+      ownPerspective &&
+      !!connectedUser?.person &&
+      ability.can(PermissionAction.update, connectedUser.person, 'identifiers'),
+    [ownPerspective, connectedUser?.person, ability],
+  )
   const [open, setOpen] = useState(false)
   const [severity, setSeverity] = useState<'success' | 'error'>('success')
   const [messageKey, setMessageKey] = useState<string | null>(null)
@@ -62,8 +81,8 @@ const OrcidControl = () => {
     }
   }, [searchParams, ownPerspective])
 
-  // Read-only view for non-own accounts: show identifier value, no auth controls
-  if (!ownPerspective) {
+  // Read-only view: no auth controls if not own perspective or no permission
+  if (!canAuthenticate) {
     return (
       <Paper
         elevation={1}

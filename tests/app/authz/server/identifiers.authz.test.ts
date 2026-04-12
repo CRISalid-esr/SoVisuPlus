@@ -116,6 +116,30 @@ describe('AuthZ (Person identifiers) – integration', () => {
     ).toBe(true)
   })
 
+  test('self-scoped account_editor cannot update own idref (hasWiderThanSelfPersonScope = false)', async () => {
+    const { person: alice } = await createPersonWithUser('local-alice')
+
+    await assignRoleToPersonUid('account_editor', 'local-alice', {
+      entityType: EntityType.Person,
+      entityUid: 'local-alice',
+    })
+
+    const { ability, ctx } = await abilityForPersonUid('local-alice')
+
+    const aliceDomain = await personDAO.fetchPersonByUid(alice.uid)
+
+    // CASL check alone passes (self-scoped rule matches own person)
+    expect(
+      ability.can(PermissionAction.update, aliceDomain!, 'identifiers'),
+    ).toBe(true)
+
+    // But hasWiderThanSelfPersonScope blocks IdRef editing
+    const { hasWiderThanSelfPersonScope } = await import('@/app/auth/ability')
+    expect(
+      hasWiderThanSelfPersonScope(ctx, 'update', 'Person', 'identifiers'),
+    ).toBe(false)
+  })
+
   test('person-scoped account_editor cannot update an out-of-scope person', async () => {
     await createPersonWithUser('local-alice')
     const { person: charlie } = await createPersonWithUser('local-charlie')

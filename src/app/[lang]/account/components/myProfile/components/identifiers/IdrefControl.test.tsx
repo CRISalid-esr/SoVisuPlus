@@ -48,6 +48,7 @@ i18n.activate('en')
 
 // ── Authz contexts ─────────────────────────────────────────────────────────────
 
+// Global (no scope) account_editor — can edit IdRef
 const authzWithPermission = makeAuthzContext({
   roleAssignments: [
     makeAssignment('account_editor', [
@@ -57,6 +58,24 @@ const authzWithPermission = makeAuthzContext({
         fields: ['identifiers'],
       },
     ]),
+  ],
+})
+
+// Self-scoped account_editor — may NOT edit IdRef
+const authzSelfScoped = makeAuthzContext({
+  personUid: 'person-test-uid',
+  roleAssignments: [
+    makeAssignment(
+      'account_editor',
+      [
+        {
+          action: PermissionAction.update,
+          subject: PermissionSubject.Person,
+          fields: ['identifiers'],
+        },
+      ],
+      [{ entityType: 'Person', entityUid: 'person-test-uid' }],
+    ),
   ],
 })
 
@@ -192,9 +211,19 @@ describe('IdrefControl', () => {
       expect(screen.getByRole('button', { name: /edit/i })).toBeDisabled()
     })
 
-    it('enables the Edit button when the user has permission', () => {
+    it('disables the Edit button when the user is only self-scoped', () => {
       setupStore()
-      setupSession(true)
+      ;(useSession as jest.Mock).mockReturnValue({
+        data: { user: { authz: authzSelfScoped } },
+      })
+      renderComponent()
+
+      expect(screen.getByRole('button', { name: /edit/i })).toBeDisabled()
+    })
+
+    it('enables the Edit button when the user has a wide-scoped permission', () => {
+      setupStore()
+      setupSession(true) // global account_editor → wider than self
       renderComponent()
 
       expect(screen.getByRole('button', { name: /edit/i })).toBeEnabled()

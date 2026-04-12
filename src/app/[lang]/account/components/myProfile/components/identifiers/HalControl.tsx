@@ -10,6 +10,9 @@ import LinkIcon from '@mui/icons-material/Link'
 import { PersonIdentifierType } from '@prisma/client'
 import { isPerson } from '@/types/Person'
 import IdentifierPill from './IdentifierPill'
+import { useSession } from 'next-auth/react'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
 
 const HalControl = () => {
   const { connectedUser, currentPerspective, ownPerspective } = useStore(
@@ -17,6 +20,21 @@ const HalControl = () => {
   )
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { data: session } = useSession()
+  const ability = useMemo(
+    () => abilityFromAuthzContext(session?.user?.authz),
+    [session?.user?.authz],
+  )
+
+  // Auth controls (HalLoginButton) are shown only when the user is viewing their
+  // own account AND holds an identifier-update permission on their own person.
+  const canAuthenticate = useMemo(
+    () =>
+      ownPerspective &&
+      !!connectedUser?.person &&
+      ability.can(PermissionAction.update, connectedUser.person, 'identifiers'),
+    [ownPerspective, connectedUser?.person, ability],
+  )
   const [open, setOpen] = useState(false)
   const [severity, setSeverity] = useState<'success' | 'error'>('success')
   const [messageKey, setMessageKey] = useState<string | null>(null)
@@ -71,8 +89,8 @@ const HalControl = () => {
     }
   }, [searchParams, ownPerspective])
 
-  // Read-only view for non-own accounts: show identifier value, no auth controls
-  if (!ownPerspective) {
+  // Read-only view: no auth controls if not own perspective or no permission
+  if (!canAuthenticate) {
     return (
       <Paper
         elevation={1}

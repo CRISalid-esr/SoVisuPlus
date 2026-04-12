@@ -44,27 +44,49 @@ jest.mock('next/server', () => ({
 }))
 
 jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(() => ({
-    user: {
-      id: 'user-id',
-      username: 'testuser',
-    },
-  })),
+  getServerSession: jest.fn(),
 }))
+
+import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
+import { PermissionAction, PermissionSubject } from '@/types/Permission'
+
+const authzWithPermission = makeAuthzContext({
+  roleAssignments: [
+    makeAssignment('account_editor', [
+      {
+        action: PermissionAction.update,
+        subject: PermissionSubject.Person,
+        fields: ['identifiers'],
+      },
+    ]),
+  ],
+})
+
+const mockSession = {
+  user: { id: 'user-id', username: 'testuser', authz: authzWithPermission },
+}
+
+const mockPerson = (uid: string) => ({
+  uid,
+  authzProperties: {
+    __type: 'Person',
+    perimeter: { Person: [uid], ResearchUnit: [] },
+  },
+})
 
 global.fetch = jest.fn()
 
 describe('GET /api/cas/[action] stores HAL identifiers', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    const { getServerSession } = jest.requireMock('next-auth') as {
+      getServerSession: jest.Mock
+    }
+    getServerSession.mockResolvedValue(mockSession)
   })
 
   it('should use lang param in redirect URL, validate ticket, resolve idHal by uid, and store HAL_LOGIN + ID_HAL_S', async () => {
-    const user = {
-      person: {
-        uid: 'person-uid',
-      },
-    }
+    const user = { person: mockPerson('person-uid') }
 
     mockGetUserByPersonIdentifier.mockResolvedValue(user)
     ;(fetch as jest.Mock).mockResolvedValue({
@@ -150,7 +172,7 @@ describe('GET /api/cas/[action] stores HAL identifiers', () => {
 
   it('should redirect with missing-data error if uid is missing', async () => {
     mockGetUserByPersonIdentifier.mockResolvedValue({
-      person: { uid: 'person-uid' },
+      person: mockPerson('person-uid'),
     })
     ;(fetch as jest.Mock).mockResolvedValue({
       ok: true,
