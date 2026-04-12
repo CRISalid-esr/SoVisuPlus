@@ -101,6 +101,7 @@ describe('WebSocketListener', () => {
         fetchConnectedUser: jest.fn(),
         setPerspective: jest.fn(),
         setPerspectiveBySlug: jest.fn(),
+        refreshPerspective: jest.fn(),
         updatePersonIdentifier: jest.fn(),
         removePersonIdentifier: jest.fn(),
       },

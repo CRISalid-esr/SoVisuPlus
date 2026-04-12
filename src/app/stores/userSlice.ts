@@ -12,6 +12,7 @@ export interface UserSlice {
     loading: boolean
     error: string | null | unknown
     fetchConnectedUser: () => Promise<void>
+    refreshPerspective: () => Promise<void>
     setPerspective: (perspective: IAgent) => void
     setPerspectiveBySlug: (uid: string) => void
     updatePersonIdentifier: (
@@ -61,6 +62,28 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
         set((state) => ({ user: { ...state.user, loading: false } }))
       }
     },
+    refreshPerspective: async () => {
+      const { ownPerspective, currentPerspective, fetchConnectedUser } =
+        get().user
+      if (ownPerspective) {
+        await fetchConnectedUser()
+        return
+      }
+      if (!currentPerspective?.slug) return
+      try {
+        const response = await fetch(
+          `/api/person/slug/${currentPerspective.slug}`,
+        )
+        if (!response.ok) return
+        const json = await response.json()
+        const entity = Person.fromJson(json)
+        set((state) => ({
+          user: { ...state.user, currentPerspective: entity },
+        }))
+      } catch (error) {
+        console.error('Failed to refresh perspective', error)
+      }
+    },
     setPerspective: (perspective: IAgent) => {
       set((state) => ({
         user: {
@@ -86,7 +109,7 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
           },
         )
         if (!response.ok) return { success: false }
-        await get().user.fetchConnectedUser()
+        await get().user.refreshPerspective()
         return { success: true }
       } catch (error) {
         console.error('Failed to update identifier', error)
@@ -100,7 +123,7 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
           { method: 'DELETE' },
         )
         if (!response.ok) return { success: false }
-        await get().user.fetchConnectedUser()
+        await get().user.refreshPerspective()
         return { success: true }
       } catch (error) {
         console.error('Failed to remove identifier', error)

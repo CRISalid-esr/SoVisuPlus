@@ -5,9 +5,11 @@ import { Trans } from '@lingui/react'
 import { CustomCard } from '@/components/Card'
 import SignatureControl from '@/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl'
 import UnitsControl from '@/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl'
+import useStore from '@/stores/global_store'
 
 const Affiliations = () => {
   const theme = useTheme()
+  const { ownPerspective } = useStore((state) => state.user)
 
   return (
     <CustomCard
@@ -28,7 +30,13 @@ const Affiliations = () => {
               lineHeight: 'normal',
             }}
           >
-            <Trans id='profile_affiliations_card_title' />
+            <Trans
+              id={
+                ownPerspective
+                  ? 'profile_affiliations_card_title'
+                  : 'profile_affiliations_card_title_other'
+              }
+            />
           </Typography>
         </Box>
       }

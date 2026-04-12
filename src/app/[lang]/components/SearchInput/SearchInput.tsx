@@ -22,6 +22,9 @@ import { ResearchUnit } from '@/types/ResearchUnit'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
 import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn'
+import { useSession } from 'next-auth/react'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
 
 interface IAutoCompleteGroupTag {
   label: string
@@ -40,6 +43,41 @@ const SearchInput: React.FC = () => {
   const [peoplePage, setPeoplePage] = useState(1)
   const [researchUnitsPage, setResearchUnitsPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const theme = useTheme()
+  const { data: session } = useSession()
+
+  const isAccountPage = Boolean(pathname.match(/^\/[a-z]{2}\/account/))
+
+  const ability = useMemo(
+    () => abilityFromAuthzContext(session?.user?.authz),
+    [session?.user?.authz],
+  )
+
+  // A synthetic Person with an empty perimeter: self-scoped rules won't match it,
+  // but global/wide-scope account_editor rules will. This detects "wider than self" scope.
+  const canManageOtherPeopleIdentifiers = useMemo(() => {
+    const foreignPerson = {
+      authzProperties: {
+        __type: 'Person',
+        perimeter: { Person: [], ResearchUnit: [] },
+      },
+    }
+    return ability.can(
+      PermissionAction.update,
+      foreignPerson as unknown as Person,
+      'identifiers',
+    )
+  }, [ability])
+
+  const searchInputIsDisabled: boolean = useMemo<boolean>(() => {
+    if (isAccountPage) return !canManageOtherPeopleIdentifiers
+    return !pathname.match(/^\/[a-z]{2}\/(documents|dashboard|expertise)/)
+  }, [pathname, isAccountPage, canManageOtherPeopleIdentifiers])
+
+  // On the account page, only search for people (not research units)
   const [searchTags, setSearchTags] = useState<IAutoCompleteGroupTag[]>([
     { label: t`sidebar_search_people`, value: 'people', selected: true },
     {
@@ -48,14 +86,23 @@ const SearchInput: React.FC = () => {
       selected: true,
     },
   ])
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const theme = useTheme()
 
-  const searchInputIsDisabled: boolean = useMemo<boolean>(() => {
-    return !pathname.match(/^\/[a-z]{2}\/(documents|dashboard|expertise)/)
-  }, [pathname])
+  useEffect(() => {
+    if (isAccountPage) {
+      setSearchTags([
+        { label: t`sidebar_search_people`, value: 'people', selected: true },
+      ])
+    } else {
+      setSearchTags([
+        { label: t`sidebar_search_people`, value: 'people', selected: true },
+        {
+          label: t`sidebar_search_research_units`,
+          value: 'researchUnits',
+          selected: true,
+        },
+      ])
+    }
+  }, [isAccountPage])
 
   const {
     fetchPeopleByName,

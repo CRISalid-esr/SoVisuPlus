@@ -50,7 +50,7 @@ i18n.activate('en')
 
 const authzWithPermission = makeAuthzContext({
   roleAssignments: [
-    makeAssignment('library_staff', [
+    makeAssignment('account_editor', [
       {
         action: PermissionAction.update,
         subject: PermissionSubject.Person,
@@ -82,10 +82,13 @@ const mockUpdatePersonIdentifier = jest.fn()
 const mockRemovePersonIdentifier = jest.fn()
 
 const setupStore = (idrefValue?: string) => {
+  const person = mockPerson(idrefValue)
   ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
     selector({
       user: {
-        connectedUser: { person: mockPerson(idrefValue) },
+        connectedUser: { person },
+        currentPerspective: person,
+        ownPerspective: true,
         updatePersonIdentifier: mockUpdatePersonIdentifier,
         removePersonIdentifier: mockRemovePersonIdentifier,
       },
@@ -162,7 +165,7 @@ describe('IdrefControl', () => {
       expect(link).toHaveAttribute('href', 'https://www.idref.fr/127220747')
     })
 
-    it('renders IdRefInfoBox (collapsed) when an idref is set', () => {
+    it('renders IdRefInfoBox immediately when an idref is set', () => {
       setupStore('127220747')
       setupSession(true)
       renderComponent()

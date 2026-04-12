@@ -8,10 +8,24 @@ import { Trans } from '@lingui/react'
 import { HalLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton'
 import LinkIcon from '@mui/icons-material/Link'
 import { PersonIdentifierType } from '@prisma/client'
+import { isPerson } from '@/types/Person'
+import IdentifierPill from './IdentifierPill'
 
 const HalControl = () => {
-  const { connectedUser } = useStore((state) => state.user)
-  const person = connectedUser?.person
+  const { connectedUser, currentPerspective, ownPerspective } = useStore(
+    (state) => state.user,
+  )
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [severity, setSeverity] = useState<'success' | 'error'>('success')
+  const [messageKey, setMessageKey] = useState<string | null>(null)
+
+  // When viewing another person's account, read their identifiers from currentPerspective
+  const person =
+    ownPerspective || !currentPerspective || !isPerson(currentPerspective)
+      ? connectedUser?.person
+      : currentPerspective
   const identifiers = person?.getIdentifiers() ?? []
 
   const { halValue, halKind, halLogin } = useMemo(() => {
@@ -38,14 +52,8 @@ const HalControl = () => {
   const hasHalLogin = Boolean(halLogin)
   const isLinked = hasHalIdentifier && hasHalLogin
 
-  const searchParams = useSearchParams()
-  const router = useRouter()
-
-  const [open, setOpen] = useState(false)
-  const [severity, setSeverity] = useState<'success' | 'error'>('success')
-  const [messageKey, setMessageKey] = useState<string | null>(null)
-
   useEffect(() => {
+    if (!ownPerspective) return
     const success = searchParams.get('success')
     const error = searchParams.get('error')
 
@@ -61,7 +69,40 @@ const HalControl = () => {
       setMessageKey(error)
       setOpen(true)
     }
-  }, [searchParams])
+  }, [searchParams, ownPerspective])
+
+  // Read-only view for non-own accounts: show identifier value, no auth controls
+  if (!ownPerspective) {
+    return (
+      <Paper
+        elevation={1}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1.5,
+          p: 2,
+          width: '100%',
+          borderRadius: 2,
+        }}
+      >
+        <Typography variant='subtitle1' fontWeight='bold'>
+          HAL
+        </Typography>
+        {hasHalIdentifier && halValue ? (
+          <IdentifierPill
+            value={halValue}
+            iconLabel='HAL'
+            iconColor='#4A90D9'
+            subLabel={halKind ?? undefined}
+          />
+        ) : (
+          <Typography variant='body2' color='text.secondary'>
+            <Trans id='hal_control_not_available' />
+          </Typography>
+        )}
+      </Paper>
+    )
+  }
 
   const handleClose = () => {
     setOpen(false)
@@ -109,119 +150,49 @@ const HalControl = () => {
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 1,
+          gap: 1.5,
           p: 2,
           width: '100%',
           borderRadius: 2,
-          paddingX: 1,
         }}
       >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant='subtitle1' fontWeight='bold'>
+            HAL
+          </Typography>
+          {isLinked && (
+            <Tooltip title={<Trans id='hal_account_linked_tooltip' />} arrow>
+              <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                <LinkIcon fontSize='small' />
+              </Box>
+            </Tooltip>
+          )}
+        </Box>
+
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
             gap: 1.5,
-            width: '100%',
             flexWrap: 'wrap',
-            rowGap: 1,
-            minWidth: 0,
           }}
         >
-          <Box
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 1,
-              px: 1.25,
-              py: 0.5,
-              borderColor: 'divider',
-              maxWidth: '100%',
-              minWidth: 0,
-            }}
-          >
-            <Typography variant='subtitle1' fontWeight='bold'>
-              HAL
-            </Typography>
-
-            {isLinked && (
-              <Tooltip title={<Trans id='hal_account_linked_tooltip' />} arrow>
-                <Box sx={{ display: 'inline-flex', alignItems: 'center' }}>
-                  <LinkIcon fontSize='small' />
-                </Box>
-              </Tooltip>
-            )}
-          </Box>
-
-          {hasHalIdentifier && (
-            <Box
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 1,
-                px: 1.25,
-                py: 0.5,
-                borderRadius: 2,
-                border: '1px solid',
-                borderColor: 'divider',
-                backgroundColor: 'action.hover',
-                maxWidth: '100%',
-                minWidth: 0,
-              }}
-            >
-              {halKind && (
-                <Typography
-                  variant='caption'
-                  color='text.secondary'
-                  sx={{ lineHeight: 1 }}
-                >
-                  {halKind}
-                </Typography>
-              )}
-
-              <Typography
-                variant='body2'
-                sx={{
-                  fontFamily:
-                    'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-                }}
-              >
-                {halValue}
-              </Typography>
-            </Box>
+          {hasHalIdentifier && halValue && (
+            <IdentifierPill
+              value={halValue}
+              iconLabel='HAL'
+              iconColor='#4A90D9'
+              subLabel={halKind ?? undefined}
+            />
           )}
 
-          {isLinked && (
-            <Box
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 1,
-                px: 1.25,
-                py: 0.5,
-                borderRadius: 2,
-                border: '1px solid',
-                borderColor: 'divider',
-                backgroundColor: 'action.hover',
-              }}
-            >
-              <Typography
-                variant='caption'
-                color='text.secondary'
-                sx={{ lineHeight: 1 }}
-              >
-                hal_login
-              </Typography>
-
-              <Typography
-                variant='body2'
-                sx={{
-                  fontFamily:
-                    'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-                }}
-              >
-                {halLogin}
-              </Typography>
-            </Box>
+          {isLinked && halLogin && (
+            <IdentifierPill
+              value={halLogin}
+              iconLabel='HAL'
+              iconColor='#4A90D9'
+              subLabel='hal_login'
+            />
           )}
 
           {/* Button rules:

@@ -397,10 +397,18 @@ msgid "profile_identifiers_card_title"
 msgstr "Mes identifiants chercheurs"
 
 #. js-lingui-explicit-id
+msgid "profile_identifiers_card_title_other"
+msgstr "Identifiants chercheurs"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:101
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:31
 msgid "profile_affiliations_card_title"
 msgstr "Mes affiliations"
+
+#. js-lingui-explicit-id
+msgid "profile_affiliations_card_title_other"
+msgstr "Affiliations"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:59
@@ -576,6 +584,26 @@ msgstr "Votre compte SoVisu+ est lié à votre compte Hal"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:236
 msgid "hal_control_helper"
 msgstr "En liant votre compte Hal à votre compte Sovisu+, vous fiabilisez votre identifiant Hal et vous pourrez aisément déposer sur Hal les publications manquantes."
+
+#. js-lingui-explicit-id
+msgid "hal_control_not_available"
+msgstr "Aucun identifiant HAL renseigné"
+
+#. js-lingui-explicit-id
+msgid "identifier_pill_copy"
+msgstr "Copier"
+
+#. js-lingui-explicit-id
+msgid "identifier_pill_copied"
+msgstr "Copié !"
+
+#. js-lingui-explicit-id
+msgid "identifier_pill_expand"
+msgstr "Voir les détails"
+
+#. js-lingui-explicit-id
+msgid "identifier_pill_collapse"
+msgstr "Masquer les détails"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
@@ -1342,6 +1370,10 @@ msgstr "Français"
 #: src/app/[lang]/account/page.tsx:21
 msgid "my_account_page_my_profile_tab"
 msgstr "Mon profil"
+
+#. js-lingui-explicit-id
+msgid "account_page_profile_tab"
+msgstr "Profil"
 
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:16
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:141
