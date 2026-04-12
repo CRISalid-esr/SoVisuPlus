@@ -28,20 +28,46 @@ jest.mock('next/server', () => ({
   },
 }))
 
+import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
+import { PermissionAction, PermissionSubject } from '@/types/Permission'
+
+const authzWithPermission = makeAuthzContext({
+  roleAssignments: [
+    makeAssignment('account_editor', [
+      {
+        action: PermissionAction.update,
+        subject: PermissionSubject.Person,
+        fields: ['identifiers'],
+      },
+    ]),
+  ],
+})
+
 jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(() => ({
-    user: {
-      id: 'user-id',
-      username: 'testuser',
-    },
-  })),
+  getServerSession: jest.fn(),
 }))
 
 global.fetch = jest.fn()
 
 describe('GET /api/orcid/callback', () => {
+  const mockSession = {
+    user: { id: 'user-id', username: 'testuser', authz: authzWithPermission },
+  }
+
+  const mockPerson = (uid: string) => ({
+    uid,
+    authzProperties: {
+      __type: 'Person',
+      perimeter: { Person: [uid], ResearchUnit: [] },
+    },
+  })
+
   beforeEach(() => {
     jest.clearAllMocks()
+    const { getServerSession } = jest.requireMock('next-auth') as {
+      getServerSession: jest.Mock
+    }
+    getServerSession.mockResolvedValue(mockSession)
 
     process.env.NEXT_PUBLIC_BASE_URL = 'https://sovisuplus.example.com'
     process.env.NEXT_PUBLIC_SUPPORTED_LOCALES = 'fr,en'
@@ -54,11 +80,7 @@ describe('GET /api/orcid/callback', () => {
     ({ nextUrl: new URL(url) }) as unknown as NextRequest
 
   it('should call ORCID token endpoint and link ORCID on success', async () => {
-    const user = {
-      person: {
-        uid: 'person-uid',
-      },
-    }
+    const user = { person: mockPerson('person-uid') }
 
     const tokenResponse = {
       access_token: 'access-token-xyz',
@@ -190,7 +212,7 @@ describe('GET /api/orcid/callback', () => {
 
   it('should redirect with error when token request fails (response.ok=false)', async () => {
     mockGetUserByPersonIdentifier.mockResolvedValueOnce({
-      person: { uid: 'person-uid' },
+      person: mockPerson('person-uid'),
     })
     ;(fetch as jest.Mock).mockResolvedValueOnce({
       ok: false,
@@ -212,7 +234,7 @@ describe('GET /api/orcid/callback', () => {
 
   it('should redirect with error when token response is missing required fields', async () => {
     mockGetUserByPersonIdentifier.mockResolvedValueOnce({
-      person: { uid: 'person-uid' },
+      person: mockPerson('person-uid'),
     })
 
     // Missing refresh_token, expires_in, scope => should hit missing_data
@@ -242,7 +264,7 @@ describe('GET /api/orcid/callback', () => {
 
   it('should redirect with error when PersonService fails to persist identifier', async () => {
     mockGetUserByPersonIdentifier.mockResolvedValueOnce({
-      person: { uid: 'person-uid' },
+      person: mockPerson('person-uid'),
     })
 
     const tokenResponse = {

@@ -17,6 +17,15 @@ jest.mock('@/stores/global_store', () => ({
   default: jest.fn(),
 }))
 
+jest.mock('next-auth/react', () => ({
+  __esModule: true,
+  useSession: jest.fn(),
+}))
+
+import { useSession } from 'next-auth/react'
+import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
+import { PermissionAction, PermissionSubject } from '@/types/Permission'
+
 type NextRouterMock = {
   replace: jest.Mock<void, [string, { scroll: boolean }]>
 }
@@ -75,6 +84,26 @@ const renderWithProviders = () =>
       <OrcidControl />
     </I18nProvider>,
   )
+
+// ── Authz helpers ─────────────────────────────────────────────────────────────
+
+const authzWithPermission = makeAuthzContext({
+  roleAssignments: [
+    makeAssignment('account_editor', [
+      {
+        action: PermissionAction.update,
+        subject: PermissionSubject.Person,
+        fields: ['identifiers'],
+      },
+    ]),
+  ],
+})
+
+const setupSession = (withPermission: boolean) => {
+  ;(useSession as jest.Mock).mockReturnValue({
+    data: withPermission ? { user: { authz: authzWithPermission } } : null,
+  })
+}
 
 // ── Store helpers ──────────────────────────────────────────────────────────────
 
@@ -140,6 +169,7 @@ describe('OrcidControl', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseSearchParams.mockReturnValue(new URLSearchParams())
+    setupSession(true) // default: account_editor permission present
   })
 
   // ── Own perspective (full view) ─────────────────────────────────────────────
@@ -175,7 +205,7 @@ describe('OrcidControl', () => {
       mockUseSearchParams.mockReturnValue(
         new URLSearchParams('success=orcid_authentication_success'),
       )
-      setupStore(null)
+      setupStore(makePersonWithoutOrcid())
       renderWithProviders()
 
       expect(
@@ -187,12 +217,21 @@ describe('OrcidControl', () => {
       mockUseSearchParams.mockReturnValue(
         new URLSearchParams('success=hal_authentication_success'),
       )
-      setupStore(null)
+      setupStore(makePersonWithoutOrcid())
       renderWithProviders()
 
       expect(
         screen.queryByText('ORCID authentication success'),
       ).not.toBeInTheDocument()
+    })
+
+    it('shows read-only view when own perspective but no account_editor permission', () => {
+      setupSession(false)
+      setupStore(makePersonWithOrcid(linkedOrcid))
+      renderWithProviders()
+
+      expect(screen.queryByTestId('OrcidLoginButton')).not.toBeInTheDocument()
+      expect(mockOrcidLoginButton).not.toHaveBeenCalled()
     })
   })
 

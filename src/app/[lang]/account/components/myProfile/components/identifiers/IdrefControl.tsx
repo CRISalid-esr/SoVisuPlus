@@ -19,10 +19,13 @@ import useStore from '@/stores/global_store'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { abilityFromAuthzContext } from '@/app/auth/ability'
+import {
+  abilityFromAuthzContext,
+  hasWiderThanSelfPersonScope,
+  EMPTY_PRINCIPAL,
+} from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { isPerson } from '@/types/Person'
-import { Can } from '@casl/react'
 import EditIcon from '@mui/icons-material/Edit'
 import { Trans } from '@lingui/react/macro'
 import { t } from '@lingui/core/macro'
@@ -50,6 +53,21 @@ const IdrefControl = () => {
     ownPerspective || !currentPerspective || !isPerson(currentPerspective)
       ? connectedUser?.person
       : currentPerspective
+
+  // IdRef may only be edited by wide-scoped account editors (global, ResearchUnit, …).
+  // Self-scoped account_editors (Person:<own uid>) are intentionally excluded.
+  const canEditIdref = useMemo(
+    () =>
+      !!person &&
+      hasWiderThanSelfPersonScope(
+        session?.user?.authz ?? EMPTY_PRINCIPAL,
+        'update',
+        'Person',
+        'identifiers',
+      ) &&
+      ability.can(PermissionAction.update, person, 'identifiers'),
+    [session?.user?.authz, ability, person],
+  )
 
   const idref = person
     ?.getIdentifiers()
@@ -189,25 +207,15 @@ const IdrefControl = () => {
             </Box>
             {idref && <IdRefInfoBox idrefId={idref.value} />}
             {person && (
-              <Can
-                I={PermissionAction.update}
-                a={person}
-                field='identifiers'
-                ability={ability}
-                passThrough
+              <Button
+                disabled={!canEditIdref}
+                variant='outlined'
+                startIcon={<EditIcon />}
+                onClick={startEdit}
+                sx={{ minWidth: 'fit-content', alignSelf: 'flex-start' }}
               >
-                {(allowed: boolean) => (
-                  <Button
-                    disabled={!allowed}
-                    variant='outlined'
-                    startIcon={<EditIcon />}
-                    onClick={startEdit}
-                    sx={{ minWidth: 'fit-content', alignSelf: 'flex-start' }}
-                  >
-                    <Trans>idref_control_edit_button</Trans>
-                  </Button>
-                )}
-              </Can>
+                <Trans>idref_control_edit_button</Trans>
+              </Button>
             )}
           </>
         ) : (

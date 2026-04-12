@@ -3,7 +3,10 @@ import authOptions from '@/app/auth/auth_options'
 import { NextResponse } from 'next/server'
 import { PersonService } from '@/lib/services/PersonService'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
-import { abilityFromAuthzContext } from '@/app/auth/ability'
+import {
+  abilityFromAuthzContext,
+  hasWiderThanSelfPersonScope,
+} from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import {
   PersonIdentifier,
@@ -81,6 +84,18 @@ export const PUT = async (request: Request, context: RouteContext) => {
   if (!ability.can(PermissionAction.update, person, 'identifiers')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
+  // IdRef editing requires a wider-than-self-Person scope.
+  // Self-scoped account_editors (Person:<own uid>) may not edit IdRef.
+  if (
+    !hasWiderThanSelfPersonScope(
+      session.user.authz,
+      'update',
+      'Person',
+      'identifiers',
+    )
+  ) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   try {
     const personService = new PersonService()
@@ -113,6 +128,16 @@ export const DELETE = async (_request: Request, context: RouteContext) => {
 
   const ability = abilityFromAuthzContext(session.user.authz)
   if (!ability.can(PermissionAction.update, person, 'identifiers')) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+  if (
+    !hasWiderThanSelfPersonScope(
+      session.user.authz,
+      'update',
+      'Person',
+      'identifiers',
+    )
+  ) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

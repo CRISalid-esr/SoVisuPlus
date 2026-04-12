@@ -11,6 +11,8 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { parseCasTicketValidationResult } from '@/app/utils/parseCasTicketValidationResult'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
 
 const isLoginOrLogout = (action: string): action is 'login' | 'logout' =>
   action === 'login' || action === 'logout'
@@ -65,6 +67,13 @@ export async function GET(
   if (!user?.person) {
     return NextResponse.redirect(
       `${userRedirectionUrl}?error=hal_authentication_failure_user_not_found`,
+    )
+  }
+
+  const ability = abilityFromAuthzContext(session.user.authz)
+  if (!ability.can(PermissionAction.update, user.person, 'identifiers')) {
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=hal_authentication_failure`,
     )
   }
 

@@ -21,6 +21,15 @@ jest.mock('@/stores/global_store', () => ({
   default: jest.fn(),
 }))
 
+jest.mock('next-auth/react', () => ({
+  __esModule: true,
+  useSession: jest.fn(),
+}))
+
+import { useSession } from 'next-auth/react'
+import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
+import { PermissionAction, PermissionSubject } from '@/types/Permission'
+
 jest.mock(
   '@/[lang]/account/components/myProfile/components/identifiers/HalLoginButton',
   () => ({
@@ -61,11 +70,35 @@ const renderWithProviders = () =>
     </I18nProvider>,
   )
 
+const authzWithPermission = makeAuthzContext({
+  roleAssignments: [
+    makeAssignment('account_editor', [
+      {
+        action: PermissionAction.update,
+        subject: PermissionSubject.Person,
+        fields: ['identifiers'],
+      },
+    ]),
+  ],
+})
+
+const setupSession = (withPermission: boolean) => {
+  ;(useSession as jest.Mock).mockReturnValue({
+    data: withPermission ? { user: { authz: authzWithPermission } } : null,
+  })
+}
+
 const makeStore = (
   identifiers: Array<{ type: string; value: string }>,
   ownPerspective = true,
 ) => {
-  const person = { getIdentifiers: () => identifiers }
+  const person = {
+    getIdentifiers: () => identifiers,
+    authzProperties: {
+      __type: 'Person',
+      perimeter: { Person: ['person-uid'], ResearchUnit: [] },
+    },
+  }
   ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
     selector({
       user: {
@@ -83,6 +116,7 @@ describe('HalControl — own perspective', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseSearchParams.mockReturnValue(new URLSearchParams())
+    setupSession(true) // default: account_editor permission present
   })
 
   it('always shows helper text', () => {
@@ -192,6 +226,17 @@ describe('HalControl — own perspective', () => {
       screen.queryByText(i18n.t('hal_authentication_success')),
     ).not.toBeInTheDocument()
   })
+
+  it('shows read-only view when own perspective but no account_editor permission', () => {
+    setupSession(false)
+    makeStore([{ type: PersonIdentifierType.idhals, value: 'jacques-dupont' }])
+    renderWithProviders()
+
+    expect(screen.queryByTestId('hal-login-button')).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(i18n.t('hal_control_helper')),
+    ).not.toBeInTheDocument()
+  })
 })
 
 // ── Read-only (non-own) perspective ───────────────────────────────────────────
@@ -200,6 +245,7 @@ describe('HalControl — read-only (non-own) perspective', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseSearchParams.mockReturnValue(new URLSearchParams())
+    setupSession(false) // no permission; ownPerspective=false anyway
   })
 
   it('shows "not available" when no HAL identifier', () => {
