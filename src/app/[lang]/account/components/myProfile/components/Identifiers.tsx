@@ -30,13 +30,11 @@ const Identifiers = () => {
               lineHeight: 'normal',
             }}
           >
-            <Trans
-              id={
-                ownPerspective
-                  ? 'profile_identifiers_card_title'
-                  : 'profile_identifiers_card_title_other'
-              }
-            />
+            {ownPerspective ? (
+              <Trans id='profile_identifiers_card_title' />
+            ) : (
+              <Trans id='profile_identifiers_card_title_other' />
+            )}
           </Typography>
         </Box>
       }

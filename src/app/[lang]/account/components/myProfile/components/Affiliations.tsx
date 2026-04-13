@@ -30,13 +30,11 @@ const Affiliations = () => {
               lineHeight: 'normal',
             }}
           >
-            <Trans
-              id={
-                ownPerspective
-                  ? 'profile_affiliations_card_title'
-                  : 'profile_affiliations_card_title_other'
-              }
-            />
+            {ownPerspective ? (
+              <Trans id='profile_affiliations_card_title' />
+            ) : (
+              <Trans id='profile_affiliations_card_title_other' />
+            )}
           </Typography>
         </Box>
       }
