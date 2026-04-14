@@ -403,6 +403,7 @@ export class DocumentDAO extends AbstractDAO {
             },
             update: {
               roles: { set: contribution.getRoleLabels() },
+              affiliations: { set: [] },
             },
             create: {
               personId,

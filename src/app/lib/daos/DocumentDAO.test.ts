@@ -450,6 +450,9 @@ describe('DocumentDAO', () => {
         roles: {
           set: ['author of introduction, etc.'],
         },
+        affiliations: {
+          set: [],
+        },
       },
       where: {
         personId_documentId: {

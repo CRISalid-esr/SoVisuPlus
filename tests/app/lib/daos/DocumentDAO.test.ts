@@ -12,22 +12,31 @@ import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import { SourceContribution } from '@/types/SourceContribution'
 import { SourcePerson } from '@/types/SourcePerson'
 import { SourceJournal } from '@/types/SourceJournal'
-import { OAStatus, PublicationIdentifierType } from '@prisma/client'
+import {
+  AuthorityOrganizationIdentifierType,
+  OAStatus,
+  PublicationIdentifierType,
+} from '@prisma/client'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
+import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
+import { AuthorityOrganization } from '@/types/AuthorityOrganization'
 
 describe('DocumentDAO Integration Tests', () => {
   let documentDAO: DocumentDAO
   let personDAO: PersonDAO
+  let authorityOrganizationDAO: AuthorityOrganizationDAO
 
   beforeAll(() => {
     documentDAO = new DocumentDAO()
     personDAO = new PersonDAO()
+    authorityOrganizationDAO = new AuthorityOrganizationDAO()
   })
 
   afterEach(async () => {
     await prisma.contribution.deleteMany()
     await prisma.document.deleteMany()
     await prisma.person.deleteMany()
+    await prisma.authorityOrganization.deleteMany()
   })
 
   test('should remove contributions', async () => {
@@ -38,6 +47,28 @@ describe('DocumentDAO Integration Tests', () => {
     const person2 = await personDAO.createOrUpdatePerson(
       new Person('local-p2', false, null, 'Bob', 'Johnson', 'Bob Johnson', []),
     )
+
+    const org1 =
+      await authorityOrganizationDAO.createOrUpdateAuthorityOrganization(
+        new AuthorityOrganization(
+          'org-123',
+          ['Some Organization'],
+          [{ latitude: 10, longitude: 42 }],
+          [{ type: AuthorityOrganizationIdentifierType.hal, value: 'org1' }],
+        ),
+      )
+    const org2 =
+      await authorityOrganizationDAO.createOrUpdateAuthorityOrganization(
+        new AuthorityOrganization(
+          'org-234',
+          ['Other Organization'],
+          [
+            { latitude: 43, longitude: 52 },
+            { latitude: 17, longitude: 13 },
+          ],
+          [{ type: AuthorityOrganizationIdentifierType.idref, value: 'org2' }],
+        ),
+      )
 
     // Step 2: Create a document with both contributors
     const documentData = new Document(
@@ -52,9 +83,11 @@ describe('DocumentDAO Integration Tests', () => {
       [], // No abstracts
       [], // No subjects
       [
-        new Contribution(Person.fromDbPerson(person1), [
-          LocRelatorHelper.fromLabel('author') as LocRelator,
-        ]),
+        new Contribution(
+          Person.fromDbPerson(person1),
+          [LocRelatorHelper.fromLabel('author') as LocRelator],
+          [AuthorityOrganization.fromDb(org1)],
+        ),
         new Contribution(Person.fromDbPerson(person2), [
           LocRelatorHelper.fromLabel('editor') as LocRelator,
         ]),
@@ -68,6 +101,9 @@ describe('DocumentDAO Integration Tests', () => {
     // Verify both contributions exist
     let contributions = await prisma.contribution.findMany({
       where: { documentId: createdDocument.id },
+      include: {
+        affiliations: true,
+      },
     })
 
     expect(contributions).toHaveLength(2)
@@ -84,7 +120,13 @@ describe('DocumentDAO Integration Tests', () => {
       [new Literal('Test Document', 'en')],
       [], // No abstracts
       [], // No subjects
-      [new Contribution(Person.fromDbPerson(person1), [])],
+      [
+        new Contribution(
+          Person.fromDbPerson(person1),
+          [],
+          [AuthorityOrganization.fromDb(org2)],
+        ),
+      ],
       [],
     )
 
@@ -93,10 +135,16 @@ describe('DocumentDAO Integration Tests', () => {
     // Verify that only person1 remains and person2's contribution was removed
     contributions = await prisma.contribution.findMany({
       where: { documentId: createdDocument.id },
+      include: {
+        affiliations: true,
+      },
     })
+
+    const { identifiers, ...rest } = org2
 
     expect(contributions).toHaveLength(1)
     expect(contributions[0].personId).toBe(person1.id)
+    expect(contributions[0].affiliations).toEqual([rest])
   })
 
   test('should handle document subjects', async () => {
