@@ -9,6 +9,8 @@ import {
 } from '@/types/PersonIdentifier'
 import { PersonService } from '@/lib/services/PersonService'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
 
 export const GET = async (req: NextRequest) => {
   const sovisuplusHost = process.env.NEXT_PUBLIC_BASE_URL
@@ -38,6 +40,13 @@ export const GET = async (req: NextRequest) => {
     console.error(`User not found for session ID: ${session?.user?.id}`)
     return NextResponse.redirect(
       `${userRedirectionUrl}?error=orcid_authentication_failure_user_not_found`,
+    )
+  }
+
+  const ability = abilityFromAuthzContext(session.user.authz)
+  if (!ability.can(PermissionAction.update, user.person, 'identifiers')) {
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=orcid_authentication_failure`,
     )
   }
 

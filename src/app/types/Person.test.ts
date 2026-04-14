@@ -145,7 +145,7 @@ describe('Person', () => {
     expect(personWithDisplayName.normalizedName).toBe('john doe jr')
   })
 
-  it('hasIdHAL test', () => {
+  it('hasIdentifier test', () => {
     const personWithIdHal = new Person(
       'P123',
       true,
@@ -159,7 +159,13 @@ describe('Person', () => {
       ],
     )
 
-    expect(personWithIdHal.hasIdHAL()).toBe(true)
+    expect(personWithIdHal.hasIdentifier(PersonIdentifierType.idhals)).toBe(
+      true,
+    )
+    expect(personWithIdHal.hasIdentifier(PersonIdentifierType.orcid)).toBe(true)
+    expect(personWithIdHal.hasIdentifier(PersonIdentifierType.scopus)).toBe(
+      false,
+    )
 
     const personWithoutIdHal = new Person(
       'P123',
@@ -174,6 +180,8 @@ describe('Person', () => {
       ],
     )
 
-    expect(personWithoutIdHal.hasIdHAL()).toBe(false)
+    expect(personWithoutIdHal.hasIdentifier(PersonIdentifierType.idhals)).toBe(
+      false,
+    )
   })
 })

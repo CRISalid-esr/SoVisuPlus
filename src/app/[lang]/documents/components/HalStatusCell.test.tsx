@@ -69,7 +69,7 @@ const mockState = {
         },
       ],
       membershipAcronyms: ['ABC', 'DEF'],
-      hasIdHAL: () => true,
+      hasIdentifier: () => true,
     },
   },
 }
@@ -171,7 +171,7 @@ describe('HalStatusCell Component', () => {
           ...mockState.user,
           currentPerspective: {
             ...mockState.user.currentPerspective,
-            hasIdHAL: () => false,
+            hasIdentifier: () => false,
           },
         },
       }),
@@ -210,6 +210,7 @@ describe('HalStatusCell Component', () => {
             slug: 'research-unit:abc',
             type: 'research_unit',
             names: [],
+            hasIdentifier: () => true,
             hasIdHAL: () => true,
           },
         },
@@ -250,6 +251,7 @@ describe('HalStatusCell Component', () => {
             slug: 'research-unit:abc',
             type: 'research_unit',
             names: [],
+            hasIdentifier: () => false,
             hasIdHAL: () => false,
           },
         },

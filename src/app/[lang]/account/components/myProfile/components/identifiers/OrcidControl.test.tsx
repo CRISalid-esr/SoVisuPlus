@@ -10,10 +10,21 @@ import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { ORCIDIdentifier, OrcidScope } from '@/types/OrcidIdentifier'
 import { PersonIdentifierType } from '@prisma/client'
 
+// ── Mocks ─────────────────────────────────────────────────────────────────────
+
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
+
+jest.mock('next-auth/react', () => ({
+  __esModule: true,
+  useSession: jest.fn(),
+}))
+
+import { useSession } from 'next-auth/react'
+import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
+import { PermissionAction, PermissionSubject } from '@/types/Permission'
 
 type NextRouterMock = {
   replace: jest.Mock<void, [string, { scroll: boolean }]>
@@ -65,6 +76,8 @@ jest.mock(
   }),
 )
 
+// ── i18n ──────────────────────────────────────────────────────────────────────
+
 const renderWithProviders = () =>
   render(
     <I18nProvider i18n={i18n}>
@@ -72,15 +85,83 @@ const renderWithProviders = () =>
     </I18nProvider>,
   )
 
+// ── Authz helpers ─────────────────────────────────────────────────────────────
+
+const authzWithPermission = makeAuthzContext({
+  roleAssignments: [
+    makeAssignment('account_editor', [
+      {
+        action: PermissionAction.update,
+        subject: PermissionSubject.Person,
+        fields: ['identifiers'],
+      },
+    ]),
+  ],
+})
+
+const setupSession = (withPermission: boolean) => {
+  ;(useSession as jest.Mock).mockReturnValue({
+    data: withPermission ? { user: { authz: authzWithPermission } } : null,
+  })
+}
+
+// ── Store helpers ──────────────────────────────────────────────────────────────
+
+const setupStore = (person: Person | null, ownPerspective = true) => {
+  ;(useStore as unknown as jest.Mock).mockImplementation(
+    (selector: (s: unknown) => unknown) =>
+      selector({
+        user: {
+          connectedUser: person ? { person } : null,
+          currentPerspective: null,
+          ownPerspective,
+        },
+      }),
+  )
+}
+
+const makePersonWithOrcid = (orcid: ORCIDIdentifier) =>
+  new Person(
+    'person-uid',
+    false,
+    'jdoe@example.com',
+    'John Doe',
+    'John',
+    'Doe',
+    [new PersonIdentifier(PersonIdentifierType.local, 'jd'), orcid],
+    [],
+  )
+
+const makePersonWithoutOrcid = () =>
+  new Person(
+    'person-uid',
+    false,
+    'jdoe@example.com',
+    'John Doe',
+    'John',
+    'Doe',
+    [new PersonIdentifier(PersonIdentifierType.local, 'jd')],
+    [],
+  )
+
+const linkedOrcid = new ORCIDIdentifier('0000-0001-7990-9804', {
+  scope: ['/read-limited'],
+  tokenType: 'bearer',
+  obtainedAt: new Date('2026-02-01T12:34:28.632Z'),
+  expiresAt: new Date('2027-02-01T12:34:28.632Z'),
+  createdAt: new Date('2026-02-01T12:34:28.632Z'),
+  updatedAt: new Date('2026-02-01T12:34:28.632Z'),
+})
+
+// ── Tests ──────────────────────────────────────────────────────────────────────
+
 describe('OrcidControl', () => {
   beforeAll(() => {
-    i18n.load({
-      en: {
-        orcid_identifier_no_orcid_provided: 'No ORCID provided',
-        orcid_control_helper: 'Helper <0>orcid.org</0>',
-        orcid_authentication_success: 'ORCID authentication success',
-        orcid_account_linked_tooltip: 'ORCID account linked',
-      },
+    i18n.load('en', {
+      orcid_identifier_no_orcid_provided: 'No ORCID provided',
+      orcid_control_helper: 'Helper <0>orcid.org</0>',
+      orcid_authentication_success: 'ORCID authentication success',
+      orcid_account_linked_tooltip: 'ORCID account linked',
     })
     i18n.activate('en')
   })
@@ -88,122 +169,110 @@ describe('OrcidControl', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseSearchParams.mockReturnValue(new URLSearchParams())
+    setupSession(true) // default: account_editor permission present
   })
 
-  it('renders ORCID value (mobile text block) and passes props to OrcidLoginButton when linked', () => {
-    const orcid = new ORCIDIdentifier('0000-0001-7990-9804', {
-      scope: ['/read-limited'],
-      tokenType: 'bearer',
-      obtainedAt: new Date('2026-02-01T12:34:28.632Z'),
-      expiresAt: new Date('2027-02-01T12:34:28.632Z'),
-      createdAt: new Date('2026-02-01T12:34:28.632Z'),
-      updatedAt: new Date('2026-02-01T12:34:28.632Z'),
-      // tokens are optional in OrcidOAuthData
+  // ── Own perspective (full view) ─────────────────────────────────────────────
+
+  describe('own perspective', () => {
+    it('shows ORCID value and link icon when linked', () => {
+      setupStore(makePersonWithOrcid(linkedOrcid))
+      renderWithProviders()
+
+      expect(screen.getAllByText('0000-0001-7990-9804')).toHaveLength(2)
+      expect(screen.getByTestId('LinkIcon')).toBeInTheDocument()
+      expect(mockOrcidLoginButton).toHaveBeenCalledWith({
+        orcidProvided: true,
+        grantedScopes: ['/read-limited'],
+        hasOauth: true,
+      })
     })
 
-    const person = new Person(
-      'person-uid',
-      false,
-      'jdoe@example.com',
-      'John Doe',
-      'John',
-      'Doe',
-      [new PersonIdentifier(PersonIdentifierType.local, 'jd'), orcid],
-      [],
-    )
+    it('shows fallback text and no link icon when no ORCID', () => {
+      setupStore(makePersonWithoutOrcid())
+      renderWithProviders()
 
-    ;(useStore as unknown as jest.Mock).mockImplementation(
-      (selector: (s: unknown) => unknown) =>
-        selector({
-          user: {
-            connectedUser: {
-              person,
-            },
-          },
-        }),
-    )
-
-    renderWithProviders()
-
-    // ORCID value should be present in the "mobile" text block
-    expect(screen.getAllByText('0000-0001-7990-9804')).toHaveLength(2) // appears twice
-
-    expect(screen.getByTestId('LinkIcon')).toBeInTheDocument()
-
-    expect(mockOrcidLoginButton).toHaveBeenCalledTimes(1)
-    expect(mockOrcidLoginButton).toHaveBeenCalledWith({
-      orcidProvided: true,
-      grantedScopes: ['/read-limited'],
-      hasOauth: true,
+      expect(screen.getByText('No ORCID provided')).toBeInTheDocument()
+      expect(screen.queryByTestId('LinkIcon')).not.toBeInTheDocument()
+      expect(mockOrcidLoginButton).toHaveBeenCalledWith({
+        orcidProvided: false,
+        grantedScopes: null,
+        hasOauth: false,
+      })
     })
-  })
 
-  it('renders fallback text when ORCID is missing and passes props to OrcidLoginButton', () => {
-    const person = new Person(
-      'person-uid',
-      false,
-      'jdoe@example.com',
-      'John Doe',
-      'John',
-      'Doe',
-      [new PersonIdentifier(PersonIdentifierType.local, 'jd')],
-      [],
-    )
+    it('shows snackbar on ?success=orcid_authentication_success', () => {
+      mockUseSearchParams.mockReturnValue(
+        new URLSearchParams('success=orcid_authentication_success'),
+      )
+      setupStore(makePersonWithoutOrcid())
+      renderWithProviders()
 
-    ;(useStore as unknown as jest.Mock).mockImplementation(
-      (selector: (s: unknown) => unknown) =>
-        selector({
-          user: {
-            connectedUser: {
-              person,
-            },
-          },
-        }),
-    )
+      expect(
+        screen.getByText('ORCID authentication success'),
+      ).toBeInTheDocument()
+    })
 
-    renderWithProviders()
+    it('ignores non-orcid URL params', () => {
+      mockUseSearchParams.mockReturnValue(
+        new URLSearchParams('success=hal_authentication_success'),
+      )
+      setupStore(makePersonWithoutOrcid())
+      renderWithProviders()
 
-    expect(screen.getByText('No ORCID provided')).toBeInTheDocument()
-    expect(screen.queryByTestId('LinkIcon')).not.toBeInTheDocument()
+      expect(
+        screen.queryByText('ORCID authentication success'),
+      ).not.toBeInTheDocument()
+    })
 
-    expect(mockOrcidLoginButton).toHaveBeenCalledWith({
-      orcidProvided: false,
-      grantedScopes: null,
-      hasOauth: false,
+    it('shows read-only view when own perspective but no account_editor permission', () => {
+      setupSession(false)
+      setupStore(makePersonWithOrcid(linkedOrcid))
+      renderWithProviders()
+
+      expect(screen.queryByTestId('OrcidLoginButton')).not.toBeInTheDocument()
+      expect(mockOrcidLoginButton).not.toHaveBeenCalled()
     })
   })
 
-  it('shows snackbar when success=orcid_* is present', () => {
-    mockUseSearchParams.mockReturnValue(
-      new URLSearchParams('success=orcid_authentication_success'),
-    )
-    ;(useStore as unknown as jest.Mock).mockImplementation(
-      (selector: (s: unknown) => unknown) =>
-        selector({
-          user: { connectedUser: null },
-        }),
-    )
+  // ── Read-only (non-own) perspective ────────────────────────────────────────
 
-    renderWithProviders()
+  describe('read-only (non-own) perspective', () => {
+    it('shows ORCID value when present', () => {
+      setupStore(makePersonWithOrcid(linkedOrcid), false)
+      renderWithProviders()
 
-    expect(screen.getByText('ORCID authentication success')).toBeInTheDocument()
-  })
+      // Both the mobile text block and the mocked PidComponent render the value
+      expect(screen.getAllByText('0000-0001-7990-9804').length).toBeGreaterThan(
+        0,
+      )
+    })
 
-  it('ignores non-orcid success messages', () => {
-    mockUseSearchParams.mockReturnValue(
-      new URLSearchParams('success=hal_authentication_success'),
-    )
-    ;(useStore as unknown as jest.Mock).mockImplementation(
-      (selector: (s: unknown) => unknown) =>
-        selector({
-          user: { connectedUser: null },
-        }),
-    )
+    it('shows fallback text when no ORCID', () => {
+      setupStore(makePersonWithoutOrcid(), false)
+      renderWithProviders()
 
-    renderWithProviders()
+      expect(screen.getByText('No ORCID provided')).toBeInTheDocument()
+    })
 
-    expect(
-      screen.queryByText('ORCID authentication success'),
-    ).not.toBeInTheDocument()
+    it('does not render the OrcidLoginButton', () => {
+      setupStore(makePersonWithOrcid(linkedOrcid), false)
+      renderWithProviders()
+
+      expect(screen.queryByTestId('OrcidLoginButton')).not.toBeInTheDocument()
+      expect(mockOrcidLoginButton).not.toHaveBeenCalled()
+    })
+
+    it('does not show a snackbar even when URL params are present', () => {
+      mockUseSearchParams.mockReturnValue(
+        new URLSearchParams('success=orcid_authentication_success'),
+      )
+      setupStore(makePersonWithOrcid(linkedOrcid), false)
+      renderWithProviders()
+
+      expect(
+        screen.queryByText('ORCID authentication success'),
+      ).not.toBeInTheDocument()
+    })
   })
 })

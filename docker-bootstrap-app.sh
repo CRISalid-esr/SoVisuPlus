@@ -54,7 +54,7 @@ PERSPECTIVES_ROLES_FILTER=${PERSPECTIVES_ROLES_FILTER:-["author ","author of int
 PUBLICATION_LIST_ROLES_FILTER=${PUBLICATION_LIST_ROLES_FILTER:-["analyst ","annotator ","author ","author in quotations or text abstracts ","author of afterword, colophon, etc. ","author of introduction, etc. ","cartographer ","commentator for written text ","compiler ","composer ","conceptor ","contributor ","curator ","degree committee member ","dissertant ","donor ","editor ","editor of compilation ","film director ","film editor ","former owner ","illustrator ","interviewee ","interviewer ","opponent ","organizer ","other ","photographer ","praeses ","production personnel ","project director ","publisher director ","rapporteur ","scientific advisor ","software developer ","sound designer ","speaker ","stage manager ","thesis advisor ","translator ","writer of accompanying material"]}
 VOCABS_URL="${VOCABS_URL:-http://localhost:8000/api/v0/autocomplete/}"
 NEXT_PUBLIC_AVAILABLE_VOCABS=${NEXT_PUBLIC_AVAILABLE_VOCABS:-jel,aat,acm,elsst,euroscivoc,pactols}
-DEFAULT_SELF_SCOPED_ROLES=${DEFAULT_SELF_SCOPED_ROLES:-document_editor,document_fetcher,document_merger}
+DEFAULT_SELF_SCOPED_ROLES=${DEFAULT_SELF_SCOPED_ROLES:-document_editor,document_fetcher,document_merger,account_editor}
 NEXT_PUBLIC_CAS_URL=${CAS_URL:-https://cas.ccsd.cnrs.fr/cas}
 NEXT_PUBLIC_INSTITUTION_NAME="${INSTITUTION_NAME:-university}"
 FIELD_ENC_PRIMARY_KID="${FIELD_ENC_PRIMARY_KID:-}"
@@ -63,6 +63,8 @@ NEXT_PUBLIC_SUPPORT_SERVICE_EMAIL_ADDR="${NEXT_PUBLIC_SUPPORT_SERVICE_EMAIL_ADDR
 NEXT_PUBLIC_ABOUT_PAGE_URL="${NEXT_PUBLIC_ABOUT_PAGE_URL}"
 NEXT_PUBLIC_TERMS_PAGE_URL="${NEXT_PUBLIC_TERMS_PAGE_URL}"
 NEXT_PUBLIC_COMMUNITY_PAGE_URL="${NEXT_PUBLIC_COMMUNITY_PAGE_URL:-https://crisalid.org}"
+NEXT_PUBLIC_HELP_URL="${NEXT_PUBLIC_HELP_URL}"
+NEXT_PUBLIC_WARN_MISSING_IDENTIFIER_TYPES="${NEXT_PUBLIC_WARN_MISSING_IDENTIFIER_TYPES:-idhals,orcid}"
 EOF
 
 CUSTOM_THEME_MOUNT="/custom-theme"

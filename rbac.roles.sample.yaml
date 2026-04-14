@@ -27,3 +27,10 @@ roles:
     permissions:
       - action: fetch_documents
         subject: Person
+
+  - name: account_editor
+    description: Edit own person identifiers (self-scoped by default)
+    permissions:
+      - action: update
+        subject: Person
+        fields: [identifiers]

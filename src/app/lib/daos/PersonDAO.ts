@@ -590,6 +590,22 @@ export class PersonDAO extends AbstractDAO {
     }
   }
 
+  public async deleteIdentifier(
+    personUid: string,
+    type: PersonIdentifierType,
+  ): Promise<void> {
+    const person = await this.prismaClient.person.findUnique({
+      where: { uid: personUid },
+      select: { id: true },
+    })
+    if (!person) {
+      throw new Error(`Person with UID ${personUid} not found`)
+    }
+    await this.prismaClient.personIdentifier.deleteMany({
+      where: { personId: person.id, type },
+    })
+  }
+
   public async fetchPersonByIdentifier(
     identifier: PersonIdentifier,
   ): Promise<Person | null> {

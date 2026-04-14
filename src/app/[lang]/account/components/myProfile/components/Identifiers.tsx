@@ -5,9 +5,11 @@ import { Trans } from '@lingui/react'
 import { CustomCard } from '@/components/Card'
 import { identifierComponentMap } from '@/app/[lang]/account/components/myProfile/components/identifiers/index'
 import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import useStore from '@/stores/global_store'
 
 const Identifiers = () => {
   const theme = useTheme()
+  const { ownPerspective } = useStore((state) => state.user)
 
   return (
     <CustomCard
@@ -28,7 +30,11 @@ const Identifiers = () => {
               lineHeight: 'normal',
             }}
           >
-            <Trans id='profile_identifiers_card_title' />
+            {ownPerspective ? (
+              <Trans id='profile_identifiers_card_title' />
+            ) : (
+              <Trans id='profile_identifiers_card_title_other' />
+            )}
           </Typography>
         </Box>
       }

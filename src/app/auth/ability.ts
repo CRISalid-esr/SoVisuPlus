@@ -66,6 +66,40 @@ const scopesToCondition = (scopes: Scope[]): Array<MongoQuery | undefined> => {
   return conds.length ? conds : [undefined]
 }
 
+/**
+ * Returns true if the user holds at least one matching permission that is NOT scoped
+ * to their own Person entity (i.e. global, ResearchUnit, Institution, …).
+ *
+ * @param p       - the authz context to inspect
+ * @param action  - the permission action to look for (e.g. 'update')
+ * @param subject - the permission subject to look for (e.g. 'Person')
+ * @param field   - optional field restriction to look for (e.g. 'identifiers')
+ */
+export const hasWiderThanSelfPersonScope = (
+  p: AuthzContext = EMPTY_PRINCIPAL,
+  action: string,
+  subject: string,
+  field?: string,
+): boolean => {
+  for (const ra of p.roleAssignments) {
+    const hasPerm = ra.permissions.some(
+      (perm) =>
+        perm.action === action &&
+        perm.subject === subject &&
+        (field === undefined || (perm.fields ?? []).includes(field)),
+    )
+    if (!hasPerm) continue
+
+    if (!ra.scopes.length) return true // global role
+
+    for (const scope of ra.scopes) {
+      if (scope.entityType !== 'Person') return true // ResearchUnit, Institution, …
+      if (scope.entityUid !== p.personUid) return true // scoped to a different person
+    }
+  }
+  return false
+}
+
 export const abilityFromAuthzContext = (
   p: AuthzContext = EMPTY_PRINCIPAL,
 ): AppAbility => {
