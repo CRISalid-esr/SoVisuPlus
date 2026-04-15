@@ -29,7 +29,7 @@ import {
   OAStatus,
   PersonIdentifierType as DbPersonIdentifierType,
 } from '@prisma/client'
-import MapCollaborations from '@/app/[lang]/dashboard/components/MapCollaborations'
+import CollaborationMap from '@/app/[lang]/dashboard/components/CollaborationMap'
 
 const DEFAULT_TOP_N = 10
 const DEFAULT_START_YEAR = 2010
@@ -434,7 +434,7 @@ const DashboardPage = () => {
           }
         >
           <CardContent sx={{ height: 'fit-content' }}>
-            <MapCollaborations
+            <CollaborationMap
               yearRange={pendingWSYearRange}
               data={documents}
               loading={loading}

@@ -780,15 +780,15 @@ msgstr "Mettre à jour"
 msgid "dashboard_page_map_title"
 msgstr "Collaborations internationales"
 
-#: src/app/[lang]/dashboard/components/MapCollaborations.tsx:326
+#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:326
 msgid "map_collaborations_tooltip_remaining_orgs"
 msgstr "Autres institutions : "
 
-#: src/app/[lang]/dashboard/components/MapCollaborations.tsx:326
+#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:326
 msgid "map_collaborations_tooltip_unknown_contributors"
 msgstr "Collaborateurs non répertoriés : "
 
-#: src/app/[lang]/dashboard/components/MapCollaborations.tsx:326
+#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:326
 msgid "map_collaborations_tooltip_other_contributors"
 msgstr "Autres collaborateurs : "
 

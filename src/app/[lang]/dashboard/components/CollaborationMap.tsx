@@ -70,7 +70,7 @@ type MapCollaborationsProps = {
   >
 }
 
-const MapCollaborations = ({
+const CollaborationMap = ({
   yearRange,
   data = [],
   loading = false,
@@ -508,4 +508,4 @@ const MapCollaborations = ({
     </Box>
   )
 }
-export default MapCollaborations
+export default CollaborationMap
