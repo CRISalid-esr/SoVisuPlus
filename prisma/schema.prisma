@@ -326,6 +326,7 @@ model AuthorityOrganization {
   id            Int                               @id @default(autoincrement())
   uid           String                            @unique
   displayNames  String[]
+  places        Json
   identifiers   AuthorityOrganizationIdentifier[]
   contributions Contribution[]
 }

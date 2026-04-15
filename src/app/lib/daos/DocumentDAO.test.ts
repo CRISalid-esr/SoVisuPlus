@@ -1,4 +1,5 @@
 import {
+  Concept as DbConcept,
   Document as DbDocument,
   DocumentRecord as DbDocumentRecord,
   DocumentState,
@@ -9,6 +10,7 @@ import {
   PublicationIdentifierType,
   PublicationIdentifierType as DbPublicationIdentifierType,
 } from '@prisma/client'
+import { AuthorityOrganizationWithRelations as DbAuthorityOrganization } from '@/prisma-schema/extended-client'
 import { Document, DocumentType } from '@/types/Document'
 import { DocumentDAO } from './DocumentDAO'
 import { PersonDAO } from './PersonDAO'
@@ -30,6 +32,10 @@ import { SourcePerson } from '@/types/SourcePerson'
 import { SourceJournal } from '@/types/SourceJournal'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 import { PersonWithRelations as DbPerson } from '@/prisma-schema/extended-client'
+import { AuthorityOrganization } from '@/types/AuthorityOrganization'
+import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
+import { ConceptDAO } from '@/lib/daos/ConceptDAO'
+import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
 
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
@@ -55,6 +61,7 @@ jest.mock('@prisma/client', () => {
     },
     contribution: {
       upsert: jest.fn(),
+      update: jest.fn(),
     },
     documentRecord: {
       upsert: jest.fn(),
@@ -138,6 +145,20 @@ describe('DocumentDAO', () => {
           [],
         ),
         [LocRelator.AUTHOR_OF_INTRODUCTION__ETC_],
+        [
+          new AuthorityOrganization(
+            'organization-1',
+            ['Some Organization'],
+            [
+              {
+                latitude: 53,
+                longitude: 34,
+              },
+              { latitude: 24, longitude: 13 },
+            ],
+            [new AuthorityOrganizationIdentifier('hal', 'organization-1')],
+          ),
+        ],
       ),
     ],
   )
@@ -150,7 +171,22 @@ describe('DocumentDAO', () => {
       oaStatus: OAStatus.GREEN,
       titles: [],
       abstracts: [],
-      subjects: [],
+      subjects: [
+        {
+          id: 1,
+          uid: 'concept-123',
+          uri: 'http://example.com/concept/123',
+          labels: [
+            {
+              id: 1,
+              value: 'Concept preferred label',
+              language: 'en',
+              type: 'PREF',
+            },
+            { id: 2, value: 'Concept alt label', language: 'en', type: 'ALT' },
+          ],
+        },
+      ],
       title_locale_0: '',
       title_locale_1: '',
       title_locale_2: '',
@@ -158,7 +194,41 @@ describe('DocumentDAO', () => {
       publicationDateStart: new Date('2022-01-01T00:00:00.000Z'),
       publicationDateEnd: new Date('2022-12-31T23:59:59.000Z'),
       upwOAStatus: OAStatus.DIAMOND,
-      contributions: [],
+      contributions: [
+        {
+          person: {
+            id: 1,
+            uid: 'person-1',
+            email: 'john@example.com',
+            displayName: 'John Doe',
+            firstName: 'John',
+            lastName: 'Doe',
+            external: false,
+          },
+          roles: ['author of introduction, etc.'],
+          affiliations: [
+            {
+              id: 1,
+              uid: 'organization-1',
+              displayNames: ['Some Organization'],
+              places: [
+                {
+                  latitude: 53,
+                  longitude: 34,
+                },
+                { latitude: 24, longitude: 13 },
+              ],
+              identifiers: [
+                {
+                  id: 1,
+                  type: 'hal',
+                  value: 'organization-1',
+                },
+              ],
+            },
+          ],
+        },
+      ],
       records: [],
       state: 'default',
       journalId: null,
@@ -180,6 +250,44 @@ describe('DocumentDAO', () => {
     jest
       .spyOn(PersonDAO.prototype, 'createOrUpdatePerson')
       .mockResolvedValue(mockPerson)
+
+    const mockConcept = {
+      id: 1,
+      uid: 'concept-123',
+      uri: 'http://example.com/concept/123',
+    } as DbConcept
+
+    jest
+      .spyOn(ConceptDAO.prototype, 'createOrUpdateConcept')
+      .mockResolvedValue(mockConcept)
+
+    const mockAuthorityOrganization = {
+      id: 1,
+      uid: 'organization-1',
+      displayNames: ['Some Organization'],
+      places: [
+        {
+          latitude: 53,
+          longitude: 34,
+        },
+        { latitude: 24, longitude: 13 },
+      ],
+      identifiers: [
+        {
+          id: 1,
+          type: 'hal',
+          value: 'organization-1',
+          organizationId: 1,
+        },
+      ],
+    } as DbAuthorityOrganization
+
+    jest
+      .spyOn(
+        AuthorityOrganizationDAO.prototype,
+        'createOrUpdateAuthorityOrganization',
+      )
+      .mockResolvedValue(mockAuthorityOrganization)
 
     const dbDocument = await documentDAO.createOrUpdateDocument(document)
 
@@ -249,8 +357,87 @@ describe('DocumentDAO', () => {
       },
     })
 
-    expect(mockPrisma.documentTitle.upsert).toHaveBeenCalled()
-    expect(mockPrisma.documentAbstract.upsert).toHaveBeenCalled()
+    expect(mockPrisma.documentTitle.upsert).toHaveBeenCalledTimes(2)
+    expect(mockPrisma.documentTitle.upsert).toHaveBeenCalledWith({
+      where: {
+        documentId_language: {
+          documentId: 1,
+          language: 'en',
+        },
+      },
+      update: {
+        value: 'Sample Document Title',
+      },
+      create: {
+        documentId: 1,
+        language: 'en',
+        value: 'Sample Document Title',
+      },
+    })
+    expect(mockPrisma.documentTitle.upsert).toHaveBeenCalledWith({
+      where: {
+        documentId_language: {
+          documentId: 1,
+          language: 'fr',
+        },
+      },
+      update: {
+        value: 'Sample Second Title',
+      },
+      create: {
+        documentId: 1,
+        language: 'fr',
+        value: 'Sample Second Title',
+      },
+    })
+    expect(mockPrisma.documentAbstract.upsert).toHaveBeenCalledTimes(1)
+    expect(mockPrisma.documentAbstract.upsert).toHaveBeenCalledWith({
+      where: {
+        documentId_language: {
+          documentId: 1,
+          language: 'fr',
+        },
+      },
+      update: {
+        value: 'Sample Abstract',
+      },
+      create: {
+        documentId: 1,
+        language: 'fr',
+        value: 'Sample Abstract',
+      },
+    })
+
+    expect(ConceptDAO.prototype.createOrUpdateConcept).toHaveBeenCalledTimes(1)
+    expect(ConceptDAO.prototype.createOrUpdateConcept).toHaveBeenCalledWith(
+      new Concept(
+        'concept-123',
+        [
+          Literal.fromObject({
+            value: 'Concept preferred label',
+            language: 'en',
+          }),
+        ],
+        [Literal.fromObject({ value: 'Concept alt label', language: 'en' })],
+        'http://example.com/concept/123',
+      ),
+    )
+    expect(mockPrisma.document.update).toHaveBeenCalledWith({
+      where: { id: 1 },
+      data: { subjects: { connect: { id: 1 } } },
+    })
+    expect(PersonDAO.prototype.createOrUpdatePerson).toHaveBeenCalledTimes(1)
+    expect(PersonDAO.prototype.createOrUpdatePerson).toHaveBeenCalledWith(
+      new Person(
+        'person-1',
+        false,
+        'john@example.com',
+        'John Doe',
+        'John',
+        'Doe',
+        [],
+      ),
+    )
     expect(mockPrisma.contribution.upsert).toHaveBeenCalledWith({
       create: {
         documentId: 1,
@@ -263,11 +450,46 @@ describe('DocumentDAO', () => {
         roles: {
           set: ['author of introduction, etc.'],
         },
+        affiliations: {
+          set: [],
+        },
       },
       where: {
         personId_documentId: {
           documentId: 1,
           personId: 1,
+        },
+      },
+    })
+    expect(
+      AuthorityOrganizationDAO.prototype.createOrUpdateAuthorityOrganization,
+    ).toHaveBeenCalledTimes(1)
+    expect(
+      AuthorityOrganizationDAO.prototype.createOrUpdateAuthorityOrganization,
+    ).toHaveBeenCalledWith(
+      new AuthorityOrganization(
+        'organization-1',
+        ['Some Organization'],
+        [
+          {
+            latitude: 53,
+            longitude: 34,
+          },
+          { latitude: 24, longitude: 13 },
+        ],
+        [new AuthorityOrganizationIdentifier('hal', 'organization-1')],
+      ),
+    )
+    expect(mockPrisma.contribution.update).toHaveBeenCalledWith({
+      where: {
+        personId_documentId: {
+          personId: 1,
+          documentId: 1,
+        },
+      },
+      data: {
+        affiliations: {
+          connect: { id: 1 },
         },
       },
     })
@@ -1206,6 +1428,30 @@ describe('DocumentDAO', () => {
         oaStatus: 'GREEN',
         publicationDate: '2022',
         upwOAStatus: 'DIAMOND',
+        contributions: [
+          {
+            person: {
+              uid: 'local-123',
+              displayName: 'John Doe',
+            },
+            affiliations: [
+              {
+                uid: 'org1234',
+                displayNames: 'Some Organization',
+                places: [
+                  {
+                    latitude: 42,
+                    longitude: 13,
+                  },
+                  {
+                    latitude: 24,
+                    longitude: 31,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       },
     ] as unknown as DbDocument[]
 
@@ -1218,12 +1464,46 @@ describe('DocumentDAO', () => {
     const result = await documentDAO.fetchOAYearDocuments(contributorUids)
 
     expect(result.documents).toHaveLength(1)
+    expect(result.documents[0].contributions).toHaveLength(1)
+    expect(result.documents[0].contributions[0].affiliations).toHaveLength(1)
+    expect(
+      result.documents[0].contributions[0].affiliations[0].places,
+    ).toHaveLength(2)
+    expect(result.documents[0].contributions[0].affiliations[0].places).toEqual(
+      [
+        {
+          latitude: 42,
+          longitude: 13,
+        },
+        {
+          latitude: 24,
+          longitude: 31,
+        },
+      ],
+    )
     expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
       select: {
         uid: true,
         oaStatus: true,
         publicationDate: true,
         upwOAStatus: true,
+        contributions: {
+          select: {
+            person: {
+              select: {
+                uid: true,
+                displayName: true,
+              },
+            },
+            affiliations: {
+              select: {
+                uid: true,
+                displayNames: true,
+                places: true,
+              },
+            },
+          },
+        },
       },
       where: {
         publicationDate: { not: null },

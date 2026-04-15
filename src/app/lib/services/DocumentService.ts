@@ -139,6 +139,20 @@ export class DocumentService {
             oaStatus: OAStatus | null
             publicationDate: string | null
             upwOAStatus: OAStatus | null
+            contributions: {
+              person: {
+                uid: string
+                displayName: string | null
+              }
+              affiliations: {
+                uid: string
+                displayNames: string[]
+                places: {
+                  latitude: number
+                  longitude: number
+                }[]
+              }[]
+            }[]
           }[]
         >
       >((acc, doc) => {
