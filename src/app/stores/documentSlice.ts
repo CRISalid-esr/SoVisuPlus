@@ -268,37 +268,24 @@ export const addDocumentSlice: StateCreator<
           const updatedDocuments = state.document.documents.map((doc) => {
             const updatedDoc = data.updated.find((d) => d.uid === doc.uid)
             if (updatedDoc) {
-              return {
-                ...doc,
-                state: updatedDoc.state as DocumentState,
-              } as Document
+              doc.state = updatedDoc.state as DocumentState
             }
             return doc
           })
           // Also update selectedDocument if it's among the merged ones
-          let updatedSelectedDocument = state.document.selectedDocument
-          if (
-            state.document.selectedDocument &&
-            documentUids.includes(state.document.selectedDocument.uid)
-          ) {
-            const updatedDoc = data.updated.find(
-              (d) => d.uid === state.document.selectedDocument?.uid,
-            )
-            if (updatedDoc) {
-              updatedSelectedDocument = Object.assign(
-                Object.create(
-                  Object.getPrototypeOf(state.document.selectedDocument),
-                ),
-                state.document.selectedDocument,
-                { state: updatedDoc.state as DocumentState },
-              )
-            }
+          const selectedDocument = state.document.selectedDocument
+          const selectUpdated = data.updated.find(
+            (d) => d.uid === selectedDocument?.uid,
+          )
+          if (selectedDocument && selectUpdated) {
+            selectedDocument.state = selectUpdated.state as DocumentState
           }
+
           return {
             document: {
               ...state.document,
               documents: updatedDocuments,
-              selectedDocument: updatedSelectedDocument,
+              selectedDocument: selectedDocument,
             },
           }
         })
