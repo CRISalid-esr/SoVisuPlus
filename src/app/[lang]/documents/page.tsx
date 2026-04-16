@@ -76,6 +76,7 @@ import { Can } from '@casl/react'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 import OAStatusCell from '@/app/[lang]/documents/components/OAStatusCell'
 import {
+  DEFAULT_PAGINATION,
   DocumentTable,
   normalizeDateFilters,
   readInitialColumnFilters,
@@ -96,10 +97,7 @@ const DEFAULT_SORTING = [
     desc: true,
   },
 ]
-const DEFAULT_PAGINATION = {
-  pageIndex: 0,
-  pageSize: 10,
-}
+
 const DocumentsPage = () => {
   const { data: session } = useSession()
   const { _ } = useLingui()
@@ -108,7 +106,12 @@ const DocumentsPage = () => {
     [session?.user?.authz],
   )
 
-  const [pagination, setPagination] = useState(readInitialPagination)
+  const initialPagination = useMemo(() => {
+    const pagination = readInitialPagination()
+    return { pageIndex: pagination.pageIndex, pageSize: pagination.pageSize }
+  }, [])
+
+  const [pagination, setPagination] = useState(initialPagination)
 
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
     readInitialColumnFilters,
@@ -654,11 +657,29 @@ const DocumentsPage = () => {
   }
 
   useEffect(() => {
+    const raw = sessionStorage.getItem('mrt_pagination_publication_table')
+    if (raw) {
+      const data = JSON.parse(raw)
+      if (data.slug != currentPerspective?.slug) {
+        sessionStorage.setItem(
+          'mrt_pagination_publication_table',
+          JSON.stringify({
+            ...DEFAULT_PAGINATION,
+            slug: currentPerspective?.slug,
+          }),
+        )
+        setPagination({
+          pageIndex: DEFAULT_PAGINATION.pageIndex,
+          pageSize: DEFAULT_PAGINATION.pageSize,
+        })
+        return
+      }
+    }
     sessionStorage.setItem(
       'mrt_pagination_publication_table',
-      JSON.stringify(pagination),
+      JSON.stringify({ ...pagination, slug: currentPerspective?.slug }),
     )
-  }, [pagination])
+  }, [currentPerspective, pagination, initialPagination])
 
   useEffect(() => {
     const id = setTimeout(() => {

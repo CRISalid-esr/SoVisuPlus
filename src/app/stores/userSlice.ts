@@ -6,9 +6,11 @@ import { ResearchUnit } from '@/types/ResearchUnit'
 
 export interface UserSlice {
   user: {
-    connectedUser: User | null // The authenticated user
+    // The authenticated user
+    connectedUser: User | null
     currentPerspective: IAgent | null
-    ownPerspective: boolean // Whether the current perspective is the connected user
+    // Whether the current perspective is the connected user
+    ownPerspective: boolean
     loading: boolean
     error: string | null | unknown
     fetchConnectedUser: () => Promise<void>
