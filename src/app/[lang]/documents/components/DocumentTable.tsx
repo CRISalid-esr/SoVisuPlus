@@ -31,6 +31,7 @@ type DocumentTableProps<T extends MRT_RowData> = MaterialReactTableProps<T> & {
 }
 
 export const DEFAULT_PAGINATION = {
+  slug: null,
   pageIndex: 0,
   pageSize: 10,
 }
