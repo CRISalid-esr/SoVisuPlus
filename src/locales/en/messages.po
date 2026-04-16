@@ -181,6 +181,27 @@ msgid "document_details_page_keywords_search_field_title"
 msgstr "Select one or more controlled vocabulary"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:397
+msgid "document_details_page_source_tab_card_title"
+msgstr "Sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:430
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:439
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "action"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:456
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalidate"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:474
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissociate"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:225
 msgid "concept_chips_free_keyword"
@@ -206,53 +227,9 @@ msgid "concept_chip_action_delete"
 msgstr "Delete"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:397
-msgid "document_details_page_source_tab_card_title"
-msgstr "Sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:430
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:439
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "action"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:456
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalidate"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:474
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissociate"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
 msgid "document_details_page_update_in_hal_tab_card_title"
 msgstr "Update in HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:255
-msgid "document_details_page_keywords_input_default"
-msgstr "Please enter at least 3 characters"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:259
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "No options"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Keyword successfully added."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Please select one vocabulary at least"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:249
@@ -265,6 +242,24 @@ msgid "document_details_page_keywords_input_options_fetch_error"
 msgstr "An error occurs"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:255
+msgid "document_details_page_keywords_input_default"
+msgstr "Please enter at least 3 characters"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Please select one vocabulary at least"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:259
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "No options"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:288
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
@@ -273,6 +268,11 @@ msgstr "Error loading suggestions"
 #: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
 msgid "document_details_page_add_in_hal_tab_card_title"
 msgstr "Add in HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Keyword successfully added."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
@@ -316,22 +316,6 @@ msgid "document_details_page_card_title"
 msgstr "Bibliographic information"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
-msgid "bibliographic_information_update_success"
-msgstr "Bibliographic information updated."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
-msgid "bibliographic_information_update_failure"
-msgstr "Failed to update bibliographic information."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:148
-msgid "document_details_page_authors_row_update_author"
-msgstr "Change authors"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:134
 msgid "document_details_page_authors_row_label"
 msgstr "Authors"
@@ -360,6 +344,22 @@ msgstr "Summary"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:151
 msgid "document_details_page_sources_row_label"
 msgstr "Sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
+msgid "bibliographic_information_update_success"
+msgstr "Bibliographic information updated."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
+msgid "bibliographic_information_update_failure"
+msgstr "Failed to update bibliographic information."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:148
+msgid "document_details_page_authors_row_update_author"
+msgstr "Change authors"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
@@ -413,6 +413,21 @@ msgid "profile_identifiers_card_title_other"
 msgstr "Identifiers"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:59
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:215
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:215
+msgid "orcid_button_update_identifier"
+msgstr "Update ORCID authorizations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:69
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:117
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:217
+msgid "orcid_button_provide_identifier"
+msgstr "Sign-in to ORCID"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:48
 msgid "orcid_permission_read_limited"
@@ -441,21 +456,6 @@ msgstr "Here are the permissions you are granting to {institutionName} on your O
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:179
 msgid "orcid_permissions_none"
 msgstr "You are not granting any permissions to {institutionName}."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:59
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:215
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:215
-msgid "orcid_button_update_identifier"
-msgstr "Update ORCID authorizations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:69
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:117
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:217
-msgid "orcid_button_provide_identifier"
-msgstr "Sign-in to ORCID"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:151
@@ -522,12 +522,9 @@ msgid "profile_affiliations_no_units"
 msgstr "No related research unit"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:125
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:237
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:295
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:225
-msgid "hal_control_helper"
-msgstr "By linking your Hal account to your Sovisu+ account, you will make your Hal ID more reliable and you will be able to easily submit missing publications to Hal."
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:118
+msgid "hal_control_not_available"
+msgstr "No HAL identifier set"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:200
@@ -536,17 +533,6 @@ msgstr "By linking your Hal account to your Sovisu+ account, you will make your 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:136
 msgid "hal_authentication_success"
 msgstr "HAL authentication successful"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:214
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:156
-msgid "hal_authentication_failure_wrong_protocol"
-msgstr "To link your SoVisu+ account, do not use the ORCID option when authenticating on HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:118
-msgid "hal_control_not_available"
-msgstr "No HAL identifier set"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:138
@@ -594,6 +580,12 @@ msgid "hal_identifier_insert_failure"
 msgstr "Failed to insert HAL identifier into the database"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:214
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:156
+msgid "hal_authentication_failure_wrong_protocol"
+msgstr "To link your SoVisu+ account, do not use the ORCID option when authenticating on HAL"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:158
 msgid "hal_authentication_failure_account_creation"
 msgstr "HAL account must be created on HAL portal before be linked to your SoVisu+ account"
@@ -602,6 +594,14 @@ msgstr "HAL account must be created on HAL portal before be linked to your SoVis
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:182
 msgid "hal_account_linked_tooltip"
 msgstr "Your SoVisu+ account is linked to your HAL account"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:125
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:237
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:295
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:225
+msgid "hal_control_helper"
+msgstr "By linking your Hal account to your Sovisu+ account, you will make your Hal ID more reliable and you will be able to easily submit missing publications to Hal."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
