@@ -1380,13 +1380,17 @@ msgstr "Anglais"
 msgid "language_fr"
 msgstr "Français"
 
-#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:466
-msgid "map_collaborations_tooltip_nb_documents_per_org"
-msgstr " publication(s) en collaboration."
-
 #: src/app/[lang]/dashboard/components/CollaborationMap.tsx:440
-msgid "map_collaborations_tooltip_remaining_orgs"
-msgstr "Autres institutions : "
+msgid "map_collaborations_tooltip_remaining_orgs {nbRemainingOrgs}"
+msgstr "Autres institutions : {nbRemainingOrgs}"
+
+#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:466
+msgid "{nbRemainingDocs, plural, one {{nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_single} other {{nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_multiple}}"
+msgstr "{nbRemainingDocs, plural, one {{nbRemainingDocs} publication en collaboration restante.} other {{nbRemainingDocs} publications en collaboration restantes.}}"
+
+#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:466
+msgid "{nbDocs, plural, one {{nbDocs} map_collaborations_tooltip_nb_documents_per_org_single} other {{nbDocs} map_collaborations_tooltip_nb_documents_per_org_multiple}}"
+msgstr "{nbDocs, plural, one {{nbDocs} publication en collaboration.} other {{nbDocs} publications en collaboration.}}"
 
 #: src/app/[lang]/dashboard/components/CollaborationMap.tsx:462
 msgid "map_collaborations_tooltip_unknown_contributors"

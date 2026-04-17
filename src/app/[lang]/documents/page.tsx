@@ -178,7 +178,6 @@ const DocumentsPage = () => {
   const columns = useMemo<
     MRT_ColumnDef<Document>[]
   >((): MRT_ColumnDef<Document>[] => {
-    const acronyms = currentPerspective?.membershipAcronyms || []
     const typeOptions = DocumentTypeService.toMenuTree()
       .filter((n) => n.value !== DocumentType.Document)
       .map(({ value, depth }) => {
