@@ -1381,8 +1381,8 @@ msgid "language_fr"
 msgstr "Français"
 
 #: src/app/[lang]/dashboard/components/CollaborationMap.tsx:466
-msgid "map_collaborations_tooltip_other_contributors"
-msgstr "Autres collaborateurs : "
+msgid "map_collaborations_tooltip_nb_documents_per_org"
+msgstr " publication(s) en collaboration."
 
 #: src/app/[lang]/dashboard/components/CollaborationMap.tsx:440
 msgid "map_collaborations_tooltip_remaining_orgs"
