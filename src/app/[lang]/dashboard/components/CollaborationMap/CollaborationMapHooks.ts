@@ -12,7 +12,7 @@ import {
 } from 'react'
 import { IAgent } from '@/types/IAgent'
 import geoJson from '@/public/countries.geo.json'
-import { Feature, MultiPolygon, Polygon } from 'geojson'
+import { Feature, GeoJSON, MultiPolygon, Polygon } from 'geojson'
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon'
 import { ECharts } from 'echarts'
 import { debounce } from 'lodash'
@@ -20,13 +20,14 @@ import ReactEcharts, { EChartsOption } from 'echarts-for-react'
 import { GeoComponentOption } from 'echarts/components'
 import useStore from '@/stores/global_store'
 import { DocumentData } from '@/app/[lang]/dashboard/page'
+import centerOfMass from '@turf/center-of-mass'
 
 const BASE_GRID_SIZE = 60
 const ZOOM_THRESHOLD = 0.8
 
 type filteredDataParams = {
-  data : MapCollaborationsProps['data'],
-  yearRange: MapCollaborationsProps['yearRange'],
+  data: MapCollaborationsProps['data']
+  yearRange: MapCollaborationsProps['yearRange']
 }
 
 /**
@@ -36,7 +37,10 @@ type filteredDataParams = {
  * name : name of organization,
  * documents : set of documents done in collaboration with the organization in yearRange
  */
-function filterData ({data, yearRange}: filteredDataParams, currentPerspective : IAgent | null){
+function filterData(
+  { data, yearRange }: filteredDataParams,
+  currentPerspective: IAgent | null,
+) {
   const processedData = Object.entries(data).reduce<
     Record<string, AffiliationData>
   >((acc, [year, docs]) => {
@@ -56,8 +60,7 @@ function filterData ({data, yearRange}: filteredDataParams, currentPerspective :
                   name: affiliation.displayNames[0],
                   documents: {},
                 }
-                acc[affiliation.uid].documents[doc.uid] ??=
-                  doc
+                acc[affiliation.uid].documents[doc.uid] ??= doc
               }
             })
           }
@@ -69,51 +72,54 @@ function filterData ({data, yearRange}: filteredDataParams, currentPerspective :
   return Object.entries(processedData).map(([key, value]) => value)
 }
 
-export function useFilteredData ({data, yearRange}: filteredDataParams) {
+export function useFilteredData({ data, yearRange }: filteredDataParams) {
   const { currentPerspective } = useStore((state) => state.user)
   return useMemo(
-    () => filterData({ data, yearRange },currentPerspective),
+    () => filterData({ data, yearRange }, currentPerspective),
     [data, yearRange, currentPerspective],
   )
 }
-
 
 /**
  * Process filtered data to group organization by country on the map
  * Return set of data indexed by country id from geoJson object
  */
 function groupByCountry(filteredData: AffiliationData[]) {
-  return geoJson.features.reduce<Record<string, AffiliationData[]>>(
-    (acc, feature) => {
-      const country:
-        | Polygon
-        | MultiPolygon
-        | Feature<Polygon | MultiPolygon> = feature.geometry as
-        | Polygon
-        | MultiPolygon
-        | Feature<Polygon | MultiPolygon>
-      acc[feature.id] = filteredData.filter((data) => {
+  return geoJson.features.reduce<
+    [Record<string, AffiliationData[]>, Record<string, Feature<GeoJSON.Point>>]
+  >(
+    ([points, centers], feature) => {
+      const country: Polygon | MultiPolygon | Feature<Polygon | MultiPolygon> =
+        feature.geometry as
+          | Polygon
+          | MultiPolygon
+          | Feature<Polygon | MultiPolygon>
+      centers[feature.properties.name] = centerOfMass(country)
+      points[feature.id] = filteredData.filter((data) => {
         const point: { type: 'Point'; coordinates: number[] } = {
           type: 'Point',
           coordinates: [data.longitude, data.latitude],
         }
         return booleanPointInPolygon(point, country)
       })
-      return acc
+      return [points, centers]
     },
-    {},
+    [{}, {}],
   )
 }
 
-export function useCountryPoints(filteredData: AffiliationData[]){
+export function useCountryPoints(filteredData: AffiliationData[]) {
   return useMemo(() => groupByCountry(filteredData), [filteredData])
 }
-
 
 /**
  * Process points by country to merge ones that are closed depending on map zoom
  */
-function mergePoints(countryPoints : Record<string, AffiliationData[]>, map: ECharts, zoom?: number) : Point[]{
+function mergePoints(
+  countryPoints: Record<string, AffiliationData[]>,
+  map: ECharts,
+  zoom?: number,
+): Point[] {
   const gridSize = Math.max(
     8,
     Math.min(80, BASE_GRID_SIZE / Math.pow(zoom ? zoom : 1, 0.6)),
@@ -163,50 +169,66 @@ function mergePoints(countryPoints : Record<string, AffiliationData[]>, map: ECh
             data: value.data,
           }
         })
-      .flat()
+        .flat()
     })
-  .flat()
+    .flat()
 }
 
-export function useMergedPoints(countryPoints : Record<string, AffiliationData[]>){
-  return useCallback((map: ECharts, zoom?: number) => mergePoints(countryPoints,map,zoom),[countryPoints])
+export function useMergedPoints(
+  countryPoints: Record<string, AffiliationData[]>,
+) {
+  return useCallback(
+    (map: ECharts, zoom?: number) => mergePoints(countryPoints, map, zoom),
+    [countryPoints],
+  )
 }
 
 /**
  * Update merged points on zoom changes
  */
-function handleRoam(chartRef : RefObject<ReactEcharts>, zoomRef : MutableRefObject<number>, mergedFnRef : MutableRefObject<(map: ECharts, zoom?: number) => Point[]>){
+function handleRoam(
+  chartRef: RefObject<ReactEcharts>,
+  zoomRef: MutableRefObject<number>,
+  mergedFnRef: MutableRefObject<(map: ECharts, zoom?: number) => Point[]>,
+) {
   const map = chartRef.current?.getEchartsInstance() as EChartsOption & {
-   geo?: GeoComponentOption
+    geo?: GeoComponentOption
   }
   if (!map) return
   map.resize()
   const zoom = map?.getOption()?.geo?.[0]?.zoom || 1
   if (
-   zoomRef.current === zoom ||
-   Math.abs(zoom - zoomRef.current) < ZOOM_THRESHOLD
+    zoomRef.current === zoom ||
+    Math.abs(zoom - zoomRef.current) < ZOOM_THRESHOLD
   )
-   return
+    return
   zoomRef.current = zoom
   const points = mergedFnRef.current(map, zoom)
   map.setOption({
-   series: [
-     {
-       id: 'collaborations',
-       data: points.map((point) => [
-         point.longitude,
-         point.latitude,
-         point.count,
-         point.data,
-       ]),
-     },
-   ],
+    series: [
+      {
+        id: 'collaborations',
+        data: points.map((point) => [
+          point.longitude,
+          point.latitude,
+          point.count,
+          point.data,
+        ]),
+      },
+    ],
   })
 }
 
-export function useHandleRoam(chartRef : RefObject<ReactEcharts>, mergedFnRef : MutableRefObject<(map: ECharts, zoom?: number) => Point[]>){
+export function useHandleRoam(
+  chartRef: RefObject<ReactEcharts>,
+  mergedFnRef: MutableRefObject<(map: ECharts, zoom?: number) => Point[]>,
+) {
   const zoomRef = useRef<number>(1.15)
-  return useMemo(() => debounce(() => {
-    handleRoam(chartRef, zoomRef, mergedFnRef)
-  }, 150), [chartRef, zoomRef, mergedFnRef])
+  return useMemo(
+    () =>
+      debounce(() => {
+        handleRoam(chartRef, zoomRef, mergedFnRef)
+      }, 150),
+    [chartRef, zoomRef, mergedFnRef],
+  )
 }

@@ -658,6 +658,24 @@ export class DocumentDAO extends AbstractDAO {
                 },
               },
               {
+                contributions: {
+                  some: {
+                    affiliations: {
+                      some : {
+                        names : {
+                          some : {
+                            value: {
+                              contains: searchTerm,
+                              mode: QueryMode.insensitive
+                            },
+                          }
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              {
                 publicationDate: {
                   contains: searchTerm,
                   mode: QueryMode.insensitive,
