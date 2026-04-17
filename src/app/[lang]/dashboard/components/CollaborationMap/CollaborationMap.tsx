@@ -1,23 +1,23 @@
 import { registerMap } from 'echarts/core'
 import ReactEcharts, { EChartsOption } from 'echarts-for-react'
-import {
-  GeoComponentOption,
-} from 'echarts/components'
+import { GeoComponentOption } from 'echarts/components'
 import geoJson from '@/public/countries.geo.json'
 import { useTheme } from '@mui/system'
 import { useEffect, useMemo, useRef } from 'react'
-import { t } from '@lingui/core/macro'
+import { plural, t } from '@lingui/core/macro'
 import { Box, CircularProgress } from '@mui/material'
 
 import { ECharts } from 'echarts'
 import {
   AffiliationData,
   ChartOption,
+  EChartsEventHandler,
   MapCollaborationsProps,
 } from '@/app/[lang]/dashboard/components/CollaborationMap/CollaborationMapTypes'
 import {
   useCountryPoints,
-  useFilteredData, useHandleRoam,
+  useFilteredData,
+  useHandleRoam,
   useMergedPoints,
 } from '@/app/[lang]/dashboard/components/CollaborationMap/CollaborationMapHooks'
 import { DocumentData } from '@/app/[lang]/dashboard/page'
@@ -39,7 +39,7 @@ const CollaborationMap = ({
     yearRange,
   })
 
-  const countryPoints = useCountryPoints(filteredData)
+  const [countryPoints, countryCenters] = useCountryPoints(filteredData)
 
   const mergedPoints = useMergedPoints(countryPoints)
 
@@ -49,12 +49,12 @@ const CollaborationMap = ({
     mergedFnRef.current = mergedPoints
   }, [mergedPoints])
 
-  const handleRoam = useHandleRoam(chartRef,mergedFnRef)
+  const handleRoam = useHandleRoam(chartRef, mergedFnRef)
 
   /**
    * Attach event handler for user map interaction
    */
-  const onEvents = useMemo(
+  const onEvents: Record<string, EChartsEventHandler> = useMemo(
     () => ({
       georoam: () => {
         handleRoam()
@@ -151,9 +151,16 @@ const CollaborationMap = ({
         bottom: '0%',
         right: '10%',
         preserveAspect: true,
+        tooltip: {
+          show: false,
+        },
       },
       tooltip: {
-        show: false,
+        show: true,
+        trigger: 'item',
+        enterable: true,
+        transitionDuration: 0.1,
+        hideDelay: 100,
       },
       toolbox: {
         feature: {
@@ -235,12 +242,19 @@ const CollaborationMap = ({
               orgs.some((org, index) => {
                 //stop iteration after reaching 5th element of list and display number of remaining organization
                 if (index == 4) {
-                  html += `<p>${t`map_collaborations_tooltip_remaining_orgs` + (orgs.length - index)}</p>`
+                  const remainingDocs: Array<[string, DocumentData][]> = []
+                  for (let i = index; i < orgs.length; i++) {
+                    remainingDocs.push(Object.entries(orgs[i][1]))
+                  }
+                  const nbRemainingDocs = remainingDocs.flat().length
+                  const nbRemainingOrgs = orgs.length - index
+                  html += `<p>${t`map_collaborations_tooltip_remaining_orgs ${nbRemainingOrgs}`}</p><a href="" style="text-decoration: none">${plural(nbRemainingDocs, { one: `${nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_single`, other: `${nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_multiple` })}</a>`
                   return true
                 }
                 const name = org[0]
                 const documents = Object.entries(org[1])
-                html += `<li>${name}<ul style="padding:0 0 0 15px; margin: 6px 0 0 0"><li style="margin: 0 0 3px 0"><a>${documents.length}${t`map_collaborations_tooltip_nb_documents_per_org`}</a></li></ul></li>`
+                const nbDocs = documents.length
+                html += `<li>${name}<ul style="padding:0 0 0 15px; margin: 6px 0 0 0"><li style="margin: 0 0 3px 0"><a href="" style="text-decoration: none">${plural(nbDocs, { one: `${nbDocs} map_collaborations_tooltip_nb_documents_per_org_single`, other: `${nbDocs} map_collaborations_tooltip_nb_documents_per_org_multiple` })}</a></li></ul></li>`
                 if (index !== orgs.length - 1) html += `</br>`
 
                 return false
