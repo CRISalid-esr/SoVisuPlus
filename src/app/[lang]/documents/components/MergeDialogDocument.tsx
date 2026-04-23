@@ -8,7 +8,7 @@ import { SourceRecordTypeLabels } from '@/app/[lang]/documents/components/Source
 import { DocumentType, SourceRecordType } from '@prisma/client'
 import { DocumentTypeLabels } from '@/app/[lang]/documents/components/DocumentTypeLabels'
 import { t } from '@lingui/core/macro'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
@@ -20,6 +20,9 @@ import { Contribution } from '@/types/Contribution'
 import { SourceRecordTypeService } from '@/lib/services/SourceRecordTypeService'
 import { useLingui } from '@lingui/react'
 import { useTheme } from '@mui/system'
+import { ParsedUrlQueryInput } from 'node:querystring'
+import { useSearchParams } from 'next/navigation'
+import NextLink from 'next/link'
 
 dayjs.extend(utc)
 
@@ -37,6 +40,7 @@ const MergeDialogDocument = React.memo(
       [toggleSelection, document.uid],
     )
     const theme = useTheme()
+    const searchParams = useSearchParams()
     const lang = Lingui.i18n.locale as ExtendedLanguageCode
     const { _ } = useLingui()
     const supportedLocales =
@@ -54,6 +58,20 @@ const MergeDialogDocument = React.memo(
       const dateFormat = LocaleDateFormats[lang] || 'MM-DD-YYYY'
       dateStr = dayjs(dateStr, 'YYYY-MM-DD').format(dateFormat)
     }
+    const sourcesUrl = useMemo(() => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set('tab', 'sources')
+      const query: ParsedUrlQueryInput = {}
+
+      params.forEach((value, key) => {
+        query[key] = value
+      })
+
+      return {
+        pathname: `/${lang}/documents/${document.uid}`,
+        query,
+      }
+    }, [document.uid, lang, searchParams])
     const contributors = useMemo(
       () =>
         document.contributions
@@ -175,7 +193,12 @@ const MergeDialogDocument = React.memo(
                 )
               })}
             </Box>
-            <Link href={''}>{t`documents_merge_dialog_box_detail_link`}</Link>
+            <Link
+              component={NextLink}
+              href={sourcesUrl}
+              target='_blank'
+              rel='noopener noreferrer'
+            >{t`documents_merge_dialog_box_detail_link`}</Link>
           </Box>
         </Box>
       </Paper>

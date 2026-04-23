@@ -124,6 +124,7 @@ const MergeDialog = ({
                 onChange={(event) => {
                   if (event.target.checked) {
                     setSelectedDocs(selectedDocsInitialization)
+                    setCheckAll(true)
                   } else {
                     setCheckAll(false)
                   }
