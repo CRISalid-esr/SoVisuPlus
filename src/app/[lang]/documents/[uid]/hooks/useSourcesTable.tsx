@@ -451,7 +451,7 @@ export const useSourcesTable = () => {
         globalFilter,
       },
     }),
-    [],
+    [ability, action, columns, data, globalFilter],
   )
 
   const table = useDocumentTable(tableOptions)
