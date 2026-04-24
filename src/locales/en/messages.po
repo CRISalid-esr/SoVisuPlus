@@ -1733,3 +1733,21 @@ msgstr "Coming soon !"
 #: src/app/[lang]/components/WordStream/WordStream.tsx:187
 msgid "wordstream_no_data_to_display"
 msgstr "No data to display"
+
+msgid "documents_merge_dialog_box_title"
+msgstr "Merge publications"
+
+msgid "documents_merge_dialog_box_info_alert"
+msgstr "You are about to merge selected publications."
+
+msgid "documents_merge_dialog_box_check_all_label"
+msgstr "Select all"
+
+msgid "documents_merge_dialog_box_cancel_button"
+msgstr "Cancel"
+
+msgid "documents_merge_dialog_box_merge_button"
+msgstr "Confirm merge ({nbDocs})"
+
+msgid "documents_merge_dialog_box_detail_link"
+msgstr "Detail"

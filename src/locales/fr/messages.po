@@ -1651,7 +1651,7 @@ msgstr "Comité de lecture"
 
 #: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:43
 msgid "sources_page_preprint_icon_label"
-msgstr "Ouvrage en cours d'édition'"
+msgstr "Ouvrage en cours d'édition"
 
 #: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:20
 msgid "sources_page_proceedings_icon_label"
@@ -1733,3 +1733,22 @@ msgstr "C'est bientôt prêt !"
 #: src/app/[lang]/components/WordStream/WordStream.tsx:187
 msgid "wordstream_no_data_to_display"
 msgstr "Aucune donnée à afficher"
+
+msgid "documents_merge_dialog_box_title"
+msgstr "Fusionner les publications"
+
+msgid "documents_merge_dialog_box_info_alert"
+msgstr "Vous êtes sur le point de fusionner les publications sélectionnées."
+
+msgid "documents_merge_dialog_box_check_all_label"
+msgstr "Tout sélectionner"
+
+msgid "documents_merge_dialog_box_cancel_button"
+msgstr "Annuler"
+
+#. js-lingui-explicit-id
+msgid "documents_merge_dialog_box_merge_button"
+msgstr "Confirmer la fusion ({nbDocs})"
+
+msgid "documents_merge_dialog_box_detail_link"
+msgstr "Détail"
