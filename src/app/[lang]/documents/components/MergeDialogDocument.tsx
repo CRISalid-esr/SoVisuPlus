@@ -74,22 +74,24 @@ const MergeDialogDocument = React.memo(
     }, [document.uid, lang, searchParams])
     const contributors = useMemo(
       () =>
-        document.contributions
-          .map((contribution: Contribution) => {
-            const person = contribution.person
-            const { firstName, lastName } = person
-            let name = [firstName, lastName].filter(Boolean).join(' ')
-            if (name.match(/^\s*$/)) {
-              name = person.getDisplayName()
-            }
-            return name
-          })
-          .filter(Boolean)
-          .join(', '),
+        document.contributions.length > 0
+          ? document.contributions
+              .map((contribution: Contribution) => {
+                const person = contribution.person
+                const { firstName, lastName } = person
+                let name = [firstName, lastName].filter(Boolean).join(' ')
+                if (name.match(/^\s*$/)) {
+                  name = person.getDisplayName()
+                }
+                return name
+              })
+              .filter(Boolean)
+              .join(', ')
+          : null,
       [document.contributions],
     )
     const journal = document.journal?.title
-    const info = dateStr + ' • ' + contributors
+    const info = dateStr + (contributors ? ' • ' + contributors : '')
 
     const types = useMemo(() => {
       const types: Array<{
@@ -100,9 +102,7 @@ const MergeDialogDocument = React.memo(
         const type = SourceRecordTypeService.getPreciseType(
           record.documentTypes,
         )
-        if (type) {
-          types.push({ platform: record.platform, value: type })
-        }
+        types.push({ platform: record.platform, value: type })
       })
       return types
     }, [document.documentType, document.records])

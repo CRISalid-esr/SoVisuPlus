@@ -111,10 +111,9 @@ export const useSourcesTable = () => {
           row: MRT_Row<DocumentRecord>
           renderedCellValue: ReactNode
         }) {
-          let type = SourceRecordTypeService.getPreciseType(
+          const type = SourceRecordTypeService.getPreciseType(
             row.original.documentTypes,
           )
-          type = type ? type : SourceRecordType.Unknown
           return (
             <Tooltip title={_(SourceRecordTypeLabels[type])}>
               {SourceRecordTypeIcons[type]}
@@ -123,10 +122,9 @@ export const useSourcesTable = () => {
         },
         filterFn: (row, id, value) => {
           if (!value || value.length === 0) return true
-          let type = SourceRecordTypeService.getPreciseType(
+          const type = SourceRecordTypeService.getPreciseType(
             row.original.documentTypes,
           )
-          type = type ? type : SourceRecordType.Unknown
           return value.includes(type)
         },
       },
