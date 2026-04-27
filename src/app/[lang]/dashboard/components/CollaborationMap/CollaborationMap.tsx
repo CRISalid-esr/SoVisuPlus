@@ -1,4 +1,4 @@
-import { registerMap } from 'echarts/core'
+import { ECElementEvent, registerMap } from 'echarts/core'
 import ReactEcharts, { EChartsOption } from 'echarts-for-react'
 import { GeoComponentOption } from 'echarts/components'
 import geoJson from '@/public/countries.geo.json'
@@ -30,6 +30,7 @@ const CollaborationMap = ({
   const theme = useTheme()
 
   const chartRef = useRef<ReactEcharts>(null)
+  const lockedPointRef = useRef<number[] | null>(null)
 
   const map = JSON.stringify(geoJson)
   registerMap('world', map)
@@ -115,6 +116,59 @@ const CollaborationMap = ({
     })
   }, [countryPoints])
 
+  useEffect(() => {
+    const chart = chartRef.current?.getEchartsInstance() as EChartsOption & {
+      geo?: GeoComponentOption
+    }
+    if (!chart) return
+    const handleClick = (params: ECElementEvent) => {
+      if (params.seriesType === 'scatter') {
+        const mouseEvent = params.event?.event as MouseEvent
+        lockedPointRef.current = [mouseEvent.offsetX, mouseEvent.offsetY]
+
+        chart.dispatchAction({
+          type: 'showTip',
+          seriesIndex: params.seriesIndex,
+          dataIndex: params.dataIndex,
+        })
+
+        return
+      }
+
+      if (params.componentType === 'geo') {
+        const countryName = params.name
+        const center = countryCenters[countryName].geometry.coordinates
+
+        if (!center) {
+          return
+        }
+
+        chart.setOption({
+          geo: {
+            center: center,
+            zoom: 4,
+          },
+        })
+
+        return
+      }
+    }
+    const handleDocumentClick = (e: MouseEvent) => {
+      const chartDom = chart.getDom()
+      if (chartDom && !chartDom.contains(e.target as Node)) {
+        lockedPointRef.current = null
+        chart.dispatchAction({
+          type: 'hideTip',
+        })
+      }
+    }
+    document.addEventListener('click', handleDocumentClick)
+    chart.on('click', handleClick)
+    return () => {
+      document.removeEventListener('click', handleDocumentClick)
+      chart.off('click', handleClick)
+    }
+  }, [countryCenters])
   /**
    * Zoom in or out action perform by custom toolbox zoom buttons
    * @param out boolean telling whether it must perform zoom out instead of in
@@ -158,9 +212,16 @@ const CollaborationMap = ({
       tooltip: {
         show: true,
         trigger: 'item',
+        triggerOn: 'mousemove|click',
         enterable: true,
-        transitionDuration: 0.1,
-        hideDelay: 100,
+        //transitionDuration: 0.1,
+        //hideDelay: 100,
+        position: function (point, params, dom, rect, size) {
+          if (lockedPointRef.current) {
+            return lockedPointRef.current
+          }
+          return point
+        },
       },
       toolbox: {
         feature: {
