@@ -960,6 +960,24 @@ describe('DocumentDAO', () => {
                 },
               },
               {
+                contributions: {
+                  some: {
+                    affiliations: {
+                      some: {
+                        names: {
+                          some: {
+                            value: {
+                              contains: 'Sample',
+                              mode: Prisma.QueryMode.insensitive,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              {
                 publicationDate: {
                   contains: 'Sample',
                   mode: Prisma.QueryMode.insensitive,

@@ -1,9 +1,9 @@
-import { registerMap } from 'echarts/core'
+import { ECElementEvent, registerMap } from 'echarts/core'
 import ReactEcharts, { EChartsOption } from 'echarts-for-react'
 import { GeoComponentOption } from 'echarts/components'
 import geoJson from '@/public/countries.geo.json'
 import { useTheme } from '@mui/system'
-import { useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { plural, t } from '@lingui/core/macro'
 import { Box, CircularProgress } from '@mui/material'
 
@@ -21,6 +21,8 @@ import {
   useMergedPoints,
 } from '@/app/[lang]/dashboard/components/CollaborationMap/CollaborationMapHooks'
 import { DocumentData } from '@/app/[lang]/dashboard/page'
+import * as Lingui from '@lingui/core'
+import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 
 const CollaborationMap = ({
   yearRange,
@@ -28,8 +30,10 @@ const CollaborationMap = ({
   loading = false,
 }: MapCollaborationsProps) => {
   const theme = useTheme()
+  const lang = Lingui.i18n.locale as ExtendedLanguageCode
 
   const chartRef = useRef<ReactEcharts>(null)
+  const lockedPointRef = useRef<number[] | null>(null)
 
   const map = JSON.stringify(geoJson)
   registerMap('world', map)
@@ -115,6 +119,59 @@ const CollaborationMap = ({
     })
   }, [countryPoints])
 
+  useEffect(() => {
+    const chart = chartRef.current?.getEchartsInstance() as EChartsOption & {
+      geo?: GeoComponentOption
+    }
+    if (!chart) return
+    const handleClick = (params: ECElementEvent) => {
+      if (params.seriesType === 'scatter') {
+        const mouseEvent = params.event?.event as MouseEvent
+        lockedPointRef.current = [mouseEvent.offsetX, mouseEvent.offsetY]
+
+        chart.dispatchAction({
+          type: 'showTip',
+          seriesIndex: params.seriesIndex,
+          dataIndex: params.dataIndex,
+        })
+
+        return
+      }
+
+      if (params.componentType === 'geo') {
+        const countryName = params.name
+        const center = countryCenters[countryName].geometry.coordinates
+
+        if (!center) {
+          return
+        }
+
+        chart.setOption({
+          geo: {
+            center: center,
+            zoom: 4,
+          },
+        })
+
+        return
+      }
+    }
+    const handleDocumentClick = (e: MouseEvent) => {
+      const chartDom = chart.getDom()
+      if (chartDom && !chartDom.contains(e.target as Node)) {
+        lockedPointRef.current = null
+        chart.dispatchAction({
+          type: 'hideTip',
+        })
+      }
+    }
+    document.addEventListener('click', handleDocumentClick)
+    chart.on('click', handleClick)
+    return () => {
+      document.removeEventListener('click', handleDocumentClick)
+      chart.off('click', handleClick)
+    }
+  }, [countryCenters])
   /**
    * Zoom in or out action perform by custom toolbox zoom buttons
    * @param out boolean telling whether it must perform zoom out instead of in
@@ -134,6 +191,18 @@ const CollaborationMap = ({
       }
     }
   }
+
+  const navigateToDetailsPage = useCallback(
+    (structures: string[]): string => {
+      const structuresStr = structures
+        .map((structure) => encodeURIComponent(structure))
+        .join(',')
+      const years = yearRange.join(',')
+
+      return `/${lang}/documents/?structures=${structuresStr}&years=${years}`
+    },
+    [lang, yearRange],
+  )
 
   const option: ChartOption = useMemo(
     () => ({
@@ -158,9 +227,16 @@ const CollaborationMap = ({
       tooltip: {
         show: true,
         trigger: 'item',
+        triggerOn: 'mousemove|click',
         enterable: true,
-        transitionDuration: 0.1,
-        hideDelay: 100,
+        //transitionDuration: 0.1,
+        //hideDelay: 100,
+        position: function (point, params, dom, rect, size) {
+          if (lockedPointRef.current) {
+            return lockedPointRef.current
+          }
+          return point
+        },
       },
       toolbox: {
         feature: {
@@ -248,13 +324,17 @@ const CollaborationMap = ({
                   }
                   const nbRemainingDocs = remainingDocs.flat().length
                   const nbRemainingOrgs = orgs.length - index
-                  html += `<p>${t`map_collaborations_tooltip_remaining_orgs ${nbRemainingOrgs}`}</p><a href="" style="text-decoration: none">${plural(nbRemainingDocs, { one: `${nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_single`, other: `${nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_multiple` })}</a>`
+                  const remainingOrgsName: string[] = []
+                  for (let i = index; i < orgs.length; i++) {
+                    remainingOrgsName.push(orgs[i][0])
+                  }
+                  html += `<p>${t`map_collaborations_tooltip_remaining_orgs ${nbRemainingOrgs}`}</p><a href=${navigateToDetailsPage(remainingOrgsName)} style="text-decoration: none">${plural(nbRemainingDocs, { one: `${nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_single`, other: `${nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_multiple` })}</a>`
                   return true
                 }
                 const name = org[0]
                 const documents = Object.entries(org[1])
                 const nbDocs = documents.length
-                html += `<li>${name}<ul style="padding:0 0 0 15px; margin: 6px 0 0 0"><li style="margin: 0 0 3px 0"><a href="" style="text-decoration: none">${plural(nbDocs, { one: `${nbDocs} map_collaborations_tooltip_nb_documents_per_org_single`, other: `${nbDocs} map_collaborations_tooltip_nb_documents_per_org_multiple` })}</a></li></ul></li>`
+                html += `<li>${name}<ul style="padding:0 0 0 15px; margin: 6px 0 0 0"><li style="margin: 0 0 3px 0"><a href=${navigateToDetailsPage([name])} style="text-decoration: none">${plural(nbDocs, { one: `${nbDocs} map_collaborations_tooltip_nb_documents_per_org_single`, other: `${nbDocs} map_collaborations_tooltip_nb_documents_per_org_multiple` })}</a></li></ul></li>`
                 if (index !== orgs.length - 1) html += `</br>`
 
                 return false
@@ -268,7 +348,12 @@ const CollaborationMap = ({
       ],
       lazyUpdate: true,
     }),
-    [theme],
+    [
+      navigateToDetailsPage,
+      theme.palette.primary.dark,
+      theme.palette.primary.light,
+      theme.palette.primary.main,
+    ],
   )
 
   return (
