@@ -9,6 +9,7 @@ import { DocumentData } from '@/app/[lang]/dashboard/page'
 import { ECharts } from 'echarts'
 
 export type AffiliationData = {
+  uid: string
   longitude: number
   latitude: number
   name: string
@@ -19,7 +20,10 @@ export type Point = {
   longitude: number
   latitude: number
   count: number
-  data: Record<string, Record<string, DocumentData>>
+  data: Record<
+    string,
+    { name: string; documents: Record<string, DocumentData> }
+  >
 }
 
 export type EChartsEventHandler = (

@@ -658,24 +658,6 @@ export class DocumentDAO extends AbstractDAO {
                 },
               },
               {
-                contributions: {
-                  some: {
-                    affiliations: {
-                      some: {
-                        names: {
-                          some: {
-                            value: {
-                              contains: searchTerm,
-                              mode: QueryMode.insensitive,
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              {
                 publicationDate: {
                   contains: searchTerm,
                   mode: QueryMode.insensitive,
@@ -740,14 +722,23 @@ export class DocumentDAO extends AbstractDAO {
         contributionFilters.push(nameFilter)
       }
 
-      if (filter.id === 'structures' && Array.isArray(filter.value)) {
+      if (
+        filter.id === 'structures' &&
+        Array.isArray(filter.value) &&
+        filter.value.length > 0
+      ) {
         const structuresFilter: Prisma.DocumentWhereInput = {
           contributions: {
             some: {
+              person: {
+                uid: {
+                  notIn: contributorUids,
+                },
+              },
               affiliations: {
                 some: {
-                  displayNames: {
-                    hasSome: filter.value,
+                  uid: {
+                    in: filter.value,
                   },
                 },
               },

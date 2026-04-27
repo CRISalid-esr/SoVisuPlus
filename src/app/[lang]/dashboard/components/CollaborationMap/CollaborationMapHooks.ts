@@ -55,6 +55,7 @@ function filterData(
                 affiliation.displayNames.length > 0
               ) {
                 acc[affiliation.uid] ??= {
+                  uid: affiliation.uid,
                   longitude: affiliation.places[0].longitude,
                   latitude: affiliation.places[0].latitude,
                   name: affiliation.displayNames[0],
@@ -131,7 +132,10 @@ function mergePoints(
         {
           coordinates: [number, number]
           count: number
-          data: Record<string, Record<string, DocumentData>>
+          data: Record<
+            string,
+            { name: string; documents: Record<string, DocumentData> }
+          >
         }
       > = {}
       points.forEach((point) => {
@@ -152,7 +156,10 @@ function mergePoints(
           grid[key].coordinates[1] += y
           grid[key].count += 1
         }
-        grid[key].data[point.name] = point.documents
+        grid[key].data[point.uid] = {
+          name: point.name,
+          documents: point.documents,
+        }
       })
       return Object.entries(grid)
         .map(([key, value]) => {

@@ -193,13 +193,16 @@ const CollaborationMap = ({
   }
 
   const navigateToDetailsPage = useCallback(
-    (structures: string[]): string => {
-      const structuresStr = structures
-        .map((structure) => encodeURIComponent(structure))
-        .join(',')
+    (structures: { uid: string; name: string }[]): string => {
+      const encodedStructures = JSON.stringify(
+        structures.map((structure) => ({
+          uid: encodeURIComponent(structure.uid),
+          name: encodeURIComponent(structure.name),
+        })),
+      )
       const years = yearRange.join(',')
 
-      return `/${lang}/documents/?structures=${structuresStr}&years=${years}`
+      return `/${lang}/documents/?structures=${encodedStructures}&years=${years}`
     },
     [lang, yearRange],
   )
@@ -311,30 +314,41 @@ const CollaborationMap = ({
                 number,
                 number,
                 number,
-                Record<string, Record<string, DocumentData>>,
+                Record<
+                  string,
+                  { name: string; documents: Record<string, DocumentData> }
+                >,
               ]
               let html = `<div style="margin:0; padding: 0"><ul style="padding:0; margin: 0">`
               const orgs = Object.entries(item[3])
               orgs.some((org, index) => {
                 //stop iteration after reaching 5th element of list and display number of remaining organization
                 if (index == 4) {
-                  const remainingDocs: Array<[string, DocumentData][]> = []
+                  const remainingDocs: Record<string, DocumentData> = {}
                   for (let i = index; i < orgs.length; i++) {
-                    remainingDocs.push(Object.entries(orgs[i][1]))
+                    const orgDocs = orgs[i][1].documents
+                    Object.entries(orgDocs).forEach(
+                      ([uid, doc]) => (remainingDocs[uid] ??= doc),
+                    )
                   }
-                  const nbRemainingDocs = remainingDocs.flat().length
+                  const nbRemainingDocs = Object.entries(remainingDocs).length
                   const nbRemainingOrgs = orgs.length - index
-                  const remainingOrgsName: string[] = []
+                  const remainingOrgsUidName: { uid: string; name: string }[] =
+                    []
                   for (let i = index; i < orgs.length; i++) {
-                    remainingOrgsName.push(orgs[i][0])
+                    remainingOrgsUidName.push({
+                      uid: orgs[i][0],
+                      name: orgs[i][1].name,
+                    })
                   }
-                  html += `<p>${t`map_collaborations_tooltip_remaining_orgs ${nbRemainingOrgs}`}</p><a href=${navigateToDetailsPage(remainingOrgsName)} style="text-decoration: none">${plural(nbRemainingDocs, { one: `${nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_single`, other: `${nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_multiple` })}</a>`
+                  html += `<p>${t`map_collaborations_tooltip_remaining_orgs ${nbRemainingOrgs}`}</p><a href=${navigateToDetailsPage(remainingOrgsUidName)} style="text-decoration: none">${plural(nbRemainingDocs, { one: `${nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_single`, other: `${nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_multiple` })}</a>`
                   return true
                 }
-                const name = org[0]
-                const documents = Object.entries(org[1])
+                const uid = org[0]
+                const name = org[1].name
+                const documents = Object.entries(org[1].documents)
                 const nbDocs = documents.length
-                html += `<li>${name}<ul style="padding:0 0 0 15px; margin: 6px 0 0 0"><li style="margin: 0 0 3px 0"><a href=${navigateToDetailsPage([name])} style="text-decoration: none">${plural(nbDocs, { one: `${nbDocs} map_collaborations_tooltip_nb_documents_per_org_single`, other: `${nbDocs} map_collaborations_tooltip_nb_documents_per_org_multiple` })}</a></li></ul></li>`
+                html += `<li>${name}<ul style="padding:0 0 0 15px; margin: 6px 0 0 0"><li style="margin: 0 0 3px 0"><a href=${navigateToDetailsPage([{ uid: uid, name: name }])} style="text-decoration: none">${plural(nbDocs, { one: `${nbDocs} map_collaborations_tooltip_nb_documents_per_org_single`, other: `${nbDocs} map_collaborations_tooltip_nb_documents_per_org_multiple` })}</a></li></ul></li>`
                 if (index !== orgs.length - 1) html += `</br>`
 
                 return false

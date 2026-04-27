@@ -15,8 +15,10 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Link,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -24,7 +26,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { MaterialReactTable } from 'material-react-table'
 import { useRouter, useSearchParams } from 'next/navigation' // Import useRouter
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import DocumentHeader from './components/DocumentHeader'
 import SyncIcon from '@mui/icons-material/Sync'
 import DocumentSyncDialog from '@/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog'
@@ -118,10 +120,16 @@ const DocumentsPage = () => {
 
     router.push(`/${lang}/documents?${params.toString()}`)
   }
-  const { table, selectedDocuments } = usePublicationsTable(
-    selectedTab,
-    triggerReloadList,
-    setOpenDialog,
+  const { table, selectedDocuments, structuresFilter, setStructuresFilter } =
+    usePublicationsTable(selectedTab, triggerReloadList, setOpenDialog)
+
+  const onDeleteStructureFilter = useCallback(
+    (structure: { uid: string; name: string }) => {
+      setStructuresFilter(
+        structuresFilter.filter((s) => s.uid !== structure.uid),
+      )
+    },
+    [setStructuresFilter, structuresFilter],
   )
 
   const onMergeDocuments = async (documentUids: string[]) => {
@@ -247,7 +255,27 @@ const DocumentsPage = () => {
           />
         </Can>
       )}
-
+      <Box sx={{ marginBottom: theme.spacing(4) }}>
+        {structuresFilter.map((structure) => {
+          const hasDuplicate = structuresFilter.some(
+            (s) => s.uid !== structure.uid && s.name === structure.name,
+          )
+          return (
+            <Tooltip
+              key={structure.uid}
+              open={hasDuplicate}
+              title={structure.uid}
+            >
+              <Chip
+                key={structure.uid}
+                sx={{ margin: '0 5px 10px 0' }}
+                label={structure.name}
+                onDelete={() => onDeleteStructureFilter(structure)}
+              />
+            </Tooltip>
+          )
+        })}
+      </Box>
       <MaterialReactTable<Document> table={table} />
       <MergeDialog
         open={openDialog}
