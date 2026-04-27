@@ -658,6 +658,24 @@ export class DocumentDAO extends AbstractDAO {
                 },
               },
               {
+                contributions: {
+                  some: {
+                    affiliations: {
+                      some: {
+                        names: {
+                          some: {
+                            value: {
+                              contains: searchTerm,
+                              mode: QueryMode.insensitive,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              {
                 publicationDate: {
                   contains: searchTerm,
                   mode: QueryMode.insensitive,
@@ -720,6 +738,23 @@ export class DocumentDAO extends AbstractDAO {
           },
         }
         contributionFilters.push(nameFilter)
+      }
+
+      if (filter.id === 'structures' && Array.isArray(filter.value)) {
+        const structuresFilter: Prisma.DocumentWhereInput = {
+          contributions: {
+            some: {
+              affiliations: {
+                some: {
+                  displayNames: {
+                    hasSome: filter.value,
+                  },
+                },
+              },
+            },
+          },
+        }
+        contributionFilters.push(structuresFilter)
       }
 
       if (filter.id === 'date' && Array.isArray(filter.value)) {

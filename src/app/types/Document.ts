@@ -7,8 +7,6 @@ import { getStringInLocale } from '@/utils/getStringInLocale'
 import { Journal, JournalJson } from '@/types/Journal'
 import { DocumentState, DocumentType, OAStatus } from '@prisma/client'
 import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
-import { BibliographicPlatform } from '@/types/BibliographicPlatform'
-import { toUTCISOString } from '@/utils/toUTCISOString'
 
 interface DocumentJson {
   uid: string

@@ -29,18 +29,33 @@ import {
   OAStatus,
   PersonIdentifierType as DbPersonIdentifierType,
 } from '@prisma/client'
-import CollaborationMap from '@/app/[lang]/dashboard/components/CollaborationMap'
+import CollaborationMap from '@/app/[lang]/dashboard/components/CollaborationMap/CollaborationMap'
 
 const DEFAULT_TOP_N = 10
 const DEFAULT_START_YEAR = 2010
 const DEFAULT_MIN_FONT = 15
 const DEFAULT_MAX_FONT = 30
 
-const IDENTIFIERS_TO_SHOW: DbPersonIdentifierType[] = [
-  DbPersonIdentifierType.idhals,
-  DbPersonIdentifierType.orcid,
-  DbPersonIdentifierType.idref,
-]
+export type DocumentData = {
+  uid: string
+  oaStatus: OAStatus | null
+  publicationDate: string | null
+  upwOAStatus: OAStatus | null
+  contributions: {
+    person: {
+      uid: string
+      displayName: string | null
+    }
+    affiliations: {
+      uid: string
+      displayNames: string[]
+      places: {
+        latitude: number
+        longitude: number
+      }[]
+    }[]
+  }[]
+}
 
 const DashboardPage = () => {
   const theme = useTheme()
@@ -49,26 +64,7 @@ const DashboardPage = () => {
   const [documents, setDocuments] = useState<
     Record<
       number,
-      {
-        uid: string
-        oaStatus: OAStatus | null
-        publicationDate: string | null
-        upwOAStatus: OAStatus | null
-        contributions: {
-          person: {
-            uid: string
-            displayName: string | null
-          }
-          affiliations: {
-            uid: string
-            displayNames: string[]
-            places: {
-              latitude: number
-              longitude: number
-            }[]
-          }[]
-        }[]
-      }[]
+      DocumentData[]
     >
   >([])
   const [loading, setLoading] = useState(false)
