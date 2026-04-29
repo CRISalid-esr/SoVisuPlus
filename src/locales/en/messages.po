@@ -1491,6 +1491,12 @@ msgstr "Back to my page"
 msgid "sidebar_help_button"
 msgstr "Help"
 
+msgid "sidebar_account"
+msgstr "See my account"
+
+msgid "sidebar_logout"
+msgstr "Logout"
+
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:118
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:195
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:214
