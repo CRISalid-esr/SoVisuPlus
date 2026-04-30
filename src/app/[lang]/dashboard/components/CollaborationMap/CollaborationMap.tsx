@@ -23,6 +23,7 @@ import {
 import { DocumentData } from '@/app/[lang]/dashboard/page'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
+import { useSearchParams } from 'next/navigation'
 
 const CollaborationMap = ({
   yearRange,
@@ -31,6 +32,7 @@ const CollaborationMap = ({
 }: MapCollaborationsProps) => {
   const theme = useTheme()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
+  const searchParams = useSearchParams()
 
   const chartRef = useRef<ReactEcharts>(null)
   const lockedPointRef = useRef<number[] | null>(null)
@@ -201,10 +203,12 @@ const CollaborationMap = ({
         })),
       )
       const years = yearRange.join(',')
-
-      return `/${lang}/documents/?structures=${encodedStructures}&years=${years}`
+      const params = new URLSearchParams(searchParams.toString())
+      params.set('structures', encodedStructures)
+      params.set('years', years)
+      return `/${lang}/documents?${params.toString()}`
     },
-    [lang, yearRange],
+    [lang, searchParams, yearRange],
   )
 
   const option: ChartOption = useMemo(

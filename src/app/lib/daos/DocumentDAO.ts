@@ -1070,6 +1070,11 @@ export class DocumentDAO extends AbstractDAO {
         person: {
           uid: string
           displayName: string | null
+          memberships: {
+            researchUnit: {
+              uid: string
+            }
+          }[]
         }
         affiliations: {
           uid: string
@@ -1098,6 +1103,15 @@ export class DocumentDAO extends AbstractDAO {
               select: {
                 uid: true,
                 displayName: true,
+                memberships: {
+                  select: {
+                    researchUnit: {
+                      select: {
+                        uid: true,
+                      },
+                    },
+                  },
+                },
               },
             },
             affiliations: {

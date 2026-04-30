@@ -48,7 +48,10 @@ function filterData(
       docs.map((doc) => {
         doc.contributions.map((contribution) => {
           const contributor = contribution.person
-          if (!(contributor.uid == currentPerspective?.uid)) {
+          if (
+            currentPerspective?.type == 'person' &&
+            contributor.uid != currentPerspective?.uid
+          ) {
             contribution.affiliations.map((affiliation) => {
               if (
                 affiliation.places.length > 0 &&
@@ -64,7 +67,29 @@ function filterData(
                 acc[affiliation.uid].documents[doc.uid] ??= doc
               }
             })
+          } else if (currentPerspective?.type == 'research_unit') {
+            const isMember = contributor.memberships.some(
+              ({ researchUnit }) => researchUnit.uid == currentPerspective?.uid,
+            )
+            if (!isMember) {
+              contribution.affiliations.map((affiliation) => {
+                if (
+                  affiliation.places.length > 0 &&
+                  affiliation.displayNames.length > 0
+                ) {
+                  acc[affiliation.uid] ??= {
+                    uid: affiliation.uid,
+                    longitude: affiliation.places[0].longitude,
+                    latitude: affiliation.places[0].latitude,
+                    name: affiliation.displayNames[0],
+                    documents: {},
+                  }
+                  acc[affiliation.uid].documents[doc.uid] ??= doc
+                }
+              })
+            }
           }
+          //TODO : implement institution case whn available
         })
       })
     }

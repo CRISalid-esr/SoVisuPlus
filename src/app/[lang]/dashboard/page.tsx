@@ -45,6 +45,11 @@ export type DocumentData = {
     person: {
       uid: string
       displayName: string | null
+      memberships: {
+        researchUnit: {
+          uid: string
+        }
+      }[]
     }
     affiliations: {
       uid: string
@@ -61,12 +66,7 @@ const DashboardPage = () => {
   const theme = useTheme()
   const { _ } = useLingui()
   const { currentPerspective } = useStore((state) => state.user)
-  const [documents, setDocuments] = useState<
-    Record<
-      number,
-      DocumentData[]
-    >
-  >([])
+  const [documents, setDocuments] = useState<Record<number, DocumentData[]>>([])
   const [loading, setLoading] = useState(false)
   const lang = (Lingui.i18n.locale || 'ul') as ExtendedLanguageCode
   const entityType = currentPerspective?.type
@@ -126,6 +126,11 @@ const DashboardPage = () => {
               person: {
                 uid: string
                 displayName: string | null
+                memberships: {
+                  researchUnit: {
+                    uid: string
+                  }
+                }[]
               }
               affiliations: {
                 uid: string
