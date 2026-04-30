@@ -93,18 +93,23 @@ const MergeDialogDocument = React.memo(
     const journal = document.journal?.title
     const info = dateStr + (contributors ? ' • ' + contributors : '')
 
-    const types = useMemo(() => {
-      const types: Array<{
+    const records = useMemo(() => {
+      const records: Array<{
+        url: string | null
         platform: BibliographicPlatform | null
         value: DocumentType | SourceRecordType
-      }> = [{ platform: null, value: document.documentType }]
+      }> = [{ url: null, platform: null, value: document.documentType }]
       document.records.forEach((record) => {
         const type = SourceRecordTypeService.getPreciseType(
           record.documentTypes,
         )
-        types.push({ platform: record.platform, value: type })
+        records.push({
+          url: record.url,
+          platform: record.platform,
+          value: type,
+        })
       })
-      return types
+      return records
     }, [document.documentType, document.records])
 
     return (
@@ -150,10 +155,11 @@ const MergeDialogDocument = React.memo(
             }}
           >
             <Box sx={{ display: 'flex', gap: '10px' }}>
-              {types.map((type) => {
+              {records.map((record) => {
                 let imageElement = null
-                if (type.platform) {
-                  const metadata = BibliographicPlatformMetadata[type.platform]
+                if (record.platform) {
+                  const metadata =
+                    BibliographicPlatformMetadata[record.platform]
                   imageElement = (
                     <Image
                       src={metadata?.icon || '/icons/default.png'}
@@ -168,25 +174,30 @@ const MergeDialogDocument = React.memo(
                 return (
                   <Paper
                     variant='outlined'
-                    key={type.platform ?? 'default'}
+                    component={record.platform ? Link : 'div'}
+                    href={record.url ?? undefined}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    key={record.platform ?? 'default'}
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
                       padding: '5px 5px',
                       gap: '6px',
-                      backgroundColor: type.platform
+                      backgroundColor: record.platform
                         ? 'inherit'
                         : theme.palette.lightSecondaryContainer,
+                      textDecoration: 'none',
                     }}
                   >
                     <Typography>
-                      {type.platform
+                      {record.platform
                         ? _(
                             SourceRecordTypeLabels[
-                              type.value as SourceRecordType
+                              record.value as SourceRecordType
                             ],
                           )
-                        : _(DocumentTypeLabels[type.value as DocumentType])}
+                        : _(DocumentTypeLabels[record.value as DocumentType])}
                     </Typography>
                     {imageElement}
                   </Paper>
