@@ -12,6 +12,7 @@ import { Journal } from '@/types/Journal'
 import { I18nProvider } from '@lingui/react'
 import { i18n } from '@lingui/core'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
+import publicationDate from '@/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate'
 
 jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(() => new URLSearchParams('')),
@@ -133,6 +134,11 @@ describe('MergeDialogDocument component', () => {
             document={mockDocument}
             checked={true}
             toggleSelection={toggle}
+            formattedData={{
+              publicationDate: true,
+              contributors: {},
+              journal: true,
+            }}
           />
         </I18nProvider>
       </ThemeProvider>,
@@ -168,19 +174,28 @@ describe('MergeDialogDocument component', () => {
             document={mockDocumentWithJournal}
             checked={true}
             toggleSelection={toggle}
+            formattedData={{
+              publicationDate: true,
+              contributors: {
+                'John Doe' : true,
+                'Marie Dupuis' : true
+              },
+              journal: true,
+            }}
           />
         </I18nProvider>
       </ThemeProvider>,
     )
     const title = screen.getByText('Test Title 2')
-    const info = screen.getByText(/John Doe, Marie Dupuis/)
+    const date = screen.getByText('documents_page_publication_date_column_no_date_available')
+    const contributor1 = screen.getByText('John Doe')
+    const contributor2 = screen.getByText('Marie Dupuis')
     const journal = screen.getByText('Nature')
     const detailLink = screen.getByRole('link')
     expect(title).toBeInTheDocument()
-    expect(info).toBeInTheDocument()
-    expect(info).toHaveTextContent(
-      'documents_page_publication_date_column_no_date_available',
-    )
+    expect(date).toBeInTheDocument()
+    expect(contributor1).toBeInTheDocument()
+    expect(contributor2).toBeInTheDocument()
     expect(journal).toBeInTheDocument()
     expect(detailLink).toHaveAttribute('href', '/en/documents/doc2?tab=sources')
   })

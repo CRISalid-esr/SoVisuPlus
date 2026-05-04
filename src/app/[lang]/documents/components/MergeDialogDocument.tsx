@@ -30,10 +30,15 @@ type MergeDialogDocumentProps = {
   document: Document
   checked: boolean
   toggleSelection: (uid: string) => void
+  formattedData: {
+    publicationDate:boolean,
+    contributors:Record<string,boolean>,
+    journal:boolean
+  }
 }
 
 const MergeDialogDocument = React.memo(
-  ({ document, checked, toggleSelection }: MergeDialogDocumentProps) => {
+  ({ document, checked, toggleSelection, formattedData }: MergeDialogDocumentProps) => {
     MergeDialogDocument.displayName = 'MergeDialogDocument'
     const handleChange = useCallback(
       () => toggleSelection(document.uid),
@@ -86,12 +91,10 @@ const MergeDialogDocument = React.memo(
                 return name
               })
               .filter(Boolean)
-              .join(', ')
           : null,
       [document.contributions],
     )
     const journal = document.journal?.title
-    const info = dateStr + (contributors ? ' • ' + contributors : '')
 
     const records = useMemo(() => {
       const records: Array<{
@@ -112,6 +115,7 @@ const MergeDialogDocument = React.memo(
       return records
     }, [document.documentType, document.records])
 
+    const [boldDate, boldContributors, boldJournal] = useMemo(()=> [!formattedData.publicationDate, formattedData.contributors, !formattedData.journal],[formattedData])
     return (
       <Paper
         elevation={1}
@@ -136,17 +140,63 @@ const MergeDialogDocument = React.memo(
           >
             {localizedTitle.value}
           </Typography>
-          <Typography variant={'caption'}>
-            {info}
+          <Box>
+            <Typography
+              variant={'caption'}
+              sx={{
+                fontWeight: boldDate ? 'bold' : 'inherit',
+              }}
+            >
+              {dateStr}
+            </Typography>
+            <Typography variant={'caption'}>{' • '}</Typography>
+            {contributors ? (
+              <>
+                {contributors.map((contributor, index) => (
+                  <Box key={contributor} sx={{ display: 'inline' }}>
+                    <Typography
+                      variant={'caption'}
+                      sx={{
+                        display: 'inline',
+                        fontWeight: boldContributors[contributor]
+                          ? 'bold'
+                          : 'inherit',
+                      }}
+                    >
+                      {contributor}
+                    </Typography>
+                    {index != contributors.length - 1 && (
+                      <Typography variant={'caption'}>{', '}</Typography>
+                    )}
+                  </Box>
+                ))}
+              </>
+            ) : (
+              <Typography
+                variant={'caption'}
+                sx={{
+                  fontWeight:
+                    Object.entries(boldContributors).length > 0
+                      ? 'bold'
+                      : 'inherit',
+                }}
+              >{t`documents_merge_dialog_box_publication_no_contributors`}</Typography>
+            )}
             {journal && (
               <>
-                {' • '}
-                <Typography variant={'caption'} sx={{ fontStyle: 'italic' }}>
+                <Typography variant={'caption'}>{' • '}</Typography>
+                <Typography
+                  variant={'caption'}
+                  sx={{
+                    fontWeight: boldJournal ? 'bold' : 'inherit',
+                    fontStyle: 'italic',
+                  }}
+                >
                   {journal}
                 </Typography>
               </>
             )}
-          </Typography>
+          </Box>
           <Box
             sx={{
               display: 'flex',

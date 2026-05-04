@@ -1752,3 +1752,6 @@ msgstr "Confirmer la fusion ({nbDocs})"
 
 msgid "documents_merge_dialog_box_detail_link"
 msgstr "Détail"
+
+msgid "documents_merge_dialog_box_publication_no_contributors"
+msgstr "Auteur(s) inconnu(s)"

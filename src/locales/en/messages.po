@@ -1751,3 +1751,6 @@ msgstr "Confirm merge ({nbDocs})"
 
 msgid "documents_merge_dialog_box_detail_link"
 msgstr "Detail"
+
+msgid "documents_merge_dialog_box_publication_no_contributors"
+msgstr "Unknown contributor(s)"
