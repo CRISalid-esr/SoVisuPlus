@@ -322,10 +322,26 @@ model AuthorityOrganizationIdentifier {
   @@index([organizationId])
 }
 
+enum AuthorityOrganizationNameType {
+  authority_organization_state_name
+}
+
+model AuthorityOrganizationName {
+  id             Int                           @id @default(autoincrement())
+  type           AuthorityOrganizationNameType
+  language       String // ISO 639-1 code (e.g., 'en', 'fr')
+  value          String
+  organization   AuthorityOrganization         @relation(fields: [organizationId], references: [id], onDelete: NoAction)
+  organizationId Int
+
+  @@unique([language, value, organizationId])
+}
+
 model AuthorityOrganization {
   id            Int                               @id @default(autoincrement())
   uid           String                            @unique
   displayNames  String[]
+  names         AuthorityOrganizationName[]
   places        Json
   identifiers   AuthorityOrganizationIdentifier[]
   contributions Contribution[]

@@ -1380,13 +1380,18 @@ msgstr "English"
 msgid "language_fr"
 msgstr "French"
 
-#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:466
-msgid "map_collaborations_tooltip_other_contributors"
-msgstr "Other collaborators : "
-
 #: src/app/[lang]/dashboard/components/CollaborationMap.tsx:440
-msgid "map_collaborations_tooltip_remaining_orgs"
-msgstr "Remaining institutions : "
+msgid "map_collaborations_tooltip_remaining_orgs {nbRemainingOrgs}"
+msgstr "Remaining institutions : {nbRemainingOrgs}"
+
+#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:466
+msgid "{nbRemainingDocs, plural, one {{nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_single} other {{nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_multiple}}"
+msgstr "{nbRemainingDocs, plural, one {{nbRemainingDocs} publication in collaboration remaining.} other {{nbRemainingDocs} publications in collaboration remaining.}}"
+
+#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:466
+msgid "{nbDocs, plural, one {{nbDocs} map_collaborations_tooltip_nb_documents_per_org_single} other {{nbDocs} map_collaborations_tooltip_nb_documents_per_org_multiple}}"
+msgstr "{nbDocs, plural, one {{nbDocs} publication in collaboration.} other {{nbDocs} publications in collaboration.}}"
+
 
 #: src/app/[lang]/dashboard/components/CollaborationMap.tsx:462
 msgid "map_collaborations_tooltip_unknown_contributors"
@@ -1733,3 +1738,21 @@ msgstr "Coming soon !"
 #: src/app/[lang]/components/WordStream/WordStream.tsx:187
 msgid "wordstream_no_data_to_display"
 msgstr "No data to display"
+
+msgid "documents_merge_dialog_box_title"
+msgstr "Merge publications"
+
+msgid "documents_merge_dialog_box_info_alert"
+msgstr "You are about to merge selected publications."
+
+msgid "documents_merge_dialog_box_check_all_label"
+msgstr "Select all"
+
+msgid "documents_merge_dialog_box_cancel_button"
+msgstr "Cancel"
+
+msgid "documents_merge_dialog_box_merge_button"
+msgstr "Confirm merge ({nbDocs})"
+
+msgid "documents_merge_dialog_box_detail_link"
+msgstr "Detail"

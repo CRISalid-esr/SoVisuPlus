@@ -1380,13 +1380,17 @@ msgstr "Anglais"
 msgid "language_fr"
 msgstr "Français"
 
-#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:466
-msgid "map_collaborations_tooltip_other_contributors"
-msgstr "Autres collaborateurs : "
-
 #: src/app/[lang]/dashboard/components/CollaborationMap.tsx:440
-msgid "map_collaborations_tooltip_remaining_orgs"
-msgstr "Autres institutions : "
+msgid "map_collaborations_tooltip_remaining_orgs {nbRemainingOrgs}"
+msgstr "Autres institutions : {nbRemainingOrgs}"
+
+#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:466
+msgid "{nbRemainingDocs, plural, one {{nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_single} other {{nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_multiple}}"
+msgstr "{nbRemainingDocs, plural, one {{nbRemainingDocs} publication en collaboration restante.} other {{nbRemainingDocs} publications en collaboration restantes.}}"
+
+#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:466
+msgid "{nbDocs, plural, one {{nbDocs} map_collaborations_tooltip_nb_documents_per_org_single} other {{nbDocs} map_collaborations_tooltip_nb_documents_per_org_multiple}}"
+msgstr "{nbDocs, plural, one {{nbDocs} publication en collaboration.} other {{nbDocs} publications en collaboration.}}"
 
 #: src/app/[lang]/dashboard/components/CollaborationMap.tsx:462
 msgid "map_collaborations_tooltip_unknown_contributors"
@@ -1651,7 +1655,7 @@ msgstr "Comité de lecture"
 
 #: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:43
 msgid "sources_page_preprint_icon_label"
-msgstr "Ouvrage en cours d'édition'"
+msgstr "Ouvrage en cours d'édition"
 
 #: src/app/[lang]/documents/components/SourceRecordTypeLabels.tsx:20
 msgid "sources_page_proceedings_icon_label"
@@ -1733,3 +1737,22 @@ msgstr "C'est bientôt prêt !"
 #: src/app/[lang]/components/WordStream/WordStream.tsx:187
 msgid "wordstream_no_data_to_display"
 msgstr "Aucune donnée à afficher"
+
+msgid "documents_merge_dialog_box_title"
+msgstr "Fusionner les publications"
+
+msgid "documents_merge_dialog_box_info_alert"
+msgstr "Vous êtes sur le point de fusionner les publications sélectionnées."
+
+msgid "documents_merge_dialog_box_check_all_label"
+msgstr "Tout sélectionner"
+
+msgid "documents_merge_dialog_box_cancel_button"
+msgstr "Annuler"
+
+#. js-lingui-explicit-id
+msgid "documents_merge_dialog_box_merge_button"
+msgstr "Confirmer la fusion ({nbDocs})"
+
+msgid "documents_merge_dialog_box_detail_link"
+msgstr "Détail"

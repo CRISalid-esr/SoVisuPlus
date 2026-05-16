@@ -1493,6 +1493,15 @@ describe('DocumentDAO', () => {
               select: {
                 uid: true,
                 displayName: true,
+                memberships: {
+                  select: {
+                    researchUnit: {
+                      select: {
+                        uid: true,
+                      },
+                    },
+                  },
+                },
               },
             },
             affiliations: {

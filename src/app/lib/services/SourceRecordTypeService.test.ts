@@ -25,5 +25,8 @@ describe('SourceRecordTypeService', () => {
         SourceRecordType.Document,
       ]),
     ).toEqual(SourceRecordType.Chapter)
+    expect(SourceRecordTypeService.getPreciseType([])).toEqual(
+      SourceRecordType.Unknown,
+    )
   })
 })
