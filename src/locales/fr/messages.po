@@ -1517,6 +1517,12 @@ msgstr "Retour à mon profil"
 msgid "sidebar_help_button"
 msgstr "Assistance"
 
+msgid "sidebar_account"
+msgstr "Accéder à mon compte"
+
+msgid "sidebar_logout"
+msgstr "Se déconnecter"
+
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:118
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:195
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:214
