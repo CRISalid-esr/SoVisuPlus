@@ -25,18 +25,19 @@ describe('ResearchUnitWorker', () => {
 
   it('should process a valid research unit message', async () => {
     const message: AMQPResearchUnitMessage = {
-      type: 'research_unit',
+      type: 'unit',
       event: 'updated',
       fields: {
         uid: 'rs-123',
+        national_type: 'UMR',
         identifiers: [
           { type: 'nns', value: '12345' },
           { type: 'ror', value: 'https://ror.org/01' },
         ],
-        names: [{ value: 'Research Unit', language: 'en' }],
-        acronym: 'RS',
+        long_labels: [{ value: 'Research Unit', language: 'en' }],
+        short_labels: [{ value: 'RS', language: 'en' }],
         descriptions: [{ value: 'A description', language: 'en' }],
-        signature: 'RS_signature',
+        main_mission: 'research',
       },
     }
 
@@ -49,7 +50,7 @@ describe('ResearchUnitWorker', () => {
       'RS',
       [new Literal('Research Unit', 'en')],
       [new Literal('A description', 'en')],
-      'RS_signature',
+      null,
       [
         { type: 'nns', value: '12345' },
         { type: 'ror', value: 'https://ror.org/01' },
@@ -63,15 +64,16 @@ describe('ResearchUnitWorker', () => {
 
   it('should log and throw an error if processing fails', async () => {
     const message: AMQPResearchUnitMessage = {
-      type: 'research_unit',
+      type: 'unit',
       event: 'updated',
       fields: {
         uid: 'rs-123',
+        national_type: null,
         identifiers: [{ type: 'nns', value: '12345' }],
-        names: [{ value: 'Research Unit', language: 'en' }],
-        acronym: 'RS',
+        long_labels: [{ value: 'Research Unit', language: 'en' }],
+        short_labels: [{ value: 'RS', language: 'en' }],
         descriptions: [{ value: 'A description', language: 'en' }],
-        signature: 'RS_signature',
+        main_mission: 'research',
       },
     }
 
@@ -87,7 +89,7 @@ describe('ResearchUnitWorker', () => {
       'RS',
       [new Literal('Research Unit', 'en')],
       [new Literal('A description', 'en')],
-      'RS_signature',
+      null,
       [{ type: 'nns', value: '12345' }],
     )
 
@@ -98,15 +100,16 @@ describe('ResearchUnitWorker', () => {
 
   it('should throw an error if an invalid identifier type is provided', async () => {
     const message: AMQPResearchUnitMessage = {
-      type: 'research_unit',
+      type: 'unit',
       event: 'updated',
       fields: {
         uid: 'rs-123',
+        national_type: null,
         identifiers: [{ type: 'INVALID', value: '12345' }],
-        names: [{ value: 'Research Unit', language: 'en' }],
-        acronym: 'RS',
+        long_labels: [{ value: 'Research Unit', language: 'en' }],
+        short_labels: [{ value: 'RS', language: 'en' }],
         descriptions: [{ value: 'A description', language: 'en' }],
-        signature: 'RS_signature',
+        main_mission: 'research',
       },
     }
 

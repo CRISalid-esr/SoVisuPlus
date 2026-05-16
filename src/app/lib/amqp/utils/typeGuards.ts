@@ -10,7 +10,9 @@ export const isPersonMessage = (msg: AMQPMessage): msg is AMQPPersonMessage =>
 
 export const isResearchUnitMessage = (
   msg: AMQPMessage,
-): msg is AMQPResearchUnitMessage => msg.type === 'research_unit'
+): msg is AMQPResearchUnitMessage =>
+  msg.type === 'unit' &&
+  (msg as AMQPResearchUnitMessage).fields?.main_mission === 'research'
 
 export const isDocumentMessage = (
   msg: AMQPMessage,
