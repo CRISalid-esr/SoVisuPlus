@@ -231,6 +231,39 @@ msgid "concept_chip_action_delete"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
+msgid "document_details_page_update_in_hal_tab_card_title"
+msgstr "Mettre à jour dans HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:255
+msgid "document_details_page_keywords_input_default"
+msgstr "Veuillez entrer au minimum 3 caractères"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:259
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "Aucune option"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Mot-clé ajouté à la publication."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Veuillez sélectionner au moins un vocabulaire"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
+msgid "document_details_page_add_in_hal_tab_card_title"
+msgstr "Déposer dans HAL"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:249
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "En cours de chargement..."
@@ -241,42 +274,9 @@ msgid "document_details_page_keywords_input_options_fetch_error"
 msgstr "Une erreur est survenue lors du chargement."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:255
-msgid "document_details_page_keywords_input_default"
-msgstr "Veuillez entrer au minimum 3 caractères"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Veuillez sélectionner au moins un vocabulaire"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:259
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "Aucune option"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:288
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Erreur lors du chargement des données"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
-msgid "document_details_page_add_in_hal_tab_card_title"
-msgstr "Déposer dans HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Mot-clé ajouté à la publication."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
-msgid "document_details_page_update_in_hal_tab_card_title"
-msgstr "Mettre à jour dans HAL"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
@@ -314,6 +314,17 @@ msgid "documents_page_publication_date_column_no_date_available"
 msgstr "Aucune date"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
+msgid "bibliographic_information_update_success"
+msgstr "Informations bibliographiques mises à jour."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
+msgid "bibliographic_information_update_failure"
+msgstr "Erreur lors de la mise à jour des informations bibliographiques."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:120
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
 msgid "document_details_page_card_title"
@@ -348,17 +359,6 @@ msgstr "Résumé"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:151
 msgid "document_details_page_sources_row_label"
 msgstr "Sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
-msgid "bibliographic_information_update_success"
-msgstr "Informations bibliographiques mises à jour."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
-msgid "bibliographic_information_update_failure"
-msgstr "Erreur lors de la mise à jour des informations bibliographiques."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:148
@@ -520,6 +520,12 @@ msgid "hal_button_provide_identifier"
 msgstr "Fournir mon identifiant Hal"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:117
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
+msgid "profile_affiliations_no_units"
+msgstr "Pas de unité(s) de recherche associée(s)"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:118
 msgid "hal_control_not_available"
 msgstr "Aucun identifiant HAL renseigné"
@@ -602,15 +608,27 @@ msgid "hal_control_helper"
 msgstr "En liant votre compte Hal à votre compte Sovisu+, vous fiabilisez votre identifiant Hal et vous pourrez aisément déposer sur Hal les publications manquantes."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:117
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
-msgid "profile_affiliations_no_units"
-msgstr "Pas de unité(s) de recherche associée(s)"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
 msgid "profile_affiliations_units_label"
 msgstr "Unités de recherche"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
+msgid "profile_affiliations_signature_label"
+msgstr "Ma signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:180
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:64
+msgid "profile_affiliations_no_signature_message"
+msgstr "Aucune signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:110
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
+msgid "profile_affiliations_signature_copied_message_confirmation"
+msgstr "Signature ajoutée au presse-papier."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
@@ -631,24 +649,6 @@ msgstr "Liste de mes publications"
 #: src/app/[lang]/account/components/authorizations/index.tsx:58
 msgid "authorizations_page_my_expertise"
 msgstr "Mes expertises"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
-msgid "profile_affiliations_signature_label"
-msgstr "Ma signature"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:180
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:64
-msgid "profile_affiliations_no_signature_message"
-msgstr "Aucune signature"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:110
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
-msgid "profile_affiliations_signature_copied_message_confirmation"
-msgstr "Signature ajoutée au presse-papier."
 
 #. js-lingui-explicit-id
 #. placeholder {0}: import { t } from '@lingui/core/macro' import { Trans } from '@lingui/react/macro' import { useRef, useState } from 'react' import useStore from '@/stores/global_store' import { Box, Button, Card, CardContent, ClickAwayListener, Grow, Link, Popper, Typography, } from '@mui/material' import { useTheme } from '@mui/material/styles' const Journal = () => { const titleRef = useRef(null) const [isPopperOpen, setIsPopperOpen] = useState(false) const theme = useTheme() const { selectedDocument = null } = useStore((state) => state.document) const journal = selectedDocument?.journal const title = journal?.title const handleClick = () => { setIsPopperOpen(!isPopperOpen) } const handleClickAway = () => { setIsPopperOpen(false) } return ( title && ( <ClickAwayListener onClickAway={handleClickAway}> <Box> <Button variant='text' ref={titleRef} onClick={handleClick} sx={{ p: 0 }} > {title} </Button> <Popper open={isPopperOpen} anchorEl={titleRef.current} placement='bottom-start' transition disablePortal sx={{ zIndex: 1, }} > {({ TransitionProps }) => ( <Grow {...TransitionProps} timeout={200}> <Card> <CardContent> <Typography gutterBottom variant='h6' sx={{ color: theme.palette.primary.main }} > {title} </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_issn'> <Link href={`https://portal.issn.org/resource/ISSN/${journal.issnL}`} target='_blank' rel='noopener noreferrer' > {journal.issnL} </Link> </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_source_type'> {t`document_details_page_journal_journal`} </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_publisher'> {journal.publisher} </Trans> </Typography> </CardContent> </Card> </Grow> )} </Popper> </Box> </ClickAwayListener> ) ) } export default Journal 
@@ -1474,24 +1474,24 @@ msgstr "Voir moins"
 msgid "see_more_contributors"
 msgstr "Voir plus"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:420
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:427
 msgid "side_bar_dashboard"
 msgstr "Tableau de bord"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:469
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:476
 msgid "side_bar_documents"
 msgstr "Publications"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:518
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:525
 msgid "side_bar_expertise"
 msgstr "Expertises"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:629
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:636
 #: src/app/[lang]/institutions/page.tsx:9
 msgid "side_bar_institutions"
 msgstr "Institutions"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:679
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:686
 #: src/app/[lang]/laboratories/page.tsx:9
 msgid "side_bar_laboratories"
 msgstr "Laboratoires"
@@ -1500,7 +1500,7 @@ msgstr "Laboratoires"
 msgid "side_bar_my_account"
 msgstr "Mon compte"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:579
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:586
 #: src/app/[lang]/groups/page.tsx:9
 msgid "side_bar_my_groups"
 msgstr "Groupes"
@@ -1509,17 +1509,21 @@ msgstr "Groupes"
 msgid "side_bar_my_research_activities"
 msgstr "Activités de recherche"
 
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:999
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:1087
+msgid "sidebar_account"
+msgstr "Accéder à mon compte"
+
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:479
 msgid "sidebar_back_to_my_perspective"
 msgstr "Retour à mon profil"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:897
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:904
 msgid "sidebar_help_button"
 msgstr "Assistance"
 
-msgid "sidebar_account"
-msgstr "Accéder à mon compte"
-
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:1024
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:1112
 msgid "sidebar_logout"
 msgstr "Se déconnecter"
 
@@ -1554,18 +1558,18 @@ msgstr "Unités de recherche"
 msgid "sidebar_search_unknown_label"
 msgstr "label inconnu"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:114
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:137
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:756
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:121
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:144
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:763
 msgid "sidebar_theme_dark"
 msgstr "Thème sombre"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:91
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:737
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:98
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:744
 msgid "sidebar_theme_light"
 msgstr "Thème clair"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:775
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:782
 msgid "sidebar_theme_system"
 msgstr "Thème automatique"
 
