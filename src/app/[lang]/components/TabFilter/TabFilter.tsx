@@ -31,7 +31,7 @@ const TabFilter = ({
         overflowX: 'auto',
         whiteSpace: 'nowrap',
         borderBottom: '1px solid #DDE4E1',
-        marginBottom: theme.spacing(8),
+        marginBottom: theme.spacing(5),
       })}
     >
       <Tabs

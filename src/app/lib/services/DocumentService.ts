@@ -143,6 +143,11 @@ export class DocumentService {
               person: {
                 uid: string
                 displayName: string | null
+                memberships: {
+                  researchUnit: {
+                    uid: string
+                  }
+                }[]
               }
               affiliations: {
                 uid: string
