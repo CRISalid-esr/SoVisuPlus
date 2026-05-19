@@ -62,6 +62,18 @@ export const readInitialGlobalFilter = () => {
   }
 }
 
+export const readInitialStructuresFilter = (): {
+  uid: string
+  name: string
+}[] => {
+  try {
+    const raw = sessionStorage.getItem('mrt_structuresFilter_publication_table')
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
 export const readInitialSorting = (): MRT_SortingState => {
   try {
     const raw = sessionStorage.getItem('mrt_sorting_publication_table')

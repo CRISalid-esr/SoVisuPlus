@@ -43,7 +43,7 @@ import Highlighter from 'react-highlight-words'
 import { LanguageChips } from '@/components/LanguageChips'
 import { Contribution } from '@/types/Contribution'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import HalStatusCell from '@/app/[lang]/documents/components/HalStatusCell'
 import HalStatusCellBadge, {
@@ -60,7 +60,11 @@ import Image from 'next/image'
 import { useDocumentTable } from '@/app/[lang]/documents/hooks/documentTable/useDocumentTable'
 import useStore from '@/stores/global_store'
 import { ParsedUrlQueryInput } from 'node:querystring'
-import { ReadonlyURLSearchParams, useSearchParams } from 'next/navigation'
+import {
+  ReadonlyURLSearchParams,
+  useRouter,
+  useSearchParams,
+} from 'next/navigation'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import InfoIcon from '@mui/icons-material/Info'
 import {
@@ -69,11 +73,18 @@ import {
   readInitialGlobalFilter,
   readInitialPagination,
   readInitialSorting,
+  readInitialStructuresFilter,
 } from '@/app/[lang]/documents/hooks/documentTable/utils/persistence'
 import { useSession } from 'next-auth/react'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { normalizeDateFilters } from '@/app/[lang]/documents/hooks/documentTable/utils/columns'
+import utc from 'dayjs/plugin/utc'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+import { ColumnFilter } from '@tanstack/table-core'
+
+dayjs.extend(utc)
+dayjs.extend(customParseFormat)
 
 const DEFAULT_SORTING = [
   {
@@ -128,6 +139,7 @@ const detailsPageUrl = (
 const usePublicationsTableStorage = (
   globalFilter: string,
   sorting: MRT_SortingState,
+  structuresFilter: { uid: string; name: string }[],
   columnFilters: MRT_ColumnFiltersState,
   pagination: {
     pageIndex: number
@@ -157,6 +169,16 @@ const usePublicationsTableStorage = (
       JSON.stringify(sorting),
     )
   }, [sorting])
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      sessionStorage.setItem(
+        'mrt_structuresFilter_publication_table',
+        JSON.stringify(structuresFilter),
+      )
+    }, 250)
+    return () => clearTimeout(id)
+  }, [structuresFilter])
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -198,6 +220,7 @@ const usePublicationsTableStorage = (
 
 const usePublicationsTableDataFetching = (
   columnFilters: MRT_ColumnFiltersState,
+  structuresFilter: { uid: string; name: string }[],
   globalFilter: string,
   sorting: MRT_SortingState,
   pagination: {
@@ -219,6 +242,10 @@ const usePublicationsTableDataFetching = (
 
   useEffect(() => {
     const adjustedFilters = normalizeDateFilters(columnFilters)
+    adjustedFilters.push({
+      id: 'structures',
+      value: structuresFilter.map((s) => s.uid),
+    })
     const contributorType = currentPerspective?.type
     if (!contributorType) return
 
@@ -264,6 +291,7 @@ const usePublicationsTableDataFetching = (
     currentPerspective,
     selectedTab,
     triggerReloadList,
+    structuresFilter,
   ])
 }
 
@@ -282,6 +310,7 @@ export const usePublicationsTable = (
   const supportedLocales = process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
 
   const searchParams = useSearchParams()
+  const router = useRouter()
   const navigateToDetailsPage = useCallback(
     (documentUid: string) => detailsPageUrl(documentUid, searchParams, lang),
     [searchParams, lang],
@@ -305,6 +334,12 @@ export const usePublicationsTable = (
 
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([])
 
+  const [structuresFilter, setStructuresFilter] = useState<
+    { uid: string; name: string }[]
+  >(readInitialStructuresFilter)
+
+  const [yearsFilter, setYearsFilter] = useState<Dayjs[]>([])
+
   const initialPagination = useMemo(() => {
     const pagination = readInitialPagination()
     return { pageIndex: pagination.pageIndex, pageSize: pagination.pageSize }
@@ -312,16 +347,71 @@ export const usePublicationsTable = (
 
   const [pagination, setPagination] = useState(initialPagination)
 
+  useEffect(() => {
+    const rawStructures: { uid: string; name: string }[] = JSON.parse(
+      decodeURIComponent(searchParams.get('structures') || '[]'),
+    )
+    const structures = Array.isArray(rawStructures)
+      ? rawStructures
+      : [rawStructures]
+    console.log(structures)
+    const years = searchParams.get('years')
+    if (structures && years) {
+      setStructuresFilter(structures)
+      const formattedYears = years
+        .split(',')
+        .map((year) => dayjs(year, 'YYYY', true))
+      setYearsFilter(formattedYears)
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete('years')
+      params.delete('structures')
+      router.replace(`/${lang}/documents?${params}`)
+    }
+  }, [lang, router, searchParams])
+
   usePublicationsTableStorage(
     globalFilter,
     sorting,
+    structuresFilter,
     columnFilters,
     pagination,
     setPagination,
   )
 
+  useEffect(() => {
+    const yearsFilterSet = yearsFilter.length > 0
+    if (yearsFilterSet) {
+      const dateFilter:
+        | { id: 'date'; value: [string | null, string | null] }
+        | undefined = columnFilters.find((filter) => filter.id === 'date') as {
+        id: 'date'
+        value: [string | null, string | null]
+      }
+      if (dateFilter) {
+        const newColumnFilters = columnFilters.map((filter) => {
+          if (filter.id == 'date') {
+            return {
+              id: filter.id,
+              value: yearsFilter,
+            } as ColumnFilter
+          } else {
+            return filter
+          }
+        })
+        setColumnFilters(newColumnFilters)
+      } else {
+        setColumnFilters((prev) => [
+          ...prev,
+          { id: 'date', value: yearsFilter },
+        ])
+      }
+      setYearsFilter([])
+    }
+  }, [columnFilters, yearsFilter])
+
   usePublicationsTableDataFetching(
     columnFilters,
+    structuresFilter,
     globalFilter,
     sorting,
     pagination,
@@ -792,5 +882,10 @@ export const usePublicationsTable = (
   )
 
   const table = useDocumentTable(tableOptions)
-  return { table: table, selectedDocuments: selectedDocuments }
+  return {
+    table: table,
+    selectedDocuments: selectedDocuments,
+    structuresFilter: structuresFilter,
+    setStructuresFilter: setStructuresFilter,
+  }
 }

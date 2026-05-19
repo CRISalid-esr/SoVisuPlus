@@ -66,7 +66,7 @@ msgstr "My publications"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:236
-#: src/app/[lang]/documents/page.tsx:781
+#: src/app/[lang]/documents/page.tsx:217
 msgid "documents_page_synchronize_button"
 msgstr "Update all publications"
 
@@ -84,34 +84,38 @@ msgstr "HAL incomplete filling"
 #: src/app/[lang]/documents/page.test.tsx:410
 #: src/app/[lang]/documents/page.test.tsx:422
 #: src/app/[lang]/documents/page.test.tsx:431
-#: src/app/[lang]/documents/page.test.tsx:580
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:733
+#: src/app/[lang]/documents/page.tsx:169
 msgid "documents_page_refresh_list_alert_own_perspective"
 msgstr "Your publication list has changed"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:736
+#: src/app/[lang]/documents/page.tsx:172
 msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr "{name}'s publication list has changed"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:789
+#: src/app/[lang]/documents/page.tsx:225
 msgid "documents_page_missing_identifiers_warning_prefix"
 msgstr "Your publication lists may be incomplete. Please go to the"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:796
+#: src/app/[lang]/documents/page.tsx:232
 msgid "documents_page_missing_identifiers_account_page"
 msgstr "My Account"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:798
+#: src/app/[lang]/documents/page.tsx:234
 msgid "documents_page_missing_identifiers_warning_suffix"
 msgstr "page to fill in your {identifiers} identifiers."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/MergeDialog.tsx:175
+msgid "documents_merge_dialog_box_merge_button"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/components/HalStatusCell.test.tsx:154
@@ -161,6 +165,27 @@ msgid "documents_page_refresh_document_alert"
 msgstr "Data concerning this publication has changed"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:393
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:404
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "action"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:421
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalidate"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:439
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissociate"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
+msgid "document_details_page_source_tab_card_title"
+msgstr "Sources"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
 msgid "document_details_page_back_to_my_publications"
 msgstr "Back to my publications"
@@ -206,25 +231,9 @@ msgid "concept_chip_action_delete"
 msgstr "Delete"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:397
-msgid "document_details_page_source_tab_card_title"
-msgstr "Sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:430
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:439
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "action"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:456
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalidate"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:474
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissociate"
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
+msgid "document_details_page_update_in_hal_tab_card_title"
+msgstr "Update in HAL"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
@@ -273,11 +282,6 @@ msgstr "Error loading suggestions"
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
 msgid "document_details_page_domains_tab_card_title"
 msgstr "Disciplines"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
-msgid "document_details_page_update_in_hal_tab_card_title"
-msgstr "Update in HAL"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:183
@@ -516,6 +520,12 @@ msgid "hal_button_provide_identifier"
 msgstr "Provide my Hal identifier"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:117
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
+msgid "profile_affiliations_no_units"
+msgstr "No related research unit"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:118
 msgid "hal_control_not_available"
 msgstr "No HAL identifier set"
@@ -598,12 +608,6 @@ msgid "hal_control_helper"
 msgstr "By linking your Hal account to your Sovisu+ account, you will make your Hal ID more reliable and you will be able to easily submit missing publications to Hal."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:117
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
-msgid "profile_affiliations_no_units"
-msgstr "No related research unit"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
 msgid "profile_affiliations_units_label"
 msgstr "Research units"
@@ -658,6 +662,14 @@ msgstr "Source type: {0}"
 msgid "document_details_page_journal_publisher"
 msgstr "Publisher: {0}"
 
+#: src/app/[lang]/dashboard/components/CollaborationMap/CollaborationMap.tsx:355
+msgid "{nbDocs, plural, one {{nbDocs} map_collaborations_tooltip_nb_documents_per_org_single} other {{nbDocs} map_collaborations_tooltip_nb_documents_per_org_multiple}}"
+msgstr "{nbDocs, plural, one {{nbDocs} publication in collaboration.} other {{nbDocs} publications in collaboration.}}"
+
+#: src/app/[lang]/dashboard/components/CollaborationMap/CollaborationMap.tsx:348
+msgid "{nbRemainingDocs, plural, one {{nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_single} other {{nbRemainingDocs} map_collaborations_tooltip_nb_documents_remaining_multiple}}"
+msgstr "{nbRemainingDocs, plural, one {{nbRemainingDocs} publication in collaboration remaining.} other {{nbRemainingDocs} publications in collaboration remaining.}}"
+
 #: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:26
 msgid "{nbUnits, plural, zero {profile_affiliations_unit_label} one {profile_affiliations_unit_label} other {profile_affiliations_units_label}}"
 msgstr "{nbUnits, plural, zero {Research unit} one {Research unit} other {Research units}}"
@@ -693,16 +705,16 @@ msgstr "See Profile"
 msgid "dashboard_page_agent_identity_card_no_agent_selected"
 msgstr "No actor selected"
 
-#: src/app/[lang]/dashboard/page.tsx:209
+#: src/app/[lang]/dashboard/page.tsx:210
 msgid "dashboard_page_main_title"
 msgstr "Dashboard page"
 
-#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:379
-#: src/app/[lang]/dashboard/page.tsx:431
+#: src/app/[lang]/dashboard/components/CollaborationMap/CollaborationMap.tsx:268
+#: src/app/[lang]/dashboard/page.tsx:432
 msgid "dashboard_page_map_title"
 msgstr "Worldwide collaborations"
 
-#: src/app/[lang]/dashboard/page.tsx:259
+#: src/app/[lang]/dashboard/page.tsx:260
 msgid "dashboard_page_publication_by_year_graph_end_year_selection_label"
 msgstr "to:"
 
@@ -725,7 +737,7 @@ msgstr "Unknown access"
 msgid "dashboard_page_publication_by_year_graph_open_access"
 msgstr "Open access:"
 
-#: src/app/[lang]/dashboard/page.tsx:228
+#: src/app/[lang]/dashboard/page.tsx:229
 msgid "dashboard_page_publication_by_year_graph_start_year_selection_label"
 msgstr "From:"
 
@@ -753,31 +765,31 @@ msgstr "Year"
 msgid "dashboard_page_publication_by_year_no_publication_found"
 msgstr "No publication found"
 
-#: src/app/[lang]/dashboard/page.tsx:298
+#: src/app/[lang]/dashboard/page.tsx:299
 msgid "dashboard_page_publication_by_year_title"
 msgstr "Scholarly publication"
 
-#: src/app/[lang]/dashboard/page.tsx:403
+#: src/app/[lang]/dashboard/page.tsx:404
 msgid "dashboard_page_wordstream_font_range_a11y"
 msgstr "Font min ↔ max"
 
-#: src/app/[lang]/dashboard/page.tsx:392
+#: src/app/[lang]/dashboard/page.tsx:393
 msgid "dashboard_page_wordstream_font_range_label"
 msgstr "Font min ↔ max"
 
-#: src/app/[lang]/dashboard/page.tsx:324
+#: src/app/[lang]/dashboard/page.tsx:325
 msgid "dashboard_page_wordstream_title"
 msgstr "Concepts and collaborations"
 
-#: src/app/[lang]/dashboard/page.tsx:383
+#: src/app/[lang]/dashboard/page.tsx:384
 msgid "dashboard_page_wordstream_topN_a11y"
 msgstr "Max. occurrences / year"
 
-#: src/app/[lang]/dashboard/page.tsx:374
+#: src/app/[lang]/dashboard/page.tsx:375
 msgid "dashboard_page_wordstream_topN_label"
 msgstr "Max. occurrences / year"
 
-#: src/app/[lang]/dashboard/page.tsx:413
+#: src/app/[lang]/dashboard/page.tsx:414
 msgid "dashboard_page_wordstream_validate_button_label"
 msgstr "Update"
 
@@ -949,11 +961,31 @@ msgstr "ORCID"
 msgid "documents_details_page_authors_tab_scopus_column"
 msgstr "Scopus"
 
-#: src/app/[lang]/documents/page.tsx:881
+#: src/app/[lang]/documents/components/MergeDialog.tsx:159
+msgid "documents_merge_dialog_box_cancel_button"
+msgstr "Cancel"
+
+#: src/app/[lang]/documents/components/MergeDialog.tsx:141
+msgid "documents_merge_dialog_box_check_all_label"
+msgstr "Select all"
+
+#: src/app/[lang]/documents/components/MergeDialogDocument.tsx:201
+msgid "documents_merge_dialog_box_detail_link"
+msgstr "Detail"
+
+#: src/app/[lang]/documents/components/MergeDialog.tsx:119
+msgid "documents_merge_dialog_box_info_alert"
+msgstr "You are about to merge selected publications."
+
+#: src/app/[lang]/documents/components/MergeDialog.tsx:99
+msgid "documents_merge_dialog_box_title"
+msgstr "Merge publications"
+
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:853
 msgid "documents_page_action_column_details"
 msgstr "Details"
 
-#: src/app/[lang]/documents/page.tsx:572
+#: src/app/[lang]/documents/page.tsx:96
 msgid "documents_page_all_documents_filter"
 msgstr "All my documents"
 
@@ -985,8 +1017,8 @@ msgstr "Conference summary"
 msgid "documents_page_conference_article_icon_label"
 msgstr "Conference article"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:195
-#: src/app/[lang]/documents/page.tsx:292
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:195
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:516
 msgid "documents_page_contributors_column"
 msgstr "Authors"
 
@@ -1069,11 +1101,11 @@ msgstr "In HAL"
 msgid "documents_page_hal_status_outside_hal"
 msgstr "Out of HAL"
 
-#: src/app/[lang]/documents/page.tsx:380
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:604
 msgid "documents_page_halStatus_column"
 msgstr "Status in HAL"
 
-#: src/app/[lang]/documents/page.tsx:578
+#: src/app/[lang]/documents/page.tsx:102
 msgid "documents_page_incomplete_hal_repository_filter"
 msgstr "HAL incomplete filling"
 
@@ -1081,15 +1113,15 @@ msgstr "HAL incomplete filling"
 msgid "documents_page_journal_article_icon_label"
 msgstr "Journal article"
 
-#: src/app/[lang]/documents/page.tsx:721
+#: src/app/[lang]/documents/page.tsx:157
 msgid "documents_page_main_title"
 msgstr "Publications"
 
-#: src/app/[lang]/documents/page.tsx:720
+#: src/app/[lang]/documents/page.tsx:156
 msgid "documents_page_main_title_first_person"
 msgstr "My publications"
 
-#: src/app/[lang]/documents/page.tsx:861
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:825
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
 
@@ -1097,7 +1129,7 @@ msgstr "Merge selected documents"
 msgid "documents_page_monograph_icon_label"
 msgstr "Monography"
 
-#: src/app/[lang]/documents/page.tsx:437
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:661
 msgid "documents_page_oaStatus_column"
 msgstr "Open Access Status"
 
@@ -1113,19 +1145,20 @@ msgstr "Description"
 msgid "documents_page_proceedings_icon_label"
 msgstr "Proceedings"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:214
-#: src/app/[lang]/documents/page.tsx:325
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:214
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:549
 msgid "documents_page_publication_date_column"
 msgstr "Publication Date"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:13
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:230
-#: src/app/[lang]/documents/page.tsx:329
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:230
+#: src/app/[lang]/documents/components/MergeDialogDocument.tsx:56
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:553
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "No date available"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:271
-#: src/app/[lang]/documents/page.tsx:360
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:271
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:584
 msgid "documents_page_publishedIn_column"
 msgstr "Published in"
 
@@ -1133,7 +1166,7 @@ msgstr "Published in"
 msgid "documents_page_refresh_document"
 msgstr "Update view"
 
-#: src/app/[lang]/documents/page.tsx:756
+#: src/app/[lang]/documents/page.tsx:192
 msgid "documents_page_refresh_list"
 msgstr "Update view"
 
@@ -1141,8 +1174,8 @@ msgstr "Update view"
 msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Scholarly publication"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:289
-#: src/app/[lang]/documents/page.tsx:460
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:289
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:684
 msgid "documents_page_source_column"
 msgstr "Sources"
 
@@ -1185,13 +1218,13 @@ msgstr "Modified"
 msgid "documents_page_synchronize_modal_title"
 msgstr "Sources to be syncronized"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:146
-#: src/app/[lang]/documents/page.tsx:225
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:146
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:449
 msgid "documents_page_title_column"
 msgstr "Title"
 
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:101
-#: src/app/[lang]/documents/page.tsx:206
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:103
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:430
 msgid "documents_page_type_column"
 msgstr "Type"
 
@@ -1380,26 +1413,19 @@ msgstr "English"
 msgid "language_fr"
 msgstr "French"
 
-#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:466
-msgid "map_collaborations_tooltip_other_contributors"
-msgstr "Other collaborators : "
-
-#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:440
-msgid "map_collaborations_tooltip_remaining_orgs"
-msgstr "Remaining institutions : "
-
-#: src/app/[lang]/dashboard/components/CollaborationMap.tsx:462
-msgid "map_collaborations_tooltip_unknown_contributors"
-msgstr "Unknown collaborators : "
+#: src/app/[lang]/dashboard/components/CollaborationMap/CollaborationMap.tsx:348
+msgid "map_collaborations_tooltip_remaining_orgs {nbRemainingOrgs}"
+msgstr "Remaining institutions : {nbRemainingOrgs}"
 
 #: src/app/[lang]/account/page.tsx:25
 msgid "my_account_page_my_profile_tab"
 msgstr "My account"
 
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsTitle.tsx:16
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:141
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:161
-#: src/app/[lang]/documents/page.tsx:246
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:141
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:161
+#: src/app/[lang]/documents/components/MergeDialogDocument.tsx:52
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:470
 msgid "no_title_available"
 msgstr "no title available"
 
@@ -1448,24 +1474,24 @@ msgstr "see less co-authors"
 msgid "see_more_contributors"
 msgstr "see more co-authors"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:420
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:427
 msgid "side_bar_dashboard"
 msgstr "Dashboard"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:469
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:476
 msgid "side_bar_documents"
 msgstr "Publications"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:518
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:525
 msgid "side_bar_expertise"
 msgstr "Expertise"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:629
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:636
 #: src/app/[lang]/institutions/page.tsx:9
 msgid "side_bar_institutions"
 msgstr "Institutions"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:679
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:686
 #: src/app/[lang]/laboratories/page.tsx:9
 msgid "side_bar_laboratories"
 msgstr "Laboratories"
@@ -1474,7 +1500,7 @@ msgstr "Laboratories"
 msgid "side_bar_my_account"
 msgstr "Account manager"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:579
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:586
 #: src/app/[lang]/groups/page.tsx:9
 msgid "side_bar_my_groups"
 msgstr "Groups"
@@ -1483,13 +1509,23 @@ msgstr "Groups"
 msgid "side_bar_my_research_activities"
 msgstr "Research activities"
 
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:999
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:1087
+msgid "sidebar_account"
+msgstr "See my account"
+
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:479
 msgid "sidebar_back_to_my_perspective"
 msgstr "Back to my page"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:897
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:904
 msgid "sidebar_help_button"
 msgstr "Help"
+
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:1024
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:1112
+msgid "sidebar_logout"
+msgstr "Logout"
 
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:118
 #: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:195
@@ -1522,18 +1558,18 @@ msgstr "Research units"
 msgid "sidebar_search_unknown_label"
 msgstr "N/C"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:114
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:137
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:756
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:121
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:144
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:763
 msgid "sidebar_theme_dark"
 msgstr "Dark theme"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:91
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:737
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:98
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:744
 msgid "sidebar_theme_light"
 msgstr "Light theme"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:775
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:782
 msgid "sidebar_theme_system"
 msgstr "Auto Theme"
 

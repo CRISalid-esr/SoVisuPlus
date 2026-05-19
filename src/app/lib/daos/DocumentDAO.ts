@@ -722,6 +722,32 @@ export class DocumentDAO extends AbstractDAO {
         contributionFilters.push(nameFilter)
       }
 
+      if (
+        filter.id === 'structures' &&
+        Array.isArray(filter.value) &&
+        filter.value.length > 0
+      ) {
+        const structuresFilter: Prisma.DocumentWhereInput = {
+          contributions: {
+            some: {
+              person: {
+                uid: {
+                  notIn: contributorUids,
+                },
+              },
+              affiliations: {
+                some: {
+                  uid: {
+                    in: filter.value,
+                  },
+                },
+              },
+            },
+          },
+        }
+        contributionFilters.push(structuresFilter)
+      }
+
       if (filter.id === 'date' && Array.isArray(filter.value)) {
         const startDate = filter.value[0] || null // Full ISO string date
         const endDate = filter.value[1] || null // Full ISO string date
@@ -1044,6 +1070,11 @@ export class DocumentDAO extends AbstractDAO {
         person: {
           uid: string
           displayName: string | null
+          memberships: {
+            researchUnit: {
+              uid: string
+            }
+          }[]
         }
         affiliations: {
           uid: string
@@ -1072,6 +1103,15 @@ export class DocumentDAO extends AbstractDAO {
               select: {
                 uid: true,
                 displayName: true,
+                memberships: {
+                  select: {
+                    researchUnit: {
+                      select: {
+                        uid: true,
+                      },
+                    },
+                  },
+                },
               },
             },
             affiliations: {

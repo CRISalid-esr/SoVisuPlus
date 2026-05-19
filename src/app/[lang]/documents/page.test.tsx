@@ -285,7 +285,7 @@ describe('DocumentsPage Component', () => {
         page: 1,
         pageSize: 10,
         searchTerm: '',
-        columnFilters: JSON.stringify([]),
+        columnFilters: JSON.stringify([{ id: 'structures', value: [] }]),
         sorting: JSON.stringify([
           {
             id: 'date',
@@ -309,7 +309,7 @@ describe('DocumentsPage Component', () => {
       expect(mockCountDocuments).toHaveBeenCalledWith({
         page: 1,
         searchTerm: '',
-        columnFilters: JSON.stringify([]),
+        columnFilters: JSON.stringify([{ id: 'structures', value: [] }]),
         searchLang: 'en',
         contributorType: 'person',
         contributorUid: '',

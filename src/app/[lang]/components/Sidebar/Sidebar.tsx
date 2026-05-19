@@ -4,19 +4,22 @@ import { Trans } from '@lingui/react/macro'
 import Check from '@/public/icons/check.svg'
 import DarkMode from '@/public/icons/dark_mode.svg'
 import LightMode from '@/public/icons/light_mode.svg'
-
 import SystemMode from '@/public/icons/system_mode.svg'
 import { User } from '@/types/User'
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Backdrop,
-  Button,
   Drawer,
   IconButton,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
+  Menu,
   MenuItem,
+  MenuList,
   Select,
   SelectChangeEvent,
   Typography,
@@ -44,8 +47,11 @@ import { signOut } from 'next-auth/react'
 import { institutionalConfig } from '@/configs/index'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import LanguageSwitcher from '@/components/LanguageSwitcher/LanguageSwitcher'
-import { HelpOutline } from '@mui/icons-material'
+import { HelpOutline, PermIdentityOutlined } from '@mui/icons-material'
 import { getRuntimeEnv } from '@/utils/runtimeEnv'
+import { t } from '@lingui/core/macro'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { useState } from 'react'
 
 interface SidebarProps {
   handleToggleDrawerAction: () => void
@@ -62,6 +68,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const helpUrl = getRuntimeEnv().NEXT_PUBLIC_HELP_URL
+  const [accountMenu, setAccountMenu] = useState<null | HTMLElement>(null)
 
   const handleThemeChange = (event: SelectChangeEvent) => {
     setTheme(event.target.value as 'light' | 'dark' | 'system')
@@ -915,126 +922,196 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
             }}
           >
             {open ? (
-              <Box
-                pt={1}
+              <Accordion
+                slotProps={{
+                  heading: {
+                    component: 'div',
+                  },
+                }}
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-around',
-                  alignItems: 'center',
-                  borderTop: '1px solid',
-                  borderColor: theme.palette.white,
+                  backgroundColor: theme.palette.onPrimaryFixedVariant,
                   width: '100%',
                 }}
               >
-                <IconButton
-                  title='account'
-                  onClick={() => router.push(`/${lang}/account`)}
-                  sx={{
-                    cursor: 'pointer',
-                    '&:hover': {
-                      transform: 'scale(1.05)',
-                      backgroundColor: theme.palette.action.hover,
-                    },
-                    transition: 'transform 0.2s ease-in-out',
-                  }}
-                >
-                  <Image
-                    src='/icons/avatar.png'
-                    alt='avatar'
-                    width={40}
-                    height={40}
-                    priority
-                  />
-                </IconButton>
-
-                <Box
-                  onClick={() => router.push(`/${lang}/account`)}
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      textDecoration: 'underline',
-                      color: theme.palette.grey[200], // or whatever hover color you want
+                <AccordionSummary
+                  expandIcon={
+                    <ExpandMoreIcon sx={{ color: theme.palette.white }} />
+                  }
+                  slotProps={{
+                    content: {
+                      sx: {
+                        gap: '10px',
+                      },
                     },
                   }}
+                  sx={{
+                    '&.Mui-expanded': {
+                      borderBottom: '1px solid',
+                      borderColor: 'divider',
+                    },
+                    width: '100%',
+                  }}
                 >
-                  <Box
+                  <Avatar
+                    alt={'avatar'}
+                    src={'/icons/avatar.png'}
+                    sx={{ width: 32, height: 32 }}
+                  >
+                    {(user?.person?.firstName.charAt(0) ?? '') +
+                      (user?.person?.lastName.charAt(0) ?? '')}
+                  </Avatar>
+                  <Typography
+                    color={theme.palette.white}
                     sx={{
                       display: 'flex',
-                      flexDirection: 'row',
-                      alignContent: 'center',
+                      fontWeight: theme.typography.fontWeightMedium,
+                      fontSize: theme.utils.pxToRem(14),
+                      lineHeight: theme.typography.lineHeight.lineHeight20px,
                       alignItems: 'center',
                     }}
                   >
-                    <Typography
-                      color={theme.palette.white}
+                    {user?.person?.firstName + ' ' + user?.person?.lastName}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails sx={{ padding: '0' }}>
+                  <MenuList sx={{ paddingBottom: '16px' }}>
+                    <MenuItem
+                      onClick={() => router.push(`/${lang}/account`)}
                       sx={{
-                        fontWeight: theme.typography.fontWeightMedium,
-                        fontSize: theme.utils.pxToRem(16),
-                        lineHeight: theme.typography.lineHeight.lineHeight20px,
+                        color: theme.palette.primaryContainer,
                       }}
                     >
-                      {user?.person?.firstName} {user?.person?.lastName}
-                    </Typography>
-                    {/* Logout icon stays separate */}
-                    <IconButton
-                      title='Logout'
-                      sx={{
-                        marginLeft: 'auto',
-                        paddingRight: '0px',
-                      }}
+                      <ListItemIcon>
+                        <PermIdentityOutlined
+                          width={theme.utils.pxToRem(22)}
+                          height={theme.utils.pxToRem(22)}
+                          sx={{
+                            color: theme.palette.primaryContainer,
+                          }}
+                        />
+                      </ListItemIcon>
+                      <ListItemText
+                        sx={{
+                          '& .MuiTypography-root': {
+                            fontFamily: 'Inter, Roboto, sans-serif',
+                          },
+                        }}
+                      >{t`sidebar_account`}</ListItemText>
+                    </MenuItem>
+                    <MenuItem
                       onClick={async () =>
                         await signOut({
                           callbackUrl: '/api/logout',
                         })
                       }
+                      sx={{
+                        color: theme.palette.primaryContainer,
+                      }}
                     >
-                      <Logout
-                        width={20}
-                        height={20}
-                        color={theme.palette.white}
-                      />
-                    </IconButton>
-                  </Box>
-                  <Typography
-                    sx={{
-                      fontSize: theme.utils.pxToRem(12),
-                      fontWeight: theme.typography.fontWeightRegular,
-                      lineHeight: theme.typography.lineHeight.lineHeight16px,
-                    }}
-                    color={theme.palette.white}
-                  >
-                    {user?.person?.email}
-                  </Typography>
-                </Box>
-              </Box>
+                      <ListItemIcon>
+                        <Logout
+                          width={theme.utils.pxToRem(22)}
+                          height={theme.utils.pxToRem(22)}
+                          color={theme.palette.primaryContainer}
+                        />
+                      </ListItemIcon>
+                      <ListItemText
+                        sx={{
+                          '& .MuiTypography-root': {
+                            fontFamily: 'Inter, Roboto, sans-serif',
+                          },
+                        }}
+                      >{t`sidebar_logout`}</ListItemText>
+                    </MenuItem>
+                  </MenuList>
+                </AccordionDetails>
+              </Accordion>
             ) : (
-              <ListItem>
+              <ListItem sx={{ padding: 0, justifyContent: 'center' }}>
                 <ListItemIcon
-                  onClick={() => {
-                    router.push(`/${lang}/account`)
-                    handleToggleDrawerAction()
+                  onClick={(event) => {
+                    setAccountMenu(event.currentTarget)
                   }}
                   sx={{
-                    height: theme.utils.pxToRem(24),
-                    width: theme.utils.pxToRem(24),
+                    height: theme.utils.pxToRem(32),
+                    width: theme.utils.pxToRem(32),
                     minWidth: 'unset',
-                    marginRight: theme.utils.pxToRem(12),
                     borderTop: '1px solid',
                     borderColor: theme.palette.white,
-                    paddingTop: theme.spacing(3),
+                    paddingTop: theme.spacing(2),
                     cursor: 'pointer',
                   }}
                 >
-                  <Image
-                    src='/icons/avatar.png'
-                    alt='avatar'
-                    width={24}
-                    height={24}
-                    priority
-                  />
+                  <Avatar
+                    alt={'avatar'}
+                    src={'/icons/avatar.png'}
+                    sx={{ width: 32, height: 32 }}
+                  >
+                    {(user?.person?.firstName.charAt(0) ?? '') +
+                      (user?.person?.lastName.charAt(0) ?? '')}
+                  </Avatar>
                 </ListItemIcon>
+                <Menu
+                  open={!!accountMenu}
+                  anchorEl={accountMenu}
+                  onClose={() => setAccountMenu(null)}
+                  slotProps={{
+                    paper: {
+                      sx: {
+                        backgroundColor: theme.palette.onPrimaryFixedVariant,
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem
+                    onClick={() => router.push(`/${lang}/account`)}
+                    sx={{
+                      color: theme.palette.primaryContainer,
+                    }}
+                  >
+                    <ListItemIcon>
+                      <PermIdentityOutlined
+                        width={theme.utils.pxToRem(22)}
+                        height={theme.utils.pxToRem(22)}
+                        sx={{
+                          color: theme.palette.primaryContainer,
+                        }}
+                      />
+                    </ListItemIcon>
+                    <ListItemText
+                      sx={{
+                        '& .MuiTypography-root': {
+                          fontFamily: 'Inter, Roboto, sans-serif',
+                        },
+                      }}
+                    >{t`sidebar_account`}</ListItemText>
+                  </MenuItem>
+                  <MenuItem
+                    onClick={async () =>
+                      await signOut({
+                        callbackUrl: '/api/logout',
+                      })
+                    }
+                    sx={{
+                      color: theme.palette.primaryContainer,
+                    }}
+                  >
+                    <ListItemIcon>
+                      <Logout
+                        width={theme.utils.pxToRem(22)}
+                        height={theme.utils.pxToRem(22)}
+                        color={theme.palette.primaryContainer}
+                      />
+                    </ListItemIcon>
+                    <ListItemText
+                      sx={{
+                        '& .MuiTypography-root': {
+                          fontFamily: 'Inter, Roboto, sans-serif',
+                        },
+                      }}
+                    >{t`sidebar_logout`}</ListItemText>
+                  </MenuItem>
+                </Menu>
               </ListItem>
             )}
           </Box>
