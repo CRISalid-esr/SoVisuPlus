@@ -30,10 +30,15 @@ type MergeDialogDocumentProps = {
   document: Document
   checked: boolean
   toggleSelection: (uid: string) => void
+  formattedData: {
+    publicationDate:boolean,
+    contributors:Record<string,boolean>,
+    journal:boolean
+  }
 }
 
 const MergeDialogDocument = React.memo(
-  ({ document, checked, toggleSelection }: MergeDialogDocumentProps) => {
+  ({ document, checked, toggleSelection, formattedData }: MergeDialogDocumentProps) => {
     MergeDialogDocument.displayName = 'MergeDialogDocument'
     const handleChange = useCallback(
       () => toggleSelection(document.uid),
@@ -86,27 +91,31 @@ const MergeDialogDocument = React.memo(
                 return name
               })
               .filter(Boolean)
-              .join(', ')
           : null,
       [document.contributions],
     )
     const journal = document.journal?.title
-    const info = dateStr + (contributors ? ' • ' + contributors : '')
 
-    const types = useMemo(() => {
-      const types: Array<{
+    const records = useMemo(() => {
+      const records: Array<{
+        url: string | null
         platform: BibliographicPlatform | null
         value: DocumentType | SourceRecordType
-      }> = [{ platform: null, value: document.documentType }]
+      }> = [{ url: null, platform: null, value: document.documentType }]
       document.records.forEach((record) => {
         const type = SourceRecordTypeService.getPreciseType(
           record.documentTypes,
         )
-        types.push({ platform: record.platform, value: type })
+        records.push({
+          url: record.url,
+          platform: record.platform,
+          value: type,
+        })
       })
-      return types
+      return records
     }, [document.documentType, document.records])
 
+    const [boldDate, boldContributors, boldJournal] = useMemo(()=> [!formattedData.publicationDate, formattedData.contributors, !formattedData.journal],[formattedData])
     return (
       <Paper
         elevation={1}
@@ -131,17 +140,63 @@ const MergeDialogDocument = React.memo(
           >
             {localizedTitle.value}
           </Typography>
-          <Typography variant={'caption'}>
-            {info}
+          <Box>
+            <Typography
+              variant={'caption'}
+              sx={{
+                fontWeight: boldDate ? 'bold' : 'inherit',
+              }}
+            >
+              {dateStr}
+            </Typography>
+            <Typography variant={'caption'}>{' • '}</Typography>
+            {contributors ? (
+              <>
+                {contributors.map((contributor, index) => (
+                  <Box key={contributor} sx={{ display: 'inline' }}>
+                    <Typography
+                      variant={'caption'}
+                      sx={{
+                        display: 'inline',
+                        fontWeight: boldContributors[contributor]
+                          ? 'bold'
+                          : 'inherit',
+                      }}
+                    >
+                      {contributor}
+                    </Typography>
+                    {index != contributors.length - 1 && (
+                      <Typography variant={'caption'}>{', '}</Typography>
+                    )}
+                  </Box>
+                ))}
+              </>
+            ) : (
+              <Typography
+                variant={'caption'}
+                sx={{
+                  fontWeight:
+                    Object.entries(boldContributors).length > 0
+                      ? 'bold'
+                      : 'inherit',
+                }}
+              >{t`documents_merge_dialog_box_publication_no_contributors`}</Typography>
+            )}
             {journal && (
               <>
-                {' • '}
-                <Typography variant={'caption'} sx={{ fontStyle: 'italic' }}>
+                <Typography variant={'caption'}>{' • '}</Typography>
+                <Typography
+                  variant={'caption'}
+                  sx={{
+                    fontWeight: boldJournal ? 'bold' : 'inherit',
+                    fontStyle: 'italic',
+                  }}
+                >
                   {journal}
                 </Typography>
               </>
             )}
-          </Typography>
+          </Box>
           <Box
             sx={{
               display: 'flex',
@@ -150,10 +205,11 @@ const MergeDialogDocument = React.memo(
             }}
           >
             <Box sx={{ display: 'flex', gap: '10px' }}>
-              {types.map((type) => {
+              {records.map((record) => {
                 let imageElement = null
-                if (type.platform) {
-                  const metadata = BibliographicPlatformMetadata[type.platform]
+                if (record.platform) {
+                  const metadata =
+                    BibliographicPlatformMetadata[record.platform]
                   imageElement = (
                     <Image
                       src={metadata?.icon || '/icons/default.png'}
@@ -168,25 +224,30 @@ const MergeDialogDocument = React.memo(
                 return (
                   <Paper
                     variant='outlined'
-                    key={type.platform ?? 'default'}
+                    component={record.platform ? Link : 'div'}
+                    href={record.url ?? undefined}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    key={record.platform ?? 'default'}
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
                       padding: '5px 5px',
                       gap: '6px',
-                      backgroundColor: type.platform
+                      backgroundColor: record.platform
                         ? 'inherit'
                         : theme.palette.lightSecondaryContainer,
+                      textDecoration: 'none',
                     }}
                   >
                     <Typography>
-                      {type.platform
+                      {record.platform
                         ? _(
                             SourceRecordTypeLabels[
-                              type.value as SourceRecordType
+                              record.value as SourceRecordType
                             ],
                           )
-                        : _(DocumentTypeLabels[type.value as DocumentType])}
+                        : _(DocumentTypeLabels[record.value as DocumentType])}
                     </Typography>
                     {imageElement}
                   </Paper>

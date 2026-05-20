@@ -18,6 +18,7 @@ import useStore from '@/stores/global_store'
 import { Trans } from '@lingui/react'
 import MergeDialogDocument from '@/app/[lang]/documents/components/MergeDialogDocument'
 import { useTheme } from '@mui/system'
+import { Journal } from '@/types/Journal'
 
 type MergeDialogProps = {
   open: boolean
@@ -48,6 +49,38 @@ const MergeDialog = ({
         initialSelectedDocuments.includes(document.uid),
       ),
     [initialSelectedDocuments, documents],
+  )
+  const formattedData = useMemo(
+    () : {publicationDate:boolean, contributors:Record<string,boolean>, journal:boolean} => {
+      const contributorsOccurrence : Record<string, number> = {}
+      const formattedContributors : Record<string, boolean> = {}
+      const isSameDate : {date : string | null, isSame: boolean} = {date : initialDocsData[0] ? initialDocsData[0]?.publicationDate : null, isSame : true}
+      const hasAllJournal : {journal : Journal | undefined, hasAll : boolean} = {journal : initialDocsData[0] ? initialDocsData[0].journal : undefined, hasAll : true}
+      initialDocsData.forEach((doc) => {
+        if(isSameDate.date != doc.publicationDate){
+          isSameDate.isSame = false
+        }
+        if(((hasAllJournal.journal === undefined) !== (doc.journal === undefined)) || (hasAllJournal.journal?.title != doc.journal?.title)){
+          hasAllJournal.hasAll = false
+        }
+        doc.contributions.forEach(contributor => {
+          const person = contributor.person
+          const { firstName, lastName } = person
+          let name = [firstName, lastName].filter(Boolean).join(' ')
+          if (name.match(/^\s*$/)) {
+            name = person.getDisplayName()
+          }
+          formattedContributors[name] = false
+          contributorsOccurrence[name] ??= 0
+          contributorsOccurrence[name] += 1
+        })
+      })
+      Object.entries(contributorsOccurrence).forEach(([key, value]) => {
+        formattedContributors[key] = (value !== initialDocsData.length)
+      })
+      console.log(formattedContributors)
+      return {publicationDate : isSameDate.isSame, contributors:formattedContributors, journal : hasAllJournal.hasAll}
+    },[initialDocsData]
   )
   const toggleSelection = useCallback(
     (uid: string) =>
@@ -149,6 +182,7 @@ const MergeDialog = ({
             document={document}
             checked={selectedDocs[document.uid]}
             toggleSelection={toggleSelection}
+            formattedData={formattedData}
           />
         ))}
       </DialogContent>
