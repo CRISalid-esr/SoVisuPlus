@@ -59,16 +59,41 @@ msgid "forbidden_page_description"
 msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:232
-#: src/app/[lang]/documents/page.test.tsx:255
-msgid "documents_page_main_title_first_person"
-msgstr "My publications"
+#: src/app/[lang]/documents/page.tsx:169
+msgid "documents_page_refresh_list_alert_own_perspective"
+msgstr "Your publication list has changed"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:172
+msgid "documents_page_refresh_list_alert_other_perspective"
+msgstr "{name}'s publication list has changed"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:236
 #: src/app/[lang]/documents/page.tsx:217
 msgid "documents_page_synchronize_button"
 msgstr "Update all publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:225
+msgid "documents_page_missing_identifiers_warning_prefix"
+msgstr "Your publication lists may be incomplete. Please go to the"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:232
+msgid "documents_page_missing_identifiers_account_page"
+msgstr "My Account"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:234
+msgid "documents_page_missing_identifiers_warning_suffix"
+msgstr "page to fill in your {identifiers} identifiers."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:232
+#: src/app/[lang]/documents/page.test.tsx:255
+msgid "documents_page_main_title_first_person"
+msgstr "My publications"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:274
@@ -86,31 +111,6 @@ msgstr "HAL incomplete filling"
 #: src/app/[lang]/documents/page.test.tsx:431
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Merge selected documents"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:169
-msgid "documents_page_refresh_list_alert_own_perspective"
-msgstr "Your publication list has changed"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:172
-msgid "documents_page_refresh_list_alert_other_perspective"
-msgstr "{name}'s publication list has changed"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:225
-msgid "documents_page_missing_identifiers_warning_prefix"
-msgstr "Your publication lists may be incomplete. Please go to the"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:232
-msgid "documents_page_missing_identifiers_account_page"
-msgstr "My Account"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:234
-msgid "documents_page_missing_identifiers_warning_suffix"
-msgstr "page to fill in your {identifiers} identifiers."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/components/MergeDialog.tsx:175
@@ -148,6 +148,11 @@ msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr "Synchronize"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:170
+msgid "documents_page_refresh_document_alert"
+msgstr "Data concerning this publication has changed"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:196
 #: src/app/[lang]/documents/[uid]/page.test.tsx:244
 msgid "document_details_bibliographic_information_tab"
@@ -158,11 +163,6 @@ msgstr "Bibliographic information"
 #: src/app/[lang]/documents/[uid]/page.test.tsx:248
 msgid "document_details_keywords_tab"
 msgstr "Keywords"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:170
-msgid "documents_page_refresh_document_alert"
-msgstr "Data concerning this publication has changed"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:393
@@ -181,14 +181,14 @@ msgid "document_details_page_source_tab_select_action_unmerge_label"
 msgstr "Dissociate"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
-msgid "document_details_page_source_tab_card_title"
-msgstr "Sources"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
 msgid "document_details_page_back_to_my_publications"
 msgstr "Back to my publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
+msgid "document_details_page_source_tab_card_title"
+msgstr "Sources"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:101
@@ -231,39 +231,6 @@ msgid "concept_chip_action_delete"
 msgstr "Delete"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
-msgid "document_details_page_update_in_hal_tab_card_title"
-msgstr "Update in HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:255
-msgid "document_details_page_keywords_input_default"
-msgstr "Please enter at least 3 characters"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:259
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "No options"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Keyword successfully added."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Please select one vocabulary at least"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
-msgid "document_details_page_add_in_hal_tab_card_title"
-msgstr "Add in HAL"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:249
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "Loading..."
@@ -274,9 +241,42 @@ msgid "document_details_page_keywords_input_options_fetch_error"
 msgstr "An error occurs"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:255
+msgid "document_details_page_keywords_input_default"
+msgstr "Please enter at least 3 characters"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Please select one vocabulary at least"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:259
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "No options"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:288
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
+msgid "keywords_concept_added_success"
+msgstr "Keyword successfully added."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
+msgid "document_details_page_update_in_hal_tab_card_title"
+msgstr "Update in HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
+msgid "document_details_page_add_in_hal_tab_card_title"
+msgstr "Add in HAL"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
@@ -287,6 +287,11 @@ msgstr "Disciplines"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:183
 msgid "document_details_page_sources_row_update_source"
 msgstr "Compare sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
+msgid "documents_page_publication_date_column_no_date_available"
+msgstr "No date available"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:128
@@ -307,22 +312,6 @@ msgstr "N/C"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:131
 msgid "document_details_page_type_row_label"
 msgstr "Type of document"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
-msgid "documents_page_publication_date_column_no_date_available"
-msgstr "No date available"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
-msgid "bibliographic_information_update_success"
-msgstr "Bibliographic information updated."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
-msgid "bibliographic_information_update_failure"
-msgstr "Failed to update bibliographic information."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:120
@@ -364,6 +353,17 @@ msgstr "Sources"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:148
 msgid "document_details_page_authors_row_update_author"
 msgstr "Change authors"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
+msgid "bibliographic_information_update_success"
+msgstr "Bibliographic information updated."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
+msgid "bibliographic_information_update_failure"
+msgstr "Failed to update bibliographic information."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
@@ -608,11 +608,6 @@ msgid "hal_control_helper"
 msgstr "By linking your Hal account to your Sovisu+ account, you will make your Hal ID more reliable and you will be able to easily submit missing publications to Hal."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
-msgid "profile_affiliations_units_label"
-msgstr "Research units"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
 msgid "profile_affiliations_signature_label"
@@ -629,6 +624,11 @@ msgstr "No signature"
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
 msgid "profile_affiliations_signature_copied_message_confirmation"
 msgstr "Signature added to clipboard."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
+msgid "profile_affiliations_units_label"
+msgstr "Research units"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
