@@ -29,9 +29,11 @@ export class ResearchUnitWorker extends MessageProcessingWorker<AMQPResearchUnit
    */
   public async process(): Promise<DataEvent[]> {
     const events: DataEvent[] = []
-    const { uid, identifiers, names, acronym, descriptions, signature } =
+    const { uid, identifiers, long_labels, short_labels, descriptions } =
       this.message.fields
     console.log(`Processing research unit with UID: ${uid}`)
+
+    const acronym = short_labels[0]?.value ?? null
 
     const transformedIdentifiers: ResearchUnitIdentifier[] = identifiers.map(
       (identifier) => {
@@ -47,9 +49,9 @@ export class ResearchUnitWorker extends MessageProcessingWorker<AMQPResearchUnit
         new ResearchUnit(
           uid,
           acronym,
-          names as Literal[],
+          long_labels as Literal[],
           descriptions as Literal[],
-          signature,
+          null,
           transformedIdentifiers,
         ),
       )

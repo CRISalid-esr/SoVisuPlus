@@ -39,17 +39,18 @@ describe('MessageProcessingWorkerFactory', () => {
     expect(worker).toBeInstanceOf(PersonWorker)
   })
 
-  it('should create a ResearchUnitWorker for research_unit messages', () => {
+  it('should create a ResearchUnitWorker for unit messages with main_mission=research', () => {
     const message: AMQPResearchUnitMessage = {
-      type: 'research_unit',
+      type: 'unit',
       event: 'updated',
       fields: {
         uid: 'rs-123',
-        acronym: 'RS',
-        signature: 'RS_Signature',
-        names: [{ value: 'Research Unit', language: 'en' }],
+        national_type: 'UMR',
+        long_labels: [{ value: 'Research Unit', language: 'en' }],
+        short_labels: [{ value: 'RS', language: 'en' }],
         descriptions: [{ value: 'A description', language: 'en' }],
-        identifiers: [{ type: 'NNS', value: '12345' }],
+        identifiers: [{ type: 'nns', value: '12345' }],
+        main_mission: 'research',
       },
     }
 
