@@ -1171,4 +1171,62 @@ describe('DocumentService', () => {
     )
     expect(mockCreateAction).toHaveBeenCalled()
   })
+
+  describe('saveContributions', () => {
+    const changes = [
+      {
+        actionType: 'ADD' as const,
+        parameters: {
+          person: {
+            uid: null,
+            displayName: 'New One',
+            firstName: null,
+            lastName: null,
+            identifiers: [],
+          },
+          roles: ['http://id.loc.gov/vocabulary/relators/aut'],
+          rank: 1,
+          affiliations: [],
+        },
+      },
+      {
+        actionType: 'REMOVE' as const,
+        parameters: { person: { uid: 'p1' } },
+      },
+    ]
+
+    it('creates one DOCUMENT/contributions action per change with the acting user', async () => {
+      await documentService.saveContributions('doc-1', changes, 'user-1234')
+
+      expect(mockCreateAction).toHaveBeenCalledTimes(2)
+      expect(mockCreateAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionType: 'ADD',
+          targetType: 'DOCUMENT',
+          targetUid: 'doc-1',
+          path: 'contributions',
+          personUid: 'local-123',
+        }),
+      )
+      expect(mockCreateAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionType: 'REMOVE',
+          targetType: 'DOCUMENT',
+          targetUid: 'doc-1',
+          path: 'contributions',
+        }),
+      )
+    })
+
+    it('throws when the acting user cannot be resolved', async () => {
+      ;(UserDAO as jest.Mock).mockImplementation(() => ({
+        getUserByIdentifier: jest.fn().mockResolvedValue(null),
+      }))
+      documentService = new DocumentService()
+
+      await expect(
+        documentService.saveContributions('doc-1', changes, 'ghost'),
+      ).rejects.toThrow('Error saving contributions')
+    })
+  })
 })

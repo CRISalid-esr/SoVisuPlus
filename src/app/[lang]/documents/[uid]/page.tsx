@@ -27,6 +27,7 @@ import { Trans } from '@lingui/react'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import UpdateInHAL from '@/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL'
 import AddInHAL from '@/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL'
+import NavigationGuardModal from '@/app/[lang]/documents/[uid]/components/Authors/components/NavigationGuardModal'
 
 const DocumentDetailsPage = () => {
   const theme = useTheme()
@@ -107,8 +108,14 @@ const DocumentDetailsPage = () => {
     }
   }, [searchParams])
 
-  const { selectedDocumentHasChanged, setSelectedDocumentHasChanged } =
-    useStore((state) => state.document)
+  const {
+    selectedDocumentHasChanged,
+    setSelectedDocumentHasChanged,
+    contributionsTabDirty,
+    setContributionsTabDirty,
+  } = useStore((state) => state.document)
+
+  const [pendingTab, setPendingTab] = useState<string | null>(null)
 
   if (!hasFetched || loading) {
     return (
@@ -128,10 +135,19 @@ const DocumentDetailsPage = () => {
     return notFound()
   }
 
-  const handleTabChange = (newValue: string) => {
+  const navigateToTab = (newValue: string) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('tab', newValue)
     router.push(`/${lang}/documents/${uid}?${params.toString()}`)
+  }
+
+  const handleTabChange = (newValue: string) => {
+    // Guard against losing unsaved contribution edits when leaving the Authors tab.
+    if (contributionsTabDirty && newValue !== selectedTab) {
+      setPendingTab(newValue)
+      return
+    }
+    navigateToTab(newValue)
   }
 
   const renderTabContent = () => {
@@ -189,6 +205,15 @@ const DocumentDetailsPage = () => {
         onTabChange={handleTabChange}
       />
       {renderTabContent()}
+      <NavigationGuardModal
+        open={pendingTab !== null}
+        onStay={() => setPendingTab(null)}
+        onLeave={() => {
+          setContributionsTabDirty(false)
+          if (pendingTab) navigateToTab(pendingTab)
+          setPendingTab(null)
+        }}
+      />
     </Box>
   )
 }

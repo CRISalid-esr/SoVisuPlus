@@ -110,4 +110,68 @@ describe('AureHalAPIClient', () => {
     expect(decodeURIComponent(calledUrl)).toContain('q=emailId_s:')
     expect(decodeURIComponent(calledUrl)).toContain('fl=idHal_s,idHal_i')
   })
+
+  it('searchAuthors returns [] without fetching when fewer than 2 chars', async () => {
+    await expect(client.searchAuthors('a')).resolves.toEqual([])
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it('searchAuthors hits /ref/author with the expected fl and sort and returns docs', async () => {
+    const docs = [
+      { fullName_s: 'Jean Dupont', idHal_s: 'jean-dupont', form_i: 42 },
+    ]
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ response: { docs } }),
+    })
+
+    await expect(client.searchAuthors('dupont')).resolves.toEqual(docs)
+
+    const calledUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string
+    const decoded = decodeURIComponent(calledUrl)
+    expect(calledUrl).toContain('https://api.archives-ouvertes.fr/ref/author/')
+    expect(decoded).toContain('q=dupont')
+    expect(decoded).toContain('fullName_s')
+    expect(decoded).toContain('idHal_s')
+    expect(new URL(calledUrl).searchParams.get('sort')).toMatch(/^idHal_s asc/)
+  })
+
+  it('searchAuthors returns [] when docs is empty', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ response: { docs: [] } }),
+    })
+    await expect(client.searchAuthors('dupont')).resolves.toEqual([])
+  })
+
+  it('searchStructures hits /ref/structure with fl=* and structure sort', async () => {
+    const docs = [{ docid: '300', name_s: 'Some Lab', ror_s: ['04ezmf85'] }]
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ response: { docs } }),
+    })
+
+    await expect(client.searchStructures('lab')).resolves.toEqual(docs)
+
+    const calledUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string
+    const decoded = decodeURIComponent(calledUrl)
+    expect(calledUrl).toContain(
+      'https://api.archives-ouvertes.fr/ref/structure/',
+    )
+    expect(decoded).toContain('q=lab')
+    expect(decoded).toContain('fl=*')
+    expect(new URL(calledUrl).searchParams.get('sort')).toMatch(/^docid asc/)
+  })
+
+  it('searchStructures throws with HTTP details when response is not ok', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: 'Server Error',
+      text: jest.fn().mockResolvedValue('boom'),
+    })
+    await expect(client.searchStructures('lab')).rejects.toThrow(
+      /AureHalAPIClient\.searchStructures: HTTP 500/,
+    )
+  })
 })

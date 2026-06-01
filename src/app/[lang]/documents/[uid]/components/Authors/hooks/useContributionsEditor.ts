@@ -1,0 +1,248 @@
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import useStore from '@/stores/global_store'
+import { Document } from '@/types/Document'
+import { LocRelator } from '@/types/LocRelator'
+import { AureHalAuthorDoc } from '@/lib/services/AureHalAPIClient'
+import {
+  buildContributionChanges,
+  defaultRankingMode,
+  workingFromContribution,
+} from '../lib/contributionDiff'
+import { halAuthorToContributionFields } from '../lib/halMapping'
+import { newLocalId } from '../lib/localId'
+import { WorkingAffiliation, WorkingContribution } from '../lib/types'
+
+function newContribution(): WorkingContribution {
+  return {
+    localId: newLocalId(),
+    personUid: null,
+    displayName: '',
+    firstName: null,
+    lastName: null,
+    identifiers: [],
+    roles: [LocRelator.CONTRIBUTOR],
+    affiliations: [],
+    rank: null,
+    notAligned: false,
+  }
+}
+
+export interface ContributionsEditor {
+  working: WorkingContribution[]
+  rankingMode: boolean
+  isFrozen: boolean
+  isDirty: boolean
+  contributorCount: number
+  setRankingMode: (value: boolean) => void
+  addContribution: () => void
+  insertContribution: (index: number) => void
+  removeContribution: (localId: string) => void
+  moveContribution: (localId: string, direction: -1 | 1) => void
+  applyHalAuthor: (localId: string, doc: AureHalAuthorDoc) => void
+  markNotAligned: (localId: string, inputText: string) => void
+  setRoles: (localId: string, roles: LocRelator[]) => void
+  addAffiliation: (localId: string, affiliation: WorkingAffiliation) => void
+  removeAffiliation: (localId: string, affiliationLocalId: string) => void
+  replaceAffiliation: (
+    localId: string,
+    affiliationLocalId: string,
+    affiliation: WorkingAffiliation,
+  ) => void
+  save: () => Promise<void>
+  cancel: () => void
+}
+
+/**
+ * Owns the editable working copy of a document's contributions. Rebuilds (and
+ * unfreezes) whenever a freshly fetched `document` replaces the previous one — the
+ * basis of the pessimistic save model. Mirrors the dirty flag into the store so the
+ * page-level navigation guard can read it.
+ */
+export function useContributionsEditor(
+  document: Document | null,
+): ContributionsEditor {
+  const { saveContributions, setContributionsTabDirty } = useStore(
+    (state) => state.document,
+  )
+
+  const baseline = useMemo(() => document?.contributions ?? [], [document])
+
+  const [working, setWorking] = useState<WorkingContribution[]>([])
+  const [rankingMode, setRankingMode] = useState(false)
+  const [isFrozen, setIsFrozen] = useState(false)
+
+  // Rebuild working state from the baseline whenever the document changes
+  // (initial load, or refresh after a save round-trip). Unfreezes the tab.
+  useEffect(() => {
+    setWorking(baseline.map(workingFromContribution))
+    setRankingMode(defaultRankingMode(baseline))
+    setIsFrozen(false)
+  }, [baseline])
+
+  const changes = useMemo(
+    () => buildContributionChanges(baseline, working, rankingMode),
+    [baseline, working, rankingMode],
+  )
+  const isDirty = !isFrozen && changes.length > 0
+
+  useEffect(() => {
+    setContributionsTabDirty(isDirty)
+    return () => setContributionsTabDirty(false)
+  }, [isDirty, setContributionsTabDirty])
+
+  const updateContribution = useCallback(
+    (
+      localId: string,
+      updater: (c: WorkingContribution) => WorkingContribution,
+    ) =>
+      setWorking((prev) =>
+        prev.map((c) => (c.localId === localId ? updater(c) : c)),
+      ),
+    [],
+  )
+
+  const addContribution = useCallback(
+    () => setWorking((prev) => [...prev, newContribution()]),
+    [],
+  )
+
+  const insertContribution = useCallback(
+    (index: number) =>
+      setWorking((prev) => {
+        const next = [...prev]
+        next.splice(index, 0, newContribution())
+        return next
+      }),
+    [],
+  )
+
+  const removeContribution = useCallback(
+    (localId: string) =>
+      setWorking((prev) => prev.filter((c) => c.localId !== localId)),
+    [],
+  )
+
+  const moveContribution = useCallback(
+    (localId: string, direction: -1 | 1) =>
+      setWorking((prev) => {
+        const index = prev.findIndex((c) => c.localId === localId)
+        const target = index + direction
+        if (index < 0 || target < 0 || target >= prev.length) return prev
+        const next = [...prev]
+        ;[next[index], next[target]] = [next[target], next[index]]
+        return next
+      }),
+    [],
+  )
+
+  const applyHalAuthor = useCallback(
+    (localId: string, doc: AureHalAuthorDoc) =>
+      updateContribution(localId, (c) => {
+        const fields = halAuthorToContributionFields(doc)
+        return {
+          ...c,
+          displayName: fields.displayName,
+          firstName: fields.firstName,
+          lastName: fields.lastName,
+          identifiers: fields.identifiers,
+          notAligned: false,
+          halExtra: doc,
+        }
+      }),
+    [updateContribution],
+  )
+
+  const markNotAligned = useCallback(
+    (localId: string, inputText: string) =>
+      updateContribution(localId, (c) => ({
+        ...c,
+        // Detach from any existing person: a not-aligned contributor is saved as a
+        // REMOVE (old uid) + ADD (uid null).
+        personUid: null,
+        displayName: inputText,
+        identifiers: [],
+        notAligned: true,
+        halExtra: undefined,
+      })),
+    [updateContribution],
+  )
+
+  const setRoles = useCallback(
+    (localId: string, roles: LocRelator[]) =>
+      updateContribution(localId, (c) => ({ ...c, roles })),
+    [updateContribution],
+  )
+
+  const addAffiliation = useCallback(
+    (localId: string, affiliation: WorkingAffiliation) =>
+      updateContribution(localId, (c) => ({
+        ...c,
+        affiliations: [...c.affiliations, affiliation],
+      })),
+    [updateContribution],
+  )
+
+  const removeAffiliation = useCallback(
+    (localId: string, affiliationLocalId: string) =>
+      updateContribution(localId, (c) => ({
+        ...c,
+        affiliations: c.affiliations.filter(
+          (a) => a.localId !== affiliationLocalId,
+        ),
+      })),
+    [updateContribution],
+  )
+
+  const replaceAffiliation = useCallback(
+    (
+      localId: string,
+      affiliationLocalId: string,
+      affiliation: WorkingAffiliation,
+    ) =>
+      updateContribution(localId, (c) => ({
+        ...c,
+        affiliations: c.affiliations.map((a) =>
+          a.localId === affiliationLocalId
+            ? { ...affiliation, localId: affiliationLocalId }
+            : a,
+        ),
+      })),
+    [updateContribution],
+  )
+
+  const save = useCallback(async () => {
+    if (changes.length === 0) return
+    const result = await saveContributions(changes)
+    if (result.success) {
+      // Pessimistic: freeze and wait for the refreshed document to rebuild.
+      setIsFrozen(true)
+      setContributionsTabDirty(false)
+    }
+  }, [changes, saveContributions, setContributionsTabDirty])
+
+  const cancel = useCallback(() => {
+    setWorking(baseline.map(workingFromContribution))
+    setRankingMode(defaultRankingMode(baseline))
+  }, [baseline])
+
+  return {
+    working,
+    rankingMode,
+    isFrozen,
+    isDirty,
+    contributorCount: working.length,
+    setRankingMode,
+    addContribution,
+    insertContribution,
+    removeContribution,
+    moveContribution,
+    applyHalAuthor,
+    markNotAligned,
+    setRoles,
+    addAffiliation,
+    removeAffiliation,
+    replaceAffiliation,
+    save,
+    cancel,
+  }
+}

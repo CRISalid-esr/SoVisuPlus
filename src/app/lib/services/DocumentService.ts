@@ -15,6 +15,8 @@ import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import dayjs from 'dayjs'
 import { OAStatus } from '@prisma/client'
 import { Literal, LiteralJson } from '@/types/Literal'
+import { ContributionChange } from '@/types/ContributionAction'
+import { InputJsonValue } from '@prisma/client/runtime/library'
 
 type ColumnFilter =
   | { id: 'date'; value: [string | null, string | null] }
@@ -55,6 +57,46 @@ export class DocumentService {
     this.actionDAO = new ActionDAO()
     this.userDAO = new UserDAO()
     this.conceptDAO = new ConceptDAO()
+  }
+
+  /**
+   * Persist contribution changes made on the Authors tab.
+   *
+   * Contribution data is intentionally NOT written to the app DB here. Each change
+   * becomes an `Action` row (targetType DOCUMENT, path 'contributions') that the
+   * change poller forwards to the graph; the updated data round-trips back via AMQP.
+   * One action is created per added / updated / removed contribution.
+   */
+  async saveContributions(
+    documentUid: string,
+    changes: ContributionChange[],
+    userName: string,
+  ): Promise<void> {
+    try {
+      const user = await this.userDAO.getUserByIdentifier(
+        new PersonIdentifier(PersonIdentifierType.local, userName),
+      )
+      if (!user?.person) {
+        throw new Error(`User with username ${userName} not found`)
+      }
+
+      await Promise.all(
+        changes.map((change) =>
+          this.actionDAO.createAction({
+            actionType: ActionType[change.actionType],
+            targetType: ActionTargetType.DOCUMENT,
+            targetUid: documentUid,
+            path: 'contributions',
+            parameters: change.parameters as unknown as InputJsonValue,
+            personUid: user.person!.uid,
+          }),
+        ),
+      )
+    } catch (error) {
+      const message = 'Error saving contributions'
+      console.error(message, error)
+      throw new Error(message)
+    }
   }
 
   async buildContributorUidArray(

@@ -35,6 +35,9 @@ yarn-error.log*
 .env
 .env.production
 
+#Claude local file
+CLAUDE.local.md
+
 # vercel
 .vercel
 
