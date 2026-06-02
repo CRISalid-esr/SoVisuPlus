@@ -39,6 +39,7 @@ export interface ContributionsEditor {
   removeContribution: (localId: string) => void
   moveContribution: (localId: string, direction: -1 | 1) => void
   reorderContribution: (fromIndex: number, toIndex: number) => void
+  reorderToGap: (fromIndex: number, gapIndex: number) => void
   applyHalAuthor: (localId: string, doc: AureHalAuthorDoc) => void
   markNotAligned: (localId: string, inputText: string) => void
   setRoles: (localId: string, roles: LocRelator[]) => void
@@ -155,6 +156,23 @@ export function useContributionsEditor(
     [],
   )
 
+  // Drop into the gap *before* card `gapIndex` (the position of an insert button).
+  const reorderToGap = useCallback(
+    (fromIndex: number, gapIndex: number) =>
+      setWorking((prev) => {
+        if (fromIndex < 0 || fromIndex >= prev.length) return prev
+        if (gapIndex < 0 || gapIndex > prev.length) return prev
+        // Account for the removal shifting indices when moving downwards.
+        const target = fromIndex < gapIndex ? gapIndex - 1 : gapIndex
+        if (target === fromIndex) return prev
+        const next = [...prev]
+        const [moved] = next.splice(fromIndex, 1)
+        next.splice(target, 0, moved)
+        return next
+      }),
+    [],
+  )
+
   const applyHalAuthor = useCallback(
     (localId: string, doc: AureHalAuthorDoc) =>
       updateContribution(localId, (c) => {
@@ -260,6 +278,7 @@ export function useContributionsEditor(
     removeContribution,
     moveContribution,
     reorderContribution,
+    reorderToGap,
     applyHalAuthor,
     markNotAligned,
     setRoles,

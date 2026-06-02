@@ -37,18 +37,18 @@ const UnsavedBanner = ({ saving, onSave, onCancel }: UnsavedBannerProps) => (
         </Typography>
       </Stack>
       <Stack direction='row' spacing={1} alignItems='center'>
-        <Button size='small' onClick={onCancel} disabled={saving}>
-          {t`documents_details_page_authors_tab_cancel`}
-        </Button>
         <Button
           size='small'
           variant='text'
           startIcon={<Save />}
           onClick={onSave}
           disabled={saving}
-          sx={{ color: 'primary.main' }}
+          sx={{ color: 'primary.main', fontWeight: 700 }}
         >
           {t`documents_details_page_authors_tab_save`}
+        </Button>
+        <Button size='small' onClick={onCancel} disabled={saving}>
+          {t`documents_details_page_authors_tab_cancel`}
         </Button>
       </Stack>
     </Stack>

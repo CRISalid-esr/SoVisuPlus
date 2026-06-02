@@ -1,4 +1,4 @@
-import { Box, IconButton, Stack, Tooltip } from '@mui/material'
+import { Box, Divider, IconButton, Stack, Tooltip } from '@mui/material'
 import { ArrowDownward, ArrowUpward, DragIndicator } from '@mui/icons-material'
 import { t } from '@lingui/core/macro'
 import { LocRelator } from '@/types/LocRelator'
@@ -63,7 +63,7 @@ const ContributionCard = ({
       sx={{
         border: '1px solid',
         borderColor: 'grey.300',
-        borderRadius: 1,
+        borderRadius: 3,
         overflow: 'hidden',
       }}
       onDragOver={(event) => {
@@ -148,6 +148,11 @@ const ContributionCard = ({
             onRemove={onRemove}
           />
         </Box>
+        <Divider
+          orientation='vertical'
+          flexItem
+          sx={{ display: { xs: 'none', md: 'block' }, borderColor: 'grey.300' }}
+        />
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <AffiliationPanel
             affiliations={contribution.affiliations}

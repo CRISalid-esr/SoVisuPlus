@@ -15,12 +15,28 @@ const ContributorList = ({ editor, readOnly }: ContributorListProps) => {
   const disabled = isFrozen
 
   const insertButton = (index: number) => (
-    <Box sx={{ textAlign: 'center', my: 0.5 }}>
+    <Box
+      sx={{ textAlign: 'center', my: 0.5, py: 0.5, borderRadius: 1 }}
+      // The gap is also a drop target: dropping here reorders the dragged card
+      // into this position (between the two surrounding contributors).
+      onDragOver={(event) => {
+        if (!disabled) event.preventDefault()
+      }}
+      onDrop={(event) => {
+        if (disabled) return
+        event.preventDefault()
+        const from = Number(event.dataTransfer.getData('text/plain'))
+        if (!Number.isNaN(from)) editor.reorderToGap(from, index)
+      }}
+    >
       <Button
         size='small'
         startIcon={<PersonAddAlt1 />}
         disabled={disabled}
-        onClick={() => editor.insertContribution(index)}
+        onClick={(event) => {
+          editor.insertContribution(index)
+          event.currentTarget.blur() // deselect after click
+        }}
       >
         {t`documents_details_page_authors_tab_insert_contributor`}
       </Button>
@@ -28,7 +44,8 @@ const ContributorList = ({ editor, readOnly }: ContributorListProps) => {
   )
 
   return (
-    <Stack spacing={1}>
+    // More breathing room between cards when ranking mode is off (no insert rows).
+    <Stack spacing={rankingMode ? 1 : 2}>
       {working.map((contribution, index) => (
         <Box key={contribution.localId}>
           {/* Insert buttons sit between cards only (no button above the first). */}

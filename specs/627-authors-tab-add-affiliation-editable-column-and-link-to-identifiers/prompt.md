@@ -335,3 +335,37 @@ The rank field is missing in the DB, you will have to add it to the Prisma Contr
 - Contributor cards use a thin grey border instead of the Paper-like shadow/box styling. Increase the vertical spacing between the elements below the contributor status (in the card's left-hand side).
 - The unsaved-changes banner sits under the title and ranking-mode toggle. It has a full-opacity background equal to the body background color (e.g. white in light mode), no surrounding border, only a thick light-orange left border. The warning icon and text are justified left and the buttons right. The Save button uses the text variant with a teal font color and a floppy-disk start icon.
 - The ranking-mode drag-and-drop handle must actually reorder the contributor card (fix the broken handle).
+
+## UI refinements (round 4)
+
+### Contributor card
+- The contributor card corners are more rounded (increased border radius).
+- The contributor card uses a thin grey border instead of a Paper-like shadow/box.
+
+### Search in HAL profile autocomplete
+- When the contribution status is different from 'Not identified', the 'Search in HAL' profile autocomplete wrapper box has a light grey background.
+
+### Unsaved-changes banner
+- The Save button comes before the Cancel button; the Save button label is in bold.
+
+### Ranking mode
+- Drag-and-drop must work not only when a contributor is dropped onto another contributor, but also when it is dropped between two contributors (the gap where the 'Insert contributor here' button sits).
+- The 'Insert contributor here' button is deselected (loses focus) after being clicked.
+
+## UI refinements (round 5)
+
+### Contributor card
+- Add vertical spacing between contributor cards when ranking mode is off.
+- Add a vertical splitter between the card's left-hand and right-hand sides; the splitter uses the same color as the card border.
+
+### Search in HAL profile autocomplete
+- When the contribution status is different from 'Not identified', the 'Search in HAL' profile autocomplete wrapper box also has a border (in addition to its light grey background).
+
+## UI refinements (round 6)
+
+### Read-only mode
+- The read-only (display-only) mode must be decided by the user's permission to edit this document's contributors, NOT by the viewing perspective. Use the same authorization as the Bibliographic tab: the CASL ability built from the session's authz context (`abilityFromAuthzContext(session.user.authz)`), checking `update` on the document for the `contributors` field. This is the same check the Save API route enforces server-side. Do not rely on a `perspective` URL parameter: a direct URL to a document uid has no perspective param and must still be protected (an unauthorized user must get the read-only display, never editable controls).
+- In read-only mode, the contributor's roles are displayed as plain text: a 'Roles :' label (French: 'Fonctions :') followed by the role labels joined by commas. The roles autocomplete is removed.
+
+### Affiliation suggestions
+- In the HAL affiliation suggestions list, results that have a ROR identifier are placed at the top of the list.

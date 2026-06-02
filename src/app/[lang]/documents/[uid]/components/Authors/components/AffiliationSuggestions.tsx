@@ -142,6 +142,13 @@ const AffiliationSuggestions = ({
 
   if (results.length === 0) return null
 
+  // Suggestions with a ROR are shown first (stable otherwise).
+  const ordered = [...results].sort(
+    (a, b) =>
+      (b.ror_s && b.ror_s.length ? 1 : 0) -
+      (a.ror_s && a.ror_s.length ? 1 : 0),
+  )
+
   if (!expanded) {
     return (
       <Box sx={{ textAlign: 'left' }}>
@@ -183,7 +190,7 @@ const AffiliationSuggestions = ({
         </Link>
       </Stack>
       <Stack spacing={1}>
-        {results.map((doc) => (
+        {ordered.map((doc) => (
           <SuggestionBox
             key={`${doc.docid}-${doc.valid_s ?? ''}`}
             doc={doc}

@@ -3,7 +3,7 @@ import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import { alpha } from '@mui/material/styles'
 import { DeleteOutline, Edit, EditOff } from '@mui/icons-material'
 import { t } from '@lingui/core/macro'
-import { LocRelator } from '@/types/LocRelator'
+import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
 import { AureHalAuthorDoc } from '@/lib/services/AureHalAPIClient'
 import { WorkingContribution } from '../lib/types'
 import { computeContributionStatus } from '../lib/contributionStatus'
@@ -109,7 +109,11 @@ const ContributorLeftPanel = ({
                     borderColor: (theme) =>
                       alpha(theme.palette.warning.main, 0.4),
                   }
-                : {}),
+                : {
+                    backgroundColor: 'grey.100',
+                    border: '1px solid',
+                    borderColor: 'grey.300',
+                  }),
             }}
           >
             <HalAuthorAutocomplete
@@ -120,11 +124,22 @@ const ContributorLeftPanel = ({
           </Box>
         )}
 
-        <RoleMultiSelect
-          roles={contribution.roles}
-          disabled={disabled || readOnly}
-          onChange={onSetRoles}
-        />
+        {readOnly ? (
+          <Typography variant='body2'>
+            <Box component='span' sx={{ fontWeight: 600 }}>
+              {t`documents_details_page_authors_tab_roles_label`} :
+            </Box>{' '}
+            {contribution.roles
+              .map((role) => LocRelatorHelper.toLabel(role))
+              .join(', ')}
+          </Typography>
+        ) : (
+          <RoleMultiSelect
+            roles={contribution.roles}
+            disabled={disabled}
+            onChange={onSetRoles}
+          />
+        )}
       </Stack>
     </Box>
   )
