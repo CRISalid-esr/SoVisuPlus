@@ -88,12 +88,6 @@ export function getJwtMaxAgeSeconds(): number {
   return restrictedHours * 60 * 60
 }
 
-// utility function to strip domain if username is an eppn (temporary)
-const stripDomainFromEppn = (username: string): string => {
-  const atIndex = username.indexOf('@')
-  return atIndex > 0 ? username.substring(0, atIndex) : username
-}
-
 const authOptions: AuthOptions = {
   debug: true,
   providers: [
@@ -119,10 +113,8 @@ const authOptions: AuthOptions = {
     }) {
       console.info('signIn callback', user, account, profile)
       const userService = new UserService()
-      const username = (profile as KeycloakProfile)?.preferred_username
       const authenticationProfile: AuthenticationProfile = {
-        // Temporary : if username is an eppn jdupont@my-univ.fr, remove the domain part
-        username: username ? stripDomainFromEppn(username) : undefined,
+        eppn: (profile as KeycloakProfile)?.preferred_username,
         email: profile?.email,
         orcid: (profile as KeycloakProfile)?.orcid,
       }
@@ -141,9 +133,7 @@ const authOptions: AuthOptions = {
     }) {
       console.info('jwt callback', token, account, user, profile)
       if (profile) {
-        const username = (profile as KeycloakProfile)?.preferred_username
-        // temporary : if username is an eppn, strip domain part
-        token.username = username ? stripDomainFromEppn(username) : undefined
+        token.username = (profile as KeycloakProfile)?.preferred_username
         token.email = profile?.email
         token.orcid = (profile as KeycloakProfile)?.orcid
       }
@@ -153,7 +143,7 @@ const authOptions: AuthOptions = {
       const userDAO = new UserDAO()
       const identifier = token.username
         ? new PersonIdentifier(
-            PersonIdentifierType.local,
+            PersonIdentifierType.eppn,
             String(token.username),
           )
         : token.orcid
