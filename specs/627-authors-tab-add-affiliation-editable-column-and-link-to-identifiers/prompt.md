@@ -267,3 +267,71 @@ If the tab is in ranking mode at save time, rank is equal to the position of the
 Roles are selected/displayed as labels (`LocRelator` enum values) but must be sent in the payload as LoC relator URIs. Use the existing `LocRelatorHelper.toUri(relator)` helper to build the payload.
 
 The rank field is missing in the DB, you will have to add it to the Prisma Contribution model. Note: the domain type `Contribution` (src/app/types/Contribution.ts) and `ContributionJson` already declare `rank`, but it is never populated from the DB — wire it through `Contribution.fromDbContribution` once the column exists.
+
+## UI refinements (round 2)
+
+### Affiliation part — missing (not-identified) affiliation
+
+1. Add a warning icon before the 'Missing HAL affiliation' label.
+2. Use a lighter orange for the card background and border (not the heavy orange).
+3. The 'Imported text:' statement is in teal (theme palette primary main color); the following affiliation name keeps its current color.
+4. The 'Suggest' text button is left-aligned, its text is bold, and it has a right-arrow (chevron) icon as end decoration.
+5. When the HAL affiliation suggestions are open, the 'Hide' text button is right-aligned and the number of suggested affiliations is in bold.
+6. Each suggested-affiliation card: tag background in light teal, tag font in teal, affiliation name in bold, 'Align' button in contained variant, card border in light teal. French translation of 'Supervised by' is 'Tutelle' when there is a single value after it and 'Tutelles' when there are multiple.
+
+### Affiliation part — global
+
+1. Remove the splitter line above 'Add a HAL affiliation'. Instead the accordion has a light grey dashed border, a 'plus' icon as start decoration, and a bold teal title.
+2. Truncate the ROR identifier everywhere: strip the 'https://ror.org/' part to keep only the relevant value.
+3. In a HAL affiliation option's display, put ': ' after the identifier type (e.g. `ROR: <value>`).
+
+### Contributor left-side part
+
+1. Add an icon beside the status: warning icon for 'Not identified', success icon (green check) for 'Identified' and 'Identified and aligned', info icon for 'Not aligned'.
+2. Change the pen icon to a crossed-out pen when the 'Search in HAL' profile autocomplete is shown, and change the tooltip to 'Hide search in HAL autocomplete'. Do not show the pen icon when the contribution status is 'Not identified'.
+3. Hide the 'Search in HAL' profile autocomplete after an option is selected.
+4. Clearing all selected values in the roles autocomplete must select the 'Contributor' option as default (never leave an empty field).
+5. Remove the trailing point separator in the option's second-line display.
+6. French translation of the roles autocomplete label is 'Fonctions' (instead of 'Rôles').
+7. For 'Not identified' contributors, the 'Search in HAL' wrapping box uses a light orange background and orange borders (not the heavy orange).
+8. In HalAuthorAutocomplete, key each option by its position number in the results (not by content) — HAL can return duplicates, which throws a React duplicate-key error.
+
+### Global
+
+1. The tab has an 'Authors' title with a red asterisk beside it.
+2. The contributor card's delete (bin) button is at the top-right corner of the contributor left-side part (not in the card header).
+3. The unsaved-changes banner is sticky; its items are horizontally center-aligned.
+4. All autocompletes display a loading circle while a request is pending.
+5. The contributor and affiliation counts are right-aligned, after the ranking-mode toggle, with the numbers in bold.
+6. Ranking mode: remove the top 'Insert contributor here' button (keep the ones between cards). The contributor card handle allows drag-and-drop to change its rank/position.
+7. Read-only mode when the user is on a perspective other than their own: editing controls disappear (the user must not change other perspectives' data). The Author tab then only displays the contributor name, identifiers, roles (roles autocomplete functionality disabled) and affiliations.
+
+## UI refinements (round 3)
+
+### Affiliation part — missing (not-identified) affiliation
+
+- 'Identified' affiliation card identifier tags must have no border, a light teal background and a teal font color.
+
+### Affiliation part — suggestions
+
+- When the HAL affiliation suggestions are shown, the 'HAL suggestion' label is in grey color with a heavier weight (subtitle text variant).
+- A HAL affiliation suggestion card has the same background as the body (according to the selected theme mode — light or dark).
+
+### Contributor left-side part
+
+- The 'Not identified' status is shown with a light orange background and an outlined warning icon. The 'Identified' and 'Identified and aligned' statuses have no border and their text is bold in the default font color.
+- When the only selected role is 'Contributor', the roles autocomplete border is light orange.
+- The 'Search in HAL' profile autocomplete background color is the same as the body background color (according to the selected theme mode).
+- Put the 'Add a contributor' option only once options have been loaded; show a spinner in the options while the request is pending.
+- Remove the contributor's affiliations after an option has been selected in the 'Search in HAL' profile autocomplete.
+
+### Autocompletes (all)
+
+- Remove the small input spinner in every autocomplete while a request is pending; keep only the larger spinner shown in the options.
+
+### Global
+
+- The 'Authors' title is on the same line as the ranking-mode toggle and is in bold (heavier font weight).
+- Contributor cards use a thin grey border instead of the Paper-like shadow/box styling. Increase the vertical spacing between the elements below the contributor status (in the card's left-hand side).
+- The unsaved-changes banner sits under the title and ranking-mode toggle. It has a full-opacity background equal to the body background color (e.g. white in light mode), no surrounding border, only a thick light-orange left border. The warning icon and text are justified left and the buttons right. The Save button uses the text variant with a teal font color and a floppy-disk start icon.
+- The ranking-mode drag-and-drop handle must actually reorder the contributor card (fix the broken handle).

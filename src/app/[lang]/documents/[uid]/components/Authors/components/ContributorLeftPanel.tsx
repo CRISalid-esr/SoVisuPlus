@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import { Edit } from '@mui/icons-material'
+import { alpha } from '@mui/material/styles'
+import { DeleteOutline, Edit, EditOff } from '@mui/icons-material'
 import { t } from '@lingui/core/macro'
 import { LocRelator } from '@/types/LocRelator'
 import { AureHalAuthorDoc } from '@/lib/services/AureHalAPIClient'
@@ -14,72 +15,118 @@ import RoleMultiSelect from './RoleMultiSelect'
 interface ContributorLeftPanelProps {
   contribution: WorkingContribution
   disabled?: boolean
+  readOnly?: boolean
   onSelectProfile: (doc: AureHalAuthorDoc) => void
   onAddContributor: (inputText: string) => void
   onSetRoles: (roles: LocRelator[]) => void
+  onRemove: () => void
 }
 
 const ContributorLeftPanel = ({
   contribution,
   disabled,
+  readOnly,
   onSelectProfile,
   onAddContributor,
   onSetRoles,
+  onRemove,
 }: ContributorLeftPanelProps) => {
   const status = computeContributionStatus(contribution)
-  const alwaysShowSearch =
-    status === 'identified' || status === 'not_identified'
-  const [penOpen, setPenOpen] = useState(false)
-  const showSearch = alwaysShowSearch || penOpen
+  const autoShow = status === 'identified' || status === 'not_identified'
+  const [showSearch, setShowSearch] = useState(autoShow)
   const isWarningBox = status === 'not_identified'
+  // No pen for 'not identified' (its search is always shown); none in read-only.
+  const showPen = !readOnly && status !== 'not_identified'
+  const searchVisible = !readOnly && showSearch
+
+  const handleSelectProfile = (doc: AureHalAuthorDoc) => {
+    onSelectProfile(doc)
+    setShowSearch(false) // hide the search after a selection
+  }
+  const handleAddContributor = (inputText: string) => {
+    onAddContributor(inputText)
+    setShowSearch(false)
+  }
 
   return (
-    <Stack spacing={1}>
-      <Typography variant='subtitle1' fontWeight={600}>
-        {contribution.displayName ||
-          t`documents_details_page_authors_tab_new_contributor`}
-      </Typography>
-
-      <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap'>
-        <ContributionStatusChip status={status} />
-        <IdentifierIconList identifiers={contribution.identifiers} />
+    <Box sx={{ position: 'relative', pr: readOnly ? 0 : 4 }}>
+      {!readOnly && (
         <Tooltip
-          title={t`documents_details_page_authors_tab_edit_identification`}
+          title={t`documents_details_page_authors_tab_remove_contributor`}
         >
-          <span>
-            <IconButton
-              size='small'
-              disabled={disabled}
-              onClick={() => setPenOpen((open) => !open)}
-            >
-              <Edit fontSize='small' />
+          <span style={{ position: 'absolute', top: 0, right: 0 }}>
+            <IconButton size='small' disabled={disabled} onClick={onRemove}>
+              <DeleteOutline fontSize='small' />
             </IconButton>
           </span>
         </Tooltip>
-      </Stack>
-
-      {showSearch && (
-        <Box
-          sx={{
-            p: 1,
-            borderRadius: 1,
-            backgroundColor: isWarningBox ? 'warning.light' : 'grey.100',
-          }}
-        >
-          <HalAuthorAutocomplete
-            disabled={disabled}
-            onSelectProfile={onSelectProfile}
-            onAddContributor={onAddContributor}
-          />
-        </Box>
       )}
 
-      <RoleMultiSelect
-        roles={contribution.roles}
-        disabled={disabled}
-        onChange={onSetRoles}
-      />
-    </Stack>
+      <Stack spacing={2}>
+        <Typography variant='subtitle1' fontWeight={600}>
+          {contribution.displayName ||
+            t`documents_details_page_authors_tab_new_contributor`}
+        </Typography>
+
+        <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap'>
+          <ContributionStatusChip status={status} />
+          <IdentifierIconList identifiers={contribution.identifiers} />
+          {showPen && (
+            <Tooltip
+              title={
+                showSearch
+                  ? t`documents_details_page_authors_tab_hide_hal_search`
+                  : t`documents_details_page_authors_tab_edit_identification`
+              }
+            >
+              <span>
+                <IconButton
+                  size='small'
+                  disabled={disabled}
+                  onClick={() => setShowSearch((open) => !open)}
+                >
+                  {showSearch ? (
+                    <EditOff fontSize='small' />
+                  ) : (
+                    <Edit fontSize='small' />
+                  )}
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
+        </Stack>
+
+        {searchVisible && (
+          <Box
+            sx={{
+              p: 1,
+              borderRadius: 1,
+              ...(isWarningBox
+                ? {
+                    backgroundColor: (theme) =>
+                      alpha(theme.palette.warning.main, 0.08),
+                    border: '1px solid',
+                    borderColor: (theme) =>
+                      alpha(theme.palette.warning.main, 0.4),
+                  }
+                : {}),
+            }}
+          >
+            <HalAuthorAutocomplete
+              disabled={disabled}
+              onSelectProfile={handleSelectProfile}
+              onAddContributor={handleAddContributor}
+            />
+          </Box>
+        )}
+
+        <RoleMultiSelect
+          roles={contribution.roles}
+          disabled={disabled || readOnly}
+          onChange={onSetRoles}
+        />
+      </Stack>
+    </Box>
   )
 }
 

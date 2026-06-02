@@ -18,6 +18,12 @@ const stripUrl = (value: string) =>
     .replace(/^https?:\/\/orcid\.org\//, '')
     .replace(/^https?:\/\/www\.idref\.fr\//, '')
 
+const loadingOption = (
+  <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
+    <CircularProgress size={18} />
+  </Box>
+)
+
 interface HalAuthorAutocompleteProps {
   disabled?: boolean
   onSelectProfile: (doc: AureHalAuthorDoc) => void
@@ -33,12 +39,15 @@ const HalAuthorAutocomplete = ({
     useDebouncedHalSearch<AureHalAuthorDoc>('/api/hal/authors')
 
   const hasQuery = input.trim().length >= 2
-  const options: Option[] = hasQuery
-    ? [
-        { kind: 'add' },
-        ...results.map((doc) => ({ kind: 'doc' as const, doc })),
-      ]
-    : []
+  // 'Add contributor' is only offered once results have loaded; while a request
+  // is pending the option list is empty so the loading spinner shows instead.
+  const options: Option[] =
+    hasQuery && !loading
+      ? [
+          { kind: 'add' },
+          ...results.map((doc) => ({ kind: 'doc' as const, doc })),
+        ]
+      : []
 
   const noOptionsText = !hasQuery
     ? t`documents_details_page_authors_tab_hal_min_chars`
@@ -69,14 +78,18 @@ const HalAuthorAutocomplete = ({
       onInputChange={(_event, value) => setInput(value)}
       onChange={handleChange}
       loading={loading}
-      loadingText={t`documents_details_page_authors_tab_hal_loading`}
+      loadingText={loadingOption}
       noOptionsText={noOptionsText}
       getOptionLabel={() => ''}
       isOptionEqualToValue={() => false}
-      renderOption={(props, option) => {
+      renderOption={(props, option, state) => {
+        // Key by result position: HAL can return duplicate docs (same idHal/form),
+        // so a content-derived key throws "duplicate key" in React.
+        const key =
+          option.kind === 'add' ? 'add-contributor' : `opt-${state.index}`
         if (option.kind === 'add') {
           return (
-            <Box component='li' {...props} key='add-contributor'>
+            <Box component='li' {...props} key={key}>
               <Typography fontStyle='italic'>
                 {t`documents_details_page_authors_tab_hal_add_contributor`}
               </Typography>
@@ -87,12 +100,14 @@ const HalAuthorAutocomplete = ({
         const highlighted = Boolean(
           doc.idHal_s || doc.orcidId_s?.length || doc.idrefId_s?.length,
         )
+        const parts = [
+          doc.emailDomain_s?.length ? doc.emailDomain_s[0] : null,
+          doc.idHal_s || null,
+          doc.orcidId_s?.length ? stripUrl(doc.orcidId_s[0]) : null,
+          doc.idrefId_s?.length ? `IdRef: ${stripUrl(doc.idrefId_s[0])}` : null,
+        ].filter(Boolean)
         return (
-          <Box
-            component='li'
-            {...props}
-            key={`${doc.form_i ?? doc.person_i ?? doc.fullName_s}-${doc.idHal_s ?? ''}`}
-          >
+          <Box component='li' {...props} key={key}>
             <Box>
               <Typography
                 component='span'
@@ -101,20 +116,15 @@ const HalAuthorAutocomplete = ({
               >
                 {doc.fullName_s}
               </Typography>
-              <Typography
-                variant='caption'
-                color='textSecondary'
-                component='div'
-              >
-                {doc.emailDomain_s?.length ? `${doc.emailDomain_s[0]} · ` : ''}
-                {doc.idHal_s ? `${doc.idHal_s} · ` : ''}
-                {doc.orcidId_s?.length
-                  ? `${stripUrl(doc.orcidId_s[0])} · `
-                  : ''}
-                {doc.idrefId_s?.length
-                  ? `IdRef: ${stripUrl(doc.idrefId_s[0])}`
-                  : ''}
-              </Typography>
+              {parts.length > 0 && (
+                <Typography
+                  variant='caption'
+                  color='textSecondary'
+                  component='div'
+                >
+                  {parts.join(' · ')}
+                </Typography>
+              )}
             </Box>
           </Box>
         )
@@ -123,17 +133,7 @@ const HalAuthorAutocomplete = ({
         <TextField
           {...params}
           placeholder={t`documents_details_page_authors_tab_hal_search_placeholder`}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {loading ? (
-                  <CircularProgress color='inherit' size={16} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
+          sx={{ backgroundColor: 'background.default' }}
         />
       )}
     />

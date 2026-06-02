@@ -7,6 +7,7 @@ import AddHalAffiliationAccordion from './AddHalAffiliationAccordion'
 interface AffiliationPanelProps {
   affiliations: WorkingAffiliation[]
   disabled?: boolean
+  readOnly?: boolean
   /** false for a brand-new contributor with no HAL profile selected yet. */
   canAddAffiliation: boolean
   onRemoveAffiliation: (affiliationLocalId: string) => void
@@ -20,6 +21,7 @@ interface AffiliationPanelProps {
 const AffiliationPanel = ({
   affiliations,
   disabled,
+  readOnly,
   canAddAffiliation,
   onRemoveAffiliation,
   onReplaceAffiliation,
@@ -31,14 +33,17 @@ const AffiliationPanel = ({
         key={aff.localId}
         affiliation={aff}
         disabled={disabled}
+        readOnly={readOnly}
         onRemove={onRemoveAffiliation}
         onSelectStructure={onReplaceAffiliation}
       />
     ))}
-    <AddHalAffiliationAccordion
-      disabled={disabled || !canAddAffiliation}
-      onAddStructure={onAddAffiliation}
-    />
+    {!readOnly && (
+      <AddHalAffiliationAccordion
+        disabled={disabled || !canAddAffiliation}
+        onAddStructure={onAddAffiliation}
+      />
+    )}
   </Stack>
 )
 

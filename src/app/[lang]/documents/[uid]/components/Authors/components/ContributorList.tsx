@@ -5,15 +5,21 @@ import { ContributionsEditor } from '../hooks/useContributionsEditor'
 import { halStructureToAffiliation } from '../lib/halMapping'
 import ContributionCard from './ContributionCard'
 
-const ContributorList = ({ editor }: { editor: ContributionsEditor }) => {
+interface ContributorListProps {
+  editor: ContributionsEditor
+  readOnly?: boolean
+}
+
+const ContributorList = ({ editor, readOnly }: ContributorListProps) => {
   const { working, rankingMode, isFrozen } = editor
+  const disabled = isFrozen
 
   const insertButton = (index: number) => (
     <Box sx={{ textAlign: 'center', my: 0.5 }}>
       <Button
         size='small'
         startIcon={<PersonAddAlt1 />}
-        disabled={isFrozen}
+        disabled={disabled}
         onClick={() => editor.insertContribution(index)}
       >
         {t`documents_details_page_authors_tab_insert_contributor`}
@@ -25,17 +31,20 @@ const ContributorList = ({ editor }: { editor: ContributionsEditor }) => {
     <Stack spacing={1}>
       {working.map((contribution, index) => (
         <Box key={contribution.localId}>
-          {rankingMode && insertButton(index)}
+          {/* Insert buttons sit between cards only (no button above the first). */}
+          {!readOnly && rankingMode && index > 0 && insertButton(index)}
           <ContributionCard
             contribution={contribution}
             index={index}
             total={working.length}
             rankingMode={rankingMode}
-            disabled={isFrozen}
+            disabled={disabled}
+            readOnly={readOnly}
             onRemove={() => editor.removeContribution(contribution.localId)}
             onMove={(direction) =>
               editor.moveContribution(contribution.localId, direction)
             }
+            onReorder={(from, to) => editor.reorderContribution(from, to)}
             onSelectProfile={(doc) =>
               editor.applyHalAuthor(contribution.localId, doc)
             }
@@ -63,16 +72,18 @@ const ContributorList = ({ editor }: { editor: ContributionsEditor }) => {
         </Box>
       ))}
 
-      <Box sx={{ textAlign: 'center', mt: 1 }}>
-        <Button
-          startIcon={<Add />}
-          variant='outlined'
-          disabled={isFrozen}
-          onClick={() => editor.addContribution()}
-        >
-          {t`documents_details_page_authors_tab_add_contributor`}
-        </Button>
-      </Box>
+      {!readOnly && (
+        <Box sx={{ textAlign: 'center', mt: 1 }}>
+          <Button
+            startIcon={<Add />}
+            variant='outlined'
+            disabled={disabled}
+            onClick={() => editor.addContribution()}
+          >
+            {t`documents_details_page_authors_tab_add_contributor`}
+          </Button>
+        </Box>
+      )}
     </Stack>
   )
 }

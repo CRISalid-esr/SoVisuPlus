@@ -4,6 +4,7 @@ import {
   AureHalStructureDoc,
 } from '@/lib/services/AureHalAPIClient'
 import { newLocalId } from './localId'
+import { truncateRor } from './affiliationDisplay'
 import {
   WorkingAffiliation,
   WorkingContribution,
@@ -85,7 +86,10 @@ export function halStructureToAffiliation(
     idref: firstOrNull(doc.idref_s),
     isni: firstOrNull(doc.isni_s),
     nns: firstOrNull(doc.rnsr_s),
-    ror: firstOrNull(doc.ror_s),
+    ror: (() => {
+      const v = firstOrNull(doc.ror_s)
+      return v ? truncateRor(v) : null
+    })(),
     wikidata: firstOrNull(doc.wikidata_s),
     importedText: null,
     halExtra: doc,

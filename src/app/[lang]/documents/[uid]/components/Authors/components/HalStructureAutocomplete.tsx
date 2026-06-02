@@ -20,6 +20,12 @@ interface HalStructureAutocompleteProps {
   onSelectStructure: (doc: AureHalStructureDoc) => void
 }
 
+const loadingOption = (
+  <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
+    <CircularProgress size={18} />
+  </Box>
+)
+
 const HalStructureAutocomplete = ({
   disabled,
   onSelectStructure,
@@ -53,7 +59,7 @@ const HalStructureAutocomplete = ({
         setInput('')
       }}
       loading={loading}
-      loadingText={t`documents_details_page_authors_tab_hal_loading`}
+      loadingText={loadingOption}
       noOptionsText={noOptionsText}
       getOptionLabel={() => ''}
       isOptionEqualToValue={() => false}
@@ -64,7 +70,7 @@ const HalStructureAutocomplete = ({
         const inlineIds = orderedAffiliationIdentifiers(
           halStructureToAffiliation(doc),
         )
-          .map((id) => `${id.label}${id.value}`)
+          .map((id) => `${id.label}: ${id.value}`)
           .join(' ')
         return (
           <Box
@@ -98,17 +104,6 @@ const HalStructureAutocomplete = ({
         <TextField
           {...params}
           placeholder={t`documents_details_page_authors_tab_hal_structure_placeholder`}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {loading ? (
-                  <CircularProgress color='inherit' size={16} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
         />
       )}
     />

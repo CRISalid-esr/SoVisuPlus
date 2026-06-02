@@ -1,12 +1,6 @@
 import { Box, IconButton, Stack, Tooltip } from '@mui/material'
-import {
-  ArrowDownward,
-  ArrowUpward,
-  DeleteOutline,
-  DragIndicator,
-} from '@mui/icons-material'
+import { ArrowDownward, ArrowUpward, DragIndicator } from '@mui/icons-material'
 import { t } from '@lingui/core/macro'
-import CustomCard from '@/app/[lang]/components/Card/CustomCard'
 import { LocRelator } from '@/types/LocRelator'
 import {
   AureHalAuthorDoc,
@@ -22,8 +16,10 @@ interface ContributionCardProps {
   total: number
   rankingMode: boolean
   disabled?: boolean
+  readOnly?: boolean
   onRemove: () => void
   onMove: (direction: -1 | 1) => void
+  onReorder: (fromIndex: number, toIndex: number) => void
   onSelectProfile: (doc: AureHalAuthorDoc) => void
   onAddContributor: (inputText: string) => void
   onSetRoles: (roles: LocRelator[]) => void
@@ -41,8 +37,10 @@ const ContributionCard = ({
   total,
   rankingMode,
   disabled,
+  readOnly,
   onRemove,
   onMove,
+  onReorder,
   onSelectProfile,
   onAddContributor,
   onSetRoles,
@@ -57,51 +55,83 @@ const ContributionCard = ({
     !contribution.displayName
   )
 
-  const header = (
-    <Stack direction='row' alignItems='center' justifyContent='space-between'>
-      <Stack direction='row' alignItems='center' spacing={0.5}>
-        {rankingMode && (
-          <>
-            <DragIndicator fontSize='small' sx={{ color: 'text.disabled' }} />
-            <Tooltip title={t`documents_details_page_authors_tab_move_up`}>
-              <span>
-                <IconButton
-                  size='small'
-                  disabled={disabled || index === 0}
-                  onClick={() => onMove(-1)}
-                >
-                  <ArrowUpward fontSize='small' />
-                </IconButton>
-              </span>
-            </Tooltip>
-            <Tooltip title={t`documents_details_page_authors_tab_move_down`}>
-              <span>
-                <IconButton
-                  size='small'
-                  disabled={disabled || index === total - 1}
-                  onClick={() => onMove(1)}
-                >
-                  <ArrowDownward fontSize='small' />
-                </IconButton>
-              </span>
-            </Tooltip>
-          </>
-        )}
-      </Stack>
-      <Tooltip title={t`documents_details_page_authors_tab_remove_contributor`}>
-        <span>
-          <IconButton size='small' disabled={disabled} onClick={onRemove}>
-            <DeleteOutline fontSize='small' />
-          </IconButton>
-        </span>
-      </Tooltip>
-    </Stack>
-  )
+  const dndEnabled = rankingMode && !readOnly && !disabled
+  const showHeader = rankingMode && !readOnly
 
   return (
-    <CustomCard header={header}>
+    <Box
+      sx={{
+        border: '1px solid',
+        borderColor: 'grey.300',
+        borderRadius: 1,
+        overflow: 'hidden',
+      }}
+      onDragOver={(event) => {
+        if (dndEnabled) event.preventDefault()
+      }}
+      onDrop={(event) => {
+        if (!dndEnabled) return
+        event.preventDefault()
+        const from = Number(event.dataTransfer.getData('text/plain'))
+        if (!Number.isNaN(from) && from !== index) onReorder(from, index)
+      }}
+    >
+      {showHeader && (
+        <Stack
+          direction='row'
+          alignItems='center'
+          spacing={0.5}
+          sx={{
+            px: 1,
+            py: 0.5,
+            borderBottom: '1px solid',
+            borderColor: 'grey.200',
+          }}
+        >
+          <Tooltip
+            title={t`documents_details_page_authors_tab_drag_to_reorder`}
+          >
+            <Box
+              component='span'
+              draggable={dndEnabled}
+              onDragStart={(event) => {
+                if (!dndEnabled) return
+                event.dataTransfer.effectAllowed = 'move'
+                event.dataTransfer.setData('text/plain', String(index))
+              }}
+              sx={{ display: 'flex', cursor: dndEnabled ? 'grab' : 'default' }}
+            >
+              <DragIndicator fontSize='small' sx={{ color: 'text.disabled' }} />
+            </Box>
+          </Tooltip>
+          <Tooltip title={t`documents_details_page_authors_tab_move_up`}>
+            <span>
+              <IconButton
+                size='small'
+                disabled={disabled || index === 0}
+                onClick={() => onMove(-1)}
+              >
+                <ArrowUpward fontSize='small' />
+              </IconButton>
+            </span>
+          </Tooltip>
+          <Tooltip title={t`documents_details_page_authors_tab_move_down`}>
+            <span>
+              <IconButton
+                size='small'
+                disabled={disabled || index === total - 1}
+                onClick={() => onMove(1)}
+              >
+                <ArrowDownward fontSize='small' />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </Stack>
+      )}
+
       <Box
         sx={{
+          p: 2,
           display: 'flex',
           flexDirection: { xs: 'column', md: 'row' },
           gap: 2,
@@ -111,15 +141,18 @@ const ContributionCard = ({
           <ContributorLeftPanel
             contribution={contribution}
             disabled={disabled}
+            readOnly={readOnly}
             onSelectProfile={onSelectProfile}
             onAddContributor={onAddContributor}
             onSetRoles={onSetRoles}
+            onRemove={onRemove}
           />
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <AffiliationPanel
             affiliations={contribution.affiliations}
             disabled={disabled}
+            readOnly={readOnly}
             canAddAffiliation={canAddAffiliation}
             onRemoveAffiliation={onRemoveAffiliation}
             onReplaceAffiliation={onReplaceAffiliation}
@@ -127,7 +160,7 @@ const ContributionCard = ({
           />
         </Box>
       </Box>
-    </CustomCard>
+    </Box>
   )
 }
 

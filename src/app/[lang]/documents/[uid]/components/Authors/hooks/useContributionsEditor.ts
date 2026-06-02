@@ -38,6 +38,7 @@ export interface ContributionsEditor {
   insertContribution: (index: number) => void
   removeContribution: (localId: string) => void
   moveContribution: (localId: string, direction: -1 | 1) => void
+  reorderContribution: (fromIndex: number, toIndex: number) => void
   applyHalAuthor: (localId: string, doc: AureHalAuthorDoc) => void
   markNotAligned: (localId: string, inputText: string) => void
   setRoles: (localId: string, roles: LocRelator[]) => void
@@ -135,6 +136,25 @@ export function useContributionsEditor(
     [],
   )
 
+  const reorderContribution = useCallback(
+    (fromIndex: number, toIndex: number) =>
+      setWorking((prev) => {
+        if (
+          fromIndex === toIndex ||
+          fromIndex < 0 ||
+          toIndex < 0 ||
+          fromIndex >= prev.length ||
+          toIndex >= prev.length
+        )
+          return prev
+        const next = [...prev]
+        const [moved] = next.splice(fromIndex, 1)
+        next.splice(toIndex, 0, moved)
+        return next
+      }),
+    [],
+  )
+
   const applyHalAuthor = useCallback(
     (localId: string, doc: AureHalAuthorDoc) =>
       updateContribution(localId, (c) => {
@@ -145,6 +165,8 @@ export function useContributionsEditor(
           firstName: fields.firstName,
           lastName: fields.lastName,
           identifiers: fields.identifiers,
+          // Selecting a HAL profile replaces the contributor: drop old affiliations.
+          affiliations: [],
           notAligned: false,
           halExtra: doc,
         }
@@ -161,6 +183,7 @@ export function useContributionsEditor(
         personUid: null,
         displayName: inputText,
         identifiers: [],
+        affiliations: [],
         notAligned: true,
         halExtra: undefined,
       })),
@@ -236,6 +259,7 @@ export function useContributionsEditor(
     insertContribution,
     removeContribution,
     moveContribution,
+    reorderContribution,
     applyHalAuthor,
     markNotAligned,
     setRoles,

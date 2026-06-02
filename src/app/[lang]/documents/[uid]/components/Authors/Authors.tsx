@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { Alert, Box, Paper } from '@mui/material'
+import { Alert, Paper } from '@mui/material'
 import { t } from '@lingui/core/macro'
 import useStore from '@/stores/global_store'
 import { useContributionsEditor } from './hooks/useContributionsEditor'
@@ -12,6 +12,8 @@ import ContributorList from './components/ContributorList'
 
 const Authors = () => {
   const { selectedDocument = null } = useStore((state) => state.document)
+  const { ownPerspective } = useStore((state) => state.user)
+  const readOnly = !ownPerspective
   const editor = useContributionsEditor(selectedDocument)
   const [saving, setSaving] = useState(false)
 
@@ -42,28 +44,29 @@ const Authors = () => {
 
   return (
     <Paper elevation={0} sx={{ p: 2 }}>
-      {editor.isDirty && (
+      <AuthorsToolbar
+        rankingMode={editor.rankingMode}
+        disabled={editor.isFrozen}
+        readOnly={readOnly}
+        contributorCount={editor.contributorCount}
+        affiliationCount={affiliationCount}
+        onToggleRankingMode={editor.setRankingMode}
+      />
+
+      {!readOnly && editor.isDirty && (
         <UnsavedBanner
           saving={saving}
           onSave={handleSave}
           onCancel={editor.cancel}
         />
       )}
-      {editor.isFrozen && (
+      {!readOnly && editor.isFrozen && (
         <Alert severity='info' sx={{ mb: 2 }}>
           {t`documents_details_page_authors_tab_frozen_notice`}
         </Alert>
       )}
 
-      <AuthorsToolbar
-        rankingMode={editor.rankingMode}
-        disabled={editor.isFrozen}
-        contributorCount={editor.contributorCount}
-        affiliationCount={affiliationCount}
-        onToggleRankingMode={editor.setRankingMode}
-      />
-
-      <ContributorList editor={editor} />
+      <ContributorList editor={editor} readOnly={readOnly} />
     </Paper>
   )
 }

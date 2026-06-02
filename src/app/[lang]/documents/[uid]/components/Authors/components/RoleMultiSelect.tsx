@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { Autocomplete, FormHelperText, TextField } from '@mui/material'
+import { alpha } from '@mui/material/styles'
 import { t } from '@lingui/core/macro'
 import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
 
@@ -28,12 +29,26 @@ const RoleMultiSelect = ({
         options={options}
         value={roles}
         getOptionLabel={(option) => LocRelatorHelper.toLabel(option)}
-        onChange={(_event, value) => onChange(value)}
+        onChange={(_event, value) =>
+          // Clearing all roles falls back to the default 'contributor' rather
+          // than an empty selection.
+          onChange(value.length === 0 ? [LocRelator.CONTRIBUTOR] : value)
+        }
         renderInput={(params) => (
           <TextField
             {...params}
             label={t`documents_details_page_authors_tab_roles_label`}
             placeholder={t`documents_details_page_authors_tab_roles_placeholder`}
+            sx={
+              isDefaultOnly
+                ? {
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: (theme) =>
+                        alpha(theme.palette.warning.main, 0.5),
+                    },
+                  }
+                : undefined
+            }
           />
         )}
       />

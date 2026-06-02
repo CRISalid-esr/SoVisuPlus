@@ -1,4 +1,5 @@
-import { Alert, Button, Stack } from '@mui/material'
+import { Box, Button, Stack, Typography } from '@mui/material'
+import { Save, Warning } from '@mui/icons-material'
 import { t } from '@lingui/core/macro'
 
 interface UnsavedBannerProps {
@@ -8,33 +9,50 @@ interface UnsavedBannerProps {
 }
 
 const UnsavedBanner = ({ saving, onSave, onCancel }: UnsavedBannerProps) => (
-  <Alert
-    severity='warning'
-    sx={{ mb: 2 }}
-    action={
-      <Stack direction='row' spacing={1}>
-        <Button
-          color='inherit'
-          size='small'
-          onClick={onCancel}
-          disabled={saving}
-        >
+  <Box
+    sx={{
+      position: 'sticky',
+      top: 0,
+      zIndex: 1100,
+      mb: 2,
+      py: 1,
+      px: 2,
+      borderRadius: 1,
+      backgroundColor: 'background.default',
+      borderLeft: '6px solid',
+      borderLeftColor: 'warning.light',
+    }}
+  >
+    <Stack
+      direction='row'
+      alignItems='center'
+      justifyContent='space-between'
+      spacing={2}
+      flexWrap='wrap'
+    >
+      <Stack direction='row' spacing={1} alignItems='center'>
+        <Warning color='warning' fontSize='small' />
+        <Typography variant='body2'>
+          {t`documents_details_page_authors_tab_unsaved_changes`}
+        </Typography>
+      </Stack>
+      <Stack direction='row' spacing={1} alignItems='center'>
+        <Button size='small' onClick={onCancel} disabled={saving}>
           {t`documents_details_page_authors_tab_cancel`}
         </Button>
         <Button
-          color='inherit'
           size='small'
-          variant='outlined'
+          variant='text'
+          startIcon={<Save />}
           onClick={onSave}
           disabled={saving}
+          sx={{ color: 'primary.main' }}
         >
           {t`documents_details_page_authors_tab_save`}
         </Button>
       </Stack>
-    }
-  >
-    {t`documents_details_page_authors_tab_unsaved_changes`}
-  </Alert>
+    </Stack>
+  </Box>
 )
 
 export default UnsavedBanner

@@ -6,7 +6,8 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { CheckCircle, DeleteOutline } from '@mui/icons-material'
+import { alpha } from '@mui/material/styles'
+import { CheckCircle, DeleteOutline, Warning } from '@mui/icons-material'
 import { t } from '@lingui/core/macro'
 import { AureHalStructureDoc } from '@/lib/services/AureHalAPIClient'
 import { WorkingAffiliation } from '../lib/types'
@@ -18,6 +19,7 @@ import HalStructureAutocomplete from './HalStructureAutocomplete'
 interface AffiliationCardProps {
   affiliation: WorkingAffiliation
   disabled?: boolean
+  readOnly?: boolean
   onRemove: (affiliationLocalId: string) => void
   onSelectStructure: (
     affiliationLocalId: string,
@@ -28,6 +30,7 @@ interface AffiliationCardProps {
 const AffiliationCard = ({
   affiliation,
   disabled,
+  readOnly,
   onRemove,
   onSelectStructure,
 }: AffiliationCardProps) => {
@@ -41,23 +44,31 @@ const AffiliationCard = ({
       sx={{
         position: 'relative',
         border: '1px solid',
-        borderColor: identified ? 'divider' : 'warning.main',
-        backgroundColor: identified ? 'transparent' : 'warning.light',
+        borderColor: identified
+          ? 'divider'
+          : (theme) => alpha(theme.palette.warning.main, 0.4),
+        backgroundColor: identified
+          ? 'transparent'
+          : (theme) => alpha(theme.palette.warning.main, 0.08),
         borderRadius: 1,
         p: 1.5,
-        pr: 5,
+        pr: readOnly ? 1.5 : 5,
       }}
     >
-      <Tooltip title={t`documents_details_page_authors_tab_remove_affiliation`}>
-        <IconButton
-          size='small'
-          disabled={disabled}
-          onClick={() => onRemove(affiliation.localId)}
-          sx={{ position: 'absolute', top: 4, right: 4 }}
+      {!readOnly && (
+        <Tooltip
+          title={t`documents_details_page_authors_tab_remove_affiliation`}
         >
-          <DeleteOutline fontSize='small' />
-        </IconButton>
-      </Tooltip>
+          <IconButton
+            size='small'
+            disabled={disabled}
+            onClick={() => onRemove(affiliation.localId)}
+            sx={{ position: 'absolute', top: 4, right: 4 }}
+          >
+            <DeleteOutline fontSize='small' />
+          </IconButton>
+        </Tooltip>
+      )}
 
       {identified ? (
         <>
@@ -78,34 +89,49 @@ const AffiliationCard = ({
               <Chip
                 key={`${id.label}-${id.value}`}
                 size='small'
-                variant='outlined'
                 label={`${id.label} ${id.value}`}
+                sx={{
+                  border: 'none',
+                  backgroundColor: (theme) =>
+                    alpha(theme.palette.primary.main, 0.1),
+                  color: 'primary.main',
+                }}
               />
             ))}
           </Stack>
         </>
       ) : (
         <Stack spacing={1}>
-          <Typography sx={{ fontWeight: 700, color: 'warning.dark' }}>
-            {t`documents_details_page_authors_tab_missing_affiliation`}
-          </Typography>
+          <Stack direction='row' spacing={0.5} alignItems='center'>
+            <Warning color='warning' fontSize='small' />
+            <Typography sx={{ fontWeight: 700, color: 'warning.dark' }}>
+              {t`documents_details_page_authors_tab_missing_affiliation`}
+            </Typography>
+          </Stack>
           <Typography variant='body2'>
-            {t`documents_details_page_authors_tab_imported_text`}{' '}
+            <Typography
+              component='span'
+              sx={{ color: 'primary.main', fontWeight: 600 }}
+            >
+              {t`documents_details_page_authors_tab_imported_text`}
+            </Typography>{' '}
             <em>&quot;{affiliation.importedText}&quot;</em>
           </Typography>
-          {affiliation.importedText && (
+          {!readOnly && affiliation.importedText && (
             <AffiliationSuggestions
               importedText={affiliation.importedText}
               disabled={disabled}
               onAlign={(doc) => onSelectStructure(affiliation.localId, doc)}
             />
           )}
-          <HalStructureAutocomplete
-            disabled={disabled}
-            onSelectStructure={(doc) =>
-              onSelectStructure(affiliation.localId, doc)
-            }
-          />
+          {!readOnly && (
+            <HalStructureAutocomplete
+              disabled={disabled}
+              onSelectStructure={(doc) =>
+                onSelectStructure(affiliation.localId, doc)
+              }
+            />
+          )}
         </Stack>
       )}
     </Box>
