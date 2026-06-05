@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 import { Autocomplete, FormHelperText, TextField } from '@mui/material'
-import { alpha } from '@mui/material/styles'
 import { t } from '@lingui/core/macro'
 import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
 
@@ -43,8 +42,7 @@ const RoleMultiSelect = ({
               isDefaultOnly
                 ? {
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: (theme) =>
-                        alpha(theme.palette.warning.main, 0.5),
+                      borderColor: (theme) => theme.palette.warningOutline,
                     },
                   }
                 : undefined

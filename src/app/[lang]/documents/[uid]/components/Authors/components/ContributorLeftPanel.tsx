@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material'
-import { alpha } from '@mui/material/styles'
 import { DeleteOutline, Edit, EditOff } from '@mui/icons-material'
 import { t } from '@lingui/core/macro'
 import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
@@ -103,11 +102,9 @@ const ContributorLeftPanel = ({
               borderRadius: 1,
               ...(isWarningBox
                 ? {
-                    backgroundColor: (theme) =>
-                      alpha(theme.palette.warning.main, 0.08),
+                    backgroundColor: (theme) => theme.palette.warningSurface,
                     border: '1px solid',
-                    borderColor: (theme) =>
-                      alpha(theme.palette.warning.main, 0.4),
+                    borderColor: (theme) => theme.palette.warningOutline,
                   }
                 : {
                     backgroundColor: 'grey.100',

@@ -1,5 +1,4 @@
 import { Chip, Stack, Typography } from '@mui/material'
-import { alpha } from '@mui/material/styles'
 import { CheckCircle, Info, WarningAmber } from '@mui/icons-material'
 import { t } from '@lingui/core/macro'
 import { ContributionStatus } from '../lib/types'
@@ -38,7 +37,7 @@ const ContributionStatusChip = ({ status }: { status: ContributionStatus }) => {
         icon={<WarningAmber fontSize='small' />}
         label={statusLabel(status)}
         sx={{
-          backgroundColor: (theme) => alpha(theme.palette.warning.main, 0.15),
+          backgroundColor: (theme) => theme.palette.warningSurfaceStrong,
           color: 'warning.dark',
           border: 'none',
           '& .MuiChip-icon': { color: 'warning.main' },

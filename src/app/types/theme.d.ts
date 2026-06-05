@@ -131,6 +131,10 @@ declare module '@mui/material/styles' {
     sidebarItemHover: string
     cardBorder: string
     textSecondary: string
+    /** Light-orange "needs attention" tints, derived from `warning.main`. */
+    warningSurface: string
+    warningSurfaceStrong: string
+    warningOutline: string
   }
 
   interface PaletteOptions {
@@ -180,6 +184,9 @@ declare module '@mui/material/styles' {
     sidebarItemHover?: string
     cardBorder?: string
     textSecondary?: string
+    warningSurface?: string
+    warningSurfaceStrong?: string
+    warningOutline?: string
   }
 }
 
