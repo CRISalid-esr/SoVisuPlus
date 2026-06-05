@@ -46,10 +46,10 @@ const AffiliationCard = ({
         border: '1px solid',
         borderColor: identified
           ? 'divider'
-          : (theme) => alpha(theme.palette.warning.main, 0.4),
+          : (theme) => theme.palette.warningOutline,
         backgroundColor: identified
           ? 'transparent'
-          : (theme) => alpha(theme.palette.warning.main, 0.08),
+          : (theme) => theme.palette.warningSurface,
         borderRadius: 1,
         p: 1.5,
         pr: readOnly ? 1.5 : 5,
