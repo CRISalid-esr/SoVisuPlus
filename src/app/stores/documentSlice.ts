@@ -518,9 +518,39 @@ export const addDocumentSlice: StateCreator<
 
         if (!response.ok) throw new Error('Failed to save contributions')
 
-        // Pessimistic model: do NOT mutate selectedDocument. The tab stays frozen
-        // until the change round-trips through the graph and a freshly fetched
-        // document replaces selectedDocument.
+        // Pessimistic model: do NOT write contribution data. Only flag the
+        // document as waiting for the graph round-trip (mirrors the server-side
+        // markDocumentsWaitingForUpdate). The Authors tab freezes on this state
+        // and unfreezes when the refreshed document comes back as `default`.
+        set((state) => {
+          const doc = state.document.selectedDocument
+          if (!doc || doc.uid !== documentUid) return state
+          const updatedDocument = new Document(
+            doc.uid,
+            doc.documentType,
+            doc.oaStatus,
+            doc.publicationDate,
+            doc.publicationDateStart,
+            doc.publicationDateEnd,
+            doc.upwOAStatus,
+            doc.titles,
+            doc.abstracts,
+            doc.subjects,
+            doc.contributions,
+            doc.records,
+            DocumentState.waiting_for_update,
+            doc.journal,
+            doc.volume,
+            doc.issue,
+            doc.pages,
+          )
+          return {
+            document: {
+              ...state.document,
+              selectedDocument: updatedDocument,
+            },
+          }
+        })
         return { success: true }
       } catch (error) {
         set((state) => ({

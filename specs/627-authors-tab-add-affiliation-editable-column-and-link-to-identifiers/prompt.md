@@ -339,33 +339,71 @@ The rank field is missing in the DB, you will have to add it to the Prisma Contr
 ## UI refinements (round 4)
 
 ### Contributor card
+
 - The contributor card corners are more rounded (increased border radius).
 - The contributor card uses a thin grey border instead of a Paper-like shadow/box.
 
 ### Search in HAL profile autocomplete
+
 - When the contribution status is different from 'Not identified', the 'Search in HAL' profile autocomplete wrapper box has a light grey background.
 
 ### Unsaved-changes banner
+
 - The Save button comes before the Cancel button; the Save button label is in bold.
 
 ### Ranking mode
+
 - Drag-and-drop must work not only when a contributor is dropped onto another contributor, but also when it is dropped between two contributors (the gap where the 'Insert contributor here' button sits).
 - The 'Insert contributor here' button is deselected (loses focus) after being clicked.
 
 ## UI refinements (round 5)
 
 ### Contributor card
+
 - Add vertical spacing between contributor cards when ranking mode is off.
 - Add a vertical splitter between the card's left-hand and right-hand sides; the splitter uses the same color as the card border.
 
 ### Search in HAL profile autocomplete
+
 - When the contribution status is different from 'Not identified', the 'Search in HAL' profile autocomplete wrapper box also has a border (in addition to its light grey background).
 
 ## UI refinements (round 6)
 
 ### Read-only mode
+
 - The read-only (display-only) mode must be decided by the user's permission to edit this document's contributors, NOT by the viewing perspective. Use the same authorization as the Bibliographic tab: the CASL ability built from the session's authz context (`abilityFromAuthzContext(session.user.authz)`), checking `update` on the document for the `contributors` field. This is the same check the Save API route enforces server-side. Do not rely on a `perspective` URL parameter: a direct URL to a document uid has no perspective param and must still be protected (an unauthorized user must get the read-only display, never editable controls).
 - In read-only mode, the contributor's roles are displayed as plain text: a 'Roles :' label (French: 'Fonctions :') followed by the role labels joined by commas. The roles autocomplete is removed.
 
 ### Affiliation suggestions
+
 - In the HAL affiliation suggestions list, results that have a ROR identifier are placed at the top of the list.
+
+## Behaviour & architecture refinements (round 7)
+
+### Freeze until the graph confirms (durable, not per-session)
+
+- The Authors tab must stay frozen until the graph has actually applied the change, even across navigation and re-fetches. The freeze must NOT be lost by leaving the page and coming back before the round-trip completes.
+- Implementation: reuse the existing `Document.state = waiting_for_update` flag (the same one merge uses), rather than a client-only flag.
+  - On save, the server (`DocumentService.saveContributions`) calls `markDocumentsWaitingForUpdate([documentUid])` after creating the `Action` rows. This is a status flag only — no contribution data is written (the pessimistic model is preserved).
+  - The store optimistically sets `selectedDocument.state = waiting_for_update` on save success for immediate feedback.
+  - The editor derives `isFrozen` from `document.state === waiting_for_update` (no local frozen state).
+  - The flag auto-clears: when the graph re-writes the document, `DocumentDAO` resets `state` to `default` (existing behaviour), so a refreshed document unfreezes the tab. A re-fetch of a still-pending document returns `waiting_for_update` and keeps it frozen.
+- Consequence (accepted): a document with a pending contributions save shows the existing greyed/shimmer "in-flight" treatment in the publication list and is not selectable for merge, exactly like a merge-pending document; its details remain openable.
+
+### Empty new contributors are not saved
+
+- A brand-new contributor row that was added but never filled in (no person uid, blank display name, no identifiers) must not produce an ADD action and must not mark the tab dirty. The diff (`buildContributionChanges`) skips such empty rows.
+
+### Read-only asterisk
+
+- The red asterisk after the tab title marks the tab as editable. It is shown only when the user can edit (i.e. not in read-only mode).
+
+### App-wide unsaved-changes navigation guard
+
+- The unsaved-changes guard is a cross-cutting concern owned by an app-level provider (`NavigationGuardProvider`, mounted once in `MainLayout`), not bolted onto the document page. Any editable surface registers intent to block via `useBlockNavigation(enabled)`; the document page passes `contributionsTabDirty`.
+- Navigation is intercepted **at the source**, never by patching `window.history.pushState` (which fights Next's App Router internals and triggers render-phase state updates):
+  - In-app links use `GuardedLink` (drop-in `next/link` replacement); programmatic navigation uses `useGuardedRouter().push/replace`. Both funnel through the guard.
+  - Browser back/forward is handled by a `popstate` listener in the provider (bounce back to the page, then prompt).
+  - Hard unloads (reload, tab close, external links) are handled by a `beforeunload` prompt in the provider.
+- All exit points from a dirty Authors tab are guarded: the tab bar, the sidebar navigation links, the sidebar account menu, and the "back to publication list" button in the document header. Confirming "leave" replays the exact intended navigation; cancelling stays.
+- Rationale: Next.js App Router has no built-in navigation blocking, and there is no sufficiently-maintained library for it, so the guard is implemented in-house at the navigation source for stability across Next versions and reuse by future editable surfaces.

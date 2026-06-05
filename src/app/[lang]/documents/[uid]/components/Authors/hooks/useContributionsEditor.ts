@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import useStore from '@/stores/global_store'
-import { Document } from '@/types/Document'
+import { Document, DocumentState } from '@/types/Document'
 import { LocRelator } from '@/types/LocRelator'
 import { AureHalAuthorDoc } from '@/lib/services/AureHalAPIClient'
 import {
@@ -71,14 +71,19 @@ export function useContributionsEditor(
 
   const [working, setWorking] = useState<WorkingContribution[]>([])
   const [rankingMode, setRankingMode] = useState(false)
-  const [isFrozen, setIsFrozen] = useState(false)
+
+  // The tab is frozen while the document is waiting for the graph to apply a
+  // pending change. This lives on `Document.state` (set on save, reset to
+  // `default` when the graph re-writes the document), so the freeze is durable:
+  // it survives navigating away and back — a re-fetch of a still-pending document
+  // returns `waiting_for_update` and keeps the tab frozen.
+  const isFrozen = document?.state === DocumentState.waiting_for_update
 
   // Rebuild working state from the baseline whenever the document changes
-  // (initial load, or refresh after a save round-trip). Unfreezes the tab.
+  // (initial load, or refresh after a save round-trip).
   useEffect(() => {
     setWorking(baseline.map(workingFromContribution))
     setRankingMode(defaultRankingMode(baseline))
-    setIsFrozen(false)
   }, [baseline])
 
   const changes = useMemo(
@@ -255,8 +260,8 @@ export function useContributionsEditor(
     if (changes.length === 0) return
     const result = await saveContributions(changes)
     if (result.success) {
-      // Pessimistic: freeze and wait for the refreshed document to rebuild.
-      setIsFrozen(true)
+      // Pessimistic: the store flags the document `waiting_for_update`, which
+      // freezes the tab until the refreshed document comes back.
       setContributionsTabDirty(false)
     }
   }, [changes, saveContributions, setContributionsTabDirty])

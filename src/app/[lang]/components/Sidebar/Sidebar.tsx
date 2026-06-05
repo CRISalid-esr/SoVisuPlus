@@ -39,8 +39,11 @@ import {
   XClose as Close,
 } from '@untitled-ui/icons-react'
 import Image from 'next/image'
-import Link from 'next/link'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
+import {
+  GuardedLink,
+  useGuardedRouter,
+} from '@/app/[lang]/components/NavigationGuard/NavigationGuardProvider'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
 import { SearchInput } from '../SearchInput'
 import { signOut } from 'next-auth/react'
@@ -65,7 +68,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
   const theme = useTheme()
   const { setTheme, currentTheme } = useThemeContext()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const router = useRouter()
+  const guardedRouter = useGuardedRouter()
   const searchParams = useSearchParams()
   const helpUrl = getRuntimeEnv().NEXT_PUBLIC_HELP_URL
   const [accountMenu, setAccountMenu] = useState<null | HTMLElement>(null)
@@ -380,7 +383,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
             </Box>
             <Box>
               <ListItem
-                component={Link}
+                component={GuardedLink}
                 href={`/${lang}/dashboard?${searchParams.toString()}`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
@@ -429,7 +432,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                 )}
               </ListItem>
               <ListItem
-                component={Link}
+                component={GuardedLink}
                 href={`/${lang}/documents?${searchParams.toString()}`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
@@ -478,7 +481,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                 )}
               </ListItem>
               <ListItem
-                component={Link}
+                component={GuardedLink}
                 href={`/${lang}/expertise?${searchParams.toString()}`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
@@ -557,7 +560,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                       color: theme.palette.primaryContainer,
                     },
                   }}
-                  component={Link}
+                  component={GuardedLink}
                   href={`/${lang}/groups?${searchParams.toString()}`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
@@ -607,7 +610,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                       color: theme.palette.primaryContainer,
                     },
                   }}
-                  component={Link}
+                  component={GuardedLink}
                   href={`/${lang}/institutions?${searchParams.toString()}`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
@@ -657,7 +660,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                       color: theme.palette.primaryContainer,
                     },
                   }}
-                  component={Link}
+                  component={GuardedLink}
                   href={`/${lang}/laboratories?${searchParams.toString()}`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
@@ -875,7 +878,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                       color: theme.palette.primaryContainer,
                     },
                   }}
-                  component={Link}
+                  component={GuardedLink}
                   href={helpUrl}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
@@ -976,7 +979,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                 <AccordionDetails sx={{ padding: '0' }}>
                   <MenuList sx={{ paddingBottom: '16px' }}>
                     <MenuItem
-                      onClick={() => router.push(`/${lang}/account`)}
+                      onClick={() => guardedRouter.push(`/${lang}/account`)}
                       sx={{
                         color: theme.palette.primaryContainer,
                       }}
@@ -1064,7 +1067,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                   }}
                 >
                   <MenuItem
-                    onClick={() => router.push(`/${lang}/account`)}
+                    onClick={() => guardedRouter.push(`/${lang}/account`)}
                     sx={{
                       color: theme.palette.primaryContainer,
                     }}

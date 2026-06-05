@@ -28,9 +28,12 @@ const AuthorsToolbar = ({
   >
     <Typography variant='h6' sx={{ fontWeight: 700 }}>
       {t`documents_details_page_authors_tab_title`}
-      <Box component='span' sx={{ color: 'error.main', ml: 0.5 }}>
-        *
-      </Box>
+      {/* The asterisk marks the tab as editable; hide it in read-only mode. */}
+      {!readOnly && (
+        <Box component='span' sx={{ color: 'error.main', ml: 0.5 }}>
+          *
+        </Box>
+      )}
     </Typography>
 
     <Stack direction='row' alignItems='center' spacing={2}>

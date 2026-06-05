@@ -92,6 +92,11 @@ export class DocumentService {
           }),
         ),
       )
+
+      // Flag the document as awaiting the graph round-trip. This freezes the
+      // Authors tab (and disables further mutations) until the graph re-writes
+      // the document, which resets the state back to `default`.
+      await this.documentDAO.markDocumentsWaitingForUpdate([documentUid])
     } catch (error) {
       const message = 'Error saving contributions'
       console.error(message, error)

@@ -11,6 +11,7 @@ import { IAgent } from '@/types/IAgent'
 import { useSearchParams } from 'next/navigation'
 import { SnackbarProvider } from 'notistack'
 import WebSocketListener from '@/lib/websocket/WebSocketListener'
+import { NavigationGuardProvider } from '@/app/[lang]/components/NavigationGuard/NavigationGuardProvider'
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const [open, setOpen] = useState(true) // Determines if the drawer is expanded or collapsed
@@ -79,30 +80,33 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         preventDuplicate
       >
         <WebSocketListener />
-        <Box sx={{ display: 'flex', height: '100vh' }}>
-          {/* AppBar for mobile */}
-          {isMobile && <Appbar handleToggleDrawer={handleToggleDrawer} />}
-          {/* Sidebar */}
-          <Sidebar
-            handleToggleDrawerAction={handleToggleDrawer}
-            open={open}
-            user={connectedUser}
-          />
-          {/* Main Content */}
-          <Box
-            component='main'
-            sx={{
-              flexGrow: 1,
-              padding: !isMobile ? '32px' : '24px 16px', // Add some padding on mobile
-              marginLeft: !isMobile && open ? '280px' : !isMobile ? '72px' : 0, // Adjust for Sidebar width
-              marginTop: isMobile ? '64px' : 0, // Adjust for AppBar height (typically 64px on mobile)
-              overflowY: 'auto', // Allow scrolling if content overflows
-              position: 'relative', // Ensure main is properly positioned
-            }}
-          >
-            {children}
+        <NavigationGuardProvider>
+          <Box sx={{ display: 'flex', height: '100vh' }}>
+            {/* AppBar for mobile */}
+            {isMobile && <Appbar handleToggleDrawer={handleToggleDrawer} />}
+            {/* Sidebar */}
+            <Sidebar
+              handleToggleDrawerAction={handleToggleDrawer}
+              open={open}
+              user={connectedUser}
+            />
+            {/* Main Content */}
+            <Box
+              component='main'
+              sx={{
+                flexGrow: 1,
+                padding: !isMobile ? '32px' : '24px 16px', // Add some padding on mobile
+                marginLeft:
+                  !isMobile && open ? '280px' : !isMobile ? '72px' : 0, // Adjust for Sidebar width
+                marginTop: isMobile ? '64px' : 0, // Adjust for AppBar height (typically 64px on mobile)
+                overflowY: 'auto', // Allow scrolling if content overflows
+                position: 'relative', // Ensure main is properly positioned
+              }}
+            >
+              {children}
+            </Box>
           </Box>
-        </Box>
+        </NavigationGuardProvider>
       </SnackbarProvider>
     </AuthenticatedRoute>
   )

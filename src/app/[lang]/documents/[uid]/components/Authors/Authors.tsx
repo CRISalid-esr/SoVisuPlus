@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Alert, Paper } from '@mui/material'
 import { t } from '@lingui/core/macro'
 import { useSession } from 'next-auth/react'
@@ -36,16 +36,8 @@ const Authors = () => {
     [editor.working],
   )
 
-  // Warn on browser close/reload while there are unsaved changes (native prompt).
-  useEffect(() => {
-    if (!editor.isDirty) return
-    const handler = (event: BeforeUnloadEvent) => {
-      event.preventDefault()
-      event.returnValue = ''
-    }
-    window.addEventListener('beforeunload', handler)
-    return () => window.removeEventListener('beforeunload', handler)
-  }, [editor.isDirty])
+  // The unsaved-changes guard (modal, beforeunload, back/forward) is owned by the
+  // app-level NavigationGuardProvider, driven by `contributionsTabDirty`.
 
   const handleSave = async () => {
     setSaving(true)

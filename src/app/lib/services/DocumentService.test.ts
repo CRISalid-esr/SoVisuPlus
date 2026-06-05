@@ -1218,6 +1218,12 @@ describe('DocumentService', () => {
       )
     })
 
+    it('flags the document as waiting for the graph round-trip', async () => {
+      await documentService.saveContributions('doc-1', changes, 'user-1234')
+
+      expect(mockMarkDocumentsWaitingForUpdate).toHaveBeenCalledWith(['doc-1'])
+    })
+
     it('throws when the acting user cannot be resolved', async () => {
       ;(UserDAO as jest.Mock).mockImplementation(() => ({
         getUserByIdentifier: jest.fn().mockResolvedValue(null),

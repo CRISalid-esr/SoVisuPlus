@@ -81,6 +81,20 @@ describe('buildContributionChanges', () => {
     expect(adds[0].parameters.person.uid).toBeNull()
   })
 
+  it('skips an empty, never-filled-in new contributor (no name/identifiers)', () => {
+    const baseline = [contribution('p1')]
+    const working = baseline.map(workingFromContribution)
+    working.push({
+      ...workingFromContribution(contribution('temp')),
+      personUid: null,
+      displayName: '   ',
+      identifiers: [],
+    })
+
+    const changes = buildContributionChanges(baseline, working, false)
+    expect(changes).toEqual([])
+  })
+
   it('emits REMOVE for a dropped baseline contribution', () => {
     const baseline = [contribution('p1')]
     const changes = buildContributionChanges(baseline, [], false)
