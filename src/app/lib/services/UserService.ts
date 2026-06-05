@@ -20,12 +20,7 @@ export class UserService {
    */
   public async submitProfile(profile: AuthenticationProfile): Promise<boolean> {
     let electedIdentifier: PersonIdentifier | null = null
-    if (profile.eppn) {
-      electedIdentifier = new PersonIdentifier(
-        PersonIdentifierType.eppn,
-        profile.eppn,
-      )
-    } else if (profile.username) {
+    if (profile.username) {
       electedIdentifier = new PersonIdentifier(
         PersonIdentifierType.local,
         profile.username,
