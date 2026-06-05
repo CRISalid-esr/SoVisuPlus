@@ -14,6 +14,63 @@ export type AureHalSearchResponse = {
   }
 }
 
+/** A HAL author-reference doc as returned by /ref/author (fields we consume). */
+export type AureHalAuthorDoc = {
+  person_i?: number
+  form_i?: number
+  firstName_s?: string
+  lastName_s?: string
+  middleName_s?: string
+  fullName_s: string
+  orcidId_s?: string[]
+  emailDomain_s?: string[]
+  idHal_s?: string
+  idrefId_s?: string[]
+}
+
+/** A HAL structure-reference doc as returned by /ref/structure (fields we consume). */
+export type AureHalStructureDoc = {
+  docid: string
+  acronym_s?: string
+  name_s?: string
+  label_s?: string
+  country_s?: string
+  type_s?: string
+  valid_s?: string
+  code_s?: string[]
+  idref_s?: string[]
+  isni_s?: string[]
+  rnsr_s?: string[]
+  ror_s?: string[]
+  wikidata_s?: string[]
+  parentAcronym_s?: string[]
+  parentName_s?: string[]
+}
+
+export type AureHalAuthorSearchResponse = {
+  response?: {
+    numFound?: number
+    start?: number
+    numFoundExact?: boolean
+    docs?: AureHalAuthorDoc[]
+  }
+}
+
+export type AureHalStructureSearchResponse = {
+  response?: {
+    numFound?: number
+    start?: number
+    numFoundExact?: boolean
+    docs?: AureHalStructureDoc[]
+  }
+}
+
+const AUREHAL_MIN_QUERY_LENGTH = 2
+// Affiliation name suggestions search structures from an imported text where even
+// a single character is meaningful, so structure search allows a 1-char minimum.
+const AUREHAL_MIN_STRUCTURE_QUERY_LENGTH = 1
+const AUREHAL_REQUEST_TIMEOUT_MS = 15000
+
 export class AureHalAPIClient {
   private readonly AUREHAL_API_BASE_URL = 'https://api.archives-ouvertes.fr'
 
@@ -21,6 +78,91 @@ export class AureHalAPIClient {
     return createHash('md5')
       .update(email.trim().toLowerCase(), 'utf8')
       .digest('hex')
+  }
+
+  /**
+   * GET a URL, aborting (and throwing) if it takes longer than `timeoutMs`.
+   * A timed-out request is treated as a failed request (per the spec's 15s rule).
+   */
+  private async getJson<T>(
+    url: string,
+    context: string,
+    timeoutMs: number = AUREHAL_REQUEST_TIMEOUT_MS,
+  ): Promise<T> {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: { accept: 'application/json' },
+        cache: 'no-store',
+        signal: controller.signal,
+      })
+      if (!res.ok) {
+        const body = await res.text().catch(() => '')
+        throw new Error(
+          `${context}: HTTP ${res.status} ${res.statusText} for ${url} - ${body}`,
+        )
+      }
+      return (await res.json()) as T
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(`${context}: request timed out after ${timeoutMs}ms`)
+      }
+      throw error
+    } finally {
+      clearTimeout(timeout)
+    }
+  }
+
+  /**
+   * Search HAL author profiles by free text. Backs the "Search in HAL" contributor
+   * autocomplete. Returns the raw HAL docs (empty array if fewer than 2 chars).
+   */
+  async searchAuthors(query: string): Promise<AureHalAuthorDoc[]> {
+    const normalized = query?.trim() ?? ''
+    if (normalized.length < AUREHAL_MIN_QUERY_LENGTH) return []
+
+    const url = new URL(`${this.AUREHAL_API_BASE_URL}/ref/author/`)
+    url.searchParams.set('q', normalized)
+    url.searchParams.set(
+      'fl',
+      'person_i,form_i,firstName_s,lastName_s,middleName_s,fullName_s,orcidId_s,emailDomain_s,idHal_s,idrefId_s',
+    )
+    url.searchParams.set(
+      'sort',
+      'idHal_s asc, orcidId_s asc,idrefId_s asc,emailDomain_s asc,lastName_s asc,firstName_s asc',
+    )
+
+    const data = await this.getJson<AureHalAuthorSearchResponse>(
+      url.toString(),
+      'AureHalAPIClient.searchAuthors',
+    )
+    return data?.response?.docs ?? []
+  }
+
+  /**
+   * Search HAL organizations (structures) by free text. Backs both the affiliation
+   * "Add HAL affiliation" autocomplete and the name-based suggestion feature.
+   * Returns the raw HAL docs (empty array if fewer than 1 char).
+   */
+  async searchStructures(query: string): Promise<AureHalStructureDoc[]> {
+    const normalized = query?.trim() ?? ''
+    if (normalized.length < AUREHAL_MIN_STRUCTURE_QUERY_LENGTH) return []
+
+    const url = new URL(`${this.AUREHAL_API_BASE_URL}/ref/structure/`)
+    url.searchParams.set('q', normalized)
+    url.searchParams.set('fl', '*')
+    url.searchParams.set(
+      'sort',
+      'docid asc,rnsr_s asc,ror_s asc,idref_s asc,isni_s asc,wikidata_s asc',
+    )
+
+    const data = await this.getJson<AureHalStructureSearchResponse>(
+      url.toString(),
+      'AureHalAPIClient.searchStructures',
+    )
+    return data?.response?.docs ?? []
   }
 
   /**

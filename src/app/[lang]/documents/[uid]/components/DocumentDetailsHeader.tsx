@@ -2,21 +2,23 @@ import { Trans } from '@lingui/react/macro'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { IconButton, Typography } from '@mui/material'
 import { Box } from '@mui/system'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import useStore from '@/stores/global_store'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import * as Lingui from '@lingui/core'
+import { useGuardedRouter } from '@/app/[lang]/components/NavigationGuard/NavigationGuardProvider'
 
 const DocumentDetailsHeader = () => {
-  const router = useRouter()
+  const guardedRouter = useGuardedRouter()
   const searchParams = useSearchParams()
   const { currentPerspective, connectedUser } = useStore((state) => state.user)
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
 
+  // Guarded so leaving a dirty Authors tab prompts before discarding edits.
   const backToPublicationList = () => {
     const params = new URLSearchParams(searchParams.toString())
     params.delete('tab')
-    router.push(`/${lang}/documents?${params.toString()}`)
+    guardedRouter.push(`/${lang}/documents?${params.toString()}`)
   }
 
   return (

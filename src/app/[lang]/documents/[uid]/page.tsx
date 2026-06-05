@@ -5,12 +5,7 @@ import { TabFilter } from '@/components/TabFilter'
 import useStore from '@/stores/global_store'
 import { Alert, Box, CircularProgress, Link, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import {
-  notFound,
-  useParams,
-  useRouter,
-  useSearchParams,
-} from 'next/navigation'
+import { notFound, useParams, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
   Authors,
@@ -27,10 +22,13 @@ import { Trans } from '@lingui/react'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import UpdateInHAL from '@/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL'
 import AddInHAL from '@/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL'
+import {
+  useBlockNavigation,
+  useGuardedRouter,
+} from '@/app/[lang]/components/NavigationGuard/NavigationGuardProvider'
 
 const DocumentDetailsPage = () => {
   const theme = useTheme()
-  const router = useRouter()
   const searchParams = useSearchParams()
   const { uid } = useParams<{ uid: string }>()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
@@ -107,8 +105,16 @@ const DocumentDetailsPage = () => {
     }
   }, [searchParams])
 
-  const { selectedDocumentHasChanged, setSelectedDocumentHasChanged } =
-    useStore((state) => state.document)
+  const {
+    selectedDocumentHasChanged,
+    setSelectedDocumentHasChanged,
+    contributionsTabDirty,
+  } = useStore((state) => state.document)
+
+  // Block navigation while the Authors tab has unsaved edits. The provider drives
+  // the confirmation modal for tabs, sidebar links, back/forward and reload alike.
+  const guardedRouter = useGuardedRouter()
+  useBlockNavigation(contributionsTabDirty)
 
   if (!hasFetched || loading) {
     return (
@@ -128,10 +134,11 @@ const DocumentDetailsPage = () => {
     return notFound()
   }
 
+  // Routed through the guard so switching away from a dirty Authors tab prompts.
   const handleTabChange = (newValue: string) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('tab', newValue)
-    router.push(`/${lang}/documents/${uid}?${params.toString()}`)
+    guardedRouter.push(`/${lang}/documents/${uid}?${params.toString()}`)
   }
 
   const renderTabContent = () => {

@@ -5,6 +5,7 @@ import { BaseQuery } from '@/types/BaseQuery'
 import { AgentType } from '@/types/IAgent'
 import { Concept } from '@/types/Concept'
 import { Literal } from '@/types/Literal'
+import { ContributionChange } from '@/types/ContributionAction'
 
 export interface DocumentQuery extends BaseQuery {
   searchTerm: string
@@ -51,6 +52,8 @@ export interface DocumentSlice {
     setSelectedDocumentHasChanged: (flag: boolean) => void
     hasFetched?: boolean
     setHasFetched: (flag: boolean) => void // To force a re-fetch
+    contributionsTabDirty: boolean
+    setContributionsTabDirty: (flag: boolean) => void
     error: string | null | unknown
     fetchDocuments: (obj: DocumentQuery) => Promise<void>
     countDocuments: (obj: CountDocumentQuery) => Promise<void>
@@ -61,6 +64,9 @@ export interface DocumentSlice {
     modifyTitles: (titles: Literal[]) => Promise<{ success: boolean }>
     modifyAbstracts: (abstracts: Literal[]) => Promise<{ success: boolean }>
     updateDocumentType: (type: DocumentType) => Promise<void>
+    saveContributions: (
+      changes: ContributionChange[],
+    ) => Promise<{ success: boolean }>
   }
 }
 
@@ -88,6 +94,14 @@ export const addDocumentSlice: StateCreator<
         document: {
           ...state.document,
           hasFetched: flag,
+        },
+      })),
+    contributionsTabDirty: false,
+    setContributionsTabDirty: (flag: boolean) =>
+      set((state) => ({
+        document: {
+          ...state.document,
+          contributionsTabDirty: flag,
         },
       })),
     fetchDocuments: async (queryObject: DocumentQuery) => {
@@ -467,6 +481,69 @@ export const addDocumentSlice: StateCreator<
             { abstracts: abstracts },
           )
 
+          return {
+            document: {
+              ...state.document,
+              selectedDocument: updatedDocument,
+            },
+          }
+        })
+        return { success: true }
+      } catch (error) {
+        set((state) => ({
+          document: {
+            ...state.document,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        }))
+        return { success: false }
+      }
+    },
+    saveContributions: async (changes: ContributionChange[]) => {
+      try {
+        const documentUid = get().document.selectedDocument?.uid
+
+        if (!documentUid) {
+          throw new Error('Cannot save contributions: no selected document')
+        }
+
+        const response = await fetch(
+          `/api/documents/${documentUid}/contributions`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ changes }),
+          },
+        )
+
+        if (!response.ok) throw new Error('Failed to save contributions')
+
+        // Pessimistic model: do NOT write contribution data. Only flag the
+        // document as waiting for the graph round-trip (mirrors the server-side
+        // markDocumentsWaitingForUpdate). The Authors tab freezes on this state
+        // and unfreezes when the refreshed document comes back as `default`.
+        set((state) => {
+          const doc = state.document.selectedDocument
+          if (!doc || doc.uid !== documentUid) return state
+          const updatedDocument = new Document(
+            doc.uid,
+            doc.documentType,
+            doc.oaStatus,
+            doc.publicationDate,
+            doc.publicationDateStart,
+            doc.publicationDateEnd,
+            doc.upwOAStatus,
+            doc.titles,
+            doc.abstracts,
+            doc.subjects,
+            doc.contributions,
+            doc.records,
+            DocumentState.waiting_for_update,
+            doc.journal,
+            doc.volume,
+            doc.issue,
+            doc.pages,
+          )
           return {
             document: {
               ...state.document,

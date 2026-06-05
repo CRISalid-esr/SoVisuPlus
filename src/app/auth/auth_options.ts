@@ -109,10 +109,10 @@ const authOptions: AuthOptions = {
   },
   callbacks: {
     async signIn({
-      user,
-      account,
-      profile,
-    }: {
+                   user,
+                   account,
+                   profile,
+                 }: {
       user: NextAuthUser
       account: Account | null
       profile?: Profile
@@ -129,11 +129,11 @@ const authOptions: AuthOptions = {
       return await userService.submitProfile(authenticationProfile)
     },
     async jwt({
-      token,
-      account,
-      user,
-      profile,
-    }: {
+                token,
+                account,
+                user,
+                profile,
+              }: {
       token: JWT
       account?: Account | null
       user?: NextAuthUser
@@ -158,9 +158,9 @@ const authOptions: AuthOptions = {
           )
         : token.orcid
           ? new PersonIdentifier(
-              PersonIdentifierType.orcid,
-              String(token.orcid),
-            )
+            PersonIdentifierType.orcid,
+            String(token.orcid),
+          )
           : null
       console.info('resolving user for identifier', identifier)
 

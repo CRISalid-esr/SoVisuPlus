@@ -352,6 +352,7 @@ model Contribution {
   personId     Int
   documentId   Int
   roles        String[]
+  rank         Int?
   affiliations AuthorityOrganization[]
   person       Person                  @relation(fields: [personId], references: [id], onDelete: Cascade)
   document     Document                @relation(fields: [documentId], references: [id], onDelete: Cascade)
