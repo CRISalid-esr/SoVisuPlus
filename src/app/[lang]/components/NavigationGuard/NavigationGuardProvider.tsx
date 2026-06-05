@@ -50,12 +50,17 @@ export function NavigationGuardProvider({ children }: { children: ReactNode }) {
   const currentUrlRef = useRef('')
   const bypassPopRef = useRef(false)
   const [pending, setPending] = useState<(() => void) | null>(null)
+  // Mirror of `blockersRef.current.size > 0` as state, so the beforeunload
+  // listener is attached only while something is blocking (otherwise an
+  // always-present beforeunload handler needlessly disables the bfcache).
+  const [blocked, setBlockedState] = useState(false)
 
   const isBlocked = useCallback(() => blockersRef.current.size > 0, [])
 
-  const setBlocked = useCallback((id: string, blocked: boolean) => {
-    if (blocked) blockersRef.current.add(id)
+  const setBlocked = useCallback((id: string, active: boolean) => {
+    if (active) blockersRef.current.add(id)
     else blockersRef.current.delete(id)
+    setBlockedState(blockersRef.current.size > 0)
   }, [])
 
   const guard = useCallback(
@@ -71,16 +76,17 @@ export function NavigationGuardProvider({ children }: { children: ReactNode }) {
     currentUrlRef.current = window.location.href
   }, [pathname, searchParams])
 
-  // Hard unloads: reload, tab close, external links.
+  // Hard unloads: reload, tab close, external links. Attached only while
+  // blocking, so the bfcache is left intact the rest of the time.
   useEffect(() => {
+    if (!blocked) return
     const handler = (event: BeforeUnloadEvent) => {
-      if (!isBlocked()) return
       event.preventDefault()
       event.returnValue = ''
     }
     window.addEventListener('beforeunload', handler)
     return () => window.removeEventListener('beforeunload', handler)
-  }, [isBlocked])
+  }, [blocked])
 
   // Browser back/forward: the URL already moved, so bounce back to the guarded
   // page (via Next's own pushState, so it re-renders consistently) and prompt.
@@ -138,15 +144,21 @@ export function useBlockNavigation(blocked: boolean): void {
  * `GuardedLink`) for any programmatic navigation that could leave an editable
  * page. Falls back to the raw router when no provider is mounted.
  */
+type NavigateOptions = { scroll?: boolean }
+
 export function useGuardedRouter() {
   const ctx = useContext(NavigationGuardContext)
   const router = useRouter()
   return useMemo(
     () => ({
-      push: (href: string) =>
-        ctx ? ctx.guard(() => router.push(href)) : router.push(href),
-      replace: (href: string) =>
-        ctx ? ctx.guard(() => router.replace(href)) : router.replace(href),
+      push: (href: string, options?: NavigateOptions) =>
+        ctx
+          ? ctx.guard(() => router.push(href, options))
+          : router.push(href, options),
+      replace: (href: string, options?: NavigateOptions) =>
+        ctx
+          ? ctx.guard(() => router.replace(href, options))
+          : router.replace(href, options),
     }),
     [ctx, router],
   )

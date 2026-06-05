@@ -44,7 +44,7 @@ describe('NavigationGuardProvider', () => {
     renderHarness(false)
     await userEvent.click(screen.getByText('go'))
 
-    expect(pushMock).toHaveBeenCalledWith('/fr/dashboard')
+    expect(pushMock).toHaveBeenCalledWith('/fr/dashboard', undefined)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
@@ -56,7 +56,7 @@ describe('NavigationGuardProvider', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument()
 
     await userEvent.click(modalButtons()[1]) // Leave
-    expect(pushMock).toHaveBeenCalledWith('/fr/dashboard')
+    expect(pushMock).toHaveBeenCalledWith('/fr/dashboard', undefined)
   })
 
   it('drops the navigation when the user chooses to stay', async () => {

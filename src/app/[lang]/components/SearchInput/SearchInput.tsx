@@ -19,7 +19,8 @@ import DoneIcon from '@mui/icons-material/Done'
 import { IAgent } from '@/types/IAgent'
 import { Person } from '@/types/Person'
 import { ResearchUnit } from '@/types/ResearchUnit'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { useGuardedRouter } from '@/app/[lang]/components/NavigationGuard/NavigationGuardProvider'
 import * as Lingui from '@lingui/core'
 import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn'
 import { useSession } from 'next-auth/react'
@@ -43,7 +44,7 @@ const SearchInput: React.FC = () => {
   const [peoplePage, setPeoplePage] = useState(1)
   const [researchUnitsPage, setResearchUnitsPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
-  const router = useRouter()
+  const guardedRouter = useGuardedRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const theme = useTheme()
@@ -357,8 +358,11 @@ const SearchInput: React.FC = () => {
         params.delete('tab')
       }
 
-      // Push updated query parameters without full page reload
-      router.push(`${targetPath}?${params.toString()}`, { scroll: false })
+      // Push updated query parameters without full page reload (guarded so an
+      // unsaved Authors tab prompts before switching perspective).
+      guardedRouter.push(`${targetPath}?${params.toString()}`, {
+        scroll: false,
+      })
     }
   }
 
@@ -375,8 +379,8 @@ const SearchInput: React.FC = () => {
       params.delete('tab')
     }
 
-    // Push updated query parameters without full page reload
-    router.push(`${targetPath}?${params.toString()}`, { scroll: false })
+    // Push updated query parameters without full page reload (guarded).
+    guardedRouter.push(`${targetPath}?${params.toString()}`, { scroll: false })
   }
 
   return (

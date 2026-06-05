@@ -55,13 +55,15 @@ describe('DocumentDetailsHeader Component', () => {
     ).toBeInTheDocument()
   })
 
-  it('calls router.back() when clicking the back button', () => {
+  it('navigates back to the publication list when clicking the back button', () => {
     renderComponent()
 
     const backButton = screen.getByRole('button')
     fireEvent.click(backButton)
 
+    // Routed through the navigation guard (no provider mounted here, so it falls
+    // through to the router, forwarding the optional navigation options).
     expect(mockRouter.push).toHaveBeenCalledTimes(1)
-    expect(mockRouter.push).toHaveBeenCalledWith('/en/documents?')
+    expect(mockRouter.push).toHaveBeenCalledWith('/en/documents?', undefined)
   })
 })
