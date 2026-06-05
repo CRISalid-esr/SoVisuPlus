@@ -1,8 +1,17 @@
 import { LocRelator } from '@/types/LocRelator'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import {
   AureHalAuthorDoc,
   AureHalStructureDoc,
 } from '@/lib/services/AureHalAPIClient'
+
+/**
+ * Known person-identifier types. Derived from the Prisma `PersonIdentifierType`
+ * enum (as a string-literal union) so it stays in sync automatically — never
+ * hand-maintain a parallel list. Raw type strings must pass through
+ * `normalizeIdentifierType` (see `identifierTypes.ts`) before becoming this type.
+ */
+export type WorkingIdentifierType = `${PersonIdentifierType}`
 
 /** Contribution status, drives chip color and which HAL box is shown. */
 export type ContributionStatus =
@@ -12,7 +21,7 @@ export type ContributionStatus =
   | 'not_identified'
 
 export interface WorkingIdentifier {
-  type: string
+  type: WorkingIdentifierType
   value: string
 }
 

@@ -66,6 +66,9 @@ export type AureHalStructureSearchResponse = {
 }
 
 const AUREHAL_MIN_QUERY_LENGTH = 2
+// Affiliation name suggestions search structures from an imported text where even
+// a single character is meaningful, so structure search allows a 1-char minimum.
+const AUREHAL_MIN_STRUCTURE_QUERY_LENGTH = 1
 const AUREHAL_REQUEST_TIMEOUT_MS = 15000
 
 export class AureHalAPIClient {
@@ -141,11 +144,11 @@ export class AureHalAPIClient {
   /**
    * Search HAL organizations (structures) by free text. Backs both the affiliation
    * "Add HAL affiliation" autocomplete and the name-based suggestion feature.
-   * Returns the raw HAL docs (empty array if fewer than 2 chars).
+   * Returns the raw HAL docs (empty array if fewer than 1 char).
    */
   async searchStructures(query: string): Promise<AureHalStructureDoc[]> {
     const normalized = query?.trim() ?? ''
-    if (normalized.length < AUREHAL_MIN_QUERY_LENGTH) return []
+    if (normalized.length < AUREHAL_MIN_STRUCTURE_QUERY_LENGTH) return []
 
     const url = new URL(`${this.AUREHAL_API_BASE_URL}/ref/structure/`)
     url.searchParams.set('q', normalized)

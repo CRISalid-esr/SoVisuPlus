@@ -114,7 +114,7 @@ const authOptions: AuthOptions = {
       console.info('signIn callback', user, account, profile)
       const userService = new UserService()
       const authenticationProfile: AuthenticationProfile = {
-        username: (profile as KeycloakProfile)?.preferred_username,
+        eppn: (profile as KeycloakProfile)?.preferred_username,
         email: profile?.email,
         orcid: (profile as KeycloakProfile)?.orcid,
       }
@@ -143,7 +143,7 @@ const authOptions: AuthOptions = {
       const userDAO = new UserDAO()
       const identifier = token.username
         ? new PersonIdentifier(
-            PersonIdentifierType.local,
+            PersonIdentifierType.eppn,
             String(token.username),
           )
         : token.orcid

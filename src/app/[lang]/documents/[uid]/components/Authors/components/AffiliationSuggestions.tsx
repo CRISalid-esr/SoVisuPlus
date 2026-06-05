@@ -122,7 +122,8 @@ const AffiliationSuggestions = ({
 
   useEffect(() => {
     const query = importedText.trim()
-    if (query.length < 2) {
+    // Affiliation suggestions search from a single character upwards.
+    if (query.length < 1) {
       setResults([])
       return
     }
@@ -145,8 +146,7 @@ const AffiliationSuggestions = ({
   // Suggestions with a ROR are shown first (stable otherwise).
   const ordered = [...results].sort(
     (a, b) =>
-      (b.ror_s && b.ror_s.length ? 1 : 0) -
-      (a.ror_s && a.ror_s.length ? 1 : 0),
+      (b.ror_s && b.ror_s.length ? 1 : 0) - (a.ror_s && a.ror_s.length ? 1 : 0),
   )
 
   if (!expanded) {

@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { Alert, Paper } from '@mui/material'
 import { t } from '@lingui/core/macro'
+import { useSnackbar } from 'notistack'
 import { useSession } from 'next-auth/react'
 import useStore from '@/stores/global_store'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
@@ -29,6 +30,7 @@ const Authors = () => {
     ability.can(PermissionAction.update, selectedDocument, 'contributors')
   )
   const editor = useContributionsEditor(selectedDocument)
+  const { enqueueSnackbar } = useSnackbar()
   const [saving, setSaving] = useState(false)
 
   const affiliationCount = useMemo(
@@ -42,7 +44,12 @@ const Authors = () => {
   const handleSave = async () => {
     setSaving(true)
     try {
-      await editor.save()
+      const result = await editor.save()
+      if (!result.success) {
+        enqueueSnackbar(t`documents_details_page_authors_tab_save_error`, {
+          variant: 'error',
+        })
+      }
     } finally {
       setSaving(false)
     }

@@ -1,7 +1,10 @@
 import { computeContributionStatus } from './contributionStatus'
+import { toWorkingIdentifiers } from './identifierTypes'
 
 const make = (types: string[], notAligned = false) => ({
-  identifiers: types.map((type) => ({ type, value: 'x' })),
+  identifiers: toWorkingIdentifiers(
+    types.map((type) => ({ type, value: 'x' })),
+  ),
   notAligned,
 })
 

@@ -20,7 +20,9 @@ export const GET = async (request: NextRequest) => {
   }
 
   const query = request.nextUrl.searchParams.get('q')?.trim() ?? ''
-  if (query.length < 2) {
+  // Structure search allows a 1-char minimum (affiliation suggestions); the
+  // manual structure autocomplete still gates at 2 chars client-side.
+  if (query.length < 1) {
     return NextResponse.json({ docs: [] })
   }
 

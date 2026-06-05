@@ -163,6 +163,22 @@ describe('AureHalAPIClient', () => {
     expect(new URL(calledUrl).searchParams.get('sort')).toMatch(/^docid asc/)
   })
 
+  it('searchStructures fetches from a single character (1-char minimum)', async () => {
+    const docs = [{ docid: '300', name_s: 'Some Lab' }]
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ response: { docs } }),
+    })
+
+    await expect(client.searchStructures('a')).resolves.toEqual(docs)
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('searchStructures returns [] without fetching when the query is empty', async () => {
+    await expect(client.searchStructures('   ')).resolves.toEqual([])
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
   it('searchStructures throws with HTTP details when response is not ok', async () => {
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: false,

@@ -50,7 +50,7 @@ export interface ContributionsEditor {
     affiliationLocalId: string,
     affiliation: WorkingAffiliation,
   ) => void
-  save: () => Promise<void>
+  save: () => Promise<{ success: boolean }>
   cancel: () => void
 }
 
@@ -256,14 +256,15 @@ export function useContributionsEditor(
     [updateContribution],
   )
 
-  const save = useCallback(async () => {
-    if (changes.length === 0) return
+  const save = useCallback(async (): Promise<{ success: boolean }> => {
+    if (changes.length === 0) return { success: true }
     const result = await saveContributions(changes)
     if (result.success) {
       // Pessimistic: the store flags the document `waiting_for_update`, which
       // freezes the tab until the refreshed document comes back.
       setContributionsTabDirty(false)
     }
+    return result
   }, [changes, saveContributions, setContributionsTabDirty])
 
   const cancel = useCallback(() => {
