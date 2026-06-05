@@ -14,6 +14,26 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:169
+msgid "documents_page_refresh_list_alert_own_perspective"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:172
+msgid "documents_page_refresh_list_alert_other_perspective"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
+msgid "document_details_page_update_in_hal_tab_card_title"
+msgstr ""
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:288
+msgid "document_details_page_keywords_input_fetch_error_label"
+msgstr ""
+
+#. js-lingui-explicit-id
 #: src/app/lib/websocket/WebSocketListener.tsx:102
 msgid "snackbar_document_created"
 msgstr "Nouvelle publication : "
@@ -39,16 +59,6 @@ msgid "snackbar_view_document"
 msgstr "Voir la publication"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/forbidden.tsx:43
-msgid "forbidden_page_back_home"
-msgstr "Retour"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/forbidden.tsx:108
-msgid "forbidden_page_description"
-msgstr "Vous n'êtes pas autorisé à accéder à cette ressource. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/not-found.tsx:45
 msgid "notfound_page_back_home"
 msgstr "Retour à la page d'accueil"
@@ -59,16 +69,41 @@ msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Contactez-nous à cette <0>adresse mail</0> si cela vous semble anormal."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:232
-#: src/app/[lang]/documents/page.test.tsx:255
-msgid "documents_page_main_title_first_person"
-msgstr "Mes publications"
+#: src/app/[lang]/forbidden.tsx:43
+msgid "forbidden_page_back_home"
+msgstr "Retour"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:108
+msgid "forbidden_page_description"
+msgstr "Vous n'êtes pas autorisé à accéder à cette ressource. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:236
 #: src/app/[lang]/documents/page.tsx:217
 msgid "documents_page_synchronize_button"
 msgstr "Mettre à jour les publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:225
+msgid "documents_page_missing_identifiers_warning_prefix"
+msgstr "Vos listes de publications sont sans doute incomplètes. Veuillez vous rendre sur la page"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:232
+msgid "documents_page_missing_identifiers_account_page"
+msgstr "Mon compte"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:234
+msgid "documents_page_missing_identifiers_warning_suffix"
+msgstr "pour renseigner vos identifiants {identifiers}."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:232
+#: src/app/[lang]/documents/page.test.tsx:255
+msgid "documents_page_main_title_first_person"
+msgstr "Mes publications"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.test.tsx:274
@@ -86,27 +121,6 @@ msgstr "Dépôt HAL incomplet"
 #: src/app/[lang]/documents/page.test.tsx:431
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Fusionner les documents sélectionnés"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:232
-#: src/app/[lang]/documents/page.test.tsx:255
-msgid "documents_page_main_title_first_person"
-msgstr "Mes publications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:225
-msgid "documents_page_missing_identifiers_warning_prefix"
-msgstr "Vos listes de publications sont sans doute incomplètes. Veuillez vous rendre sur la page"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:232
-msgid "documents_page_missing_identifiers_account_page"
-msgstr "Mon compte"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.tsx:234
-msgid "documents_page_missing_identifiers_warning_suffix"
-msgstr "pour renseigner vos identifiants {identifiers}."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/components/MergeDialog.tsx:209
@@ -144,31 +158,6 @@ msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr "Synchroniser"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
-msgid "document_details_page_back_to_my_publications"
-msgstr "Retour à mes publications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
-msgid "document_details_page_source_tab_card_title"
-msgstr "Références bibliographiques sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:101
-msgid "document_details_page_keywords_tab_card_title"
-msgstr "Mots-clés"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:120
-msgid "document_details_page_keywords_tab_card_empty_content"
-msgstr "Aucun mot-clé"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:134
-msgid "document_details_page_keywords_search_field_title"
-msgstr "Sélectionner un ou plusieurs vocabulaires contrôlés"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.tsx:177
 msgid "documents_page_refresh_document_alert"
 msgstr "Les informations relatives à cette publication ont changé"
@@ -184,6 +173,47 @@ msgstr "Informations bibliographiques"
 #: src/app/[lang]/documents/[uid]/page.test.tsx:248
 msgid "document_details_keywords_tab"
 msgstr "Mots-clés"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:393
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:404
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "Actions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:421
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalider"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:439
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissocier"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
+msgid "document_details_page_source_tab_card_title"
+msgstr "Références bibliographiques sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
+msgid "document_details_page_back_to_my_publications"
+msgstr "Retour à mes publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:101
+msgid "document_details_page_keywords_tab_card_title"
+msgstr "Mots-clés"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:120
+msgid "document_details_page_keywords_tab_card_empty_content"
+msgstr "Aucun mot-clé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:134
+msgid "document_details_page_keywords_search_field_title"
+msgstr "Sélectionner un ou plusieurs vocabulaires contrôlés"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
@@ -211,26 +241,6 @@ msgid "concept_chip_action_delete"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
-msgid "document_details_page_add_in_hal_tab_card_title"
-msgstr "Déposer dans HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr "Domaines"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:249
-msgid "document_details_page_keywords_input_options_loading"
-msgstr "En cours de chargement..."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:253
-msgid "document_details_page_keywords_input_options_fetch_error"
-msgstr "Une erreur est survenue lors du chargement."
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:255
 msgid "document_details_page_keywords_input_default"
@@ -254,30 +264,29 @@ msgid "document_details_page_keywords_input_options_no_vocabs"
 msgstr "Veuillez sélectionner au moins un vocabulaire"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
+msgid "document_details_page_add_in_hal_tab_card_title"
+msgstr "Déposer dans HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:249
+msgid "document_details_page_keywords_input_options_loading"
+msgstr "En cours de chargement..."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:253
+msgid "document_details_page_keywords_input_options_fetch_error"
+msgstr "Une erreur est survenue lors du chargement."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
 msgid "document_details_page_domains_tab_card_title"
 msgstr "Domaines"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Mot-clé ajouté à la publication."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:393
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:404
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "Actions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:421
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalider"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:439
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissocier"
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:183
+msgid "document_details_page_sources_row_update_source"
+msgstr "Comparer les sources"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:128
@@ -303,11 +312,6 @@ msgstr "Type de document"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "Aucune date"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:183
-msgid "document_details_page_sources_row_update_source"
-msgstr "Comparer les sources"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:120
@@ -362,17 +366,6 @@ msgid "document_details_page_authors_row_update_author"
 msgstr "Modifier les auteurs"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
-msgid "bibliographic_information_update_success"
-msgstr "Informations bibliographiques mises à jour."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
-msgid "bibliographic_information_update_failure"
-msgstr "Erreur lors de la mise à jour des informations bibliographiques."
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Retour à la page d'accueil"
@@ -403,12 +396,6 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "Une nouvelle expertise est en attente de validation"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:102
-#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:34
-msgid "profile_affiliations_card_title"
-msgstr "Mes affiliations"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:34
 msgid "profile_identifiers_card_title"
 msgstr "Mes identifiants"
@@ -417,6 +404,17 @@ msgstr "Mes identifiants"
 #: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:36
 msgid "profile_identifiers_card_title_other"
 msgstr "Identifiants"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:102
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:34
+msgid "profile_affiliations_card_title"
+msgstr "Mes affiliations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:36
+msgid "profile_affiliations_card_title_other"
+msgstr "Affiliations"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:59
@@ -432,41 +430,6 @@ msgstr "Modifier mes autorisations ORCID"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:217
 msgid "orcid_button_provide_identifier"
 msgstr "Fournir mon identifiant ORCID"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:36
-msgid "profile_affiliations_card_title_other"
-msgstr "Affiliations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:48
-msgid "orcid_permission_read_limited"
-msgstr "Lire vos informations avec une visibilitée fixée sur «Organisations de confiance»"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:49
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:49
-msgid "orcid_permission_activities_update"
-msgstr "Créer ou mettre à jour vos activités scientifiques (publications, etc.)"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
-msgid "orcid_permission_person_update"
-msgstr "Mettre à jour vos informations biographiques (nom, affiliation, etc.)"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:163
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:163
-msgid "orcid_permissions_intro"
-msgstr "Voici les autorisations que vous accordez à {institutionName} sur votre profil ORCID :"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:179
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:179
-msgid "orcid_permissions_none"
-msgstr "Vous n’accordez aucune autorisation à {institutionName}."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:151
@@ -645,6 +608,11 @@ msgid "hal_control_helper"
 msgstr "En liant votre compte Hal à votre compte Sovisu+, vous fiabilisez votre identifiant Hal et vous pourrez aisément déposer sur Hal les publications manquantes."
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
+msgid "profile_affiliations_units_label"
+msgstr "Unités de recherche"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
 msgid "profile_affiliations_signature_label"
@@ -661,11 +629,6 @@ msgstr "Aucune signature"
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
 msgid "profile_affiliations_signature_copied_message_confirmation"
 msgstr "Signature ajoutée au presse-papier."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
-msgid "profile_affiliations_units_label"
-msgstr "Unités de recherche"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
@@ -686,11 +649,6 @@ msgstr "Liste de mes publications"
 #: src/app/[lang]/account/components/authorizations/index.tsx:58
 msgid "authorizations_page_my_expertise"
 msgstr "Mes expertises"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
-msgid "profile_affiliations_units_label"
-msgstr "Unités de recherche"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: import { t } from '@lingui/core/macro' import { Trans } from '@lingui/react/macro' import { useRef, useState } from 'react' import useStore from '@/stores/global_store' import { Box, Button, Card, CardContent, ClickAwayListener, Grow, Link, Popper, Typography, } from '@mui/material' import { useTheme } from '@mui/material/styles' const Journal = () => { const titleRef = useRef(null) const [isPopperOpen, setIsPopperOpen] = useState(false) const theme = useTheme() const { selectedDocument = null } = useStore((state) => state.document) const journal = selectedDocument?.journal const title = journal?.title const handleClick = () => { setIsPopperOpen(!isPopperOpen) } const handleClickAway = () => { setIsPopperOpen(false) } return ( title && ( <ClickAwayListener onClickAway={handleClickAway}> <Box> <Button variant='text' ref={titleRef} onClick={handleClick} sx={{ p: 0 }} > {title} </Button> <Popper open={isPopperOpen} anchorEl={titleRef.current} placement='bottom-start' transition disablePortal sx={{ zIndex: 1, }} > {({ TransitionProps }) => ( <Grow {...TransitionProps} timeout={200}> <Card> <CardContent> <Typography gutterBottom variant='h6' sx={{ color: theme.palette.primary.main }} > {title} </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_issn'> <Link href={`https://portal.issn.org/resource/ISSN/${journal.issnL}`} target='_blank' rel='noopener noreferrer' > {journal.issnL} </Link> </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_source_type'> {t`document_details_page_journal_journal`} </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_publisher'> {journal.publisher} </Trans> </Typography> </CardContent> </Card> </Grow> )} </Popper> </Box> </ClickAwayListener> ) ) } export default Journal 
@@ -1007,7 +965,7 @@ msgstr "Annuler"
 msgid "documents_details_page_authors_tab_contributors_count"
 msgstr "Contributeurs"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/RoleMultiSelect.tsx:57
+#: src/app/[lang]/documents/[uid]/components/Authors/components/RoleMultiSelect.tsx:55
 msgid "documents_details_page_authors_tab_default_role_warning"
 msgstr "Rôle par défaut - à vérifier"
 
@@ -1015,7 +973,7 @@ msgstr "Rôle par défaut - à vérifier"
 msgid "documents_details_page_authors_tab_drag_to_reorder"
 msgstr "Glisser pour réordonner"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:79
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:78
 msgid "documents_details_page_authors_tab_edit_identification"
 msgstr "Modifier l'identification"
 
@@ -1053,15 +1011,15 @@ msgstr "Rechercher un profil dans HAL"
 msgid "documents_details_page_authors_tab_hal_structure_placeholder"
 msgstr "Rechercher une organisation dans HAL"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationSuggestions.tsx:179
+#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationSuggestions.tsx:178
 msgid "documents_details_page_authors_tab_hal_suggestion"
 msgstr "Suggestion HAL"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationSuggestions.tsx:190
+#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationSuggestions.tsx:189
 msgid "documents_details_page_authors_tab_hide"
 msgstr "Masquer"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:78
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:77
 msgid "documents_details_page_authors_tab_hide_hal_search"
 msgstr "Masquer la recherche dans HAL"
 
@@ -1101,7 +1059,7 @@ msgstr "Rester sur la page"
 msgid "documents_details_page_authors_tab_nav_guard_title"
 msgstr "Modifications non enregistrées"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:68
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:67
 msgid "documents_details_page_authors_tab_new_contributor"
 msgstr "Nouveau contributeur"
 
@@ -1113,16 +1071,16 @@ msgstr "Mode classement"
 msgid "documents_details_page_authors_tab_remove_affiliation"
 msgstr "Supprimer l'affiliation"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:55
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:54
 msgid "documents_details_page_authors_tab_remove_contributor"
 msgstr "Supprimer le contributeur"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:130
-#: src/app/[lang]/documents/[uid]/components/Authors/components/RoleMultiSelect.tsx:40
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:127
+#: src/app/[lang]/documents/[uid]/components/Authors/components/RoleMultiSelect.tsx:39
 msgid "documents_details_page_authors_tab_roles_label"
 msgstr "Fonctions"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/RoleMultiSelect.tsx:41
+#: src/app/[lang]/documents/[uid]/components/Authors/components/RoleMultiSelect.tsx:40
 msgid "documents_details_page_authors_tab_roles_placeholder"
 msgstr "Sélectionner des rôles"
 
@@ -1134,27 +1092,27 @@ msgstr "Enregistrer"
 msgid "documents_details_page_authors_tab_save_error"
 msgstr "Échec de l'enregistrement des contributions. Veuillez réessayer."
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributionStatusChip.tsx:12
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributionStatusChip.tsx:11
 msgid "documents_details_page_authors_tab_status_identified"
 msgstr "Identifié"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributionStatusChip.tsx:10
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributionStatusChip.tsx:9
 msgid "documents_details_page_authors_tab_status_identified_and_aligned"
 msgstr "Identifié et aligné"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributionStatusChip.tsx:14
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributionStatusChip.tsx:13
 msgid "documents_details_page_authors_tab_status_not_aligned"
 msgstr "Non aligné"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributionStatusChip.tsx:16
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributionStatusChip.tsx:15
 msgid "documents_details_page_authors_tab_status_not_identified"
 msgstr "Non identifié"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationSuggestions.tsx:163
+#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationSuggestions.tsx:162
 msgid "documents_details_page_authors_tab_suggest"
 msgstr "Suggérer"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationSuggestions.tsx:164
+#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationSuggestions.tsx:163
 msgid "documents_details_page_authors_tab_suggest_matches"
 msgstr "correspondances dans HAL"
 
