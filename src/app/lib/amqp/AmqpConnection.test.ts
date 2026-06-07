@@ -152,7 +152,7 @@ describe('AmqpConnection', () => {
       expect(mockInteractiveChannel.bindQueue).toHaveBeenCalledWith(
         'dlq.sovisuplus-interactive',
         'dlx.graph',
-        '#',
+        'sovisuplus-interactive',
       )
 
       expect(mockBatchChannel.assertQueue).toHaveBeenCalledWith(
@@ -165,7 +165,7 @@ describe('AmqpConnection', () => {
       expect(mockBatchChannel.bindQueue).toHaveBeenCalledWith(
         'dlq.sovisuplus-batch',
         'dlx.graph',
-        '#',
+        'sovisuplus-batch',
       )
     })
 

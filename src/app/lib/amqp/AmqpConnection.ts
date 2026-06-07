@@ -126,7 +126,7 @@ export class AmqpConnection {
       durable: true,
       arguments: { 'x-consumer-timeout': 43200000 },
     })
-    await channel.bindQueue(dlqName, 'dlx.graph', '#')
+    await channel.bindQueue(dlqName, 'dlx.graph', queueName)
 
     await channel.assertQueue(queueName, {
       durable: true,
