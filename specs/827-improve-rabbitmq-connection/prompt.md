@@ -17,7 +17,7 @@ Upgrade `amqplib` from `^0.10.9` to `^2.0.1`. Drop `@types/amqplib` — types ar
 
 **Notable additions used by this branch**:
 
-- v1.1.0 — `connectWithRecoveryPromise()`: built-in reconnection with configurable backoff (see Issue 2).
+- v1.1.0 — built-in reconnection via recovery options on `connect()` (see Issue 2).
 - v1.2.0 — bundled TypeScript types.
 
 ---
@@ -46,12 +46,13 @@ Restarting the container fixes the issue only because RabbitMQ is available agai
 
 ### Spec
 
-Replace `connect(amqpUrl)` with `connectWithRecoveryPromise(amqpUrl, onReconnect, options)` (added in amqplib v1.1.0).
+Pass a `recovery` object to `connect(amqpUrl, { recovery: { ... } })`. This returns a `RecoveringChannelModel` instead of a plain `ChannelModel`.
 
-- `options`: `{ retryTimeout: 2000, maxRetryTimeout: 30000, jitter: 1000 }` — exponential backoff from 2 s to 30 s with 1 s jitter.
-- `onReconnect` callback: called by amqplib after each successful reconnection. Use it to recreate the two channels and re-register the stored `interactiveHandler` and `batchHandler`.
+- `recovery` options: `{ initialDelay: 2000, maxDelay: 30000, factor: 2, jitter: 0.1 }` — exponential backoff from 2 s to 30 s.
+- `recovery.setup(model: ChannelModel)` callback: called by amqplib on every successful (re)connect. Use it to recreate the two channels and re-register the stored `interactiveHandler` and `batchHandler`.
+- `RecoveringChannelModel` emits `disconnect` (set `connected = false`, log) and `reconnect-scheduled` (log attempt/delay) events.
 
-`connect()` must not swallow errors. If `connectWithRecoveryPromise` rejects (e.g. bad credentials — a non-transient error), the exception propagates to `listener.ts` and the process exits with a clear error, not a downstream `TypeError`.
+`connect()` must not swallow errors. If the initial connection rejects (e.g. bad credentials — a non-transient error), the exception propagates to `listener.ts` and the process exits with a clear error, not a downstream `TypeError`.
 
 **`publish()` during reconnect**: if `publish()` is called while `!this.connected`, enqueue the message in memory and flush once reconnected. Bounded buffer of 100 messages; warn and drop on overflow.
 
@@ -85,7 +86,7 @@ The existing `sovisuplus` queue on the `graph` exchange receives:
 | `event.structures.structure.*` | research unit events from graph |
 | `event.harvestings.*.*`        | harvesting state/result events  |
 
-Outbound messages (user actions) are published to the `graph` exchange with routing keys like `task.documents.document.merge`, consumed by `crisalid-ikg-user-actions`.
+Outbound messages (user actions) are published to the `graph` exchange with routing keys like `task.documents.document.merge`, consumed by `crisalid-ikg-actions-interactive`.
 
 ### New queue architecture
 
@@ -168,13 +169,13 @@ await connection.consumeInteractive(async (msg: string) => {
 })
 ```
 
-**Dead-letter queues**: declare two DLQs, one per consumer queue, bound to the existing `dlx.graph` dead-letter exchange (mirrors the `dlx.graph` / `dlq.crisalid-ikg-user-actions` pattern in `definitions.sample.json`):
+**Dead-letter queues**: declare two DLQs, one per consumer queue, bound to the existing `dlx.graph` dead-letter exchange (mirrors the `dlx.graph` / `dlq.crisalid-ikg-actions-interactive` pattern in `definitions.sample.json`):
 
 | Consumer queue           | DLQ                          |
 | ------------------------ | ---------------------------- |
 | `sovisuplus-interactive` | `dlq.sovisuplus-interactive` |
 | `sovisuplus-batch`       | `dlq.sovisuplus-batch`       |
 
-Both consumer queues must be asserted with `x-dead-letter-exchange: dlx.graph` and `x-dead-letter-routing-key` set to their own queue name. Both DLQs are asserted by sovisuplus at startup (`assertQueue`, durable, `x-consumer-timeout: 43200000`), bound to `dlx.graph` with routing key `#`.
+Both consumer queues must be asserted with `x-dead-letter-exchange: dlx.graph` and `x-dead-letter-routing-key` set to their own queue name. Both DLQs are asserted by sovisuplus at startup (`assertQueue`, durable, `x-consumer-timeout: 43200000`), bound to `dlx.graph` with the **source queue name** as routing key (e.g. `sovisuplus-interactive` for `dlq.sovisuplus-interactive`). Using a specific routing key rather than `#` ensures each DLQ only receives dead letters from its own source queue.
 
-`definitions.sample.json` in `crisalid-deployment` must be updated accordingly (separate task).
+`definitions.sample.json` in `crisalid-deployment` has been updated accordingly.
