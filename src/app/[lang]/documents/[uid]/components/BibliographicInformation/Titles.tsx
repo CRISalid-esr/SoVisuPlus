@@ -45,19 +45,16 @@ const Titles = ({
         a={selectedDocument}
         field='titles'
         ability={ability}
-        passThrough
       >
-        {(allowed: boolean) => (
-          <Button
-            disabled={!allowed || (selectedDocument?.isFrozen ?? false)}
-            variant='outlined'
-            startIcon={<EditIcon />}
-            onClick={() => setEdit(true)}
-            sx={{ minWidth: 'fit-content' }}
-          >
-            <Trans>document_details_page_titles_row_edit_button</Trans>
-          </Button>
-        )}
+        <Button
+          disabled={selectedDocument?.isFrozen ?? false}
+          variant='outlined'
+          startIcon={<EditIcon />}
+          onClick={() => setEdit(true)}
+          sx={{ minWidth: 'fit-content' }}
+        >
+          <Trans>document_details_page_titles_row_edit_button</Trans>
+        </Button>
       </Can>
     </Box>
   ) : (

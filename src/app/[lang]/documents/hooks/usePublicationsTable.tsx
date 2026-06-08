@@ -774,6 +774,15 @@ export const usePublicationsTable = (
     _,
     typeOptions,
   ])
+  // The user has any selectable row only if they can merge at least one listed
+  // document that isn't waiting for an update — drives the toolbar "select all"
+  // checkbox, which must be disabled for users without merge permission.
+  const hasSelectableRow = documents.some(
+    (doc) =>
+      isDocument(doc) &&
+      ability.can(PermissionAction.merge, doc) &&
+      doc.state === DocumentState.default,
+  )
   const tableOptions: MRT_TableOptions<Document> = useMemo(
     () => ({
       columns,
@@ -784,6 +793,7 @@ export const usePublicationsTable = (
         const canMerge = ability.can(PermissionAction.merge, row.original)
         return canMerge && row.original.state == DocumentState.default
       },
+      muiSelectAllCheckboxProps: { disabled: !hasSelectableRow },
       manualFiltering: true,
       manualPagination: true,
       manualSorting: true,
@@ -876,6 +886,7 @@ export const usePublicationsTable = (
       pagination,
       sorting,
       ability,
+      hasSelectableRow,
       setOpenDialog,
       navigateToDetailsPage,
     ],

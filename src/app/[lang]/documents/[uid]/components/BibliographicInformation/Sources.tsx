@@ -10,7 +10,10 @@ import {
   BibliographicPlatformMetadata,
 } from '@/types/BibliographicPlatform'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { ReactElement } from 'react'
+import { ReactElement, useMemo } from 'react'
+import { useSession } from 'next-auth/react'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
 
 const Sources = () => {
   const theme = useTheme()
@@ -20,6 +23,17 @@ const Sources = () => {
   const searchParams = useSearchParams()
   const { uid } = useParams<{ uid: string }>()
   const lang = Lingui.i18n.locale
+
+  const { data: session } = useSession()
+  const ability = useMemo(
+    () => abilityFromAuthzContext(session?.user.authz),
+    [session?.user?.authz],
+  )
+  // Visible to editors — anyone who can update the document — regardless of the
+  // document state. The button only navigates to the Sources tab.
+  const canEdit = !!(
+    selectedDocument && ability.can(PermissionAction.update, selectedDocument)
+  )
 
   const goToSourcesTab = () => {
     const params = new URLSearchParams(searchParams.toString())
@@ -71,14 +85,16 @@ const Sources = () => {
         }
         return acc
       }, [])}
-      <Button
-        variant='outlined'
-        startIcon={<EditIcon />}
-        onClick={goToSourcesTab}
-        sx={{ minWidth: 'fit-content' }}
-      >
-        <Trans>document_details_page_sources_row_update_source</Trans>
-      </Button>
+      {canEdit && (
+        <Button
+          variant='outlined'
+          startIcon={<EditIcon />}
+          onClick={goToSourcesTab}
+          sx={{ minWidth: 'fit-content' }}
+        >
+          <Trans>document_details_page_sources_row_update_source</Trans>
+        </Button>
+      )}
     </Box>
   )
 }

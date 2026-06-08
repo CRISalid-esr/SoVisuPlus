@@ -128,77 +128,70 @@ const Type = () => {
         a={selectedDocument}
         field='documentType'
         ability={ability}
-        passThrough
       >
-        {(allowed: boolean) => (
-          <>
-            <Button
-              size='small'
-              variant='outlined'
-              startIcon={<EditIcon />}
-              onClick={handleOpen}
-              disabled={!allowed || selectedDocument.isFrozen}
-              sx={{ minWidth: 'fit-content' }}
-            >
-              <Trans>document_details_page_type_edit_button</Trans>
-            </Button>
+        <Button
+          size='small'
+          variant='outlined'
+          startIcon={<EditIcon />}
+          onClick={handleOpen}
+          disabled={selectedDocument.isFrozen}
+          sx={{ minWidth: 'fit-content' }}
+        >
+          <Trans>document_details_page_type_edit_button</Trans>
+        </Button>
 
-            <Popover
-              open={open}
-              anchorEl={anchorEl}
-              onClose={handleClose}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-              slotProps={{
-                paper: {
-                  sx: { p: 2, minWidth: 360, maxHeight: 420 },
-                },
+        <Popover
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+          slotProps={{
+            paper: {
+              sx: { p: 2, minWidth: 360, maxHeight: 420 },
+            },
+          }}
+        >
+          <Stack spacing={1.5}>
+            <Typography variant='subtitle2'>
+              <Trans>document_details_page_type_select_label</Trans>
+            </Typography>
+
+            <Box
+              sx={{
+                border: (t) => `1px solid ${t.palette.divider}`,
+                borderRadius: 1,
+                p: 1,
+                maxHeight: 300,
+                overflow: 'auto',
               }}
             >
-              <Stack spacing={1.5}>
-                <Typography variant='subtitle2'>
-                  <Trans>document_details_page_type_select_label</Trans>
-                </Typography>
+              <RichTreeView
+                items={items}
+                checkboxSelection
+                multiSelect={false}
+                selectedItems={
+                  (pendingType ?? currentType) as unknown as TreeViewItemId
+                }
+                onSelectedItemsChange={handleSelect}
+                defaultExpandedItems={defaultExpandedItems}
+              />
+            </Box>
 
-                <Box
-                  sx={{
-                    border: (t) => `1px solid ${t.palette.divider}`,
-                    borderRadius: 1,
-                    p: 1,
-                    maxHeight: 300,
-                    overflow: 'auto',
-                  }}
-                >
-                  <RichTreeView
-                    items={items}
-                    checkboxSelection
-                    multiSelect={false}
-                    selectedItems={
-                      (pendingType ?? currentType) as unknown as TreeViewItemId
-                    }
-                    onSelectedItemsChange={handleSelect}
-                    defaultExpandedItems={defaultExpandedItems}
-                  />
-                </Box>
-
-                <Box
-                  sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}
-                >
-                  <Button onClick={handleClose}>
-                    <Trans>document_details_page_cancel_button</Trans>
-                  </Button>
-                  <Button
-                    variant='contained'
-                    onClick={handleApply}
-                    disabled={!pendingType || pendingType === currentType}
-                  >
-                    <Trans>document_details_page_apply_button</Trans>
-                  </Button>
-                </Box>
-              </Stack>
-            </Popover>
-          </>
-        )}
+            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+              <Button onClick={handleClose}>
+                <Trans>document_details_page_cancel_button</Trans>
+              </Button>
+              <Button
+                variant='contained'
+                onClick={handleApply}
+                disabled={!pendingType || pendingType === currentType}
+              >
+                <Trans>document_details_page_apply_button</Trans>
+              </Button>
+            </Box>
+          </Stack>
+        </Popover>
       </Can>
     </Box>
   )

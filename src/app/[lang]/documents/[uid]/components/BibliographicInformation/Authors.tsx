@@ -98,19 +98,15 @@ const Authors = () => {
         a={selectedDocument}
         field='contributors'
         ability={ability}
-        passThrough
       >
-        {(allowed: boolean) => (
-          <Button
-            disabled={!allowed}
-            variant='outlined'
-            startIcon={<EditIcon />}
-            onClick={goToAuthorsTab}
-            sx={{ minWidth: 'fit-content' }}
-          >
-            <Trans>document_details_page_authors_row_update_author</Trans>
-          </Button>
-        )}
+        <Button
+          variant='outlined'
+          startIcon={<EditIcon />}
+          onClick={goToAuthorsTab}
+          sx={{ minWidth: 'fit-content' }}
+        >
+          <Trans>document_details_page_authors_row_update_author</Trans>
+        </Button>
       </Can>
     </Box>
   )
