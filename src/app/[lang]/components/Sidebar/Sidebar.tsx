@@ -54,7 +54,7 @@ import { HelpOutline, PermIdentityOutlined } from '@mui/icons-material'
 import { getRuntimeEnv } from '@/utils/runtimeEnv'
 import { t } from '@lingui/core/macro'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 interface SidebarProps {
   handleToggleDrawerAction: () => void
@@ -70,6 +70,16 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const guardedRouter = useGuardedRouter()
   const searchParams = useSearchParams()
+  // The `tab` param belongs to the document details page; its values (authors,
+  // sources…) are invalid elsewhere and break the destination's TabFilter. Drop
+  // it from nav links when leaving the details page so it doesn't leak.
+  const navSearchParams = useMemo(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (pathname.startsWith(`/${lang}/documents/`)) {
+      params.delete('tab')
+    }
+    return params.toString()
+  }, [searchParams, pathname, lang])
   const helpUrl = getRuntimeEnv().NEXT_PUBLIC_HELP_URL
   const [accountMenu, setAccountMenu] = useState<null | HTMLElement>(null)
 
@@ -384,7 +394,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
             <Box>
               <ListItem
                 component={GuardedLink}
-                href={`/${lang}/dashboard?${searchParams.toString()}`}
+                href={`/${lang}/dashboard?${navSearchParams}`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   marginBottom: theme.utils.pxToRem(4),
@@ -433,7 +443,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
               </ListItem>
               <ListItem
                 component={GuardedLink}
-                href={`/${lang}/documents?${searchParams.toString()}`}
+                href={`/${lang}/documents?${navSearchParams}`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   marginBottom: theme.utils.pxToRem(4),
@@ -482,7 +492,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
               </ListItem>
               <ListItem
                 component={GuardedLink}
-                href={`/${lang}/expertise?${searchParams.toString()}`}
+                href={`/${lang}/expertise?${navSearchParams}`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   marginBottom: theme.utils.pxToRem(4),
@@ -561,7 +571,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                     },
                   }}
                   component={GuardedLink}
-                  href={`/${lang}/groups?${searchParams.toString()}`}
+                  href={`/${lang}/groups?${navSearchParams}`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
@@ -611,7 +621,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                     },
                   }}
                   component={GuardedLink}
-                  href={`/${lang}/institutions?${searchParams.toString()}`}
+                  href={`/${lang}/institutions?${navSearchParams}`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
@@ -661,7 +671,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                     },
                   }}
                   component={GuardedLink}
-                  href={`/${lang}/laboratories?${searchParams.toString()}`}
+                  href={`/${lang}/laboratories?${navSearchParams}`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
