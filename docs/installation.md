@@ -110,8 +110,9 @@ Following table gives detailed information on each environment variable:
 6. Run the Prisma migration with `npx prisma migrate dev --name init`.
 7. Run the development server with `npm run dev`.
 
-To enable the AMQP listener, start a Rabbitmq instance on your local machine, fill in the .env file
-with Rabbitmq parameters and run the listener : `npm run dev:listener`
+To enable the AMQP listener, start a RabbitMQ instance on your local machine, fill in the `.env` file with the RabbitMQ parameters (`AMQP_USER`, `AMQP_PASSWORD`, `AMQP_HOST`, `AMQP_PORT`, `AMQP_EXCHANGE_NAME`, `AMQP_INTERACTIVE_QUEUE_NAME`, `AMQP_BATCH_QUEUE_NAME`) and run the listener: `npm run dev:listener`
+
+The listener creates two queues (`sovisuplus-interactive` and `sovisuplus-batch` by default) and their dead-letter queues automatically at startup. It reconnects automatically if RabbitMQ is temporarily unavailable.
 
 ### RBAC setup (required)
 
