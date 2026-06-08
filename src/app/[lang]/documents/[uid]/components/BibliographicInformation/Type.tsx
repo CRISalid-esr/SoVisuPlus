@@ -137,7 +137,7 @@ const Type = () => {
               variant='outlined'
               startIcon={<EditIcon />}
               onClick={handleOpen}
-              disabled={!allowed}
+              disabled={!allowed || selectedDocument.isFrozen}
               sx={{ minWidth: 'fit-content' }}
             >
               <Trans>document_details_page_type_edit_button</Trans>

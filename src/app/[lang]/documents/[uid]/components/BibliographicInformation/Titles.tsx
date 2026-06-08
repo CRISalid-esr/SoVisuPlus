@@ -49,7 +49,7 @@ const Titles = ({
       >
         {(allowed: boolean) => (
           <Button
-            disabled={!allowed}
+            disabled={!allowed || (selectedDocument?.isFrozen ?? false)}
             variant='outlined'
             startIcon={<EditIcon />}
             onClick={() => setEdit(true)}

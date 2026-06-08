@@ -91,6 +91,9 @@ export const useSourcesTable = () => {
   const [action, setAction] = useState<string>('')
   const [globalFilter, setGlobalFilter] = useState(readInitialGlobalFilter)
   const { selectedDocument = null } = useStore((state) => state.document)
+  // A frozen document (waiting for the graph to apply a pending change) is
+  // read-only: rows can't be selected and actions can't be triggered.
+  const isFrozen = selectedDocument?.isFrozen ?? false
   const [data] = useState<DocumentRecord[]>(selectedDocument?.records || [])
   const typeOptions = useMemo(() => createSourceTypeTree(_), [_])
   const columns = useMemo<
@@ -368,8 +371,9 @@ export const useSourcesTable = () => {
       columns,
       data,
       enableRowSelection: (row) => {
-        return ability.can(PermissionAction.unmerge, row.original)
+        return !isFrozen && ability.can(PermissionAction.unmerge, row.original)
       },
+      muiSelectAllCheckboxProps: { disabled: isFrozen },
       positionToolbarAlertBanner: 'bottom',
       onGlobalFilterChange: setGlobalFilter,
       renderTopToolbarCustomActions: ({ table }) => {
@@ -406,7 +410,7 @@ export const useSourcesTable = () => {
               >
                 <MenuItem
                   value='pending'
-                  disabled={!rowSelected}
+                  disabled={!rowSelected || isFrozen}
                   onClick={async () => {
                     await onInvalidateDocument(
                       table
@@ -424,7 +428,7 @@ export const useSourcesTable = () => {
 
                 <MenuItem
                   value='rejected'
-                  disabled={!rowSelected}
+                  disabled={!rowSelected || isFrozen}
                   onClick={async () => {
                     await onUnmergeDocument(
                       table
@@ -449,7 +453,7 @@ export const useSourcesTable = () => {
         globalFilter,
       },
     }),
-    [ability, action, columns, data, globalFilter],
+    [ability, action, columns, data, globalFilter, isFrozen],
   )
 
   const table = useDocumentTable(tableOptions)

@@ -79,131 +79,140 @@ const Keywords = () => {
       ability={ability}
       passThrough
     >
-      {(allowed: boolean) => (
-        <CustomCard
-          header={
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <Typography
+      {(allowed: boolean) => {
+        // A frozen document (waiting for the graph to apply a pending change) is
+        // read-only, regardless of the user's edit permission.
+        const editable = allowed && !(selectedDocument?.isFrozen ?? false)
+        return (
+          <CustomCard
+            header={
+              <Box
                 sx={{
-                  color: theme.palette.primary.main,
-                  fontSize: theme.utils.pxToRem(20),
-                  fontStyle: 'normal',
-                  fontWeight: theme.typography.fontWeightRegular,
-                  lineHeight: 'normal',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
                 }}
               >
-                <Trans id='document_details_page_keywords_tab_card_title' />
-              </Typography>
-            </Box>
-          }
-        >
-          <CardContent>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              {groups.length > 0 ? (
-                groups.map((group) => (
-                  <ConceptChip
-                    key={group.uid as string}
-                    group={group}
-                    language={lang as ExtendedLanguageCode}
-                    removable={allowed}
-                    onRemoveConcepts={onRemoveConcepts}
-                  />
-                ))
-              ) : (
-                <Typography sx={{ fontStyle: 'italic' }}>
-                  <Trans id='document_details_page_keywords_tab_card_empty_content' />
+                <Typography
+                  sx={{
+                    color: theme.palette.primary.main,
+                    fontSize: theme.utils.pxToRem(20),
+                    fontStyle: 'normal',
+                    fontWeight: theme.typography.fontWeightRegular,
+                    lineHeight: 'normal',
+                  }}
+                >
+                  <Trans id='document_details_page_keywords_tab_card_title' />
                 </Typography>
-              )}
-            </Box>
-            <Box
-              sx={{
-                display: allowed ? 'flex' : 'none',
-                gap: '20px',
-                alignItems: 'start',
-                marginTop: '45px',
-                flexDirection: 'column',
-              }}
-            >
-              <Typography sx={{ fontSize: '17px' }}>
-                <Trans id='document_details_page_keywords_search_field_title' />
-              </Typography>
-              <FormGroup
+              </Box>
+            }
+          >
+            <CardContent>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {groups.length > 0 ? (
+                  groups.map((group) => (
+                    <ConceptChip
+                      key={group.uid as string}
+                      group={group}
+                      language={lang as ExtendedLanguageCode}
+                      removable={editable}
+                      onRemoveConcepts={onRemoveConcepts}
+                    />
+                  ))
+                ) : (
+                  <Typography sx={{ fontStyle: 'italic' }}>
+                    <Trans id='document_details_page_keywords_tab_card_empty_content' />
+                  </Typography>
+                )}
+              </Box>
+              <Box
                 sx={{
-                  display: 'grid',
-                  gap: 1.5,
-                  gridTemplateRows: 'repeat(2,1fr)',
-                  gridTemplateColumns: 'repeat(2,1fr)',
-                  marginBottom: '12px',
-                  width: '100%',
+                  display: editable ? 'flex' : 'none',
+                  gap: '20px',
+                  alignItems: 'start',
+                  marginTop: '45px',
+                  flexDirection: 'column',
                 }}
               >
-                {Vocab.getVocabs()?.map(
-                  (vocab) =>
-                    Object.keys(VOCABS).includes(vocab.toUpperCase()) && (
-                      <Paper
-                        key={vocab + '-checkbox'}
-                        sx={{
-                          alignItems: 'center',
-                          display: 'flex',
-                          gap: 1,
-                          padding: '10px 8px',
-                        }}
-                      >
-                        <Checkbox
-                          onChange={handleCheckboxChange}
-                          name={vocab}
-                        />
-                        <Box
-                          sx={{ alignItems: 'center', display: 'flex', gap: 1 }}
+                <Typography sx={{ fontSize: '17px' }}>
+                  <Trans id='document_details_page_keywords_search_field_title' />
+                </Typography>
+                <FormGroup
+                  sx={{
+                    display: 'grid',
+                    gap: 1.5,
+                    gridTemplateRows: 'repeat(2,1fr)',
+                    gridTemplateColumns: 'repeat(2,1fr)',
+                    marginBottom: '12px',
+                    width: '100%',
+                  }}
+                >
+                  {Vocab.getVocabs()?.map(
+                    (vocab) =>
+                      Object.keys(VOCABS).includes(vocab.toUpperCase()) && (
+                        <Paper
+                          key={vocab + '-checkbox'}
+                          sx={{
+                            alignItems: 'center',
+                            display: 'flex',
+                            gap: 1,
+                            padding: '10px 8px',
+                          }}
                         >
-                          <Image
-                            src={VOCABS[vocab.toUpperCase()]?.icon || ''}
-                            alt={vocab.toUpperCase()}
-                            width={24}
-                            height={24}
+                          <Checkbox
+                            onChange={handleCheckboxChange}
+                            name={vocab}
                           />
-                          <Link
-                            href={VOCABS[vocab.toUpperCase()]?.url || ''}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            sx={{ display: 'inherit' }}
+                          <Box
+                            sx={{
+                              alignItems: 'center',
+                              display: 'flex',
+                              gap: 1,
+                            }}
                           >
-                            <Typography>
-                              {VOCABS[vocab.toUpperCase()]?.name || ''}
-                            </Typography>
-                          </Link>
-                        </Box>
-                        <Tooltip
-                          title={VOCABS[vocab.toUpperCase()]?.org || ''}
-                          key={vocab + '-checkbox-and-label'}
-                        >
-                          <IconButton sx={{ marginLeft: 'auto' }}>
-                            <HelpOutline />
-                          </IconButton>
-                        </Tooltip>
-                      </Paper>
-                    ),
-                )}
-              </FormGroup>
-              <KeywordSearchAutocomplete
-                selectedVocabs={
-                  selectedVocabs
-                    ? Object.keys(selectedVocabs).filter(
-                        (key) => selectedVocabs[key],
-                      )
-                    : []
-                }
-              />
-            </Box>
-          </CardContent>
-        </CustomCard>
-      )}
+                            <Image
+                              src={VOCABS[vocab.toUpperCase()]?.icon || ''}
+                              alt={vocab.toUpperCase()}
+                              width={24}
+                              height={24}
+                            />
+                            <Link
+                              href={VOCABS[vocab.toUpperCase()]?.url || ''}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              sx={{ display: 'inherit' }}
+                            >
+                              <Typography>
+                                {VOCABS[vocab.toUpperCase()]?.name || ''}
+                              </Typography>
+                            </Link>
+                          </Box>
+                          <Tooltip
+                            title={VOCABS[vocab.toUpperCase()]?.org || ''}
+                            key={vocab + '-checkbox-and-label'}
+                          >
+                            <IconButton sx={{ marginLeft: 'auto' }}>
+                              <HelpOutline />
+                            </IconButton>
+                          </Tooltip>
+                        </Paper>
+                      ),
+                  )}
+                </FormGroup>
+                <KeywordSearchAutocomplete
+                  selectedVocabs={
+                    selectedVocabs
+                      ? Object.keys(selectedVocabs).filter(
+                          (key) => selectedVocabs[key],
+                        )
+                      : []
+                  }
+                />
+              </Box>
+            </CardContent>
+          </CustomCard>
+        )
+      }}
     </Can>
   )
 }

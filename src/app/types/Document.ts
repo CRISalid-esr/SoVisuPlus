@@ -54,6 +54,15 @@ class Document implements Authorizable {
   }
 
   /**
+   * The document is frozen (not editable) while it waits for the graph to apply
+   * a pending change. This is durable: it survives navigating away and back, as a
+   * re-fetch of a still-pending document returns `waiting_for_update`.
+   */
+  get isFrozen(): boolean {
+    return this.state === DocumentState.waiting_for_update
+  }
+
+  /**
    * Convert a string to a valid DocumentType or return DocumentType.Document as default
    * @param typeString - The string representation of the document type
    * @returns A valid DocumentType
