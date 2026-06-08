@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import useStore from '@/stores/global_store'
-import { Document, DocumentState } from '@/types/Document'
+import { Document } from '@/types/Document'
 import { LocRelator } from '@/types/LocRelator'
 import { AureHalAuthorDoc } from '@/lib/services/AureHalAPIClient'
 import {
@@ -77,7 +77,7 @@ export function useContributionsEditor(
   // `default` when the graph re-writes the document), so the freeze is durable:
   // it survives navigating away and back — a re-fetch of a still-pending document
   // returns `waiting_for_update` and keeps the tab frozen.
-  const isFrozen = document?.state === DocumentState.waiting_for_update
+  const isFrozen = document?.isFrozen ?? false
 
   // Rebuild working state from the baseline whenever the document changes
   // (initial load, or refresh after a save round-trip).

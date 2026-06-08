@@ -6,7 +6,7 @@ import useStore from '@/stores/global_store'
 import { Alert, Box, CircularProgress, Link, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { notFound, useParams, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Authors,
   BibliographicInformation,
@@ -26,6 +26,9 @@ import {
   useBlockNavigation,
   useGuardedRouter,
 } from '@/app/[lang]/components/NavigationGuard/NavigationGuardProvider'
+import { useSession } from 'next-auth/react'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
 
 const DocumentDetailsPage = () => {
   const theme = useTheme()
@@ -116,6 +119,17 @@ const DocumentDetailsPage = () => {
   const guardedRouter = useGuardedRouter()
   useBlockNavigation(contributionsTabDirty)
 
+  // Only editors see the frozen notice — read-only viewers never have controls to
+  // freeze, so the message would be irrelevant noise to them.
+  const { data: session } = useSession()
+  const ability = useMemo(
+    () => abilityFromAuthzContext(session?.user?.authz),
+    [session?.user?.authz],
+  )
+  const canEdit = !!(
+    selectedDocument && ability.can(PermissionAction.update, selectedDocument)
+  )
+
   if (!hasFetched || loading) {
     return (
       <Box
@@ -195,6 +209,11 @@ const DocumentDetailsPage = () => {
         selectedValue={selectedTab}
         onTabChange={handleTabChange}
       />
+      {canEdit && selectedDocument?.isFrozen && (
+        <Alert severity='info' sx={{ mb: 2 }}>
+          <Trans id='document_details_page_frozen_notice' />
+        </Alert>
+      )}
       {renderTabContent()}
     </Box>
   )

@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Alert, Paper } from '@mui/material'
+import { Paper } from '@mui/material'
 import { t } from '@lingui/core/macro'
 import { useSnackbar } from 'notistack'
 import { useSession } from 'next-auth/react'
@@ -72,11 +72,6 @@ const Authors = () => {
           onSave={handleSave}
           onCancel={editor.cancel}
         />
-      )}
-      {!readOnly && editor.isFrozen && (
-        <Alert severity='info' sx={{ mb: 2 }}>
-          {t`documents_details_page_authors_tab_frozen_notice`}
-        </Alert>
       )}
 
       <ContributorList editor={editor} readOnly={readOnly} />
