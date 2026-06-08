@@ -161,6 +161,13 @@ Every contribution action uses `targetType: DOCUMENT`, `targetUid: <document uid
   A brand-new contributor (never persisted) sends `person.uid: null` (the graph mints/matches by identifiers).
 - **Rank:** if ranking mode is ON at save time, `rank` = the card's 1-based position in the list (first card = 1); if OFF, `rank` is `null` for every contribution. This is intended and destructive (saving with ranking OFF clears all ranks).
 - A brand-new contributor row that was never filled in (no uid, blank displayName, no identifiers) is skipped: it produces no ADD action and does not mark the tab dirty.
+- **Action sequencing (`id` / `nextId`).** So the graph knows whether more contribution messages of the same save batch are still coming before confirming all changes, every action's `parameters` (ADD, UPDATE **and** REMOVE) also carries:
+  - `id` — the change's position in the batch (its array index).
+  - `nextId` — the index of the next change if there is one, otherwise `null`.
+
+  For `n` changes the rows carry `id: 0…n-1`; each `nextId` points at the following row's `id`, and the **last** row's `nextId` is `null` to mark the end of the batch. These are assigned in `DocumentService.saveContributions` by spreading them onto the existing `change.parameters` — a save-time transport concern, not part of the client-side diff or the `ContributionAction` types.
+
+  The rows **must be inserted in order**: the change poller picks them up in insertion order, so the `nextId: null` row has to be written last. Create them **sequentially** with a `for` loop that `await`s each `createAction` before the next — `Promise.all(changes.map(...))` does not guarantee insertion order (the terminal row could land first and make the graph confirm prematurely), and `.map` cannot run async work sequentially anyway.
 
 **Refresh model — pessimistic and durable.** On Save the in-memory edits are discarded and the tab is **frozen** (read-only) until the document is refreshed from the graph. The freeze is stored on `Document.state = waiting_for_update`, not in client-only state, so it survives navigation and re-fetches:
 

@@ -80,18 +80,30 @@ export class DocumentService {
         throw new Error(`User with username ${userName} not found`)
       }
 
-      await Promise.all(
-        changes.map((change) =>
-          this.actionDAO.createAction({
-            actionType: ActionType[change.actionType],
-            targetType: ActionTargetType.DOCUMENT,
-            targetUid: documentUid,
-            path: 'contributions',
-            parameters: change.parameters as unknown as InputJsonValue,
-            personUid: user.person!.uid,
-          }),
-        ),
-      )
+      // `id`/`nextId` sequence the actions so the graph knows whether another
+      // contribution message is still coming before it confirms all changes.
+      // `id` is the change's position; `nextId` points at the next one, or null
+      // when this is the last change in the batch.
+      //
+      // Created sequentially (NOT Promise.all): the change poller picks rows up
+      // in insertion order, so the row carrying `nextId: null` must be written
+      // last. Concurrent inserts could reorder it ahead of its predecessors and
+      // make the graph confirm before every change has been processed.
+      for (let index = 0; index < changes.length; index++) {
+        const change = changes[index]
+        await this.actionDAO.createAction({
+          actionType: ActionType[change.actionType],
+          targetType: ActionTargetType.DOCUMENT,
+          targetUid: documentUid,
+          path: 'contributions',
+          parameters: {
+            ...change.parameters,
+            id: index,
+            nextId: index + 1 < changes.length ? index + 1 : null,
+          } as unknown as InputJsonValue,
+          personUid: user.person!.uid,
+        })
+      }
 
       // Flag the document as awaiting the graph round-trip. This freezes the
       // Authors tab (and disables further mutations) until the graph re-writes

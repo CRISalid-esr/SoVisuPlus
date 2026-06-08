@@ -1218,6 +1218,23 @@ describe('DocumentService', () => {
       )
     })
 
+    it('sequences the actions with id and nextId (null on the last change)', async () => {
+      await documentService.saveContributions('doc-1', changes, 'user-1234')
+
+      expect(mockCreateAction).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          parameters: expect.objectContaining({ id: 0, nextId: 1 }),
+        }),
+      )
+      expect(mockCreateAction).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          parameters: expect.objectContaining({ id: 1, nextId: null }),
+        }),
+      )
+    })
+
     it('flags the document as waiting for the graph round-trip', async () => {
       await documentService.saveContributions('doc-1', changes, 'user-1234')
 
