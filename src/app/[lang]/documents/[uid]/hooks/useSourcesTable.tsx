@@ -95,6 +95,11 @@ export const useSourcesTable = () => {
   // read-only: rows can't be selected and actions can't be triggered.
   const isFrozen = selectedDocument?.isFrozen ?? false
   const [data] = useState<DocumentRecord[]>(selectedDocument?.records || [])
+  // The user has any selectable row only if the document isn't frozen and they can
+  // unmerge at least one record — drives the toolbar "select all" checkbox.
+  const hasSelectableRow =
+    !isFrozen &&
+    data.some((record) => ability.can(PermissionAction.unmerge, record))
   const typeOptions = useMemo(() => createSourceTypeTree(_), [_])
   const columns = useMemo<
     MRT_ColumnDef<DocumentRecord>[]
@@ -373,7 +378,7 @@ export const useSourcesTable = () => {
       enableRowSelection: (row) => {
         return !isFrozen && ability.can(PermissionAction.unmerge, row.original)
       },
-      muiSelectAllCheckboxProps: { disabled: isFrozen },
+      muiSelectAllCheckboxProps: { disabled: !hasSelectableRow },
       positionToolbarAlertBanner: 'bottom',
       onGlobalFilterChange: setGlobalFilter,
       renderTopToolbarCustomActions: ({ table }) => {
@@ -453,7 +458,7 @@ export const useSourcesTable = () => {
         globalFilter,
       },
     }),
-    [ability, action, columns, data, globalFilter, isFrozen],
+    [ability, action, columns, data, globalFilter, isFrozen, hasSelectableRow],
   )
 
   const table = useDocumentTable(tableOptions)

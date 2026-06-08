@@ -6,12 +6,38 @@ import { createTheme, ThemeProvider } from '@mui/material/styles'
 import '@testing-library/jest-dom'
 import { fireEvent, render, screen } from '@testing-library/react'
 import Sources from './Sources'
+import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
+import { PermissionAction, PermissionSubject } from '@/types/Permission'
+import { useSession } from 'next-auth/react'
 
 // Mock Zustand store
 jest.mock('@/stores/global_store', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
+
+jest.mock('next-auth/react', () => ({
+  __esModule: true,
+  useSession: jest.fn(),
+}))
+
+// Global editor role — grants update on the document, so the (permission-gated)
+// "compare sources" button renders.
+const authz = makeAuthzContext({
+  roleAssignments: [
+    makeAssignment(
+      'document_editor',
+      [
+        {
+          action: PermissionAction.update,
+          subject: PermissionSubject.Document,
+          fields: ['titles', 'abstracts', 'contributors'],
+        },
+      ],
+      [],
+    ),
+  ],
+})
 
 // Mock MUI Theme
 jest.mock('@mui/material/styles', () => ({
@@ -77,6 +103,8 @@ jest.mock('@/types/BibliographicPlatform', () => {
 const mockState = {
   document: {
     selectedDocument: {
+      // Lets CASL detect the subject as Document so the global editor role matches.
+      authzProperties: { __type: 'Document' },
       records: [
         {
           platform: BibliographicPlatform.HAL,
@@ -102,10 +130,13 @@ const mockState = {
 
 describe('Sources Component', () => {
   beforeEach(() => {
+    jest.clearAllMocks()
     ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
       selector(mockState),
     )
-    jest.clearAllMocks()
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { authz } },
+    })
   })
 
   const theme = createTheme({
