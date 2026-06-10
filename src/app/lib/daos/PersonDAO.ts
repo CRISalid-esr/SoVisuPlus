@@ -9,6 +9,8 @@ import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
 import { ResearchUnitDAO } from '@/lib/daos/ResearchUnitDAO'
+import { SourcePersonDAO } from '@/lib/daos/SourcePersonDAO'
+import { SourcePerson } from '@/types/SourcePerson'
 import removeAccents from 'remove-accents'
 import { ORCIDIdentifier, OrcidOAuthData } from '@/types/OrcidIdentifier'
 import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
@@ -82,6 +84,8 @@ export class PersonDAO extends AbstractDAO {
 
           await this.upsertMemberships(person.memberships, dbPerson.id)
 
+          await this.upsertRecords(person.records, dbPerson.id)
+
           const dbPersonWithRelations =
             await this.prismaClient.person.findUniqueOrThrow({
               where: { uid: person.uid },
@@ -96,6 +100,11 @@ export class PersonDAO extends AbstractDAO {
                         descriptions: true,
                       },
                     },
+                  },
+                },
+                records: {
+                  include: {
+                    identifiers: true,
                   },
                 },
               },
@@ -173,6 +182,21 @@ export class PersonDAO extends AbstractDAO {
           positionCode: membership.positionCode,
         },
       })
+    }
+  }
+
+  /**
+   * Upsert the source-person records of a given person
+   * @param records - List of source persons to upsert
+   * @param personId - The ID of the person in the database
+   */
+  private async upsertRecords(
+    records: SourcePerson[],
+    personId: number,
+  ): Promise<void> {
+    const sourcePersonDAO = new SourcePersonDAO()
+    for (const record of records) {
+      await sourcePersonDAO.createOrUpdateSourcePerson(record, personId)
     }
   }
 
@@ -478,6 +502,11 @@ export class PersonDAO extends AbstractDAO {
           },
         },
         identifiers: true,
+        records: {
+          include: {
+            identifiers: true,
+          },
+        },
       },
       orderBy: {
         lastName: 'asc',
@@ -513,6 +542,11 @@ export class PersonDAO extends AbstractDAO {
             },
           },
           identifiers: true,
+          records: {
+            include: {
+              identifiers: true,
+            },
+          },
         },
       })
 
@@ -553,6 +587,11 @@ export class PersonDAO extends AbstractDAO {
           },
         },
         identifiers: true,
+        records: {
+          include: {
+            identifiers: true,
+          },
+        },
       },
     })
 
@@ -576,6 +615,11 @@ export class PersonDAO extends AbstractDAO {
             },
           },
           identifiers: true,
+          records: {
+            include: {
+              identifiers: true,
+            },
+          },
         },
       })
 
@@ -632,6 +676,11 @@ export class PersonDAO extends AbstractDAO {
             },
           },
           identifiers: true,
+          records: {
+            include: {
+              identifiers: true,
+            },
+          },
         },
       })
 

@@ -68,6 +68,10 @@ jest.mock('@prisma/client', () => {
       update: jest.fn(),
       deleteMany: jest.fn(),
     },
+    sourcePerson: {
+      upsert: jest.fn().mockResolvedValue({ id: 1 }),
+      update: jest.fn(),
+    },
     publicationIdentifier: {
       createManyAndReturn: jest.fn(),
       findMany: jest.fn(),
@@ -313,7 +317,7 @@ describe('DocumentDAO', () => {
             identifiers: true,
             contributions: {
               include: {
-                person: true,
+                person: { include: { identifiers: true } },
               },
             },
             journal: true,
@@ -343,6 +347,11 @@ describe('DocumentDAO', () => {
                         descriptions: true,
                       },
                     },
+                  },
+                },
+                records: {
+                  include: {
+                    identifiers: true,
                   },
                 },
               },
@@ -641,33 +650,13 @@ describe('DocumentDAO', () => {
           create: [
             {
               person: {
-                connectOrCreate: {
-                  create: {
-                    name: 'Matthieu Dupond',
-                    source: 'hal',
-                    sourceId: 'hal-001-uid',
-                    uid: 'hal-001-uid',
-                  },
-                  where: {
-                    uid: 'hal-001-uid',
-                  },
-                },
+                connect: { uid: 'hal-001-uid' },
               },
               role: 'author',
             },
             {
               person: {
-                connectOrCreate: {
-                  create: {
-                    name: 'Laura Dupuis',
-                    source: 'hal',
-                    sourceId: 'hal-002-uid',
-                    uid: 'hal-002-uid',
-                  },
-                  where: {
-                    uid: 'hal-002-uid',
-                  },
-                },
+                connect: { uid: 'hal-002-uid' },
               },
               role: 'teacher',
             },
@@ -706,33 +695,13 @@ describe('DocumentDAO', () => {
           create: [
             {
               person: {
-                connectOrCreate: {
-                  create: {
-                    name: 'Matthieu Dupond',
-                    source: 'hal',
-                    sourceId: 'hal-001-uid',
-                    uid: 'hal-001-uid',
-                  },
-                  where: {
-                    uid: 'hal-001-uid',
-                  },
-                },
+                connect: { uid: 'hal-001-uid' },
               },
               role: 'author',
             },
             {
               person: {
-                connectOrCreate: {
-                  create: {
-                    name: 'Laura Dupuis',
-                    source: 'hal',
-                    sourceId: 'hal-002-uid',
-                    uid: 'hal-002-uid',
-                  },
-                  where: {
-                    uid: 'hal-002-uid',
-                  },
-                },
+                connect: { uid: 'hal-002-uid' },
               },
               role: 'teacher',
             },
@@ -1049,6 +1018,11 @@ describe('DocumentDAO', () => {
                     },
                   },
                 },
+                records: {
+                  include: {
+                    identifiers: true,
+                  },
+                },
               },
             },
           },
@@ -1058,7 +1032,7 @@ describe('DocumentDAO', () => {
             identifiers: true,
             contributions: {
               include: {
-                person: true,
+                person: { include: { identifiers: true } },
               },
             },
             journal: true,
@@ -1167,6 +1141,11 @@ describe('DocumentDAO', () => {
                     },
                   },
                 },
+                records: {
+                  include: {
+                    identifiers: true,
+                  },
+                },
               },
             },
           },
@@ -1176,7 +1155,7 @@ describe('DocumentDAO', () => {
             identifiers: true,
             contributions: {
               include: {
-                person: true,
+                person: { include: { identifiers: true } },
               },
             },
             journal: true,
@@ -1280,6 +1259,11 @@ describe('DocumentDAO', () => {
                     },
                   },
                 },
+                records: {
+                  include: {
+                    identifiers: true,
+                  },
+                },
               },
             },
           },
@@ -1289,7 +1273,7 @@ describe('DocumentDAO', () => {
             identifiers: true,
             contributions: {
               include: {
-                person: true,
+                person: { include: { identifiers: true } },
               },
             },
             journal: true,
@@ -1397,6 +1381,11 @@ describe('DocumentDAO', () => {
                     },
                   },
                 },
+                records: {
+                  include: {
+                    identifiers: true,
+                  },
+                },
               },
             },
           },
@@ -1406,7 +1395,7 @@ describe('DocumentDAO', () => {
             identifiers: true,
             contributions: {
               include: {
-                person: true,
+                person: { include: { identifiers: true } },
               },
             },
             journal: true,
@@ -1612,6 +1601,11 @@ describe('DocumentDAO', () => {
                     },
                   },
                 },
+                records: {
+                  include: {
+                    identifiers: true,
+                  },
+                },
               },
             },
           },
@@ -1621,7 +1615,7 @@ describe('DocumentDAO', () => {
             identifiers: true,
             contributions: {
               include: {
-                person: true,
+                person: { include: { identifiers: true } },
               },
             },
             journal: true,
@@ -1723,6 +1717,11 @@ describe('DocumentDAO', () => {
                       },
                     },
                   },
+                  records: {
+                    include: {
+                      identifiers: true,
+                    },
+                  },
                 },
               },
             },
@@ -1732,7 +1731,7 @@ describe('DocumentDAO', () => {
               identifiers: true,
               contributions: {
                 include: {
-                  person: true,
+                  person: { include: { identifiers: true } },
                 },
               },
               journal: true,

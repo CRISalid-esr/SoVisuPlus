@@ -12,6 +12,7 @@ import {
 import { Document, DocumentType } from '@/types/Document'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PersonDAO } from './PersonDAO'
+import { SourcePersonDAO } from '@/lib/daos/SourcePersonDAO'
 import {
   BibliographicPlatform,
   getBibliographicPlatformDbValue,
@@ -101,6 +102,11 @@ export class DocumentDAO extends AbstractDAO {
                         },
                       },
                     },
+                    records: {
+                      include: {
+                        identifiers: true,
+                      },
+                    },
                   },
                 },
               },
@@ -108,7 +114,9 @@ export class DocumentDAO extends AbstractDAO {
             records: {
               include: {
                 identifiers: true,
-                contributions: { include: { person: true } },
+                contributions: {
+                  include: { person: { include: { identifiers: true } } },
+                },
                 journal: true,
               },
             },
@@ -204,6 +212,11 @@ export class DocumentDAO extends AbstractDAO {
                         },
                       },
                     },
+                    records: {
+                      include: {
+                        identifiers: true,
+                      },
+                    },
                   },
                 },
               },
@@ -211,7 +224,9 @@ export class DocumentDAO extends AbstractDAO {
             records: {
               include: {
                 identifiers: true,
-                contributions: { include: { person: true } },
+                contributions: {
+                  include: { person: { include: { identifiers: true } } },
+                },
                 journal: true,
               },
             },
@@ -300,7 +315,9 @@ export class DocumentDAO extends AbstractDAO {
             records: {
               include: {
                 identifiers: true,
-                contributions: { include: { person: true } },
+                contributions: {
+                  include: { person: { include: { identifiers: true } } },
+                },
                 journal: true,
               },
             },
@@ -465,8 +482,18 @@ export class DocumentDAO extends AbstractDAO {
         },
       })
 
+      const sourcePersonDAO = new SourcePersonDAO()
+
       for (const record of records) {
         try {
+          // Ensure each source contributor exists with its identifiers before
+          // connecting it to the document record's contributions.
+          for (const contribution of record.contributions) {
+            await sourcePersonDAO.createOrUpdateSourcePerson(
+              contribution.person,
+            )
+          }
+
           const documentRecord = await this.prismaClient.documentRecord.upsert({
             where: {
               uid: record.uid,
@@ -496,15 +523,7 @@ export class DocumentDAO extends AbstractDAO {
                 create: record.contributions.map((contribution) => ({
                   role: LocRelatorHelper.toLabel(contribution.role),
                   person: {
-                    connectOrCreate: {
-                      where: { uid: contribution.person.uid },
-                      create: {
-                        uid: contribution.person.uid,
-                        name: contribution.person.name,
-                        source: contribution.person.source,
-                        sourceId: contribution.person.sourceId,
-                      },
-                    },
+                    connect: { uid: contribution.person.uid },
                   },
                 })),
               },
@@ -542,15 +561,7 @@ export class DocumentDAO extends AbstractDAO {
                 create: record.contributions.map((contribution) => ({
                   role: LocRelatorHelper.toLabel(contribution.role),
                   person: {
-                    connectOrCreate: {
-                      where: { uid: contribution.person.uid },
-                      create: {
-                        uid: contribution.person.uid,
-                        name: contribution.person.name,
-                        source: contribution.person.source,
-                        sourceId: contribution.person.sourceId,
-                      },
-                    },
+                    connect: { uid: contribution.person.uid },
                   },
                 })),
               },
@@ -1027,6 +1038,11 @@ export class DocumentDAO extends AbstractDAO {
                     },
                   },
                 },
+                records: {
+                  include: {
+                    identifiers: true,
+                  },
+                },
               },
             },
           },
@@ -1036,7 +1052,7 @@ export class DocumentDAO extends AbstractDAO {
             identifiers: true,
             contributions: {
               include: {
-                person: true,
+                person: { include: { identifiers: true } },
               },
             },
             journal: true,
@@ -1222,6 +1238,11 @@ export class DocumentDAO extends AbstractDAO {
                     },
                   },
                 },
+                records: {
+                  include: {
+                    identifiers: true,
+                  },
+                },
               },
             },
           },
@@ -1229,7 +1250,9 @@ export class DocumentDAO extends AbstractDAO {
         records: {
           include: {
             identifiers: true,
-            contributions: { include: { person: true } },
+            contributions: {
+              include: { person: { include: { identifiers: true } } },
+            },
             journal: true,
           },
         },

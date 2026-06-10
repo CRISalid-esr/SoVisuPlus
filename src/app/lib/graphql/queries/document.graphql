@@ -68,6 +68,16 @@ query Documents($where: DocumentWhere) {
           }
           types
         }
+        recorded_by {
+          uid
+          name
+          source
+          source_identifier
+          identifiers {
+            type
+            value
+          }
+        }
       }
     }
     publishedInConnection {
@@ -116,6 +126,10 @@ query Documents($where: DocumentWhere) {
           name
           source
           source_identifier
+          identifiers {
+            type
+            value
+          }
         }
       }
       has_identifiers {

@@ -13,6 +13,8 @@ import { IAgent, IAgentJson } from '@/types/IAgent'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { PersonIdentifier as DbPersonIdentifier } from '@prisma/client'
 import { PersonMembership } from '@/types/PersonMembership'
+import { SourcePerson, SourcePersonJson } from '@/types/SourcePerson'
+import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
 import removeAccents from 'remove-accents'
 import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
 
@@ -26,6 +28,7 @@ interface PersonJson extends IAgentJson {
   lastName?: string
   identifiers?: Array<PersonIdentifierJson | ORCIDIdentifierJson>
   memberships?: PersonMembership[]
+  records: SourcePersonJson[]
 }
 
 type IdentifierHydrationJson = PersonIdentifierJson | ORCIDIdentifierJson
@@ -44,6 +47,7 @@ class Person implements IAgent, Authorizable {
     public memberships: PersonMembership[] = [],
     public type: 'person' = 'person',
     public slug: string | null = null,
+    public records: SourcePerson[] = [],
   ) {
     this.validateIdentifiers(identifiers)
     this.normalizedName = removeAccents(this.displayNameGuard().toLowerCase())
@@ -74,6 +78,30 @@ class Person implements IAgent, Authorizable {
 
   getIdentifiers(): PersonIdentifier[] {
     return this.identifiers
+  }
+
+  /**
+   * Identifiers to display in the UI. Returns the person's own identifiers
+   * when present; otherwise falls back to the deduplicated identifiers of the
+   * source-person records (deduplicated on type + value).
+   */
+  displayIdentifiers(): Array<PersonIdentifier | SourcePersonIdentifier> {
+    if (this.identifiers.length > 0) {
+      return this.identifiers
+    }
+
+    const seen = new Set<string>()
+    const deduped: SourcePersonIdentifier[] = []
+    for (const record of this.records) {
+      for (const identifier of record.getIdentifiers()) {
+        const key = `${identifier.type}:${identifier.value}`
+        if (!seen.has(key)) {
+          seen.add(key)
+          deduped.push(identifier)
+        }
+      }
+    }
+    return deduped
   }
 
   setIdentifiers(value: PersonIdentifier[]) {
@@ -135,6 +163,7 @@ class Person implements IAgent, Authorizable {
         : [],
       'person',
       person.slug,
+      person.records.map((record) => SourcePerson.fromDbSourcePerson(record)),
     )
   }
 
@@ -182,6 +211,7 @@ class Person implements IAgent, Authorizable {
       json.memberships ?? [],
       'person',
       json.slug ?? null,
+      json.records.map((record) => SourcePerson.fromJson(record)),
     )
   }
 
