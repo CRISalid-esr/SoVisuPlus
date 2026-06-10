@@ -35,6 +35,7 @@ model Person {
   user           User?
   contributions  Contribution[]
   memberships    Membership[]
+  records        SourcePerson[]
 }
 
 model Membership {
@@ -181,12 +182,37 @@ enum HalSubmitType {
 }
 
 model SourcePerson {
-  id                 Int                  @id @default(autoincrement())
-  uid                String               @unique
+  id                 Int                      @id @default(autoincrement())
+  uid                String                   @unique
   name               String
   source             String
   sourceId           String?
+  identifiers        SourcePersonIdentifier[]
   SourceContribution SourceContribution[]
+  person             Person?                  @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId           Int?
+}
+
+enum SourcePersonIdentifierType {
+  openalex
+  idref
+  orcid
+  idhals
+  idhali
+  isni
+  viaf
+  googlescholar
+  researcherid
+}
+
+model SourcePersonIdentifier {
+  id             Int                        @id @default(autoincrement())
+  type           SourcePersonIdentifierType
+  value          String
+  sourcePerson   SourcePerson               @relation(fields: [sourcePersonId], references: [id], onDelete: Cascade)
+  sourcePersonId Int
+
+  @@unique([type, value]) // The same identifer should not be used twice
 }
 
 model SourceContribution {

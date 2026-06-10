@@ -1,7 +1,12 @@
 import { AbstractGraphQLClient } from './AbstractGraphQLClient'
 import { Document, DocumentState } from '@/types/Document'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
-import { GraphPersonResponse, PersonGraphQLClient } from './PersonGraphQLClient'
+import {
+  GraphPersonResponse,
+  GraphSourcePersonIdentifierResponse,
+  GraphSourcePersonResponse,
+  PersonGraphQLClient,
+} from './PersonGraphQLClient'
 import { Literal } from '@/types/Literal'
 import { Contribution } from '@/types/Contribution'
 import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
@@ -13,22 +18,16 @@ import { JournalIdentifier } from '@/types/JournalIdentifier'
 import { SourceContribution } from '@/types/SourceContribution'
 import { SourceJournal } from '@/types/SourceJournal'
 import { SourcePerson } from '@/types/SourcePerson'
+import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
 import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
-
-interface GraphSourcePersonResponse {
-  uid: string
-  name: string
-  source: string
-  source_identifier: string | null
-}
 
 interface GraphAuthorityOrganization {
   uid: string
   display_names: string[]
   places: {
-    latitude: number,
+    latitude: number
     longitude: number
   }[]
   identifiers: {
@@ -225,7 +224,12 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
               }
               return idsAcc
             }, [])
-            return new AuthorityOrganization(org.uid, org.display_names, org.places, ids)
+            return new AuthorityOrganization(
+              org.uid,
+              org.display_names,
+              org.places,
+              ids,
+            )
           })
 
           acc.push(new Contribution(person, locRelators, organizations))
@@ -262,6 +266,25 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
                     contributor.name,
                     contributor.source,
                     contributor.source_identifier,
+                    contributor.identifiers
+                      .map(
+                        (identifier: GraphSourcePersonIdentifierResponse) => {
+                          try {
+                            return new SourcePersonIdentifier(
+                              SourcePersonIdentifier.typeFromString(
+                                identifier.type,
+                              ),
+                              identifier.value,
+                            )
+                          } catch {
+                            console.warn(
+                              `Unsupported source identifier type for ${identifier.value}: ${identifier.type}`,
+                            )
+                            return null // Skip unsupported identifiers
+                          }
+                        },
+                      )
+                      .filter((identifier) => identifier !== null),
                   )
                   const { role } = sourceContributionData
                   const locRelator = SourceContribution.getRelatorFromKey(role)

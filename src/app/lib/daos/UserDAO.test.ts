@@ -77,6 +77,7 @@ describe('UserDAO', () => {
         email: 'johndoe@myuniversity.com',
         identifiers: [],
         memberships: [],
+        records: [],
       },
       roles: [
         {
@@ -151,6 +152,11 @@ describe('UserDAO', () => {
                     identifiers: true,
                   },
                 },
+              },
+            },
+            records: {
+              include: {
+                identifiers: true,
               },
             },
           },
@@ -246,6 +252,11 @@ describe('UserDAO', () => {
                     external: true,
                   },
                 },
+              },
+            },
+            records: {
+              include: {
+                identifiers: true,
               },
             },
           },

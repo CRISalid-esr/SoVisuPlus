@@ -70,6 +70,7 @@ describe('PersonGraphQLClient', () => {
               last_names: [{ value: 'Doe' }],
             },
           ],
+          recorded_by: [],
         },
       ],
     }
@@ -127,6 +128,7 @@ describe('PersonGraphQLClient', () => {
               last_names: [{ value: 'Smith' }],
             },
           ],
+          recorded_by: [],
         },
       ],
     }

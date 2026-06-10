@@ -84,9 +84,9 @@ describe('DocumentGraphQLClient', () => {
                   display_names: ['Some Organization'],
                   places: [
                     {
-                      latitude:1.23456,
-                      longitude: 98.7654
-                    }
+                      latitude: 1.23456,
+                      longitude: 98.7654,
+                    },
                   ],
                   identifiers: [
                     { type: 'openalex', value: '000054' },
@@ -117,6 +117,7 @@ describe('DocumentGraphQLClient', () => {
                     name: 'John Smith',
                     source: 'somesource',
                     source_identifier: 'source001',
+                    identifiers: [],
                   },
                 },
               ],
@@ -206,9 +207,9 @@ describe('DocumentGraphQLClient', () => {
               ['Some Organization'],
               [
                 {
-                  latitude:1.23456,
-                  longitude: 98.7654
-                }
+                  latitude: 1.23456,
+                  longitude: 98.7654,
+                },
               ],
               [
                 new AuthorityOrganizationIdentifier(
@@ -361,6 +362,7 @@ describe('DocumentGraphQLClient', () => {
                     name: 'John Smith',
                     source: 'somesource',
                     source_identifier: 'source001',
+                    identifiers: [],
                   },
                 },
               ],
@@ -407,6 +409,7 @@ describe('DocumentGraphQLClient', () => {
                     name: 'John Smith',
                     source: 'somesource',
                     source_identifier: 'source001',
+                    identifiers: [],
                   },
                 },
               ],

@@ -17,6 +17,16 @@ query PeopleQuery($where: PersonWhere) {
         value
       }
     }
+    recorded_by {
+      uid
+      name
+      source
+      source_identifier
+      identifiers {
+        type
+        value
+      }
+    }
 
     membershipsConnection {
       edges {

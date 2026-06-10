@@ -30,6 +30,7 @@ import {
   SourceContribution,
   SourceJournal,
   SourcePerson,
+  SourcePersonIdentifier,
   User,
   UserRole,
   UserRoleScope,
@@ -56,7 +57,7 @@ export type AuthorityOrganizationWithRelations = AuthorityOrganization & {
 }
 
 export type SourceContributionWithRelations = SourceContribution & {
-  person: SourcePerson
+  person: SourcePersonWithRelations
 }
 
 export type DocumentRecordWithRelations = DocumentRecord & {
@@ -109,9 +110,14 @@ export type MembershipWithRelations = Membership & {
   researchUnit: ResearchUnitWithRelations
 }
 
+export type SourcePersonWithRelations = SourcePerson & {
+  identifiers: SourcePersonIdentifier[]
+}
+
 export type PersonWithRelations = Person & {
   identifiers: PersonIdentifierWithRelations[]
   memberships: MembershipWithRelations[]
+  records: SourcePersonWithRelations[]
 }
 
 export type UserWithRelations = User & {
