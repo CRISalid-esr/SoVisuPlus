@@ -1,5 +1,6 @@
 'use client'
 import { createTheme, alpha, PaletteOptions } from '@mui/material/styles'
+import { yellow as muiYellow } from '@mui/material/colors'
 import componentsOverride from './overrides'
 import { dark, light, colors } from './palette'
 import breakpoints from './breakpoints'
@@ -21,6 +22,10 @@ const warningTints = (warningMain: string) => ({
   warningOutline: alpha(warningMain, 0.4),
 })
 
+// Amber-yellow used to flag deprecated / "OLD" reference data (e.g. HAL
+// structure results no longer valid). Legible on both light and dark surfaces.
+const warningYellow = muiYellow[800]
+
 // Resolve `warning.main` (MUI fills the defaults) so the tints can derive from it.
 const resolvedWarningMain = (palette: PaletteOptions): string =>
   createTheme({ palette }).palette.warning.main
@@ -32,6 +37,7 @@ const lightTheme = createTheme({
   palette: {
     ...lightPalette,
     ...warningTints(resolvedWarningMain(lightPalette)),
+    warningYellow,
   },
   breakpoints,
   typography,
@@ -42,6 +48,7 @@ const darkTheme = createTheme({
   palette: {
     ...darkPalette,
     ...warningTints(resolvedWarningMain(darkPalette)),
+    warningYellow,
   },
   breakpoints,
   typography,

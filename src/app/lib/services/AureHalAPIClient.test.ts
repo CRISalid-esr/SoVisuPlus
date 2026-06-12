@@ -1,4 +1,8 @@
-import { AureHalAPIClient } from '@/lib/services/AureHalAPIClient'
+import {
+  AureHalAPIClient,
+  formatAuthorStructures,
+  normalizeHalNameQuery,
+} from '@/lib/services/AureHalAPIClient'
 
 describe('AureHalAPIClient', () => {
   const client = new AureHalAPIClient()
@@ -128,12 +132,12 @@ describe('AureHalAPIClient', () => {
     await expect(client.searchAuthors('dupont')).resolves.toEqual(docs)
 
     const calledUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string
-    const decoded = decodeURIComponent(calledUrl)
+    const params = new URL(calledUrl).searchParams
     expect(calledUrl).toContain('https://api.archives-ouvertes.fr/ref/author/')
-    expect(decoded).toContain('q=dupont')
-    expect(decoded).toContain('fullName_s')
-    expect(decoded).toContain('idHal_s')
-    expect(new URL(calledUrl).searchParams.get('sort')).toMatch(/^idHal_s asc/)
+    expect(params.get('q')).toBe('text:dupont AND valid_s:(PREFERRED OR OLD)')
+    expect(params.get('fl')).toContain('fullName_s')
+    expect(params.get('fl')).toContain('idHal_s')
+    expect(params.get('sort')).toMatch(/^valid_s desc/)
   })
 
   it('searchAuthors returns [] when docs is empty', async () => {
@@ -189,5 +193,123 @@ describe('AureHalAPIClient', () => {
     await expect(client.searchStructures('lab')).rejects.toThrow(
       /AureHalAPIClient\.searchStructures: HTTP 500/,
     )
+  })
+
+  it('searchAuthorSuggestions normalises the display name (accents/hyphens stripped)', async () => {
+    const docs = [{ fullName_s: 'Élodie Le-Goff' }]
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ response: { docs } }),
+    })
+
+    await expect(
+      client.searchAuthorSuggestions('Élodie Le-Goff'),
+    ).resolves.toEqual(docs)
+
+    const params = new URL(
+      (global.fetch as jest.Mock).mock.calls[0][0] as string,
+    ).searchParams
+    expect(params.get('q')).toBe(
+      'text:Elodie Le Goff AND valid_s:(PREFERRED OR OLD)',
+    )
+  })
+
+  it('searchAuthorSuggestions returns [] without fetching when normalised name too short', async () => {
+    await expect(client.searchAuthorSuggestions('é-')).resolves.toEqual([])
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it('getAuthorStructures returns null without fetching when a required field is missing', async () => {
+    await expect(
+      client.getAuthorStructures('Jean', '', 'univ.fr'),
+    ).resolves.toBeNull()
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it('getAuthorStructures formats org entries (orgName[1], addrLine, orgName[0])', async () => {
+    const response = {
+      response: {
+        result: {
+          org: [
+            {
+              orgName: ['LS2N', 'Laboratoire des Sciences du Numérique'],
+              desc: { address: { addrLine: 'Nantes', country: '' } },
+            },
+            { orgName: ['CNRS', 'Centre National'] },
+            { orgName: 'IRD' },
+          ],
+        },
+      },
+    }
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue(response),
+    })
+
+    await expect(
+      client.getAuthorStructures('Jean', 'Dupont', 'univ.fr'),
+    ).resolves.toBe(
+      'Laboratoire des Sciences du Numérique (Nantes). Centre National (CNRS). IRD',
+    )
+
+    const calledUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string
+    const decoded = decodeURIComponent(calledUrl)
+    expect(calledUrl).toContain(
+      'https://api.archives-ouvertes.fr/search/authorstructure/',
+    )
+    expect(decoded).toContain('firstName_t=Jean')
+    expect(decoded).toContain('lastName_t=Dupont')
+    expect(decoded).toContain('email=univ.fr')
+  })
+
+  it('getAuthorPublicationCount returns null without fetching when an id is missing', async () => {
+    await expect(client.getAuthorPublicationCount('42', '')).resolves.toBeNull()
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it('getAuthorPublicationCount queries authIdFormPerson_s and returns numFound', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ response: { numFound: 7 } }),
+    })
+
+    await expect(client.getAuthorPublicationCount('42', '99')).resolves.toBe(7)
+
+    const decoded = decodeURIComponent(
+      (global.fetch as jest.Mock).mock.calls[0][0] as string,
+    )
+    expect(decoded).toContain('q=authIdFormPerson_s:42-99')
+  })
+
+  it('getAuthorPublicationCount defaults to 0 when numFound is absent', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ response: {} }),
+    })
+    await expect(client.getAuthorPublicationCount('42', '99')).resolves.toBe(0)
+  })
+})
+
+describe('normalizeHalNameQuery', () => {
+  it('strips diacritics, hyphens and special characters, collapsing spaces', () => {
+    expect(normalizeHalNameQuery('  Élodie  Le-Goff (épse) ')).toBe(
+      'Elodie Le Goff epse',
+    )
+  })
+})
+
+describe('formatAuthorStructures', () => {
+  it('uses orgName[0] alone when there is no addrLine nor orgName[1]', () => {
+    expect(formatAuthorStructures([{ orgName: 'IRD' }])).toBe('IRD')
+  })
+
+  it('skips orgs without an orgName and joins with a point', () => {
+    expect(
+      formatAuthorStructures([
+        { orgName: [] as unknown as string[] },
+        { orgName: 'IRD' },
+        { orgName: ['CNRS', 'Centre'] },
+      ]),
+    ).toBe('IRD. Centre (CNRS)')
   })
 })

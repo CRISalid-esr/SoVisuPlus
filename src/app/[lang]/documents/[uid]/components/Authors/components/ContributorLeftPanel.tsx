@@ -9,6 +9,7 @@ import { computeContributionStatus } from '../lib/contributionStatus'
 import ContributionStatusChip from './ContributionStatusChip'
 import IdentifierIconList from './IdentifierIconList'
 import HalAuthorAutocomplete from './HalAuthorAutocomplete'
+import HalProfileSuggestions from './HalProfileSuggestions'
 import RoleMultiSelect from './RoleMultiSelect'
 
 interface ContributorLeftPanelProps {
@@ -31,12 +32,24 @@ const ContributorLeftPanel = ({
   onRemove,
 }: ContributorLeftPanelProps) => {
   const status = computeContributionStatus(contribution)
-  const autoShow = status === 'identified' || status === 'not_identified'
-  const [showSearch, setShowSearch] = useState(autoShow)
-  const isWarningBox = status === 'not_identified'
-  // No pen for 'not identified' (its search is always shown); none in read-only.
-  const showPen = !readOnly && status !== 'not_identified'
-  const searchVisible = !readOnly && showSearch
+  const isNotIdentified = status === 'not_identified'
+  const isNotAligned = status === 'not_aligned'
+  // A row with no person uid is fresh-added (always starts 'Not identified') or was
+  // detached. A fresh 'Not identified' row shows the autocomplete so the user can pick
+  // a HAL profile; once one is selected it becomes identified/aligned and behaves
+  // exactly like a baseline contributor (no autocomplete, no pen). Only 'Not aligned'
+  // rows keep the pen to show/hide the autocomplete.
+  const isNew = contribution.personUid === null
+
+  const [showSearch, setShowSearch] = useState(false)
+  const showPen = !readOnly && isNotAligned
+  // Autocomplete: shown open for a fresh 'Not identified' row; pen-toggled for
+  // 'Not aligned'. Nothing else shows it.
+  const searchVisible =
+    !readOnly && ((isNew && isNotIdentified) || (isNotAligned && showSearch))
+  // Baseline 'Not identified' rows get the suggestion panel instead.
+  const showSuggestions = !readOnly && !isNew && isNotIdentified
+  const isWarningBox = isNotIdentified
 
   const handleSelectProfile = (doc: AureHalAuthorDoc) => {
     onSelectProfile(doc)
@@ -119,6 +132,14 @@ const ContributorLeftPanel = ({
               onAddContributor={handleAddContributor}
             />
           </Box>
+        )}
+
+        {showSuggestions && (
+          <HalProfileSuggestions
+            displayName={contribution.displayName}
+            disabled={disabled}
+            onConfirm={onSelectProfile}
+          />
         )}
 
         {readOnly ? (

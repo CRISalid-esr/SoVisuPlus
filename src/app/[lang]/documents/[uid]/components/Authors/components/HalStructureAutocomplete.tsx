@@ -65,7 +65,6 @@ const HalStructureAutocomplete = ({
       isOptionEqualToValue={() => false}
       renderOption={(props, doc) => {
         const name = doc.name_s || doc.label_s || ''
-        const hasRor = Boolean(doc.ror_s && doc.ror_s.length > 0)
         const validityStyle = structureValidityStyle(doc)
         const inlineIds = orderedAffiliationIdentifiers(
           halStructureToAffiliation(doc),
@@ -82,8 +81,8 @@ const HalStructureAutocomplete = ({
               <Typography
                 component='span'
                 sx={{
-                  color: hasRor ? 'primary.main' : validityStyle.color,
-                  fontWeight: hasRor ? 700 : validityStyle.fontWeight,
+                  color: validityStyle.color,
+                  fontWeight: validityStyle.fontWeight,
                 }}
               >
                 {name}

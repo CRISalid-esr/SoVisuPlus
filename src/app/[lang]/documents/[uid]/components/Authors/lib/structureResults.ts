@@ -2,8 +2,8 @@ import { AureHalStructureDoc } from '@/lib/services/AureHalAPIClient'
 
 const VALID_RANK: Record<string, number> = {
   VALID: 0,
-  INCOMING: 1,
-  OLD: 2,
+  OLD: 1,
+  INCOMING: 2,
 }
 
 const validRank = (doc: AureHalStructureDoc): number =>
@@ -20,7 +20,7 @@ export function countStructureIdentifiers(doc: AureHalStructureDoc): number {
 }
 
 /**
- * Order HAL structure results: by validity (VALID, INCOMING, OLD), then results
+ * Order HAL structure results: by validity (VALID, OLD, INCOMING), then results
  * with a ROR first, then by descending identifier count.
  */
 export function orderStructureDocs(
@@ -49,7 +49,7 @@ export function structureValidityStyle(doc: AureHalStructureDoc): {
     case 'INCOMING':
       return { color: 'warning.dark', fontWeight: 700 }
     case 'OLD':
-      return { color: 'text.disabled', fontWeight: 400 }
+      return { color: 'warningYellow', fontWeight: 400 }
     default:
       return { color: 'text.primary', fontWeight: 400 }
   }

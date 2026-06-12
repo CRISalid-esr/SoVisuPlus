@@ -22,10 +22,78 @@ export type AureHalAuthorDoc = {
   lastName_s?: string
   middleName_s?: string
   fullName_s: string
+  label_s?: string
   orcidId_s?: string[]
   emailDomain_s?: string[]
   idHal_s?: string
   idrefId_s?: string[]
+}
+
+/** One organisation entry from /search/authorstructure (an author's affiliations). */
+export type AureHalOrg = {
+  idno?: string | string[]
+  orgName: string | string[]
+  date?: string | string[]
+  desc?: {
+    address?: { addrLine?: string; country?: string }
+    ref?: string
+  }
+  listRelation?: { relation?: string | string[] }
+}
+
+export type AureHalAuthorStructureResponse = {
+  response?: { result?: { org?: AureHalOrg[] } }
+}
+
+export type AureHalPublicationCountResponse = {
+  response?: { numFound?: number }
+}
+
+/**
+ * Normalise a contributor display name into a HAL free-text query token: strip
+ * diacritics and replace hyphens / other special characters with spaces. Used to
+ * build the `text:` clause of the author-suggestion search.
+ */
+export function normalizeHalNameQuery(name: string): string {
+  return (name ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // drop combining diacritics
+    .replace(/[^a-zA-Z0-9\s]/g, ' ') // drop hyphens & other special chars
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/**
+ * Build the single "affiliations" display string for an author from HAL
+ * `/search/authorstructure` org entries. For each org: use `orgName[1]` if present
+ * else `orgName[0]`; append `(addrLine)` if present, otherwise `(orgName[0])` when
+ * `orgName[1]` was used. Orgs are joined with '. '.
+ */
+export function formatAuthorStructures(orgs: AureHalOrg[]): string {
+  return orgs
+    .map(formatAuthorOrg)
+    .filter((entry): entry is string => Boolean(entry))
+    .join('. ')
+}
+
+function formatAuthorOrg(org: AureHalOrg): string | null {
+  const names = Array.isArray(org.orgName)
+    ? org.orgName
+    : org.orgName != null
+      ? [org.orgName]
+      : []
+  const primary = names[1] ?? names[0]
+  if (!primary) return null
+
+  const addrLine = org.desc?.address?.addrLine
+  let parenthetical: string | null = null
+  if (addrLine) {
+    parenthetical = addrLine
+  } else if (names[1] != null && names[0] != null && names[0] !== names[1]) {
+    parenthetical = names[0]
+  }
+
+  return parenthetical ? `${primary} (${parenthetical})` : primary
 }
 
 /** A HAL structure-reference doc as returned by /ref/structure (fields we consume). */
@@ -116,29 +184,104 @@ export class AureHalAPIClient {
   }
 
   /**
-   * Search HAL author profiles by free text. Backs the "Search in HAL" contributor
-   * autocomplete. Returns the raw HAL docs (empty array if fewer than 2 chars).
+   * Run a HAL author-reference search for a free-text token. The token is wrapped
+   * in `text:<token> AND valid_s:(PREFERRED OR OLD)` and results are sorted with
+   * valid (PREFERRED) profiles first. Shared by the autocomplete and the
+   * name-based profile suggestions.
    */
-  async searchAuthors(query: string): Promise<AureHalAuthorDoc[]> {
-    const normalized = query?.trim() ?? ''
-    if (normalized.length < AUREHAL_MIN_QUERY_LENGTH) return []
-
+  private async authorSearch(queryText: string): Promise<AureHalAuthorDoc[]> {
     const url = new URL(`${this.AUREHAL_API_BASE_URL}/ref/author/`)
-    url.searchParams.set('q', normalized)
+    url.searchParams.set(
+      'q',
+      `text:${queryText} AND valid_s:(PREFERRED OR OLD)`,
+    )
     url.searchParams.set(
       'fl',
       'person_i,form_i,firstName_s,lastName_s,middleName_s,fullName_s,orcidId_s,emailDomain_s,idHal_s,idrefId_s',
     )
     url.searchParams.set(
       'sort',
-      'idHal_s asc, orcidId_s asc,idrefId_s asc,emailDomain_s asc,lastName_s asc,firstName_s asc',
+      'valid_s desc,idHal_s asc,orcidId_s asc,idrefId_s asc',
     )
 
     const data = await this.getJson<AureHalAuthorSearchResponse>(
       url.toString(),
-      'AureHalAPIClient.searchAuthors',
+      'AureHalAPIClient.authorSearch',
     )
     return data?.response?.docs ?? []
+  }
+
+  /**
+   * Search HAL author profiles by free text. Backs the "Search in HAL" contributor
+   * autocomplete. Returns the raw HAL docs (empty array if fewer than 2 chars).
+   */
+  async searchAuthors(query: string): Promise<AureHalAuthorDoc[]> {
+    const normalized = query?.trim() ?? ''
+    if (normalized.length < AUREHAL_MIN_QUERY_LENGTH) return []
+    return this.authorSearch(normalized)
+  }
+
+  /**
+   * Search HAL author profiles to suggest a match for a contributor, based on its
+   * display name. The name is normalised (accents, hyphens and special characters
+   * removed) before the search. Returns [] for a too-short normalised name.
+   */
+  async searchAuthorSuggestions(
+    displayName: string,
+  ): Promise<AureHalAuthorDoc[]> {
+    const normalized = normalizeHalNameQuery(displayName)
+    if (normalized.length < AUREHAL_MIN_QUERY_LENGTH) return []
+    return this.authorSearch(normalized)
+  }
+
+  /**
+   * Fetch and format a HAL author's affiliations from /search/authorstructure.
+   * Returns null unless all three required fields (firstName, lastName, email) are
+   * non-empty; otherwise the joined affiliations string (possibly empty).
+   */
+  async getAuthorStructures(
+    firstName: string,
+    lastName: string,
+    email: string,
+  ): Promise<string | null> {
+    const first = firstName?.trim() ?? ''
+    const last = lastName?.trim() ?? ''
+    const mail = email?.trim() ?? ''
+    if (!first || !last || !mail) return null
+
+    const url = new URL(`${this.AUREHAL_API_BASE_URL}/search/authorstructure/`)
+    url.searchParams.set('firstName_t', first)
+    url.searchParams.set('lastName_t', last)
+    url.searchParams.set('email', mail)
+
+    const data = await this.getJson<AureHalAuthorStructureResponse>(
+      url.toString(),
+      'AureHalAPIClient.getAuthorStructures',
+    )
+    return formatAuthorStructures(data?.response?.result?.org ?? [])
+  }
+
+  /**
+   * Fetch a HAL author's number of publications from /search via the
+   * authIdFormPerson_s:<form_i>-<person_i> query. Returns null unless both ids are
+   * present; otherwise the `numFound` count (0 when none).
+   */
+  async getAuthorPublicationCount(
+    formId: string,
+    personId: string,
+  ): Promise<number | null> {
+    const form = formId?.trim() ?? ''
+    const person = personId?.trim() ?? ''
+    if (!form || !person) return null
+
+    const url = new URL(`${this.AUREHAL_API_BASE_URL}/search/`)
+    url.searchParams.set('q', `authIdFormPerson_s:${form}-${person}`)
+
+    const data = await this.getJson<AureHalPublicationCountResponse>(
+      url.toString(),
+      'AureHalAPIClient.getAuthorPublicationCount',
+    )
+    return data?.response?.numFound ?? 0
   }
 
   /**
