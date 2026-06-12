@@ -78,6 +78,7 @@ describe('addDocumentSlice', () => {
               lastName: 'Doe',
               identifiers: [],
               memberships: [],
+              records: [],
               type: 'person',
               slug: null,
               normalizedName: 'jane doe',

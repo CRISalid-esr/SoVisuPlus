@@ -67,6 +67,7 @@ describe('Person', () => {
         },
       ],
       memberships: [],
+      records: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -99,6 +100,7 @@ describe('Person', () => {
       lastName: 'Smith',
       identifiers: [],
       memberships: [],
+      records: [],
       normalizedName: 'alice smith',
       createdAt: new Date(),
       updatedAt: new Date(),

@@ -48,6 +48,7 @@ describe('DocumentRecord type', () => {
             name: 'Mary Dupuis',
             source: 'hal',
             sourceId: 'hal/001',
+            identifiers: [],
           },
         },
       ],

@@ -1,10 +1,15 @@
-import { SourcePerson as DbSourcePerson } from '@prisma/client'
+import { SourcePersonWithRelations as DbSourcePerson } from '@/prisma-schema/extended-client'
+import {
+  SourcePersonIdentifier,
+  SourcePersonIdentifierJson,
+} from '@/types/SourcePersonIdentifier'
 
 export interface SourcePersonJson {
   uid: string
   name: string
   source: string
   sourceId: string | null
+  identifiers: SourcePersonIdentifierJson[]
 }
 
 export class SourcePerson {
@@ -13,10 +18,23 @@ export class SourcePerson {
     public name: string,
     public source: string,
     public sourceId: string | null,
+    private identifiers: SourcePersonIdentifier[] = [],
   ) {}
 
+  getIdentifiers(): SourcePersonIdentifier[] {
+    return this.identifiers
+  }
+
   static fromJson(json: SourcePersonJson): SourcePerson {
-    return new SourcePerson(json.uid, json.name, json.source, json.sourceId)
+    return new SourcePerson(
+      json.uid,
+      json.name,
+      json.source,
+      json.sourceId,
+      (json.identifiers ?? []).map((identifier) =>
+        SourcePersonIdentifier.fromJson(identifier),
+      ),
+    )
   }
 
   static fromDbSourcePerson(sourcePerson: DbSourcePerson): SourcePerson {
@@ -25,6 +43,9 @@ export class SourcePerson {
       sourcePerson.name,
       sourcePerson.source,
       sourcePerson.sourceId,
+      sourcePerson.identifiers.map((identifier) =>
+        SourcePersonIdentifier.fromDB(identifier),
+      ),
     )
   }
 }

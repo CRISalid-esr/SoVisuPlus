@@ -89,6 +89,11 @@ export class UserDAO extends AbstractDAO {
                   },
                 },
               },
+              records: {
+                include: {
+                  identifiers: true,
+                },
+              },
             },
           },
           roles: {

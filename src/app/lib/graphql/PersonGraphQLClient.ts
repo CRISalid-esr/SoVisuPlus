@@ -7,10 +7,25 @@ import { InternalPerson } from '@/types/InternalPerson'
 import { ResearchUnit } from '@/types/ResearchUnit'
 import { Literal } from '@/types/Literal'
 import { researchUnitIdentifierTypeFromString } from '@/types/ResearchUnitIdentifier'
+import { SourcePerson } from '@/types/SourcePerson'
+import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
 
 export interface GraphPersonIdentifier {
   type: string
   value: string
+}
+
+export interface GraphSourcePersonIdentifierResponse {
+  type: string
+  value: string
+}
+
+export interface GraphSourcePersonResponse {
+  uid: string
+  name: string
+  source: string
+  source_identifier: string | null
+  identifiers: GraphSourcePersonIdentifierResponse[]
 }
 
 interface GraphPersonName {
@@ -66,6 +81,7 @@ export interface GraphPersonResponse {
   names: GraphPersonName[]
   membershipsConnection?: GraphMembershipConnection
   employmentsConnection?: GraphMembershipConnection
+  recorded_by: GraphSourcePersonResponse[]
 }
 
 export interface GraphPeopleResponse {
@@ -134,7 +150,7 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
 
   public hydrate(personData: GraphPersonResponse): Person {
     const personType = personData.external ? ExternalPerson : InternalPerson
-    return new personType(
+    const person = new personType(
       personData.uid,
       null,
       personData.display_name,
@@ -178,5 +194,32 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
         positionCode: edge.properties.position_code ?? null,
       })) ?? [],
     )
+
+    person.records = personData.recorded_by.map(
+      (record: GraphSourcePersonResponse) =>
+        new SourcePerson(
+          record.uid,
+          record.name,
+          record.source,
+          record.source_identifier,
+          record.identifiers
+            .map((identifier: GraphSourcePersonIdentifierResponse) => {
+              try {
+                return new SourcePersonIdentifier(
+                  SourcePersonIdentifier.typeFromString(identifier.type),
+                  identifier.value,
+                )
+              } catch {
+                console.warn(
+                  `Unsupported source identifier type for ${identifier.value}: ${identifier.type}`,
+                )
+                return null // Skip unsupported identifiers
+              }
+            })
+            .filter((identifier) => identifier !== null), // Remove null entries
+        ),
+    )
+
+    return person
   }
 }

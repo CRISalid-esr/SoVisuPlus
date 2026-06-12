@@ -22,7 +22,9 @@ import { Trans } from '@lingui/react/macro'
 import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 import { getRuntimeEnv } from '@/utils/runtimeEnv'
 
-const IDENTIFIERS_TO_SHOW: DbPersonIdentifierType[] = [
+// Typed as string[] so it can match both person and source-person identifier
+// type enums (their values overlap and are plain strings).
+const IDENTIFIERS_TO_SHOW: string[] = [
   DbPersonIdentifierType.idhals,
   DbPersonIdentifierType.orcid,
   DbPersonIdentifierType.idref,
@@ -58,7 +60,7 @@ const ContributorIdentityCard = ({
   }
   const identifiersToDisplay = useMemo(() => {
     return person
-      .getIdentifiers()
+      .displayIdentifiers()
       .filter((id) => IDENTIFIERS_TO_SHOW.includes(id.type))
   }, [person])
 
