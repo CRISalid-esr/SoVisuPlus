@@ -71,22 +71,33 @@ Status display (left-side, under the name):
 - Not aligned: info (blue) with an info icon.
 - Not identified: a light-orange background chip with an outlined warning icon.
 
-Beside the status, list identifiers as type-icons with a tooltip showing the value, in order: ORCID, IdRef, IdHAL, Scopus (each only if present). Beside the identifiers, a pen icon button toggles the search-in-HAL autocomplete; when the autocomplete is shown the pen becomes a crossed-out pen (EditOff) with tooltip 'Hide search in HAL autocomplete'. The pen is **not** shown when the status is 'Not identified'.
+Beside the status, list identifiers as type-icons with a tooltip showing the value, in order: ORCID, IdRef, IdHAL, Scopus (each only if present). Beside the identifiers, a pen icon button toggles the search-in-HAL autocomplete; when the autocomplete is shown the pen becomes a crossed-out pen (EditOff) with tooltip 'Hide search in HAL autocomplete'. The pen is shown **only** on 'Not aligned' rows.
 
-### Searching a contributor in HAL
+### Identifying a contributor in HAL — autocomplete vs suggestions
 
-Under the status, a 'Search in HAL' autocomplete searches HAL author profiles. Visibility/box per status:
+A freshly-added contributor (via the 'Add a contributor' / 'Insert contributor here' buttons) always starts 'Not identified' with no person `uid`. While it is still 'Not identified' it shows the search-in-HAL autocomplete so the user can pick a HAL profile; as soon as a profile is selected it becomes identified/aligned and behaves **exactly like a baseline contributor** (no autocomplete, no pen). A row's person `uid` being `null` (fresh-added, or detached via 'Add contributor') is what distinguishes it from a baseline contributor loaded from the document.
 
-- Not identified: always shown, in a box with a light-orange background and orange border.
-- Identified / Identified and aligned / Not aligned: hidden until the pen is clicked; when shown, the box has a light-grey background and a border.
-- In all cases the TextField background equals the body background.
+What is shown under the status, by row and status:
+
+| Row / status                                  | Search-in-HAL autocomplete        | Pen     | Name-based suggestions |
+| --------------------------------------------- | --------------------------------- | ------- | ---------------------- |
+| Not identified, `uid` null (fresh-added)      | **yes** — shown open (orange box) | no      | no                     |
+| Not identified, `uid` set (baseline)          | no                                | no      | **yes** (orange box)   |
+| Identified / Identified and aligned (any row) | no                                | no      | no                     |
+| Not aligned                                   | **yes** — pen-toggled (grey box)  | **yes** | no                     |
+
+So once a contributor is identified or aligned it offers neither autocomplete nor suggestions (it can still be removed via the bin); only a 'Not aligned' row keeps the pen to show/hide the autocomplete.
+
+#### Search-in-HAL autocomplete
+
+Original behaviour. Shown open for a fresh 'Not identified' row (no pen) and pen-toggled for a 'Not aligned' row. The box uses a light-orange background + orange border when 'Not identified', otherwise a light-grey background and border. The TextField background equals the body background.
 
 Behaviour: 350 ms debounce, request from ≥ 2 characters, a spinner shown **in the options** (no small input-adornment spinner) while pending, and the options replaced by an explanatory message when the request is too short, fails, or times out (15 s = failed).
 
 Endpoint:
-`https://api.archives-ouvertes.fr/ref/author/?q=[input]&fl=person_i,form_i,firstName_s,lastName_s,middleName_s,fullName_s,orcidId_s,emailDomain_s,idHal_s,idrefId_s&sort=idHal_s asc, orcidId_s asc,idrefId_s asc,emailDomain_s asc,lastName_s asc,firstName_s asc`
+`https://api.archives-ouvertes.fr/ref/author/?q=text:[input] AND valid_s:(PREFERRED OR OLD)&fl=person_i,form_i,firstName_s,lastName_s,middleName_s,fullName_s,orcidId_s,emailDomain_s,idHal_s,idrefId_s&sort=valid_s desc,idHal_s asc,orcidId_s asc,idrefId_s asc`
 
-Response: `response.docs[]` of HAL profiles. Consumed fields: `fullName_s`, `firstName_s`, `lastName_s`, `orcidId_s`, `emailDomain_s`, `idHal_s`, `idrefId_s` (`person_i`/`form_i` are ignored). `response.numFound` is the count.
+Response: `response.docs[]` of HAL profiles. Consumed fields: `fullName_s`, `firstName_s`, `lastName_s`, `orcidId_s`, `emailDomain_s`, `idHal_s`, `idrefId_s` (`person_i`/`form_i` are ignored here). `response.numFound` is the count.
 
 Options (only once results have loaded; spinner in options while pending):
 
@@ -97,6 +108,24 @@ Options (only once results have loaded; spinner in options while pending):
 Selecting a profile replaces the card data: `fullName_s` → displayName; `firstName_s`/`lastName_s` → the person's first/last name; identifiers replaced by `idHal_s`→`idhals`, `orcidId_s`→`orcid`, `idrefId_s`→`idref` (other ids, incl. `form_i`/`person_i`, ignored); status recomputed; the rest of the doc kept in temporary storage until Save. After selecting, hide the autocomplete and clear the contributor's affiliations.
 
 Selecting **'Add contributor'**: the input text becomes the displayName, all identifiers are removed, status becomes 'Not aligned', and the contribution is **detached** from its person (its `uid` becomes `null`). On an existing contributor this detach is what makes Save emit a **REMOVE** of the old person uid plus an **ADD** with `uid: null` (rather than an UPDATE).
+
+#### Name-based suggestions (baseline 'Not identified' only)
+
+In the autocomplete's place, a baseline 'Not identified' contributor shows a suggestion panel wrapped in an orange box (light-orange background + orange border, same as the not-identified treatment). It auto-fetches matching HAL profiles from the contributor's display name; if there are none, the box is not rendered. The collapsed/expanded layout mirrors the affiliation suggestions: collapsed = a left-aligned bold 'Suggest ([N] matches in HAL)' text button with a chevron end-icon; expanded = a 'HAL suggestion : [N]' subtitle with a right-aligned 'Hide' button, then the result cards (the first card is highlighted with a primary-coloured border).
+
+The query is built from the **normalized** display name — all accents, hyphens and other special characters removed (diacritics stripped, specials replaced by spaces, spaces collapsed). Endpoint (same response shape as the autocomplete):
+`https://api.archives-ouvertes.fr/ref/author/?q=text:[normalized displayName] AND valid_s:(PREFERRED OR OLD)&fl=person_i,form_i,firstName_s,lastName_s,middleName_s,fullName_s,orcidId_s,emailDomain_s,idHal_s,idrefId_s&sort=valid_s desc,idHal_s asc,orcidId_s asc,idrefId_s asc`
+
+Each result card: on the left an Avatar with the person's initials (first letters of `firstName_s`/`middleName_s`/`lastName_s` when present, else of `fullName_s` or `label_s`); in the centre two lines — line 1 = `fullName_s` (or `label_s`) bold, then `idHal_s` (if any), then an ORCID icon (if `orcidId_s`) and an IdRef icon (if `idrefId_s`); line 2 = the profile's affiliations followed by its HAL publication count; on the right a 'Confirm' button that selects the profile (same replacement as selecting an autocomplete profile: maps identifiers, recomputes status, clears affiliations).
+
+Line 2 is enriched **lazily** — only once the panel is expanded and the card is rendered — via two further HAL calls per card, through the backend proxy:
+
+- **Affiliations** — only if the profile's `firstName_s`, `lastName_s` and `emailDomain_s` are all present and non-empty (if `emailDomain_s` is an array, join its values with commas):
+  `https://api.archives-ouvertes.fr/search/authorstructure/?firstName_t=[firstName_s]&lastName_t=[lastName_s]&email=[emailDomain_s]`
+  Response shape: `response.result.org[]`, each org `{ idno?, orgName: string|string[], date?, desc?: { address?: { addrLine?, country }, ref? }, listRelation?: { relation? } }`. For each org build a string: use `orgName[1]` if defined else `orgName[0]`; if `desc.address.addrLine` is defined append it in parentheses, otherwise — when `orgName[1]` was the one used — append `orgName[0]` in parentheses (e.g. `orgName[1] (addrLine)`, `orgName[1] (orgName[0])`, `orgName[0] (addrLine)`, or just `orgName[0]`). Skip orgs with no `orgName`. Join the org strings with '. '.
+- **Publication count** — only if `form_i` and `person_i` are present:
+  `https://api.archives-ouvertes.fr/search/?q=authIdFormPerson_s:[form_i]-[person_i]`
+  Take `response.numFound`: 0 → 'No publication found on HAL'; 1 → '1 publication in HAL'; N → 'N publications in HAL'.
 
 ### Roles
 
@@ -135,7 +164,7 @@ Aligning uses the HAL org's data: the affiliation becomes identified, `name_s` (
 
 The 'Add HAL affiliation' accordion has a light-grey dashed border, a plus start-icon and a bold teal title. Expanding it reveals a HAL structure autocomplete (350 ms debounce, ≥ 2 characters) using the same structure URL as above. On error/timeout, show an error message instead of options; on empty results, show 'Not found'. Selecting an option adds the organization to the affiliations per the display rules above (not persisted until Save).
 
-Results ordering: by `valid_s` VALID → INCOMING → OLD; within the same `valid_s`, ROR-bearing first, then by identifier count (most first). Each result: `name_s` (or `label_s`) — bold + primary-main if it has `ror_s`, then a caption with `acronym_s` (if any) and identifiers joined by a space, each formatted as type in CAPS + ': ' + value (e.g. `ROR: 04ezmf85`), ROR first. (Note this colon form differs from the tag form `ROR 04ezmf85` used on affiliation cards and suggestion boxes.) Colour by `valid_s`: VALID → bold green; INCOMING → bold dark-orange; OLD → grey, normal weight.
+Results ordering: by `valid_s` VALID → OLD → INCOMING; within the same `valid_s`, ROR-bearing first, then by identifier count (most first). Each result: `name_s` (or `label_s`), then a caption with `acronym_s` (if any) and identifiers joined by a space, each formatted as type in CAPS + ': ' + value (e.g. `ROR: 04ezmf85`), ROR first. (Note this colon form differs from the tag form `ROR 04ezmf85` used on affiliation cards and suggestion boxes.) The name's colour/weight is driven **only** by `valid_s` (ROR does **not** affect it): VALID → bold green; INCOMING → bold dark-orange; OLD → amber-yellow (`warningYellow` palette token), normal weight.
 
 ## Adding a new contribution
 

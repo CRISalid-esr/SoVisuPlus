@@ -135,6 +135,8 @@ declare module '@mui/material/styles' {
     warningSurface: string
     warningSurfaceStrong: string
     warningOutline: string
+    /** Amber-yellow flagging deprecated / "OLD" reference data. */
+    warningYellow: string
   }
 
   interface PaletteOptions {
@@ -187,6 +189,7 @@ declare module '@mui/material/styles' {
     warningSurface?: string
     warningSurfaceStrong?: string
     warningOutline?: string
+    warningYellow?: string
   }
 }
 
