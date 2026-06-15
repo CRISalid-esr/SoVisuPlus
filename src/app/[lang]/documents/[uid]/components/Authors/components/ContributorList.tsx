@@ -2,7 +2,6 @@ import { Box, Button, Stack } from '@mui/material'
 import { Add, PersonAddAlt1 } from '@mui/icons-material'
 import { t } from '@lingui/core/macro'
 import { ContributionsEditor } from '../hooks/useContributionsEditor'
-import { halStructureToAffiliation } from '../lib/halMapping'
 import ContributionCard from './ContributionCard'
 
 interface ContributorListProps {
@@ -57,34 +56,18 @@ const ContributorList = ({ editor, readOnly }: ContributorListProps) => {
             rankingMode={rankingMode}
             disabled={disabled}
             readOnly={readOnly}
-            onRemove={() => editor.removeContribution(contribution.localId)}
-            onMove={(direction) =>
-              editor.moveContribution(contribution.localId, direction)
-            }
-            onReorder={(from, to) => editor.reorderContribution(from, to)}
-            onSelectProfile={(doc) =>
-              editor.applyHalAuthor(contribution.localId, doc)
-            }
-            onAddContributor={(inputText) =>
-              editor.markNotAligned(contribution.localId, inputText)
-            }
-            onSetRoles={(roles) => editor.setRoles(contribution.localId, roles)}
-            onRemoveAffiliation={(affLocalId) =>
-              editor.removeAffiliation(contribution.localId, affLocalId)
-            }
-            onReplaceAffiliation={(affLocalId, doc) =>
-              editor.replaceAffiliation(
-                contribution.localId,
-                affLocalId,
-                halStructureToAffiliation(doc),
-              )
-            }
-            onAddAffiliation={(doc) =>
-              editor.addAffiliation(
-                contribution.localId,
-                halStructureToAffiliation(doc),
-              )
-            }
+            // Pass the editor's stable actions straight through (no per-card inline
+            // arrows): the card binds its own localId, keeping these references
+            // constant so memoized cards skip re-rendering on unrelated edits.
+            removeContribution={editor.removeContribution}
+            moveContribution={editor.moveContribution}
+            reorderContribution={editor.reorderContribution}
+            applyHalAuthor={editor.applyHalAuthor}
+            markNotAligned={editor.markNotAligned}
+            setRoles={editor.setRoles}
+            removeAffiliation={editor.removeAffiliation}
+            replaceAffiliation={editor.replaceAffiliation}
+            addAffiliation={editor.addAffiliation}
           />
         </Box>
       ))}
