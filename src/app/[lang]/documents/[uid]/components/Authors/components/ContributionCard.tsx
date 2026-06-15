@@ -1,12 +1,11 @@
+import { memo } from 'react'
 import { Box, Divider, IconButton, Stack, Tooltip } from '@mui/material'
 import { ArrowDownward, ArrowUpward, DragIndicator } from '@mui/icons-material'
 import { t } from '@lingui/core/macro'
 import { LocRelator } from '@/types/LocRelator'
-import {
-  AureHalAuthorDoc,
-  AureHalStructureDoc,
-} from '@/lib/services/AureHalAPIClient'
-import { WorkingContribution } from '../lib/types'
+import { AureHalAuthorDoc } from '@/lib/services/AureHalAPIClient'
+import { halStructureToAffiliation } from '../lib/halMapping'
+import { WorkingAffiliation, WorkingContribution } from '../lib/types'
 import ContributorLeftPanel from './ContributorLeftPanel'
 import AffiliationPanel from './AffiliationPanel'
 
@@ -17,37 +16,43 @@ interface ContributionCardProps {
   rankingMode: boolean
   disabled?: boolean
   readOnly?: boolean
-  onRemove: () => void
-  onMove: (direction: -1 | 1) => void
-  onReorder: (fromIndex: number, toIndex: number) => void
-  onSelectProfile: (doc: AureHalAuthorDoc) => void
-  onAddContributor: (inputText: string) => void
-  onSetRoles: (roles: LocRelator[]) => void
-  onRemoveAffiliation: (affiliationLocalId: string) => void
-  onReplaceAffiliation: (
+  // Stable editor actions (each a useCallback from useContributionsEditor). The
+  // card binds its own `localId` instead of the parent pre-binding an inline arrow
+  // per card, so these references stay constant across list re-renders — which lets
+  // React.memo skip cards whose `contribution` did not change.
+  removeContribution: (localId: string) => void
+  moveContribution: (localId: string, direction: -1 | 1) => void
+  reorderContribution: (fromIndex: number, toIndex: number) => void
+  applyHalAuthor: (localId: string, doc: AureHalAuthorDoc) => void
+  markNotAligned: (localId: string, inputText: string) => void
+  setRoles: (localId: string, roles: LocRelator[]) => void
+  removeAffiliation: (localId: string, affiliationLocalId: string) => void
+  replaceAffiliation: (
+    localId: string,
     affiliationLocalId: string,
-    doc: AureHalStructureDoc,
+    affiliation: WorkingAffiliation,
   ) => void
-  onAddAffiliation: (doc: AureHalStructureDoc) => void
+  addAffiliation: (localId: string, affiliation: WorkingAffiliation) => void
 }
 
-const ContributionCard = ({
+const ContributionCard = memo(function ContributionCard({
   contribution,
   index,
   total,
   rankingMode,
   disabled,
   readOnly,
-  onRemove,
-  onMove,
-  onReorder,
-  onSelectProfile,
-  onAddContributor,
-  onSetRoles,
-  onRemoveAffiliation,
-  onReplaceAffiliation,
-  onAddAffiliation,
-}: ContributionCardProps) => {
+  removeContribution,
+  moveContribution,
+  reorderContribution,
+  applyHalAuthor,
+  markNotAligned,
+  setRoles,
+  removeAffiliation,
+  replaceAffiliation,
+  addAffiliation,
+}: ContributionCardProps) {
+  const { localId } = contribution
   const canAddAffiliation = !(
     contribution.personUid === null &&
     !contribution.notAligned &&
@@ -73,7 +78,9 @@ const ContributionCard = ({
         if (!dndEnabled) return
         event.preventDefault()
         const from = Number(event.dataTransfer.getData('text/plain'))
-        if (!Number.isNaN(from) && from !== index) onReorder(from, index)
+        if (!Number.isNaN(from) && from !== index) {
+          reorderContribution(from, index)
+        }
       }}
     >
       {showHeader && (
@@ -109,7 +116,7 @@ const ContributionCard = ({
               <IconButton
                 size='small'
                 disabled={disabled || index === 0}
-                onClick={() => onMove(-1)}
+                onClick={() => moveContribution(localId, -1)}
               >
                 <ArrowUpward fontSize='small' />
               </IconButton>
@@ -120,7 +127,7 @@ const ContributionCard = ({
               <IconButton
                 size='small'
                 disabled={disabled || index === total - 1}
-                onClick={() => onMove(1)}
+                onClick={() => moveContribution(localId, 1)}
               >
                 <ArrowDownward fontSize='small' />
               </IconButton>
@@ -142,10 +149,10 @@ const ContributionCard = ({
             contribution={contribution}
             disabled={disabled}
             readOnly={readOnly}
-            onSelectProfile={onSelectProfile}
-            onAddContributor={onAddContributor}
-            onSetRoles={onSetRoles}
-            onRemove={onRemove}
+            onSelectProfile={(doc) => applyHalAuthor(localId, doc)}
+            onAddContributor={(inputText) => markNotAligned(localId, inputText)}
+            onSetRoles={(roles) => setRoles(localId, roles)}
+            onRemove={() => removeContribution(localId)}
           />
         </Box>
         <Divider
@@ -159,14 +166,24 @@ const ContributionCard = ({
             disabled={disabled}
             readOnly={readOnly}
             canAddAffiliation={canAddAffiliation}
-            onRemoveAffiliation={onRemoveAffiliation}
-            onReplaceAffiliation={onReplaceAffiliation}
-            onAddAffiliation={onAddAffiliation}
+            onRemoveAffiliation={(affLocalId) =>
+              removeAffiliation(localId, affLocalId)
+            }
+            onReplaceAffiliation={(affLocalId, doc) =>
+              replaceAffiliation(
+                localId,
+                affLocalId,
+                halStructureToAffiliation(doc),
+              )
+            }
+            onAddAffiliation={(doc) =>
+              addAffiliation(localId, halStructureToAffiliation(doc))
+            }
           />
         </Box>
       </Box>
     </Box>
   )
-}
+})
 
 export default ContributionCard
