@@ -2,7 +2,14 @@ import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 import { Document as DocumentClass, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 import { Journal } from '@/types/Journal'
+import { Contribution } from '@/types/Contribution'
+import { ResearchUnitIdentifierType } from '@/types/ResearchUnitIdentifier'
 import xpath from 'xpath'
+
+export type HalTEIOptions = {
+  domains?: string[]
+  productionDate?: string
+}
 
 /**
  * HAL TEI (AOfr profile) interchange service.
@@ -120,16 +127,21 @@ export class HalTEIInterchangeService {
   /**
    * Convert a DocumentClass into HAL TEI XML (AOfr-TEI).
    */
-  public toHalTEI(document: DocumentClass): string {
+  public toHalTEI(
+    document: DocumentClass,
+    options: HalTEIOptions = {},
+  ): string {
     const lang = this.pickMainLanguage(document)
+    const date = options.productionDate ?? document.publicationDate ?? null
 
     const dom = this.domParser.parseFromString(
       this.minimalTeiSkeletonXml(),
       'text/xml',
     )
 
-    this.patchDocumentType(dom, document.documentType)
+    this.patchDocumentType(dom, document.documentType, options.domains ?? [])
     this.patchTitles(dom, document.titles)
+    this.patchAuthors(dom, document.contributions ?? [])
     this.patchAbstracts(dom, document.abstracts)
     this.patchLangUsage(dom, lang)
 
@@ -138,8 +150,10 @@ export class HalTEIInterchangeService {
         volume: document.volume ?? null,
         issue: document.issue ?? null,
         pages: document.pages ?? null,
-        publicationDate: document.publicationDate ?? null,
+        publicationDate: date,
       })
+    } else if (date) {
+      this.patchProductionDate(dom, date)
     }
 
     return this.serialize(dom)
@@ -274,7 +288,8 @@ export class HalTEIInterchangeService {
 
   private minimalTeiSkeletonXml(): string {
     return `<?xml version="1.0" encoding="UTF-8"?>
-<TEI>
+<TEI xmlns="http://www.tei-c.org/ns/1.0"
+     xmlns:hal="http://hal.archives-ouvertes.fr/">
   <text>
     <body>
       <listBibl>
@@ -300,7 +315,11 @@ export class HalTEIInterchangeService {
 </TEI>`
   }
 
-  private patchDocumentType(dom: Document, documentType: DocumentType): void {
+  private patchDocumentType(
+    dom: Document,
+    documentType: DocumentType,
+    domains: string[],
+  ): void {
     const code = this.mapDocumentTypeToHalTypology(documentType)
 
     const textClass = this.ensureElement(
@@ -313,11 +332,19 @@ export class HalTEIInterchangeService {
       dom,
       "//*[local-name()='classCode' and @scheme='halTypology']",
     )
+    this.removeAll(dom, "//*[local-name()='classCode' and @scheme='halDomain']")
 
-    const classCode = this.createElement(dom, 'classCode')
-    classCode.setAttribute('scheme', 'halTypology')
-    classCode.setAttribute('n', code)
-    textClass.appendChild(classCode)
+    const typologyCode = this.createElement(dom, 'classCode')
+    typologyCode.setAttribute('scheme', 'halTypology')
+    typologyCode.setAttribute('n', code)
+    textClass.appendChild(typologyCode)
+
+    for (const domain of domains) {
+      const domainCode = this.createElement(dom, 'classCode')
+      domainCode.setAttribute('scheme', 'halDomain')
+      domainCode.setAttribute('n', domain)
+      textClass.appendChild(domainCode)
+    }
   }
 
   private patchTitles(dom: Document, titles: Literal[]): void {
@@ -329,12 +356,155 @@ export class HalTEIInterchangeService {
 
     this.removeAllWithin(titleStmt, "./*[local-name()='title']")
 
+    const analytic = this.ensureElement(
+      dom,
+      "//*[local-name()='biblStruct']/*[local-name()='analytic']",
+      () => this.createElement(dom, 'analytic'),
+    )
+
+    this.removeAllWithin(analytic, "./*[local-name()='title']")
+
     for (const t of titles) {
-      const title = this.createElement(dom, 'title')
-      if (t.language) title.setAttribute('xml:lang', t.language)
-      title.appendChild(dom.createTextNode(t.value))
-      titleStmt.appendChild(title)
+      const mkTitle = () => {
+        const title = this.createElement(dom, 'title')
+        if (t.language) title.setAttribute('xml:lang', t.language)
+        title.appendChild(dom.createTextNode(t.value))
+        return title
+      }
+      titleStmt.appendChild(mkTitle())
+      analytic.appendChild(mkTitle())
     }
+  }
+
+  private static readonly IDNO_TYPE_MAP: Partial<
+    Record<ResearchUnitIdentifierType, string>
+  > = {
+    [ResearchUnitIdentifierType.nns]: 'RNSR',
+    [ResearchUnitIdentifierType.ror]: 'ROR',
+    [ResearchUnitIdentifierType.isni]: 'ISNI',
+    [ResearchUnitIdentifierType.idref]: 'IdRef',
+  }
+
+  private patchAuthors(dom: Document, contributions: Contribution[]): void {
+    const analytic = this.ensureElement(
+      dom,
+      "//*[local-name()='biblStruct']/*[local-name()='analytic']",
+      () => this.createElement(dom, 'analytic'),
+    )
+
+    this.removeAllWithin(analytic, "./*[local-name()='author']")
+
+    const orgMap = new Map<
+      string,
+      {
+        xmlId: string
+        orgName: string
+        identifiers: { type: string; value: string }[]
+      }
+    >()
+    let orgCounter = 0
+
+    const sorted = contributions
+      .slice()
+      .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
+
+    for (const contribution of sorted) {
+      const { person } = contribution
+      const names = this.resolveAuthorNames(
+        person.firstName,
+        person.lastName,
+        person.displayName,
+      )
+      if (!names) continue
+
+      const author = this.createElement(dom, 'author')
+      author.setAttribute('role', 'aut')
+
+      const persName = this.createElement(dom, 'persName')
+
+      const forename = this.createElement(dom, 'forename')
+      forename.setAttribute('type', 'first')
+      forename.appendChild(dom.createTextNode(names.forename))
+      persName.appendChild(forename)
+
+      const surname = this.createElement(dom, 'surname')
+      surname.appendChild(dom.createTextNode(names.surname))
+      persName.appendChild(surname)
+
+      author.appendChild(persName)
+
+      const firstUnit = person.memberships?.[0]?.researchUnit
+      if (firstUnit) {
+        if (!orgMap.has(firstUnit.uid)) {
+          orgCounter++
+          const xmlId = `localStruct-${orgCounter}`
+          const idnos = firstUnit.identifiers
+            .map((id) => {
+              const halType = HalTEIInterchangeService.IDNO_TYPE_MAP[id.type]
+              return halType ? { type: halType, value: id.value } : null
+            })
+            .filter((x): x is { type: string; value: string } => x !== null)
+          orgMap.set(firstUnit.uid, {
+            xmlId,
+            orgName:
+              firstUnit.getDisplayName('fr') ?? firstUnit.names[0]?.value ?? '',
+            identifiers: idnos,
+          })
+        }
+        const { xmlId } = orgMap.get(firstUnit.uid)!
+        const affiliation = this.createElement(dom, 'affiliation')
+        affiliation.setAttribute('ref', `#${xmlId}`)
+        author.appendChild(affiliation)
+      }
+
+      analytic.appendChild(author)
+    }
+
+    if (orgMap.size > 0) this.patchOrganisations(dom, orgMap)
+  }
+
+  private patchOrganisations(
+    dom: Document,
+    orgMap: Map<
+      string,
+      {
+        xmlId: string
+        orgName: string
+        identifiers: { type: string; value: string }[]
+      }
+    >,
+  ): void {
+    const textEl = xpath.select1("//*[local-name()='text']", dom) as
+      | Element
+      | undefined
+    if (!textEl) return
+
+    const back = this.createElement(dom, 'back')
+    const listOrg = this.createElement(dom, 'listOrg')
+    listOrg.setAttribute('type', 'structures')
+
+    for (const { xmlId, orgName, identifiers } of orgMap.values()) {
+      const org = this.createElement(dom, 'org')
+      org.setAttribute('type', 'laboratory')
+      org.setAttributeNS(
+        'http://www.w3.org/XML/1998/namespace',
+        'xml:id',
+        xmlId,
+      )
+      const orgNameEl = this.createElement(dom, 'orgName')
+      orgNameEl.appendChild(dom.createTextNode(orgName))
+      org.appendChild(orgNameEl)
+      for (const { type, value } of identifiers) {
+        const idno = this.createElement(dom, 'idno')
+        idno.setAttribute('type', type)
+        idno.appendChild(dom.createTextNode(value))
+        org.appendChild(idno)
+      }
+      listOrg.appendChild(org)
+    }
+
+    back.appendChild(listOrg)
+    textEl.appendChild(back)
   }
 
   private patchAbstracts(dom: Document, abstracts: Literal[]): void {
@@ -418,6 +588,61 @@ export class HalTEIInterchangeService {
     }
   }
 
+  private resolveAuthorNames(
+    firstName: string | null | undefined,
+    lastName: string | null | undefined,
+    displayName: string | null | undefined,
+  ): { forename: string; surname: string } | null {
+    const first = firstName?.trim() ?? ''
+    const last = lastName?.trim() ?? ''
+
+    if (first && last) return { forename: first, surname: last }
+
+    // Strip authority-record disambiguation like " (19..-.... ; Auteur En Sciences Économiques)"
+    const display = (displayName?.trim() ?? '')
+      .replace(/\s*\([^)]*\)/g, '')
+      .trim()
+
+    if (display) {
+      const spaceIdx = display.indexOf(' ')
+      if (spaceIdx > 0) {
+        return {
+          forename: first || display.substring(0, spaceIdx),
+          surname: last || display.substring(spaceIdx + 1).trim(),
+        }
+      }
+      // Single clean word: use as surname only if we already have a forename
+      if (first) return { forename: first, surname: display }
+      if (last) return { forename: display, surname: last }
+    }
+
+    // Can't produce both a valid forename and surname — skip this author
+    return null
+  }
+
+  private patchProductionDate(dom: Document, date: string): void {
+    const monogr = this.ensureElement(
+      dom,
+      "//*[local-name()='biblStruct']/*[local-name()='monogr']",
+      () => this.createElement(dom, 'monogr'),
+    )
+    const imprintEl = this.ensureElementWithin(
+      monogr,
+      "./*[local-name()='imprint']",
+      () => this.createElement(dom, 'imprint'),
+    )
+    const datePub = this.ensureElementWithin(
+      imprintEl,
+      "./*[local-name()='date' and @type='datePub']",
+      () => {
+        const d = this.createElement(dom, 'date')
+        d.setAttribute('type', 'datePub')
+        return d
+      },
+    )
+    this.setText(datePub, date)
+  }
+
   private upsertBiblScope(
     dom: Document,
     imprintEl: Element,
@@ -466,8 +691,10 @@ export class HalTEIInterchangeService {
     return (t ?? '').trim()
   }
 
+  private static readonly TEI_NS = 'http://www.tei-c.org/ns/1.0'
+
   private createElement(dom: Document, tagName: string): Element {
-    return dom.createElement(tagName)
+    return dom.createElementNS(HalTEIInterchangeService.TEI_NS, tagName)
   }
 
   private setText(el: Element, value: string): void {
