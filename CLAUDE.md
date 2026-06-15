@@ -2,11 +2,11 @@
 
 ## Feature specs
 
-Each major feature is backed by a spec document in `specs/<branch-name>/spec.md`, where `<branch-name>` is the Git branch the feature is developed on. Read the relevant spec before working on a feature branch — it captures the intent, scope, and design decisions that are not otherwise visible from the code.
+Each major feature is backed by a spec document in `specs/<branch-name>/prompt.md`, where `<branch-name>` is the Git branch the feature is developed on. Read the relevant spec before working on a feature branch — it captures the intent, scope, and design decisions that are not otherwise visible from the code.
 
-| Branch                      | Spec                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------ |
-| `838-automated-hal-deposit` | [`specs/838-automated-hal-deposit/spec.md`](specs/838-automated-hal-deposit/spec.md) |
+| Branch                      | Spec                                                                                     |
+| --------------------------- | ---------------------------------------------------------------------------------------- |
+| `838-automated-hal-deposit` | [`specs/838-automated-hal-deposit/prompt.md`](specs/838-automated-hal-deposit/prompt.md) |
 
 ## Git commits
 
