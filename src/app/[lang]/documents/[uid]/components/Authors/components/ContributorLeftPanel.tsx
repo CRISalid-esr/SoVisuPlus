@@ -4,6 +4,7 @@ import { DeleteOutline, Edit, EditOff } from '@mui/icons-material'
 import { t } from '@lingui/core/macro'
 import { LocRelator, LocRelatorHelper } from '@/types/LocRelator'
 import { AureHalAuthorDoc } from '@/lib/services/AureHalAPIClient'
+import useStore from '@/stores/global_store'
 import { WorkingContribution } from '../lib/types'
 import { computeContributionStatus } from '../lib/contributionStatus'
 import ContributionStatusChip from './ContributionStatusChip'
@@ -31,6 +32,12 @@ const ContributorLeftPanel = ({
   onSetRoles,
   onRemove,
 }: ContributorLeftPanelProps) => {
+  // The signed-in user's own person uid (primitive selector → re-renders only when
+  // it changes). MainLayout fetches `connectedUser` and blocks render until it's
+  // loaded, so it is reliably present here.
+  const currentUserPersonUid = useStore(
+    (state) => state.user.connectedUser?.person?.uid ?? null,
+  )
   const status = computeContributionStatus(contribution)
   const isNotIdentified = status === 'not_identified'
   const isNotAligned = status === 'not_aligned'
@@ -50,6 +57,10 @@ const ContributorLeftPanel = ({
   // Baseline 'Not identified' rows get the suggestion panel instead.
   const showSuggestions = !readOnly && !isNew && isNotIdentified
   const isWarningBox = isNotIdentified
+  // A user may not delete their own contribution: hide the bin on that card.
+  const isOwnContribution =
+    !!contribution.personUid && contribution.personUid === currentUserPersonUid
+  const showRemoveBin = !readOnly && !isOwnContribution
 
   const handleSelectProfile = (doc: AureHalAuthorDoc) => {
     onSelectProfile(doc)
@@ -61,8 +72,8 @@ const ContributorLeftPanel = ({
   }
 
   return (
-    <Box sx={{ position: 'relative', pr: readOnly ? 0 : 4 }}>
-      {!readOnly && (
+    <Box sx={{ position: 'relative', pr: showRemoveBin ? 4 : 0 }}>
+      {showRemoveBin && (
         <Tooltip
           title={t`documents_details_page_authors_tab_remove_contributor`}
         >

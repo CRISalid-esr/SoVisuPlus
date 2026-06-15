@@ -59,6 +59,23 @@ export const POST = async (
       )
     }
 
+    // A user may not delete their own contribution (the UI hides the bin; this is
+    // the server-side enforcement of the same rule).
+    const ownPersonUid = session?.user.authz?.personUid
+    const removesOwnContribution =
+      !!ownPersonUid &&
+      changes.some(
+        (change) =>
+          change.actionType === 'REMOVE' &&
+          change.parameters.person.uid === ownPersonUid,
+      )
+    if (removesOwnContribution) {
+      return NextResponse.json(
+        { error: 'A user cannot delete its own contribution' },
+        { status: 403 },
+      )
+    }
+
     await documentService.saveContributions(uid, changes, userName)
 
     return NextResponse.json({ success: true })
