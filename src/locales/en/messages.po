@@ -148,6 +148,16 @@ msgid "documents_page_synchronize_modal_synchronize_button"
 msgstr "Synchronize"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:191
+msgid "documents_page_refresh_document_alert"
+msgstr "Data concerning this publication has changed"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/page.tsx:214
+msgid "document_details_page_frozen_notice"
+msgstr "This document is waiting to be updated from the graph and cannot be edited right now."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.test.tsx:196
 #: src/app/[lang]/documents/[uid]/page.test.tsx:244
 msgid "document_details_bibliographic_information_tab"
@@ -158,6 +168,16 @@ msgstr "Bibliographic information"
 #: src/app/[lang]/documents/[uid]/page.test.tsx:248
 msgid "document_details_keywords_tab"
 msgstr "Keywords"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
+msgid "document_details_page_source_tab_card_title"
+msgstr "Sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
+msgid "document_details_page_back_to_my_publications"
+msgstr "Back to my publications"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:402
@@ -176,16 +196,6 @@ msgid "document_details_page_source_tab_select_action_unmerge_label"
 msgstr "Dissociate"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
-msgid "document_details_page_back_to_my_publications"
-msgstr "Back to my publications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
-msgid "document_details_page_source_tab_card_title"
-msgstr "Sources"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:105
 msgid "document_details_page_keywords_tab_card_title"
 msgstr "Keywords"
@@ -199,16 +209,6 @@ msgstr "No keywords"
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:138
 msgid "document_details_page_keywords_search_field_title"
 msgstr "Select one or more controlled vocabulary"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:191
-msgid "documents_page_refresh_document_alert"
-msgstr "Data concerning this publication has changed"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.tsx:214
-msgid "document_details_page_frozen_notice"
-msgstr "This document is waiting to be updated from the graph and cannot be edited right now."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
@@ -289,16 +289,6 @@ msgid "keywords_concept_added_success"
 msgstr "Keyword successfully added."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:214
-msgid "document_details_page_sources_row_update_source"
-msgstr "Compare sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
-msgid "documents_page_publication_date_column_no_date_available"
-msgstr "No date available"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:128
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:101
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:163
@@ -317,6 +307,16 @@ msgstr "N/C"
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:131
 msgid "document_details_page_type_row_label"
 msgstr "Type of document"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:68
+msgid "documents_page_publication_date_column_no_date_available"
+msgstr "No date available"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:214
+msgid "document_details_page_sources_row_update_source"
+msgstr "Compare sources"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:120
@@ -381,16 +381,6 @@ msgid "internal_server_page_description"
 msgstr "The server detected an internal error and was unable to process your request. Please try again later!"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:34
-msgid "profile_identifiers_card_title"
-msgstr "My identifiers"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:36
-msgid "profile_identifiers_card_title_other"
-msgstr "Identifiers"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/notification/index.tsx:27
 msgid "notification_page_notification_title"
 msgstr "Nofications"
@@ -422,6 +412,16 @@ msgid "profile_affiliations_card_title_other"
 msgstr "Affiliations"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:34
+msgid "profile_identifiers_card_title"
+msgstr "My identifiers"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:36
+msgid "profile_identifiers_card_title_other"
+msgstr "Identifiers"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:59
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:215
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:215
@@ -435,36 +435,6 @@ msgstr "Update ORCID authorizations"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:217
 msgid "orcid_button_provide_identifier"
 msgstr "Sign-in to ORCID"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:48
-msgid "orcid_permission_read_limited"
-msgstr "Read your information with visibility set to 'Trusted Organizations'"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:49
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:49
-msgid "orcid_permission_activities_update"
-msgstr "Create or update your research activities (publications, etc.)"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
-msgid "orcid_permission_person_update"
-msgstr "Update your biographical information (name, affiliation, etc.)"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:163
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:163
-msgid "orcid_permissions_intro"
-msgstr "Here are the permissions you are granting to {institutionName} on your ORCID profile:"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:179
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:179
-msgid "orcid_permissions_none"
-msgstr "You are not granting any permissions to {institutionName}."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:151
@@ -511,6 +481,36 @@ msgstr "Your ORCID account is linked to your SoVisu+ account"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:291
 msgid "orcid_control_helper"
 msgstr "ORCID is a free, unique, persistent identifier (PID) for individuals to use as they engage in research, scholarship, and innovation activities. It can also help you save time when you use your ORCID to sign into systems like this one. Link your ORCID iD to uniquely identify your research outputs and improve metadata quality. Learn more about how ORCID helps you spend more time conducting your research and less time managing it at <0>orcid.org</0>."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:48
+msgid "orcid_permission_read_limited"
+msgstr "Read your information with visibility set to 'Trusted Organizations'"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:49
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:49
+msgid "orcid_permission_activities_update"
+msgstr "Create or update your research activities (publications, etc.)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:50
+msgid "orcid_permission_person_update"
+msgstr "Update your biographical information (name, affiliation, etc.)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:163
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:163
+msgid "orcid_permissions_intro"
+msgstr "Here are the permissions you are granting to {institutionName} on your ORCID profile:"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:179
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:179
+msgid "orcid_permissions_none"
+msgstr "You are not granting any permissions to {institutionName}."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:34
@@ -950,7 +950,7 @@ msgstr "Sources"
 msgid "document_details_update_in_hal_tab"
 msgstr "Update in HAL"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorList.tsx:100
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorList.tsx:83
 msgid "documents_details_page_authors_tab_add_contributor"
 msgstr "Add a contributor"
 
@@ -982,11 +982,11 @@ msgstr "Contributors"
 msgid "documents_details_page_authors_tab_default_role_warning"
 msgstr "Default role - please check"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributionCard.tsx:92
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributionCard.tsx:99
 msgid "documents_details_page_authors_tab_drag_to_reorder"
 msgstr "Drag to reorder"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:91
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:102
 msgid "documents_details_page_authors_tab_edit_identification"
 msgstr "Change the identification"
 
@@ -1030,7 +1030,7 @@ msgstr "HAL suggestion"
 msgid "documents_details_page_authors_tab_hide"
 msgstr "Hide"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:90
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:101
 msgid "documents_details_page_authors_tab_hide_hal_search"
 msgstr "Hide search in HAL autocomplete"
 
@@ -1038,7 +1038,7 @@ msgstr "Hide search in HAL autocomplete"
 msgid "documents_details_page_authors_tab_imported_text"
 msgstr "Imported text:"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorList.tsx:41
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorList.tsx:40
 msgid "documents_details_page_authors_tab_insert_contributor"
 msgstr "Insert contributor here"
 
@@ -1046,11 +1046,11 @@ msgstr "Insert contributor here"
 msgid "documents_details_page_authors_tab_missing_affiliation"
 msgstr "Missing HAL affiliation"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributionCard.tsx:118
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributionCard.tsx:125
 msgid "documents_details_page_authors_tab_move_down"
 msgstr "Move down"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributionCard.tsx:107
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributionCard.tsx:114
 msgid "documents_details_page_authors_tab_move_up"
 msgstr "Move up"
 
@@ -1070,7 +1070,7 @@ msgstr "Stay on this page"
 msgid "documents_details_page_authors_tab_nav_guard_title"
 msgstr "Unsaved changes"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:80
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:91
 msgid "documents_details_page_authors_tab_new_contributor"
 msgstr "New contributor"
 
@@ -1086,11 +1086,11 @@ msgstr "Ranking mode"
 msgid "documents_details_page_authors_tab_remove_affiliation"
 msgstr "Remove affiliation"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:67
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:78
 msgid "documents_details_page_authors_tab_remove_contributor"
 msgstr "Remove contributor"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:148
+#: src/app/[lang]/documents/[uid]/components/Authors/components/ContributorLeftPanel.tsx:159
 #: src/app/[lang]/documents/[uid]/components/Authors/components/RoleMultiSelect.tsx:39
 msgid "documents_details_page_authors_tab_roles_label"
 msgstr "Roles"
