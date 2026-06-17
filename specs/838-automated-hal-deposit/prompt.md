@@ -245,7 +245,7 @@ Polls the database at short intervals for `HalDeposit` rows with `status: pendin
 For each pending deposit:
 
 1. Set `status = running`, record `startedAt`.
-2. Generate TEI XML via `HalTEIInterchangeService.toHalTEI()`. Inject `<idno type="localRef">` with the document UID. Write to `uploads/hal-tei/<depositId>/art.xml`.
+2. Generate TEI XML via `HalTEIInterchangeService.toHalTEI()`, passing `halDeposit.halDocumentType` as `options.halDocumentType` (the conversion from `document.documentType` is only the fallback when this field is absent). Inject `<idno type="localRef">` with the document UID. Write to `uploads/hal-tei/<depositId>/art.xml`.
 3. Fetch `HalDepositFile` rows for the deposit.
    - If none: XML-only deposit (Case 1).
    - If any: copy files from `uploads/hal-files/` into a ZIP alongside the TEI (Case 2). Inject `<ref type="file" .../>` elements into the TEI for each file before zipping.

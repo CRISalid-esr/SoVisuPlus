@@ -9,6 +9,7 @@ import xpath from 'xpath'
 export type HalTEIOptions = {
   domains?: string[]
   language?: string
+  halDocumentType?: string
 }
 
 /**
@@ -142,7 +143,10 @@ export class HalTEIInterchangeService {
       'text/xml',
     )
 
-    this.patchDocumentType(dom, document.documentType, options.domains ?? [])
+    const halCode =
+      options.halDocumentType ??
+      this.mapDocumentTypeToHalTypology(document.documentType)
+    this.patchDocumentType(dom, halCode, options.domains ?? [])
     this.patchTitles(dom, document.titles)
     this.patchAuthors(dom, document.contributions ?? [])
     this.patchAbstracts(dom, document.abstracts)
@@ -320,11 +324,9 @@ export class HalTEIInterchangeService {
 
   private patchDocumentType(
     dom: Document,
-    documentType: DocumentType,
+    halCode: string,
     domains: string[],
   ): void {
-    const code = this.mapDocumentTypeToHalTypology(documentType)
-
     const textClass = this.ensureElement(
       dom,
       "//*[local-name()='profileDesc']/*[local-name()='textClass']",
@@ -339,7 +341,7 @@ export class HalTEIInterchangeService {
 
     const typologyCode = this.createElement(dom, 'classCode')
     typologyCode.setAttribute('scheme', 'halTypology')
-    typologyCode.setAttribute('n', code)
+    typologyCode.setAttribute('n', halCode)
     textClass.appendChild(typologyCode)
 
     for (const domain of domains) {

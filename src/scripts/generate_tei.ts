@@ -11,10 +11,12 @@ const parseArgs = (
   documentUid: string
   domains: string[]
   language?: string
+  halDocumentType?: string
 } => {
   let documentUid = ''
   const domains: string[] = []
   let language: string | undefined
+  let halDocumentType: string | undefined
   for (let i = 0; i < argv.length; i++) {
     switch (argv[i]) {
       case '--document-uid':
@@ -26,14 +28,19 @@ const parseArgs = (
       case '--language':
         language = argv[++i]
         break
+      case '--hal-document-type':
+        halDocumentType = argv[++i]
+        break
     }
   }
   if (!documentUid) throw new Error('--document-uid is required')
-  return { documentUid, domains, language }
+  return { documentUid, domains, language, halDocumentType }
 }
 
 const main = async () => {
-  const { documentUid, domains, language } = parseArgs(process.argv.slice(2))
+  const { documentUid, domains, language, halDocumentType } = parseArgs(
+    process.argv.slice(2),
+  )
 
   const dao = new DocumentDAO()
   const document = await dao.fetchDocumentById(documentUid)
@@ -51,7 +58,7 @@ const main = async () => {
   }
 
   const service = new HalTEIInterchangeService()
-  const tei = service.toHalTEI(document, { domains, language })
+  const tei = service.toHalTEI(document, { domains, language, halDocumentType })
 
   process.stdout.write(tei + '\n')
 }

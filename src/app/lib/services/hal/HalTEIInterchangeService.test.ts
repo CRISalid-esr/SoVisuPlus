@@ -201,6 +201,13 @@ describe('HalTEIInterchangeService', () => {
       expect(out).toContain('<date type="datePub">2001</date>')
     })
 
+    it('halDocumentType option overrides auto-mapped typology', () => {
+      const doc = makeDoc(DocumentType.Article) // auto-maps to 'ART'
+      const out = service.toHalTEI(doc, { halDocumentType: 'THESE' })
+      expect(out).toContain('n="THESE"')
+      expect(out).not.toContain('n="ART"')
+    })
+
     it('type mapping (Prisma -> HAL) writes correct halTypology', () => {
       const cases: Array<[DocumentType, string]> = [
         [DocumentType.Article, 'ART'],
