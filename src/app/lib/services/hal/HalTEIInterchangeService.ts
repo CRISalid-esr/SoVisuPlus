@@ -436,15 +436,20 @@ export class HalTEIInterchangeService {
       author.appendChild(persName)
 
       for (const org of contribution.affiliations) {
+        const idnos = org.identifiers
+          .map((id) => {
+            const halType = HalTEIInterchangeService.IDNO_TYPE_MAP[id.type]
+            return halType && id.value
+              ? { type: halType, value: id.value }
+              : null
+          })
+          .filter((x): x is { type: string; value: string } => x !== null)
+
+        if (idnos.length === 0) continue
+
         if (!orgMap.has(org.uid)) {
           orgCounter++
           const xmlId = `localStruct-${orgCounter}`
-          const idnos = org.identifiers
-            .map((id) => {
-              const halType = HalTEIInterchangeService.IDNO_TYPE_MAP[id.type]
-              return halType ? { type: halType, value: id.value } : null
-            })
-            .filter((x): x is { type: string; value: string } => x !== null)
           orgMap.set(org.uid, {
             xmlId,
             orgName: org.displayNames[0] ?? '',

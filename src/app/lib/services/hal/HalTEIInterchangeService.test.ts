@@ -240,6 +240,50 @@ describe('HalTEIInterchangeService', () => {
       expect(out).toContain('<idno type="ROR">https://ror.org/example</idno>')
     })
 
+    it('omits affiliation when org has no HAL-recognized identifiers', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+      const person = new Person('p-1', false, null, 'John Doe', 'John', 'Doe')
+      const org = new AuthorityOrganization(
+        'org-no-id',
+        ['University of Ferrara'],
+        [],
+        [new AuthorityOrganizationIdentifier('scopus' as never, '12345')],
+      )
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+      const out = service.toHalTEI(doc)
+      expect(out).not.toContain('ref="#localStruct-')
+      expect(out).not.toContain('<listOrg')
+      expect(out).toContain('<surname>Doe</surname>')
+    })
+
+    it('omits affiliation when org has empty identifiers', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+      const person = new Person('p-1', false, null, 'John Doe', 'John', 'Doe')
+      const org = new AuthorityOrganization('org-empty', ['Some Lab'], [], [])
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+      const out = service.toHalTEI(doc)
+      expect(out).not.toContain('ref="#localStruct-')
+      expect(out).not.toContain('<listOrg')
+    })
+
+    it('omits affiliation when org has HAL-recognized identifier type but empty value', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+      const person = new Person('p-1', false, null, 'John Doe', 'John', 'Doe')
+      const org = new AuthorityOrganization(
+        'org-empty-val',
+        ['Some Lab'],
+        [],
+        [new AuthorityOrganizationIdentifier('ror' as never, '')],
+      )
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+      const out = service.toHalTEI(doc)
+      expect(out).not.toContain('ref="#localStruct-')
+      expect(out).not.toContain('<listOrg')
+    })
+
     it('halDocumentType option overrides auto-mapped typology', () => {
       const doc = makeDoc(DocumentType.Article) // auto-maps to 'ART'
       const out = service.toHalTEI(doc, { halDocumentType: 'THESE' })
