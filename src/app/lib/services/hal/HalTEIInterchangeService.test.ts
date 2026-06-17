@@ -156,7 +156,7 @@ describe('HalTEIInterchangeService', () => {
         new Literal('This article presents a general discussion...', 'en'),
       ]
 
-      const out = service.toHalTEI(doc)
+      const out = service.toHalTEI(doc, { language: 'en' })
 
       // titles
       expect(out).toContain(

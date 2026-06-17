@@ -9,6 +9,7 @@ import xpath from 'xpath'
 export type HalTEIOptions = {
   domains?: string[]
   productionDate?: string
+  language?: string
 }
 
 /**
@@ -131,7 +132,10 @@ export class HalTEIInterchangeService {
     document: DocumentClass,
     options: HalTEIOptions = {},
   ): string {
-    const lang = this.pickMainLanguage(document)
+    const lang =
+      options.language ??
+      process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0] ??
+      'fr'
     const date = options.productionDate ?? document.publicationDate ?? null
 
     const dom = this.domParser.parseFromString(
@@ -743,11 +747,6 @@ export class HalTEIInterchangeService {
     for (const n of nodes) {
       if (n.parentNode) n.parentNode.removeChild(n)
     }
-  }
-
-  private pickMainLanguage(document: DocumentClass): string {
-    const l = document.titles.find((t) => !!t.language)?.language
-    return l && l !== 'ul' ? l : 'fr'
   }
 
   private mapDocumentTypeToHalTypology(documentType: DocumentType): string {

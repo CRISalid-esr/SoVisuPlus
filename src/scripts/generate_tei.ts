@@ -7,10 +7,16 @@ dotenv.config()
 
 const parseArgs = (
   argv: string[],
-): { documentUid: string; domains: string[]; date?: string } => {
+): {
+  documentUid: string
+  domains: string[]
+  date?: string
+  language?: string
+} => {
   let documentUid = ''
   const domains: string[] = []
   let date: string | undefined
+  let language: string | undefined
   for (let i = 0; i < argv.length; i++) {
     switch (argv[i]) {
       case '--document-uid':
@@ -22,14 +28,19 @@ const parseArgs = (
       case '--date':
         date = argv[++i]
         break
+      case '--language':
+        language = argv[++i]
+        break
     }
   }
   if (!documentUid) throw new Error('--document-uid is required')
-  return { documentUid, domains, date }
+  return { documentUid, domains, date, language }
 }
 
 const main = async () => {
-  const { documentUid, domains, date } = parseArgs(process.argv.slice(2))
+  const { documentUid, domains, date, language } = parseArgs(
+    process.argv.slice(2),
+  )
 
   const dao = new DocumentDAO()
   const document = await dao.fetchDocumentById(documentUid)
@@ -40,7 +51,11 @@ const main = async () => {
   }
 
   const service = new HalTEIInterchangeService()
-  const tei = service.toHalTEI(document, { domains, productionDate: date })
+  const tei = service.toHalTEI(document, {
+    domains,
+    productionDate: date,
+    language,
+  })
 
   process.stdout.write(tei + '\n')
 }
