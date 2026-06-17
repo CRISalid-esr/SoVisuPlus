@@ -3,7 +3,6 @@ import { Document as DocumentClass, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 import { Journal } from '@/types/Journal'
 import { Contribution } from '@/types/Contribution'
-import { ResearchUnitIdentifierType } from '@/types/ResearchUnitIdentifier'
 import xpath from 'xpath'
 
 export type HalTEIOptions = {
@@ -381,13 +380,11 @@ export class HalTEIInterchangeService {
     }
   }
 
-  private static readonly IDNO_TYPE_MAP: Partial<
-    Record<ResearchUnitIdentifierType, string>
-  > = {
-    [ResearchUnitIdentifierType.nns]: 'RNSR',
-    [ResearchUnitIdentifierType.ror]: 'ROR',
-    [ResearchUnitIdentifierType.isni]: 'ISNI',
-    [ResearchUnitIdentifierType.idref]: 'IdRef',
+  private static readonly IDNO_TYPE_MAP: Partial<Record<string, string>> = {
+    nns: 'RNSR',
+    ror: 'ROR',
+    isni: 'ISNI',
+    idref: 'IdRef',
   }
 
   private patchAuthors(dom: Document, contributions: Contribution[]): void {
@@ -438,25 +435,23 @@ export class HalTEIInterchangeService {
 
       author.appendChild(persName)
 
-      const firstUnit = person.memberships?.[0]?.researchUnit
-      if (firstUnit) {
-        if (!orgMap.has(firstUnit.uid)) {
+      for (const org of contribution.affiliations) {
+        if (!orgMap.has(org.uid)) {
           orgCounter++
           const xmlId = `localStruct-${orgCounter}`
-          const idnos = firstUnit.identifiers
+          const idnos = org.identifiers
             .map((id) => {
               const halType = HalTEIInterchangeService.IDNO_TYPE_MAP[id.type]
               return halType ? { type: halType, value: id.value } : null
             })
             .filter((x): x is { type: string; value: string } => x !== null)
-          orgMap.set(firstUnit.uid, {
+          orgMap.set(org.uid, {
             xmlId,
-            orgName:
-              firstUnit.getDisplayName('fr') ?? firstUnit.names[0]?.value ?? '',
+            orgName: org.displayNames[0] ?? '',
             identifiers: idnos,
           })
         }
-        const { xmlId } = orgMap.get(firstUnit.uid)!
+        const { xmlId } = orgMap.get(org.uid)!
         const affiliation = this.createElement(dom, 'affiliation')
         affiliation.setAttribute('ref', `#${xmlId}`)
         author.appendChild(affiliation)

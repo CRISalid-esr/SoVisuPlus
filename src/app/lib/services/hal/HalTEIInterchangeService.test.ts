@@ -6,6 +6,10 @@ import { HalTEIInterchangeService } from '@/lib/services/hal/HalTEIInterchangeSe
 import { DocumentType, Document as DocumentClass } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 import { Journal } from '@/types/Journal'
+import { Contribution } from '@/types/Contribution'
+import { AuthorityOrganization } from '@/types/AuthorityOrganization'
+import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
+import { Person } from '@/types/Person'
 import { DocumentState } from '@prisma/client'
 
 const readFixture = (name: string): string => {
@@ -199,6 +203,41 @@ describe('HalTEIInterchangeService', () => {
       expect(out).toContain('<biblScope unit="issue">2</biblScope>')
       expect(out).toContain('<biblScope unit="pp">655 - 701</biblScope>')
       expect(out).toContain('<date type="datePub">2001</date>')
+    })
+
+    it('writes authors with affiliation refs and org structures', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+
+      const person = new Person(
+        'p-1',
+        false,
+        null,
+        'Marie Curie',
+        'Marie',
+        'Curie',
+      )
+      const org = new AuthorityOrganization(
+        'org-uid-1',
+        ['LPTHE'],
+        [],
+        [
+          new AuthorityOrganizationIdentifier(
+            'ror' as never,
+            'https://ror.org/example',
+          ),
+        ],
+      )
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+
+      const out = service.toHalTEI(doc)
+
+      expect(out).toContain('<forename type="first">Marie</forename>')
+      expect(out).toContain('<surname>Curie</surname>')
+      expect(out).toContain('ref="#localStruct-1"')
+      expect(out).toContain('xml:id="localStruct-1"')
+      expect(out).toContain('<orgName>LPTHE</orgName>')
+      expect(out).toContain('<idno type="ROR">https://ror.org/example</idno>')
     })
 
     it('halDocumentType option overrides auto-mapped typology', () => {
