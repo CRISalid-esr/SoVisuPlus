@@ -344,7 +344,7 @@ The form validates client-side before advancing: document type, at least one dom
 
 #### Step 2 — Review
 
-A modal with summary of all entered data (document type, domains as chips, conditional fields, file list) is displayed before submission. The user can go back to edit or confirm.
+A summary of all entered data (document type, domains as chips, conditional fields, file list) is displayed before submission. The user can go back to edit or confirm.
 
 #### Step 3 — Uploading / submitted
 
