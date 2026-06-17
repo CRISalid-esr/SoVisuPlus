@@ -306,7 +306,7 @@ The component checks two conditions before rendering the form. Both are checked 
 | User does not have `deposit_hal` permission for this document                                 | The HalDeposit tab is hidden                                                                                                                                                                                                                                        |
 | User has permission but is missing `hal_login` or `idhals`/`idhali`                           | Info alert inviting the user to link their HAL account to their institutional account, with a direct link to the account page (`/[lang]/account`). No form is shown.                                                                                                |
 | User has permission and HAL identifiers, but document has no `publicationDate`                | Info alert: "This document has no publication date. Please add one before depositing." with a link to the Bibliographic information tab (`?tab=bibliographic_information`). No form is shown. The deposit creation endpoint also rejects such deposits server-side. |
-| No author has at least one affiliation with a HAL-recognized identifier (RNSR/ROR/ISNI/IdRef) | Error alert: "Aucun auteur n'a de structure d'affiliation avec un identifiant reconnu par HAL. Veuillez compléter les affiliations dans l'onglet Auteurs." with a link to the Authors tab (`?tab=authors`). No form is shown. Also enforced server-side.            |
+| No author has at least one affiliation with a HAL-recognized identifier (RNSR/ROR/ISNI/IdRef) | Error alert: "Any author has an affiliation with a complying HAL identifier. Please go to Author tab to complete information." with a link to the Authors tab (`?tab=authors`). No form is shown. Also enforced server-side.                                        |
 
 If the user doesn't have hal_login or idhals/idhali, the tab should displays following text : `A HAL login or identifier is necessary to perform a submission. If you would like to do so, please complete your HAL information on the MyAccount page.` and a button bellow 'Go to My Account' that opens the MyAccount page.
 Otherwise, the UI behaves according to following description.
@@ -320,7 +320,7 @@ The form is pre-populated from the document's existing data where possible.
 **Read-only sections** (data pulled from other tabs, with a link to edit there):
 
 - Title, abstract and date (from the _Bibliographic information_ tab)
-- Authors and affiliations (from the _Authors_ tab). If any author has affiliations that will be silently dropped at submission time (affiliations with no HAL-recognized identifier), show an inline warning: "Les structures d'affiliation de certains auteurs n'ont pas d'identifiant reconnu par HAL et ne seront pas soumises. Pour les compléter, rendez-vous dans l'onglet Auteurs." This is a soft warning — it does not block submission.
+- Authors and affiliations (from the _Authors_ tab). If any author has affiliations that will be silently dropped at submission time (affiliations with no HAL-recognized identifier), show an inline warning: "Some contributor's affiliations are not recognized by HAL and won't be submitted. Go to Author tab if you want to change it." This is a soft warning — it does not block submission.
 
 **Deposit metadata** (editable, submitted with the deposit):
 
