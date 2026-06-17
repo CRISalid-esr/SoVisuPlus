@@ -251,6 +251,12 @@ For each pending deposit:
 
 1. Set `status = running`, record `startedAt`.
 2. Generate TEI XML via `HalTEIInterchangeService.toHalTEI()`, passing `halDeposit.halDocumentType` as `options.halDocumentType` (the conversion from `document.documentType` is only the fallback when this field is absent). Inject `<idno type="localRef">` with the document UID. Write to `uploads/hal-tei/<depositId>/art.xml`.
+
+   **Affiliation org type and identifier resolution** (applied per `<org>` element in the TEI):
+   - If the org has an RNSR identifier: `type="laboratory"`, emit **only** the RNSR `<idno>` (ROR/ISNI/IdRef are dropped).
+   - Otherwise: `type="institution"`, emit all remaining HAL-recognized identifiers (ROR, ISNI, IdRef).
+   - Orgs with no HAL-recognized identifier (RNSR/ROR/ISNI/IdRef) or only identifiers with empty values are silently skipped.
+
 3. Fetch `HalDepositFile` rows for the deposit.
    - If none: XML-only deposit (Case 1).
    - If any: copy files from `uploads/hal-files/` into a ZIP alongside the TEI (Case 2). Inject `<ref type="file" .../>` elements into the TEI for each file before zipping.

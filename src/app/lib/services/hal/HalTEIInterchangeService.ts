@@ -401,6 +401,7 @@ export class HalTEIInterchangeService {
       {
         xmlId: string
         orgName: string
+        orgType: string
         identifiers: { type: string; value: string }[]
       }
     >()
@@ -447,13 +448,17 @@ export class HalTEIInterchangeService {
 
         if (idnos.length === 0) continue
 
+        const { orgType, idnos: resolvedIdnos } =
+          HalTEIInterchangeService.resolveOrgEntry(idnos)
+
         if (!orgMap.has(org.uid)) {
           orgCounter++
           const xmlId = `localStruct-${orgCounter}`
           orgMap.set(org.uid, {
             xmlId,
             orgName: org.displayNames[0] ?? '',
-            identifiers: idnos,
+            orgType,
+            identifiers: resolvedIdnos,
           })
         }
         const { xmlId } = orgMap.get(org.uid)!
@@ -468,6 +473,15 @@ export class HalTEIInterchangeService {
     if (orgMap.size > 0) this.patchOrganisations(dom, orgMap)
   }
 
+  private static resolveOrgEntry(idnos: { type: string; value: string }[]): {
+    orgType: string
+    idnos: { type: string; value: string }[]
+  } {
+    const rnsr = idnos.find((id) => id.type === 'RNSR')
+    if (rnsr) return { orgType: 'laboratory', idnos: [rnsr] }
+    return { orgType: 'institution', idnos }
+  }
+
   private patchOrganisations(
     dom: Document,
     orgMap: Map<
@@ -475,6 +489,7 @@ export class HalTEIInterchangeService {
       {
         xmlId: string
         orgName: string
+        orgType: string
         identifiers: { type: string; value: string }[]
       }
     >,
@@ -488,9 +503,9 @@ export class HalTEIInterchangeService {
     const listOrg = this.createElement(dom, 'listOrg')
     listOrg.setAttribute('type', 'structures')
 
-    for (const { xmlId, orgName, identifiers } of orgMap.values()) {
+    for (const { xmlId, orgName, orgType, identifiers } of orgMap.values()) {
       const org = this.createElement(dom, 'org')
-      org.setAttribute('type', 'laboratory')
+      org.setAttribute('type', orgType)
       org.setAttributeNS(
         'http://www.w3.org/XML/1998/namespace',
         'xml:id',

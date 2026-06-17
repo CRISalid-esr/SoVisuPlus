@@ -238,6 +238,60 @@ describe('HalTEIInterchangeService', () => {
       expect(out).toContain('xml:id="localStruct-1"')
       expect(out).toContain('<orgName>LPTHE</orgName>')
       expect(out).toContain('<idno type="ROR">https://ror.org/example</idno>')
+      expect(out).toContain('type="institution"')
+    })
+
+    it('sets org type to laboratory and keeps only RNSR when org has RNSR', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+      const person = new Person(
+        'p-1',
+        false,
+        null,
+        'Marie Curie',
+        'Marie',
+        'Curie',
+      )
+      const org = new AuthorityOrganization(
+        'org-1',
+        ['LPTHE'],
+        [],
+        [new AuthorityOrganizationIdentifier('nns' as never, '200012345A')],
+      )
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+      const out = service.toHalTEI(doc)
+      expect(out).toContain('type="laboratory"')
+      expect(out).toContain('<idno type="RNSR">200012345A</idno>')
+    })
+
+    it('drops ROR and uses RNSR when org has both', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+      const person = new Person(
+        'p-1',
+        false,
+        null,
+        'Marie Curie',
+        'Marie',
+        'Curie',
+      )
+      const org = new AuthorityOrganization(
+        'org-1',
+        ['LPTHE'],
+        [],
+        [
+          new AuthorityOrganizationIdentifier('nns' as never, '200012345A'),
+          new AuthorityOrganizationIdentifier(
+            'ror' as never,
+            'https://ror.org/example',
+          ),
+        ],
+      )
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+      const out = service.toHalTEI(doc)
+      expect(out).toContain('type="laboratory"')
+      expect(out).toContain('<idno type="RNSR">200012345A</idno>')
+      expect(out).not.toContain('<idno type="ROR">')
     })
 
     it('omits affiliation when org has no HAL-recognized identifiers', () => {
