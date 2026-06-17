@@ -3,12 +3,12 @@ import { Document as DocumentClass, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 import { Journal } from '@/types/Journal'
 import { Contribution } from '@/types/Contribution'
-import { ResearchUnitIdentifierType } from '@/types/ResearchUnitIdentifier'
 import xpath from 'xpath'
 
 export type HalTEIOptions = {
   domains?: string[]
-  productionDate?: string
+  language?: string
+  halDocumentType?: string
 }
 
 /**
@@ -131,15 +131,21 @@ export class HalTEIInterchangeService {
     document: DocumentClass,
     options: HalTEIOptions = {},
   ): string {
-    const lang = this.pickMainLanguage(document)
-    const date = options.productionDate ?? document.publicationDate ?? null
+    const lang =
+      options.language ??
+      process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0] ??
+      'fr'
+    const date = document.publicationDate ?? null
 
     const dom = this.domParser.parseFromString(
       this.minimalTeiSkeletonXml(),
       'text/xml',
     )
 
-    this.patchDocumentType(dom, document.documentType, options.domains ?? [])
+    const halCode =
+      options.halDocumentType ??
+      this.mapDocumentTypeToHalTypology(document.documentType)
+    this.patchDocumentType(dom, halCode, options.domains ?? [])
     this.patchTitles(dom, document.titles)
     this.patchAuthors(dom, document.contributions ?? [])
     this.patchAbstracts(dom, document.abstracts)
@@ -317,11 +323,9 @@ export class HalTEIInterchangeService {
 
   private patchDocumentType(
     dom: Document,
-    documentType: DocumentType,
+    halCode: string,
     domains: string[],
   ): void {
-    const code = this.mapDocumentTypeToHalTypology(documentType)
-
     const textClass = this.ensureElement(
       dom,
       "//*[local-name()='profileDesc']/*[local-name()='textClass']",
@@ -336,7 +340,7 @@ export class HalTEIInterchangeService {
 
     const typologyCode = this.createElement(dom, 'classCode')
     typologyCode.setAttribute('scheme', 'halTypology')
-    typologyCode.setAttribute('n', code)
+    typologyCode.setAttribute('n', halCode)
     textClass.appendChild(typologyCode)
 
     for (const domain of domains) {
@@ -376,13 +380,11 @@ export class HalTEIInterchangeService {
     }
   }
 
-  private static readonly IDNO_TYPE_MAP: Partial<
-    Record<ResearchUnitIdentifierType, string>
-  > = {
-    [ResearchUnitIdentifierType.nns]: 'RNSR',
-    [ResearchUnitIdentifierType.ror]: 'ROR',
-    [ResearchUnitIdentifierType.isni]: 'ISNI',
-    [ResearchUnitIdentifierType.idref]: 'IdRef',
+  private static readonly IDNO_TYPE_MAP: Partial<Record<string, string>> = {
+    nns: 'RNSR',
+    ror: 'ROR',
+    isni: 'ISNI',
+    idref: 'IdRef',
   }
 
   private patchAuthors(dom: Document, contributions: Contribution[]): void {
@@ -433,25 +435,28 @@ export class HalTEIInterchangeService {
 
       author.appendChild(persName)
 
-      const firstUnit = person.memberships?.[0]?.researchUnit
-      if (firstUnit) {
-        if (!orgMap.has(firstUnit.uid)) {
+      for (const org of contribution.affiliations) {
+        const idnos = org.identifiers
+          .map((id) => {
+            const halType = HalTEIInterchangeService.IDNO_TYPE_MAP[id.type]
+            return halType && id.value
+              ? { type: halType, value: id.value }
+              : null
+          })
+          .filter((x): x is { type: string; value: string } => x !== null)
+
+        if (idnos.length === 0) continue
+
+        if (!orgMap.has(org.uid)) {
           orgCounter++
           const xmlId = `localStruct-${orgCounter}`
-          const idnos = firstUnit.identifiers
-            .map((id) => {
-              const halType = HalTEIInterchangeService.IDNO_TYPE_MAP[id.type]
-              return halType ? { type: halType, value: id.value } : null
-            })
-            .filter((x): x is { type: string; value: string } => x !== null)
-          orgMap.set(firstUnit.uid, {
+          orgMap.set(org.uid, {
             xmlId,
-            orgName:
-              firstUnit.getDisplayName('fr') ?? firstUnit.names[0]?.value ?? '',
+            orgName: org.displayNames[0] ?? '',
             identifiers: idnos,
           })
         }
-        const { xmlId } = orgMap.get(firstUnit.uid)!
+        const { xmlId } = orgMap.get(org.uid)!
         const affiliation = this.createElement(dom, 'affiliation')
         affiliation.setAttribute('ref', `#${xmlId}`)
         author.appendChild(affiliation)
@@ -743,11 +748,6 @@ export class HalTEIInterchangeService {
     for (const n of nodes) {
       if (n.parentNode) n.parentNode.removeChild(n)
     }
-  }
-
-  private pickMainLanguage(document: DocumentClass): string {
-    const l = document.titles.find((t) => !!t.language)?.language
-    return l && l !== 'ul' ? l : 'fr'
   }
 
   private mapDocumentTypeToHalTypology(documentType: DocumentType): string {

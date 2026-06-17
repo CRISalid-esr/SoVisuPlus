@@ -250,7 +250,7 @@ Polls the database at short intervals for `HalDeposit` rows with `status: pendin
 For each pending deposit:
 
 1. Set `status = running`, record `startedAt`.
-2. Generate TEI XML via `HalTEIInterchangeService.toHalTEI()`. Inject `<idno type="localRef">` with the document UID. Write to `uploads/hal-tei/<depositId>/art.xml`.
+2. Generate TEI XML via `HalTEIInterchangeService.toHalTEI()`, passing `halDeposit.halDocumentType` as `options.halDocumentType` (the conversion from `document.documentType` is only the fallback when this field is absent). Inject `<idno type="localRef">` with the document UID. Write to `uploads/hal-tei/<depositId>/art.xml`.
 3. Fetch `HalDepositFile` rows for the deposit.
    - If none: XML-only deposit (Case 1).
    - If any: copy files from `uploads/hal-files/` into a ZIP alongside the TEI (Case 2). Inject `<ref type="file" .../>` elements into the TEI for each file before zipping.
@@ -301,10 +301,12 @@ Mockup is available at [mockup path]/blob/main/src/app/[lang]/documents/[uid]/co
 
 The component checks two conditions before rendering the form. Both are checked server-side in the API route; the UI mirrors these checks client-side for UX only.
 
-| Condition                                                           | UI response                                                                                                                                                          |
-| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| User does not have `deposit_hal` permission for this document       | The HalDeposit tab is hidden                                                                                                                                         |
-| User has permission but is missing `hal_login` or `idhals`/`idhali` | Info alert inviting the user to link their HAL account to their institutional account, with a direct link to the account page (`/[lang]/account`). No form is shown. |
+| Condition                                                                                     | UI response                                                                                                                                                                                                                                                         |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| User does not have `deposit_hal` permission for this document                                 | The HalDeposit tab is hidden                                                                                                                                                                                                                                        |
+| User has permission but is missing `hal_login` or `idhals`/`idhali`                           | Info alert inviting the user to link their HAL account to their institutional account, with a direct link to the account page (`/[lang]/account`). No form is shown.                                                                                                |
+| User has permission and HAL identifiers, but document has no `publicationDate`                | Info alert: "This document has no publication date. Please add one before depositing." with a link to the Bibliographic information tab (`?tab=bibliographic_information`). No form is shown. The deposit creation endpoint also rejects such deposits server-side. |
+| No author has at least one affiliation with a HAL-recognized identifier (RNSR/ROR/ISNI/IdRef) | Error alert: "Aucun auteur n'a de structure d'affiliation avec un identifiant reconnu par HAL. Veuillez compléter les affiliations dans l'onglet Auteurs." with a link to the Authors tab (`?tab=authors`). No form is shown. Also enforced server-side.            |
 
 If the user doesn't have hal_login or idhals/idhali, the tab should displays following text : `A HAL login or identifier is necessary to perform a submission. If you would like to do so, please complete your HAL information on the MyAccount page.` and a button bellow 'Go to My Account' that opens the MyAccount page.
 Otherwise, the UI behaves according to following description.
@@ -318,7 +320,7 @@ The form is pre-populated from the document's existing data where possible.
 **Read-only sections** (data pulled from other tabs, with a link to edit there):
 
 - Title, abstract and date (from the _Bibliographic information_ tab)
-- Authors and affiliations (from the _Authors_ tab)
+- Authors and affiliations (from the _Authors_ tab). If any author has affiliations that will be silently dropped at submission time (affiliations with no HAL-recognized identifier), show an inline warning: "Les structures d'affiliation de certains auteurs n'ont pas d'identifiant reconnu par HAL et ne seront pas soumises. Pour les compléter, rendez-vous dans l'onglet Auteurs." This is a soft warning — it does not block submission.
 
 **Deposit metadata** (editable, submitted with the deposit):
 
@@ -326,7 +328,7 @@ The form is pre-populated from the document's existing data where possible.
 | ------------- | ------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Document type | Select                    | Yes      | HAL typology (ART, COMM, THESE, HDR, OUV, COUV, REPORT, POSTER, PRESCONF). Pre-populated from the CERIF→HAL mapping but the user can refine it — this is the primary purpose of this field, since the internal CERIF typology is coarser than HAL's. |
 | HAL domains   | Multi-select autocomplete | Yes (≥1) | Populated from `halDomainsByCode` generated by `generate_hal_domains.ts` → `src/app/types/HalDomains.ts`. The script fetches the authoritative list from the HAL reference API at build/generate time.                                               |
-| Language      | Select                    | Yes      | Pre-populated from document. French should be prefered if available                                                                                                                                                                                  |
+| Language      | Select                    | Yes      | Language of the deposited file (not of the metadata). Must be set explicitly by the user; defaults to French.                                                                                                                                        |
 | License       | Select                    | Yes      | CC BY, CC BY-SA, CC BY-ND, CC BY-NC, CC BY-NC-ND, CC0.                                                                                                                                                                                               |
 
 **Conditional fields** (appear based on selected document type):

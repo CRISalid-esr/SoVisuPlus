@@ -7,10 +7,16 @@ dotenv.config()
 
 const parseArgs = (
   argv: string[],
-): { documentUid: string; domains: string[]; date?: string } => {
+): {
+  documentUid: string
+  domains: string[]
+  language?: string
+  halDocumentType?: string
+} => {
   let documentUid = ''
   const domains: string[] = []
-  let date: string | undefined
+  let language: string | undefined
+  let halDocumentType: string | undefined
   for (let i = 0; i < argv.length; i++) {
     switch (argv[i]) {
       case '--document-uid':
@@ -19,17 +25,22 @@ const parseArgs = (
       case '--domain':
         domains.push(argv[++i] ?? '')
         break
-      case '--date':
-        date = argv[++i]
+      case '--language':
+        language = argv[++i]
+        break
+      case '--hal-document-type':
+        halDocumentType = argv[++i]
         break
     }
   }
   if (!documentUid) throw new Error('--document-uid is required')
-  return { documentUid, domains, date }
+  return { documentUid, domains, language, halDocumentType }
 }
 
 const main = async () => {
-  const { documentUid, domains, date } = parseArgs(process.argv.slice(2))
+  const { documentUid, domains, language, halDocumentType } = parseArgs(
+    process.argv.slice(2),
+  )
 
   const dao = new DocumentDAO()
   const document = await dao.fetchDocumentById(documentUid)
@@ -39,8 +50,15 @@ const main = async () => {
     process.exit(1)
   }
 
+  if (!document.publicationDate) {
+    console.error(
+      `Document ${documentUid} has no publicationDate — cannot generate TEI`,
+    )
+    process.exit(1)
+  }
+
   const service = new HalTEIInterchangeService()
-  const tei = service.toHalTEI(document, { domains, productionDate: date })
+  const tei = service.toHalTEI(document, { domains, language, halDocumentType })
 
   process.stdout.write(tei + '\n')
 }
