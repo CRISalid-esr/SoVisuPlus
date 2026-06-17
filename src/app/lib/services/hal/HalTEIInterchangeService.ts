@@ -8,7 +8,6 @@ import xpath from 'xpath'
 
 export type HalTEIOptions = {
   domains?: string[]
-  productionDate?: string
   language?: string
 }
 
@@ -136,7 +135,7 @@ export class HalTEIInterchangeService {
       options.language ??
       process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0] ??
       'fr'
-    const date = options.productionDate ?? document.publicationDate ?? null
+    const date = document.publicationDate ?? null
 
     const dom = this.domParser.parseFromString(
       this.minimalTeiSkeletonXml(),
