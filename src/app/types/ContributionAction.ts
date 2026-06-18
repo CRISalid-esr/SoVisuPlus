@@ -16,6 +16,8 @@ export interface ContributionActionAffiliation {
   acronym: string | null
   name: string | null
   label: string | null
+  /** HAL affiliation type value (e.g. 'laboratory'); the graph maps it. */
+  type: string | null
   hal: string | null
   idref: string | null
   isni: string | null

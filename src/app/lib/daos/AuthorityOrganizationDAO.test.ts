@@ -1,5 +1,6 @@
 import {
   AuthorityOrganizationIdentifierType,
+  AuthorityOrganizationType,
   PrismaClient,
 } from '@prisma/client'
 import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
@@ -38,6 +39,7 @@ describe('AuthorityOrganizationDAO', () => {
   const organization = new AuthorityOrganization(
     '123',
     ['Some Organization'],
+    AuthorityOrganizationType.laboratory,
     [{ latitude: 53, longitude: 34 }],
     [
       {
@@ -62,6 +64,7 @@ describe('AuthorityOrganizationDAO', () => {
       data: {
         uid: '123',
         displayNames: ['Some Organization'],
+        type: AuthorityOrganizationType.laboratory,
         places: [{ latitude: 53, longitude: 34 }],
       },
       include: {
@@ -75,6 +78,7 @@ describe('AuthorityOrganizationDAO', () => {
       id: 1,
       uid: '123',
       displayNames: ['Some Organization'],
+      type: AuthorityOrganizationType.laboratory,
       places: [{ latitude: 53, longitude: 34 }],
       identifiers: [
         {
@@ -100,6 +104,7 @@ describe('AuthorityOrganizationDAO', () => {
       data: {
         uid: '123',
         displayNames: ['Some Organization'],
+        type: AuthorityOrganizationType.laboratory,
         places: [{ latitude: 53, longitude: 34 }],
       },
       include: {
@@ -113,6 +118,7 @@ describe('AuthorityOrganizationDAO', () => {
       id: 1,
       uid: '123',
       displayNames: ['Some Organization'],
+      type: AuthorityOrganizationType.laboratory,
       places: [{ latitude: 53, longitude: 34 }],
       identifiers: [
         {

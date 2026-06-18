@@ -362,10 +362,21 @@ model AuthorityOrganizationName {
   @@unique([language, value, organizationId])
 }
 
+enum AuthorityOrganizationType {
+  organization
+  research_team_group
+  laboratory
+  research_team
+  institution
+  laboratory_group
+  institution_group
+}
+
 model AuthorityOrganization {
   id            Int                               @id @default(autoincrement())
   uid           String                            @unique
   displayNames  String[]
+  type          AuthorityOrganizationType?
   names         AuthorityOrganizationName[]
   places        Json
   identifiers   AuthorityOrganizationIdentifier[]

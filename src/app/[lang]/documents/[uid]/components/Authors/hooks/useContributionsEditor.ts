@@ -10,6 +10,7 @@ import {
 } from '../lib/contributionDiff'
 import { halAuthorToContributionFields } from '../lib/halMapping'
 import { newLocalId } from '../lib/localId'
+import { HalAffiliationType } from '../lib/affiliationType'
 import { WorkingAffiliation, WorkingContribution } from '../lib/types'
 
 function newContribution(): WorkingContribution {
@@ -49,6 +50,11 @@ export interface ContributionsEditor {
     localId: string,
     affiliationLocalId: string,
     affiliation: WorkingAffiliation,
+  ) => void
+  setAffiliationType: (
+    localId: string,
+    affiliationLocalId: string,
+    type: HalAffiliationType | null,
   ) => void
   save: () => Promise<{ success: boolean }>
   cancel: () => void
@@ -256,6 +262,21 @@ export function useContributionsEditor(
     [updateContribution],
   )
 
+  const setAffiliationType = useCallback(
+    (
+      localId: string,
+      affiliationLocalId: string,
+      type: HalAffiliationType | null,
+    ) =>
+      updateContribution(localId, (c) => ({
+        ...c,
+        affiliations: c.affiliations.map((a) =>
+          a.localId === affiliationLocalId ? { ...a, type } : a,
+        ),
+      })),
+    [updateContribution],
+  )
+
   const save = useCallback(async (): Promise<{ success: boolean }> => {
     if (changes.length === 0) return { success: true }
     const result = await saveContributions(changes)
@@ -291,6 +312,7 @@ export function useContributionsEditor(
     addAffiliation,
     removeAffiliation,
     replaceAffiliation,
+    setAffiliationType,
     save,
     cancel,
   }

@@ -14,6 +14,8 @@ import { t } from '@lingui/core/macro'
 import { AureHalStructureDoc } from '@/lib/services/AureHalAPIClient'
 import { halStructureToAffiliation } from '../lib/halMapping'
 import { orderedAffiliationIdentifiers } from '../lib/affiliationDisplay'
+import { normalizeHalType } from '../lib/affiliationType'
+import { halAffiliationTypeLabel } from '../lib/affiliationTypeLabels'
 
 interface AffiliationSuggestionsProps {
   importedText: string
@@ -49,6 +51,7 @@ const SuggestionBox = ({
   const name = doc.name_s || doc.label_s || ''
   const ids = orderedAffiliationIdentifiers(halStructureToAffiliation(doc))
   const supervisor = supervisors(doc)
+  const affType = normalizeHalType(doc.type_s)
 
   return (
     <Box
@@ -83,7 +86,19 @@ const SuggestionBox = ({
             />
           ))}
         </Stack>
-        <Typography sx={{ mt: 0.5, fontWeight: 700 }}>{name}</Typography>
+        <Stack
+          direction='row'
+          spacing={0.5}
+          alignItems='center'
+          flexWrap='wrap'
+          useFlexGap
+          sx={{ mt: 0.5 }}
+        >
+          <Typography sx={{ fontWeight: 700 }}>{name}</Typography>
+          {affType && (
+            <Chip size='small' label={halAffiliationTypeLabel(affType)} />
+          )}
+        </Stack>
         {supervisor.values.length > 0 && (
           <Typography variant='caption' color='textSecondary' component='div'>
             {supervisor.values.length > 1

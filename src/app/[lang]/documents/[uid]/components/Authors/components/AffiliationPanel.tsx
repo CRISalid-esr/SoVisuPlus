@@ -1,5 +1,6 @@
 import { Stack } from '@mui/material'
 import { AureHalStructureDoc } from '@/lib/services/AureHalAPIClient'
+import { HalAffiliationType } from '../lib/affiliationType'
 import { WorkingAffiliation } from '../lib/types'
 import AffiliationCard from './AffiliationCard'
 import AddHalAffiliationAccordion from './AddHalAffiliationAccordion'
@@ -15,6 +16,10 @@ interface AffiliationPanelProps {
     affiliationLocalId: string,
     doc: AureHalStructureDoc,
   ) => void
+  onChangeAffiliationType: (
+    affiliationLocalId: string,
+    type: HalAffiliationType | null,
+  ) => void
   onAddAffiliation: (doc: AureHalStructureDoc) => void
 }
 
@@ -25,6 +30,7 @@ const AffiliationPanel = ({
   canAddAffiliation,
   onRemoveAffiliation,
   onReplaceAffiliation,
+  onChangeAffiliationType,
   onAddAffiliation,
 }: AffiliationPanelProps) => (
   <Stack spacing={1}>
@@ -36,6 +42,7 @@ const AffiliationPanel = ({
         readOnly={readOnly}
         onRemove={onRemoveAffiliation}
         onSelectStructure={onReplaceAffiliation}
+        onChangeType={onChangeAffiliationType}
       />
     ))}
     {!readOnly && (

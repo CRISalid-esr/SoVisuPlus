@@ -5,6 +5,8 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { LocRelator } from '@/types/LocRelator'
+import { AuthorityOrganization } from '@/types/AuthorityOrganization'
+import { AuthorityOrganizationType } from '@prisma/client'
 import {
   buildContributionChanges,
   workingFromContribution,
@@ -129,6 +131,30 @@ describe('buildContributionChanges', () => {
       expect(c.actionType).toBe('UPDATE')
       if (c.actionType === 'UPDATE') expect(c.parameters.rank).toBeNull()
     })
+  })
+
+  it('maps the DB affiliation type to its HAL default and carries a change in the payload', () => {
+    const org = new AuthorityOrganization(
+      'o1',
+      ['Some Lab'],
+      AuthorityOrganizationType.research_team,
+      [],
+      [],
+    )
+    const baseline = [
+      new Contribution(person('p1'), [LocRelator.AUTHOR], [org], null),
+    ]
+    const working = baseline.map(workingFromContribution)
+    // research_team -> researchteam (HAL default).
+    expect(working[0].affiliations[0].type).toBe('researchteam')
+
+    working[0].affiliations[0].type = 'institution'
+    const changes = buildContributionChanges(baseline, working, false)
+    expect(changes).toHaveLength(1)
+    expect(changes[0].actionType).toBe('UPDATE')
+    if (changes[0].actionType === 'UPDATE') {
+      expect(changes[0].parameters.affiliations[0].type).toBe('institution')
+    }
   })
 
   it('treats "Add contributor" on an existing contributor as REMOVE + ADD', () => {

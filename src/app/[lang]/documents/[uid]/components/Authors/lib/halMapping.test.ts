@@ -57,6 +57,24 @@ describe('halStructureToAffiliation', () => {
     expect(aff.name).toBe('Some Lab')
     expect(isAffiliationIdentified(aff)).toBe(true)
   })
+
+  it('maps a known type_s to the HAL affiliation type', () => {
+    const aff = halStructureToAffiliation({
+      docid: '301',
+      name_s: 'Some Lab',
+      type_s: 'researchteam',
+    })
+    expect(aff.type).toBe('researchteam')
+  })
+
+  it('drops an unknown type_s to null', () => {
+    const aff = halStructureToAffiliation({
+      docid: '302',
+      name_s: 'Some Lab',
+      type_s: 'regroupinstitution',
+    })
+    expect(aff.type).toBeNull()
+  })
 })
 
 const affiliation = (
@@ -66,6 +84,7 @@ const affiliation = (
   acronym: null,
   name: null,
   label: null,
+  type: null,
   hal: null,
   idref: null,
   isni: null,

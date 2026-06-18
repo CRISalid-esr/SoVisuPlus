@@ -2,7 +2,9 @@ import {
   Box,
   Chip,
   IconButton,
+  MenuItem,
   Stack,
+  TextField,
   Tooltip,
   Typography,
 } from '@mui/material'
@@ -13,6 +15,11 @@ import { AureHalStructureDoc } from '@/lib/services/AureHalAPIClient'
 import { WorkingAffiliation } from '../lib/types'
 import { isAffiliationIdentified } from '../lib/halMapping'
 import { orderedAffiliationIdentifiers } from '../lib/affiliationDisplay'
+import {
+  HAL_AFFILIATION_TYPES,
+  HalAffiliationType,
+} from '../lib/affiliationType'
+import { halAffiliationTypeLabel } from '../lib/affiliationTypeLabels'
 import AffiliationSuggestions from './AffiliationSuggestions'
 import HalStructureAutocomplete from './HalStructureAutocomplete'
 
@@ -25,6 +32,10 @@ interface AffiliationCardProps {
     affiliationLocalId: string,
     doc: AureHalStructureDoc,
   ) => void
+  onChangeType: (
+    affiliationLocalId: string,
+    type: HalAffiliationType | null,
+  ) => void
 }
 
 const AffiliationCard = ({
@@ -33,6 +44,7 @@ const AffiliationCard = ({
   readOnly,
   onRemove,
   onSelectStructure,
+  onChangeType,
 }: AffiliationCardProps) => {
   const identified = isAffiliationIdentified(affiliation)
   const name =
@@ -72,11 +84,49 @@ const AffiliationCard = ({
 
       {identified ? (
         <>
-          <Stack direction='row' spacing={1} alignItems='center'>
-            <CheckCircle color='success' fontSize='small' />
-            <Typography sx={{ color: 'primary.main', fontWeight: 700 }}>
-              {name}
-            </Typography>
+          <Stack
+            direction='row'
+            spacing={1}
+            alignItems='center'
+            justifyContent='space-between'
+          >
+            <Stack
+              direction='row'
+              spacing={1}
+              alignItems='center'
+              sx={{ minWidth: 0 }}
+            >
+              <CheckCircle color='success' fontSize='small' />
+              <Typography
+                noWrap
+                sx={{ color: 'primary.main', fontWeight: 700 }}
+              >
+                {name}
+              </Typography>
+            </Stack>
+            <TextField
+              select
+              size='small'
+              label={t`documents_details_page_authors_tab_affiliation_type_label`}
+              value={affiliation.type ?? ''}
+              disabled={disabled || readOnly}
+              onChange={(event) =>
+                onChangeType(
+                  affiliation.localId,
+                  (event.target.value || null) as HalAffiliationType | null,
+                )
+              }
+              sx={{ flexShrink: 0, minWidth: 180, ml: 1, mr: readOnly ? 0 : 4 }}
+            >
+              <MenuItem value=''>
+                <em>{t`documents_details_page_authors_tab_affiliation_type_none`}</em>
+              </MenuItem>
+              {HAL_AFFILIATION_TYPES.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {halAffiliationTypeLabel(type)}
+                </MenuItem>
+              ))}
+            </TextField>
           </Stack>
           <Stack
             direction='row'

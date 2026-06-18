@@ -4,13 +4,17 @@ import {
   AuthorityOrganizationJson,
 } from '@/types/AuthorityOrganization'
 import { AuthorityOrganizationWithRelations as DbAuthorityOrganization } from '@/prisma-schema/extended-client'
-import { AuthorityOrganizationIdentifierType } from '@prisma/client'
+import {
+  AuthorityOrganizationIdentifierType,
+  AuthorityOrganizationType,
+} from '@prisma/client'
 
 describe('AuthorityOrganization.fromJson', () => {
   it('should parse AuthorityOrganizationJson to AuthorityOrganization correctly ', () => {
     const input: AuthorityOrganizationJson = {
       uid: '123',
       displayNames: ['Some Organization'],
+      type: 'laboratory',
       places: [{ latitude: 53, longitude: 34 }],
       identifiers: [
         {
@@ -25,6 +29,7 @@ describe('AuthorityOrganization.fromJson', () => {
     expect(organization.uid).toBe('123')
     expect(organization.displayNames).toHaveLength(1)
     expect(organization.displayNames[0]).toBe('Some Organization')
+    expect(organization.type).toBe(AuthorityOrganizationType.laboratory)
     expect(organization.places).toHaveLength(1)
     expect(organization.places[0]).toEqual({ latitude: 53, longitude: 34 })
     expect(organization.identifiers).toHaveLength(1)
@@ -41,6 +46,7 @@ describe('AuthorityOrganization.fromDb', () => {
       id: 1,
       uid: '123',
       displayNames: ['Some Organization'],
+      type: AuthorityOrganizationType.laboratory,
       places: [{ latitude: 53, longitude: 34 }],
       identifiers: [
         {
@@ -57,6 +63,7 @@ describe('AuthorityOrganization.fromDb', () => {
     expect(organization.uid).toBe('123')
     expect(organization.displayNames).toHaveLength(1)
     expect(organization.displayNames[0]).toBe('Some Organization')
+    expect(organization.type).toBe(AuthorityOrganizationType.laboratory)
     expect(organization.places).toHaveLength(1)
     expect(organization.places[0]).toEqual({ latitude: 53, longitude: 34 })
     expect(organization.identifiers).toHaveLength(1)
