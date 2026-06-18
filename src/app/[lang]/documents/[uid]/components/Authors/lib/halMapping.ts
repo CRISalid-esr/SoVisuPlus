@@ -5,6 +5,7 @@ import {
 } from '@/lib/services/AureHalAPIClient'
 import { newLocalId } from './localId'
 import { truncateRor } from './affiliationDisplay'
+import { normalizeHalType } from './affiliationType'
 import {
   WorkingAffiliation,
   WorkingContribution,
@@ -82,6 +83,7 @@ export function halStructureToAffiliation(
     acronym: doc.acronym_s ?? null,
     name,
     label: doc.label_s ?? null,
+    type: normalizeHalType(doc.type_s),
     hal: doc.docid ?? null,
     idref: firstOrNull(doc.idref_s),
     isni: firstOrNull(doc.isni_s),

@@ -5,6 +5,7 @@ import { t } from '@lingui/core/macro'
 import { LocRelator } from '@/types/LocRelator'
 import { AureHalAuthorDoc } from '@/lib/services/AureHalAPIClient'
 import { halStructureToAffiliation } from '../lib/halMapping'
+import { HalAffiliationType } from '../lib/affiliationType'
 import { WorkingAffiliation, WorkingContribution } from '../lib/types'
 import ContributorLeftPanel from './ContributorLeftPanel'
 import AffiliationPanel from './AffiliationPanel'
@@ -32,6 +33,11 @@ interface ContributionCardProps {
     affiliationLocalId: string,
     affiliation: WorkingAffiliation,
   ) => void
+  setAffiliationType: (
+    localId: string,
+    affiliationLocalId: string,
+    type: HalAffiliationType | null,
+  ) => void
   addAffiliation: (localId: string, affiliation: WorkingAffiliation) => void
 }
 
@@ -50,6 +56,7 @@ const ContributionCard = memo(function ContributionCard({
   setRoles,
   removeAffiliation,
   replaceAffiliation,
+  setAffiliationType,
   addAffiliation,
 }: ContributionCardProps) {
   const { localId } = contribution
@@ -175,6 +182,9 @@ const ContributionCard = memo(function ContributionCard({
                 affLocalId,
                 halStructureToAffiliation(doc),
               )
+            }
+            onChangeAffiliationType={(affLocalId, type) =>
+              setAffiliationType(localId, affLocalId, type)
             }
             onAddAffiliation={(doc) =>
               addAffiliation(localId, halStructureToAffiliation(doc))

@@ -1,6 +1,9 @@
 import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
-import { AuthorityOrganizationIdentifierType } from '@prisma/client'
+import {
+  AuthorityOrganizationIdentifierType,
+  AuthorityOrganizationType,
+} from '@prisma/client'
 import prisma from '@/lib/daos/prisma'
 
 describe('AuthorityOrganizationDAO Integration Tests', () => {
@@ -14,6 +17,7 @@ describe('AuthorityOrganizationDAO Integration Tests', () => {
   const authorityOrganization = new AuthorityOrganization(
     '123',
     ['Some Organization'],
+    AuthorityOrganizationType.laboratory,
     [{ latitude: 53, longitude: 34 }],
     [
       {

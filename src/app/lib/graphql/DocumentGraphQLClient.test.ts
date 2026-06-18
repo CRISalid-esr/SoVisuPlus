@@ -18,6 +18,7 @@ import { SourceJournal } from '@/types/SourceJournal'
 import {
   PublicationIdentifierType,
   AuthorityOrganizationIdentifierType,
+  AuthorityOrganizationType,
   OAStatus,
 } from '@prisma/client'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
@@ -82,6 +83,7 @@ describe('DocumentGraphQLClient', () => {
                 {
                   uid: 'some-org-001',
                   display_names: ['Some Organization'],
+                  type: 'laboratory',
                   places: [
                     {
                       latitude: 1.23456,
@@ -205,6 +207,7 @@ describe('DocumentGraphQLClient', () => {
             new AuthorityOrganization(
               'some-org-001',
               ['Some Organization'],
+              AuthorityOrganizationType.laboratory,
               [
                 {
                   latitude: 1.23456,
