@@ -119,6 +119,33 @@ Implementation (backend + helpers, all still current):
 
 ---
 
+## Instruction 6 — remove-date (bin) button
+
+> Add a bin icon button at the top-right corner of the date calendar popover that lets the
+> user remove the date completely (set `publicationDate` to null). *(First asked with a
+> confirmation dialog; then revised:)* no dialog — clicking the bin should clear the current
+> selection (day, month and year) and show a blank Year step. The Apply/Confirm button then
+> saves as usual, and **with no selection it saves null**.
+
+- A `DeleteOutline` `IconButton` (error colour, `size='small'`) sits in a header row of the
+  popover, right-aligned opposite the `..._select_label` title (header `Box` with
+  `justifyContent: 'space-between'`). Tooltip/`aria-label` =
+  `document_details_page_publication_date_remove_button` ("Remove date" / "Supprimer la
+  date").
+- Clicking it runs `clearSelection()`: `setValue(null)`, `setPrecision('year')`,
+  `setActiveStep('year')` — i.e. a blank Year grid. Nothing is persisted yet. The bin is
+  `disabled` when there is no current selection (`!value`).
+- **No confirmation dialog** (the initial dialog version was removed).
+- `handleApply` now persists `value ? serializePublicationDate(value, precision) : null`, and
+  the Apply button is no longer `disabled` on empty selection — so clear-then-Apply removes
+  the date. (Previously Apply did `if (!value) return handleClose()`, i.e. it did **not**
+  save null; this was fixed.)
+- i18n: only `..._remove_button` is needed; the short-lived dialog ids
+  (`..._remove_dialog_title` / `..._remove_dialog_text` / `..._remove_confirm`) were removed
+  by `i18n:extract --clean`.
+
+---
+
 ## Files
 
 - `src/app/utils/publicationDate.ts` (+ `publicationDate.test.ts`)
@@ -136,7 +163,7 @@ Implementation (backend + helpers, all still current):
 ## Verification
 
 - `npx tsc --noEmit` and `npx next lint` clean for the touched files.
-- `npx jest PublicationDate.test BibliographicInformation.test` → green (29 tests). Note: the
+- `npx jest PublicationDate.test BibliographicInformation.test` → green (31 tests). Note: the
   component path contains `[lang]`/`[uid]`, which jest reads as a regex — use a plain pattern
   like `npx jest PublicationDate.test`, not the bracketed path.
 - i18n: `npm run i18n:extract` then fill new `msgstr` in `src/locales/{en,fr}/messages.po`,
@@ -146,5 +173,7 @@ Implementation (backend + helpers, all still current):
   icon button (rounded border) opens the stepper; picking a year auto-advances to a blank
   Month step, then to a blank Day step (no arrows); previous steps stay teal; the selected
   day is solid teal; Apply stores `YYYY` / `YYYY-MM` / `YYYY-MM-DD` and persists across reload.
+  The top-right bin clears the selection back to a blank Year step (no dialog), and Apply with
+  no selection clears the date (`null`).
   Clean up local footprints afterwards (restore edited documents, delete audit `Action` rows,
   stop the dev server, remove temp files).

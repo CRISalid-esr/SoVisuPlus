@@ -17,6 +17,7 @@ import {
   Typography,
 } from '@mui/material'
 import EditCalendarIcon from '@mui/icons-material/EditCalendar'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import { YearCalendar } from '@mui/x-date-pickers/YearCalendar'
 import { MonthCalendar } from '@mui/x-date-pickers/MonthCalendar'
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar'
@@ -100,10 +101,11 @@ const PublicationDate = ({
   }
   const handleClose = () => setAnchorEl(null)
 
+  // Save the current selection. With no selection the publication date is
+  // cleared (set to null).
   const handleApply = async () => {
-    if (!value) return handleClose()
     const response = await modifyPublicationDate(
-      serializePublicationDate(value, precision),
+      value ? serializePublicationDate(value, precision) : null,
     )
     setAlert?.({
       open: true,
@@ -115,6 +117,14 @@ const PublicationDate = ({
       ),
     })
     handleClose()
+  }
+
+  // Clear the in-popover selection (day, month and year) and return to a blank
+  // year step. Nothing is persisted until Apply.
+  const clearSelection = () => {
+    setValue(null)
+    setPrecision('year')
+    setActiveStep('year')
   }
 
   // Step navigation: a previous/current step drops the deeper levels (keeping
@@ -156,6 +166,7 @@ const PublicationDate = ({
     : t`documents_page_publication_date_column_no_date_available`
 
   const editLabel = t`document_details_page_publication_date_row_edit_button`
+  const removeLabel = t`document_details_page_publication_date_remove_button`
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -193,9 +204,33 @@ const PublicationDate = ({
           slotProps={{ paper: { sx: { p: 2 } } }}
         >
           <Stack spacing={1.5} sx={{ minWidth: 300 }}>
-            <Typography variant='subtitle2'>
-              <Trans>document_details_page_publication_date_select_label</Trans>
-            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 1,
+              }}
+            >
+              <Typography variant='subtitle2'>
+                <Trans>
+                  document_details_page_publication_date_select_label
+                </Trans>
+              </Typography>
+              <Tooltip title={removeLabel}>
+                <span>
+                  <IconButton
+                    aria-label={removeLabel}
+                    size='small'
+                    color='error'
+                    disabled={!value}
+                    onClick={clearSelection}
+                  >
+                    <DeleteOutlineIcon fontSize='small' />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            </Box>
 
             {/* Steps: next adds a deeper level, previous removes deeper levels */}
             <Stepper nonLinear activeStep={activeIndex} alternativeLabel>
@@ -275,11 +310,7 @@ const PublicationDate = ({
               <Button onClick={handleClose}>
                 <Trans>document_details_page_cancel_button</Trans>
               </Button>
-              <Button
-                variant='contained'
-                onClick={handleApply}
-                disabled={!value}
-              >
+              <Button variant='contained' onClick={handleApply}>
                 <Trans>document_details_page_apply_button</Trans>
               </Button>
             </Box>

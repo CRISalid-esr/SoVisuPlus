@@ -1,4 +1,4 @@
-import { Box, IconButton, TableCell, TableRow } from '@mui/material'
+import { Box, TableCell, TableRow } from '@mui/material'
 import * as Lingui from '@lingui/core'
 import { useEffect, useState } from 'react'
 
@@ -11,13 +11,9 @@ import {
   DocumentField,
   DocumentLocalizableFieldKey,
 } from './BibliographicInformation'
-import EditIcon from '@mui/icons-material/Edit'
 import styles from './Row.module.css'
-import { useTheme } from '@mui/material/styles'
-import EditLocaleText from '@/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText'
 
 const Row = ({ field }: { field: DocumentField }) => {
-  const theme = useTheme()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const [selectedLang, setSelectedLang] = useState<string>(lang)
   const [content, setContent] = useState('')
@@ -58,7 +54,7 @@ const Row = ({ field }: { field: DocumentField }) => {
 
   return (
     <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-      <TableCell component='th' scope='row'>
+      <TableCell component='th' scope='row' sx={{ verticalAlign: 'middle' }}>
         <Box sx={{ alignItems: 'center', display: 'flex', gap: '2rem' }}>
           <RowLabel>{field.title}</RowLabel>
 
@@ -77,18 +73,17 @@ const Row = ({ field }: { field: DocumentField }) => {
         </Box>
       </TableCell>
 
-      <TableCell
-        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-        className={styles.cell}
-      >
-        {field.component && (
-          <field.component
-            content={content}
-            field={field}
-            edit={displayEdit}
-            setEdit={setDisplayEdit}
-          ></field.component>
-        )}
+      <TableCell sx={{ verticalAlign: 'middle' }} className={styles.cell}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {field.component && (
+            <field.component
+              content={content}
+              field={field}
+              edit={displayEdit}
+              setEdit={setDisplayEdit}
+            ></field.component>
+          )}
+        </Box>
       </TableCell>
     </TableRow>
   )

@@ -35,6 +35,7 @@ const APPLY_BTN = /document_details_page_apply_button/i
 const STEP_YEAR = /document_details_page_publication_date_step_year/i
 const STEP_MONTH = /document_details_page_publication_date_step_month/i
 const STEP_DAY = /document_details_page_publication_date_step_day/i
+const REMOVE_BTN = /document_details_page_publication_date_remove_button/i
 
 const makeDoc = (
   publicationDate: string | null,
@@ -261,6 +262,31 @@ describe('PublicationDate component', () => {
       fireEvent.click(screen.getByRole('button', { name: EDIT_BTN }))
       // No year picked yet → the Month step cannot be reached.
       expect(screen.getByRole('button', { name: STEP_MONTH })).toBeDisabled()
+    })
+
+    it('clears the selection then saves null on Apply (no dialog)', async () => {
+      const { modifyPublicationDate } = setup({ publicationDate: '2024-03-15' })
+      renderComponent()
+
+      fireEvent.click(screen.getByRole('button', { name: EDIT_BTN }))
+      // The bin clears the in-popover selection (no confirmation dialog)...
+      fireEvent.click(screen.getByRole('button', { name: REMOVE_BTN }))
+      // ...and once cleared it disables itself.
+      expect(screen.getByRole('button', { name: REMOVE_BTN })).toBeDisabled()
+      // Apply with no selection persists null.
+      fireEvent.click(screen.getByRole('button', { name: APPLY_BTN }))
+
+      await waitFor(() =>
+        expect(modifyPublicationDate).toHaveBeenCalledWith(null),
+      )
+    })
+
+    it('disables the remove button when there is no selection', () => {
+      setup({ publicationDate: null })
+      renderComponent()
+
+      fireEvent.click(screen.getByRole('button', { name: EDIT_BTN }))
+      expect(screen.getByRole('button', { name: REMOVE_BTN })).toBeDisabled()
     })
 
     it('auto-advances to the next deeper step after each pick', async () => {
