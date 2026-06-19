@@ -70,6 +70,56 @@ const CollaborationMap = ({
   )
 
   /**
+   * Smoothly zoom about a client-space point by replaying real mouse-wheel
+   * events — the same RoamController path scrolling uses, so the geo base and
+   * the scatter stay in sync (no shift) and the merged points are recomputed
+   * through the existing `georoam` -> `handleRoam` wiring. The ticks are spread
+   * evenly over a short duration so the zoom glides. Each tick is echarts'
+   * smallest step (factor 1.1, reached when the normalised |deltaY| <= 40);
+   * wheel up (negative deltaY) zooms in.
+   */
+  const smoothWheelZoom = useCallback(
+    (
+      clientX: number,
+      clientY: number,
+      totalTicks: number,
+      out: boolean,
+      interval = 45, // ms between ticks (lower = faster glide)
+    ) => {
+      const map = chartRef.current?.getEchartsInstance() as ECharts | undefined
+      if (!map) return
+      const dom = map.getDom() as HTMLElement
+      const target = (dom.querySelector('canvas') as HTMLElement | null) ?? dom
+      const deltaY = out ? 30 : -30
+      const fireWheel = () =>
+        target.dispatchEvent(
+          new WheelEvent('wheel', {
+            deltaY,
+            clientX,
+            clientY,
+            bubbles: true,
+            cancelable: true,
+          }),
+        )
+
+      const start = performance.now()
+      let fired = 0
+      let nextAt = 0
+      const step = (now: number) => {
+        const elapsed = now - start
+        while (fired < totalTicks && elapsed >= nextAt) {
+          fireWheel()
+          fired += 1
+          nextAt += interval
+        }
+        if (fired < totalTicks) requestAnimationFrame(step)
+      }
+      requestAnimationFrame(step)
+    },
+    [],
+  )
+
+  /**
    * Update map on rendering
    * @param map the echarts component rendering the datavizualisation
    */
@@ -142,18 +192,44 @@ const CollaborationMap = ({
 
       if (params.componentType === 'geo') {
         const countryName = params.name
-        const center = countryCenters[countryName].geometry.coordinates
+        const center = countryCenters[countryName]?.geometry.coordinates
 
         if (!center) {
           return
         }
 
-        chart.setOption({
-          geo: {
-            center: center,
-            zoom: 4,
-          },
-        })
+        // Smoothly zoom in towards the clicked country using the same wheel
+        // path as the toolbox buttons (geo base and points stay in sync, no
+        // shift). Aim for ~zoom 4: derive how many 1.1 ticks reach it from the
+        // current zoom, and zoom about the country's on-screen position.
+        const instance = chartRef.current?.getEchartsInstance() as
+          | ECharts
+          | undefined
+        if (!instance) return
+        const px = instance.convertToPixel(
+          { geoIndex: 0 },
+          center as number[],
+        ) as number[] | undefined
+        if (!px) return
+        const dom = instance.getDom() as HTMLElement
+        const target =
+          (dom.querySelector('canvas') as HTMLElement | null) ?? dom
+        const rect = target.getBoundingClientRect()
+        const currentZoom =
+          (instance.getOption() as { geo?: { zoom?: number }[] }).geo?.[0]
+            ?.zoom || 1
+        const factor = 4 / currentZoom
+        const ticks = Math.max(
+          1,
+          Math.round(Math.abs(Math.log(factor)) / Math.log(1.1)),
+        )
+        smoothWheelZoom(
+          rect.left + px[0],
+          rect.top + px[1],
+          ticks,
+          factor < 1,
+          30,
+        )
 
         return
       }
@@ -173,25 +249,25 @@ const CollaborationMap = ({
       document.removeEventListener('click', handleDocumentClick)
       chart.off('click', handleClick)
     }
-  }, [countryCenters])
+  }, [countryCenters, smoothWheelZoom])
   /**
-   * Zoom in or out action perform by custom toolbox zoom buttons
+   * Zoom in or out action perform by custom toolbox zoom buttons.
+   * Zooms about the centre of the map over 6 wheel ticks.
    * @param out boolean telling whether it must perform zoom out instead of in
    */
   const zoomInOut = (out: boolean) => {
-    const map = chartRef.current?.getEchartsInstance() as EChartsOption & {
-      geo?: GeoComponentOption
-    }
-    if (map) {
-      const geo = map.getOption().geo?.[0]
-      if (geo) {
-        const scale = out ? 0.8 : 1.2
-        const newZoom = (geo.zoom || 1) * scale
-        map.setOption({
-          geo: [{ zoom: newZoom }],
-        })
-      }
-    }
+    const map = chartRef.current?.getEchartsInstance() as ECharts | undefined
+    if (!map) return
+    const dom = map.getDom() as HTMLElement
+    const target = (dom.querySelector('canvas') as HTMLElement | null) ?? dom
+    const rect = target.getBoundingClientRect()
+    smoothWheelZoom(
+      rect.left + rect.width / 2,
+      rect.top + rect.height / 2,
+      6,
+      out,
+      35,
+    )
   }
 
   const navigateToDetailsPage = useCallback(

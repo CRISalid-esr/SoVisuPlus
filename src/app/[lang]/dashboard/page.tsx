@@ -32,7 +32,6 @@ import {
 import CollaborationMap from '@/app/[lang]/dashboard/components/CollaborationMap/CollaborationMap'
 
 const DEFAULT_TOP_N = 10
-const DEFAULT_START_YEAR = 2010
 const DEFAULT_MIN_FONT = 15
 const DEFAULT_MAX_FONT = 30
 
@@ -66,7 +65,11 @@ const DashboardPage = () => {
   const theme = useTheme()
   const { _ } = useLingui()
   const { currentPerspective } = useStore((state) => state.user)
+  const { yearRange, setYearRange, initYearRangeForPerspective } = useStore(
+    (state) => state.dashboard,
+  )
   const [documents, setDocuments] = useState<Record<number, DocumentData[]>>([])
+  const [oldestYear, setOldestYear] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const lang = (Lingui.i18n.locale || 'ul') as ExtendedLanguageCode
   const entityType = currentPerspective?.type
@@ -79,26 +82,19 @@ const DashboardPage = () => {
   const [pendingWSFontRange, setPendingWSFontRange] = useState<
     [number, number]
   >([DEFAULT_MIN_FONT, DEFAULT_MAX_FONT])
-  const [pendingWSYearRange, setPendingWSYearRange] = useState<
-    [number, number]
-  >([DEFAULT_START_YEAR, currentYear])
 
   const [appliedWSTopN, setAppliedWSTopN] = useState<number>(DEFAULT_TOP_N)
   const [appliedWSFontRange, setAppliedWSFontRange] = useState<
     [number, number]
   >([DEFAULT_MIN_FONT, DEFAULT_MAX_FONT])
-  const [appliedWSYearRange, setAppliedWSYearRange] = useState<
-    [number, number]
-  >([DEFAULT_START_YEAR, currentYear])
 
-  // Reset controls when perspective changes
+  // Reset controls when perspective changes (year range is handled by the
+  // dashboard store via initYearRangeForPerspective in the fetch effect)
   useEffect(() => {
     setPendingWSTopN(DEFAULT_TOP_N)
     setPendingWSFontRange([DEFAULT_MIN_FONT, DEFAULT_MAX_FONT])
-    setPendingWSYearRange([DEFAULT_START_YEAR, currentYear])
     setAppliedWSTopN(DEFAULT_TOP_N)
     setAppliedWSFontRange([DEFAULT_MIN_FONT, DEFAULT_MAX_FONT])
-    setAppliedWSYearRange([DEFAULT_START_YEAR, currentYear])
   }, [uid, entityType, currentYear])
 
   useEffect(() => {
@@ -152,7 +148,9 @@ const DashboardPage = () => {
             ? currentYear - 5
             : oldestYear
           : currentYear
-        setPendingWSYearRange([start, currentYear])
+        setOldestYear(oldestYear)
+        if (contributorUid)
+          initYearRangeForPerspective(contributorUid, [start, currentYear])
         setDocuments(documents)
       } catch (error) {
         console.error('Error while fetching documents per year', error)
@@ -160,20 +158,17 @@ const DashboardPage = () => {
       setLoading(false)
     }
     fetchData()
-  }, [currentPerspective, currentYear])
+  }, [currentPerspective, currentYear, initYearRangeForPerspective])
 
   const wsSliderHaveChanges = !(
     pendingWSTopN === appliedWSTopN &&
     pendingWSFontRange[0] === appliedWSFontRange[0] &&
-    pendingWSFontRange[1] === appliedWSFontRange[1] &&
-    pendingWSYearRange[0] === appliedWSYearRange[0] &&
-    pendingWSYearRange[1] === appliedWSYearRange[1]
+    pendingWSFontRange[1] === appliedWSFontRange[1]
   )
 
   const handleWSSliderValidate = () => {
     setAppliedWSTopN(pendingWSTopN)
     setAppliedWSFontRange(pendingWSFontRange)
-    setAppliedWSYearRange(pendingWSYearRange)
   }
 
   const DashboardHeaderTitle = ({
@@ -195,6 +190,11 @@ const DashboardPage = () => {
   )
 
   const canShowWordstream = Boolean(uid && entityType)
+
+  // Earliest selectable start year: the perspective's oldest publication year,
+  // falling back to currentYear before documents load, and never above the
+  // currently-selected start so its value always stays in the options list.
+  const minStartYear = Math.min(oldestYear ?? currentYear, yearRange[0])
 
   return (
     <Box>
@@ -228,19 +228,16 @@ const DashboardPage = () => {
           >
             <Typography>{t`dashboard_page_publication_by_year_graph_start_year_selection_label`}</Typography>
             <Select
-              value={pendingWSYearRange[0]}
+              value={yearRange[0]}
               onChange={(event) =>
-                setPendingWSYearRange([
-                  event.target.value as number,
-                  pendingWSYearRange[1],
-                ])
+                setYearRange([event.target.value as number, yearRange[1]])
               }
             >
               {Array.from(
                 {
-                  length: currentYear - 1990 + 1,
+                  length: currentYear - minStartYear + 1,
                 },
-                (_, i) => 1990 + i,
+                (_, i) => minStartYear + i,
               ).map((year) => (
                 <MenuItem key={year} value={year}>
                   {year}
@@ -259,17 +256,14 @@ const DashboardPage = () => {
           >
             <Typography>{t`dashboard_page_publication_by_year_graph_end_year_selection_label`}</Typography>
             <Select
-              value={pendingWSYearRange[1]}
+              value={yearRange[1]}
               onChange={(event) =>
-                setPendingWSYearRange([
-                  pendingWSYearRange[0],
-                  event.target.value as number,
-                ])
+                setYearRange([yearRange[0], event.target.value as number])
               }
             >
               {Array.from(
-                { length: currentYear - pendingWSYearRange[0] + 1 },
-                (_, i) => pendingWSYearRange[0] + i,
+                { length: currentYear - yearRange[0] + 1 },
+                (_, i) => yearRange[0] + i,
               ).map((year) => (
                 <MenuItem key={year} value={year}>
                   {year}
@@ -303,7 +297,7 @@ const DashboardPage = () => {
           >
             <CardContent>
               <PublicationCard
-                yearRange={pendingWSYearRange}
+                yearRange={yearRange}
                 data={documents}
                 loading={loading}
               />
@@ -335,8 +329,8 @@ const DashboardPage = () => {
                   entityType={entityType!}
                   lang={lang}
                   topics={[WordstreamTopic.Concepts, WordstreamTopic.CoAuthors]}
-                  fromYear={pendingWSYearRange[0]}
-                  toYear={pendingWSYearRange[1]}
+                  fromYear={yearRange[0]}
+                  toYear={yearRange[1]}
                   topN={appliedWSTopN}
                   minFont={appliedWSFontRange[0]}
                   maxFont={appliedWSFontRange[1]}
@@ -436,7 +430,7 @@ const DashboardPage = () => {
         >
           <CardContent sx={{ height: 'fit-content' }}>
             <CollaborationMap
-              yearRange={pendingWSYearRange}
+              yearRange={yearRange}
               data={documents}
               loading={loading}
             />
