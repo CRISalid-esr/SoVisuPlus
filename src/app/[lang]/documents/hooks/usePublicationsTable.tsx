@@ -151,6 +151,13 @@ const usePublicationsTableStorage = (
       pageSize: number
     }>
   >,
+  setGlobalFilter: React.Dispatch<React.SetStateAction<string>>,
+  setColumnFilters: React.Dispatch<
+    React.SetStateAction<MRT_ColumnFiltersState>
+  >,
+  setStructuresFilter: React.Dispatch<
+    React.SetStateAction<{ uid: string; name: string }[]>
+  >,
 ) => {
   useEffect(() => {
     const id = setTimeout(() => {
@@ -208,6 +215,23 @@ const usePublicationsTableStorage = (
           pageIndex: DEFAULT_PAGINATION.pageIndex,
           pageSize: DEFAULT_PAGINATION.pageSize,
         })
+        // Clear all filters on perspective change: the partnership/affiliation
+        // context (and any other filter) is meaningless under a new perspective.
+        setStructuresFilter([])
+        setColumnFilters([])
+        setGlobalFilter('')
+        sessionStorage.setItem(
+          'mrt_structuresFilter_publication_table',
+          JSON.stringify([]),
+        )
+        sessionStorage.setItem(
+          'mrt_columnFilters_publication_table',
+          JSON.stringify([]),
+        )
+        sessionStorage.setItem(
+          'mrt_global_publication_table',
+          JSON.stringify(''),
+        )
         return
       }
     }
@@ -215,7 +239,14 @@ const usePublicationsTableStorage = (
       'mrt_pagination_publication_table',
       JSON.stringify({ ...pagination, slug: currentPerspective?.slug }),
     )
-  }, [currentPerspective, pagination, setPagination])
+  }, [
+    currentPerspective,
+    pagination,
+    setPagination,
+    setGlobalFilter,
+    setColumnFilters,
+    setStructuresFilter,
+  ])
 }
 
 const usePublicationsTableDataFetching = (
@@ -376,6 +407,9 @@ export const usePublicationsTable = (
     columnFilters,
     pagination,
     setPagination,
+    setGlobalFilter,
+    setColumnFilters,
+    setStructuresFilter,
   )
 
   useEffect(() => {
@@ -892,7 +926,7 @@ export const usePublicationsTable = (
     ],
   )
 
-  const table = useDocumentTable(tableOptions)
+  const table = useDocumentTable(tableOptions, () => setStructuresFilter([]))
   return {
     table: table,
     selectedDocuments: selectedDocuments,

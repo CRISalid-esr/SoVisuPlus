@@ -51,7 +51,7 @@ next-env.d.ts
 .vscode/launch.json
 
 # messages.js
-messages.js
+src/locales/*/messages.js
 
 # RBAC (env-specific)
 rbac.roles.yaml
