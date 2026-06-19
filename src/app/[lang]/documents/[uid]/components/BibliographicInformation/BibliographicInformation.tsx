@@ -105,7 +105,7 @@ const BibliographicInformation = () => {
     date: {
       value: 'date',
       title: t`document_details_page_publication_date_row_label`,
-      component: PublicationDate,
+      component: (props) => <PublicationDate {...props} setAlert={setAlert} />,
     },
     abstracts: {
       value: 'abstracts',

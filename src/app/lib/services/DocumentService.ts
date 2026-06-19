@@ -530,4 +530,37 @@ export class DocumentService {
       throw new Error(message)
     }
   }
+
+  async updatePublicationDate(
+    documentUid: string,
+    publicationDate: string | null,
+    userName: string,
+  ): Promise<void> {
+    try {
+      const user = await this.userDAO.getUserByIdentifier(
+        new PersonIdentifier(PersonIdentifierType.local, userName),
+      )
+      if (!user?.person) {
+        throw new Error(`User with username ${userName} not found`)
+      }
+
+      await this.documentDAO.updatePublicationDateByUid(
+        documentUid,
+        publicationDate,
+      )
+
+      await this.actionDAO.createAction({
+        actionType: ActionType.UPDATE,
+        targetType: ActionTargetType.DOCUMENT,
+        targetUid: documentUid,
+        path: 'publicationDate',
+        parameters: { value: publicationDate },
+        personUid: user.person.uid,
+      })
+    } catch (error) {
+      const message = 'Error updating publication date'
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
 }

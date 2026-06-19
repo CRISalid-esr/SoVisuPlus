@@ -24,6 +24,7 @@ describe('Zustand Global Store - useStore with DocumentSlice', () => {
         addConcepts: jest.fn(),
         modifyTitles: jest.fn(),
         modifyAbstracts: jest.fn(),
+        modifyPublicationDate: jest.fn(),
         saveContributions: jest.fn(),
         contributionsTabDirty: false,
         setContributionsTabDirty: jest.fn(),

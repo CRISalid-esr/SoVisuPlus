@@ -130,6 +130,7 @@ describe('WebSocketListener', () => {
         addConcepts: jest.fn(),
         modifyTitles: jest.fn(),
         modifyAbstracts: jest.fn(),
+        modifyPublicationDate: jest.fn(),
         saveContributions: jest.fn(),
         contributionsTabDirty: false,
         setContributionsTabDirty: jest.fn(),

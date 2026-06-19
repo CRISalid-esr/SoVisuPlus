@@ -1457,6 +1457,27 @@ export class DocumentDAO extends AbstractDAO {
     })
   }
 
+  public async updatePublicationDateByUid(
+    uid: string,
+    publicationDate: string | null,
+  ): Promise<void> {
+    const doc = await this.prismaClient.document.findUnique({
+      where: { uid },
+      select: { id: true },
+    })
+
+    if (!doc) {
+      throw new Error(`Document with UID ${uid} not found`)
+    }
+
+    await this.prismaClient.document.update({
+      where: { id: doc.id },
+      data: {
+        publicationDate,
+      },
+    })
+  }
+
   /**
    * Handle potential conflicts with existing PublicationIdentifiers
    * @param identifiers - The list of identifiers to check

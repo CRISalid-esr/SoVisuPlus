@@ -63,6 +63,9 @@ export interface DocumentSlice {
     removeConcepts: (conceptUids: string[]) => Promise<void>
     modifyTitles: (titles: Literal[]) => Promise<{ success: boolean }>
     modifyAbstracts: (abstracts: Literal[]) => Promise<{ success: boolean }>
+    modifyPublicationDate: (
+      publicationDate: string | null,
+    ) => Promise<{ success: boolean }>
     updateDocumentType: (type: DocumentType) => Promise<void>
     saveContributions: (
       changes: ContributionChange[],
@@ -544,6 +547,55 @@ export const addDocumentSlice: StateCreator<
             doc.issue,
             doc.pages,
           )
+          return {
+            document: {
+              ...state.document,
+              selectedDocument: updatedDocument,
+            },
+          }
+        })
+        return { success: true }
+      } catch (error) {
+        set((state) => ({
+          document: {
+            ...state.document,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        }))
+        return { success: false }
+      }
+    },
+    modifyPublicationDate: async (publicationDate: string | null) => {
+      try {
+        const documentUid = get().document.selectedDocument?.uid
+
+        if (!documentUid) {
+          throw new Error(
+            'Cannot modify publication date: no selected document',
+          )
+        }
+
+        const response = await fetch(
+          `/api/documents/${documentUid}/publicationDate`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ publicationDate }),
+          },
+        )
+
+        if (!response.ok) throw new Error('Failed to modify publication date')
+
+        set((state) => {
+          const doc = state.document.selectedDocument
+          if (!doc) return state
+
+          const updatedDocument = Object.assign(
+            Object.create(Object.getPrototypeOf(doc)),
+            doc,
+            { publicationDate },
+          )
+
           return {
             document: {
               ...state.document,
