@@ -242,7 +242,8 @@ const PublicationDate = ({
                     icon={<StepDot n={i + 1} reached={i <= activeIndex} />}
                     sx={{
                       '& .MuiStepLabel-label': {
-                        color: i <= activeIndex ? 'text.primary' : 'text.disabled',
+                        color:
+                          i <= activeIndex ? 'text.primary' : 'text.disabled',
                       },
                     }}
                   >

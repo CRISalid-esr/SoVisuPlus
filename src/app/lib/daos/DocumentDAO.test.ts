@@ -1,4 +1,5 @@
 import {
+  AuthorityOrganizationType,
   Concept as DbConcept,
   Document as DbDocument,
   DocumentRecord as DbDocumentRecord,
@@ -153,6 +154,7 @@ describe('DocumentDAO', () => {
           new AuthorityOrganization(
             'organization-1',
             ['Some Organization'],
+            AuthorityOrganizationType.laboratory,
             [
               {
                 latitude: 53,
@@ -269,6 +271,7 @@ describe('DocumentDAO', () => {
       id: 1,
       uid: 'organization-1',
       displayNames: ['Some Organization'],
+      type: AuthorityOrganizationType.laboratory,
       places: [
         {
           latitude: 53,
@@ -479,6 +482,7 @@ describe('DocumentDAO', () => {
       new AuthorityOrganization(
         'organization-1',
         ['Some Organization'],
+        AuthorityOrganizationType.laboratory,
         [
           {
             latitude: 53,

@@ -67,6 +67,7 @@ const ContributorList = ({ editor, readOnly }: ContributorListProps) => {
             setRoles={editor.setRoles}
             removeAffiliation={editor.removeAffiliation}
             replaceAffiliation={editor.replaceAffiliation}
+            setAffiliationType={editor.setAffiliationType}
             addAffiliation={editor.addAffiliation}
           />
         </Box>

@@ -31,6 +31,7 @@ query Documents($where: DocumentWhere) {
       affiliations {
         uid
         display_names
+        type
         places {
           latitude
           longitude

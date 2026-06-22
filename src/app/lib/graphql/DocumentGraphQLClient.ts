@@ -26,6 +26,7 @@ import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationId
 interface GraphAuthorityOrganization {
   uid: string
   display_names: string[]
+  type: string | null
   places: {
     latitude: number
     longitude: number
@@ -227,6 +228,9 @@ export class DocumentGraphQLClient extends AbstractGraphQLClient {
             return new AuthorityOrganization(
               org.uid,
               org.display_names,
+              AuthorityOrganization.authorityOrganizationTypeFromString(
+                org.type,
+              ),
               org.places,
               ids,
             )

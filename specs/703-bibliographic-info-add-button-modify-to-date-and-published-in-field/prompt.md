@@ -33,7 +33,7 @@ Implementation (backend + helpers, all still current):
   `documentSlice.ts` (mirrors `modifyTitles`: PUT + optimistic update).
 - **API route** `src/app/api/documents/[uid]/publicationDate/route.ts` (PUT): auth, format
   validation (`^\d{4}(-\d{2}(-\d{2})?)?$` + valid dayjs), `ability.can(update, document,
-  'publicationDate')`, then `documentService.updatePublicationDate`.
+'publicationDate')`, then `documentService.updatePublicationDate`.
 - **Service** `DocumentService.updatePublicationDate` + **DAO**
   `DocumentDAO.updatePublicationDateByUid` (mirror the `documentType` flow; emit an `UPDATE`
   `Action` with `path: 'publicationDate'`, `parameters: { value }`).
@@ -58,10 +58,10 @@ Implementation (backend + helpers, all still current):
 
 - Edit affordance → an `EditCalendar` `IconButton` in a `Tooltip`, with `aria-label` =
   `document_details_page_publication_date_row_edit_button`, kept inside the `<Can I={update}
-  field='publicationDate'>` gate and `disabled` when `selectedDocument.isFrozen`.
+field='publicationDate'>` gate and `disabled` when `selectedDocument.isFrozen`.
 - Decision (asked & chosen): **progressive chips** model over `YearCalendar` /
   `MonthCalendar` / day-only `DateCalendar` (one single-level grid at a time, no auto-advance,
-  no view-switch arrow). *(Superseded by Instruction 3.)*
+  no view-switch arrow). _(Superseded by Instruction 3.)_
 
 ---
 
@@ -79,7 +79,7 @@ Implementation (backend + helpers, all still current):
   (drops deeper levels); next leaves `precision` (new level unconfirmed).
 - **No preselection on a newly added level:** the grid receives `value` only when
   `index(activeStep) <= index(precision)`, else `null`; always pass `referenceDate={value ??
-  dayjs()}` so the blank grid still opens at the right year/month.
+dayjs()}` so the blank grid still opens at the right year/month.
 - Decision (asked & chosen): going **back** keeps that step's value (still selected) and only
   drops deeper levels.
 - i18n: replaced `..._add_month` / `..._add_day` with step labels `..._step_year` /
@@ -122,8 +122,8 @@ Implementation (backend + helpers, all still current):
 ## Instruction 6 — remove-date (bin) button
 
 > Add a bin icon button at the top-right corner of the date calendar popover that lets the
-> user remove the date completely (set `publicationDate` to null). *(First asked with a
-> confirmation dialog; then revised:)* no dialog — clicking the bin should clear the current
+> user remove the date completely (set `publicationDate` to null). _(First asked with a
+> confirmation dialog; then revised:)_ no dialog — clicking the bin should clear the current
 > selection (day, month and year) and show a blank Year step. The Apply/Confirm button then
 > saves as usual, and **with no selection it saves null**.
 

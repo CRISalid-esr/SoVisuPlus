@@ -4,6 +4,7 @@ import {
   AureHalAuthorDoc,
   AureHalStructureDoc,
 } from '@/lib/services/AureHalAPIClient'
+import { HalAffiliationType } from './affiliationType'
 
 /**
  * Known person-identifier types. Derived from the Prisma `PersonIdentifierType`
@@ -31,6 +32,8 @@ export interface WorkingAffiliation {
   acronym: string | null
   name: string | null
   label: string | null
+  /** HAL affiliation type (select value); null when unknown / no default. */
+  type: HalAffiliationType | null
   hal: string | null
   idref: string | null
   isni: string | null

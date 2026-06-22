@@ -197,7 +197,9 @@ describe('PublicationDate component', () => {
       setup({ publicationDate: '2024-03-15' })
       renderComponent()
       fireEvent.click(screen.getByRole('button', { name: EDIT_BTN }))
-      expect(screen.getByRole('button', { name: STEP_YEAR })).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: STEP_YEAR }),
+      ).toBeInTheDocument()
       expect(
         screen.getByRole('button', { name: STEP_MONTH }),
       ).toBeInTheDocument()

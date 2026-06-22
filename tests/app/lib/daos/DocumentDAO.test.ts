@@ -14,6 +14,7 @@ import { SourcePerson } from '@/types/SourcePerson'
 import { SourceJournal } from '@/types/SourceJournal'
 import {
   AuthorityOrganizationIdentifierType,
+  AuthorityOrganizationType,
   OAStatus,
   PublicationIdentifierType,
 } from '@prisma/client'
@@ -53,6 +54,7 @@ describe('DocumentDAO Integration Tests', () => {
         new AuthorityOrganization(
           'org-123',
           ['Some Organization'],
+          AuthorityOrganizationType.laboratory,
           [{ latitude: 10, longitude: 42 }],
           [{ type: AuthorityOrganizationIdentifierType.hal, value: 'org1' }],
         ),
@@ -62,6 +64,7 @@ describe('DocumentDAO Integration Tests', () => {
         new AuthorityOrganization(
           'org-234',
           ['Other Organization'],
+          AuthorityOrganizationType.research_team,
           [
             { latitude: 43, longitude: 52 },
             { latitude: 17, longitude: 13 },
