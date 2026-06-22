@@ -12,7 +12,15 @@ roles:
       - action: update
         subject: Document
         fields:
-          [titles, abstracts, contributors, identifiers, documentType, subjects]
+          [
+            titles,
+            abstracts,
+            contributors,
+            identifiers,
+            documentType,
+            subjects,
+            publicationDate,
+          ]
 
   - name: document_merger
     description: Merge / unmerge documents and source records

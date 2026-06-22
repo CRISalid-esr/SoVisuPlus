@@ -50,5 +50,8 @@ next-env.d.ts
 
 .vscode/launch.json
 
+# generated Lingui catalogs (compiled in CI)
+src/locales/*/messages.js
+
 # RBAC (env-specific)
 rbac.roles.yaml

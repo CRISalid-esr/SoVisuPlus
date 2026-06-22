@@ -24,6 +24,7 @@ import * as Lingui from '@lingui/core'
 
 export const useDocumentTable = <T extends MRT_RowData>(
   options: MRT_TableOptions<T>,
+  onResetFilters?: () => void,
 ) => {
   const { columns, initialState, state } = options
 
@@ -35,12 +36,17 @@ export const useDocumentTable = <T extends MRT_RowData>(
         <MRT_ToggleDensePaddingButton table={table} />
         <MRT_ToggleFullScreenButton table={table} />
         <MRT_ShowHideColumnsButton table={table} />
-        <IconButton onClick={() => table.resetColumnFilters()}>
+        <IconButton
+          onClick={() => {
+            table.resetColumnFilters()
+            onResetFilters?.()
+          }}
+        >
           <FilterAltOff />
         </IconButton>
       </Box>
     ),
-    [],
+    [onResetFilters],
   )
 
   const [columnSizing, setColumnSizing] = useState<MRT_ColumnSizingState>(() =>
