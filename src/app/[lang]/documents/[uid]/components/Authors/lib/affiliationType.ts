@@ -19,8 +19,8 @@ const HAL_AFFILIATION_TYPE_SET = new Set<string>(HAL_AFFILIATION_TYPES)
 
 /**
  * Map our database `AuthorityOrganizationType` to the HAL value used as the
- * select's default. Only the three directly-equivalent types map; every other
- * DB value (organization, *_group) has no default and returns null.
+ * select's default. Every DB value maps except `organization`, which has no
+ * sensible HAL default and returns null.
  */
 const DB_TYPE_TO_HAL: Partial<
   Record<AuthorityOrganizationType, HalAffiliationType>
@@ -28,6 +28,9 @@ const DB_TYPE_TO_HAL: Partial<
   [AuthorityOrganizationType.institution]: 'institution',
   [AuthorityOrganizationType.laboratory]: 'laboratory',
   [AuthorityOrganizationType.research_team]: 'researchteam',
+  [AuthorityOrganizationType.institution_group]: 'institution',
+  [AuthorityOrganizationType.laboratory_group]: 'regrouplaboratory',
+  [AuthorityOrganizationType.research_team_group]: 'researchteam',
 }
 
 /** DB enum -> HAL select value (null when there is no sensible default). */

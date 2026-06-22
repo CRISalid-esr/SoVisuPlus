@@ -25,9 +25,10 @@ The feature deliberately uses two distinct vocabularies, bridged by a mapping:
   use this vocabulary.
 
 **DB → HAL mapping** (used only to pick the select's _default_ value):
-`institution → institution`, `laboratory → laboratory`, `research_team → researchteam`.
-Every other DB value (`organization`, `institution_group`, `laboratory_group`,
-`research_team_group`) has **no default** → the select shows empty / "None".
+`institution → institution`, `laboratory → laboratory`, `research_team → researchteam`,
+`institution_group → institution`, `laboratory_group → regrouplaboratory`,
+`research_team_group → researchteam`. Only `organization` has **no default** → the select
+shows empty / "None".
 
 **Save → graph**: the value sent back is the **HAL string** verbatim (the contribution save
 payload is entirely HAL-shaped; the graph maps it on its side). There is no reverse
