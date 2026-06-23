@@ -220,6 +220,7 @@ describe('HalTEIInterchangeService', () => {
       const org = new AuthorityOrganization(
         'org-uid-1',
         ['LPTHE'],
+        null,
         [],
         [
           new AuthorityOrganizationIdentifier(
@@ -255,6 +256,7 @@ describe('HalTEIInterchangeService', () => {
       const org = new AuthorityOrganization(
         'org-1',
         ['LPTHE'],
+        null,
         [],
         [new AuthorityOrganizationIdentifier('nns' as never, '200012345A')],
       )
@@ -278,6 +280,7 @@ describe('HalTEIInterchangeService', () => {
       const org = new AuthorityOrganization(
         'org-1',
         ['LPTHE'],
+        null,
         [],
         [
           new AuthorityOrganizationIdentifier('nns' as never, '200012345A'),
@@ -301,6 +304,7 @@ describe('HalTEIInterchangeService', () => {
       const org = new AuthorityOrganization(
         'org-no-id',
         ['University of Ferrara'],
+        null,
         [],
         [new AuthorityOrganizationIdentifier('scopus' as never, '12345')],
       )
@@ -315,7 +319,13 @@ describe('HalTEIInterchangeService', () => {
       const doc = makeDoc(DocumentType.Article)
       doc.publicationDate = '2001'
       const person = new Person('p-1', false, null, 'John Doe', 'John', 'Doe')
-      const org = new AuthorityOrganization('org-empty', ['Some Lab'], [], [])
+      const org = new AuthorityOrganization(
+        'org-empty',
+        ['Some Lab'],
+        null,
+        [],
+        [],
+      )
       doc.contributions = [new Contribution(person, [], [org], 1)]
       const out = service.toHalTEI(doc)
       expect(out).not.toContain('ref="#localStruct-')
@@ -329,6 +339,7 @@ describe('HalTEIInterchangeService', () => {
       const org = new AuthorityOrganization(
         'org-empty-val',
         ['Some Lab'],
+        null,
         [],
         [new AuthorityOrganizationIdentifier('ror' as never, '')],
       )
