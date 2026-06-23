@@ -6,6 +6,10 @@ import { HalTEIInterchangeService } from '@/lib/services/hal/HalTEIInterchangeSe
 import { DocumentType, Document as DocumentClass } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 import { Journal } from '@/types/Journal'
+import { Contribution } from '@/types/Contribution'
+import { AuthorityOrganization } from '@/types/AuthorityOrganization'
+import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
+import { Person } from '@/types/Person'
 import { DocumentState } from '@prisma/client'
 
 const readFixture = (name: string): string => {
@@ -156,7 +160,7 @@ describe('HalTEIInterchangeService', () => {
         new Literal('This article presents a general discussion...', 'en'),
       ]
 
-      const out = service.toHalTEI(doc)
+      const out = service.toHalTEI(doc, { language: 'en' })
 
       // titles
       expect(out).toContain(
@@ -199,6 +203,146 @@ describe('HalTEIInterchangeService', () => {
       expect(out).toContain('<biblScope unit="issue">2</biblScope>')
       expect(out).toContain('<biblScope unit="pp">655 - 701</biblScope>')
       expect(out).toContain('<date type="datePub">2001</date>')
+    })
+
+    it('writes authors with affiliation refs and org structures', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+
+      const person = new Person(
+        'p-1',
+        false,
+        null,
+        'Marie Curie',
+        'Marie',
+        'Curie',
+      )
+      const org = new AuthorityOrganization(
+        'org-uid-1',
+        ['LPTHE'],
+        [],
+        [
+          new AuthorityOrganizationIdentifier(
+            'ror' as never,
+            'https://ror.org/example',
+          ),
+        ],
+      )
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+
+      const out = service.toHalTEI(doc)
+
+      expect(out).toContain('<forename type="first">Marie</forename>')
+      expect(out).toContain('<surname>Curie</surname>')
+      expect(out).toContain('ref="#localStruct-1"')
+      expect(out).toContain('xml:id="localStruct-1"')
+      expect(out).toContain('<orgName>LPTHE</orgName>')
+      expect(out).toContain('<idno type="ROR">https://ror.org/example</idno>')
+      expect(out).toContain('type="institution"')
+    })
+
+    it('sets org type to laboratory and keeps only RNSR when org has RNSR', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+      const person = new Person(
+        'p-1',
+        false,
+        null,
+        'Marie Curie',
+        'Marie',
+        'Curie',
+      )
+      const org = new AuthorityOrganization(
+        'org-1',
+        ['LPTHE'],
+        [],
+        [new AuthorityOrganizationIdentifier('nns' as never, '200012345A')],
+      )
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+      const out = service.toHalTEI(doc)
+      expect(out).toContain('type="laboratory"')
+      expect(out).toContain('<idno type="RNSR">200012345A</idno>')
+    })
+
+    it('drops ROR and uses RNSR when org has both', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+      const person = new Person(
+        'p-1',
+        false,
+        null,
+        'Marie Curie',
+        'Marie',
+        'Curie',
+      )
+      const org = new AuthorityOrganization(
+        'org-1',
+        ['LPTHE'],
+        [],
+        [
+          new AuthorityOrganizationIdentifier('nns' as never, '200012345A'),
+          new AuthorityOrganizationIdentifier(
+            'ror' as never,
+            'https://ror.org/example',
+          ),
+        ],
+      )
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+      const out = service.toHalTEI(doc)
+      expect(out).toContain('type="laboratory"')
+      expect(out).toContain('<idno type="RNSR">200012345A</idno>')
+      expect(out).not.toContain('<idno type="ROR">')
+    })
+
+    it('omits affiliation when org has no HAL-recognized identifiers', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+      const person = new Person('p-1', false, null, 'John Doe', 'John', 'Doe')
+      const org = new AuthorityOrganization(
+        'org-no-id',
+        ['University of Ferrara'],
+        [],
+        [new AuthorityOrganizationIdentifier('scopus' as never, '12345')],
+      )
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+      const out = service.toHalTEI(doc)
+      expect(out).not.toContain('ref="#localStruct-')
+      expect(out).not.toContain('<listOrg')
+      expect(out).toContain('<surname>Doe</surname>')
+    })
+
+    it('omits affiliation when org has empty identifiers', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+      const person = new Person('p-1', false, null, 'John Doe', 'John', 'Doe')
+      const org = new AuthorityOrganization('org-empty', ['Some Lab'], [], [])
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+      const out = service.toHalTEI(doc)
+      expect(out).not.toContain('ref="#localStruct-')
+      expect(out).not.toContain('<listOrg')
+    })
+
+    it('omits affiliation when org has HAL-recognized identifier type but empty value', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+      const person = new Person('p-1', false, null, 'John Doe', 'John', 'Doe')
+      const org = new AuthorityOrganization(
+        'org-empty-val',
+        ['Some Lab'],
+        [],
+        [new AuthorityOrganizationIdentifier('ror' as never, '')],
+      )
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+      const out = service.toHalTEI(doc)
+      expect(out).not.toContain('ref="#localStruct-')
+      expect(out).not.toContain('<listOrg')
+    })
+
+    it('halDocumentType option overrides auto-mapped typology', () => {
+      const doc = makeDoc(DocumentType.Article) // auto-maps to 'ART'
+      const out = service.toHalTEI(doc, { halDocumentType: 'THESE' })
+      expect(out).toContain('n="THESE"')
+      expect(out).not.toContain('n="ART"')
     })
 
     it('type mapping (Prisma -> HAL) writes correct halTypology', () => {
