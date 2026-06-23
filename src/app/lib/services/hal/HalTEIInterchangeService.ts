@@ -385,6 +385,7 @@ export class HalTEIInterchangeService {
     ror: 'ROR',
     isni: 'ISNI',
     idref: 'IdRef',
+    hal: 'idhal',
   }
 
   private patchAuthors(dom: Document, contributions: Contribution[]): void {

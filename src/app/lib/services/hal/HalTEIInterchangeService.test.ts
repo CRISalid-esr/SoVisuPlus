@@ -297,6 +297,58 @@ describe('HalTEIInterchangeService', () => {
       expect(out).not.toContain('<idno type="ROR">')
     })
 
+    it('emits idhal idno and institution type when org has a HAL identifier', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+      const person = new Person(
+        'p-1',
+        false,
+        null,
+        'Marie Curie',
+        'Marie',
+        'Curie',
+      )
+      const org = new AuthorityOrganization(
+        'org-hal',
+        ['LPTHE'],
+        null,
+        [],
+        [new AuthorityOrganizationIdentifier('hal' as never, '1234')],
+      )
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+      const out = service.toHalTEI(doc)
+      expect(out).toContain('type="institution"')
+      expect(out).toContain('<idno type="idhal">1234</idno>')
+    })
+
+    it('keeps only RNSR and drops HAL idno when org has both', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+      const person = new Person(
+        'p-1',
+        false,
+        null,
+        'Marie Curie',
+        'Marie',
+        'Curie',
+      )
+      const org = new AuthorityOrganization(
+        'org-rnsr-hal',
+        ['LPTHE'],
+        null,
+        [],
+        [
+          new AuthorityOrganizationIdentifier('nns' as never, '200012345A'),
+          new AuthorityOrganizationIdentifier('hal' as never, '1234'),
+        ],
+      )
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+      const out = service.toHalTEI(doc)
+      expect(out).toContain('type="laboratory"')
+      expect(out).toContain('<idno type="RNSR">200012345A</idno>')
+      expect(out).not.toContain('<idno type="idhal">')
+    })
+
     it('omits affiliation when org has no HAL-recognized identifiers', () => {
       const doc = makeDoc(DocumentType.Article)
       doc.publicationDate = '2001'
