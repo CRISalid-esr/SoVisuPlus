@@ -136,7 +136,14 @@ The listener also polls `verify` deposits automatically at a very long interval.
 - `HAL_SERVICE_ACCOUNT_LOGIN`
 - `HAL_SERVICE_ACCOUNT_PASSWORD`
 
-**`On-Behalf-Of` header** identifies the person on whose behalf the deposit is made. It is composed from two of the person's stored identifiers:
+**`On-Behalf-Of` header** identifies the person on whose behalf the deposit is made. **The deposit is always made on behalf of the current perspective's person, not necessarily the logged-in user:**
+
+- In **self perspective** (a researcher viewing their own perspective), the On-Behalf-Of person is the logged-in user.
+- In a **visited perspective** (e.g. a librarian who has switched to a researcher's `Person` perspective), the On-Behalf-Of person is the **visited** person.
+
+So `HalDeposit.personUid` = the perspective's `Person`, and the eligibility/identifier checks below all apply to **that** person — not to the authenticated user. The perspective also gates feature availability (see access-control gates).
+
+The header is composed from two of that person's stored identifiers:
 
 - `login|` → `PersonIdentifierType.hal_login`
 - `idhal|` → `PersonIdentifierType.idhals` (preferred) or `PersonIdentifierType.idhali` (both accepted by HAL)
@@ -153,48 +160,57 @@ A person is only eligible to be deposited on behalf of if they have **both** `ha
 
 One document can have multiple deposit attempts (1-n).
 
-| Field         | Type      | Notes                                                                   |
-| ------------- | --------- | ----------------------------------------------------------------------- |
-| `id`          | int PK    |                                                                         |
-| `documentUid` | FK        | The document being deposited                                            |
-| `personUid`   | FK        | The person who triggered the deposit (for On-Behalf-Of)                 |
-| `status`      | enum      | See lifecycle below                                                     |
-| `halId`       | string?   | e.g. `hal-03701711`, returned by SWORD                                  |
-| `halPassword` | string?   | Returned by SWORD, needed for future PUT                                |
-| `halVersion`  | int?      | Returned by SWORD                                                       |
-| `halUrl`      | string?   | Public HAL URL from `<link rel="alternate">`                            |
-| `startedAt`   | datetime? | Set when status transitions to `running`; used to detect stale deposits |
-| `retryCount`  | int       | Number of failed SWORD attempts; starts at 0                            |
-| `nextRetryAt` | datetime? | Earliest time for the next attempt; null means try immediately          |
-| `lastError`   | string?   | Last SWORD error message, for debugging                                 |
-| `createdAt`   | datetime  |                                                                         |
-| `updatedAt`   | datetime  |                                                                         |
+| Field                | Type      | Notes                                                                                  |
+| -------------------- | --------- | -------------------------------------------------------------------------------------- |
+| `id`                 | int PK    |                                                                                        |
+| `documentUid`        | FK        | The document being deposited                                                           |
+| `personUid`          | FK        | The perspective's person the deposit is made on behalf of                              |
+| `status`             | enum      | See lifecycle below                                                                    |
+| `halId`              | string?   | e.g. `hal-03701711`, returned by SWORD                                                 |
+| `halPassword`        | string?   | Returned by SWORD, needed for future PUT                                               |
+| `halVersion`         | int?      | Returned by SWORD                                                                      |
+| `halUrl`             | string?   | Public HAL URL from `<link rel="alternate">`                                           |
+| `startedAt`          | datetime? | Set when status transitions to `running`; used to detect stale deposits                |
+| `retryCount`         | int       | Number of failed (retryable) SWORD attempts; starts at 0                               |
+| `nextRetryAt`        | datetime? | Earliest time for the next attempt; null means try immediately                         |
+| `lastError`          | string?   | Last SWORD error message, for debugging                                                |
+| `refreshRequestedAt` | datetime? | Set by the refresh endpoint to request an on-demand status check; cleared once handled |
+| `createdAt`          | datetime  |                                                                                        |
+| `updatedAt`          | datetime  |                                                                                        |
 
 #### `HalDepositFile`
 
-Attached files for a deposit (0-n per deposit). One file is flagged as main; the rest are complementary.
+Attached files for a deposit (0-n per deposit). One file is flagged as main; the rest are complementary. The HAL deposit form carries the source, type, visibility and license **per file**, so these are stored on `HalDepositFile` (not on `HalDeposit`).
 
-| Field          | Type     | Notes                                              |
-| -------------- | -------- | -------------------------------------------------- |
-| `id`           | int PK   |                                                    |
-| `halDepositId` | FK       |                                                    |
-| `filePath`     | string   | Path on disk within the uploads mount              |
-| `fileName`     | string   | Original filename, used as `target` in TEI and ZIP |
-| `isMain`       | boolean  | True for the primary PDF; false for complementary  |
-| `mimeType`     | string   |                                                    |
-| `createdAt`    | datetime |                                                    |
+| Field          | Type     | Notes                                                                                                                         |
+| -------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `id`           | int PK   |                                                                                                                               |
+| `halDepositId` | FK       |                                                                                                                               |
+| `filePath`     | string   | Path on disk within the uploads mount                                                                                         |
+| `fileName`     | string   | Original filename, used as `target` in TEI and ZIP                                                                            |
+| `isMain`       | boolean  | True for the primary PDF; false for complementary                                                                             |
+| `mimeType`     | string   |                                                                                                                               |
+| `fileSource`   | string   | File's source code → TEI `ref/@subtype` (`author`, `greenPublisher`, `publisherAgreement`, `publisherPaid`)                   |
+| `fileType`     | string   | File's type code → TEI `ref/@type` (`file`, `src`, `annex`)                                                                   |
+| `visibility`   | string   | Embargo option (`now`, `15d`, `1m`, `3m`, `6m`, `1y`, `2y`); the listener computes `ref` `@notBefore` = deposit date + offset |
+| `license`      | string?  | CC/ETALAB/Copyright code → TEI `availability/licence/@target`; required for the main file, nullable for complementary         |
+| `createdAt`    | datetime |                                                                                                                               |
 
 #### Deposit status lifecycle
 
 ```
-pending ──► running ──► accept    (XML-only, HTTP 202, no moderation)
-                   └──► verify ──► accept
+pending ──► running ──► accept              (XML-only, HTTP 202, no moderation)
+                   └──► verify ──► accept   (ZIP, HTTP 201, after moderation)
                               ├──► update
                               ├──► delete
                               └──► replace
 
+running ──► pending   (retryable failure: network / HAL offline / 5xx / 408 / 429)
+running ──► error     (terminal failure: non-retryable 4xx — invalid TEI, bad credentials, …)
 running ──► pending   (stale recovery on listener restart)
 ```
+
+`error` is a **terminal** state: the deposit is not retried automatically; `lastError` carries the reason and is surfaced in the UI. The user can fix the cause and create a new deposit.
 
 ---
 
@@ -207,10 +223,10 @@ The DocumentGraphQLClient shouldn't be touched as there is no HalDeposit and Hal
 
 Two directories are mounted into the Docker container as volumes:
 
-| Directory            | Purpose                                            |
-| -------------------- | -------------------------------------------------- |
-| `uploads/hal-files/` | User-uploaded attachment files                     |
-| `uploads/hal-tei/`   | TEI XML and ZIP archives generated by the listener |
+| Directory            | Purpose                                                |
+| -------------------- | ------------------------------------------------------ |
+| `uploads/hal-files/` | User-uploaded attachment files                         |
+| `uploads/hal-tei/`   | TEI XML and ZIP archives built by `HalDepositPackager` |
 
 Files under `uploads/hal-tei/` are organised per deposit: `uploads/hal-tei/<depositId>/art.xml` and `uploads/hal-tei/<depositId>/art.zip`.
 
@@ -226,50 +242,83 @@ File cleanup strategy is deferred to a later iteration.
 
 Accepts a **multipart form** containing both deposit metadata fields and the file(s). In a single atomic operation:
 
-- Creates the `HalDeposit` row with `status: pending`, linked to the document and the authenticated person.
-- Writes each uploaded file to `uploads/hal-files/<depositId>/<filename>` and creates the corresponding `HalDepositFile` rows. At most one file may be flagged `isMain: true`.
+- Creates the `HalDeposit` row with `status: pending`, linked to the document and to the **perspective person** (`personUid`, the person the deposit is made on behalf of — see HAL credentials), which the request carries.
+- Writes each uploaded file to `uploads/hal-files/<depositId>/<filename>` and creates the corresponding `HalDepositFile` rows (with their `fileSource`, `fileType`, `visibility`, `license`). At most one file may be flagged `isMain: true`.
 
-Authorization: requires `deposit_hal` permission for the target person, plus the person must have both `hal_login` and `idhals`/`idhali` identifiers stored.
+Authorization: requires `deposit_hal` permission for the perspective person, plus that person must have both `hal_login` and `idhals`/`idhali` identifiers stored. The endpoint also rejects deposits when: the submitted document type is not `enabled` in `halDepositFormConfig`; the document has no `publicationDate`; no author has a HAL-recognized affiliation; or (for `ART`) the document has no `journal`. The same validations the form runs client-side are re-checked here from the shared config.
 
 #### Status refresh endpoint
 
 `POST /api/hal/deposits/:depositId/refresh`
 
-Enqueues an on-demand status check for a `verify` deposit. The actual HAL poll is executed by the listener; this endpoint signals the intent (e.g. sets a `refreshRequestedAt` flag or similar mechanism TBD).
+Enqueues an on-demand status check. It sets `refreshRequestedAt = NOW()` on the deposit and returns immediately; the actual HAL poll is performed by the listener (which clears the flag once handled). Allowed for deposits in `verify`, `update`, or `delete` — not just `verify` — because a moderator's decision can change after the fact and the user may also act directly on HAL, so they need to re-pull the current status on demand. The listener picks up flagged rows on a **short interval** (independent of the long background verify loop) so the refresh feels immediate.
 
 ---
 
-### Listener additions
+### Deposit processing classes
 
-A new fourth subsystem `startHalDepositPoller` is added to `src/scripts/listener.ts` alongside the existing three.
+The deposit business logic is **not** implemented inline in the listener script. It lives in dedicated classes under `src/app/lib/services/hal/`, so it is unit-testable in isolation and the listener only schedules calls into it. The decomposition is:
 
-#### Pending deposit processor
+#### `HalSwordClient`
 
-Polls the database at short intervals for `HalDeposit` rows with `status: pending` where `nextRetryAt IS NULL OR nextRetryAt <= NOW()`.
+Pure HTTP layer over the SWORD API — no database access, no domain logic. Reads `HAL_SWORD_ENDPOINT`, `HAL_SERVICE_ACCOUNT_LOGIN`, `HAL_SERVICE_ACCOUNT_PASSWORD` from the environment. Two methods:
 
-For each pending deposit:
+- `deposit(payload)` — POSTs either the XML body (`Content-Type: text/xml`) or the ZIP (`Content-Type: application/zip` + `Content-Disposition`), with the `Packaging` and `On-Behalf-Of` headers. Returns the raw HTTP status code and body.
+- `getStatus(halId)` — GETs `<endpoint>/<halId>` and returns the raw body.
 
-1. Set `status = running`, record `startedAt`.
-2. Generate TEI XML via `HalTEIInterchangeService.toHalTEI()`, passing `halDeposit.halDocumentType` as `options.halDocumentType` (the conversion from `document.documentType` is only the fallback when this field is absent). Inject `<idno type="localRef">` with the document UID. Write to `uploads/hal-tei/<depositId>/art.xml`.
+It is the only class that performs network I/O against HAL.
 
-   **Affiliation org type and identifier resolution** (applied per `<org>` element in the TEI):
-   - If the org has an RNSR identifier: `type="laboratory"`, emit **only** the RNSR `<idno>` (ROR/ISNI/IdRef are dropped).
-   - Otherwise: `type="institution"`, emit all remaining HAL-recognized identifiers (ROR, ISNI, IdRef).
-   - Orgs with no HAL-recognized identifier (RNSR/ROR/ISNI/IdRef) or only identifiers with empty values are silently skipped.
+#### `HalSwordResponseParser`
 
-3. Fetch `HalDepositFile` rows for the deposit.
-   - If none: XML-only deposit (Case 1).
-   - If any: copy files from `uploads/hal-files/` into a ZIP alongside the TEI (Case 2). Inject `<ref type="file" .../>` elements into the TEI for each file before zipping.
-4. Submit to HAL SWORD API using the service account credentials and the person's `On-Behalf-Of` header.
-5. Parse the Atom response; update `HalDeposit` with `halId`, `halPassword`, `halVersion`, `halUrl`, and the new `status` (`accept` for HTTP 202, `verify` for HTTP 201). Reset `retryCount` and `nextRetryAt` to null.
-6. On SWORD failure (network error, HAL offline, unexpected HTTP status): increment `retryCount`, compute `nextRetryAt` using exponential backoff (see below), store `lastError`, set `status` back to `pending`.
-7. Broadcast a WebSocket event so the UI updates in real time.
+Parses HAL's XML responses into typed objects — no I/O. One method parses the Atom entry returned by a deposit (`<id>`, `<hal:password>`, `<hal:version>`, `href` of `<link rel="alternate">`); another parses the `<document>` status response (`status`, `comment`). Kept separate from `HalSwordClient` so parsing can be tested against fixtures.
 
-#### Stale deposit recovery
+#### `HalDepositPackager`
 
-On listener startup, any `HalDeposit` with `status: running` is reset to `pending` with `nextRetryAt` set according to its current `retryCount`. This handles listener crashes mid-request. The same logic runs periodically: a deposit stuck in `running` for more than **10 minutes** is considered stale and reset.
+Turns a deposit and its `HalDepositFile` rows into the on-disk artifacts under `uploads/hal-tei/<depositId>/`. It:
 
-#### Exponential retry backoff
+- Calls `HalTEIInterchangeService.toHalTEI()`, passing `halDeposit.halDocumentType` as `options.halDocumentType` (the conversion from `document.documentType` is only the fallback when this field is absent) and the other deposit-specific overrides.
+- Injects `<idno type="localRef">` with the document UID.
+- When files exist, injects one `<ref .../>` element per file (with `@type` `file`/`src`/`annex` and `@subtype` the file source — see the file block) and builds `art.zip` (copying from `uploads/hal-files/`); otherwise writes only `art.xml`.
+
+Returns a descriptor (payload location, content type, xml-vs-zip) consumed by `HalSwordClient`. This class owns all filesystem concerns.
+
+#### `HalOnBehalfOfBuilder`
+
+Builds the `On-Behalf-Of` header value from a person's stored identifiers (`hal_login` → `login|…`, `idhals`/`idhali` → `idhal|…`; ORCID excluded). Returns `null` when the person lacks the required identifiers, so callers can fail fast.
+
+#### `HalDepositService`
+
+The orchestrator and single entry point the listener (and the refresh endpoint) call. It holds the business logic and depends on `HalDepositDAO`, `HalDepositPackager`, `HalSwordClient`, `HalSwordResponseParser`, `HalOnBehalfOfBuilder`, and a `WebSocketNotifier` (injected, as `ActionDispatchService` is given its AMQP connection). Public methods:
+
+- `processDuePendingDeposits()` — see the pending-deposit algorithm below.
+- `recoverStaleDeposits()` — stale recovery (below).
+- `pollVerifyDeposits()` — background `verify`-status polling (below).
+- `processRefreshRequests()` — on-demand status refreshes signalled by the refresh endpoint (below).
+
+Private helper `computeNextRetryAt(retryCount)` implements the backoff formula.
+
+##### Pending deposit algorithm (`processDuePendingDeposits`)
+
+Loads `HalDeposit` rows with `status: pending` where `nextRetryAt IS NULL OR nextRetryAt <= NOW()` via `HalDepositDAO`. For each:
+
+1. Atomically claim the deposit: set `status = running` and record `startedAt` via a **conditional update guarded on `status = pending`** (see _Claiming / locking_ below). If the claim updates no row, another worker already took it — skip.
+2. Build the artifacts with `HalDepositPackager` (XML-only when there are no files — Case 1; ZIP when there are — Case 2).
+3. Submit with `HalSwordClient` using the service account credentials and the `On-Behalf-Of` header from `HalOnBehalfOfBuilder`.
+4. Parse the response with `HalSwordResponseParser`; update `HalDeposit` with `halId`, `halPassword`, `halVersion`, `halUrl`, and the new `status` (`accept` for HTTP 202, `verify` for HTTP 201). Reset `retryCount` and `nextRetryAt` to null.
+5. On failure, classify the error:
+   - **Retryable** — network error, HAL offline, HTTP 5xx, 408, 429: increment `retryCount`, compute `nextRetryAt` via exponential backoff (see below), store `lastError`, set `status` back to `pending`.
+   - **Terminal** — any other non-retryable 4xx (invalid TEI, bad service credentials, missing/invalid On-Behalf-Of, etc.): set `status = error`, store `lastError`, leave `nextRetryAt` null. Not retried automatically.
+6. Broadcast a WebSocket event via the notifier so the UI updates in real time.
+
+###### Claiming / locking
+
+The `running` status **is** the lock: the pending→running transition is a single conditional `UPDATE … WHERE id = ? AND status = 'pending'`, so only one worker can claim a given row and a submission that outlasts the poll interval cannot be picked up twice. Stale recovery (below) is the safety net that releases a `running` row if the worker dies mid-request.
+
+##### Stale deposit recovery (`recoverStaleDeposits`)
+
+Any `HalDeposit` with `status: running` is reset to `pending` with `nextRetryAt` set according to its current `retryCount`. This handles listener crashes mid-request. Called once on listener startup and then periodically: a deposit stuck in `running` for more than **10 minutes** is considered stale and reset.
+
+##### Exponential retry backoff (`computeNextRetryAt`)
 
 HAL can be offline for hours. After each failed SWORD attempt, `nextRetryAt` is set to:
 
@@ -288,11 +337,23 @@ nextRetryAt = now + delay
 | 5            | 32 min                    |
 | 6+           | 4 h (capped)              |
 
-There is no hard maximum retry count — the deposit stays `pending` indefinitely until it either succeeds or is manually cancelled.
+There is no hard maximum retry count for **retryable** failures — the deposit stays `pending` and keeps retrying until it either succeeds or, if a later attempt hits a non-retryable error, moves to the terminal `error` state. (There is no manual-cancel action in this iteration.)
 
-#### Verify status poller
+##### Verify status polling (`pollVerifyDeposits`)
 
-Polls the database at a long interval for `HalDeposit` rows with `status: verify`. For each, calls the HAL SWORD status endpoint, updates `status`, and broadcasts a WebSocket event if the status changed. Also handles on-demand refresh requests (see web process above).
+Background loop on a **long** interval. Loads `HalDeposit` rows with `status: verify`, calls `HalSwordClient.getStatus()` for each, parses with `HalSwordResponseParser`, updates `status`, and broadcasts a WebSocket event if the status changed.
+
+##### On-demand refresh (`processRefreshRequests`)
+
+Short-interval loop. Loads `HalDeposit` rows where `refreshRequestedAt IS NOT NULL` (status in `verify`/`update`/`delete`), calls `HalSwordClient.getStatus()`, updates `status`, clears `refreshRequestedAt`, and broadcasts a WebSocket event if the status changed. This is what makes the UI "refresh status" button feel immediate, independent of the long background loop.
+
+### Listener additions
+
+A new fourth subsystem `startHalDepositPoller` is added to `src/scripts/listener.ts` alongside the existing three. It is a **thin scheduler** — it owns no business logic, mirroring how `startChangePoller` delegates to `ActionDispatchService`. It instantiates `HalDepositService` and:
+
+- Calls `recoverStaleDeposits()` once on startup.
+- Runs a short-interval loop calling `processDuePendingDeposits()` and `processRefreshRequests()` (re-running `recoverStaleDeposits()` periodically to catch the 10-minute stale case).
+- Runs a long-interval loop calling `pollVerifyDeposits()`.
 
 ---
 
@@ -305,14 +366,15 @@ Mockup is available at [mockup path]/blob/main/src/app/[lang]/documents/[uid]/co
 
 ### Access control gates (shown before the form)
 
-The component checks two conditions before rendering the form. Both are checked server-side in the API route; the UI mirrors these checks client-side for UX only.
+The component checks the following conditions before rendering the form. All are checked server-side in the API route; the UI mirrors these checks client-side for UX only. The "person" below is the **current perspective's person** (the logged-in user in self perspective, or the visited person in a librarian's visited perspective — see HAL credentials).
 
-| Condition                                                                                     | UI response                                                                                                                                                                                                                                                         |
-| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| User does not have `deposit_hal` permission for this document                                 | The HalDeposit tab is hidden                                                                                                                                                                                                                                        |
-| User has permission but is missing `hal_login` or `idhals`/`idhali`                           | Info alert inviting the user to link their HAL account to their institutional account, with a direct link to the account page (`/[lang]/account`). No form is shown.                                                                                                |
-| User has permission and HAL identifiers, but document has no `publicationDate`                | Info alert: "This document has no publication date. Please add one before depositing." with a link to the Bibliographic information tab (`?tab=bibliographic_information`). No form is shown. The deposit creation endpoint also rejects such deposits server-side. |
-| No author has at least one affiliation with a HAL-recognized identifier (RNSR/ROR/ISNI/IdRef) | Error alert: "Any author has an affiliation with a complying HAL identifier. Please go to Author tab to complete information." with a link to the Authors tab (`?tab=authors`). No form is shown. Also enforced server-side.                                        |
+| Condition                                                                                     | UI response                                                                                                                                                                                                                                                                                                                       |
+| --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Current perspective is not a `Person`, or the user lacks `deposit_hal` for that person        | The HalDeposit tab is hidden                                                                                                                                                                                                                                                                                                      |
+| Has permission but the perspective person is missing `hal_login` or `idhals`/`idhali`         | Info alert inviting the user to link the HAL account to the institutional account, with a direct link to the account page (`/[lang]/account`). No form is shown.                                                                                                                                                                  |
+| Has permission and HAL identifiers, but document has no `publicationDate`                     | Info alert: "This document has no publication date. Please add one before depositing." with a link to the Bibliographic information tab (`?tab=bibliographic_information`). No form is shown. The deposit creation endpoint also rejects such deposits server-side.                                                               |
+| No author has at least one affiliation with a HAL-recognized identifier (RNSR/ROR/ISNI/IdRef) | Error alert: "No author has an affiliation with a complying HAL identifier. Please go to the Author tab to complete the information." with a link to the Authors tab (`?tab=authors`). No form is shown. Also enforced server-side.                                                                                               |
+| Document type is `ART` but the document has no `journal`                                      | Info alert: "This article has no journal. Please add one before depositing." with a link to the Bibliographic information tab (`?tab=bibliographic_information`). No form is shown. Also rejected server-side. (Journal editing in that tab is a later iteration, so for now this is a hard prerequisite met via harvested data.) |
 
 If the user doesn't have hal_login or idhals/idhali, the tab should displays following text : `A HAL login or identifier is necessary to perform a submission. If you would like to do so, please complete your HAL information on the MyAccount page.` and a button bellow 'Go to My Account' that opens the MyAccount page.
 Otherwise, the UI behaves according to following description.
@@ -326,6 +388,7 @@ The form is pre-populated from the document's existing data where possible.
 **Read-only sections** (data pulled from other tabs, with a link to edit there):
 
 - Title, abstract and date (from the _Bibliographic information_ tab)
+- For `ART`: the journal, read from the document's `journal` (also from the _Bibliographic information_ tab). It is shown read-only and is **not** an editable deposit field — it must already be present on the document (see the missing-journal gate above). Making the journal editable in the Bibliographic information tab (with ISSN autocompletion) is a later iteration.
 - Authors and affiliations (from the _Authors_ tab). If any author has affiliations that will be silently dropped at submission time (affiliations with no HAL-recognized identifier), show an inline warning: "Some contributor's affiliations are not recognized by HAL and won't be submitted. Go to Author tab if you want to change it." This is a soft warning — it does not block submission.
 
 **Deposit metadata** (editable, submitted with the deposit):
@@ -338,29 +401,101 @@ The form is pre-populated from the document's existing data where possible.
 
 **Conditional fields** (appear based on selected document type):
 
-| Document type            | Extra fields                                                  |
-| ------------------------ | ------------------------------------------------------------- |
-| ART                      | Journal name (required)                                       |
-| COMM / POSTER / PRESCONF | Conference title (required), city, country                    |
-| THESE / HDR              | Issuing body (required); director / jury president (required) |
-| REPORT                   | Institution (required)                                        |
-| COUV                     | Book title (required)                                         |
+| Document type            | Extra fields                                                                            |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| ART                      | _(none editable)_ — the journal is read from the document; see the missing-journal gate |
+| COMM / POSTER / PRESCONF | Conference title (required), city, country                                              |
+| THESE / HDR              | Issuing body (required)                                                                 |
+| REPORT                   | Institution (required)                                                                  |
+| COUV                     | Book title (required)                                                                   |
+
+> **First-iteration scope.** The first implementation only needs to be functional for **ART** (article) end to end; the conditional metadata and TEI mapping for the other types (COMM/POSTER/PRESCONF, THESE/HDR, REPORT, COUV) are completed in follow-up issues.
+>
+> Two fields are explicitly deferred and **not implemented now**:
+>
+> - **THESE/HDR director / jury president** — the field is left out of the form and the TEI for this iteration; it will be added later.
+> - **Conference country** — rendered as a plain free-text input whose value is **not processed** (not mapped to the TEI `country/@key`); a later issue will turn it into a country-code selector.
+
+##### Form configuration
+
+The conditional-fields table above is **not** hard-coded in the component. It is declared once in a dedicated TypeScript config file — `src/app/lib/services/hal/halDepositFormConfig.ts` — so the type→fields mapping and the set of depositable types can evolve without touching the form or the API route. No YAML; a plain typed module.
+
+The config does two things:
+
+1. **Limits which HAL document types are depositable.** Not every type is ready in early iterations; a type marked `enabled: false` is omitted from the document-type `Select` and rejected server-side. In the first iteration **only `ART` is enabled**.
+2. **Declares the type-specific fields and whether each is required or optional.** The base fields (document type, ≥1 domain, language, and — when a main file is attached — its license) are always present and are not part of this per-type map.
+
+Shape (illustrative):
+
+```ts
+export type HalFieldKey =
+  | 'conferenceTitle'
+  | 'conferenceCity'
+  | 'conferenceCountry'
+  | 'institution'
+  | 'bookTitle'
+// 'journalName' is intentionally absent — the journal is read from the document, not entered here
+// 'director' is intentionally absent — deferred (see first-iteration scope)
+
+export type HalDepositTypeConfig = {
+  enabled: boolean
+  fields: Partial<Record<HalFieldKey, 'required' | 'optional'>>
+}
+
+export const halDepositFormConfig: Record<
+  HalDocumentType,
+  HalDepositTypeConfig
+> = {
+  ART: { enabled: true, fields: {} },
+  COMM: {
+    enabled: false,
+    fields: {
+      conferenceTitle: 'required',
+      conferenceCity: 'optional',
+      conferenceCountry: 'optional',
+    },
+  },
+  POSTER: {
+    enabled: false,
+    fields: {
+      conferenceTitle: 'required',
+      conferenceCity: 'optional',
+      conferenceCountry: 'optional',
+    },
+  },
+  PRESCONF: {
+    enabled: false,
+    fields: {
+      conferenceTitle: 'required',
+      conferenceCity: 'optional',
+      conferenceCountry: 'optional',
+    },
+  },
+  THESE: { enabled: false, fields: { institution: 'required' } },
+  HDR: { enabled: false, fields: { institution: 'required' } },
+  REPORT: { enabled: false, fields: { institution: 'required' } },
+  COUV: { enabled: false, fields: { bookTitle: 'required' } },
+  OUV: { enabled: false, fields: {} },
+}
+```
+
+The module also exposes small helpers derived from the map (e.g. `enabledHalDocumentTypes()`, `fieldsForType(type)`, `requiredFieldsForType(type)`). **Both the client form and the server-side creation endpoint import this single config** so the rendered fields, the client-side validation, and the server-side validation can never drift apart. If the document's CERIF→HAL pre-mapped type is not `enabled`, the form falls back to the first enabled type (or shows a "not yet supported" notice if none applies).
 
 **File upload** (at the bottom of the form):
 
-- **Main file** (optional, PDF): one file. Triggers a ZIP deposit (Case 2 in SWORD section).
+- **Main file** (optional, PDF): one file. Triggers a ZIP deposit (Case 2 in SWORD section). When omitted, the deposit is a metadata-only **notice** (XML-only, Case 1) — depositing the PDF is never mandatory.
 - **Complementary files** (optional, multiple): appended to the ZIP alongside the main file.
 
-File uploading expand other fields :
+When at least one file is attached, each file (main **and** complementary) expands a grid of four selectors, with the codes shown in parentheses (UI codes that also drive the TEI — see the TEI mapping section):
 
-| Field           | Type   | Required                                                         | Notes                                                                                                                                                           |
-| --------------- | ------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| File's source   | Select | Yes (default 'Provided by author(s)')                            | File provided by author(s), Publisher allowing publisher's file submission, Publisher's express consent for submission, Funded publication fees for open access |
-| File's type     | Select | Yes (default 'Document')                                         | Document (pdf,jpg...), Source file (docx, tex...), Additional data                                                                                              |
-| File visibility | Select | Yes (default 'Immediately')                                      | Immediately, In 2 weeks, In 1 month, In 3 months, In 6 months, In 1 year, In 2 years                                                                            |
-| License         | Select | Yes for main file, No for others (no default value in both case) | CC BY, CC BY-SA, CC BY-ND, CC BY-NC, CC BY-NC-ND, CC0.                                                                                                          |
+| Field           | Type   | Required                                                         | Options (UI code)                                                                                                                                                                                                                 |
+| --------------- | ------ | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| File's source   | Select | Yes (default 'Provided by author(s)')                            | Provided by author(s) (`author`), Publisher allowing publisher's file submission (`greenPublisher`), Publisher's express consent for submission (`publisherAgreement`), Funded publication fees for open access (`publisherPaid`) |
+| File's type     | Select | Yes (default 'Document')                                         | Document — pdf, jpg… (`file`), Source file — docx, tex… (`src`), Additional data (`annex`). Default `file` for the main file, `annex` for complementary files                                                                     |
+| File visibility | Select | Yes (default 'Immediately')                                      | Immediately (`now`), In 15 days (`15d`), In 1 month (`1m`), In 3 months (`3m`), In 6 months (`6m`), In 1 year (`1y`), In 2 years (`2y`)                                                                                           |
+| License         | Select | Yes for main file, No for others (no default value in both case) | CC BY, CC BY-SA, CC BY-NC, CC BY-NC-SA, CC BY-ND, CC BY-NC-ND, ETALAB (Open Licence), Copyright (all rights reserved)                                                                                                             |
 
-The form validates client-side before advancing: document type, language, license and at least one domain are all required (journal/conference/etc. required conditionally per type).
+The form validates client-side before advancing: document type, language and at least one domain are always required; when a main file is attached its license is also required (complementary files may stay license-less). Journal/conference/etc. fields are required conditionally per type.
 
 #### Step 2 — Review
 
@@ -376,18 +511,28 @@ The pending/running default display is shown while the request is in flight. On 
 
 In mockup, the DemoSwitcher component is purpose to show what happen according to the deposit status. It shouldn't been included in layout.
 
-The deposit status view is displayed if there is at least one `HalDeposit` row for the document (based on document uid) - the person uid doesn't matter here - and no source record with platform of type `BibliographicPlatform.hal` in document's records. If there is more than one deposit, the one with the most recent `updatedAt` field's value should be used.
+The deposit status view is displayed if there is at least one `HalDeposit` row for the document (based on document uid) - the person uid doesn't matter here - and no source record with platform of type `BibliographicPlatform.HAL` in document's records. If there is more than one deposit, the one with the most recent `updatedAt` field's value should be used.
+
+Once the publication is live on HAL and harvested back, a `BibliographicPlatform.HAL` source record arrives via the graph (RabbitMQ message) and lands in the document's records; at that point the condition above becomes false and the status panel is replaced. The form is **not** re-shown by SoVisuPlus on its own after a deposit exists — a general re-deposit action (returning to the form) is deferred to a later iteration.
 
 Once a deposit exists, the form is replaced by a status panel keyed on `HalDeposit.status`. Each view shows the status, submission date and the HAL identifier with a link to the public HAL page when available. The "refresh status" button calls `POST /api/hal/deposits/:depositId/refresh`.
 
-| Status                | Icon / colour     | Message                                    | Actions                     |
-| --------------------- | ----------------- | ------------------------------------------ | --------------------------- |
-| `pending` / `running` | Info, blue        | Deposit queued or in progress              | Refresh status              |
-| `verify`              | Hourglass, orange | Under moderation (1–5 working days)        | Refresh status              |
-| `accept`              | Checkmark, green  | Published on HAL; public URL shown         | —                           |
-| `update`              | Warning, orange   | Moderator requested changes; comment shown | Re-deposit (resets to form) |
-| `delete`              | Error, red        | Rejected; rejection reason shown           | Re-deposit (resets to form) |
-| `replace`             | Info, grey        | Replaced by another version                | —                           |
+| Status                | Icon / colour     | Message                                    | Actions        |
+| --------------------- | ----------------- | ------------------------------------------ | -------------- |
+| `pending` / `running` | Info, blue        | Deposit queued or in progress              | —              |
+| `verify`              | Hourglass, orange | Under moderation (1–5 working days)        | Refresh status |
+| `accept`              | Checkmark, green  | Published on HAL; public URL shown         | —              |
+| `update`              | Warning, orange   | Moderator requested changes; comment shown | Refresh status |
+| `delete`              | Error, red        | Rejected; rejection reason shown           | Refresh status |
+| `replace`             | Info, grey        | Replaced by another version                | —              |
+| `error`               | Error, red        | Submission failed; `lastError` shown       | —              |
+
+A general **"Re-deposit"** action (start a fresh deposit) is **deferred to a later iteration** — it is not specific to any status. In this iteration the only action offered on `verify`/`update`/`delete` is "Refresh status".
+
+These two statuses mean the deposit is **stuck on the HAL side**, and crucially **no HAL source record is harvested while a deposit sits in them**:
+
+- `update` — HAL is waiting for the contributor to apply the requested changes **directly on HAL**. SoVisuPlus cannot push those changes (PUT is out of scope), so the panel stays in `update`; "Refresh status" re-pulls the status after the user has acted on HAL. Only once HAL accepts does it move to `accept` and a source record is eventually harvested (then the panel is replaced — see the display rule below).
+- `delete` — the deposit was rejected. This is effectively terminal for this iteration: no source record will ever be harvested, and there is no re-deposit yet, so the panel keeps showing the rejection reason.
 
 ---
 
@@ -400,15 +545,68 @@ The form fields that are not already on the `Document` model must be persisted o
 | HAL document type (refined) | `halDocumentType` (string)                      |
 | HAL domain codes            | `halDomains` (string array / JSON)              |
 | Language                    | `language` (string)                             |
-| License                     | `license` (string)                              |
-| Journal name                | `journalName` (string?)                         |
 | Conference title            | `conferenceTitle` (string?)                     |
 | Conference city / country   | `conferenceCity`, `conferenceCountry` (string?) |
 | Institution                 | `institution` (string?)                         |
-| Director / jury president   | `director` (string?)                            |
 | Book title                  | `bookTitle` (string?)                           |
 
-`HalTEIInterchangeService.toHalTEI()` will need to be extended to accept these deposit-specific overrides in addition to the base `DocumentClass`.
+The **journal is not stored here** — it lives on the `Document` (`document.journal`) and `toHalTEI` reads it directly. License, file source, file type and visibility are **per file** and live on `HalDepositFile`. The director / jury-president field is deferred (not stored or emitted in this iteration).
+
+`HalTEIInterchangeService.toHalTEI()` will need to be extended to accept these deposit-specific overrides in addition to the base `DocumentClass`. `HalTEIOptions` (currently `{ domains, language, halDocumentType }`) is widened to carry `conferenceTitle`, `conferenceCity`, `conferenceCountry`, `institution`, `bookTitle`, and the per-file descriptors (source, type, visibility, license — see below). The journal is **not** an option — it already comes from `document.journal`.
+
+#### TEI mapping of deposit metadata (AOfr profile)
+
+Element paths below are taken from the AOfr schema (`aofr.xsd`) and confirmed against real preprod deposits. All elements are in the TEI namespace; `<biblFull>` children must keep schema order: `titleStmt`, `editionStmt`, `publicationStmt`, `seriesStmt`, `notesStmt`, `sourceDesc`, `profileDesc`.
+
+| Field                     | TEI location                                                                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| HAL document type         | `profileDesc/textClass/classCode[@scheme="halTypology"]/@n` _(already emitted)_                                                      |
+| HAL domains               | `profileDesc/textClass/classCode[@scheme="halDomain"]/@n` (one per domain) _(already emitted)_                                       |
+| Language (of the file)    | `profileDesc/langUsage/language/@ident` _(already emitted)_                                                                          |
+| License (per file)        | `publicationStmt/availability/licence/@target` = the CC/ETALAB URL (see table); one `<licence>` per distinct file license            |
+| Journal name (ART)        | `sourceDesc/biblStruct/monogr/title[@level="j"]` — read from `document.journal` (already emitted by `toHalTEI`), not a deposit field |
+| Book title (COUV)         | `sourceDesc/biblStruct/monogr/title[@level="m"]`                                                                                     |
+| Conference title (COMM/…) | `sourceDesc/biblStruct/monogr/meeting/title`                                                                                         |
+| Conference city           | `sourceDesc/biblStruct/monogr/meeting/settlement`                                                                                    |
+| Conference country        | _Deferred_ — captured as free text, **not** mapped to `meeting/country/@key` in this iteration                                       |
+| Issuing body (THESE/HDR)  | `sourceDesc/biblStruct/monogr/authority[@type="institution"]`                                                                        |
+| Director / jury president | _Deferred_ — field not implemented in this iteration (would map to `monogr/authority[@type="supervisor"]` / `[@type="jury"]`)        |
+| Institution (REPORT)      | `sourceDesc/biblStruct/monogr/authority[@type="institution"]`                                                                        |
+| Attached files            | `editionStmt/edition/ref` (see file block; `@type` = `file`/`src`/`annex`)                                                           |
+| File embargo / visibility | `editionStmt/edition/date/@notBefore` (XSD: "%embargo sur chaque fichier")                                                           |
+| Document internal UID     | `<idno type="localRef">` with the document UID (already injected by the packager)                                                    |
+
+**License → `@target` URL** (`availability/licence/@target`):
+
+| UI value    | `@target`                                                                                                                  |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------- |
+| CC BY       | `http://creativecommons.org/licenses/by/4.0/`                                                                              |
+| CC BY-SA    | `http://creativecommons.org/licenses/by-sa/4.0/`                                                                           |
+| CC BY-NC    | `http://creativecommons.org/licenses/by-nc/4.0/`                                                                           |
+| CC BY-NC-SA | `http://creativecommons.org/licenses/by-nc-sa/4.0/`                                                                        |
+| CC BY-ND    | `http://creativecommons.org/licenses/by-nd/4.0/`                                                                           |
+| CC BY-NC-ND | `http://creativecommons.org/licenses/by-nc-nd/4.0/`                                                                        |
+| ETALAB      | _To confirm_ against HAL's licence reference list                                                                          |
+| Copyright   | _To confirm_ — likely **no** `<licence>` element (closed/copyright is expressed differently); resolve before relying on it |
+
+**File block** — files and their embargo live in `editionStmt/edition`. Each file is one `<ref>` whose `@type` is the file kind (`file` for a document, `src` for a source file, `annex` for additional data) and `@subtype` is the file source; the embargo date (derived from the file-visibility delay relative to the deposit date) is a sibling `<date notBefore="…">`:
+
+```xml
+<editionStmt>
+  <edition>
+    <date notBefore="2026-12-24"/>                                  <!-- omitted when visibility = now -->
+    <ref type="file" target="doc.pdf" subtype="author" n="1"/>      <!-- main file (Document) -->
+    <ref type="annex" target="data.csv" subtype="author" n="2"/>    <!-- complementary (Additional data) -->
+  </edition>
+</editionStmt>
+```
+
+- `target` = the file's `fileName` (no path — files are zipped with `zip -j`).
+- `@type` = the **file type** code (`file` / `src` / `annex`), from `HalDepositFile.fileType`.
+- `@subtype` = the **file source** code (`author` / `greenPublisher` / `publisherAgreement` / `publisherPaid`), from `HalDepositFile.fileSource`.
+- `n` = 1-based sequence index.
+- `@notBefore` (embargo) maps from `HalDepositFile.visibility`: `now` → no date; `15d / 1m / 3m / 6m / 1y / 2y` → deposit date + offset.
+- **License** is per file (`HalDepositFile.license`). Structurally the AOfr schema only exposes `publicationStmt/availability/licence` (document-level), but `<licence>` is repeatable with `@target` and may contain `<ref>` elements pointing back to specific files. **The exact per-file association is the one remaining open point** — confirm against HAL before relying on more than one distinct license per deposit; the article-first case (single main PDF) needs only one `<licence>`.
 
 ---
 
@@ -419,4 +617,4 @@ A new `deposit_hal` permission action is added. It follows the existing scoped R
 - A researcher can deposit their own publications (scoped to their own `Person`).
 - A librarian or laboratory manager can deposit publications on behalf of others (scoped to a `ResearchUnit`, `Institution`, etc., or globally).
 
-The deposit trigger endpoint checks `ability.can(PermissionAction.deposit_hal, targetPerson)` server-side. Having `hal_login` + `idhals`/`idhali` is a data prerequisite checked separately — it is not a substitute for the RBAC check.
+The deposit trigger endpoint checks `ability.can(PermissionAction.deposit_hal, perspectivePerson)` server-side (the perspective person — see HAL credentials). Having `hal_login` + `idhals`/`idhali` is a data prerequisite checked separately — it is not a substitute for the RBAC check.
