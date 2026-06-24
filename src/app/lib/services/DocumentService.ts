@@ -12,6 +12,13 @@ import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 import { DocumentType, Document } from '@/types/Document'
 import { Concept, ConceptJson } from '@/types/Concept'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
+import {
+  HalDepositDAO,
+  CreateHalDepositParams,
+  HalDepositFileInput,
+} from '@/lib/daos/HalDepositDAO'
+import { HalDeposit } from '@/types/HalDeposit'
+import { Person } from '@/types/Person'
 import dayjs from 'dayjs'
 import { OAStatus } from '@prisma/client'
 import { Literal, LiteralJson } from '@/types/Literal'
@@ -50,6 +57,7 @@ export class DocumentService {
   private actionDAO: ActionDAO
   private userDAO: UserDAO
   private conceptDAO: ConceptDAO
+  private halDepositDAO: HalDepositDAO
 
   constructor() {
     this.documentDAO = new DocumentDAO()
@@ -57,6 +65,50 @@ export class DocumentService {
     this.actionDAO = new ActionDAO()
     this.userDAO = new UserDAO()
     this.conceptDAO = new ConceptDAO()
+    this.halDepositDAO = new HalDepositDAO()
+  }
+
+  // ─── HAL deposits ─────────────────────────────────────────────────────────
+  // The go-between for the deposit API routes and HalDepositDAO. Deposits are made on behalf
+  // of the perspective person carried by the request, not the authenticated user.
+
+  /** Fetch the perspective person (for the server-side authz + eligibility checks). */
+  async getPersonByUid(uid: string): Promise<Person | null> {
+    return this.personDAO.fetchPersonByUid(uid)
+  }
+
+  /** Create a deposit row in `pending` status (files are attached afterwards). */
+  async createHalDeposit(params: CreateHalDepositParams): Promise<HalDeposit> {
+    return this.halDepositDAO.createDeposit(params)
+  }
+
+  /** Attach uploaded files (already written to disk) to a deposit. */
+  async attachDepositFiles(
+    depositId: number,
+    files: HalDepositFileInput[],
+  ): Promise<HalDeposit> {
+    return this.halDepositDAO.addFiles(depositId, files)
+  }
+
+  /** Remove a deposit (used to roll back when post-creation steps fail). */
+  async deleteHalDeposit(depositId: number): Promise<void> {
+    await this.halDepositDAO.deleteDeposit(depositId)
+  }
+
+  async getHalDepositById(depositId: number): Promise<HalDeposit | null> {
+    return this.halDepositDAO.findById(depositId)
+  }
+
+  /** Latest deposit for a document (by updatedAt), used to render the status panel. */
+  async getLatestDepositForDocument(
+    documentUid: string,
+  ): Promise<HalDeposit | null> {
+    return this.halDepositDAO.findLatestByDocumentUid(documentUid)
+  }
+
+  /** Signal an on-demand status refresh for a deposit (listener picks it up). */
+  async requestDepositRefresh(depositId: number): Promise<void> {
+    await this.halDepositDAO.requestRefresh(depositId, new Date())
   }
 
   /**
