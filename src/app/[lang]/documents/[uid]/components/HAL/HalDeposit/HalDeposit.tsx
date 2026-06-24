@@ -16,10 +16,12 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
+  Paper,
   Select,
   TextField,
   Typography,
 } from '@mui/material'
+import { Add } from '@mui/icons-material'
 import useStore from '@/stores/global_store'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
@@ -222,6 +224,15 @@ export default function HalDeposit() {
     selectedDocument.titles[0]?.value ??
     ''
 
+  const abstract =
+    selectedDocument.abstracts.find((a) => a.language === lang)?.value ??
+    selectedDocument.abstracts[0]?.value ??
+    ''
+
+  const sortedContributions = [...(selectedDocument.contributions ?? [])].sort(
+    (a, b) => (a.rank ?? 0) - (b.rank ?? 0),
+  )
+
   // ─── Review step ───────────────────────────────────────────────────────────
   if (step === 'review') {
     const files = [
@@ -285,6 +296,92 @@ export default function HalDeposit() {
         <Trans>hal_deposit_form_metadata_note</Trans>
       </Alert>
 
+      {/* Read-only metadata pulled from other tabs */}
+      <Section
+        title={t`hal_deposit_section_title_abstract`}
+        action={
+          <Button
+            size='small'
+            sx={{ textTransform: 'none', fontWeight: 600 }}
+            onClick={() => navigateToTab('bibliographic_information')}
+          >
+            <Trans>hal_deposit_modify_in_biblio</Trans>
+          </Button>
+        }
+      >
+        <Paper variant='outlined' sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F7F6' }}>
+          <Typography sx={{ fontWeight: 600, mb: 0.5 }}>
+            {title || <Trans>hal_deposit_no_title</Trans>}
+          </Typography>
+          <Typography
+            variant='body2'
+            color='text.secondary'
+            sx={{
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {abstract || <Trans>hal_deposit_no_abstract</Trans>}
+          </Typography>
+        </Paper>
+      </Section>
+
+      <Section
+        title={t`hal_deposit_section_authors`}
+        action={
+          <Button
+            size='small'
+            sx={{ textTransform: 'none', fontWeight: 600 }}
+            onClick={() => navigateToTab('authors')}
+          >
+            <Trans>hal_deposit_modify_in_authors</Trans>
+          </Button>
+        }
+      >
+        <Paper variant='outlined' sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F7F6' }}>
+          {sortedContributions.length === 0 ? (
+            <Typography variant='body2' color='text.secondary'>
+              <Trans>hal_deposit_no_authors</Trans>
+            </Typography>
+          ) : (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {sortedContributions.map((c, i) => {
+                const roles = c.getRoleLabels().join(', ')
+                const affiliations = c.affiliations
+                  .map((o) => o.displayNames[0])
+                  .filter(Boolean)
+                  .join(', ')
+                return (
+                  <Box key={i}>
+                    <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                      {c.rank != null && `${c.rank}. `}
+                      {c.person?.getDisplayName(lang) || '—'}
+                      {roles && (
+                        <Typography
+                          component='span'
+                          variant='caption'
+                          color='text.secondary'
+                          sx={{ ml: 1, fontStyle: 'italic' }}
+                        >
+                          {`(${roles})`}
+                        </Typography>
+                      )}
+                    </Typography>
+                    {affiliations && (
+                      <Typography variant='caption' color='text.secondary'>
+                        {affiliations}
+                      </Typography>
+                    )}
+                  </Box>
+                )
+              })}
+            </Box>
+          )}
+        </Paper>
+      </Section>
+
       {hasDroppedAffiliations && (
         <Alert severity='warning' sx={{ mb: 2 }}>
           <Trans>hal_deposit_form_affiliations_note</Trans>
@@ -292,10 +389,10 @@ export default function HalDeposit() {
       )}
 
       <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel>{t`hal_deposit_field_document_type`}</InputLabel>
+        <InputLabel>{`${t`hal_deposit_field_document_type`} *`}</InputLabel>
         <Select
           value={documentType}
-          label={t`hal_deposit_field_document_type`}
+          label={`${t`hal_deposit_field_document_type`} *`}
           onChange={(e) => setDocumentType(e.target.value)}
         >
           {enabledHalDocumentTypes().map((typ) => (
@@ -317,7 +414,7 @@ export default function HalDeposit() {
         renderInput={(params) => (
           <TextField
             {...params}
-            label={t`hal_deposit_field_domains`}
+            label={`${t`hal_deposit_field_domains`} *`}
             placeholder={t`hal_deposit_domains_placeholder`}
           />
         )}
@@ -325,10 +422,10 @@ export default function HalDeposit() {
       />
 
       <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel>{t`hal_deposit_field_language`}</InputLabel>
+        <InputLabel>{`${t`hal_deposit_field_language`} *`}</InputLabel>
         <Select
           value={language}
-          label={t`hal_deposit_field_language`}
+          label={`${t`hal_deposit_field_language`} *`}
           onChange={(e) => setLanguage(e.target.value)}
         >
           {LANGUAGE_OPTIONS.map((l) => (
@@ -347,6 +444,7 @@ export default function HalDeposit() {
       <AttachedFileRow
         accept='application/pdf'
         requireLicense
+        isMain
         file={mainFile}
         onSelect={(file) =>
           setMainFile({
@@ -384,7 +482,7 @@ export default function HalDeposit() {
           visibilityOptions={VISIBILITY_OPTIONS}
         />
       ))}
-      <Button component='label' sx={{ mt: 1 }}>
+      <Button component='label' startIcon={<Add />} sx={{ mt: 1 }}>
         <Trans>hal_deposit_add_complementary_file</Trans>
         <input
           type='file'
@@ -443,6 +541,40 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
         {label}
       </Typography>
       <Typography>{value}</Typography>
+    </Box>
+  )
+}
+
+/** Read-only block: an uppercase section title with a right-aligned edit action above the content. */
+function Section({
+  title,
+  action,
+  children,
+}: {
+  title: string
+  action?: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <Box sx={{ mb: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 1,
+        }}
+      >
+        <Typography
+          variant='subtitle2'
+          color='text.secondary'
+          sx={{ fontWeight: 600, letterSpacing: '0.05em' }}
+        >
+          {title}
+        </Typography>
+        {action}
+      </Box>
+      {children}
     </Box>
   )
 }

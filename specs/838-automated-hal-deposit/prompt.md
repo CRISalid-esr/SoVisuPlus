@@ -391,6 +391,12 @@ The form is pre-populated from the document's existing data where possible.
 - For `ART`: the journal, read from the document's `journal` (also from the _Bibliographic information_ tab). It is shown read-only and is **not** an editable deposit field — it must already be present on the document (see the missing-journal gate above). Making the journal editable in the Bibliographic information tab (with ISSN autocompletion) is a later iteration.
 - Authors and affiliations (from the _Authors_ tab). If any author has affiliations that will be silently dropped at submission time (affiliations with no HAL-recognized identifier), show an inline warning: "Some contributor's affiliations are not recognized by HAL and won't be submitted. Go to Author tab if you want to change it." This is a soft warning — it does not block submission.
 
+Presentation of the read-only sections:
+
+- Each section has a header with a right-aligned **Modify** action button (its label is **bold**) that navigates to the corresponding tab — "Edit in Bibliographic information" → `bibliographic_information`, "Edit in the Authors tab" → `authors`. The body is a neutral grey surface (`#F5F7F6`).
+- The title/abstract section shows the localized title (bold) and a 3-line-clamped abstract, with "No title provided" / "No abstract provided" fallbacks.
+- The authors section lists contributors **sorted by rank** (ascending). The **rank value is displayed only when it exists** (not null) — never fabricate a positional index. Each row shows the contributor's display name (bold), their role label(s) in parentheses, and their affiliation name(s). The affiliation name uses the organization's `displayNames[0]` (language-tagged organization names are not yet exposed to the client). When there are no contributors, show "No author provided".
+
 **Deposit metadata** (editable, submitted with the deposit):
 
 | Field         | Type                      | Required | Notes                                                                                                                                                                                                                                                |
@@ -496,6 +502,14 @@ When at least one file is attached, each file (main **and** complementary) expan
 | License         | Select | Yes for main file, No for others (no default value in both case) | CC BY, CC BY-SA, CC BY-NC, CC BY-NC-SA, CC BY-ND, CC BY-NC-ND, ETALAB (Open Licence), Copyright (all rights reserved)                                                                                                             |
 
 The form validates client-side before advancing: document type, language and at least one domain are always required; when a main file is attached its license is also required (complementary files may stay license-less). Journal/conference/etc. fields are required conditionally per type.
+
+**Required-field markers.** Every field that is required gets a trailing asterisk (` *`) on its label, derived from the Required columns above — **not** from the design mockup. This covers: document type, HAL domains, language, and the per-file source / type / visibility selectors (always required); the license selector shows the asterisk **only for the main file**. The **main file itself is optional and carries no asterisk** (depositing the PDF is never mandatory). The asterisk is a literal character appended in the UI — it is language-neutral and is not part of any translation string.
+
+**File upload affordances.**
+
+- The empty main-file picker button shows a cloud-upload icon (`CloudUpload`); the "Add a complementary file" button shows a plus icon (`Add`).
+- Once a file is picked, its row shows a paper-clip icon (`AttachFile`) before the file name, followed by the human-readable file size (B / KB / MB).
+- The selected-file box is tinted by role: a **light teal** surface (`#E8F5F4`) for the main file and a **light grey** surface (`#F5F7F6`) for complementary files.
 
 #### Step 2 — Review
 
