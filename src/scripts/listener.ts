@@ -5,6 +5,7 @@ import { AmqpConnection } from '@/lib/amqp/AmqpConnection'
 import { startWebSocketServer } from './startWebSocketServer'
 import { startAMQPConsumer } from './startAMQPConsumer'
 import { startChangePoller } from './startChangePoller'
+import { startHalDepositPoller } from './startHalDepositPoller'
 
 dotenv.config()
 ;(async () => {
@@ -21,6 +22,7 @@ dotenv.config()
     const batchSemaphore = new Sema(1)
     await startAMQPConsumer(connection, interactiveSemaphore, batchSemaphore)
     startChangePoller(connection)
+    startHalDepositPoller()
   } catch (error) {
     console.error('❌ Error during startup:', error)
   }
