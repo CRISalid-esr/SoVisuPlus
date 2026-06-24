@@ -55,7 +55,28 @@ jest.mock('next/navigation', () => ({
 
 jest.mock('next-auth/react', () => ({
   __esModule: true,
-  useSession: () => ({ data: { user: { authz: { roleAssignments: [] } } } }),
+  // Grant all abilities (manage/all) so the deposit tab is shown; permission gating itself is
+  // covered by the route/service tests. Using a real authz context keeps a real CASL ability
+  // (with .on), which <Can> subscribes to.
+  useSession: () => ({
+    data: {
+      user: {
+        authz: {
+          userId: '1',
+          personUid: null,
+          roleAssignments: [
+            {
+              role: 'admin',
+              permissions: [{ action: 'manage', subject: 'all' }],
+              scopes: [],
+            },
+          ],
+          roles: ['admin'],
+          scopes: [],
+        },
+      },
+    },
+  }),
 }))
 
 const document: Document = new Document(
@@ -170,6 +191,9 @@ describe('DocumentDetailsPage Component', () => {
         document: { ...mockState.document, loading: false, hasFetched: true },
         user: {
           currentPerspective: {
+            type: 'person',
+            uid: 'person:john-doe',
+            getDisplayName: () => 'John Doe',
             person: {
               id: '1',
               firstName: 'John',
@@ -218,6 +242,9 @@ describe('DocumentDetailsPage Component', () => {
         document: { ...mockState.document, loading: false, hasFetched: true },
         user: {
           currentPerspective: {
+            type: 'person',
+            uid: 'person:john-doe',
+            getDisplayName: () => 'John Doe',
             person: {
               id: '1',
               firstName: 'John',

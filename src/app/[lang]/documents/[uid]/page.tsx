@@ -21,7 +21,7 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Trans } from '@lingui/react'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import UpdateInHAL from '@/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL'
-import AddInHAL from '@/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL'
+import HalDeposit from '@/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit'
 import {
   useBlockNavigation,
   useGuardedRouter,
@@ -84,13 +84,6 @@ const DocumentDetailsPage = () => {
   const halRecord = selectedDocument?.records.find(
     (record) => record.platform === BibliographicPlatform.HAL,
   )
-  if (!halRecord) {
-    tabs.push({
-      label: t`document_details_add_in_hal_tab`,
-      value: 'add_in_hal',
-      color: theme.palette.primary.main,
-    })
-  }
 
   useEffect(() => {
     if (selectedDocument?.uid == uid && hasFetched) {
@@ -129,6 +122,22 @@ const DocumentDetailsPage = () => {
   const canEdit = !!(
     selectedDocument && ability.can(PermissionAction.update, selectedDocument)
   )
+
+  // The HAL deposit tab is shown only when the document is not yet in HAL and the user can
+  // deposit on behalf of the current (person) perspective.
+  const currentPerspective = useStore((state) => state.user?.currentPerspective)
+  const canDeposit = !!(
+    currentPerspective &&
+    currentPerspective.type === 'person' &&
+    ability.can(PermissionAction.deposit_hal, currentPerspective)
+  )
+  if (!halRecord && canDeposit) {
+    tabs.push({
+      label: t`document_details_add_in_hal_tab`,
+      value: 'add_in_hal',
+      color: theme.palette.primary.main,
+    })
+  }
 
   if (!hasFetched || loading) {
     return (
@@ -170,7 +179,7 @@ const DocumentDetailsPage = () => {
       case 'update_in_hal':
         return <UpdateInHAL />
       case 'add_in_hal':
-        return <AddInHAL />
+        return <HalDeposit />
       default:
         return <BibliographicInformation />
     }

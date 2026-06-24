@@ -35,6 +35,24 @@ interface DepositPayload {
 const bad = (error: string, reason?: string, status = 400) =>
   NextResponse.json({ error, ...(reason ? { reason } : {}) }, { status })
 
+/** Latest deposit for a document (for the status panel). Returns `null` when there is none. */
+export const GET = async (request: Request) => {
+  const session = (await getServerSession(authOptions)) as Session & {
+    user: { username?: string }
+  }
+  if (!session?.user?.username) {
+    return bad('User is not authenticated', undefined, 401)
+  }
+
+  const documentUid = new URL(request.url).searchParams.get('documentUid')
+  if (!documentUid) return bad('Missing documentUid')
+
+  const deposit = await new DocumentService().getLatestDepositForDocument(
+    documentUid,
+  )
+  return NextResponse.json(deposit ? deposit.toJson() : null, { status: 200 })
+}
+
 export const POST = async (request: Request) => {
   const session = (await getServerSession(authOptions)) as Session & {
     user: { username?: string }

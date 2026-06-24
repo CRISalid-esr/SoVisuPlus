@@ -9,13 +9,15 @@ import { addDocumentSlice, DocumentSlice } from './documentSlice'
 import { addUserSlice, UserSlice } from './userSlice'
 import { addHarvestingSlice, HarvestingSlice } from './harvestingSlice'
 import { addDashboardSlice, DashboardSlice } from './dashboardSlice'
+import { addHalDepositSlice, HalDepositSlice } from './halDepositSlice'
 
 export type GlobalStore = ResearchUnitSlice &
   PersonSlice &
   DocumentSlice &
   UserSlice &
   HarvestingSlice &
-  DashboardSlice
+  DashboardSlice &
+  HalDepositSlice
 
 const useStore = create<GlobalStore>()(
   devtools(
@@ -26,6 +28,7 @@ const useStore = create<GlobalStore>()(
       ...addUserSlice(...a),
       ...addHarvestingSlice(...a),
       ...addDashboardSlice(...a),
+      ...addHalDepositSlice(...a),
     }),
     { name: 'GlobalStore' }, // Optional: Name for debugging in devtools
   ),
