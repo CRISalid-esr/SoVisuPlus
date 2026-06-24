@@ -46,23 +46,33 @@ describe('HalDepositStatusPanel', () => {
         halUrl: 'https://hal.science/hal-1',
       }),
     )
-    expect(screen.getByText('Published on HAL')).toBeInTheDocument()
+    expect(
+      screen.getByText('hal_deposit_status_published_title'),
+    ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /hal-1/ })).toHaveAttribute(
       'href',
       'https://hal.science/hal-1',
     )
-    expect(screen.queryByText('Refresh status')).not.toBeInTheDocument()
+    expect(
+      screen.queryByText('hal_deposit_status_refresh'),
+    ).not.toBeInTheDocument()
   })
 
   it('offers a refresh action while under moderation (verify)', () => {
     renderPanel(deposit({ status: 'verify', halId: 'hal-2' }))
-    expect(screen.getByText('Under moderation')).toBeInTheDocument()
-    expect(screen.getByText('Refresh status')).toBeInTheDocument()
+    expect(
+      screen.getByText('hal_deposit_status_moderation_title'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('hal_deposit_status_refresh'),
+    ).toBeInTheDocument()
   })
 
   it('shows the error message for a failed submission', () => {
     renderPanel(deposit({ status: 'error', lastError: 'invalid TEI' }))
-    expect(screen.getByText('Submission failed')).toBeInTheDocument()
+    expect(
+      screen.getByText('hal_deposit_status_failed_title'),
+    ).toBeInTheDocument()
     expect(screen.getByText('invalid TEI')).toBeInTheDocument()
   })
 })

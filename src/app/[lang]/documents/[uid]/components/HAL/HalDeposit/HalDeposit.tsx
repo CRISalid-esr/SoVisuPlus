@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Trans } from '@lingui/react/macro'
 import { t } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react'
 import * as Lingui from '@lingui/core'
 import { useRouter, useParams } from 'next/navigation'
 import {
@@ -31,6 +32,8 @@ import {
   FILE_SOURCE_OPTIONS,
   FILE_TYPE_OPTIONS,
   VISIBILITY_OPTIONS,
+  OptionLabel,
+  labelOf,
 } from './halDepositOptions'
 import { HalDepositStatusPanel } from './HalDepositStatusPanel'
 import { hasHalRecognisedAffiliation } from './halDepositGates'
@@ -43,6 +46,9 @@ const DOMAIN_OPTIONS = Object.values(halDomainsByCode)
 export default function HalDeposit() {
   const router = useRouter()
   const { uid } = useParams<{ uid: string }>()
+  const { _ } = useLingui()
+  const renderLabel = (label: OptionLabel) =>
+    typeof label === 'string' ? label : _(label)
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
 
   const { selectedDocument } = useStore((s) => s.document)
@@ -111,18 +117,14 @@ export default function HalDeposit() {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity='info'>
-          <Trans>
-            A HAL login or identifier is necessary to perform a submission. If
-            you would like to do so, please complete your HAL information on the
-            MyAccount page.
-          </Trans>
+          <Trans>hal_deposit_gate_no_hal_id</Trans>
         </Alert>
         <Button
           sx={{ mt: 2 }}
           variant='contained'
           onClick={() => router.push(`/${lang}/account`)}
         >
-          <Trans>Go to My Account</Trans>
+          <Trans>hal_deposit_gate_go_my_account</Trans>
         </Button>
       </Box>
     )
@@ -131,8 +133,8 @@ export default function HalDeposit() {
   if (!selectedDocument.publicationDate) {
     return (
       <GateAlert
-        message={t`This document has no publication date. Please add one before depositing.`}
-        actionLabel={t`Go to Bibliographic information`}
+        message={t`hal_deposit_gate_no_date`}
+        actionLabel={t`hal_deposit_gate_go_biblio`}
         onAction={() => navigateToTab('bibliographic_information')}
       />
     )
@@ -141,8 +143,8 @@ export default function HalDeposit() {
   if (documentType === 'ART' && !selectedDocument.journal?.title) {
     return (
       <GateAlert
-        message={t`This article has no journal. Please add one before depositing.`}
-        actionLabel={t`Go to Bibliographic information`}
+        message={t`hal_deposit_gate_no_journal`}
+        actionLabel={t`hal_deposit_gate_go_biblio`}
         onAction={() => navigateToTab('bibliographic_information')}
       />
     )
@@ -152,8 +154,8 @@ export default function HalDeposit() {
     return (
       <GateAlert
         severity='error'
-        message={t`No author has an affiliation with a complying HAL identifier. Please go to the Author tab to complete the information.`}
-        actionLabel={t`Go to Authors`}
+        message={t`hal_deposit_gate_no_affiliation`}
+        actionLabel={t`hal_deposit_gate_go_authors`}
         onAction={() => navigateToTab('authors')}
       />
     )
@@ -209,7 +211,7 @@ export default function HalDeposit() {
     const result = await createDeposit(uid, form)
     setSubmitting(false)
     if (!result.success) {
-      setError(result.error ?? 'Deposit failed')
+      setError(result.error ?? t`hal_deposit_error_failed`)
       setStep('form')
     }
     // On success the slice sets the deposit, flipping this component to the status panel.
@@ -229,19 +231,22 @@ export default function HalDeposit() {
     return (
       <Box sx={{ p: 3 }}>
         <Typography variant='h6' gutterBottom>
-          <Trans>Review your deposit</Trans>
+          <Trans>hal_deposit_review_heading</Trans>
         </Typography>
         {error && (
           <Alert severity='error' sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
-        <ReviewRow label={t`Title`} value={title} />
-        <ReviewRow label={t`Document type`} value={documentType} />
-        <ReviewRow label={t`Language`} value={language} />
+        <ReviewRow label={t`hal_deposit_field_title`} value={title} />
+        <ReviewRow label={t`hal_deposit_field_document_type`} value={documentType} />
+        <ReviewRow
+          label={t`hal_deposit_field_language`}
+          value={renderLabel(labelOf(LANGUAGE_OPTIONS, language))}
+        />
         <Box sx={{ mb: 1.5 }}>
           <Typography variant='caption' color='text.secondary'>
-            <Trans>HAL domains</Trans>
+            <Trans>hal_deposit_field_domains</Trans>
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
             {domains.map((d) => (
@@ -250,15 +255,19 @@ export default function HalDeposit() {
           </Box>
         </Box>
         <ReviewRow
-          label={t`Files`}
-          value={files.length ? files.map((f) => f.file.name).join(', ') : t`Notice only (no file)`}
+          label={t`hal_deposit_field_files`}
+          value={files.length ? files.map((f) => f.file.name).join(', ') : t`hal_deposit_files_notice_only`}
         />
         <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
           <Button onClick={() => setStep('form')} disabled={submitting}>
-            <Trans>Back</Trans>
+            <Trans>hal_deposit_button_back</Trans>
           </Button>
           <Button variant='contained' onClick={handleSubmit} disabled={submitting}>
-            {submitting ? <Trans>Submitting…</Trans> : <Trans>Confirm deposit</Trans>}
+            {submitting ? (
+              <Trans>hal_deposit_button_submitting</Trans>
+            ) : (
+              <Trans>hal_deposit_button_confirm</Trans>
+            )}
           </Button>
         </Box>
       </Box>
@@ -269,31 +278,24 @@ export default function HalDeposit() {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant='h6' gutterBottom>
-        <Trans>Deposit in HAL</Trans>
+        <Trans>hal_deposit_form_heading</Trans>
       </Typography>
 
       <Alert severity='info' sx={{ mb: 2 }}>
-        <Trans>
-          Title, abstract, date, journal and authors are taken from the other
-          tabs.
-        </Trans>
+        <Trans>hal_deposit_form_metadata_note</Trans>
       </Alert>
 
       {hasDroppedAffiliations && (
         <Alert severity='warning' sx={{ mb: 2 }}>
-          <Trans>
-            Some contributor&apos;s affiliations are not recognized by HAL and
-            won&apos;t be submitted. Go to the Author tab if you want to change
-            it.
-          </Trans>
+          <Trans>hal_deposit_form_affiliations_note</Trans>
         </Alert>
       )}
 
       <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel>{t`Document type`}</InputLabel>
+        <InputLabel>{t`hal_deposit_field_document_type`}</InputLabel>
         <Select
           value={documentType}
-          label={t`Document type`}
+          label={t`hal_deposit_field_document_type`}
           onChange={(e) => setDocumentType(e.target.value)}
         >
           {enabledHalDocumentTypes().map((typ) => (
@@ -313,21 +315,25 @@ export default function HalDeposit() {
         value={DOMAIN_OPTIONS.filter((o) => domains.includes(o.code))}
         onChange={(_, v) => setDomains(v.map((o) => o.code))}
         renderInput={(params) => (
-          <TextField {...params} label={t`HAL domains`} placeholder={t`Select domains`} />
+          <TextField
+            {...params}
+            label={t`hal_deposit_field_domains`}
+            placeholder={t`hal_deposit_domains_placeholder`}
+          />
         )}
         sx={{ mb: 2 }}
       />
 
       <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel>{t`Language`}</InputLabel>
+        <InputLabel>{t`hal_deposit_field_language`}</InputLabel>
         <Select
           value={language}
-          label={t`Language`}
+          label={t`hal_deposit_field_language`}
           onChange={(e) => setLanguage(e.target.value)}
         >
           {LANGUAGE_OPTIONS.map((l) => (
             <MenuItem key={l.value} value={l.value}>
-              {l.label}
+              {renderLabel(l.label)}
             </MenuItem>
           ))}
         </Select>
@@ -336,7 +342,7 @@ export default function HalDeposit() {
       <Divider sx={{ my: 2 }} />
 
       <Typography sx={{ fontWeight: 500, mb: 1 }}>
-        <Trans>Main file (optional, PDF)</Trans>
+        <Trans>hal_deposit_main_file_heading</Trans>
       </Typography>
       <AttachedFileRow
         accept='application/pdf'
@@ -360,7 +366,7 @@ export default function HalDeposit() {
       />
 
       <Typography sx={{ fontWeight: 500, mt: 2, mb: 1 }}>
-        <Trans>Complementary files (optional)</Trans>
+        <Trans>hal_deposit_complementary_files_heading</Trans>
       </Typography>
       {annexes.map((annex, i) => (
         <AttachedFileRow
@@ -379,7 +385,7 @@ export default function HalDeposit() {
         />
       ))}
       <Button component='label' sx={{ mt: 1 }}>
-        <Trans>Add a complementary file</Trans>
+        <Trans>hal_deposit_add_complementary_file</Trans>
         <input
           type='file'
           hidden
@@ -402,7 +408,7 @@ export default function HalDeposit() {
           disabled={!valid}
           onClick={() => setStep('review')}
         >
-          <Trans>Review</Trans>
+          <Trans>hal_deposit_button_review</Trans>
         </Button>
       </Box>
     </Box>

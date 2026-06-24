@@ -2,6 +2,7 @@
 
 import { Trans } from '@lingui/react/macro'
 import { t } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react'
 import {
   Box,
   Button,
@@ -14,6 +15,7 @@ import {
   Typography,
 } from '@mui/material'
 import { Close } from '@mui/icons-material'
+import { OptionLabel } from './halDepositOptions'
 
 export type AttachedFile = {
   file: File
@@ -23,7 +25,7 @@ export type AttachedFile = {
   license: string
 }
 
-type Option = { value: string; label: string }
+type Option = { value: string; label: OptionLabel }
 
 interface Props {
   file: AttachedFile | null
@@ -57,7 +59,7 @@ export function AttachedFileRow({
   if (!file) {
     return (
       <Button component='label' variant='outlined'>
-        <Trans>Choose a file</Trans>
+        <Trans>hal_deposit_file_choose</Trans>
         <input
           type='file'
           hidden
@@ -75,7 +77,7 @@ export function AttachedFileRow({
     <Paper variant='outlined' sx={{ p: 2, mb: 1 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography sx={{ fontWeight: 500 }}>{file.file.name}</Typography>
-        <IconButton size='small' onClick={onRemove} aria-label={t`Remove file`}>
+        <IconButton size='small' onClick={onRemove} aria-label={t`hal_deposit_file_remove`}>
           <Close fontSize='small' />
         </IconButton>
       </Box>
@@ -88,25 +90,25 @@ export function AttachedFileRow({
         }}
       >
         <Selector
-          label={t`File's source`}
+          label={t`hal_deposit_file_source`}
           value={file.source}
           options={sourceOptions}
           onChange={(v) => onChange({ source: v })}
         />
         <Selector
-          label={t`File's type`}
+          label={t`hal_deposit_file_type`}
           value={file.kind}
           options={typeOptions}
           onChange={(v) => onChange({ kind: v })}
         />
         <Selector
-          label={t`File visibility`}
+          label={t`hal_deposit_file_visibility`}
           value={file.visibility}
           options={visibilityOptions}
           onChange={(v) => onChange({ visibility: v })}
         />
         <Selector
-          label={requireLicense ? t`License *` : t`License`}
+          label={requireLicense ? t`hal_deposit_file_license_required` : t`hal_deposit_file_license`}
           value={file.license}
           options={licenseOptions}
           error={requireLicense && !file.license}
@@ -130,13 +132,14 @@ function Selector({
   onChange: (v: string) => void
   error?: boolean
 }) {
+  const { _ } = useLingui()
   return (
     <FormControl size='small' fullWidth error={error}>
       <InputLabel>{label}</InputLabel>
       <Select value={value} label={label} onChange={(e) => onChange(e.target.value)}>
         {options.map((o) => (
           <MenuItem key={o.value} value={o.value}>
-            {o.label}
+            {typeof o.label === 'string' ? o.label : _(o.label)}
           </MenuItem>
         ))}
       </Select>
