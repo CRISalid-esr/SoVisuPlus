@@ -9,6 +9,8 @@ import {
   DocumentRecord,
   DocumentState,
   DocumentTitle,
+  HalDeposit,
+  HalDepositFile,
   HalSubmitType,
   Journal,
   JournalIdentifier,
@@ -87,6 +89,12 @@ export type DocumentWithRelations = Document & {
   records: DocumentRecordWithRelations[]
   journal: JournalWithRelations | null
   state: DocumentState
+}
+
+export type HalDepositWithRelations = HalDeposit & {
+  files: HalDepositFile[]
+  document: { uid: string }
+  person: { uid: string }
 }
 
 export type RoleWithPermission = RolePermission & {
