@@ -5,10 +5,35 @@ import { Journal } from '@/types/Journal'
 import { Contribution } from '@/types/Contribution'
 import xpath from 'xpath'
 
+/** A file to reference in the TEI `editionStmt/edition` (codes already resolved by the caller). */
+export type HalFileDescriptor = {
+  fileName: string
+  /** HAL fileType code → `ref/@type` (file | src | annex). */
+  fileType: string
+  /** HAL fileSource code → `ref/@subtype` (author | greenPublisher | …). */
+  fileSource: string
+  /** Embargo date `YYYY-MM-DD` → `date/@notBefore`; null/undefined = immediately visible. */
+  notBefore?: string | null
+  /** 1-based sequence index → `ref/@n`. */
+  n: number
+}
+
 export type HalTEIOptions = {
   domains?: string[]
   language?: string
   halDocumentType?: string
+  /** Internal document UID, emitted as `<idno type="localRef">` for round-trip matching. */
+  localRef?: string
+  /** Resolved Creative Commons `@target` URL for `availability/licence` (null = omit). */
+  licenceTarget?: string | null
+  /** Attached files (Case 2 / ZIP deposit). Empty/absent ⇒ XML-only notice. */
+  files?: HalFileDescriptor[]
+  // Deferred type-specific overrides (stored now, only emitted for non-ART types later).
+  conferenceTitle?: string | null
+  conferenceCity?: string | null
+  conferenceCountry?: string | null
+  institution?: string | null
+  bookTitle?: string | null
 }
 
 /**
@@ -162,6 +187,11 @@ export class HalTEIInterchangeService {
       this.patchProductionDate(dom, date)
     }
 
+    if (options.localRef) this.patchLocalRef(dom, options.localRef)
+    if (options.files?.length) this.patchFiles(dom, options.files)
+    if (options.licenceTarget) this.patchLicence(dom, options.licenceTarget)
+    this.pruneEmptyDepositElements(dom)
+
     return this.serialize(dom)
   }
 
@@ -301,6 +331,8 @@ export class HalTEIInterchangeService {
       <listBibl>
         <biblFull>
           <titleStmt></titleStmt>
+          <editionStmt><edition></edition></editionStmt>
+          <publicationStmt></publicationStmt>
           <sourceDesc>
             <biblStruct>
               <analytic></analytic>
@@ -556,6 +588,105 @@ export class HalTEIInterchangeService {
     const language = this.createElement(dom, 'language')
     language.setAttribute('ident', lang)
     langUsage.appendChild(language)
+  }
+
+  /**
+   * Emit the document's internal UID as `<idno type="localRef">` so a later HAL harvest can be
+   * matched back to this document.
+   * NOTE: exact placement to confirm against a real preprod deposit (spec open item); HAL is
+   * expected to preserve and surface this localRef.
+   */
+  private patchLocalRef(dom: Document, localRef: string): void {
+    const pubStmt = this.ensureElement(
+      dom,
+      "//*[local-name()='biblFull']/*[local-name()='publicationStmt']",
+      () => this.createElement(dom, 'publicationStmt'),
+    )
+    this.removeAllWithin(
+      pubStmt,
+      "./*[local-name()='idno' and @type='localRef']",
+    )
+    const idno = this.createElement(dom, 'idno')
+    idno.setAttribute('type', 'localRef')
+    idno.appendChild(dom.createTextNode(localRef))
+    pubStmt.appendChild(idno)
+  }
+
+  /**
+   * Reference each attached file in `editionStmt/edition` as a `<ref>` (with its embargo date as
+   * a preceding sibling `<date notBefore>` when delayed). `@type` is the file kind, `@subtype`
+   * the file source, `@target` the filename used in the ZIP.
+   */
+  private patchFiles(dom: Document, files: HalFileDescriptor[]): void {
+    const editionStmt = this.ensureElement(
+      dom,
+      "//*[local-name()='biblFull']/*[local-name()='editionStmt']",
+      () => this.createElement(dom, 'editionStmt'),
+    )
+    const edition = this.ensureElementWithin(
+      editionStmt,
+      "./*[local-name()='edition']",
+      () => this.createElement(dom, 'edition'),
+    )
+
+    for (const f of files) {
+      if (f.notBefore) {
+        const date = this.createElement(dom, 'date')
+        date.setAttribute('notBefore', f.notBefore)
+        edition.appendChild(date)
+      }
+      const ref = this.createElement(dom, 'ref')
+      ref.setAttribute('type', f.fileType)
+      ref.setAttribute('subtype', f.fileSource)
+      ref.setAttribute('target', f.fileName)
+      ref.setAttribute('n', String(f.n))
+      edition.appendChild(ref)
+    }
+  }
+
+  /** Emit the deposit licence as `publicationStmt/availability/licence/@target`. */
+  private patchLicence(dom: Document, target: string): void {
+    const pubStmt = this.ensureElement(
+      dom,
+      "//*[local-name()='biblFull']/*[local-name()='publicationStmt']",
+      () => this.createElement(dom, 'publicationStmt'),
+    )
+    const availability = this.ensureElementWithin(
+      pubStmt,
+      "./*[local-name()='availability']",
+      () => this.createElement(dom, 'availability'),
+    )
+    this.removeAllWithin(availability, "./*[local-name()='licence']")
+    const licence = this.createElement(dom, 'licence')
+    licence.setAttribute('target', target)
+    availability.appendChild(licence)
+  }
+
+  /** Drop the editionStmt/publicationStmt skeleton placeholders when nothing populated them. */
+  private pruneEmptyDepositElements(dom: Document): void {
+    const edition = xpath.select1(
+      "//*[local-name()='editionStmt']/*[local-name()='edition']",
+      dom,
+    ) as Element | undefined
+    if (edition && !this.hasElementChild(edition)) {
+      const editionStmt = edition.parentNode
+      if (editionStmt?.parentNode) editionStmt.parentNode.removeChild(editionStmt)
+    }
+
+    const pubStmt = xpath.select1(
+      "//*[local-name()='biblFull']/*[local-name()='publicationStmt']",
+      dom,
+    ) as Element | undefined
+    if (pubStmt && !this.hasElementChild(pubStmt) && pubStmt.parentNode) {
+      pubStmt.parentNode.removeChild(pubStmt)
+    }
+  }
+
+  private hasElementChild(el: Element): boolean {
+    for (let i = 0; i < el.childNodes.length; i++) {
+      if (el.childNodes[i].nodeType === 1) return true
+    }
+    return false
   }
 
   private patchJournalAndImprint(
