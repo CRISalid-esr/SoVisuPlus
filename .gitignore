@@ -10,6 +10,9 @@
 !.yarn/releases
 !.yarn/versions
 
+# HAL deposit files (uploaded attachments + generated TEI/ZIP)
+/uploads
+
 # testing
 /coverage
 

@@ -42,3 +42,9 @@ roles:
       - action: update
         subject: Person
         fields: [identifiers]
+
+  - name: document_depositor
+    description: Deposit publications to HAL on behalf of a person (self-scoped by default)
+    permissions:
+      - action: deposit_hal
+        subject: Person
