@@ -59,7 +59,7 @@ export default function HalDeposit() {
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
 
   const { selectedDocument } = useStore((s) => s.document)
-  const { currentPerspective } = useStore((s) => s.user)
+  const { currentPerspective, ownPerspective } = useStore((s) => s.user)
   const { byDocument, loading, fetchLatestDeposit, createDeposit } = useStore(
     (s) => s.halDeposit,
   )
@@ -141,15 +141,21 @@ export default function HalDeposit() {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity='info'>
-          <Trans>hal_deposit_gate_no_hal_id</Trans>
+          {ownPerspective ? (
+            <Trans>hal_deposit_gate_no_hal_id</Trans>
+          ) : (
+            <Trans>hal_deposit_gate_no_hal_id_other</Trans>
+          )}
         </Alert>
-        <Button
-          sx={{ mt: 2 }}
-          variant='contained'
-          onClick={() => router.push(`/${lang}/account`)}
-        >
-          <Trans>hal_deposit_gate_go_my_account</Trans>
-        </Button>
+        {ownPerspective && (
+          <Button
+            sx={{ mt: 2 }}
+            variant='contained'
+            onClick={() => router.push(`/${lang}/account`)}
+          >
+            <Trans>hal_deposit_gate_go_my_account</Trans>
+          </Button>
+        )}
       </Box>
     )
   }
