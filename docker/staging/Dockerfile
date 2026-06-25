@@ -57,6 +57,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/rbac.roles.sample.yaml /app/rbac.
 
 RUN touch .env && chown nextjs:nodejs .env
 
+# Pre-create HAL upload directories owned by the runtime user (container runs as nextjs)
+RUN mkdir -p /app/uploads/hal-files /app/uploads/hal-tei \
+    && chown -R nextjs:nodejs /app/uploads
+
 # queries are not bundled in the build, so we need to copy them manually
 COPY --from=builder --chown=nextjs:nodejs /app/src/app/lib/graphql/queries /app/src/app/lib/graphql/queries
 
