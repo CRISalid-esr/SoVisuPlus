@@ -100,6 +100,10 @@ const config: Config = {
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   preset: 'ts-jest',
   moduleNameMapper: {
+    // `@/app/*` maps to `src/app/*` (matches tsconfig's `@/*` → `src/*` fallback, used by API
+    // routes for imports like `@/app/auth/...`). Must precede the generic rule below, which
+    // assumes paths live directly under `src/app`.
+    '^@/app/(.*)$': '<rootDir>/src/app/$1',
     '^@/(.*)$': '<rootDir>/src/app/$1',
   },
 

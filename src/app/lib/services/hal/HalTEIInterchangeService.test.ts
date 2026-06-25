@@ -297,6 +297,58 @@ describe('HalTEIInterchangeService', () => {
       expect(out).not.toContain('<idno type="ROR">')
     })
 
+    it('emits idhal idno and institution type when org has a HAL identifier', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+      const person = new Person(
+        'p-1',
+        false,
+        null,
+        'Marie Curie',
+        'Marie',
+        'Curie',
+      )
+      const org = new AuthorityOrganization(
+        'org-hal',
+        ['LPTHE'],
+        null,
+        [],
+        [new AuthorityOrganizationIdentifier('hal' as never, '1234')],
+      )
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+      const out = service.toHalTEI(doc)
+      expect(out).toContain('type="institution"')
+      expect(out).toContain('<idno type="idhal">1234</idno>')
+    })
+
+    it('keeps only RNSR and drops HAL idno when org has both', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.publicationDate = '2001'
+      const person = new Person(
+        'p-1',
+        false,
+        null,
+        'Marie Curie',
+        'Marie',
+        'Curie',
+      )
+      const org = new AuthorityOrganization(
+        'org-rnsr-hal',
+        ['LPTHE'],
+        null,
+        [],
+        [
+          new AuthorityOrganizationIdentifier('nns' as never, '200012345A'),
+          new AuthorityOrganizationIdentifier('hal' as never, '1234'),
+        ],
+      )
+      doc.contributions = [new Contribution(person, [], [org], 1)]
+      const out = service.toHalTEI(doc)
+      expect(out).toContain('type="laboratory"')
+      expect(out).toContain('<idno type="RNSR">200012345A</idno>')
+      expect(out).not.toContain('<idno type="idhal">')
+    })
+
     it('omits affiliation when org has no HAL-recognized identifiers', () => {
       const doc = makeDoc(DocumentType.Article)
       doc.publicationDate = '2001'
@@ -379,6 +431,72 @@ describe('HalTEIInterchangeService', () => {
         expect(out).toContain(`scheme="halTypology"`)
         expect(out).toContain(`n="${expectedHal}"`)
       }
+    })
+
+    it('injects the document UID as <idno type="localRef">', () => {
+      const out = service.toHalTEI(makeDoc(DocumentType.Article), {
+        localRef: 'doc-1',
+      })
+      expect(out).toContain('type="localRef"')
+      expect(out).toContain('doc-1')
+    })
+
+    it('emits a <ref> per file with type/subtype/target/n and an embargo date', () => {
+      const out = service.toHalTEI(makeDoc(DocumentType.Article), {
+        files: [
+          {
+            fileName: 'doc.pdf',
+            fileType: 'file',
+            fileSource: 'author',
+            notBefore: '2026-12-24',
+            n: 1,
+          },
+          {
+            fileName: 'data.csv',
+            fileType: 'annex',
+            fileSource: 'author',
+            n: 2,
+          },
+        ],
+      })
+      expect(out).toContain('type="file"')
+      expect(out).toContain('subtype="author"')
+      expect(out).toContain('target="doc.pdf"')
+      expect(out).toContain('n="1"')
+      expect(out).toContain('type="annex"')
+      expect(out).toContain('target="data.csv"')
+      expect(out).toContain('notBefore="2026-12-24"')
+    })
+
+    it('emits availability/licence with the resolved @target', () => {
+      const out = service.toHalTEI(makeDoc(DocumentType.Article), {
+        licenceTarget: 'http://creativecommons.org/licenses/by/4.0/',
+      })
+      expect(out).toContain('<licence')
+      expect(out).toContain(
+        'target="http://creativecommons.org/licenses/by/4.0/"',
+      )
+    })
+
+    it('prunes empty editionStmt/publicationStmt when no deposit options are given', () => {
+      const out = service.toHalTEI(makeDoc(DocumentType.Article))
+      expect(out).not.toContain('editionStmt')
+      expect(out).not.toContain('publicationStmt')
+    })
+
+    it('keeps biblFull child order: editionStmt before publicationStmt before sourceDesc', () => {
+      const out = service.toHalTEI(makeDoc(DocumentType.Article), {
+        localRef: 'doc-1',
+        files: [
+          { fileName: 'doc.pdf', fileType: 'file', fileSource: 'author', n: 1 },
+        ],
+      })
+      const edition = out.indexOf('editionStmt')
+      const publication = out.indexOf('publicationStmt')
+      const source = out.indexOf('sourceDesc')
+      expect(edition).toBeGreaterThan(-1)
+      expect(publication).toBeGreaterThan(edition)
+      expect(source).toBeGreaterThan(publication)
     })
   })
 })

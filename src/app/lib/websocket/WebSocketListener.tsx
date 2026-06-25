@@ -7,6 +7,7 @@ import { Trans } from '@lingui/react'
 import {
   GenericEvent,
   isDataEvent,
+  isHalDepositEvent,
   isHarvestingResultEvent,
   isHarvestingStateEvent,
 } from '@/types/GenericEvent'
@@ -21,6 +22,7 @@ const WebSocketListener = () => {
   const { currentPerspective, connectedUser } = useStore((state) => state.user)
   const { setListHasChanged, setSelectedDocumentHasChanged, selectedDocument } =
     useStore((state) => state.document)
+  const { applyDepositEvent } = useStore((state) => state.halDeposit)
 
   // keep fresh values available inside the ws callback
   const perspectiveRef = useRef(currentPerspective)
@@ -140,6 +142,10 @@ const WebSocketListener = () => {
       if (isHarvestingResultEvent(data)) {
         incrementPlatformCount(data.personUid, data.platform, data.status)
       }
+
+      if (isHalDepositEvent(data)) {
+        applyDepositEvent(data)
+      }
     }
 
     return () => ws.close()
@@ -152,6 +158,7 @@ const WebSocketListener = () => {
     setListHasChanged,
     setSelectedDocumentHasChanged,
     selectedDocument,
+    applyDepositEvent,
     searchParams,
   ])
 

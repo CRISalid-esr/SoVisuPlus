@@ -42,3 +42,15 @@ roles:
       - action: update
         subject: Person
         fields: [identifiers]
+
+  - name: document_depositor
+    description: Deposit publications to HAL on behalf of a person (self-scoped by default)
+    permissions:
+      - action: deposit_hal
+        subject: Person
+
+  - name: document_depositor_unauthenticated
+    description: Deposit to HAL on behalf of a person without requiring their HAL login (idhal still required); explicit grant only
+    permissions:
+      - action: deposit_hal_unauthenticated
+        subject: Person

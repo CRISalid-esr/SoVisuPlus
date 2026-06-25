@@ -36,6 +36,7 @@ model Person {
   contributions  Contribution[]
   memberships    Membership[]
   records        SourcePerson[]
+  deposits       HalDeposit[]
 }
 
 model Membership {
@@ -86,12 +87,79 @@ model Document {
   title_locale_2       String?
   records              DocumentRecord[]
   state                DocumentState      @default(default)
+  deposits             HalDeposit[]
 
   journalId Int?
   journal   Journal? @relation(fields: [journalId], references: [id], onDelete: SetNull)
   volume    String?
   issue     String?
   pages     String?
+}
+
+enum HalDepositStatus {
+  pending
+  running
+  accept
+  verify
+  update
+  delete
+  replace
+  error
+}
+
+model HalDeposit {
+  id         Int              @id @default(autoincrement())
+  documentId Int
+  document   Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  personId   Int
+  person     Person           @relation(fields: [personId], references: [id], onDelete: Cascade)
+  status     HalDepositStatus @default(pending)
+
+  // Returned by SWORD
+  halId       String?
+  halPassword String?
+  halVersion  Int?
+  halUrl      String?
+
+  // Async processing bookkeeping
+  startedAt          DateTime?
+  retryCount         Int       @default(0)
+  nextRetryAt        DateTime?
+  lastError          String? // last SWORD/transport error (our side), for debugging
+  comment            String? // moderator comment / rejection reason from HAL status response
+  refreshRequestedAt DateTime?
+
+  // Deposit-specific metadata used to generate the TEI
+  halDocumentType   String
+  halDomains        String[]
+  language          String
+  conferenceTitle   String?
+  conferenceCity    String?
+  conferenceCountry String?
+  institution       String?
+  bookTitle         String?
+
+  files     HalDepositFile[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([status])
+  @@index([refreshRequestedAt])
+}
+
+model HalDepositFile {
+  id           Int        @id @default(autoincrement())
+  halDepositId Int
+  halDeposit   HalDeposit @relation(fields: [halDepositId], references: [id], onDelete: Cascade)
+  filePath     String
+  fileName     String
+  isMain       Boolean    @default(false)
+  mimeType     String
+  fileSource   String // HAL fileSource code -> TEI ref/@subtype
+  fileType     String // HAL fileType code -> TEI ref/@type (file/src/annex)
+  visibility   String // embargo option (now/15d/1m/3m/6m/1y/2y)
+  license      String? // CC/ETALAB/Copyright code -> availability/licence/@target
+  createdAt    DateTime   @default(now())
 }
 
 model Journal {
@@ -564,6 +632,8 @@ enum PermissionAction {
   merge
   unmerge
   fetch_documents
+  deposit_hal
+  deposit_hal_unauthenticated
 }
 
 enum PermissionSubject {
