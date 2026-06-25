@@ -633,6 +633,7 @@ enum PermissionAction {
   unmerge
   fetch_documents
   deposit_hal
+  deposit_hal_unauthenticated
 }
 
 enum PermissionSubject {

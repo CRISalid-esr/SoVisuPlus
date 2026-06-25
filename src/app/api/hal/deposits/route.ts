@@ -81,12 +81,17 @@ export const POST = async (request: Request) => {
       return bad('Invalid deposit payload')
     }
 
-    // Authorization: deposit_hal on the perspective person.
+    // Authorization: deposit_hal — or deposit_hal_unauthenticated, which additionally waives the
+    // perspective person's hal_login requirement — on the perspective person.
     const person = await service.getPersonByUid(payload.personUid)
     if (!person) return bad('Person not found', undefined, 404)
 
     const ability = abilityFromAuthzContext(session.user.authz)
-    if (!ability.can(PermissionAction.deposit_hal, person)) {
+    const canUnauthenticated = ability.can(
+      PermissionAction.deposit_hal_unauthenticated,
+      person,
+    )
+    if (!ability.can(PermissionAction.deposit_hal, person) && !canUnauthenticated) {
       return bad(
         'Not allowed to deposit on behalf of this person',
         undefined,
@@ -102,6 +107,7 @@ export const POST = async (request: Request) => {
       document,
       person,
       payload.halDocumentType,
+      { allowUnauthenticated: canUnauthenticated },
     )
     if (!eligibility.ok)
       return bad('Document is not eligible', eligibility.reason)

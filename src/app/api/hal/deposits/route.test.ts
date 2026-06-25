@@ -85,11 +85,25 @@ describe('POST /api/hal/deposits', () => {
     expect(res.status).toBe(401)
   })
 
-  it('returns 403 when the user lacks deposit_hal on the perspective person', async () => {
+  it('returns 403 when the user has neither deposit_hal nor deposit_hal_unauthenticated', async () => {
     can.mockReturnValue(false)
     const res = await POST(buildRequest(basePayload))
     expect(res.status).toBe(403)
     expect(service.createHalDeposit).not.toHaveBeenCalled()
+  })
+
+  it('allows the deposit via deposit_hal_unauthenticated and passes the waiver to eligibility', async () => {
+    can.mockImplementation(
+      (action: string) => action === 'deposit_hal_unauthenticated',
+    )
+    const res = await POST(buildRequest(basePayload))
+    expect(res.status).not.toBe(403)
+    expect(mockValidate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'ART',
+      expect.objectContaining({ allowUnauthenticated: true }),
+    )
   })
 
   it('returns 400 with the reason when the document is ineligible', async () => {

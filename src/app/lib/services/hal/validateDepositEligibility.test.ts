@@ -83,6 +83,36 @@ describe('validateDepositEligibility', () => {
     })
   })
 
+  const idhalOnlyPerson = () =>
+    new Person('p-idhal', false, null, 'Id', 'Id', 'Hal', [
+      new PersonIdentifier(PersonIdentifierType.idhals, 'id-hal-only'),
+    ])
+
+  it('rejects an idhal-only person by default (hal_login required)', () => {
+    expect(
+      validateDepositEligibility(makeArt(), idhalOnlyPerson(), 'ART'),
+    ).toEqual({ ok: false, reason: 'missing_identifiers' })
+  })
+
+  it('accepts an idhal-only person when unauthenticated deposits are allowed', () => {
+    expect(
+      validateDepositEligibility(makeArt(), idhalOnlyPerson(), 'ART', {
+        allowUnauthenticated: true,
+      }),
+    ).toEqual({ ok: true })
+  })
+
+  it('still requires an idhal even when unauthenticated deposits are allowed', () => {
+    const noIdhal = new Person('p-3', false, null, 'No', 'No', 'Idhal', [
+      new PersonIdentifier(PersonIdentifierType.hal_login, 'login-only'),
+    ])
+    expect(
+      validateDepositEligibility(makeArt(), noIdhal, 'ART', {
+        allowUnauthenticated: true,
+      }),
+    ).toEqual({ ok: false, reason: 'missing_identifiers' })
+  })
+
   it('rejects when the document has no publication date', () => {
     expect(
       validateDepositEligibility(

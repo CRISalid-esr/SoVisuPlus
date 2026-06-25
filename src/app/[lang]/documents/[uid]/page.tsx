@@ -129,7 +129,11 @@ const DocumentDetailsPage = () => {
   const canDeposit = !!(
     currentPerspective &&
     currentPerspective.type === 'person' &&
-    ability.can(PermissionAction.deposit_hal, currentPerspective)
+    (ability.can(PermissionAction.deposit_hal, currentPerspective) ||
+      ability.can(
+        PermissionAction.deposit_hal_unauthenticated,
+        currentPerspective,
+      ))
   )
   if (!halRecord && canDeposit) {
     tabs.push({

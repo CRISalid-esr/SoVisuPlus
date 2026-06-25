@@ -1,11 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Trans } from '@lingui/react/macro'
 import { t } from '@lingui/core/macro'
 import { useLingui } from '@lingui/react'
 import * as Lingui from '@lingui/core'
+import { useSession } from 'next-auth/react'
 import { useRouter, useParams } from 'next/navigation'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
 import {
   Alert,
   Autocomplete,
@@ -61,6 +64,12 @@ export default function HalDeposit() {
     (s) => s.halDeposit,
   )
 
+  const { data: session } = useSession()
+  const ability = useMemo(
+    () => abilityFromAuthzContext(session?.user?.authz),
+    [session?.user?.authz],
+  )
+
   const [step, setStep] = useState<Step>('form')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -104,11 +113,18 @@ export default function HalDeposit() {
     : null
   const perspectiveUid = perspectivePerson?.uid ?? null
 
-  const hasHalIdentifiers =
+  // `deposit_hal_unauthenticated` waives the hal_login requirement (idhal still required).
+  const canDepositUnauthenticated =
     !!perspectivePerson &&
-    perspectivePerson.hasIdentifier(PersonIdentifierType.hal_login) &&
+    ability.can(PermissionAction.deposit_hal_unauthenticated, perspectivePerson)
+  const hasIdhal =
+    !!perspectivePerson &&
     (perspectivePerson.hasIdentifier(PersonIdentifierType.idhals) ||
       perspectivePerson.hasIdentifier(PersonIdentifierType.idhali))
+  const hasHalIdentifiers =
+    hasIdhal &&
+    (canDepositUnauthenticated ||
+      perspectivePerson.hasIdentifier(PersonIdentifierType.hal_login))
 
   const hasHalRecord = selectedDocument.records.some(
     (r) => r.platform === BibliographicPlatform.HAL,

@@ -31,10 +31,10 @@ describe('HalOnBehalfOfBuilder', () => {
     expect(header).toBe('login|marvin;idhal|12345')
   })
 
-  it('returns null when hal_login is missing', () => {
+  it('emits idhal only when hal_login is missing', () => {
     expect(
       HalOnBehalfOfBuilder.build([id(PersonIdentifierType.idhals, 'arthur')]),
-    ).toBeNull()
+    ).toBe('idhal|arthur')
   })
 
   it('returns null when no idhal identifier is present', () => {

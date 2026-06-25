@@ -1,7 +1,7 @@
+import { PersonIdentifierType } from '@prisma/client'
 import { Document } from '@/types/Document'
 import { Person } from '@/types/Person'
 import { isDepositableType } from './halDepositFormConfig'
-import { HalOnBehalfOfBuilder } from './HalOnBehalfOfBuilder'
 
 /**
  * Reasons a document/person cannot be deposited. These are returned by the shared validator and
@@ -17,6 +17,26 @@ export type DepositIneligibilityReason =
 export type DepositEligibility =
   | { ok: true }
   | { ok: false; reason: DepositIneligibilityReason }
+
+export interface DepositEligibilityOptions {
+  /**
+   * When true, the depositing user holds `deposit_hal_unauthenticated`, so the perspective person
+   * does not need a `hal_login` — an idhal alone is sufficient.
+   */
+  allowUnauthenticated?: boolean
+}
+
+/** The person must have an idhal, and (unless unauthenticated deposits are allowed) a hal_login. */
+const hasRequiredHalIdentifiers = (
+  person: Person,
+  allowUnauthenticated: boolean,
+): boolean => {
+  const hasIdhal =
+    person.hasIdentifier(PersonIdentifierType.idhals) ||
+    person.hasIdentifier(PersonIdentifierType.idhali)
+  if (!hasIdhal) return false
+  return allowUnauthenticated || person.hasIdentifier(PersonIdentifierType.hal_login)
+}
 
 /** Org identifier types HAL recognises for an affiliation (RNSR/ROR/ISNI/IdRef). */
 const HAL_RECOGNISED_ORG_IDENTIFIERS = new Set(['nns', 'ror', 'isni', 'idref'])
@@ -41,12 +61,13 @@ export const validateDepositEligibility = (
   document: Document,
   person: Person,
   halType: string,
+  options: DepositEligibilityOptions = {},
 ): DepositEligibility => {
   if (!isDepositableType(halType)) {
     return { ok: false, reason: 'type_not_depositable' }
   }
 
-  if (HalOnBehalfOfBuilder.build(person.getIdentifiers()) === null) {
+  if (!hasRequiredHalIdentifiers(person, !!options.allowUnauthenticated)) {
     return { ok: false, reason: 'missing_identifiers' }
   }
 
