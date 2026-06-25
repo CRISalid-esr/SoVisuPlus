@@ -1809,7 +1809,7 @@ msgstr "En cours de modération"
 
 #: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:133
 msgid "hal_deposit_status_published_message"
-msgstr "Votre publication a été acceptée et publiée sur HAL."
+msgstr "Votre publication a été acceptée et publiée sur HAL. Mettez à jour vos publications pour voir la nouvelle source HAL nouvellement déposée sur ce document."
 
 #: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:132
 msgid "hal_deposit_status_published_title"

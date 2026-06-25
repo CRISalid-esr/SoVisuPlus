@@ -1809,7 +1809,7 @@ msgstr "Under moderation"
 
 #: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:133
 msgid "hal_deposit_status_published_message"
-msgstr "Your publication has been accepted and published on HAL."
+msgstr "Your publication has been accepted and published on HAL. Update your publications to see the newly deposited HAL source record on this document."
 
 #: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:132
 msgid "hal_deposit_status_published_title"

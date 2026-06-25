@@ -27,6 +27,7 @@ import useStore from '@/stores/global_store'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { isPerson } from '@/types/Person'
 import { enabledHalDocumentTypes } from '@/lib/services/hal/halDepositFormConfig'
 import { halDomainsByCode } from '@/types/HalDomains'
 import {
@@ -55,9 +56,7 @@ export default function HalDeposit() {
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
 
   const { selectedDocument } = useStore((s) => s.document)
-  const { currentPerspective, ownPerspective, connectedUser } = useStore(
-    (s) => s.user,
-  )
+  const { currentPerspective } = useStore((s) => s.user)
   const { byDocument, loading, fetchLatestDeposit, createDeposit } = useStore(
     (s) => s.halDeposit,
   )
@@ -98,23 +97,18 @@ export default function HalDeposit() {
   }
 
   // ─── Access gates (UX mirror of the server checks) ─────────────────────────
-  const perspectiveUid =
-    currentPerspective?.type === 'person' ? currentPerspective.uid : null
-
-  // Identifier check is only reliable for the user's own perspective; the server enforces it
-  // for visited perspectives.
-  const ownIdentifiers = ownPerspective
-    ? (connectedUser?.person?.getIdentifiers() ?? [])
+  // The deposit is made on behalf of the perspective person, whose identifiers are available
+  // client-side for both own and visited perspectives. (The server re-checks regardless.)
+  const perspectivePerson = isPerson(currentPerspective)
+    ? currentPerspective
     : null
+  const perspectiveUid = perspectivePerson?.uid ?? null
+
   const hasHalIdentifiers =
-    ownIdentifiers === null
-      ? true
-      : ownIdentifiers.some((i) => i.type === PersonIdentifierType.hal_login) &&
-        ownIdentifiers.some(
-          (i) =>
-            i.type === PersonIdentifierType.idhals ||
-            i.type === PersonIdentifierType.idhali,
-        )
+    !!perspectivePerson &&
+    perspectivePerson.hasIdentifier(PersonIdentifierType.hal_login) &&
+    (perspectivePerson.hasIdentifier(PersonIdentifierType.idhals) ||
+      perspectivePerson.hasIdentifier(PersonIdentifierType.idhali))
 
   const hasHalRecord = selectedDocument.records.some(
     (r) => r.platform === BibliographicPlatform.HAL,
