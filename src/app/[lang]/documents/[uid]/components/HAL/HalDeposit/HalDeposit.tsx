@@ -12,6 +12,7 @@ import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   Divider,
   FormControl,
   InputLabel,
@@ -57,7 +58,7 @@ export default function HalDeposit() {
   const { currentPerspective, ownPerspective, connectedUser } = useStore(
     (s) => s.user,
   )
-  const { byDocument, fetchLatestDeposit, createDeposit } = useStore(
+  const { byDocument, loading, fetchLatestDeposit, createDeposit } = useStore(
     (s) => s.halDeposit,
   )
 
@@ -84,6 +85,17 @@ export default function HalDeposit() {
   }
 
   if (!selectedDocument) return null
+
+  // Wait for the latest-deposit fetch before deciding form vs status panel, so the form is not
+  // briefly flashed on (re)load before an existing deposit's status is applied.
+  const depositLoaded = !!uid && uid in byDocument && !loading[uid]
+  if (!depositLoaded) {
+    return (
+      <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Box>
+    )
+  }
 
   // ─── Access gates (UX mirror of the server checks) ─────────────────────────
   const perspectiveUid =
