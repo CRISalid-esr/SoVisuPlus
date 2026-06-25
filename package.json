@@ -74,6 +74,7 @@
     "@types/react-highlight-words": "^0.20.0",
     "@types/ws": "^8.18.1",
     "@untitled-ui/icons-react": "^0.1.3",
+    "@types/adm-zip": "^0.5.8",
     "@xmldom/xmldom": "^0.8.11",
     "adm-zip": "^0.5.17",
     "amqplib": "^2.0.1",
