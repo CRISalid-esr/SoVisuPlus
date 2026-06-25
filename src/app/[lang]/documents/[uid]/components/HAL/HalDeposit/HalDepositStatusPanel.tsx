@@ -2,7 +2,15 @@
 
 import { useState } from 'react'
 import { Trans } from '@lingui/react/macro'
-import { Alert, Box, Button, Link, Typography } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  LinearProgress,
+  Link,
+  Typography,
+} from '@mui/material'
 import {
   CheckCircle,
   ErrorOutline,
@@ -83,7 +91,11 @@ export function HalDepositStatusPanel({ deposit }: Props) {
       )}
 
       {REFRESHABLE.includes(deposit.status) && (
-        <Button variant='outlined' onClick={handleRefresh} disabled={refreshing}>
+        <Button
+          variant='outlined'
+          onClick={handleRefresh}
+          disabled={refreshing}
+        >
           {refreshing ? (
             <Trans>hal_deposit_status_refreshing</Trans>
           ) : (
@@ -105,14 +117,16 @@ type StatusView = {
 
 const STATUS_VIEWS: Record<string, StatusView> = {
   pending: {
-    icon: <Info color='info' />,
+    icon: (
+      <LinearProgress color='info' sx={{ width: 96, borderRadius: 1 }} />
+    ),
     color: 'info.main',
     severity: 'info',
     title: <Trans>hal_deposit_status_in_progress_title</Trans>,
     message: <Trans>hal_deposit_status_in_progress_message</Trans>,
   },
   running: {
-    icon: <Info color='info' />,
+    icon: <CircularProgress size={22} thickness={5} color='info' />,
     color: 'info.main',
     severity: 'info',
     title: <Trans>hal_deposit_status_in_progress_title</Trans>,
