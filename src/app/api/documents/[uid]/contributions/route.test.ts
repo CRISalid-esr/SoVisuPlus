@@ -69,10 +69,24 @@ jest.mock('next-auth', () => ({
   getServerSession: jest.fn(),
 }))
 
-const post = (changes: unknown) =>
-  POST({ json: async () => ({ changes }) } as Request, {
+const post = (contributions: unknown) =>
+  POST({ json: async () => ({ contributions }) } as Request, {
     params: Promise.resolve({ uid: 'doc-123' }),
   })
+
+// Minimal full-state entry for the baseline contributor (user-1234).
+const ownContribution = {
+  person: {
+    uid: 'user-1234',
+    displayName: 'First Last',
+    firstName: 'First',
+    lastName: 'Last',
+    identifiers: [],
+  },
+  roles: ['http://id.loc.gov/vocabulary/relators/aut'],
+  rank: null,
+  affiliations: [],
+}
 
 describe('POST /api/documents/[uid]/contributions', () => {
   beforeEach(() => {
@@ -83,10 +97,10 @@ describe('POST /api/documents/[uid]/contributions', () => {
     })
   })
 
-  it('rejects removing the acting user own contribution with 403', async () => {
-    const response = await post([
-      { actionType: 'REMOVE', parameters: { person: { uid: 'user-1234' } } },
-    ])
+  it('rejects dropping the acting user own contribution with 403', async () => {
+    // The baseline document lists user-1234 as a contributor; omitting them from
+    // the full-state payload would remove their own contribution.
+    const response = await post([])
 
     expect(response.status).toBe(403)
     expect(await response.json()).toEqual({
@@ -95,17 +109,16 @@ describe('POST /api/documents/[uid]/contributions', () => {
     expect(saveContributions).not.toHaveBeenCalled()
   })
 
-  it('allows removing another contributor and saves the changes', async () => {
-    const changes = [
-      { actionType: 'REMOVE', parameters: { person: { uid: 'someone-else' } } },
-    ]
-    const response = await post(changes)
+  it('allows removing another contributor while keeping own and saves the state', async () => {
+    // Keeps user-1234 (own) but drops any other contributor by omitting them.
+    const contributions = [ownContribution]
+    const response = await post(contributions)
 
     expect(response.status).toBe(200)
     expect(await response.json()).toEqual({ success: true })
     expect(saveContributions).toHaveBeenCalledWith(
       'doc-123',
-      changes,
+      contributions,
       'user-1234',
     )
   })
@@ -113,9 +126,7 @@ describe('POST /api/documents/[uid]/contributions', () => {
   it('returns 401 when not authenticated', async () => {
     ;(getServerSession as jest.Mock).mockResolvedValue(null)
 
-    const response = await post([
-      { actionType: 'ADD', parameters: { person: { uid: null } } },
-    ])
+    const response = await post([ownContribution])
 
     expect(response.status).toBe(401)
     expect(saveContributions).not.toHaveBeenCalled()

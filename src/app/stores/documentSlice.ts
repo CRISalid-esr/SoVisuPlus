@@ -5,7 +5,7 @@ import { BaseQuery } from '@/types/BaseQuery'
 import { AgentType } from '@/types/IAgent'
 import { Concept } from '@/types/Concept'
 import { Literal } from '@/types/Literal'
-import { ContributionChange } from '@/types/ContributionAction'
+import { ContributionActionParameters } from '@/types/ContributionAction'
 
 export interface DocumentQuery extends BaseQuery {
   searchTerm: string
@@ -68,7 +68,7 @@ export interface DocumentSlice {
     ) => Promise<{ success: boolean }>
     updateDocumentType: (type: DocumentType) => Promise<void>
     saveContributions: (
-      changes: ContributionChange[],
+      contributions: ContributionActionParameters[],
     ) => Promise<{ success: boolean }>
   }
 }
@@ -502,7 +502,9 @@ export const addDocumentSlice: StateCreator<
         return { success: false }
       }
     },
-    saveContributions: async (changes: ContributionChange[]) => {
+    saveContributions: async (
+      contributions: ContributionActionParameters[],
+    ) => {
       try {
         const documentUid = get().document.selectedDocument?.uid
 
@@ -515,7 +517,7 @@ export const addDocumentSlice: StateCreator<
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ changes }),
+            body: JSON.stringify({ contributions }),
           },
         )
 
