@@ -22,7 +22,7 @@ import { Person } from '@/types/Person'
 import dayjs from 'dayjs'
 import { OAStatus } from '@prisma/client'
 import { Literal, LiteralJson } from '@/types/Literal'
-import { ContributionChange } from '@/types/ContributionAction'
+import { ContributionActionParameters } from '@/types/ContributionAction'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 
 type ColumnFilter =
@@ -112,16 +112,18 @@ export class DocumentService {
   }
 
   /**
-   * Persist contribution changes made on the Authors tab.
+   * Persist the contributions made on the Authors tab.
    *
-   * Contribution data is intentionally NOT written to the app DB here. Each change
-   * becomes an `Action` row (targetType DOCUMENT, path 'contributions') that the
-   * change poller forwards to the graph; the updated data round-trips back via AMQP.
-   * One action is created per added / updated / removed contribution.
+   * Contribution data is intentionally NOT written to the app DB here. The save
+   * becomes a single authoritative `Action` row (actionType UPDATE, targetType
+   * DOCUMENT, path 'contributions') that the change poller forwards to the graph;
+   * the updated data round-trips back via AMQP. The action carries the complete new
+   * state of the document's contributions — contributors present are upserted,
+   * contributors absent are removed.
    */
   async saveContributions(
     documentUid: string,
-    changes: ContributionChange[],
+    contributions: ContributionActionParameters[],
     userName: string,
   ): Promise<void> {
     try {
@@ -132,30 +134,14 @@ export class DocumentService {
         throw new Error(`User with username ${userName} not found`)
       }
 
-      // `id`/`nextId` sequence the actions so the graph knows whether another
-      // contribution message is still coming before it confirms all changes.
-      // `id` is the change's position; `nextId` points at the next one, or null
-      // when this is the last change in the batch.
-      //
-      // Created sequentially (NOT Promise.all): the change poller picks rows up
-      // in insertion order, so the row carrying `nextId: null` must be written
-      // last. Concurrent inserts could reorder it ahead of its predecessors and
-      // make the graph confirm before every change has been processed.
-      for (let index = 0; index < changes.length; index++) {
-        const change = changes[index]
-        await this.actionDAO.createAction({
-          actionType: ActionType[change.actionType],
-          targetType: ActionTargetType.DOCUMENT,
-          targetUid: documentUid,
-          path: 'contributions',
-          parameters: {
-            ...change.parameters,
-            id: index,
-            nextId: index + 1 < changes.length ? index + 1 : null,
-          } as unknown as InputJsonValue,
-          personUid: user.person!.uid,
-        })
-      }
+      await this.actionDAO.createAction({
+        actionType: ActionType.UPDATE,
+        targetType: ActionTargetType.DOCUMENT,
+        targetUid: documentUid,
+        path: 'contributions',
+        parameters: { contributions } as unknown as InputJsonValue,
+        personUid: user.person.uid,
+      })
 
       // Flag the document as awaiting the graph round-trip. This freezes the
       // Authors tab (and disables further mutations) until the graph re-writes

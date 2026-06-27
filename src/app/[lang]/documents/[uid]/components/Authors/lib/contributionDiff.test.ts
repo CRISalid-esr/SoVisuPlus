@@ -8,7 +8,8 @@ import { LocRelator } from '@/types/LocRelator'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
 import { AuthorityOrganizationType } from '@prisma/client'
 import {
-  buildContributionChanges,
+  buildContributionsState,
+  contributionsAreDirty,
   workingFromContribution,
 } from './contributionDiff'
 
@@ -40,36 +41,17 @@ function contribution(
   )
 }
 
-describe('buildContributionChanges', () => {
-  it('produces no changes when nothing changed', () => {
-    const baseline = [contribution('p1')]
+describe('buildContributionsState', () => {
+  it('carries every non-empty contribution in order', () => {
+    const baseline = [contribution('p1'), contribution('p2')]
     const working = baseline.map(workingFromContribution)
-    expect(buildContributionChanges(baseline, working, false)).toEqual([])
+
+    const state = buildContributionsState(working, false)
+    expect(state).toHaveLength(2)
+    expect(state.map((c) => c.person.uid)).toEqual(['p1', 'p2'])
   })
 
-  it('emits UPDATE when a role is added', () => {
-    const baseline = [contribution('p1', { roles: [LocRelator.AUTHOR] })]
-    const working = baseline.map(workingFromContribution)
-    working[0].roles = [LocRelator.AUTHOR, LocRelator.EDITOR]
-
-    const changes = buildContributionChanges(baseline, working, false)
-    expect(changes).toHaveLength(1)
-    expect(changes[0].actionType).toBe('UPDATE')
-  })
-
-  it('emits UPDATE when an identifier changes', () => {
-    const baseline = [contribution('p1')]
-    const working = baseline.map(workingFromContribution)
-    working[0].identifiers = [
-      { type: PersonIdentifierType.orcid, value: '0000-0001' },
-    ]
-
-    const changes = buildContributionChanges(baseline, working, false)
-    expect(changes).toHaveLength(1)
-    expect(changes[0].actionType).toBe('UPDATE')
-  })
-
-  it('emits ADD for a brand-new contributor (no person uid)', () => {
+  it('keeps a null person uid for a brand-new contributor', () => {
     const baseline = [contribution('p1')]
     const working = baseline.map(workingFromContribution)
     working.push({
@@ -77,10 +59,9 @@ describe('buildContributionChanges', () => {
       personUid: null,
     })
 
-    const changes = buildContributionChanges(baseline, working, false)
-    const adds = changes.filter((c) => c.actionType === 'ADD')
-    expect(adds).toHaveLength(1)
-    expect(adds[0].parameters.person.uid).toBeNull()
+    const state = buildContributionsState(working, false)
+    expect(state).toHaveLength(2)
+    expect(state[1].person.uid).toBeNull()
   })
 
   it('skips an empty, never-filled-in new contributor (no name/identifiers)', () => {
@@ -93,29 +74,17 @@ describe('buildContributionChanges', () => {
       identifiers: [],
     })
 
-    const changes = buildContributionChanges(baseline, working, false)
-    expect(changes).toEqual([])
-  })
-
-  it('emits REMOVE for a dropped baseline contribution', () => {
-    const baseline = [contribution('p1')]
-    const changes = buildContributionChanges(baseline, [], false)
-    expect(changes).toEqual([
-      { actionType: 'REMOVE', parameters: { person: { uid: 'p1' } } },
-    ])
+    const state = buildContributionsState(working, false)
+    expect(state).toHaveLength(1)
+    expect(state[0].person.uid).toBe('p1')
   })
 
   it('assigns sequential ranks when ranking mode is on', () => {
     const baseline = [contribution('p1'), contribution('p2')]
     const working = baseline.map(workingFromContribution)
 
-    const changes = buildContributionChanges(baseline, working, true)
-    expect(changes).toHaveLength(2)
-    expect(changes.every((c) => c.actionType === 'UPDATE')).toBe(true)
-    const ranks = changes.map((c) =>
-      c.actionType === 'UPDATE' ? c.parameters.rank : null,
-    )
-    expect(ranks).toEqual([1, 2])
+    const state = buildContributionsState(working, true)
+    expect(state.map((c) => c.rank)).toEqual([1, 2])
   })
 
   it('nulls all ranks when ranking mode is off', () => {
@@ -125,15 +94,11 @@ describe('buildContributionChanges', () => {
     ]
     const working = baseline.map(workingFromContribution)
 
-    const changes = buildContributionChanges(baseline, working, false)
-    expect(changes).toHaveLength(2)
-    changes.forEach((c) => {
-      expect(c.actionType).toBe('UPDATE')
-      if (c.actionType === 'UPDATE') expect(c.parameters.rank).toBeNull()
-    })
+    const state = buildContributionsState(working, false)
+    expect(state.map((c) => c.rank)).toEqual([null, null])
   })
 
-  it('maps the DB affiliation type to its HAL default and carries a change in the payload', () => {
+  it('maps the DB affiliation type to its HAL default and carries it in the payload', () => {
     const org = new AuthorityOrganization(
       'o1',
       ['Some Lab'],
@@ -149,15 +114,83 @@ describe('buildContributionChanges', () => {
     expect(working[0].affiliations[0].type).toBe('researchteam')
 
     working[0].affiliations[0].type = 'institution'
-    const changes = buildContributionChanges(baseline, working, false)
-    expect(changes).toHaveLength(1)
-    expect(changes[0].actionType).toBe('UPDATE')
-    if (changes[0].actionType === 'UPDATE') {
-      expect(changes[0].parameters.affiliations[0].type).toBe('institution')
-    }
+    const state = buildContributionsState(working, false)
+    expect(state[0].affiliations[0].type).toBe('institution')
+  })
+})
+
+describe('contributionsAreDirty', () => {
+  it('is clean when nothing changed', () => {
+    const baseline = [contribution('p1')]
+    const working = baseline.map(workingFromContribution)
+    expect(contributionsAreDirty(baseline, working, false)).toBe(false)
   })
 
-  it('treats "Add contributor" on an existing contributor as REMOVE + ADD', () => {
+  it('is dirty when a role is added', () => {
+    const baseline = [contribution('p1', { roles: [LocRelator.AUTHOR] })]
+    const working = baseline.map(workingFromContribution)
+    working[0].roles = [LocRelator.AUTHOR, LocRelator.EDITOR]
+    expect(contributionsAreDirty(baseline, working, false)).toBe(true)
+  })
+
+  it('is dirty when an identifier changes', () => {
+    const baseline = [contribution('p1')]
+    const working = baseline.map(workingFromContribution)
+    working[0].identifiers = [
+      { type: PersonIdentifierType.orcid, value: '0000-0001' },
+    ]
+    expect(contributionsAreDirty(baseline, working, false)).toBe(true)
+  })
+
+  it('is dirty when a contributor is added', () => {
+    const baseline = [contribution('p1')]
+    const working = baseline.map(workingFromContribution)
+    working.push({
+      ...workingFromContribution(contribution('temp')),
+      personUid: null,
+    })
+    expect(contributionsAreDirty(baseline, working, false)).toBe(true)
+  })
+
+  it('is dirty when a contributor is removed', () => {
+    const baseline = [contribution('p1')]
+    expect(contributionsAreDirty(baseline, [], false)).toBe(true)
+  })
+
+  it('is not dirty after adding an empty, never-filled-in row', () => {
+    const baseline = [contribution('p1')]
+    const working = baseline.map(workingFromContribution)
+    working.push({
+      ...workingFromContribution(contribution('temp')),
+      personUid: null,
+      displayName: '   ',
+      identifiers: [],
+    })
+    expect(contributionsAreDirty(baseline, working, false)).toBe(false)
+  })
+
+  it('is not dirty on reorder when ranking mode is off', () => {
+    const baseline = [contribution('p1'), contribution('p2')]
+    const working = baseline.map(workingFromContribution).reverse()
+    expect(contributionsAreDirty(baseline, working, false)).toBe(false)
+  })
+
+  it('is dirty on reorder when ranking mode is on', () => {
+    const baseline = [
+      contribution('p1', { rank: 1 }),
+      contribution('p2', { rank: 2 }),
+    ]
+    const working = baseline.map(workingFromContribution).reverse()
+    expect(contributionsAreDirty(baseline, working, true)).toBe(true)
+  })
+
+  it('is dirty when ranking mode is toggled on', () => {
+    const baseline = [contribution('p1'), contribution('p2')]
+    const working = baseline.map(workingFromContribution)
+    expect(contributionsAreDirty(baseline, working, true)).toBe(true)
+  })
+
+  it('is dirty when "Add contributor" detaches an existing contributor', () => {
     const baseline = [
       contribution('p1', { ids: [[PersonIdentifierType.orcid, 'x']] }),
     ]
@@ -166,11 +199,6 @@ describe('buildContributionChanges', () => {
     working[0].personUid = null
     working[0].notAligned = true
     working[0].identifiers = []
-
-    const changes = buildContributionChanges(baseline, working, false)
-    const types = changes.map((c) => c.actionType).sort()
-    expect(types).toEqual(['ADD', 'REMOVE'])
-    const remove = changes.find((c) => c.actionType === 'REMOVE')
-    expect(remove?.parameters).toEqual({ person: { uid: 'p1' } })
+    expect(contributionsAreDirty(baseline, working, false)).toBe(true)
   })
 })

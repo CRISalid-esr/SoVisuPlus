@@ -4,7 +4,7 @@ import { getServerSession, Session } from 'next-auth'
 import authOptions from '@/app/auth/auth_options'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
-import { ContributionChange } from '@/types/ContributionAction'
+import { ContributionActionParameters } from '@/types/ContributionAction'
 
 export const POST = async (
   request: Request,
@@ -32,11 +32,12 @@ export const POST = async (
 
   try {
     const body = await request.json()
-    const changes: ContributionChange[] = body.changes
+    const contributions: ContributionActionParameters[] = body.contributions
 
-    if (!Array.isArray(changes) || changes.length === 0) {
+    // The full state may be empty (all contributors removed); only the shape is required.
+    if (!Array.isArray(contributions)) {
       return NextResponse.json(
-        { error: 'changes must be a non-empty array' },
+        { error: 'contributions must be an array' },
         { status: 400 },
       )
     }
@@ -60,23 +61,24 @@ export const POST = async (
     }
 
     // A user may not delete their own contribution (the UI hides the bin; this is
-    // the server-side enforcement of the same rule).
+    // the server-side enforcement of the same rule). With a full-state payload that
+    // means: they were a contributor on the document and are no longer in the
+    // submitted list. Editors who were never contributors are not affected.
     const ownPersonUid = session?.user.authz?.personUid
-    const removesOwnContribution =
+    const wasContributor =
       !!ownPersonUid &&
-      changes.some(
-        (change) =>
-          change.actionType === 'REMOVE' &&
-          change.parameters.person.uid === ownPersonUid,
-      )
-    if (removesOwnContribution) {
+      document.contributions.some((c) => c.person.uid === ownPersonUid)
+    const stillContributor = contributions.some(
+      (c) => c.person.uid === ownPersonUid,
+    )
+    if (wasContributor && !stillContributor) {
       return NextResponse.json(
         { error: 'A user cannot delete its own contribution' },
         { status: 403 },
       )
     }
 
-    await documentService.saveContributions(uid, changes, userName)
+    await documentService.saveContributions(uid, contributions, userName)
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -1,10 +1,13 @@
 /**
- * Payload contracts for contribution changes sent at "Save" time on the Authors tab.
+ * Payload contracts for the contributions update sent at "Save" time on the Authors tab.
  *
- * Saving does NOT write contribution data to the app DB: each change becomes an
- * `Action` row (targetType DOCUMENT, path 'contributions') that the change poller
- * publishes to the graph. These types are the shape of that action's `parameters`,
- * shared by the client diff builder, the API route validation and the service.
+ * Saving does NOT write contribution data to the app DB: the save becomes a single
+ * authoritative `Action` row (actionType UPDATE, targetType DOCUMENT, path
+ * 'contributions') that the change poller publishes to the graph. The graph treats
+ * the carried contribution list as the new complete state — contributors present are
+ * upserted, contributors absent are removed. These types are the shape of that
+ * action's `parameters`, shared by the client state builder, the API route
+ * validation and the service.
  */
 
 export interface ContributionActionPersonIdentifier {
@@ -26,7 +29,7 @@ export interface ContributionActionAffiliation {
   wikidata: string | null
 }
 
-/** parameters payload for an ADD or UPDATE contribution action. */
+/** Full state of one contribution in the authoritative update payload. */
 export interface ContributionActionParameters {
   person: {
     /** null for a brand-new contributor never persisted (graph mints / matches by identifiers). */
@@ -43,14 +46,10 @@ export interface ContributionActionParameters {
   affiliations: ContributionActionAffiliation[]
 }
 
-/** parameters payload for a REMOVE contribution action (identifies the contribution by person uid). */
-export interface RemoveContributionParameters {
-  person: {
-    uid: string
-  }
+/**
+ * parameters payload for the single authoritative contributions UPDATE action:
+ * the complete, ordered list of contributions the document should have after the save.
+ */
+export interface ContributionsUpdateParameters {
+  contributions: ContributionActionParameters[]
 }
-
-export type ContributionChange =
-  | { actionType: 'ADD'; parameters: ContributionActionParameters }
-  | { actionType: 'UPDATE'; parameters: ContributionActionParameters }
-  | { actionType: 'REMOVE'; parameters: RemoveContributionParameters }

@@ -1173,70 +1173,71 @@ describe('DocumentService', () => {
   })
 
   describe('saveContributions', () => {
-    const changes = [
+    const contributions = [
       {
-        actionType: 'ADD' as const,
-        parameters: {
-          person: {
-            uid: null,
-            displayName: 'New One',
-            firstName: null,
-            lastName: null,
-            identifiers: [],
-          },
-          roles: ['http://id.loc.gov/vocabulary/relators/aut'],
-          rank: 1,
-          affiliations: [],
+        person: {
+          uid: null,
+          displayName: 'New One',
+          firstName: null,
+          lastName: null,
+          identifiers: [],
         },
+        roles: ['http://id.loc.gov/vocabulary/relators/aut'],
+        rank: 1,
+        affiliations: [],
       },
       {
-        actionType: 'REMOVE' as const,
-        parameters: { person: { uid: 'p1' } },
+        person: {
+          uid: 'p1',
+          displayName: 'Existing',
+          firstName: null,
+          lastName: null,
+          identifiers: [],
+        },
+        roles: ['http://id.loc.gov/vocabulary/relators/aut'],
+        rank: 2,
+        affiliations: [],
       },
     ]
 
-    it('creates one DOCUMENT/contributions action per change with the acting user', async () => {
-      await documentService.saveContributions('doc-1', changes, 'user-1234')
+    it('creates a single DOCUMENT/contributions UPDATE action carrying the full state', async () => {
+      await documentService.saveContributions(
+        'doc-1',
+        contributions,
+        'user-1234',
+      )
 
-      expect(mockCreateAction).toHaveBeenCalledTimes(2)
+      expect(mockCreateAction).toHaveBeenCalledTimes(1)
       expect(mockCreateAction).toHaveBeenCalledWith(
         expect.objectContaining({
-          actionType: 'ADD',
+          actionType: 'UPDATE',
           targetType: 'DOCUMENT',
           targetUid: 'doc-1',
           path: 'contributions',
           personUid: 'local-123',
-        }),
-      )
-      expect(mockCreateAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          actionType: 'REMOVE',
-          targetType: 'DOCUMENT',
-          targetUid: 'doc-1',
-          path: 'contributions',
+          parameters: { contributions },
         }),
       )
     })
 
-    it('sequences the actions with id and nextId (null on the last change)', async () => {
-      await documentService.saveContributions('doc-1', changes, 'user-1234')
+    it('does not chain the action with id/nextId fields', async () => {
+      await documentService.saveContributions(
+        'doc-1',
+        contributions,
+        'user-1234',
+      )
 
-      expect(mockCreateAction).toHaveBeenNthCalledWith(
-        1,
-        expect.objectContaining({
-          parameters: expect.objectContaining({ id: 0, nextId: 1 }),
-        }),
-      )
-      expect(mockCreateAction).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({
-          parameters: expect.objectContaining({ id: 1, nextId: null }),
-        }),
-      )
+      const { parameters } = mockCreateAction.mock.calls[0][0]
+      expect(parameters).not.toHaveProperty('id')
+      expect(parameters).not.toHaveProperty('nextId')
     })
 
     it('flags the document as waiting for the graph round-trip', async () => {
-      await documentService.saveContributions('doc-1', changes, 'user-1234')
+      await documentService.saveContributions(
+        'doc-1',
+        contributions,
+        'user-1234',
+      )
 
       expect(mockMarkDocumentsWaitingForUpdate).toHaveBeenCalledWith(['doc-1'])
     })
@@ -1248,7 +1249,7 @@ describe('DocumentService', () => {
       documentService = new DocumentService()
 
       await expect(
-        documentService.saveContributions('doc-1', changes, 'ghost'),
+        documentService.saveContributions('doc-1', contributions, 'ghost'),
       ).rejects.toThrow('Error saving contributions')
     })
   })

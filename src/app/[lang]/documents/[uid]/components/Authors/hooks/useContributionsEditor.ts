@@ -4,7 +4,8 @@ import { Document } from '@/types/Document'
 import { LocRelator } from '@/types/LocRelator'
 import { AureHalAuthorDoc } from '@/lib/services/AureHalAPIClient'
 import {
-  buildContributionChanges,
+  buildContributionsState,
+  contributionsAreDirty,
   defaultRankingMode,
   workingFromContribution,
 } from '../lib/contributionDiff'
@@ -92,11 +93,12 @@ export function useContributionsEditor(
     setRankingMode(defaultRankingMode(baseline))
   }, [baseline])
 
-  const changes = useMemo(
-    () => buildContributionChanges(baseline, working, rankingMode),
-    [baseline, working, rankingMode],
+  const contributions = useMemo(
+    () => buildContributionsState(working, rankingMode),
+    [working, rankingMode],
   )
-  const isDirty = !isFrozen && changes.length > 0
+  const isDirty =
+    !isFrozen && contributionsAreDirty(baseline, working, rankingMode)
 
   useEffect(() => {
     setContributionsTabDirty(isDirty)
@@ -278,15 +280,15 @@ export function useContributionsEditor(
   )
 
   const save = useCallback(async (): Promise<{ success: boolean }> => {
-    if (changes.length === 0) return { success: true }
-    const result = await saveContributions(changes)
+    if (!isDirty) return { success: true }
+    const result = await saveContributions(contributions)
     if (result.success) {
       // Pessimistic: the store flags the document `waiting_for_update`, which
       // freezes the tab until the refreshed document comes back.
       setContributionsTabDirty(false)
     }
     return result
-  }, [changes, saveContributions, setContributionsTabDirty])
+  }, [isDirty, contributions, saveContributions, setContributionsTabDirty])
 
   const cancel = useCallback(() => {
     setWorking(baseline.map(workingFromContribution))
