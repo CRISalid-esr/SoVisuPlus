@@ -51,7 +51,7 @@ Example response body:
 
 Fields to extract and store: `<id>` (HAL identifier), `<hal:password>`, `<hal:version>`, href value in `<link rel="alternate">` (public URL).
 
-The document's internal UID is sent as `<idno type="localRef">` in the TEI before submission.
+The document's internal UID is sent as `monogr/idno[@type="localRef"]` in the TEI before submission.
 
 ---
 
@@ -178,6 +178,8 @@ One document can have multiple deposit attempts (1-n).
 | `createdAt`          | datetime  |                                                                                        |
 | `updatedAt`          | datetime  |                                                                                        |
 
+This table lists only the lifecycle columns. `HalDeposit` **also** stores the form's deposit metadata (`halDocumentType`, `halDomains`, `language`, and the per-type conditional fields) — those columns are defined in [Deposit-specific metadata stored on `HalDeposit`](#deposit-specific-metadata-stored-on-haldeposit) below, alongside their TEI mapping, rather than duplicated here.
+
 #### `HalDepositFile`
 
 Attached files for a deposit (0-n per deposit). One file is flagged as main; the rest are complementary. The HAL deposit form carries the source, type, visibility and license **per file**, so these are stored on `HalDepositFile` (not on `HalDeposit`).
@@ -192,7 +194,7 @@ Attached files for a deposit (0-n per deposit). One file is flagged as main; the
 | `mimeType`     | string   |                                                                                                                               |
 | `fileSource`   | string   | File's source code → TEI `ref/@subtype` (`author`, `greenPublisher`, `publisherAgreement`, `publisherPaid`)                   |
 | `fileType`     | string   | File's type code → TEI `ref/@type` (`file`, `src`, `annex`)                                                                   |
-| `visibility`   | string   | Embargo option (`now`, `15d`, `1m`, `3m`, `6m`, `1y`, `2y`); the listener computes `ref` `@notBefore` = deposit date + offset |
+| `visibility`   | string   | Embargo option (`now`, `15d`, `1m`, `3m`, `6m`, `1y`, `2y`); the listener emits the embargo as a `<date notBefore>` child of the file's `<ref>`, dated deposit date + offset (`now` → no date) |
 | `license`      | string?  | CC/ETALAB/Copyright code → TEI `availability/licence/@target`; required for the main file, nullable for complementary         |
 | `createdAt`    | datetime |                                                                                                                               |
 
@@ -277,7 +279,7 @@ Parses HAL's XML responses into typed objects — no I/O. One method parses the 
 Turns a deposit and its `HalDepositFile` rows into the on-disk artifacts under `uploads/hal-tei/<depositId>/`. It:
 
 - Calls `HalTEIInterchangeService.toHalTEI()`, passing `halDeposit.halDocumentType` as `options.halDocumentType` (the conversion from `document.documentType` is only the fallback when this field is absent) and the other deposit-specific overrides.
-- Injects `<idno type="localRef">` with the document UID.
+- Injects the document UID as `monogr/idno[@type="localRef"]`.
 - When files exist, injects one `<ref .../>` element per file (with `@type` `file`/`src`/`annex` and `@subtype` the file source — see the file block) and builds `art.zip` (copying from `uploads/hal-files/`); otherwise writes only `art.xml`.
 
 Returns a descriptor (payload location, content type, xml-vs-zip) consumed by `HalSwordClient`. This class owns all filesystem concerns.
@@ -505,9 +507,9 @@ The module also exposes small helpers derived from the map (e.g. `enabledHalDocu
 
 ##### Per-type field sources
 
-Some conditional fields draw their value from outside the form rather than free text:
+Some conditional fields are not plain free-text inputs:
 
-**Conference start date** (COMM / POSTER / PRESCONF). Supports **partial precision** — `YYYY`, `YYYY-MM` or `YYYY-MM-DD` — exactly like the document publication date. Reuse the existing publication-date control `PublicationDate.tsx` (`src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx`), a year→month→day stepper, or extract its self-contained precision logic into a shared component. Build on the existing utilities in `src/app/utils/publicationDate.ts` (`DatePrecision`, `parsePublicationDate`, `serializePublicationDate`, `formatPublicationDate`) — do not invent a new date format. The value is stored as the partial ISO string on `HalDeposit.conferenceStartDate` and emitted verbatim to `meeting/date[@type="start"]`.
+**Conference start date** (COMM / POSTER / PRESCONF). Supports **partial precision** — `YYYY`, `YYYY-MM` or `YYYY-MM-DD` — exactly like the document publication date. Reuse the existing publication-date control `PublicationDate.tsx` (`src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx`), a year→month→day stepper, or extract its self-contained precision logic into a shared component. Build on the existing utilities in `src/app/utils/publicationDate.ts` (`DatePrecision`, `parsePublicationDate`, `serializePublicationDate`, `formatPublicationDate`) — do not invent a new date format. The value is stored as the partial ISO string on `HalDeposit.conferenceStartDate` and emitted as the **text content** of `meeting/date[@type="start"]` (e.g. `<date type="start">2024-06</date>`), consistent with how the publication `datePub` is emitted.
 
 **Country selector** (COMM / POSTER / PRESCONF). Backed by a static, hand-authored TypeScript module (e.g. `src/app/types/HalCountries.ts`) that lists each country's **ISO code** and its **English and French** display names, so the picker can label options in either supported locale. There is no runtime API call — the list is not expected to change. Only the **code** is written to the TEI (`meeting/country/@key`); the name is UI-only. (This may later be replaced by a generated module, following the `generate_hal_domains.ts` → `src/app/types/HalDomains.ts` precedent.)
 
@@ -528,7 +530,7 @@ The picker is a **select** whose options are:
 - The document's **contributors** (`Document.contributions`, each a `Contribution { person, roles: LocRelator[] }`). Contributors that already hold the relevant role are **highlighted and listed first** — `LocRelator.THESIS_ADVISOR` for THESE, `LocRelator.DEGREE_COMMITTEE_MEMBER` for HDR.
 - A special **"Search in HAL"** action option. Choosing it opens the **same HAL profile autocomplete used in the Authors tab** — `HalAuthorAutocomplete` (`src/app/[lang]/documents/[uid]/components/Authors/components/HalAuthorAutocomplete.tsx`) → `/api/hal/authors` → `AureHalAPIClient.searchAuthors()`. Reuse the existing component/route; it already implements the "special action option + result options" select pattern. **Do not build a new search.**
 
-The selected person — whether an existing contributor or a HAL profile — is stored on `HalDeposit.supervisor` as the **display name**, which is emitted as the `authority[@type="supervisor"]` content. If picked via the HAL search the person's `idHal` is also captured, but it is **not** emitted to the TEI in this iteration (kept for future disambiguation).
+The selected person — whether an existing contributor or a HAL profile — is stored on `HalDeposit.supervisor` as the **display name**, which is emitted as the `authority[@type="supervisor"]` content. The HAL search is only used to pick the right person; no `idHal` is persisted or emitted in this iteration.
 
 **File upload** (at the bottom of the form):
 
@@ -608,7 +610,7 @@ The form fields that are not already on the `Document` model must be persisted o
 | Conference country             | `conferenceCountry` (string?) — stores the **ISO country code**, not the name      |
 | Institution / issuing body     | `institution` (string?)                                                            |
 | Book title                     | `bookTitle` (string?)                                                               |
-| Supervisor (THESE/HDR)         | `supervisor` (string?) — selected person's display name (emitted as the `authority[@type="supervisor"]` content; an `idHal` from HAL search is captured but not emitted) |
+| Supervisor (THESE/HDR)         | `supervisor` (string?) — selected person's display name (emitted as the `authority[@type="supervisor"]` content; no `idHal` stored this iteration) |
 
 The **journal is not stored here** — it lives on the `Document` (`document.journal`) and `toHalTEI` reads it directly. License, file source, file type and visibility are **per file** and live on `HalDepositFile`. THESE/HDR titles are not stored either — they come from `Document.titles` and are guarded by the bilingual-title gate.
 
@@ -617,6 +619,10 @@ The **journal is not stored here** — it lives on the `Document` (`document.jou
 #### TEI mapping of deposit metadata (AOfr profile)
 
 Element paths below are taken from the AOfr schema (`aofr.xsd`) and confirmed against real preprod deposits. All elements are in the TEI namespace; `<biblFull>` children must keep schema order: `titleStmt`, `editionStmt`, `publicationStmt`, `seriesStmt`, `notesStmt`, `sourceDesc`, `profileDesc`.
+
+`<monogr>` children must likewise follow the XSD sequence: `idno`, `title` (journal `level="j"` / book `level="m"`), `meeting`, `respStmt`, `settlement`, `country`, `editor`, `imprint`, `authority` (institution then supervisor). The packager already emits the journal `title` + `imprint`; the new `meeting` and `authority` elements must be **inserted at their schema position**, not appended — HAL rejects out-of-order children. (Inside `<meeting>` the order is `title`, `date`, `settlement`, `country`.)
+
+> **`<notesStmt>` metadata notes are not emitted in this iteration.** The official example deposits carry notes such as `audience`, `peerReviewing`, `popularLevel`, `invitedCommunication` and `proceedings` marked "%%mandatory", but HAL only requires them when the depositor adds publication comments — which is out of scope here. SoVisuPlus omits the `<notesStmt>` metadata notes; they are not forgotten fields.
 
 | Field                     | TEI location                                                                                                                         |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -628,13 +634,14 @@ Element paths below are taken from the AOfr schema (`aofr.xsd`) and confirmed ag
 | Book title (COUV)         | `sourceDesc/biblStruct/monogr/title[@level="m"]` (same slot as the ART journal, which uses `level="j"`)                              |
 | Conference title (COMM/…) | `sourceDesc/biblStruct/monogr/meeting/title`                                                                                         |
 | Conference city           | `sourceDesc/biblStruct/monogr/meeting/settlement`                                                                                    |
-| Conference start date     | `sourceDesc/biblStruct/monogr/meeting/date[@type="start"]` — the partial ISO value (`YYYY` / `YYYY-MM` / `YYYY-MM-DD`) verbatim       |
+| Conference start date     | `sourceDesc/biblStruct/monogr/meeting/date[@type="start"]` — partial ISO value as **element text** (`<date type="start">YYYY[-MM[-DD]]</date>`), matching how `datePub` is emitted (not the `@when` attribute) |
 | Conference country        | `sourceDesc/biblStruct/monogr/meeting/country/@key` = the ISO country code (the name is UI-only and **not** emitted)                  |
 | Institution / issuing body (REPORT / THESE / HDR) | `sourceDesc/biblStruct/monogr/authority[@type="institution"]`                                                    |
-| Supervisor (THESE thesis advisor / HDR chair of jury) | `sourceDesc/biblStruct/monogr/authority[@type="supervisor"]` (content = the person's name; confirm against the AOfr schema) |
+| Supervisor (THESE thesis advisor / HDR chair of jury) | `sourceDesc/biblStruct/monogr/authority[@type="supervisor"]` (content = the person's name) — the required supervisor field for THESE/HDR |
+| Publication date (THESE / HDR) | `monogr/imprint/date[@type="datePub"]` **and** `monogr/imprint/date[@type="dateDefended"]`, both set to the document's publication date (for a thesis the publication date is the defense date). Other types emit only `datePub`. |
 | Attached files            | `editionStmt/edition/ref` (see file block; `@type` = `file`/`src`/`annex`)                                                           |
-| File embargo / visibility | `editionStmt/edition/date/@notBefore` (XSD: "%embargo sur chaque fichier")                                                           |
-| Document internal UID     | `<idno type="localRef">` with the document UID (already injected by the packager)                                                    |
+| File embargo / visibility | `editionStmt/edition/ref/date/@notBefore` — a `<date>` **child of each file's `<ref>`** (XSD: "%embargo sur chaque fichier")          |
+| Document internal UID     | `sourceDesc/biblStruct/monogr/idno[@type="localRef"]` with the document UID (injected by the packager)                               |
 
 **License → `@target` URL** (`availability/licence/@target`):
 
@@ -649,14 +656,15 @@ Element paths below are taken from the AOfr schema (`aofr.xsd`) and confirmed ag
 | ETALAB      | _To confirm_ against HAL's licence reference list                                                                          |
 | Copyright   | _To confirm_ — likely **no** `<licence>` element (closed/copyright is expressed differently); resolve before relying on it |
 
-**File block** — files and their embargo live in `editionStmt/edition`. Each file is one `<ref>` whose `@type` is the file kind (`file` for a document, `src` for a source file, `annex` for additional data) and `@subtype` is the file source; the embargo date (derived from the file-visibility delay relative to the deposit date) is a sibling `<date notBefore="…">`:
+**File block** — files and their embargo live in `editionStmt/edition`. Each file is one `<ref>` whose `@type` is the file kind (`file` for a document, `src` for a source file, `annex` for additional data) and `@subtype` is the file source; the per-file embargo date (derived from the file-visibility delay relative to the deposit date) is a **child** `<date notBefore="…">` of that `<ref>` (confirmed against the official SWORD examples):
 
 ```xml
 <editionStmt>
   <edition>
-    <date notBefore="2026-12-24"/>                                  <!-- omitted when visibility = now -->
-    <ref type="file" target="doc.pdf" subtype="author" n="1"/>      <!-- main file (Document) -->
-    <ref type="annex" target="data.csv" subtype="author" n="2"/>    <!-- complementary (Additional data) -->
+    <ref type="file" target="doc.pdf" subtype="author" n="1">       <!-- main file (Document) -->
+      <date notBefore="2026-12-24"/>                                <!-- omitted when visibility = now -->
+    </ref>
+    <ref type="annex" target="data.csv" subtype="author" n="2"/>    <!-- complementary (Additional data), no embargo -->
   </edition>
 </editionStmt>
 ```
@@ -665,7 +673,7 @@ Element paths below are taken from the AOfr schema (`aofr.xsd`) and confirmed ag
 - `@type` = the **file type** code (`file` / `src` / `annex`), from `HalDepositFile.fileType`.
 - `@subtype` = the **file source** code (`author` / `greenPublisher` / `publisherAgreement` / `publisherPaid`), from `HalDepositFile.fileSource`.
 - `n` = 1-based sequence index.
-- `@notBefore` (embargo) maps from `HalDepositFile.visibility`: `now` → no date; `15d / 1m / 3m / 6m / 1y / 2y` → deposit date + offset.
+- `@notBefore` (embargo) maps from `HalDepositFile.visibility`: `now` → no `<date>` child; `15d / 1m / 3m / 6m / 1y / 2y` → a `<date notBefore="…">` child of the file's `<ref>`, dated deposit date + offset. The embargo date is always a child of the `<ref>` it applies to (per the official examples), so each file carries its own embargo independently.
 - **License** is per file (`HalDepositFile.license`). Structurally the AOfr schema only exposes `publicationStmt/availability/licence` (document-level), but `<licence>` is repeatable with `@target` and may contain `<ref>` elements pointing back to specific files. **The exact per-file association is the one remaining open point** — confirm against HAL before relying on more than one distinct license per deposit; the article-first case (single main PDF) needs only one `<licence>`.
 
 ---
