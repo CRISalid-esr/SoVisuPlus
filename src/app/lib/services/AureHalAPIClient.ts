@@ -29,6 +29,15 @@ export type AureHalAuthorDoc = {
   idrefId_s?: string[]
 }
 
+/**
+ * True when a HAL author profile carries at least one usable identifier
+ * (IdHAL, ORCID or IdRef). Profiles with none of these cannot identify a
+ * contributor, so they are dropped from the name-based suggestion panel.
+ */
+export function authorDocHasIdentifier(doc: AureHalAuthorDoc): boolean {
+  return Boolean(doc.idHal_s || doc.orcidId_s?.length || doc.idrefId_s?.length)
+}
+
 /** One organisation entry from /search/authorstructure (an author's affiliations). */
 export type AureHalOrg = {
   idno?: string | string[]
@@ -224,14 +233,16 @@ export class AureHalAPIClient {
   /**
    * Search HAL author profiles to suggest a match for a contributor, based on its
    * display name. The name is normalised (accents, hyphens and special characters
-   * removed) before the search. Returns [] for a too-short normalised name.
+   * removed) before the search. Profiles without any identifier (IdHAL, ORCID or
+   * IdRef) are dropped — they would leave the contributor unidentified. Returns []
+   * for a too-short normalised name.
    */
   async searchAuthorSuggestions(
     displayName: string,
   ): Promise<AureHalAuthorDoc[]> {
     const normalized = normalizeHalNameQuery(displayName)
     if (normalized.length < AUREHAL_MIN_QUERY_LENGTH) return []
-    return this.authorSearch(normalized)
+    return (await this.authorSearch(normalized)).filter(authorDocHasIdentifier)
   }
 
   /**
