@@ -93,7 +93,6 @@ describe('ResearchUnitDAO', () => {
         signature: researchUnit.signature,
         slug: 'research-unit:rs001',
       },
-      include: { names: true, descriptions: true, identifiers: true },
     })
   })
 

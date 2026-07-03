@@ -96,10 +96,6 @@ describe('PersonDAO', () => {
     })
     ;(mockPrisma.person.findFirst as jest.Mock).mockResolvedValue(null)
     ;(mockPrisma.personIdentifier.findMany as jest.Mock).mockResolvedValue([])
-    ;(mockPrisma.person.findUniqueOrThrow as jest.Mock).mockResolvedValue({
-      ...person,
-      id: 1,
-    })
     const dbPerson: DbPerson = await personDAO.createOrUpdatePerson(person)
     expect(dbPerson.uid).toEqual('local-johndoe')
     expect(dbPerson.email).toEqual('johndoe@myuniversity.com')

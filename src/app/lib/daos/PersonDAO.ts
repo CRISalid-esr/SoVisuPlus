@@ -1,5 +1,9 @@
 import slugify from 'slugify'
-import { PersonIdentifier as DbPersonIdentifier, Prisma } from '@prisma/client'
+import {
+  PersonIdentifier as DbPersonIdentifier,
+  Person as DbPerson,
+  Prisma,
+} from '@prisma/client'
 import { Person } from '@/types/Person'
 import {
   PersonIdentifier,
@@ -15,8 +19,6 @@ import removeAccents from 'remove-accents'
 import { ORCIDIdentifier, OrcidOAuthData } from '@/types/OrcidIdentifier'
 import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
 import { decryptString, encryptString } from '@/utils/crypto/fieldEncryption'
-import { PersonWithRelations as DbPerson } from '@/prisma-schema/extended-client'
-
 /** PersonDAO: Handles operations related to Person and PersonIdentifiers */
 export class PersonDAO extends AbstractDAO {
   static ORCID_IDENTIFIER_AAD_PREFIX = 'orcidIdentifier:id='
@@ -86,31 +88,10 @@ export class PersonDAO extends AbstractDAO {
 
           await this.upsertRecords(person.records, dbPerson.id)
 
-          const dbPersonWithRelations =
-            await this.prismaClient.person.findUniqueOrThrow({
-              where: { uid: person.uid },
-              include: {
-                identifiers: true,
-                memberships: {
-                  include: {
-                    researchUnit: {
-                      include: {
-                        names: true,
-                        identifiers: true,
-                        descriptions: true,
-                      },
-                    },
-                  },
-                },
-                records: {
-                  include: {
-                    identifiers: true,
-                  },
-                },
-              },
-            })
-
-          return dbPersonWithRelations
+          // The upsert result carries every scalar column callers read (id, external,
+          // uid, …); the person's relations are written above but never consumed off the
+          // return value, so there is no need to re-fetch them here.
+          return dbPerson
         } catch (error) {
           if (
             error instanceof PrismaClientKnownRequestError &&
@@ -485,11 +466,6 @@ export class PersonDAO extends AbstractDAO {
       skip: (page - 1) * itemsPerPage,
       take: itemsPerPage,
       include: {
-        contributions: {
-          select: {
-            roles: true,
-          },
-        },
         memberships: {
           include: {
             researchUnit: {

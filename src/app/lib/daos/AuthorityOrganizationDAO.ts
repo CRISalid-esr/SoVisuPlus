@@ -1,6 +1,6 @@
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
-import { AuthorityOrganizationWithRelations as DbAuthorityOrganization } from '@/prisma-schema/extended-client'
+import { AuthorityOrganization as DbAuthorityOrganization } from '@prisma/client'
 import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
 
 export class AuthorityOrganizationDAO extends AbstractDAO {
@@ -14,76 +14,55 @@ export class AuthorityOrganizationDAO extends AbstractDAO {
   ): Promise<DbAuthorityOrganization> {
     const { uid, displayNames, type, places, identifiers } = authority
     try {
-      let dbAuthority: DbAuthorityOrganization | null =
-        await this.prismaClient.authorityOrganization.findUnique({
-          where: { uid: uid },
-          include: {
-            identifiers: true,
-          },
-        })
-      if (!dbAuthority) {
-        dbAuthority = await this.prismaClient.authorityOrganization.create({
-          data: {
-            uid: uid,
-            displayNames: displayNames,
-            type: type,
-            places: places,
-          },
-          include: {
-            identifiers: true,
-          },
-        })
-      } else {
-        dbAuthority = await this.prismaClient.authorityOrganization.update({
-          where: { uid: uid },
-          data: {
-            uid: uid,
-            displayNames: displayNames,
-            type: type,
-            places: places,
-          },
-          include: {
-            identifiers: true,
-          },
-        })
-      }
-      await this.prismaClient.authorityOrganizationIdentifier.deleteMany({
-        where: { organizationId: dbAuthority.id },
-      })
-      const idsToAdd = []
-      for (const identifier of identifiers) {
-        const idType =
-          AuthorityOrganizationIdentifier.authorityOrganizationIdentifierTypeFromString(
+      // Identifiers are a shared many-to-many entity keyed by (type, value) — the same
+      // identifier legitimately belongs to several authority organizations (a graph org's
+      // root and its states share identifiers). Reuse existing rows via connectOrCreate
+      // rather than deleting/recreating them, which would collide on the (type, value) unique.
+      const seen = new Set<string>()
+      const identifierLinks = identifiers
+        .map((identifier) => ({
+          type: AuthorityOrganizationIdentifier.authorityOrganizationIdentifierTypeFromString(
             identifier.type,
-          )
-        if (idType) {
-          const id =
-            await this.prismaClient.authorityOrganizationIdentifier.create({
-              data: {
-                type: idType,
-                value: identifier.value,
-                organizationId: dbAuthority.id,
-              },
-            })
-          idsToAdd.push(id)
-        } else {
-          console.error(
-            `Invalid identifier type ${identifier.type} for authority organization UID ${dbAuthority.uid}`,
-          )
-        }
-      }
-      dbAuthority = await this.prismaClient.authorityOrganization.update({
-        where: { uid: uid },
-        data: {
-          identifiers: {
-            connect: idsToAdd,
+          ),
+          value: identifier.value,
+        }))
+        .filter((identifier) => {
+          if (!identifier.type) {
+            console.error(
+              `Invalid identifier type for authority organization UID ${uid}`,
+            )
+            return false
+          }
+          // A root-elected affiliation unions many states, so dedupe (type, value).
+          const key = `${identifier.type}::${identifier.value}`
+          if (seen.has(key)) return false
+          seen.add(key)
+          return true
+        })
+        .map((identifier) => ({
+          where: {
+            type_value: { type: identifier.type!, value: identifier.value },
           },
+          create: { type: identifier.type!, value: identifier.value },
+        }))
+
+      return await this.prismaClient.authorityOrganization.upsert({
+        where: { uid: uid },
+        create: {
+          uid: uid,
+          displayNames: displayNames,
+          type: type,
+          places: places,
+          identifiers: { connectOrCreate: identifierLinks },
         },
-        include: {
-          identifiers: true,
+        update: {
+          displayNames: displayNames,
+          type: type,
+          places: places,
+          // Disconnect the org's current identifiers, then reconnect/create the shared rows.
+          identifiers: { set: [], connectOrCreate: identifierLinks },
         },
       })
-      return dbAuthority
     } catch (error) {
       console.error(
         'Error during authority organization creation or update:',

@@ -405,14 +405,12 @@ enum AuthorityOrganizationIdentifierType {
 }
 
 model AuthorityOrganizationIdentifier {
-  id             Int                                 @id @default(autoincrement())
-  type           AuthorityOrganizationIdentifierType
-  value          String
-  organization   AuthorityOrganization               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  organizationId Int
+  id            Int                                 @id @default(autoincrement())
+  type          AuthorityOrganizationIdentifierType
+  value         String
+  organizations AuthorityOrganization[]
 
   @@unique([type, value])
-  @@index([organizationId])
 }
 
 enum AuthorityOrganizationNameType {

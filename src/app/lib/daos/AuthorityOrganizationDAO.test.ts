@@ -5,19 +5,12 @@ import {
 } from '@prisma/client'
 import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
-import { AuthorityOrganizationWithRelations as DbAuthorityOrganization } from '@/prisma-schema/extended-client'
 
 jest.mock('@prisma/client', () => {
   const prismaClient: PrismaClient = jest.requireActual('@prisma/client')
   const mockPrismaClient = {
     authorityOrganization: {
-      findUnique: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-    },
-    authorityOrganizationIdentifier: {
-      deleteMany: jest.fn(),
-      create: jest.fn(),
+      upsert: jest.fn(),
     },
   }
   return {
@@ -27,6 +20,7 @@ jest.mock('@prisma/client', () => {
 })
 
 const mockPrisma = new PrismaClient()
+const upsertMock = () => mockPrisma.authorityOrganization.upsert as jest.Mock
 
 describe('AuthorityOrganizationDAO', () => {
   let authorityOrganizationDAO: AuthorityOrganizationDAO
@@ -34,6 +28,7 @@ describe('AuthorityOrganizationDAO', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     authorityOrganizationDAO = new AuthorityOrganizationDAO()
+    upsertMock().mockResolvedValue({ id: 1 })
   })
 
   const organization = new AuthorityOrganization(
@@ -49,147 +44,85 @@ describe('AuthorityOrganizationDAO', () => {
     ],
   )
 
-  it("should create an authority organization if it doesn't exist in database", async () => {
-    ;(
-      mockPrisma.authorityOrganization.findUnique as jest.Mock
-    ).mockResolvedValue(null)
-    ;(mockPrisma.authorityOrganization.create as jest.Mock).mockResolvedValue({
-      id: 1,
-    })
-
+  it('upserts the organization, connecting/creating identifiers as a shared many-to-many by (type, value)', async () => {
     await authorityOrganizationDAO.createOrUpdateAuthorityOrganization(
       organization,
     )
-    expect(mockPrisma.authorityOrganization.create).toHaveBeenCalledWith({
-      data: {
+
+    const link = {
+      where: {
+        type_value: {
+          type: AuthorityOrganizationIdentifierType.hal,
+          value: '123',
+        },
+      },
+      create: { type: AuthorityOrganizationIdentifierType.hal, value: '123' },
+    }
+    expect(upsertMock()).toHaveBeenCalledWith({
+      where: { uid: '123' },
+      create: {
         uid: '123',
         displayNames: ['Some Organization'],
         type: AuthorityOrganizationType.laboratory,
         places: [{ latitude: 53, longitude: 34 }],
+        identifiers: { connectOrCreate: [link] },
       },
-      include: {
-        identifiers: true,
-      },
-    })
-  })
-
-  it('should update an authority organization if it exists in database', async () => {
-    const mockDbAuthorityOrganization: DbAuthorityOrganization = {
-      id: 1,
-      uid: '123',
-      displayNames: ['Some Organization'],
-      type: AuthorityOrganizationType.laboratory,
-      places: [{ latitude: 53, longitude: 34 }],
-      identifiers: [
-        {
-          id: 1,
-          type: AuthorityOrganizationIdentifierType.hal,
-          value: '123',
-          organizationId: 1,
-        },
-      ],
-    }
-    ;(
-      mockPrisma.authorityOrganization.findUnique as jest.Mock
-    ).mockResolvedValue(mockDbAuthorityOrganization)
-    ;(mockPrisma.authorityOrganization.update as jest.Mock).mockResolvedValue(
-      mockDbAuthorityOrganization,
-    )
-
-    await authorityOrganizationDAO.createOrUpdateAuthorityOrganization(
-      organization,
-    )
-    expect(mockPrisma.authorityOrganization.update).toHaveBeenCalledWith({
-      where: { uid: '123' },
-      data: {
-        uid: '123',
+      update: {
         displayNames: ['Some Organization'],
         type: AuthorityOrganizationType.laboratory,
         places: [{ latitude: 53, longitude: 34 }],
-      },
-      include: {
-        identifiers: true,
+        // disconnect the org's current identifiers, then reconnect/create the shared rows
+        identifiers: { set: [], connectOrCreate: [link] },
       },
     })
   })
 
-  it('should delete all existing authority organization identifiers in relation to the upserted authority organization and create and connect new ones', async () => {
-    const mockDbAuthorityOrganization: DbAuthorityOrganization = {
-      id: 1,
-      uid: '123',
-      displayNames: ['Some Organization'],
-      type: AuthorityOrganizationType.laboratory,
-      places: [{ latitude: 53, longitude: 34 }],
-      identifiers: [
+  it('skips identifiers whose type is not a known AuthorityOrganizationIdentifierType', async () => {
+    const org = new AuthorityOrganization(
+      '123',
+      ['Some Organization'],
+      null,
+      [],
+      [
         {
-          id: 1,
-          type: AuthorityOrganizationIdentifierType.idref,
-          value: '456',
-          organizationId: 1,
+          type: 'not-a-real-type' as AuthorityOrganizationIdentifierType,
+          value: 'x',
         },
+        { type: AuthorityOrganizationIdentifierType.ror, value: 'r1' },
       ],
-    }
+    )
 
-    const mockDbUpdatedAuthorityOrganization: DbAuthorityOrganization = {
-      ...mockDbAuthorityOrganization,
-      identifiers: [
-        {
-          id: 2,
-          type: AuthorityOrganizationIdentifierType.hal,
-          value: '123',
-          organizationId: 1,
+    await authorityOrganizationDAO.createOrUpdateAuthorityOrganization(org)
+
+    const arg = upsertMock().mock.calls[0][0]
+    expect(arg.create.identifiers.connectOrCreate).toEqual([
+      {
+        where: {
+          type_value: {
+            type: AuthorityOrganizationIdentifierType.ror,
+            value: 'r1',
+          },
         },
+        create: { type: AuthorityOrganizationIdentifierType.ror, value: 'r1' },
+      },
+    ])
+  })
+
+  it('dedupes repeated (type, value) identifiers', async () => {
+    const org = new AuthorityOrganization(
+      '123',
+      ['Some Organization'],
+      null,
+      [],
+      [
+        { type: AuthorityOrganizationIdentifierType.ror, value: 'r1' },
+        { type: AuthorityOrganizationIdentifierType.ror, value: 'r1' },
       ],
-    }
-    ;(
-      mockPrisma.authorityOrganization.findUnique as jest.Mock
-    ).mockResolvedValue(mockDbAuthorityOrganization)
-    ;(mockPrisma.authorityOrganization.update as jest.Mock)
-      .mockResolvedValueOnce(mockDbAuthorityOrganization)
-      .mockResolvedValueOnce(mockDbUpdatedAuthorityOrganization)
-      .mockResolvedValue(null)
-    ;(
-      mockPrisma.authorityOrganizationIdentifier.create as jest.Mock
-    ).mockResolvedValue({ id: 2 })
+    )
 
-    const result =
-      await authorityOrganizationDAO.createOrUpdateAuthorityOrganization(
-        organization,
-      )
+    await authorityOrganizationDAO.createOrUpdateAuthorityOrganization(org)
 
-    expect(
-      mockPrisma.authorityOrganizationIdentifier.deleteMany,
-    ).toHaveBeenCalledWith({
-      where: { organizationId: 1 },
-    })
-
-    expect(
-      mockPrisma.authorityOrganizationIdentifier.create,
-    ).toHaveBeenCalledTimes(1)
-    expect(
-      mockPrisma.authorityOrganizationIdentifier.create,
-    ).toHaveBeenCalledWith({
-      data: {
-        type: AuthorityOrganizationIdentifierType.hal,
-        value: '123',
-        organizationId: 1,
-      },
-    })
-    expect(mockPrisma.authorityOrganization.update).toHaveBeenNthCalledWith(2, {
-      where: { uid: '123' },
-      data: {
-        identifiers: {
-          connect: [
-            {
-              id: 2,
-            },
-          ],
-        },
-      },
-      include: {
-        identifiers: true,
-      },
-    })
-    expect(result).toEqual(mockDbUpdatedAuthorityOrganization)
+    const arg = upsertMock().mock.calls[0][0]
+    expect(arg.update.identifiers.connectOrCreate).toHaveLength(1)
   })
 })

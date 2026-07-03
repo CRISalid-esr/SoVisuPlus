@@ -67,6 +67,25 @@ Prisma's generated types only cover single tables. When a query uses `include` o
 
 These types are **internal to the DAO layer**. DAOs use them to type the raw Prisma result, then immediately convert it to a domain class. The file also exports the singleton `prisma` client used by all DAOs.
 
+#### When to add or update a composite type
+
+Add or update a type here only when **all three** hold: a DAO runs a query with `include`/`select`, the joined shape can't be expressed by the base Prisma types, and that shape is passed to a domain mapper (`Foo.fromDb(...)`). This file is **demand-driven** — it describes shapes that are actually fetched, not every relation in the schema.
+
+**Do not** try to describe every relation of every model. A model is joined in different shapes in different queries (different subsets, different depths), so no single `XWithRelations` type can stand for "the relations of X" — that is why, for example, both `RoleWithRelations` and `RoleWithPermissionIds` exist. Forcing a type per relation leads either to a maximal type that lies about queries fetching less, or to a combinatorial explosion of variant types. Only add the shape a query actually produces.
+
+**Prefer deriving the type from the query.** Define the include once and let Prisma infer the payload, so the type cannot drift from the query:
+
+```ts
+const documentInclude = {
+  titles: true,
+  contributions: { include: { person: true } },
+} satisfies Prisma.DocumentInclude
+
+type DocumentWithRelations = Prisma.DocumentGetPayload<{ include: typeof documentInclude }>
+```
+
+Reserve the hand-written `X & { … }` intersection types (the current style in this file) for cases where a derived type is impractical. Hand-written types have **no compiler link** to the query — a DAO that does `... as DocumentWithRelations` on an `include` block is an unchecked assertion, so the type and the query drift silently. Keep the two in sync when you touch either side.
+
 ### Zustand store
 
 Client-side state is managed with [Zustand](https://zustand.docs.pmnd.rs/). All slices are combined into a single unified store in `src/app/stores/global_store.ts`, which is the only file components should import from.

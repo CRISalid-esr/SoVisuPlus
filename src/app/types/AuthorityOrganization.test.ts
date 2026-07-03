@@ -53,7 +53,6 @@ describe('AuthorityOrganization.fromDb', () => {
           id: 1,
           type: AuthorityOrganizationIdentifierType.hal,
           value: '123',
-          organizationId: 1,
         },
       ],
     }

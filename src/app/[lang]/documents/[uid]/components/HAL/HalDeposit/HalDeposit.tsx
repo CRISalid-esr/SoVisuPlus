@@ -180,16 +180,10 @@ export default function HalDeposit() {
     )
   }
 
-  if (!hasHalRecognisedAffiliation(selectedDocument)) {
-    return (
-      <GateAlert
-        severity='error'
-        message={t`hal_deposit_gate_no_affiliation`}
-        actionLabel={t`hal_deposit_gate_go_authors`}
-        onAction={() => navigateToTab('authors')}
-      />
-    )
-  }
+  // At least one contributor must carry a HAL-recognised affiliation identifier.
+  // Surfaced inline in the authors section (not as a full-page gate) and gates the
+  // Review button, so the form stays visible while the user fixes it in the Authors tab.
+  const hasIdentifiedAffiliation = hasHalRecognisedAffiliation(selectedDocument)
 
   // ─── Soft warning: affiliations that will be dropped ───────────────────────
   const hasDroppedAffiliations = selectedDocument.contributions?.some((c) =>
@@ -203,6 +197,7 @@ export default function HalDeposit() {
 
   // ─── Validation ────────────────────────────────────────────────────────────
   const valid =
+    hasIdentifiedAffiliation &&
     !!documentType &&
     !!language &&
     domains.length > 0 &&
@@ -369,6 +364,11 @@ export default function HalDeposit() {
         }
       >
         <Paper variant='outlined' sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F7F6' }}>
+          {!hasIdentifiedAffiliation && (
+            <Alert severity='error' sx={{ mb: 1.5 }}>
+              <Trans>hal_deposit_gate_no_affiliation</Trans>
+            </Alert>
+          )}
           {sortedContributions.length === 0 ? (
             <Typography variant='body2' color='text.secondary'>
               <Trans>hal_deposit_no_authors</Trans>

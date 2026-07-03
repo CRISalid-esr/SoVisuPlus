@@ -59,8 +59,8 @@ describe('ResearchUnit', () => {
     }).toThrowError(/INVALID_TYPE is not a valid ResearchUnitIdentifierType/)
   })
 
-  it('should create a ResearchUnit object from a DbResearchUnit object', () => {
-    // Mock DbResearchUnit input
+  it('should create a ResearchUnit object from a DbResearchUnitWithRelations object', () => {
+    // Mock DbResearchUnitWithRelations input
     const dbResearchUnit = {
       id: 1,
       uid: 'RS123',
@@ -159,7 +159,7 @@ describe('ResearchUnit', () => {
   })
 
   it('should handle an empty identifiers array if not provided', () => {
-    // Mock DbResearchUnit input without identifiers
+    // Mock DbResearchUnitWithRelations input without identifiers
     const dbResearchUnit = {
       id: 2,
       uid: 'RS456',

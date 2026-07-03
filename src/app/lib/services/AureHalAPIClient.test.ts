@@ -196,7 +196,7 @@ describe('AureHalAPIClient', () => {
   })
 
   it('searchAuthorSuggestions normalises the display name (accents/hyphens stripped)', async () => {
-    const docs = [{ fullName_s: 'Élodie Le-Goff' }]
+    const docs = [{ fullName_s: 'Élodie Le-Goff', idHal_s: 'elodie-le-goff' }]
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: jest.fn().mockResolvedValue({ response: { docs } }),
@@ -217,6 +217,50 @@ describe('AureHalAPIClient', () => {
   it('searchAuthorSuggestions returns [] without fetching when normalised name too short', async () => {
     await expect(client.searchAuthorSuggestions('é-')).resolves.toEqual([])
     expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it('searchAuthorSuggestions keeps only profiles bearing an identifier', async () => {
+    const withIdHal = { fullName_s: 'A IdHal', idHal_s: 'a-idhal' }
+    const withOrcid = { fullName_s: 'B Orcid', orcidId_s: ['0000-0001'] }
+    const withIdref = { fullName_s: 'C Idref', idrefId_s: ['123'] }
+    const noId = { fullName_s: 'D NoId' }
+    const emptyArrays = { fullName_s: 'E Empty', orcidId_s: [], idrefId_s: [] }
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        response: { docs: [withIdHal, noId, withOrcid, emptyArrays, withIdref] },
+      }),
+    })
+
+    await expect(client.searchAuthorSuggestions('dupont')).resolves.toEqual([
+      withIdHal,
+      withOrcid,
+      withIdref,
+    ])
+  })
+
+  it('searchAuthorSuggestions returns [] when no profile has an identifier', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        response: { docs: [{ fullName_s: 'A NoId' }, { fullName_s: 'B NoId' }] },
+      }),
+    })
+
+    await expect(client.searchAuthorSuggestions('dupont')).resolves.toEqual([])
+  })
+
+  it('searchAuthors (autocomplete) does NOT filter identifier-less profiles', async () => {
+    const docs = [
+      { fullName_s: 'Jean Dupont', idHal_s: 'jean-dupont' },
+      { fullName_s: 'No Identifier' },
+    ]
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ response: { docs } }),
+    })
+
+    await expect(client.searchAuthors('dupont')).resolves.toEqual(docs)
   })
 
   it('getAuthorStructures returns null without fetching when a required field is missing', async () => {
