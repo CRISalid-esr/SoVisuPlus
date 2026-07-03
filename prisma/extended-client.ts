@@ -105,10 +105,6 @@ export type RoleWithRelations = Role & {
   permissions: RoleWithPermission[] // include: { permissions: { include: { permission: true } } }
 }
 
-export type RoleWithPermissionIds = Role & {
-  permissions: Array<Pick<RolePermission, 'permissionId'>> // include: { permissions: { select: { permissionId: true } } }
-}
-
 export type UserRoleWithRelations = UserRole & {
   role: RoleWithRelations
   scopes: UserRoleScope[]

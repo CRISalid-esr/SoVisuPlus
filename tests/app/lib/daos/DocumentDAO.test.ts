@@ -42,35 +42,48 @@ describe('DocumentDAO Integration Tests', () => {
 
   test('should remove contributions', async () => {
     // Step 1: Create persons
-    const person1 = await personDAO.createOrUpdatePerson(
-      new Person('local-p1', false, null, 'Alice', 'Smith', 'Alice Smith', []),
+    const person1Data = new Person(
+      'local-p1',
+      false,
+      null,
+      'Alice',
+      'Smith',
+      'Alice Smith',
+      [],
     )
-    const person2 = await personDAO.createOrUpdatePerson(
-      new Person('local-p2', false, null, 'Bob', 'Johnson', 'Bob Johnson', []),
+    const person2Data = new Person(
+      'local-p2',
+      false,
+      null,
+      'Bob',
+      'Johnson',
+      'Bob Johnson',
+      [],
     )
+    const person1 = await personDAO.createOrUpdatePerson(person1Data)
+    await personDAO.createOrUpdatePerson(person2Data)
 
-    const org1 =
-      await authorityOrganizationDAO.createOrUpdateAuthorityOrganization(
-        new AuthorityOrganization(
-          'org-123',
-          ['Some Organization'],
-          AuthorityOrganizationType.laboratory,
-          [{ latitude: 10, longitude: 42 }],
-          [{ type: AuthorityOrganizationIdentifierType.hal, value: 'org1' }],
-        ),
-      )
+    const org1Data = new AuthorityOrganization(
+      'org-123',
+      ['Some Organization'],
+      AuthorityOrganizationType.laboratory,
+      [{ latitude: 10, longitude: 42 }],
+      [{ type: AuthorityOrganizationIdentifierType.hal, value: 'org1' }],
+    )
+    const org2Data = new AuthorityOrganization(
+      'org-234',
+      ['Other Organization'],
+      AuthorityOrganizationType.research_team,
+      [
+        { latitude: 43, longitude: 52 },
+        { latitude: 17, longitude: 13 },
+      ],
+      [{ type: AuthorityOrganizationIdentifierType.idref, value: 'org2' }],
+    )
+    await authorityOrganizationDAO.createOrUpdateAuthorityOrganization(org1Data)
     const org2 =
       await authorityOrganizationDAO.createOrUpdateAuthorityOrganization(
-        new AuthorityOrganization(
-          'org-234',
-          ['Other Organization'],
-          AuthorityOrganizationType.research_team,
-          [
-            { latitude: 43, longitude: 52 },
-            { latitude: 17, longitude: 13 },
-          ],
-          [{ type: AuthorityOrganizationIdentifierType.idref, value: 'org2' }],
-        ),
+        org2Data,
       )
 
     // Step 2: Create a document with both contributors
@@ -87,11 +100,11 @@ describe('DocumentDAO Integration Tests', () => {
       [], // No subjects
       [
         new Contribution(
-          Person.fromDbPerson(person1),
+          person1Data,
           [LocRelatorHelper.fromLabel('author') as LocRelator],
-          [AuthorityOrganization.fromDb(org1)],
+          [org1Data],
         ),
-        new Contribution(Person.fromDbPerson(person2), [
+        new Contribution(person2Data, [
           LocRelatorHelper.fromLabel('editor') as LocRelator,
         ]),
       ],
@@ -123,13 +136,7 @@ describe('DocumentDAO Integration Tests', () => {
       [new Literal('Test Document', 'en')],
       [], // No abstracts
       [], // No subjects
-      [
-        new Contribution(
-          Person.fromDbPerson(person1),
-          [],
-          [AuthorityOrganization.fromDb(org2)],
-        ),
-      ],
+      [new Contribution(person1Data, [], [org2Data])],
       [],
     )
 
@@ -143,11 +150,9 @@ describe('DocumentDAO Integration Tests', () => {
       },
     })
 
-    const { identifiers, ...rest } = org2
-
     expect(contributions).toHaveLength(1)
     expect(contributions[0].personId).toBe(person1.id)
-    expect(contributions[0].affiliations).toEqual([rest])
+    expect(contributions[0].affiliations).toEqual([org2])
   })
 
   test('should handle document subjects', async () => {

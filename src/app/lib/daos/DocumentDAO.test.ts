@@ -284,7 +284,6 @@ describe('DocumentDAO', () => {
           id: 1,
           type: 'hal',
           value: 'organization-1',
-          organizationId: 1,
         },
       ],
     } as DbAuthorityOrganization
@@ -312,61 +311,7 @@ describe('DocumentDAO', () => {
         publicationDateEnd: '2022-12-31T23:59:59.000Z',
         upwOAStatus: 'DIAMOND',
       },
-      include: {
-        titles: true,
-        abstracts: true,
-        records: {
-          include: {
-            identifiers: true,
-            contributions: {
-              include: {
-                person: { include: { identifiers: true } },
-              },
-            },
-            journal: true,
-          },
-        },
-        subjects: {
-          include: {
-            labels: true,
-          },
-        },
-        contributions: {
-          include: {
-            affiliations: {
-              include: {
-                identifiers: true,
-              },
-            },
-            person: {
-              include: {
-                identifiers: true,
-                memberships: {
-                  include: {
-                    researchUnit: {
-                      include: {
-                        names: true,
-                        identifiers: true,
-                        descriptions: true,
-                      },
-                    },
-                  },
-                },
-                records: {
-                  include: {
-                    identifiers: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-        journal: {
-          include: {
-            identifiers: true,
-          },
-        },
-      },
+      select: { id: true, uid: true },
     })
 
     expect(mockPrisma.documentTitle.upsert).toHaveBeenCalledTimes(2)
@@ -1696,57 +1641,7 @@ describe('DocumentDAO', () => {
           volume: '42',
           journal: { connect: { id: 1 } },
         }),
-        include: {
-          titles: true,
-          abstracts: true,
-          subjects: { include: { labels: true } },
-          contributions: {
-            include: {
-              affiliations: {
-                include: {
-                  identifiers: true,
-                },
-              },
-              person: {
-                include: {
-                  identifiers: true,
-                  memberships: {
-                    include: {
-                      researchUnit: {
-                        include: {
-                          names: true,
-                          identifiers: true,
-                          descriptions: true,
-                        },
-                      },
-                    },
-                  },
-                  records: {
-                    include: {
-                      identifiers: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          records: {
-            include: {
-              identifiers: true,
-              contributions: {
-                include: {
-                  person: { include: { identifiers: true } },
-                },
-              },
-              journal: true,
-            },
-          },
-          journal: {
-            include: {
-              identifiers: true,
-            },
-          },
-        },
+        select: { id: true, uid: true },
       }),
     )
 

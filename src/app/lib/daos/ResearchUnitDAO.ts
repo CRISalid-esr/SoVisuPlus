@@ -1,5 +1,5 @@
-import { ResearchUnitWithRelations as DbResearchUnit } from '@/prisma-schema/extended-client'
-import { Prisma } from '@prisma/client'
+import { ResearchUnitWithRelations as DbResearchUnitWithRelations } from '@/prisma-schema/extended-client'
+import { Prisma, ResearchUnit as DbResearchUnit } from '@prisma/client'
 import { ResearchUnit } from '@/types/ResearchUnit'
 import {
   ResearchUnitIdentifier,
@@ -36,7 +36,7 @@ export class ResearchUnitDAO extends AbstractDAO {
       const maxRetries = 3
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-          const dbResearchUnit = (await this.prismaClient.researchUnit.upsert({
+          const dbResearchUnit = await this.prismaClient.researchUnit.upsert({
             where: { uid: researchUnit.uid },
             update: {
               acronym: researchUnit.acronym,
@@ -49,12 +49,7 @@ export class ResearchUnitDAO extends AbstractDAO {
               signature: researchUnit.signature,
               slug: uniqueSlug,
             },
-            include: {
-              names: true,
-              descriptions: true,
-              identifiers: true,
-            },
-          })) as DbResearchUnit
+          })
 
           for (const name of researchUnit.names) {
             await this.prismaClient.researchUnitName.upsert({
@@ -166,7 +161,7 @@ export class ResearchUnitDAO extends AbstractDAO {
    */
   public async getResearchUnitByUid(
     uid: string,
-  ): Promise<DbResearchUnit | null> {
+  ): Promise<DbResearchUnitWithRelations | null> {
     return this.prismaClient.researchUnit.findUnique({
       where: { uid },
       include: {
@@ -286,7 +281,7 @@ export class ResearchUnitDAO extends AbstractDAO {
           _count: 'asc',
         },
       },
-    })) as DbResearchUnit[]
+    })) as DbResearchUnitWithRelations[]
     return researchUnits.map(ResearchUnit.fromDbResearchUnit)
   }
 

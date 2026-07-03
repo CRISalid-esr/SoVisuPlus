@@ -1,6 +1,6 @@
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
-import { AuthorityOrganizationWithRelations as DbAuthorityOrganization } from '@/prisma-schema/extended-client'
+import { AuthorityOrganization as DbAuthorityOrganization } from '@prisma/client'
 import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
 
 export class AuthorityOrganizationDAO extends AbstractDAO {
@@ -61,9 +61,6 @@ export class AuthorityOrganizationDAO extends AbstractDAO {
           places: places,
           // Disconnect the org's current identifiers, then reconnect/create the shared rows.
           identifiers: { set: [], connectOrCreate: identifierLinks },
-        },
-        include: {
-          identifiers: true,
         },
       })
     } catch (error) {

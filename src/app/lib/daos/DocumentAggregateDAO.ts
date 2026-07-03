@@ -54,7 +54,6 @@ export class DocumentAggregateDAO extends AbstractDAO {
               select: {
                 uid: true,
                 displayName: true,
-                normalizedName: true,
                 firstName: true,
                 lastName: true,
               },

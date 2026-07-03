@@ -74,7 +74,6 @@ describe('AuthorityOrganizationDAO', () => {
         // disconnect the org's current identifiers, then reconnect/create the shared rows
         identifiers: { set: [], connectOrCreate: [link] },
       },
-      include: { identifiers: true },
     })
   })
 

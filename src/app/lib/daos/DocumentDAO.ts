@@ -1,8 +1,6 @@
+import { DocumentWithRelations as DbDocument } from '@/prisma-schema/extended-client'
 import {
-  AuthorityOrganizationWithRelations as DbAuthorityOrganization,
-  DocumentWithRelations as DbDocument,
-} from '@/prisma-schema/extended-client'
-import {
+  AuthorityOrganization as DbAuthorityOrganization,
   Concept as DbConcept,
   DocumentState,
   OAStatus,
@@ -59,7 +57,9 @@ export class DocumentDAO extends AbstractDAO {
    * @param document - The Document object to create or update
    * @returns The created or updated Document record
    */
-  public async createOrUpdateDocument(document: Document): Promise<DbDocument> {
+  public async createOrUpdateDocument(
+    document: Document,
+  ): Promise<Pick<DbDocument, 'id' | 'uid'>> {
     const {
       uid,
       titles,
@@ -74,59 +74,20 @@ export class DocumentDAO extends AbstractDAO {
     } = document
 
     try {
-      let dbDocument: DbDocument | null =
-        await this.prismaClient.document.findUnique({
-          where: { uid: uid },
-          include: {
-            titles: true,
-            abstracts: true,
-            subjects: { include: { labels: true } },
-            contributions: {
-              include: {
-                affiliations: {
-                  include: {
-                    identifiers: true,
-                  },
-                },
-                person: {
-                  include: {
-                    identifiers: true,
-                    memberships: {
-                      include: {
-                        researchUnit: {
-                          include: {
-                            names: true,
-                            identifiers: true,
-                            descriptions: true,
-                          },
-                        },
-                      },
-                    },
-                    records: {
-                      include: {
-                        identifiers: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            records: {
-              include: {
-                identifiers: true,
-                contributions: {
-                  include: { person: { include: { identifiers: true } } },
-                },
-                journal: true,
-              },
-            },
-            journal: {
-              include: {
-                identifiers: true,
-              },
-            },
-          },
-        })
+      // Only the fields used by the obsolete-contribution/subject diffing below are read
+      // off the existing row; everything else is (re)written by the upserts that follow.
+      const existing = await this.prismaClient.document.findUnique({
+        where: { uid: uid },
+        select: {
+          id: true,
+          contributions: { select: { person: { select: { uid: true } } } },
+          subjects: { select: { uid: true } },
+        },
+      })
+
+      // The created/updated row is only used for its id (write loops below) and its uid
+      // (returned to callers, which merely truthiness-check it) — no relations are read.
+      let dbDocument: Pick<DbDocument, 'id' | 'uid'>
 
       let journalId: number | null = null
 
@@ -165,7 +126,7 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
 
-      if (!dbDocument) {
+      if (!existing) {
         dbDocument = await this.prismaClient.document.create({
           data: {
             uid: uid,
@@ -187,60 +148,12 @@ export class DocumentDAO extends AbstractDAO {
             issue,
             pages,
           },
-          include: {
-            titles: true,
-            abstracts: true,
-            subjects: { include: { labels: true } },
-            contributions: {
-              include: {
-                affiliations: {
-                  include: {
-                    identifiers: true,
-                  },
-                },
-                person: {
-                  include: {
-                    identifiers: true,
-                    memberships: {
-                      include: {
-                        researchUnit: {
-                          include: {
-                            names: true,
-                            identifiers: true,
-                            descriptions: true,
-                          },
-                        },
-                      },
-                    },
-                    records: {
-                      include: {
-                        identifiers: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            records: {
-              include: {
-                identifiers: true,
-                contributions: {
-                  include: { person: { include: { identifiers: true } } },
-                },
-                journal: true,
-              },
-            },
-            journal: {
-              include: {
-                identifiers: true,
-              },
-            },
-          },
+          select: { id: true, uid: true },
         })
       } else {
         // Remove obsolete contributions
         const existingContributors = new Set(
-          dbDocument.contributions.map((c) => c.person.uid),
+          existing.contributions.map((c) => c.person.uid),
         )
         const newContributors = new Set(contributions.map((c) => c.person.uid))
         const contributorsToRemove = [...existingContributors].filter(
@@ -250,7 +163,7 @@ export class DocumentDAO extends AbstractDAO {
         if (contributorsToRemove.length > 0) {
           await this.prismaClient.contribution.deleteMany({
             where: {
-              documentId: dbDocument.id,
+              documentId: existing.id,
               person: {
                 uid: { in: contributorsToRemove },
               },
@@ -259,7 +172,7 @@ export class DocumentDAO extends AbstractDAO {
         }
 
         // Remove obsolete subjects
-        const existingSubjects = new Set(dbDocument.subjects.map((s) => s.uid))
+        const existingSubjects = new Set(existing.subjects.map((s) => s.uid))
         const newSubjects = new Set(subjects.map((s) => s.uid))
         const subjectsToRemove = [...existingSubjects].filter(
           (uid) => !newSubjects.has(uid),
@@ -267,7 +180,7 @@ export class DocumentDAO extends AbstractDAO {
 
         if (subjectsToRemove.length > 0) {
           await this.prismaClient.document.update({
-            where: { id: dbDocument.id },
+            where: { id: existing.id },
             data: {
               subjects: {
                 disconnect: subjectsToRemove.map((uid) => ({ uid })),
@@ -276,7 +189,7 @@ export class DocumentDAO extends AbstractDAO {
           })
         }
 
-        dbDocument = (await this.prismaClient.document.update({
+        dbDocument = await this.prismaClient.document.update({
           where: { uid },
           data: {
             documentType: document.documentType,
@@ -298,36 +211,8 @@ export class DocumentDAO extends AbstractDAO {
             issue,
             pages,
           },
-          include: {
-            titles: true,
-            abstracts: true,
-            subjects: { include: { labels: true } },
-            contributions: {
-              include: {
-                affiliations: {
-                  include: {
-                    identifiers: true,
-                  },
-                },
-                person: true,
-              },
-            },
-            records: {
-              include: {
-                identifiers: true,
-                contributions: {
-                  include: { person: { include: { identifiers: true } } },
-                },
-                journal: true,
-              },
-            },
-            journal: { include: { identifiers: true } },
-          },
-        })) as DbDocument
-      }
-
-      if (!dbDocument) {
-        throw new Error('dbDocument is null')
+          select: { id: true, uid: true },
+        })
       }
 
       for (const title of titles) {
