@@ -6,10 +6,12 @@ import { AMQPResearchUnitMessage } from '@/types/AMQPResearchUnitMessage'
 import { DocumentWorker } from '@/lib/amqp/workers/DocumentWorker'
 import { HarvestingStateEventWorker } from '@/lib/amqp/workers/HarvestingStateEventWorker'
 import { HarvestingResultEventWorker } from '@/lib/amqp/workers/HarvestingResultEventWorker'
+import { ChangeEventWorker } from '@/lib/amqp/workers/ChangeEventWorker'
 
 import { AMQPDocumentMessage } from '@/types/AMQPDocumentMessage'
 import { AMQPHarvestingStateEventMessage } from '@/types/AMQPHarvestingStateEventMessage'
 import { AMQPHarvestingResultEventMessage } from '@/types/AMQPHarvestingResultEventMessage'
+import { AMQPChangeEventMessage } from '@/types/AMQPChangeEventMessage'
 import { AMQPMessage } from '@/types/AMQPMessage'
 
 describe('MessageProcessingWorkerFactory', () => {
@@ -132,6 +134,30 @@ describe('MessageProcessingWorkerFactory', () => {
 
     const worker = factory.createWorker(message)
     expect(worker).toBeInstanceOf(HarvestingResultEventWorker)
+  })
+
+  it('should create a ChangeEventWorker for change messages', () => {
+    const message: AMQPChangeEventMessage = {
+      type: 'change',
+      event: 'failed',
+      fields: {
+        uid: 'sovisuplus:action-1',
+        id: 'action-1',
+        application: 'sovisuplus',
+        person_uid: 'person-1',
+        target_type: 'DOCUMENT',
+        target_uid: 'doc-1',
+        path: 'contributions',
+        action_type: 'UPDATE',
+        status: 'failed',
+        error_message: 'boom',
+        warnings: [],
+        timestamp: '2026-01-01T09:00:00Z',
+      },
+    }
+
+    const worker = factory.createWorker(message)
+    expect(worker).toBeInstanceOf(ChangeEventWorker)
   })
 
   it('should throw an error for unknown message type', () => {

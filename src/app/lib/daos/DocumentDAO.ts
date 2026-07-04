@@ -1321,6 +1321,44 @@ export class DocumentDAO extends AbstractDAO {
     })
   }
 
+  /**
+   * Unfreeze documents whose graph round-trip failed: no `document_updated`
+   * message will re-write them, so their state must be reset here. Only
+   * documents currently `waiting_for_update` are touched.
+   */
+  public async resetDocumentsWaitingForUpdate(uids: string[]) {
+    await this.prismaClient.document.updateMany({
+      where: { uid: { in: uids }, state: DocumentState.waiting_for_update },
+      data: { state: DocumentState.default },
+    })
+
+    return this.prismaClient.document.findMany({
+      where: { uid: { in: uids } },
+      select: { uid: true, state: true },
+    })
+  }
+
+  public async getDocumentLabelsByUid(
+    uid: string,
+  ): Promise<Record<string, string>> {
+    const document = await this.prismaClient.document.findUnique({
+      where: { uid },
+      include: { titles: true },
+    })
+
+    if (!document) {
+      return {}
+    }
+
+    const labels: Record<string, string> = {}
+    for (const title of document.titles) {
+      if (title.value && title.language) {
+        labels[title.language] = title.value
+      }
+    }
+    return labels
+  }
+
   public async updateDocumentTypeByUid(
     uid: string,
     documentType: DocumentType,

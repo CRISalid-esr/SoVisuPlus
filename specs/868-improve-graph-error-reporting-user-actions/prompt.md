@@ -160,17 +160,17 @@ Add it to the `GenericEvent` union with an `isUserActionOutcomeEvent` guard.
   `personUid === connectedUser.person.uid`. Other users are not concerned by
   the outcome toast (they still get the regular `document_updated` toast on
   success).
-- **Unfreeze on failure**: if the store's `selectedDocument.uid` matches
-  `targetUid`, call `setSelectedDocumentHasChanged(true)` — the refetch
-  returns the DB document whose state the worker just reset to `default`, so
-  the Authors tab unfreezes through the existing mechanism (no new store
-  path).
+- **Unfreeze on failure**: `setSelectedDocumentHasChanged` only shows the
+  manual "refresh" banner (no auto-refetch), so a dedicated slice action
+  `unfreezeSelectedDocument(targetUid)` resets the in-store document's state
+  from `waiting_for_update` to `default` when the uid matches — the user can
+  retry immediately. Nothing changed remotely on failure, so the in-store
+  data stays valid.
 - **Toasts** (dedicated rendering branch, distinct from the `DataEvent`
   toast):
-  - `applied` + empty `warnings` → **success** variant: "your change to
-    _{label}_ was saved". Keep it light — the generic `document_updated`
-    toast also fires; consider letting this toast replace it for the acting
-    user rather than stacking two.
+  - `applied` + empty `warnings` → **no outcome toast** — the generic
+    `document_updated` toast already tells the acting user their save went
+    through; stacking a second toast would be noise.
   - `applied` + non-empty `warnings` → **warning** variant, long
     `autoHideDuration` (or persist until dismissed): "saved, but N items
     could not be applied", with the warning list.
