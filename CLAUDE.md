@@ -4,10 +4,11 @@
 
 Each major feature is backed by a spec document in `specs/<branch-name>/prompt.md`, where `<branch-name>` is the Git branch the feature is developed on. Read the relevant spec before working on a feature branch — it captures the intent, scope, and design decisions that are not otherwise visible from the code.
 
-| Branch                                   | Spec                                                                                                               |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `838-automated-hal-deposit`              | [`specs/838-automated-hal-deposit/prompt.md`](specs/838-automated-hal-deposit/prompt.md)                           |
-| `send-global-contributor-update-message` | [`specs/send-global-contributor-update-message/prompt.md`](specs/send-global-contributor-update-message/prompt.md) |
+| Branch                                           | Spec                                                                                                                               |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `838-automated-hal-deposit`                      | [`specs/838-automated-hal-deposit/prompt.md`](specs/838-automated-hal-deposit/prompt.md)                                           |
+| `send-global-contributor-update-message`         | [`specs/send-global-contributor-update-message/prompt.md`](specs/send-global-contributor-update-message/prompt.md)                 |
+| `868-improve-graph-error-reporting-user-actions` | [`specs/868-improve-graph-error-reporting-user-actions/prompt.md`](specs/868-improve-graph-error-reporting-user-actions/prompt.md) |
 
 ## Git commits
 
@@ -81,7 +82,9 @@ const documentInclude = {
   contributions: { include: { person: true } },
 } satisfies Prisma.DocumentInclude
 
-type DocumentWithRelations = Prisma.DocumentGetPayload<{ include: typeof documentInclude }>
+type DocumentWithRelations = Prisma.DocumentGetPayload<{
+  include: typeof documentInclude
+}>
 ```
 
 Reserve the hand-written `X & { … }` intersection types (the current style in this file) for cases where a derived type is impractical. Hand-written types have **no compiler link** to the query — a DAO that does `... as DocumentWithRelations` on an `include` block is an unchecked assertion, so the type and the query drift silently. Keep the two in sync when you touch either side.
