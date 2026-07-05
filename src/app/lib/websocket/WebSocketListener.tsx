@@ -12,51 +12,14 @@ import {
   isHarvestingStateEvent,
   isUserActionOutcomeEvent,
 } from '@/types/GenericEvent'
-import { ChangeWarningFields } from '@/types/AMQPChangeEventMessage'
+import { changeWarningMessage } from '@/lib/websocket/changeWarningMessages'
+import { UserActionOutcomeDetails } from '@/lib/websocket/UserActionOutcomeDetails'
 import { IconButton } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { SnackbarKey } from 'notistack'
 import { buildWebSocketURL } from '@/lib/websocket/ws-url'
 import * as Lingui from '@lingui/core'
 import { useSearchParams } from 'next/navigation'
-
-// One line per warning attached to a change outcome. Codes come from the
-// graph's open taxonomy; unknown codes fall back to a generic message.
-// Static <Trans id> branches only — dynamic ids are not extracted.
-const warningLine = (warning: ChangeWarningFields) => {
-  const context = warning.context ?? {}
-  const displayName = String(context.display_name ?? '')
-  const organizationUid = String(context.source_organization_uid ?? '')
-  switch (warning.code) {
-    case 'UNRESOLVABLE_PERSON':
-      return (
-        <Trans
-          id='user_action_warning_unresolvable_person'
-          values={{ displayName }}
-        />
-      )
-    case 'EXTERNAL_PERSON_CREATION_FAILED':
-      return (
-        <Trans
-          id='user_action_warning_external_person_creation_failed'
-          values={{ displayName }}
-        />
-      )
-    case 'MISSING_DISPLAY_NAME':
-      return <Trans id='user_action_warning_missing_display_name' />
-    case 'AFFILIATION_CONFLICT':
-      return (
-        <Trans
-          id='user_action_warning_affiliation_conflict'
-          values={{ organizationUid }}
-        />
-      )
-    case 'AFFILIATION_WITHOUT_IDENTIFIER':
-      return <Trans id='user_action_warning_affiliation_without_identifier' />
-    default:
-      return <Trans id='user_action_warning_unknown' />
-  }
-}
 
 const WebSocketListener = () => {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
@@ -254,18 +217,14 @@ const WebSocketListener = () => {
                 <Trans id='snackbar_view_document' />
               </a>
             )}
-            {data.outcome === 'failed' && data.errorMessage && (
-              <div style={{ fontSize: '0.85em', opacity: 0.8 }}>
-                {data.errorMessage}
-              </div>
-            )}
             {warnings.length > 0 && (
               <ul style={{ margin: '4px 0 0', paddingLeft: 16 }}>
                 {warnings.map((warning, index) => (
-                  <li key={index}>{warningLine(warning)}</li>
+                  <li key={index}>{changeWarningMessage(warning)}</li>
                 ))}
               </ul>
             )}
+            <UserActionOutcomeDetails event={data} />
           </div>,
           data.outcome === 'failed'
             ? { variant: 'error', persist: true, action: dismissAction }
