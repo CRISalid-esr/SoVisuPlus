@@ -10,18 +10,28 @@ import {
   isHalDepositEvent,
   isHarvestingResultEvent,
   isHarvestingStateEvent,
+  isUserActionOutcomeEvent,
 } from '@/types/GenericEvent'
+import { changeWarningMessage } from '@/lib/websocket/changeWarningMessages'
+import { UserActionOutcomeDetails } from '@/lib/websocket/UserActionOutcomeDetails'
+import { IconButton } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
+import { SnackbarKey } from 'notistack'
 import { buildWebSocketURL } from '@/lib/websocket/ws-url'
 import * as Lingui from '@lingui/core'
 import { useSearchParams } from 'next/navigation'
 
 const WebSocketListener = () => {
-  const { enqueueSnackbar } = useSnackbar()
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar()
   const { startHarvesting, updateHarvestingStatus, incrementPlatformCount } =
     useStore((state) => state.harvesting)
   const { currentPerspective, connectedUser } = useStore((state) => state.user)
-  const { setListHasChanged, setSelectedDocumentHasChanged, selectedDocument } =
-    useStore((state) => state.document)
+  const {
+    setListHasChanged,
+    setSelectedDocumentHasChanged,
+    selectedDocument,
+    unfreezeSelectedDocument,
+  } = useStore((state) => state.document)
   const { applyDepositEvent } = useStore((state) => state.halDeposit)
 
   // keep fresh values available inside the ws callback
@@ -146,6 +156,85 @@ const WebSocketListener = () => {
       if (isHalDepositEvent(data)) {
         applyDepositEvent(data)
       }
+
+      if (isUserActionOutcomeEvent(data)) {
+        // Outcomes only concern the user who performed the action.
+        const connectedUid = connectedUserRef?.person?.uid
+        if (!connectedUid || data.personUid !== connectedUid) {
+          return
+        }
+
+        if (data.outcome === 'failed') {
+          // No document_updated message follows a failure: the listener
+          // process reset the DB state, this resets the in-store copy.
+          unfreezeSelectedDocument(data.targetUid)
+        }
+
+        const warnings = data.warnings || []
+        if (data.outcome === 'applied' && warnings.length === 0) {
+          // Clean success — the regular document_updated toast covers it.
+          return
+        }
+
+        const labels = data.objectLabels || {}
+        const currentLang = Lingui.i18n.locale as string
+        const selectedLabel =
+          (currentLang && labels[currentLang]) || Object.values(labels)[0] || ''
+
+        const params = new URLSearchParams(searchParams?.toString())
+        params.set(
+          'tab',
+          data.path === 'contributions'
+            ? 'authors'
+            : 'bibliographic_information',
+        )
+
+        const dismissAction = (snackbarId: SnackbarKey) => (
+          <IconButton
+            size='small'
+            color='inherit'
+            onClick={() => closeSnackbar(snackbarId)}
+          >
+            <CloseIcon fontSize='small' />
+          </IconButton>
+        )
+
+        enqueueSnackbar(
+          <div>
+            {data.outcome === 'failed' ? (
+              <Trans id='snackbar_user_action_failed' />
+            ) : (
+              <Trans id='snackbar_user_action_applied_with_warnings' />
+            )}
+            {selectedLabel && (
+              <strong style={{ marginLeft: 6 }}>{selectedLabel}</strong>
+            )}
+            {data.targetType === 'DOCUMENT' && (
+              <a
+                href={`/documents/${data.targetUid}` + '?' + params.toString()}
+                style={{ marginLeft: 8 }}
+              >
+                <Trans id='snackbar_view_document' />
+              </a>
+            )}
+            {warnings.length > 0 && (
+              <ul style={{ margin: '4px 0 0', paddingLeft: 16 }}>
+                {warnings.map((warning, index) => (
+                  <li key={index}>{changeWarningMessage(warning)}</li>
+                ))}
+              </ul>
+            )}
+            <UserActionOutcomeDetails event={data} />
+          </div>,
+          data.outcome === 'failed'
+            ? { variant: 'error', persist: true, action: dismissAction }
+            : {
+                variant: 'warning',
+                autoHideDuration: 30000,
+                action: dismissAction,
+              },
+        )
+      }
     }
 
     return () => ws.close()
@@ -160,6 +249,8 @@ const WebSocketListener = () => {
     selectedDocument,
     applyDepositEvent,
     searchParams,
+    unfreezeSelectedDocument,
+    closeSnackbar,
   ])
 
   return null

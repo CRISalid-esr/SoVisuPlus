@@ -1,6 +1,7 @@
 import { AMQPMessage } from '@/types/AMQPMessage'
 
 import {
+  isChangeEventMessage,
   isDocumentMessage,
   isHarvestingResultEventMessage,
   isHarvestingStateEventMessage,
@@ -14,6 +15,7 @@ import { ResearchUnitWorker } from '@/lib/amqp/workers/ResearchUnitWorker'
 import { DocumentWorker } from '@/lib/amqp/workers/DocumentWorker'
 import { HarvestingStateEventWorker } from '@/lib/amqp/workers/HarvestingStateEventWorker'
 import { HarvestingResultEventWorker } from '@/lib/amqp/workers/HarvestingResultEventWorker'
+import { ChangeEventWorker } from '@/lib/amqp/workers/ChangeEventWorker'
 
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { ResearchUnitDAO } from '@/lib/daos/ResearchUnitDAO'
@@ -52,6 +54,10 @@ export class MessageProcessingWorkerFactory {
 
     if (isHarvestingResultEventMessage(message)) {
       return new HarvestingResultEventWorker(message, new PersonDAO())
+    }
+
+    if (isChangeEventMessage(message)) {
+      return new ChangeEventWorker(message, new DocumentDAO())
     }
 
     throw new Error(

@@ -22,6 +22,9 @@ export class AmqpConnection {
     'event.structures.structure.*.interactive',
     'event.documents.document.*.interactive',
     'event.harvestings.*.*.interactive',
+    // User-action outcomes (change.applied / change.failed) — emitted by the
+    // graph in interactive mode only, hence no batch counterpart below.
+    'event.changes.change.*.interactive',
   ]
   private readonly BATCH_BINDING_KEYS = [
     'event.people.person.*.batch',

@@ -70,6 +70,7 @@ export interface DocumentSlice {
     saveContributions: (
       contributions: ContributionActionParameters[],
     ) => Promise<{ success: boolean }>
+    unfreezeSelectedDocument: (documentUid: string) => void
   }
 }
 
@@ -566,6 +567,45 @@ export const addDocumentSlice: StateCreator<
         }))
         return { success: false }
       }
+    },
+    // Failure path of the pessimistic model: the graph reported the action
+    // failed, so no refreshed document will come back to reset the state —
+    // unfreeze in place so the user can retry immediately.
+    unfreezeSelectedDocument: (documentUid: string) => {
+      set((state) => {
+        const doc = state.document.selectedDocument
+        if (
+          !doc ||
+          doc.uid !== documentUid ||
+          doc.state !== DocumentState.waiting_for_update
+        )
+          return state
+        const updatedDocument = new Document(
+          doc.uid,
+          doc.documentType,
+          doc.oaStatus,
+          doc.publicationDate,
+          doc.publicationDateStart,
+          doc.publicationDateEnd,
+          doc.upwOAStatus,
+          doc.titles,
+          doc.abstracts,
+          doc.subjects,
+          doc.contributions,
+          doc.records,
+          DocumentState.default,
+          doc.journal,
+          doc.volume,
+          doc.issue,
+          doc.pages,
+        )
+        return {
+          document: {
+            ...state.document,
+            selectedDocument: updatedDocument,
+          },
+        }
+      })
     },
     modifyPublicationDate: async (publicationDate: string | null) => {
       try {

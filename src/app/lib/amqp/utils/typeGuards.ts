@@ -4,6 +4,7 @@ import { AMQPDocumentMessage } from '@/types/AMQPDocumentMessage'
 import { AMQPResearchUnitMessage } from '@/types/AMQPResearchUnitMessage'
 import { AMQPHarvestingStateEventMessage } from '@/types/AMQPHarvestingStateEventMessage'
 import { AMQPHarvestingResultEventMessage } from '@/types/AMQPHarvestingResultEventMessage'
+import { AMQPChangeEventMessage } from '@/types/AMQPChangeEventMessage'
 
 export const isPersonMessage = (msg: AMQPMessage): msg is AMQPPersonMessage =>
   msg.type === 'person'
@@ -27,3 +28,7 @@ export const isHarvestingResultEventMessage = (
   msg: AMQPMessage,
 ): msg is AMQPHarvestingResultEventMessage =>
   msg.type === 'harvesting_result_event'
+
+export const isChangeEventMessage = (
+  msg: AMQPMessage,
+): msg is AMQPChangeEventMessage => msg.type === 'change'

@@ -362,3 +362,48 @@ describe('addDocumentSlice - mergeDocuments', () => {
     expect(error).toBeNull()
   })
 })
+
+describe('addDocumentSlice - unfreezeSelectedDocument', () => {
+  let useStore: ReturnType<typeof createTestStore>
+
+  beforeEach(() => {
+    useStore = createTestStore()
+    jest.clearAllMocks()
+  })
+
+  it('resets the selected document state when uid matches and it is waiting', () => {
+    useStore.setState((s) => ({
+      document: {
+        ...s.document,
+        selectedDocument: makeDoc('doc-1', DbDocumentState.waiting_for_update),
+      },
+    }))
+
+    useStore.getState().document.unfreezeSelectedDocument('doc-1')
+
+    expect(useStore.getState().document.selectedDocument?.state).toBe(
+      DbDocumentState.default,
+    )
+  })
+
+  it('does nothing when the uid does not match the selected document', () => {
+    useStore.setState((s) => ({
+      document: {
+        ...s.document,
+        selectedDocument: makeDoc('doc-1', DbDocumentState.waiting_for_update),
+      },
+    }))
+
+    useStore.getState().document.unfreezeSelectedDocument('doc-other')
+
+    expect(useStore.getState().document.selectedDocument?.state).toBe(
+      DbDocumentState.waiting_for_update,
+    )
+  })
+
+  it('does nothing when no document is selected', () => {
+    useStore.getState().document.unfreezeSelectedDocument('doc-1')
+
+    expect(useStore.getState().document.selectedDocument).toBeNull()
+  })
+})

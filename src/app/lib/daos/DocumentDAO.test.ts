@@ -1908,6 +1908,54 @@ describe('DocumentDAO', () => {
     expect(result).toEqual([])
   })
 
+  it('resets waiting_for_update state back to default', async () => {
+    const uids = ['doc-1']
+    ;(mockPrisma.document.updateMany as jest.Mock).mockResolvedValue({
+      count: 1,
+    })
+    ;(mockPrisma.document.findMany as jest.Mock).mockResolvedValue([
+      { uid: 'doc-1', state: DocumentState.default },
+    ])
+
+    const dao = new DocumentDAO()
+    const result = await dao.resetDocumentsWaitingForUpdate(uids)
+
+    expect(mockPrisma.document.updateMany).toHaveBeenCalledWith({
+      where: { uid: { in: uids }, state: DocumentState.waiting_for_update },
+      data: { state: DocumentState.default },
+    })
+    expect(result).toEqual([{ uid: 'doc-1', state: DocumentState.default }])
+  })
+
+  it('returns document titles as labels keyed by language', async () => {
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue({
+      id: 1,
+      uid: 'doc-1',
+      titles: [
+        { id: 1, documentId: 1, language: 'en', value: 'A title' },
+        { id: 2, documentId: 1, language: 'fr', value: 'Un titre' },
+      ],
+    })
+
+    const dao = new DocumentDAO()
+    const labels = await dao.getDocumentLabelsByUid('doc-1')
+
+    expect(mockPrisma.document.findUnique).toHaveBeenCalledWith({
+      where: { uid: 'doc-1' },
+      include: { titles: true },
+    })
+    expect(labels).toEqual({ en: 'A title', fr: 'Un titre' })
+  })
+
+  it('returns empty labels when the document is unknown', async () => {
+    ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue(null)
+
+    const dao = new DocumentDAO()
+    const labels = await dao.getDocumentLabelsByUid('missing-doc')
+
+    expect(labels).toEqual({})
+  })
+
   it('updates document type by uid', async () => {
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue({
       id: 99,

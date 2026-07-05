@@ -26,6 +26,7 @@ describe('Zustand Global Store - useStore with DocumentSlice', () => {
         modifyAbstracts: jest.fn(),
         modifyPublicationDate: jest.fn(),
         saveContributions: jest.fn(),
+        unfreezeSelectedDocument: jest.fn(),
         contributionsTabDirty: false,
         setContributionsTabDirty: jest.fn(),
         listHasChanged: false,
