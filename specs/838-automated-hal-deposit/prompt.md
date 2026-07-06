@@ -525,12 +525,11 @@ Read the values at `facet_counts/facet_fields/authorityInstitution_s`. This is a
 
 THESE and HDR each require one supervisor — a **thesis advisor** for THESE, a **chair of the jury** for HDR. Both are emitted to the same TEI slot, `monogr/authority[@type="supervisor"]` (content = the person's name).
 
-The picker is a **select** whose options are:
+The picker is a **select** whose options are **only** the document's contributors (`Document.contributions`, each a `Contribution { person, roles: LocRelator[] }`) whose `roles` include the relevant relator — `LocRelator.THESIS_ADVISOR` for THESE, `LocRelator.DEGREE_COMMITTEE_MEMBER` for HDR. Contributors without that role are **not** listed.
 
-- The document's **contributors** (`Document.contributions`, each a `Contribution { person, roles: LocRelator[] }`). Contributors that already hold the relevant role are **highlighted and listed first** — `LocRelator.THESIS_ADVISOR` for THESE, `LocRelator.DEGREE_COMMITTEE_MEMBER` for HDR.
-- A special **"Search in HAL"** action option. Choosing it opens the **same HAL profile autocomplete used in the Authors tab** — `HalAuthorAutocomplete` (`src/app/[lang]/documents/[uid]/components/Authors/components/HalAuthorAutocomplete.tsx`) → `/api/hal/authors` → `AureHalAPIClient.searchAuthors()`. Reuse the existing component/route; it already implements the "special action option + result options" select pattern. **Do not build a new search.**
+If **no** contributor holds the relevant role, the options are replaced by a message prompting the user to add a contributor with the relevant role (or tag an existing contributor with it) before a supervisor can be selected.
 
-The selected person — whether an existing contributor or a HAL profile — is stored on `HalDeposit.supervisor` as the **display name**, which is emitted as the `authority[@type="supervisor"]` content. The HAL search is only used to pick the right person; no `idHal` is persisted or emitted in this iteration.
+The selected contributor is stored on `HalDeposit.supervisor` as the **display name**, which is emitted as the `authority[@type="supervisor"]` content. No `idHal` is persisted or emitted in this iteration.
 
 **File upload** (at the bottom of the form):
 
@@ -610,7 +609,7 @@ The form fields that are not already on the `Document` model must be persisted o
 | Conference country             | `conferenceCountry` (string?) — stores the **ISO country code**, not the name      |
 | Institution / issuing body     | `institution` (string?)                                                            |
 | Book title                     | `bookTitle` (string?)                                                               |
-| Supervisor (THESE/HDR)         | `supervisor` (string?) — selected person's display name (emitted as the `authority[@type="supervisor"]` content; no `idHal` stored this iteration) |
+| Supervisor (THESE/HDR)         | `supervisor` (string?) — selected contributor's display name (emitted as the `authority[@type="supervisor"]` content; no `idHal` stored this iteration) |
 
 The **journal is not stored here** — it lives on the `Document` (`document.journal`) and `toHalTEI` reads it directly. License, file source, file type and visibility are **per file** and live on `HalDepositFile`. THESE/HDR titles are not stored either — they come from `Document.titles` and are guarded by the bilingual-title gate.
 
