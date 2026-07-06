@@ -59,11 +59,13 @@ const makeDeposit = (id: number, files: HalDepositFile[]) =>
     'ART',
     ['shs.hisphilso'],
     'en',
-    null,
-    null,
-    null,
-    null,
-    null,
+    null, // conferenceTitle
+    null, // conferenceCity
+    null, // conferenceStartDate
+    null, // conferenceCountry
+    null, // institution
+    null, // bookTitle
+    null, // supervisor
     files,
     new Date(Date.UTC(2026, 5, 24)),
     new Date(Date.UTC(2026, 5, 24)),

@@ -21,17 +21,26 @@ const orgWithRor = () =>
     ['LPTHE'],
     null,
     [],
-    [new AuthorityOrganizationIdentifier('ror' as never, 'https://ror.org/xyz')],
+    [
+      new AuthorityOrganizationIdentifier(
+        'ror' as never,
+        'https://ror.org/xyz',
+      ),
+    ],
   )
 
 const makeArt = ({
   publicationDate = '2024',
   withJournal = true,
   withAffiliation = true,
+  titles = [new Literal('Title', 'en')],
+  type = DocumentType.Article,
 }: {
   publicationDate?: string | null
   withJournal?: boolean
   withAffiliation?: boolean
+  titles?: Literal[]
+  type?: DocumentType
 } = {}): DocumentClass => {
   const person = eligiblePerson()
   const contribution = new Contribution(
@@ -42,13 +51,13 @@ const makeArt = ({
   )
   return new DocumentClass(
     'doc-1',
-    DocumentType.Article,
+    type,
     null,
     publicationDate,
     null,
     null,
     null,
-    [new Literal('Title', 'en')],
+    titles,
     [],
     [],
     [contribution],
@@ -60,16 +69,21 @@ const makeArt = ({
   )
 }
 
+const bilingualTitles = () => [
+  new Literal('English title', 'en'),
+  new Literal('Titre français', 'fr'),
+]
+
 describe('validateDepositEligibility', () => {
   it('accepts a complete ART document + eligible person', () => {
-    expect(validateDepositEligibility(makeArt(), eligiblePerson(), 'ART')).toEqual(
-      { ok: true },
-    )
+    expect(
+      validateDepositEligibility(makeArt(), eligiblePerson(), 'ART'),
+    ).toEqual({ ok: true })
   })
 
-  it('rejects a non-depositable type', () => {
+  it('rejects an unknown / non-depositable type', () => {
     expect(
-      validateDepositEligibility(makeArt(), eligiblePerson(), 'COMM'),
+      validateDepositEligibility(makeArt(), eligiblePerson(), 'NOPE'),
     ).toEqual({ ok: false, reason: 'type_not_depositable' })
   })
 
@@ -141,5 +155,40 @@ describe('validateDepositEligibility', () => {
         'ART',
       ),
     ).toEqual({ ok: false, reason: 'no_hal_affiliation' })
+  })
+
+  it('rejects a THESE/HDR that lacks a bilingual (fr+en) title', () => {
+    for (const type of ['THESE', 'HDR']) {
+      expect(
+        validateDepositEligibility(
+          makeArt({
+            withJournal: false,
+            titles: [new Literal('EN only', 'en')],
+          }),
+          eligiblePerson(),
+          type,
+        ),
+      ).toEqual({ ok: false, reason: 'missing_bilingual_title' })
+    }
+  })
+
+  it('accepts a THESE with both a French and an English title', () => {
+    expect(
+      validateDepositEligibility(
+        makeArt({ withJournal: false, titles: bilingualTitles() }),
+        eligiblePerson(),
+        'THESE',
+      ),
+    ).toEqual({ ok: true })
+  })
+
+  it('does not require a bilingual title for non-thesis types', () => {
+    expect(
+      validateDepositEligibility(
+        makeArt({ withJournal: false, titles: [new Literal('EN only', 'en')] }),
+        eligiblePerson(),
+        'OUV',
+      ),
+    ).toEqual({ ok: true })
   })
 })

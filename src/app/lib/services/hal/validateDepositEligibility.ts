@@ -12,6 +12,7 @@ export type DepositIneligibilityReason =
   | 'missing_identifiers'
   | 'missing_publication_date'
   | 'missing_journal'
+  | 'missing_bilingual_title'
   | 'no_hal_affiliation'
 
 export type DepositEligibility =
@@ -35,19 +36,31 @@ const hasRequiredHalIdentifiers = (
     person.hasIdentifier(PersonIdentifierType.idhals) ||
     person.hasIdentifier(PersonIdentifierType.idhali)
   if (!hasIdhal) return false
-  return allowUnauthenticated || person.hasIdentifier(PersonIdentifierType.hal_login)
+  return (
+    allowUnauthenticated || person.hasIdentifier(PersonIdentifierType.hal_login)
+  )
 }
 
 /** Org identifier types HAL recognises for an affiliation (RNSR/ROR/ISNI/IdRef). */
 const HAL_RECOGNISED_ORG_IDENTIFIERS = new Set(['nns', 'ror', 'isni', 'idref'])
+
+/** HAL requires a thesis/HDR to carry both a French and an English title. */
+const THESIS_TYPES = new Set(['THESE', 'HDR'])
+
+const hasBilingualTitle = (document: Document): boolean => {
+  const hasLang = (lang: string) =>
+    (document.titles ?? []).some(
+      (t) => t.language === lang && !!t.value?.trim(),
+    )
+  return hasLang('fr') && hasLang('en')
+}
 
 const hasHalRecognisedAffiliation = (document: Document): boolean =>
   (document.contributions ?? []).some((contribution) =>
     contribution.affiliations.some((org) =>
       org.identifiers.some(
         (id) =>
-          HAL_RECOGNISED_ORG_IDENTIFIERS.has(id.type) &&
-          !!id.value?.trim(),
+          HAL_RECOGNISED_ORG_IDENTIFIERS.has(id.type) && !!id.value?.trim(),
       ),
     ),
   )
@@ -77,6 +90,10 @@ export const validateDepositEligibility = (
 
   if (halType === 'ART' && !document.journal?.title?.trim()) {
     return { ok: false, reason: 'missing_journal' }
+  }
+
+  if (THESIS_TYPES.has(halType) && !hasBilingualTitle(document)) {
+    return { ok: false, reason: 'missing_bilingual_title' }
   }
 
   if (!hasHalRecognisedAffiliation(document)) {

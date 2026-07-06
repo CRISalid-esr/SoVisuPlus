@@ -28,12 +28,17 @@ export type HalTEIOptions = {
   licenceTarget?: string | null
   /** Attached files (Case 2 / ZIP deposit). Empty/absent ⇒ XML-only notice. */
   files?: HalFileDescriptor[]
-  // Deferred type-specific overrides (stored now, only emitted for non-ART types later).
+  // Type-specific overrides emitted into <monogr> for the non-ART types.
   conferenceTitle?: string | null
   conferenceCity?: string | null
+  /** Partial ISO 8601 (YYYY / YYYY-MM / YYYY-MM-DD) → meeting/date[@type="start"] text. */
+  conferenceStartDate?: string | null
+  /** ISO 3166-1 alpha-2 code → meeting/country/@key. */
   conferenceCountry?: string | null
   institution?: string | null
   bookTitle?: string | null
+  /** THESE thesis advisor / HDR chair of jury → monogr/authority[@type="supervisor"]. */
+  supervisor?: string | null
 }
 
 /**
@@ -186,6 +191,30 @@ export class HalTEIInterchangeService {
     } else if (date) {
       this.patchProductionDate(dom, date)
     }
+
+    // Per-type conditional metadata into <monogr> (guarded so ART output is unchanged).
+    if (options.bookTitle) this.patchBookTitle(dom, options.bookTitle)
+    if (
+      options.conferenceTitle ||
+      options.conferenceStartDate ||
+      options.conferenceCity ||
+      options.conferenceCountry
+    ) {
+      this.patchMeeting(dom, {
+        title: options.conferenceTitle ?? null,
+        startDate: options.conferenceStartDate ?? null,
+        city: options.conferenceCity ?? null,
+        countryCode: options.conferenceCountry ?? null,
+      })
+    }
+    if (options.institution)
+      this.patchMonogrAuthority(dom, 'institution', options.institution)
+    if (options.supervisor)
+      this.patchMonogrAuthority(dom, 'supervisor', options.supervisor)
+    // For a thesis/HDR the publication date is the defense date — emit it as dateDefended
+    // alongside the datePub already produced above.
+    if ((halCode === 'THESE' || halCode === 'HDR') && date)
+      this.patchDefenseDate(dom, date)
 
     if (options.localRef) this.patchLocalRef(dom, options.localRef)
     if (options.files?.length) this.patchFiles(dom, options.files)
@@ -670,7 +699,8 @@ export class HalTEIInterchangeService {
     ) as Element | undefined
     if (edition && !this.hasElementChild(edition)) {
       const editionStmt = edition.parentNode
-      if (editionStmt?.parentNode) editionStmt.parentNode.removeChild(editionStmt)
+      if (editionStmt?.parentNode)
+        editionStmt.parentNode.removeChild(editionStmt)
     }
 
     const pubStmt = xpath.select1(
@@ -679,6 +709,16 @@ export class HalTEIInterchangeService {
     ) as Element | undefined
     if (pubStmt && !this.hasElementChild(pubStmt) && pubStmt.parentNode) {
       pubStmt.parentNode.removeChild(pubStmt)
+    }
+
+    // Drop the skeleton's placeholder <title level="j"/> (and any empty monogr title) when
+    // nothing populated it — e.g. book types emit only title[@level="m"].
+    const monogrTitles = this.selectNodes(
+      dom,
+      "//*[local-name()='monogr']/*[local-name()='title']",
+    )
+    for (const t of monogrTitles) {
+      if (!this.nodeText(t) && t.parentNode) t.parentNode.removeChild(t)
     }
   }
 
@@ -793,6 +833,139 @@ export class HalTEIInterchangeService {
       },
     )
     this.setText(datePub, date)
+  }
+
+  /** XSD child order of `<monogr>` — new children must be inserted at their position. */
+  private static readonly MONOGR_CHILD_ORDER: Readonly<Record<string, number>> =
+    Object.freeze({
+      idno: 0,
+      title: 1,
+      meeting: 2,
+      respStmt: 3,
+      settlement: 4,
+      country: 5,
+      editor: 6,
+      imprint: 7,
+      authority: 8,
+    })
+
+  private monogrRank(el: Node): number {
+    const name = (el as Element).localName ?? el.nodeName
+    return HalTEIInterchangeService.MONOGR_CHILD_ORDER[name] ?? 99
+  }
+
+  /** Insert `el` into `monogr` at its schema-mandated position (HAL rejects out-of-order children). */
+  private insertMonogrChild(monogr: Element, el: Element): void {
+    const rank = this.monogrRank(el)
+    for (let i = 0; i < monogr.childNodes.length; i++) {
+      const child = monogr.childNodes[i]
+      if (child.nodeType !== 1) continue
+      if (this.monogrRank(child) > rank) {
+        monogr.insertBefore(el, child)
+        return
+      }
+    }
+    monogr.appendChild(el)
+  }
+
+  private ensureMonogr(dom: Document): Element {
+    return this.ensureElement(
+      dom,
+      "//*[local-name()='biblStruct']/*[local-name()='monogr']",
+      () => this.createElement(dom, 'monogr'),
+    )
+  }
+
+  /** Related-book title for COUV/OUV → `monogr/title[@level="m"]` (same slot family as journal). */
+  private patchBookTitle(dom: Document, bookTitle: string): void {
+    const monogr = this.ensureMonogr(dom)
+    const existing = xpath.select1(
+      "./*[local-name()='title' and @level='m']",
+      monogr,
+    ) as Element | undefined
+    if (existing) {
+      this.setText(existing, bookTitle)
+      return
+    }
+    const title = this.createElement(dom, 'title')
+    title.setAttribute('level', 'm')
+    this.setText(title, bookTitle)
+    this.insertMonogrChild(monogr, title)
+  }
+
+  /** Conference metadata for COMM/POSTER/PRESCONF → `monogr/meeting` (title, date, settlement, country). */
+  private patchMeeting(
+    dom: Document,
+    opts: {
+      title: string | null
+      startDate: string | null
+      city: string | null
+      countryCode: string | null
+    },
+  ): void {
+    const monogr = this.ensureMonogr(dom)
+    let meeting = xpath.select1("./*[local-name()='meeting']", monogr) as
+      | Element
+      | undefined
+    if (!meeting) {
+      meeting = this.createElement(dom, 'meeting')
+      this.insertMonogrChild(monogr, meeting)
+    }
+    // meeting is built once; append children in their XSD order: title, date, settlement, country.
+    if (opts.title) {
+      const t = this.createElement(dom, 'title')
+      this.setText(t, opts.title)
+      meeting.appendChild(t)
+    }
+    if (opts.startDate) {
+      const d = this.createElement(dom, 'date')
+      d.setAttribute('type', 'start')
+      this.setText(d, opts.startDate)
+      meeting.appendChild(d)
+    }
+    if (opts.city) {
+      const s = this.createElement(dom, 'settlement')
+      this.setText(s, opts.city)
+      meeting.appendChild(s)
+    }
+    if (opts.countryCode) {
+      const c = this.createElement(dom, 'country')
+      c.setAttribute('key', opts.countryCode)
+      meeting.appendChild(c)
+    }
+  }
+
+  /** Issuing body / supervisor → `monogr/authority[@type="institution"|"supervisor"]`. */
+  private patchMonogrAuthority(
+    dom: Document,
+    type: 'institution' | 'supervisor',
+    content: string,
+  ): void {
+    const monogr = this.ensureMonogr(dom)
+    const authority = this.createElement(dom, 'authority')
+    authority.setAttribute('type', type)
+    this.setText(authority, content)
+    this.insertMonogrChild(monogr, authority)
+  }
+
+  /** THESE/HDR defense date → a second `monogr/imprint/date[@type="dateDefended"]`. */
+  private patchDefenseDate(dom: Document, date: string): void {
+    const monogr = this.ensureMonogr(dom)
+    const imprintEl = this.ensureElementWithin(
+      monogr,
+      "./*[local-name()='imprint']",
+      () => this.createElement(dom, 'imprint'),
+    )
+    const dateDefended = this.ensureElementWithin(
+      imprintEl,
+      "./*[local-name()='date' and @type='dateDefended']",
+      () => {
+        const d = this.createElement(dom, 'date')
+        d.setAttribute('type', 'dateDefended')
+        return d
+      },
+    )
+    this.setText(dateDefended, date)
   }
 
   private upsertBiblScope(

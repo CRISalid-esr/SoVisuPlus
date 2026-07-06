@@ -142,6 +142,18 @@ export type AureHalStructureSearchResponse = {
   }
 }
 
+/**
+ * Solr facet response for the `authorityInstitution_s` facet. The facet array
+ * interleaves each value with its integer count: `["Univ A", 42, "Univ B", 7, …]`.
+ */
+export type AureHalInstitutionFacetResponse = {
+  facet_counts?: {
+    facet_fields?: {
+      authorityInstitution_s?: Array<string | number>
+    }
+  }
+}
+
 const AUREHAL_MIN_QUERY_LENGTH = 2
 // Affiliation name suggestions search structures from an imported text where even
 // a single character is meaningful, so structure search allows a 1-char minimum.
@@ -317,6 +329,35 @@ export class AureHalAPIClient {
       'AureHalAPIClient.searchStructures',
     )
     return data?.response?.docs ?? []
+  }
+
+  /**
+   * Search HAL issuing bodies / institutions via the `authorityInstitution_s` Solr facet.
+   * Backs the REPORT institution and THESE/HDR issuing-body autocomplete. The facet array
+   * interleaves value/count pairs, so we keep only the string entries. Returns [] for a
+   * too-short query.
+   */
+  async searchInstitutions(query: string): Promise<string[]> {
+    const normalized = query?.trim() ?? ''
+    if (normalized.length < AUREHAL_MIN_QUERY_LENGTH) return []
+
+    const url = new URL(`${this.AUREHAL_API_BASE_URL}/search/`)
+    url.searchParams.set('q', '*:*')
+    url.searchParams.set('rows', '0')
+    url.searchParams.set('facet', 'true')
+    url.searchParams.set('facet.field', 'authorityInstitution_s')
+    url.searchParams.set('facet.limit', '30')
+    url.searchParams.set('facet.mincount', '1')
+    url.searchParams.set('facet.contains.ignoreCase', 'true')
+    url.searchParams.set('facet.contains', normalized)
+
+    const data = await this.getJson<AureHalInstitutionFacetResponse>(
+      url.toString(),
+      'AureHalAPIClient.searchInstitutions',
+    )
+    const facet = data?.facet_counts?.facet_fields?.authorityInstitution_s ?? []
+    // Keep only the facet values (strings); drop the interleaved integer counts.
+    return facet.filter((entry): entry is string => typeof entry === 'string')
   }
 
   /**

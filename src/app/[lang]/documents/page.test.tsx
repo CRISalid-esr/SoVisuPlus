@@ -432,7 +432,9 @@ describe('DocumentsPage Component', () => {
       })
       expect(mergeBtn).toBeEnabled()
     })
-  })
+    // This MRT-heavy render is slow under full-suite parallel load; the default 5s
+    // timeout flakes even though it passes in ~2.3s in isolation.
+  }, 20000)
 
   describe('missing identifiers warning', () => {
     const originalEnv = process.env

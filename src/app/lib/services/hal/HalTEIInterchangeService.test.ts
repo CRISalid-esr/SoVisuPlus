@@ -484,6 +484,100 @@ describe('HalTEIInterchangeService', () => {
       expect(out).not.toContain('publicationStmt')
     })
 
+    describe('per-type conditional metadata', () => {
+      it('emits the book title as monogr/title[@level="m"] for COUV', () => {
+        const doc = makeDoc(DocumentType.BookChapter)
+        doc.publicationDate = '2016'
+        const out = service.toHalTEI(doc, {
+          halDocumentType: 'COUV',
+          bookTitle: 'Titre ouvrage',
+        })
+        expect(out).toContain('<title level="m">Titre ouvrage</title>')
+        // the skeleton's empty journal title must not linger
+        expect(out).not.toContain('<title level="j"/>')
+        expect(out).not.toContain('<title level="j"></title>')
+      })
+
+      it('emits monogr/meeting with title, start date (text), settlement and country key', () => {
+        const doc = makeDoc(DocumentType.ConferenceArticle)
+        doc.publicationDate = '2016'
+        const out = service.toHalTEI(doc, {
+          halDocumentType: 'COMM',
+          conferenceTitle: 'My Conference',
+          conferenceStartDate: '2016-01',
+          conferenceCity: 'Prague',
+          conferenceCountry: 'CZ',
+        })
+        expect(out).toContain('<meeting>')
+        expect(out).toContain('<title>My Conference</title>')
+        expect(out).toContain('<date type="start">2016-01</date>')
+        expect(out).toContain('<settlement>Prague</settlement>')
+        expect(out).toContain('<country key="CZ"/>')
+        // meeting child order: title < date < settlement < country
+        const m = out.slice(out.indexOf('<meeting>'), out.indexOf('</meeting>'))
+        expect(m.indexOf('<title>')).toBeLessThan(m.indexOf('<date'))
+        expect(m.indexOf('<date')).toBeLessThan(m.indexOf('<settlement>'))
+        expect(m.indexOf('<settlement>')).toBeLessThan(m.indexOf('<country'))
+        // meeting sits before imprint in monogr
+        expect(out.indexOf('<meeting>')).toBeLessThan(out.indexOf('<imprint>'))
+      })
+
+      it('emits monogr/authority[@type="institution"] for REPORT', () => {
+        const doc = makeDoc(DocumentType.ScholarlyPublication)
+        doc.publicationDate = '2016'
+        const out = service.toHalTEI(doc, {
+          halDocumentType: 'REPORT',
+          institution: 'Some University',
+        })
+        expect(out).toContain(
+          '<authority type="institution">Some University</authority>',
+        )
+      })
+
+      it('emits institution + supervisor authorities and dateDefended for THESE', () => {
+        const doc = makeDoc(DocumentType.ScholarlyPublication)
+        doc.publicationDate = '2014-03-26'
+        const out = service.toHalTEI(doc, {
+          halDocumentType: 'THESE',
+          institution: "Université d'appartenance",
+          supervisor: 'Superviseur',
+        })
+        expect(out).toContain(
+          '<authority type="institution">Université d\'appartenance</authority>',
+        )
+        expect(out).toContain(
+          '<authority type="supervisor">Superviseur</authority>',
+        )
+        // institution authority appears before supervisor authority
+        expect(out.indexOf('type="institution"')).toBeLessThan(
+          out.indexOf('type="supervisor"'),
+        )
+        // both datePub and dateDefended are emitted for a thesis
+        expect(out).toContain('<date type="datePub">2014-03-26</date>')
+        expect(out).toContain('<date type="dateDefended">2014-03-26</date>')
+        // authority is the last monogr child (after imprint)
+        expect(out.indexOf('<imprint>')).toBeLessThan(
+          out.indexOf('type="institution"'),
+        )
+      })
+
+      it('leaves ART output free of meeting/authority/book-title elements', () => {
+        const doc = makeDoc(DocumentType.Article)
+        doc.journal = new Journal(
+          'Foundations of Physics',
+          '1234-5678',
+          'Springer',
+          [],
+        )
+        doc.publicationDate = '2001'
+        const out = service.toHalTEI(doc, { halDocumentType: 'ART' })
+        expect(out).not.toContain('<meeting>')
+        expect(out).not.toContain('<authority type="supervisor"')
+        expect(out).not.toContain('type="dateDefended"')
+        expect(out).not.toContain('level="m"')
+      })
+    })
+
     it('keeps biblFull child order: editionStmt before publicationStmt before sourceDesc', () => {
       const out = service.toHalTEI(makeDoc(DocumentType.Article), {
         localRef: 'doc-1',

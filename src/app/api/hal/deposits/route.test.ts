@@ -193,6 +193,54 @@ describe('POST /api/hal/deposits', () => {
     expect(res.status).toBe(400)
   })
 
+  it('rejects when a required conditional field is missing (COUV without book title)', async () => {
+    const res = await POST(
+      buildRequest({ ...basePayload, halDocumentType: 'COUV', files: [] }),
+    )
+    expect(res.status).toBe(400)
+    expect(await res.json()).toMatchObject({
+      reason: 'missing_field:bookTitle',
+    })
+    expect(service.createHalDeposit).not.toHaveBeenCalled()
+  })
+
+  it('rejects a THESE/HDR deposit that has no main file', async () => {
+    const res = await POST(
+      buildRequest({
+        ...basePayload,
+        halDocumentType: 'THESE',
+        institution: 'Univ',
+        supervisor: 'Advisor',
+        files: [],
+      }),
+    )
+    expect(res.status).toBe(400)
+    expect(await res.json()).toMatchObject({ reason: 'missing_main_file' })
+  })
+
+  it('passes conditional metadata through to createHalDeposit', async () => {
+    const payload = {
+      ...basePayload,
+      halDocumentType: 'COMM',
+      conferenceTitle: 'My Conf',
+      conferenceCity: 'Prague',
+      conferenceStartDate: '2016-01',
+      conferenceCountry: 'CZ',
+      files: [],
+    }
+    const res = await POST(buildRequest(payload))
+    expect(res.status).toBe(201)
+    expect(service.createHalDeposit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        halDocumentType: 'COMM',
+        conferenceTitle: 'My Conf',
+        conferenceCity: 'Prague',
+        conferenceStartDate: '2016-01',
+        conferenceCountry: 'CZ',
+      }),
+    )
+  })
+
   it('rolls back the deposit row when a post-creation step throws', async () => {
     service.attachDepositFiles.mockRejectedValue(new Error('db down'))
     const payload = {
