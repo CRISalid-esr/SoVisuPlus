@@ -13,6 +13,11 @@ export interface ParsedStatus {
   comment: string | null
 }
 
+export interface ParsedError {
+  summary: string | null
+  verboseDescription: string | null
+}
+
 /**
  * Parses HAL's SWORD XML responses into plain objects. No I/O, no domain logic — kept separate
  * from `HalSwordClient` so it can be unit-tested against fixtures. Namespace-agnostic via
@@ -50,6 +55,22 @@ export class HalSwordResponseParser {
     return {
       status: this.text(doc, "//*[local-name()='document']/*[local-name()='status']"),
       comment: this.text(doc, "//*[local-name()='document']/*[local-name()='comment']"),
+    }
+  }
+
+  /**
+   * Parse the `<sword:error>` body returned on a rejected deposit (HTTP 4xx). Returns the
+   * human-readable `<summary>` and `<sword:verboseDescription>`; both `null` when the body is not
+   * a SWORD error document (caller falls back to the raw response).
+   */
+  static parseError(xml: string): ParsedError {
+    const doc = this.domParser.parseFromString(xml, 'text/xml')
+    return {
+      summary: this.text(doc, "//*[local-name()='error']/*[local-name()='summary']"),
+      verboseDescription: this.text(
+        doc,
+        "//*[local-name()='verboseDescription']",
+      ),
     }
   }
 

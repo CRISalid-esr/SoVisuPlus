@@ -247,7 +247,7 @@ Accepts a **multipart form** containing both deposit metadata fields and the fil
 - Creates the `HalDeposit` row with `status: pending`, linked to the document and to the **perspective person** (`personUid`, the person the deposit is made on behalf of — see HAL credentials), which the request carries.
 - Writes each uploaded file to `uploads/hal-files/<depositId>/<filename>` and creates the corresponding `HalDepositFile` rows (with their `fileSource`, `fileType`, `visibility`, `license`). At most one file may be flagged `isMain: true`.
 
-Authorization: requires `deposit_hal` permission for the perspective person, plus that person must have both `hal_login` and `idhals`/`idhali` identifiers stored. The endpoint also rejects deposits when: the submitted document type is not `enabled` in `halDepositFormConfig`; the document has no `publicationDate`; no author has a HAL-recognized affiliation; (for `ART`) the document has no `journal`; any `required` field for the type (per `halDepositFormConfig`) is missing; or (for `THESE`/`HDR`) the document does not have both a French and an English title (either one missing), or no main file was uploaded (`requiresMainFile`). The same validations the form runs client-side are re-checked here from the shared config.
+Authorization: requires `deposit_hal` permission for the perspective person, plus that person must have both `hal_login` and `idhals`/`idhali` identifiers stored. The endpoint also rejects deposits when: the submitted document type is not `enabled` in `halDepositFormConfig`; the document has no `publicationDate`; no author has a HAL-recognized affiliation; (for `ART`) the document has no `journal`; any `required` field for the type (per `halDepositFormConfig`) is missing; or (for `THESE`/`HDR`) the document does not have both a French and an English title (either one missing) or both a French and an English set of keywords, or (for `THESE` only) both a French and an English abstract (either one missing), or no main file was uploaded (`requiresMainFile`). The same validations the form runs client-side are re-checked here from the shared config.
 
 #### Status refresh endpoint
 
@@ -376,8 +376,10 @@ The component checks the following conditions before rendering the form. All are
 | Has permission but the perspective person is missing `hal_login` or `idhals`/`idhali`         | Info alert inviting the user to link the HAL account to the institutional account, with a direct link to the account page (`/[lang]/account`). No form is shown.                                                                                                                                                                  |
 | Has permission and HAL identifiers, but document has no `publicationDate`                     | Info alert: "This document has no publication date. Please add one before depositing." with a link to the Bibliographic information tab (`?tab=bibliographic_information`). No form is shown. The deposit creation endpoint also rejects such deposits server-side.                                                               |
 | No author has at least one affiliation with a HAL-recognized identifier (RNSR/ROR/ISNI/IdRef) | Error alert: "No author has an affiliation with a complying HAL identifier. Please go to the Author tab to complete the information." with a link to the Authors tab (`?tab=authors`). No form is shown. Also enforced server-side.                                                                                               |
-| Document type is `ART` but the document has no `journal`                                      | Info alert: "This article has no journal. Please add one before depositing." with a link to the Bibliographic information tab (`?tab=bibliographic_information`). No form is shown. Also rejected server-side. (Journal editing in that tab is a later iteration, so for now this is a hard prerequisite met via harvested data.) |
-| Document type is `THESE`/`HDR` but the document does **not have both** a French and an English title (either one missing) | Info alert inviting the user to add the missing title, with a link to the Bibliographic information tab (`?tab=bibliographic_information`). No form is shown. Also rejected server-side. (HAL requires a bilingual title for these types; the title stays read-only — see the read-only sections below.) |
+
+> The **ART missing-journal rule is _not_ a form-hiding gate.** The form is shown for every document type. The deposit type is **pre-filled from the document's own (CERIF→HAL) type** (falling back to the first enabled type when the mapping is too coarse to be depositable), and the user can refine it. Only when `ART` is the selected type and the document has no `journal` does an inline warning appear (in the Bibliographic information section) and the **Review button is disabled**; for any non-`ART` type there is no journal requirement at all. It is still rejected server-side (`missing_journal`, ART-only). Journal editing in the Bibliographic information tab (with ISSN autocompletion) is a later iteration.
+
+> The **THESE/HDR bilingual-title, bilingual-abstract and bilingual-keywords rules are _not_ form-hiding gates** — unlike the rows above, the form is still shown. They are handled inline in Step 1 (see the read-only Title/abstract section): the form stays visible, an alert appears in the relevant section, and the **Review button is disabled** until both a French and an English title **and** a French and an English set of keywords exist (and, **for `THESE` only**, both a French and an English abstract — an HDR does not require an abstract). They are still rejected server-side (`missing_bilingual_title` / `missing_bilingual_abstract` / `missing_bilingual_keywords`) as a safety net.
 
 If the user doesn't have hal_login or idhals/idhali, the tab should displays following text : `A HAL login or identifier is necessary to perform a submission. If you would like to do so, please complete your HAL information on the MyAccount page.` and a button bellow 'Go to My Account' that opens the MyAccount page.
 Otherwise, the UI behaves according to following description.
@@ -390,21 +392,24 @@ The form is pre-populated from the document's existing data where possible.
 
 **Read-only sections** (data pulled from other tabs, with a link to edit there):
 
-- Title, abstract and date (from the _Bibliographic information_ tab)
-- For `ART`: the journal, read from the document's `journal` (also from the _Bibliographic information_ tab). It is shown read-only and is **not** an editable deposit field — it must already be present on the document (see the missing-journal gate above). Making the journal editable in the Bibliographic information tab (with ISSN autocompletion) is a later iteration.
+- **Bibliographic information** (from the _Bibliographic information_ tab) — a single read-only card showing the title, abstract, **publication date** and **journal title** (the journal row is shown only when the document has one). **For `THESE`/`HDR`, both a French and an English title _and_ a French and an English set of keywords are required; a French and an English abstract are additionally required for `THESE` only (an `HDR` does not require an abstract).** When any required item is missing, the form is **still shown**, but a warning alert appears at the top of this card (inviting the user to add the missing title/abstract/keywords) and the **Review button is disabled** until the required items exist. The deposit endpoint also rejects such deposits server-side (`missing_bilingual_title` / `missing_bilingual_abstract` / `missing_bilingual_keywords`). None of these fields is an editable deposit field — they must already be present on the document. For `ART` the journal is required (see the inline ART missing-journal check above). Making the journal editable in the Bibliographic information tab (with ISSN autocompletion) is a later iteration.
 - Authors and affiliations (from the _Authors_ tab). If any author has affiliations that will be silently dropped at submission time (affiliations with no HAL-recognized identifier), show an inline warning: "Some contributor's affiliations are not recognized by HAL and won't be submitted. Go to Author tab if you want to change it." This is a soft warning — it does not block submission.
 
 Presentation of the read-only sections:
 
 - Each section has a header with a right-aligned **Modify** action button (its label is **bold**) that navigates to the corresponding tab — "Edit in Bibliographic information" → `bibliographic_information`, "Edit in the Authors tab" → `authors`. The body is a neutral grey surface (`#F5F7F6`).
-- The title/abstract section shows the localized title (bold) and a 3-line-clamped abstract, with "No title provided" / "No abstract provided" fallbacks.
+- The **Bibliographic information** section (titled "Bibliographic information") shows the localized title (bold), a 3-line-clamped abstract with "No title provided" / "No abstract provided" fallbacks, then the publication date and — when present — the journal title as small labelled read-only rows.
 - The authors section lists contributors **sorted by rank** (ascending). The **rank value is displayed only when it exists** (not null) — never fabricate a positional index. Each row shows the contributor's display name (bold), their role label(s) in parentheses, and their affiliation name(s). The affiliation name uses the organization's `displayNames[0]` (language-tagged organization names are not yet exposed to the client). When there are no contributors, show "No author provided".
+- The banner explaining that these fields come from the other tabs is rendered as a **borderless, background-less** info alert (icon + message only), not a filled alert box.
+- The form's main heading ("HAL Deposit") is rendered **bold and teal** (`primary.main`).
 
 **Deposit metadata** (editable, submitted with the deposit):
 
+The editable fields below are introduced by a **"Deposit metadata"** section heading, rendered above the document-type selector. The three **section subtitles** — Bibliographic information, Authors, Deposit metadata — share one style: **uppercase**, semibold, letter-spaced, muted colour, with uniform vertical spacing around each (same top/bottom margins). The **file labels** (Main file, Complementary files) are _not_ styled as subtitles — they keep normal casing and the files block is set off by a top divider.
+
 | Field         | Type                      | Required | Notes                                                                                                                                                                                                                                                |
 | ------------- | ------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Document type | Select                    | Yes      | HAL typology (ART, COMM, THESE, HDR, OUV, COUV, REPORT, POSTER, PRESCONF). Pre-populated from the CERIF→HAL mapping but the user can refine it — this is the primary purpose of this field, since the internal CERIF typology is coarser than HAL's. |
+| Document type | Select                    | Yes      | HAL typology (ART, COMM, THESE, HDR, OUV, COUV, REPORT, POSTER). Pre-populated from the CERIF→HAL mapping but the user can refine it — this is the primary purpose of this field, since the internal CERIF typology is coarser than HAL's. |
 | HAL domains   | Multi-select autocomplete | Yes (≥1) | Populated from `halDomainsByCode` generated by `generate_hal_domains.ts` → `src/app/types/HalDomains.ts`. The script fetches the authoritative list from the HAL reference API at build/generate time.                                               |
 | Language      | Select                    | Yes      | Language of the deposited file (not of the metadata). Must be set explicitly by the user; defaults to French.                                                                                                                                        |
 
@@ -412,14 +417,14 @@ Presentation of the read-only sections:
 
 | Document type            | Extra fields                                                                                                                                       |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ART                      | _(none editable)_ — the journal is read from the document; see the missing-journal gate                                                            |
+| ART                      | _(none editable)_ — the journal is read from the document; see the inline ART missing-journal check                                                 |
 | OUV                      | _(none)_ — baseline type; unlike `ART` it does not even require a journal                                                                          |
 | COUV                     | Book title (required)                                                                                                                              |
-| COMM / POSTER / PRESCONF | Conference title, city, starting date, country — **all required**. Starting date supports `YYYY`/`YYYY-MM`/`YYYY-MM-DD` precision via the publication-date control (see the conference fields below) |
+| COMM / POSTER | Conference title, city, starting date, country — **all required**. Starting date supports `YYYY`/`YYYY-MM`/`YYYY-MM-DD` precision via the publication-date control (see the conference fields below) |
 | REPORT                   | Institution (required) — HAL facet autocomplete (see _Per-type field sources_)                                                                     |
-| THESE / HDR              | Issuing body (required) **and** supervisor (required) — main file required + bilingual-title gate (see the THESE/HDR rules below)                   |
+| THESE / HDR              | Issuing body (required) **and** supervisor (required) — main file required + in-form bilingual-title and bilingual-keywords checks, plus a bilingual-abstract check for `THESE` only (see the THESE/HDR rules below)          |
 
-> **Iteration scope.** The first implementation needed to be functional for **ART** (article) end to end. Follow-up issues then complete the conditional metadata and TEI mapping for the remaining types: **OUV**, **COUV**, **COMM/POSTER/PRESCONF**, **REPORT** and **THESE/HDR**. The per-type field rules, sources and TEI mapping for all of these are specified in the sections below.
+> **Iteration scope.** The first implementation was functional for **ART** (article) end to end. The remaining types — **OUV**, **COUV**, **COMM/POSTER**, **REPORT** and **THESE/HDR** — are **now implemented and enabled**, with their conditional metadata and TEI mapping specified in the sections below.
 >
 > The **conference starting date** is captured as a calendar field and the **conference country** as a country-code selector mapped to `meeting/country/@key` (both previously deferred — see _Per-type field sources_). The **THESE/HDR supervisor** (thesis advisor / chair of jury) is mapped to `authority[@type="supervisor"]` (previously deferred — see _THESE/HDR supervisor field_).
 
@@ -429,7 +434,7 @@ The conditional-fields table above is **not** hard-coded in the component. It is
 
 The config does three things:
 
-1. **Limits which HAL document types are depositable.** Not every type is ready in early iterations; a type marked `enabled: false` is omitted from the document-type `Select` and rejected server-side. In the first iteration **only `ART` is enabled**.
+1. **Limits which HAL document types are depositable.** A type marked `enabled: false` is omitted from the document-type `Select` and rejected server-side. **All supported types are now enabled** — `ART`, `OUV`, `COUV`, `COMM`, `POSTER`, `REPORT`, `THESE` and `HDR`; the flag remains so a type can be held back for QA with a one-line change.
 2. **Declares the type-specific fields and whether each is required or optional.** The base fields (document type, ≥1 domain, language, and — when a main file is attached — its license) are always present and are not part of this per-type map.
 3. **Flags type-level requirements that are not a single field** — currently whether the type requires a main file (`requiresMainFile`, true for THESE/HDR). The form and the server validation both read this flag.
 
@@ -445,7 +450,7 @@ export type HalFieldKey =
   | 'bookTitle'
   | 'supervisor'
 // 'journalName' is intentionally absent — the journal is read from the document, not entered here
-// THESE/HDR titles are not fields either — a bilingual-title gate enforces them (see gates table)
+// THESE/HDR titles are not fields either — an inline bilingual-title check enforces them (Step 1)
 
 export type HalDepositTypeConfig = {
   enabled: boolean
@@ -458,10 +463,10 @@ export const halDepositFormConfig: Record<
   HalDepositTypeConfig
 > = {
   ART: { enabled: true, fields: {} },
-  OUV: { enabled: false, fields: {} },
-  COUV: { enabled: false, fields: { bookTitle: 'required' } },
+  OUV: { enabled: true, fields: {} },
+  COUV: { enabled: true, fields: { bookTitle: 'required' } },
   COMM: {
-    enabled: false,
+    enabled: true,
     fields: {
       conferenceTitle: 'required',
       conferenceCity: 'required',
@@ -470,7 +475,7 @@ export const halDepositFormConfig: Record<
     },
   },
   POSTER: {
-    enabled: false,
+    enabled: true,
     fields: {
       conferenceTitle: 'required',
       conferenceCity: 'required',
@@ -478,25 +483,16 @@ export const halDepositFormConfig: Record<
       conferenceCountry: 'required',
     },
   },
-  PRESCONF: {
-    enabled: false,
-    fields: {
-      conferenceTitle: 'required',
-      conferenceCity: 'required',
-      conferenceStartDate: 'required',
-      conferenceCountry: 'required',
-    },
-  },
-  REPORT: { enabled: false, fields: { institution: 'required' } },
+  REPORT: { enabled: true, fields: { institution: 'required' } },
   // THESE/HDR: the shared `supervisor` field is labelled per type — thesis advisor for THESE,
   // chair of jury for HDR (see the THESE/HDR supervisor field section).
   THESE: {
-    enabled: false,
+    enabled: true,
     requiresMainFile: true,
     fields: { institution: 'required', supervisor: 'required' },
   },
   HDR: {
-    enabled: false,
+    enabled: true,
     requiresMainFile: true,
     fields: { institution: 'required', supervisor: 'required' },
   },
@@ -509,9 +505,9 @@ The module also exposes small helpers derived from the map (e.g. `enabledHalDocu
 
 Some conditional fields are not plain free-text inputs:
 
-**Conference start date** (COMM / POSTER / PRESCONF). Supports **partial precision** — `YYYY`, `YYYY-MM` or `YYYY-MM-DD` — exactly like the document publication date. Reuse the existing publication-date control `PublicationDate.tsx` (`src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx`), a year→month→day stepper, or extract its self-contained precision logic into a shared component. Build on the existing utilities in `src/app/utils/publicationDate.ts` (`DatePrecision`, `parsePublicationDate`, `serializePublicationDate`, `formatPublicationDate`) — do not invent a new date format. The value is stored as the partial ISO string on `HalDeposit.conferenceStartDate` and emitted as the **text content** of `meeting/date[@type="start"]` (e.g. `<date type="start">2024-06</date>`), consistent with how the publication `datePub` is emitted.
+**Conference start date** (COMM / POSTER). Supports **partial precision** — `YYYY`, `YYYY-MM` or `YYYY-MM-DD` — exactly like the document publication date. Reuse the existing publication-date control `PublicationDate.tsx` (`src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx`), a year→month→day stepper, or extract its self-contained precision logic into a shared component. Build on the existing utilities in `src/app/utils/publicationDate.ts` (`DatePrecision`, `parsePublicationDate`, `serializePublicationDate`, `formatPublicationDate`) — do not invent a new date format. The value is stored as the partial ISO string on `HalDeposit.conferenceStartDate` and emitted as the **text content** of `meeting/date[@type="start"]` (e.g. `<date type="start">2024-06</date>`), consistent with how the publication `datePub` is emitted.
 
-**Country selector** (COMM / POSTER / PRESCONF). Backed by a static, hand-authored TypeScript module (e.g. `src/app/types/HalCountries.ts`) that lists each country's **ISO code** and its **English and French** display names, so the picker can label options in either supported locale. There is no runtime API call — the list is not expected to change. Only the **code** is written to the TEI (`meeting/country/@key`); the name is UI-only. (This may later be replaced by a generated module, following the `generate_hal_domains.ts` → `src/app/types/HalDomains.ts` precedent.)
+**Country selector** (COMM / POSTER). Backed by a static, hand-authored TypeScript module (e.g. `src/app/types/HalCountries.ts`) that lists each country's **ISO code** and its **English and French** display names, so the picker can label options in either supported locale. There is no runtime API call — the list is not expected to change. Only the **code** is written to the TEI (`meeting/country/@key`); the name is UI-only. (This may later be replaced by a generated module, following the `generate_hal_domains.ts` → `src/app/types/HalDomains.ts` precedent.)
 
 **Institution autocomplete** (REPORT institution **and** THESE/HDR issuing body — same field, same source). Distinct from the affiliation autocomplete used in the Authors tab (`HalStructureAutocomplete` → `/ref/structure/`). Options come from the HAL facet search, with the user input substituted for `[input]`:
 
@@ -611,7 +607,7 @@ The form fields that are not already on the `Document` model must be persisted o
 | Book title                     | `bookTitle` (string?)                                                               |
 | Supervisor (THESE/HDR)         | `supervisor` (string?) — selected contributor's display name (emitted as the `authority[@type="supervisor"]` content; no `idHal` stored this iteration) |
 
-The **journal is not stored here** — it lives on the `Document` (`document.journal`) and `toHalTEI` reads it directly. License, file source, file type and visibility are **per file** and live on `HalDepositFile`. THESE/HDR titles are not stored either — they come from `Document.titles` and are guarded by the bilingual-title gate.
+The **journal is not stored here** — it lives on the `Document` (`document.journal`) and `toHalTEI` reads it directly. License, file source, file type and visibility are **per file** and live on `HalDepositFile`. THESE/HDR titles are not stored either — they come from `Document.titles` and are guarded by the inline bilingual-title check.
 
 `HalTEIInterchangeService.toHalTEI()` will need to be extended to accept these deposit-specific overrides in addition to the base `DocumentClass`. `HalTEIOptions` (currently `{ domains, language, halDocumentType }`) is widened to carry `conferenceTitle`, `conferenceCity`, `conferenceStartDate`, `conferenceCountry`, `institution`, `bookTitle`, `supervisor`, and the per-file descriptors (source, type, visibility, license — see below). The journal is **not** an option — it already comes from `document.journal`.
 

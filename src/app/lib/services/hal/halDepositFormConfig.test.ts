@@ -1,4 +1,6 @@
+import { DocumentType } from '@prisma/client'
 import {
+  defaultHalDocumentType,
   enabledHalDocumentTypes,
   fieldsForType,
   halDepositFormConfig,
@@ -19,7 +21,6 @@ describe('halDepositFormConfig', () => {
         'HDR',
         'OUV',
         'POSTER',
-        'PRESCONF',
         'REPORT',
         'THESE',
       ].sort(),
@@ -40,8 +41,8 @@ describe('halDepositFormConfig', () => {
     expect(requiredFieldsForType('ART')).toEqual([])
   })
 
-  it('requires all four conference fields for COMM/POSTER/PRESCONF', () => {
-    for (const type of ['COMM', 'POSTER', 'PRESCONF'] as const) {
+  it('requires all four conference fields for COMM/POSTER', () => {
+    for (const type of ['COMM', 'POSTER'] as const) {
       expect(requiredFieldsForType(type).sort()).toEqual(
         [
           'conferenceCity',
@@ -86,6 +87,21 @@ describe('halDepositFormConfig', () => {
     expect(validateConditionalFields('ART', {})).toEqual([])
   })
 
+  it('pre-fills the deposit type from the document type when it maps to a depositable type', () => {
+    expect(defaultHalDocumentType(DocumentType.Article)).toBe('ART')
+    expect(defaultHalDocumentType(DocumentType.JournalArticle)).toBe('ART')
+    expect(defaultHalDocumentType(DocumentType.ConferenceArticle)).toBe('COMM')
+    expect(defaultHalDocumentType(DocumentType.Presentation)).toBe('COMM')
+    expect(defaultHalDocumentType(DocumentType.Book)).toBe('OUV')
+    expect(defaultHalDocumentType(DocumentType.BookChapter)).toBe('COUV')
+  })
+
+  it('falls back to the first enabled type when the mapped type is not depositable', () => {
+    // ScholarlyPublication → UNDEFINED, Proceedings → PROCEEDINGS: neither is depositable.
+    expect(defaultHalDocumentType(DocumentType.ScholarlyPublication)).toBe('ART')
+    expect(defaultHalDocumentType(DocumentType.Proceedings)).toBe('ART')
+  })
+
   it('covers every HAL document type in the config map', () => {
     expect(Object.keys(halDepositFormConfig).sort()).toEqual(
       [
@@ -95,7 +111,6 @@ describe('halDepositFormConfig', () => {
         'HDR',
         'OUV',
         'POSTER',
-        'PRESCONF',
         'REPORT',
         'THESE',
       ].sort(),

@@ -13,6 +13,8 @@ export type DepositIneligibilityReason =
   | 'missing_publication_date'
   | 'missing_journal'
   | 'missing_bilingual_title'
+  | 'missing_bilingual_abstract'
+  | 'missing_bilingual_keywords'
   | 'no_hal_affiliation'
 
 export type DepositEligibility =
@@ -44,15 +46,39 @@ const hasRequiredHalIdentifiers = (
 /** Org identifier types HAL recognises for an affiliation (RNSR/ROR/ISNI/IdRef). */
 const HAL_RECOGNISED_ORG_IDENTIFIERS = new Set(['nns', 'ror', 'isni', 'idref'])
 
-/** HAL requires a thesis/HDR to carry both a French and an English title. */
+/** HAL requires a thesis/HDR to carry a bilingual (fr+en) title and keywords. */
 const THESIS_TYPES = new Set(['THESE', 'HDR'])
 
-const hasBilingualTitle = (document: Document): boolean => {
+/** A bilingual (fr+en) abstract is mandatory for a THESE, but not for an HDR. */
+const ABSTRACT_REQUIRED_TYPES = new Set(['THESE'])
+
+const hasBilingual = (
+  entries: { language: string; value?: string | null }[] | undefined,
+): boolean => {
   const hasLang = (lang: string) =>
-    (document.titles ?? []).some(
-      (t) => t.language === lang && !!t.value?.trim(),
-    )
+    (entries ?? []).some((e) => e.language === lang && !!e.value?.trim())
   return hasLang('fr') && hasLang('en')
+}
+
+const hasBilingualTitle = (document: Document): boolean =>
+  hasBilingual(document.titles)
+
+const hasBilingualAbstract = (document: Document): boolean =>
+  hasBilingual(document.abstracts)
+
+/**
+ * HAL requires a thesis/HDR to carry bilingual keywords: at least one subject preferred label in
+ * French and at least one in English. Keywords come from the document subjects (`Concept` labels).
+ */
+const hasBilingualKeywords = (document: Document): boolean => {
+  const langs = new Set(
+    (document.subjects ?? []).flatMap((subject) =>
+      subject.prefLabels
+        .filter((label) => label.value?.trim())
+        .map((label) => label.language),
+    ),
+  )
+  return langs.has('fr') && langs.has('en')
 }
 
 const hasHalRecognisedAffiliation = (document: Document): boolean =>
@@ -94,6 +120,14 @@ export const validateDepositEligibility = (
 
   if (THESIS_TYPES.has(halType) && !hasBilingualTitle(document)) {
     return { ok: false, reason: 'missing_bilingual_title' }
+  }
+
+  if (ABSTRACT_REQUIRED_TYPES.has(halType) && !hasBilingualAbstract(document)) {
+    return { ok: false, reason: 'missing_bilingual_abstract' }
+  }
+
+  if (THESIS_TYPES.has(halType) && !hasBilingualKeywords(document)) {
+    return { ok: false, reason: 'missing_bilingual_keywords' }
   }
 
   if (!hasHalRecognisedAffiliation(document)) {

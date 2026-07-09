@@ -1,7 +1,7 @@
 /**
  * Static ISO 3166-1 alpha-2 country list with English and French display names.
  *
- * Backs the conference country selector for COMM/POSTER/PRESCONF deposits. Only the `code`
+ * Backs the conference country selector for COMM/POSTER deposits. Only the `code`
  * is written to the TEI (`meeting/country/@key`); the localized name is UI-only. There is no
  * runtime API call — the list is not expected to change. (It may later be replaced by a
  * generated module, following the generate_hal_domains.ts precedent.)

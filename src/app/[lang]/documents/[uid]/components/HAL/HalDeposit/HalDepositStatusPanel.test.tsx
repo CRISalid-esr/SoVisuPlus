@@ -73,6 +73,40 @@ describe('HalDepositStatusPanel', () => {
     expect(
       screen.getByText('hal_deposit_status_failed_title'),
     ).toBeInTheDocument()
-    expect(screen.getByText('invalid TEI')).toBeInTheDocument()
+    expect(screen.getByText(/invalid TEI/)).toBeInTheDocument()
+  })
+
+  it('renders a nested verbose description as sub-bullets with HTML leaves', () => {
+    const { container } = renderPanel(
+      deposit({
+        status: 'error',
+        lastError:
+          'Some parameters were not understood\n{"group":{"nested-key":"<b>bold</b>"}}',
+      }),
+    )
+
+    // The branch key and the nested leaf key both appear.
+    expect(screen.getByText('group:')).toBeInTheDocument()
+    expect(screen.getByText('nested-key:')).toBeInTheDocument()
+
+    // The list is nested: an <li> contains a further <ul>.
+    expect(container.querySelector('li ul')).not.toBeNull()
+
+    // The leaf HTML is rendered, not escaped.
+    expect(container.querySelector('b')?.textContent).toBe('bold')
+  })
+
+  it('hardens links in HAL messages to open safely in a new tab', () => {
+    const { container } = renderPanel(
+      deposit({
+        status: 'error',
+        lastError:
+          'Duplicate\n{"duplicate-entry":"See <a href=\\"https://hal.science/x\\">record</a>"}',
+      }),
+    )
+    const link = container.querySelector('a')
+    expect(link).toHaveAttribute('href', 'https://hal.science/x')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
 })

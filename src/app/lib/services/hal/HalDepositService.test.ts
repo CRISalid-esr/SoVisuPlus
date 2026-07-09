@@ -159,6 +159,26 @@ describe('HalDepositService.processDuePendingDeposits', () => {
     expect(m.deposits.registerFailure).not.toHaveBeenCalled()
   })
 
+  it('surfaces the HAL summary and verbose description on a rejected deposit', async () => {
+    const m = buildMocks()
+    m.deposits.findDuePending.mockResolvedValue([makeDeposit()])
+    m.sword.deposit.mockResolvedValue({
+      status: 400,
+      body: `<?xml version="1.0" encoding="utf-8"?>
+<sword:error xmlns:sword="http://purl.org/net/sword/error/" xmlns="http://www.w3.org/2005/Atom">
+  <summary>Some parameters sent with the request were not understood</summary>
+  <sword:verboseDescription>{"duplicate-entry":"halshs-00654062"}</sword:verboseDescription>
+</sword:error>`,
+    })
+
+    await buildService(m).processDuePendingDeposits(NOW)
+
+    expect(m.deposits.markError).toHaveBeenCalledWith(
+      1,
+      'Some parameters sent with the request were not understood\n{"duplicate-entry":"halshs-00654062"}',
+    )
+  })
+
   it('treats a thrown network error as retryable', async () => {
     const m = buildMocks()
     m.deposits.findDuePending.mockResolvedValue([makeDeposit()])

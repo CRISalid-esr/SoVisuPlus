@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Trans } from '@lingui/react/macro'
 import { t } from '@lingui/core/macro'
 import { useLingui } from '@lingui/react'
@@ -32,6 +32,7 @@ import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { isPerson } from '@/types/Person'
 import {
+  defaultHalDocumentType,
   enabledHalDocumentTypes,
   fieldsForType,
   isHalDocumentType,
@@ -43,9 +44,11 @@ import {
 import { halDomainsByCode } from '@/types/HalDomains'
 import { halCountries, countryLabel } from '@/types/HalCountries'
 import { LocRelator } from '@/types/LocRelator'
+import { formatPublicationDate } from '@/utils/publicationDate'
 import PartialDateField from './PartialDateField'
 import HalInstitutionAutocomplete from './HalInstitutionAutocomplete'
 import {
+  HAL_DOCUMENT_TYPE_OPTIONS,
   LANGUAGE_OPTIONS,
   LICENSE_OPTIONS,
   FILE_SOURCE_OPTIONS,
@@ -61,6 +64,14 @@ import { AttachedFileRow, AttachedFile } from './AttachedFileRow'
 type Step = 'form' | 'review'
 
 const DOMAIN_OPTIONS = Object.values(halDomainsByCode)
+
+// Shared style for the form's section subtitles (Bibliographic information, Authors, Deposit
+// metadata): uppercase, semibold, letter-spaced. (File labels are intentionally not subtitles.)
+const SUBTITLE_SX = {
+  fontWeight: 600,
+  letterSpacing: '0.05em',
+  textTransform: 'uppercase' as const,
+}
 
 export default function HalDeposit() {
   const router = useRouter()
@@ -108,6 +119,16 @@ export default function HalDeposit() {
   useEffect(() => {
     if (uid) fetchLatestDeposit(uid)
   }, [uid, fetchLatestDeposit])
+
+  // Pre-fill the deposit type from the document's own (CERIF→HAL) type, once per document. The
+  // ref guard keeps a later manual change from being overwritten on unrelated store updates.
+  const typeInitUidRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (selectedDocument && typeInitUidRef.current !== selectedDocument.uid) {
+      typeInitUidRef.current = selectedDocument.uid
+      setDocumentType(defaultHalDocumentType(selectedDocument.documentType))
+    }
+  }, [selectedDocument])
 
   const deposit = uid ? byDocument[uid] : null
 
@@ -195,35 +216,41 @@ export default function HalDeposit() {
     )
   }
 
-  if (documentType === 'ART' && !selectedDocument.journal?.title) {
-    return (
-      <GateAlert
-        message={t`hal_deposit_gate_no_journal`}
-        actionLabel={t`hal_deposit_gate_go_biblio`}
-        onAction={() => navigateToTab('bibliographic_information')}
-      />
-    )
-  }
+  // ART requires a journal. Only ART is affected — other types never require one, so the form is
+  // shown regardless of type; when ART is selected without a journal, we show an inline alert (near
+  // the type selector) and disable the Review button instead of hiding the whole form.
+  const journalMissing =
+    documentType === 'ART' && !selectedDocument.journal?.title
 
   // At least one contributor must carry a HAL-recognised affiliation identifier.
   // Surfaced inline in the authors section (not as a full-page gate) and gates the
   // Review button, so the form stays visible while the user fixes it in the Authors tab.
   const hasIdentifiedAffiliation = hasHalRecognisedAffiliation(selectedDocument)
 
-  // THESE/HDR require both a French and an English title (HAL bilingual-title rule).
+  // THESE/HDR require a bilingual (fr+en) title and keywords; a bilingual abstract is required for a
+  // THESE only, not an HDR. Rather than hiding the form, we show it with the Review button disabled
+  // and an inline alert in the title/résumé section (below).
   const isThesisType = documentType === 'THESE' || documentType === 'HDR'
   const hasBilingualTitle = ['fr', 'en'].every((l) =>
     selectedDocument.titles.some((tl) => tl.language === l && tl.value?.trim()),
   )
-  if (isThesisType && !hasBilingualTitle) {
-    return (
-      <GateAlert
-        message={t`hal_deposit_gate_missing_bilingual_title`}
-        actionLabel={t`hal_deposit_gate_go_biblio`}
-        onAction={() => navigateToTab('bibliographic_information')}
-      />
-    )
-  }
+  const hasBilingualAbstract = ['fr', 'en'].every((l) =>
+    selectedDocument.abstracts.some(
+      (a) => a.language === l && a.value?.trim(),
+    ),
+  )
+  const bilingualTitleMissing = isThesisType && !hasBilingualTitle
+  const bilingualAbstractMissing =
+    documentType === 'THESE' && !hasBilingualAbstract
+
+  // THESE/HDR also require bilingual keywords: at least one French and one English subject label.
+  const keywordLangs = new Set(
+    (selectedDocument.subjects ?? []).flatMap((s) =>
+      s.prefLabels.filter((l) => l.value?.trim()).map((l) => l.language),
+    ),
+  )
+  const bilingualKeywordsMissing =
+    isThesisType && !(keywordLangs.has('fr') && keywordLangs.has('en'))
 
   // ─── Soft warning: affiliations that will be dropped ───────────────────────
   const hasDroppedAffiliations = selectedDocument.contributions?.some((c) =>
@@ -267,7 +294,11 @@ export default function HalDeposit() {
     domains.length > 0 &&
     (!mainFile || !!mainFile.license) &&
     missingConditional.length === 0 &&
-    (!mainFileRequired || !!mainFile)
+    (!mainFileRequired || !!mainFile) &&
+    !bilingualTitleMissing &&
+    !bilingualAbstractMissing &&
+    !bilingualKeywordsMissing &&
+    !journalMissing
 
   const handleSubmit = async () => {
     if (!valid || !uid || !perspectiveUid) return
@@ -348,7 +379,7 @@ export default function HalDeposit() {
         <ReviewRow label={t`hal_deposit_field_title`} value={title} />
         <ReviewRow
           label={t`hal_deposit_field_document_type`}
-          value={documentType}
+          value={renderLabel(labelOf(HAL_DOCUMENT_TYPE_OPTIONS, documentType))}
         />
         <ReviewRow
           label={t`hal_deposit_field_language`}
@@ -441,17 +472,42 @@ export default function HalDeposit() {
   // ─── Form step ─────────────────────────────────────────────────────────────
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant='h6' gutterBottom>
+      <Typography
+        variant='h6'
+        gutterBottom
+        sx={{ fontWeight: 700, color: 'primary.main' }}
+      >
         <Trans>hal_deposit_form_heading</Trans>
       </Typography>
 
-      <Alert severity='info' sx={{ mb: 2 }}>
+      <Alert
+        severity='info'
+        sx={{ mb: 2, bgcolor: 'transparent', border: 'none', px: 0, py: 0 }}
+      >
         <Trans>hal_deposit_form_metadata_note</Trans>
       </Alert>
 
+      {bilingualKeywordsMissing && (
+        <Alert
+          severity='warning'
+          sx={{ mb: 2 }}
+          action={
+            <Button
+              size='small'
+              sx={{ textTransform: 'none', fontWeight: 600 }}
+              onClick={() => navigateToTab('keywords')}
+            >
+              <Trans>hal_deposit_modify_in_keywords</Trans>
+            </Button>
+          }
+        >
+          <Trans>hal_deposit_gate_missing_bilingual_keywords</Trans>
+        </Alert>
+      )}
+
       {/* Read-only metadata pulled from other tabs */}
       <Section
-        title={t`hal_deposit_section_title_abstract`}
+        title={t`hal_deposit_section_bibliographic`}
         action={
           <Button
             size='small'
@@ -462,6 +518,21 @@ export default function HalDeposit() {
           </Button>
         }
       >
+        {bilingualTitleMissing && (
+          <Alert severity='warning' sx={{ mb: 1 }}>
+            <Trans>hal_deposit_gate_missing_bilingual_title</Trans>
+          </Alert>
+        )}
+        {bilingualAbstractMissing && (
+          <Alert severity='warning' sx={{ mb: 1 }}>
+            <Trans>hal_deposit_gate_missing_bilingual_abstract</Trans>
+          </Alert>
+        )}
+        {journalMissing && (
+          <Alert severity='warning' sx={{ mb: 1 }}>
+            <Trans>hal_deposit_gate_no_journal</Trans>
+          </Alert>
+        )}
         <Paper
           variant='outlined'
           sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F7F6' }}
@@ -481,6 +552,31 @@ export default function HalDeposit() {
           >
             {abstract || <Trans>hal_deposit_no_abstract</Trans>}
           </Typography>
+
+          <Box sx={{ mt: 1.5, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            <Typography variant='body2'>
+              <Typography component='span' variant='caption' color='text.secondary'>
+                <Trans>hal_deposit_field_publication_date</Trans>
+              </Typography>
+              {': '}
+              {selectedDocument.publicationDate
+                ? formatPublicationDate(selectedDocument.publicationDate, lang)
+                : '—'}
+            </Typography>
+            {selectedDocument.journal?.title && (
+              <Typography variant='body2'>
+                <Typography
+                  component='span'
+                  variant='caption'
+                  color='text.secondary'
+                >
+                  <Trans>hal_deposit_field_journal</Trans>
+                </Typography>
+                {': '}
+                {selectedDocument.journal.title}
+              </Typography>
+            )}
+          </Box>
         </Paper>
       </Section>
 
@@ -496,15 +592,15 @@ export default function HalDeposit() {
           </Button>
         }
       >
+        {!hasIdentifiedAffiliation && (
+          <Alert severity='error' sx={{ mb: 1 }}>
+            <Trans>hal_deposit_gate_no_affiliation</Trans>
+          </Alert>
+        )}
         <Paper
           variant='outlined'
           sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F7F6' }}
         >
-          {!hasIdentifiedAffiliation && (
-            <Alert severity='error' sx={{ mb: 1.5 }}>
-              <Trans>hal_deposit_gate_no_affiliation</Trans>
-            </Alert>
-          )}
           {sortedContributions.length === 0 ? (
             <Typography variant='body2' color='text.secondary'>
               <Trans>hal_deposit_no_authors</Trans>
@@ -552,6 +648,14 @@ export default function HalDeposit() {
         </Alert>
       )}
 
+      <Typography
+        variant='subtitle2'
+        color='text.secondary'
+        sx={{ ...SUBTITLE_SX, mt: 3, mb: 3 }}
+      >
+        <Trans>hal_deposit_section_metadata</Trans>
+      </Typography>
+
       <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel>{`${t`hal_deposit_field_document_type`} *`}</InputLabel>
         <Select
@@ -561,7 +665,7 @@ export default function HalDeposit() {
         >
           {enabledHalDocumentTypes().map((typ) => (
             <MenuItem key={typ} value={typ}>
-              {typ}
+              {renderLabel(labelOf(HAL_DOCUMENT_TYPE_OPTIONS, typ))}
             </MenuItem>
           ))}
         </Select>
@@ -712,8 +816,14 @@ export default function HalDeposit() {
       <Divider sx={{ my: 2 }} />
 
       <Typography sx={{ fontWeight: 500, mb: 1 }}>
-        <Trans>hal_deposit_main_file_heading</Trans>
-        {mainFileRequired && ' *'}
+        {mainFileRequired ? (
+          <>
+            <Trans>hal_deposit_main_file_heading_required</Trans>
+            {' *'}
+          </>
+        ) : (
+          <Trans>hal_deposit_main_file_heading</Trans>
+        )}
       </Typography>
       <AttachedFileRow
         accept='application/pdf'
@@ -836,7 +946,7 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <Box sx={{ mb: 2 }}>
+    <Box sx={{ mt: 2, mb: 2 }}>
       <Box
         sx={{
           display: 'flex',
@@ -845,11 +955,7 @@ function Section({
           mb: 1,
         }}
       >
-        <Typography
-          variant='subtitle2'
-          color='text.secondary'
-          sx={{ fontWeight: 600, letterSpacing: '0.05em' }}
-        >
+        <Typography variant='subtitle2' color='text.secondary' sx={SUBTITLE_SX}>
           {title}
         </Typography>
         {action}

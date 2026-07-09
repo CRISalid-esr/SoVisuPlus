@@ -5,6 +5,7 @@ import path from 'node:path'
 import { HalTEIInterchangeService } from '@/lib/services/hal/HalTEIInterchangeService'
 import { DocumentType, Document as DocumentClass } from '@/types/Document'
 import { Literal } from '@/types/Literal'
+import { Concept } from '@/types/Concept'
 import { Journal } from '@/types/Journal'
 import { Contribution } from '@/types/Contribution'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
@@ -181,6 +182,48 @@ describe('HalTEIInterchangeService', () => {
       // doctype
       expect(out).toContain('scheme="halTypology"')
       expect(out).toContain('n="ART"')
+    })
+
+    it('emits fr+en subject keywords for a THESE (other languages dropped)', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.subjects = [
+        new Concept('c-1', [
+          new Literal('mécanique quantique', 'fr'),
+          new Literal('quantum mechanics', 'en'),
+          new Literal('Quantenmechanik', 'de'),
+        ]),
+      ]
+
+      const out = service.toHalTEI(doc, { halDocumentType: 'THESE' })
+
+      expect(out).toContain('<keywords scheme="author">')
+      expect(out).toContain('<term xml:lang="fr">mécanique quantique</term>')
+      expect(out).toContain('<term xml:lang="en">quantum mechanics</term>')
+      expect(out).not.toContain('Quantenmechanik')
+    })
+
+    it('emits one term per subject for non-thesis types (fr preferred, en fallback)', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.subjects = [
+        new Concept('c-fr', [
+          new Literal('physique', 'fr'),
+          new Literal('physics', 'en'),
+        ]),
+        new Concept('c-en', [new Literal('astronomy', 'en')]),
+      ]
+
+      const out = service.toHalTEI(doc)
+
+      // French subject → French term only (English preferred label dropped).
+      expect(out).toContain('<term xml:lang="fr">physique</term>')
+      expect(out).not.toContain('physics')
+      // English-only subject → English term as fallback.
+      expect(out).toContain('<term xml:lang="en">astronomy</term>')
+    })
+
+    it('emits no keywords element when the document has no subjects', () => {
+      const out = service.toHalTEI(makeDoc(DocumentType.Article))
+      expect(out).not.toContain('<keywords')
     })
 
     it('writes monogr journal title + imprint volume/issue/pages/datePub when journal is provided', () => {
@@ -419,7 +462,7 @@ describe('HalTEIInterchangeService', () => {
         [DocumentType.Monograph, 'OUV'],
         [DocumentType.BookChapter, 'COUV'],
         [DocumentType.BookOfChapters, 'OUV'],
-        [DocumentType.Presentation, 'PRESCONF'],
+        [DocumentType.Presentation, 'COMM'],
         [DocumentType.Comment, 'NOTE'],
         [DocumentType.Document, 'UNDEFINED'],
         [DocumentType.ScholarlyPublication, 'UNDEFINED'],

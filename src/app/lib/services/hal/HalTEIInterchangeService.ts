@@ -1,8 +1,10 @@
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 import { Document as DocumentClass, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
+import { Concept } from '@/types/Concept'
 import { Journal } from '@/types/Journal'
 import { Contribution } from '@/types/Contribution'
+import { halTypologyForDocumentType } from '@/lib/services/hal/halDepositFormConfig'
 import xpath from 'xpath'
 
 /** A file to reference in the TEI `editionStmt/edition` (codes already resolved by the caller). */
@@ -98,25 +100,6 @@ export class HalTEIInterchangeService {
     SON: DocumentType.Document,
   })
 
-  private static readonly DOCUMENT_TYPE_TO_HAL_TYPOLOGY: Readonly<
-    Record<DocumentType, string>
-  > = Object.freeze({
-    [DocumentType.Document]: 'UNDEFINED',
-    [DocumentType.ScholarlyPublication]: 'UNDEFINED',
-    [DocumentType.Presentation]: 'PRESCONF',
-    [DocumentType.Article]: 'ART',
-    [DocumentType.ConferenceAbstract]: 'COMM',
-    [DocumentType.Preface]: 'OTHER',
-    [DocumentType.Comment]: 'NOTE',
-    [DocumentType.JournalArticle]: 'ART',
-    [DocumentType.Book]: 'OUV',
-    [DocumentType.Monograph]: 'OUV',
-    [DocumentType.BookChapter]: 'COUV',
-    [DocumentType.BookOfChapters]: 'OUV',
-    [DocumentType.ConferenceArticle]: 'COMM',
-    [DocumentType.Proceedings]: 'PROCEEDINGS',
-  })
-
   /**
    * Parse HAL TEI XML into DocumentClass model
    */
@@ -176,6 +159,7 @@ export class HalTEIInterchangeService {
       options.halDocumentType ??
       this.mapDocumentTypeToHalTypology(document.documentType)
     this.patchDocumentType(dom, halCode, options.domains ?? [])
+    this.patchKeywords(dom, document.subjects ?? [], halCode)
     this.patchTitles(dom, document.titles)
     this.patchAuthors(dom, document.contributions ?? [])
     this.patchAbstracts(dom, document.abstracts)
@@ -410,6 +394,62 @@ export class HalTEIInterchangeService {
       domainCode.setAttribute('n', domain)
       textClass.appendChild(domainCode)
     }
+  }
+
+  /**
+   * Emits the document subjects as `textClass/keywords[@scheme="author"]/term` (one `<term>` per
+   * preferred label, tagged with its `xml:lang`). Only preferred labels are used — never alt labels.
+   *
+   * - For THESE/HDR both the French **and** English preferred label of each subject are emitted
+   *   (other languages are dropped); HAL requires the fr+en pair for a thesis/HDR.
+   * - For every other type a single term per subject is emitted: the French label, or the English
+   *   label when the subject has no French translation.
+   *
+   * The `<keywords>` block is inserted before the `classCode` children (matching the HAL THESE/HDR
+   * examples); `textClass` is an unbounded choice so the order is not schema-significant.
+   */
+  private patchKeywords(
+    dom: Document,
+    subjects: Concept[],
+    halCode: string,
+  ): void {
+    const isThesis = halCode === 'THESE' || halCode === 'HDR'
+
+    const terms: { lang: string; value: string }[] = []
+    for (const subject of subjects) {
+      const pref = (lang: string) =>
+        subject.prefLabels.find(
+          (l) => l.language === lang && l.value?.trim(),
+        )
+      const fr = pref('fr')
+      const en = pref('en')
+      if (isThesis) {
+        if (fr) terms.push({ lang: 'fr', value: fr.value })
+        if (en) terms.push({ lang: 'en', value: en.value })
+      } else {
+        const chosen = fr ?? en
+        if (chosen) terms.push({ lang: chosen.language, value: chosen.value })
+      }
+    }
+
+    if (terms.length === 0) return
+
+    const textClass = this.ensureElement(
+      dom,
+      "//*[local-name()='profileDesc']/*[local-name()='textClass']",
+      () => this.createElement(dom, 'textClass'),
+    )
+    this.removeAllWithin(textClass, "./*[local-name()='keywords']")
+
+    const keywords = this.createElement(dom, 'keywords')
+    keywords.setAttribute('scheme', 'author')
+    for (const term of terms) {
+      const termEl = this.createElement(dom, 'term')
+      termEl.setAttribute('xml:lang', term.lang)
+      termEl.appendChild(dom.createTextNode(term.value))
+      keywords.appendChild(termEl)
+    }
+    textClass.insertBefore(keywords, textClass.firstChild)
   }
 
   private patchTitles(dom: Document, titles: Literal[]): void {
@@ -893,7 +933,7 @@ export class HalTEIInterchangeService {
     this.insertMonogrChild(monogr, title)
   }
 
-  /** Conference metadata for COMM/POSTER/PRESCONF → `monogr/meeting` (title, date, settlement, country). */
+  /** Conference metadata for COMM/POSTER → `monogr/meeting` (title, date, settlement, country). */
   private patchMeeting(
     dom: Document,
     opts: {
@@ -1071,9 +1111,6 @@ export class HalTEIInterchangeService {
   }
 
   private mapDocumentTypeToHalTypology(documentType: DocumentType): string {
-    return (
-      HalTEIInterchangeService.DOCUMENT_TYPE_TO_HAL_TYPOLOGY[documentType] ??
-      'UNDEFINED'
-    )
+    return halTypologyForDocumentType(documentType)
   }
 }

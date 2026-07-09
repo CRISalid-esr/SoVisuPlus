@@ -11,11 +11,12 @@
  * from the document, not entered here, so it is not a field key either.
  */
 
+import { DocumentType } from '@prisma/client'
+
 export const HAL_DOCUMENT_TYPES = [
   'ART',
   'COMM',
   'POSTER',
-  'PRESCONF',
   'THESE',
   'HDR',
   'REPORT',
@@ -50,7 +51,7 @@ export type HalDepositTypeConfig = {
   fields: Partial<Record<HalFieldKey, FieldRequirement>>
 }
 
-/** The four conference fields shared by COMM/POSTER/PRESCONF — all required. */
+/** The four conference fields shared by COMM/POSTER — all required. */
 const conferenceFields: Partial<Record<HalFieldKey, FieldRequirement>> = {
   conferenceTitle: 'required',
   conferenceCity: 'required',
@@ -65,7 +66,6 @@ export const halDepositFormConfig: Record<
   ART: { enabled: true, fields: {} },
   COMM: { enabled: true, fields: { ...conferenceFields } },
   POSTER: { enabled: true, fields: { ...conferenceFields } },
-  PRESCONF: { enabled: true, fields: { ...conferenceFields } },
   // THESE/HDR: `supervisor` is labelled per type — thesis advisor for THESE,
   // chair of jury for HDR (see the THESE/HDR supervisor field section of the spec).
   THESE: {
@@ -116,3 +116,46 @@ export const validateConditionalFields = (
   values: Partial<Record<HalFieldKey, string | null | undefined>>,
 ): HalFieldKey[] =>
   requiredFieldsForType(type).filter((key) => !values[key]?.trim())
+
+/**
+ * Mapping from the internal (CERIF) DocumentType to a HAL typology code. The CERIF typology is
+ * coarser than HAL's (e.g. THESE/HDR/REPORT all share `ScholarlyPublication`), so several types
+ * map to `UNDEFINED`; the user refines the deposit type in the form. Shared with
+ * `HalTEIInterchangeService` so the pre-filled type and the generated TEI stay in sync.
+ */
+export const DOCUMENT_TYPE_TO_HAL_TYPOLOGY: Readonly<
+  Record<DocumentType, string>
+> = Object.freeze({
+  [DocumentType.Document]: 'UNDEFINED',
+  [DocumentType.ScholarlyPublication]: 'UNDEFINED',
+  [DocumentType.Presentation]: 'COMM',
+  [DocumentType.Article]: 'ART',
+  [DocumentType.ConferenceAbstract]: 'COMM',
+  [DocumentType.Preface]: 'OTHER',
+  [DocumentType.Comment]: 'NOTE',
+  [DocumentType.JournalArticle]: 'ART',
+  [DocumentType.Book]: 'OUV',
+  [DocumentType.Monograph]: 'OUV',
+  [DocumentType.BookChapter]: 'COUV',
+  [DocumentType.BookOfChapters]: 'OUV',
+  [DocumentType.ConferenceArticle]: 'COMM',
+  [DocumentType.Proceedings]: 'PROCEEDINGS',
+})
+
+/** The HAL typology code a document maps to (falls back to `UNDEFINED`). */
+export const halTypologyForDocumentType = (
+  documentType: DocumentType,
+): string => DOCUMENT_TYPE_TO_HAL_TYPOLOGY[documentType] ?? 'UNDEFINED'
+
+/**
+ * The default deposit type pre-selected in the form for a document: its mapped HAL typology when
+ * that type is depositable, otherwise the first enabled type. The user can always refine it.
+ */
+export const defaultHalDocumentType = (
+  documentType: DocumentType,
+): HalDocumentType => {
+  const mapped = halTypologyForDocumentType(documentType)
+  return isDepositableType(mapped)
+    ? (mapped as HalDocumentType)
+    : enabledHalDocumentTypes()[0]
+}

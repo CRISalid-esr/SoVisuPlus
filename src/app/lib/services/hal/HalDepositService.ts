@@ -107,8 +107,24 @@ export class HalDepositService {
     }
 
     const kind = this.isRetryableStatus(response.status) ? 'retryable' : 'terminal'
-    const message = `HAL responded ${response.status}: ${response.body?.slice(0, 500) ?? ''}`
-    await this.fail(deposit, kind, message, now)
+    await this.fail(deposit, kind, this.buildErrorMessage(response), now)
+  }
+
+  /**
+   * Human-readable failure message from a rejected deposit. HAL returns a SWORD error document
+   * whose `<summary>` and `<sword:verboseDescription>` explain the rejection — surface those
+   * instead of the truncated raw XML. The two are joined by a newline (summary first) so the UI
+   * can split them apart and render the JSON verbose description as a list. Falls back to the
+   * status + raw body when the response is not a parseable SWORD error (e.g. a 5xx HTML page).
+   */
+  private buildErrorMessage(response: SwordResponse): string {
+    const body = response.body ?? ''
+    const { summary, verboseDescription } =
+      HalSwordResponseParser.parseError(body)
+    if (summary || verboseDescription) {
+      return [summary, verboseDescription].filter(Boolean).join('\n')
+    }
+    return `HAL responded ${response.status}: ${body.slice(0, 500)}`
   }
 
   private isRetryableStatus(status: number): boolean {

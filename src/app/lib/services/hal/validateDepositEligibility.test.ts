@@ -7,6 +7,7 @@ import { AuthorityOrganization } from '@/types/AuthorityOrganization'
 import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
 import { Person } from '@/types/Person'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
+import { Concept } from '@/types/Concept'
 import { validateDepositEligibility } from './validateDepositEligibility'
 
 const eligiblePerson = () =>
@@ -34,12 +35,16 @@ const makeArt = ({
   withJournal = true,
   withAffiliation = true,
   titles = [new Literal('Title', 'en')],
+  abstracts = [],
+  subjects = [],
   type = DocumentType.Article,
 }: {
   publicationDate?: string | null
   withJournal?: boolean
   withAffiliation?: boolean
   titles?: Literal[]
+  abstracts?: Literal[]
+  subjects?: Concept[]
   type?: DocumentType
 } = {}): DocumentClass => {
   const person = eligiblePerson()
@@ -58,8 +63,8 @@ const makeArt = ({
     null,
     null,
     titles,
-    [],
-    [],
+    abstracts,
+    subjects,
     [contribution],
     [],
     DocumentState.default,
@@ -72,6 +77,18 @@ const makeArt = ({
 const bilingualTitles = () => [
   new Literal('English title', 'en'),
   new Literal('Titre français', 'fr'),
+]
+
+const bilingualAbstracts = () => [
+  new Literal('English abstract', 'en'),
+  new Literal('Résumé français', 'fr'),
+]
+
+const bilingualSubjects = () => [
+  new Concept('c-1', [
+    new Literal('quantique', 'fr'),
+    new Literal('quantum', 'en'),
+  ]),
 ]
 
 describe('validateDepositEligibility', () => {
@@ -172,17 +189,86 @@ describe('validateDepositEligibility', () => {
     }
   })
 
-  it('accepts a THESE with both a French and an English title', () => {
+  it('rejects a THESE that has a bilingual title but lacks a bilingual (fr+en) abstract', () => {
     expect(
       validateDepositEligibility(
-        makeArt({ withJournal: false, titles: bilingualTitles() }),
+        makeArt({
+          withJournal: false,
+          titles: bilingualTitles(),
+          abstracts: [new Literal('EN only', 'en')],
+        }),
+        eligiblePerson(),
+        'THESE',
+      ),
+    ).toEqual({ ok: false, reason: 'missing_bilingual_abstract' })
+  })
+
+  it('does not require an abstract for an HDR', () => {
+    expect(
+      validateDepositEligibility(
+        makeArt({
+          withJournal: false,
+          titles: bilingualTitles(),
+          abstracts: [],
+          subjects: bilingualSubjects(),
+        }),
+        eligiblePerson(),
+        'HDR',
+      ),
+    ).toEqual({ ok: true })
+  })
+
+  it('rejects a THESE/HDR with bilingual title and abstract but no bilingual keywords', () => {
+    for (const type of ['THESE', 'HDR']) {
+      expect(
+        validateDepositEligibility(
+          makeArt({
+            withJournal: false,
+            titles: bilingualTitles(),
+            abstracts: bilingualAbstracts(),
+            subjects: [new Concept('c-fr', [new Literal('français', 'fr')])],
+          }),
+          eligiblePerson(),
+          type,
+        ),
+      ).toEqual({ ok: false, reason: 'missing_bilingual_keywords' })
+    }
+  })
+
+  it('accepts a THESE with a French and an English title, abstract and keywords', () => {
+    expect(
+      validateDepositEligibility(
+        makeArt({
+          withJournal: false,
+          titles: bilingualTitles(),
+          abstracts: bilingualAbstracts(),
+          subjects: bilingualSubjects(),
+        }),
         eligiblePerson(),
         'THESE',
       ),
     ).toEqual({ ok: true })
   })
 
-  it('does not require a bilingual title for non-thesis types', () => {
+  it('accepts THESE keywords when fr and en come from different subjects', () => {
+    expect(
+      validateDepositEligibility(
+        makeArt({
+          withJournal: false,
+          titles: bilingualTitles(),
+          abstracts: bilingualAbstracts(),
+          subjects: [
+            new Concept('c-fr', [new Literal('français', 'fr')]),
+            new Concept('c-en', [new Literal('english', 'en')]),
+          ],
+        }),
+        eligiblePerson(),
+        'HDR',
+      ),
+    ).toEqual({ ok: true })
+  })
+
+  it('does not require a bilingual title, abstract or keywords for non-thesis types', () => {
     expect(
       validateDepositEligibility(
         makeArt({ withJournal: false, titles: [new Literal('EN only', 'en')] }),
