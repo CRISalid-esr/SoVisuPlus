@@ -519,9 +519,9 @@ Read the values at `facet_counts/facet_fields/authorityInstitution_s`. This is a
 
 ##### THESE/HDR supervisor field
 
-THESE and HDR each require one supervisor — a **thesis advisor** for THESE, a **chair of the jury** for HDR. Both are emitted to the same TEI slot, `monogr/authority[@type="supervisor"]` (content = the person's name).
+THESE and HDR each require one supervisor — a **thesis advisor** for THESE, a **chair of the jury** for HDR. Both are emitted to the same TEI slot, `monogr/authority[@type="supervisor"]` (content = the person's name). The field is **labelled per type**: "Thesis supervisor" / "Directeur / Directrice de thèse" for THESE, "Jury president" / "Président du jury" for HDR.
 
-The picker is a **select** whose options are **only** the document's contributors (`Document.contributions`, each a `Contribution { person, roles: LocRelator[] }`) whose `roles` include the relevant relator — `LocRelator.THESIS_ADVISOR` for THESE, `LocRelator.DEGREE_COMMITTEE_MEMBER` for HDR. Contributors without that role are **not** listed.
+The picker is a **select** whose options are **only** the document's contributors (`Document.contributions`, each a `Contribution { person, roles: LocRelator[] }`) whose `roles` include the relevant relator — `LocRelator.THESIS_ADVISOR` for THESE, `LocRelator.DEGREE_COMMITTEE_MEMBER` for HDR. Contributors without that role are **not** listed. When **exactly one** contributor holds the relevant role, that contributor is **selected by default** (the user can still change it; a manual choice is never overwritten).
 
 If **no** contributor holds the relevant role, the options are replaced by a message prompting the user to add a contributor with the relevant role (or tag an existing contributor with it) before a supervisor can be selected.
 

@@ -130,6 +130,27 @@ export default function HalDeposit() {
     }
   }, [selectedDocument])
 
+  // When exactly one contributor holds the supervisor role for the selected THESE/HDR, pre-select
+  // them. The guard leaves a manual choice untouched; changing the type clears `conditional`, so a
+  // new sole candidate is re-selected for the new type.
+  useEffect(() => {
+    if (!selectedDocument) return
+    if (documentType !== 'THESE' && documentType !== 'HDR') return
+    const role =
+      documentType === 'HDR'
+        ? LocRelator.DEGREE_COMMITTEE_MEMBER
+        : LocRelator.THESIS_ADVISOR
+    const candidates = (selectedDocument.contributions ?? []).filter((c) =>
+      c.roles.includes(role),
+    )
+    if (candidates.length !== 1) return
+    const name = candidates[0].person?.getDisplayName(lang) ?? ''
+    if (!name) return
+    setConditional((prev) =>
+      prev.supervisor ? prev : { ...prev, supervisor: name },
+    )
+  }, [selectedDocument, documentType, lang])
+
   const deposit = uid ? byDocument[uid] : null
 
   const navigateToTab = (tab: string) => {
@@ -282,6 +303,11 @@ export default function HalDeposit() {
   const supervisorCandidates = (selectedDocument.contributions ?? []).filter(
     (c) => c.roles.includes(supervisorRole),
   )
+  // The supervisor field is labelled per type: thesis supervisor for THESE, jury president for HDR.
+  const supervisorLabel =
+    documentType === 'HDR'
+      ? t`hal_deposit_field_supervisor_hdr`
+      : t`hal_deposit_field_supervisor_these`
 
   // ─── Validation ────────────────────────────────────────────────────────────
   const missingConditional = isHalDocumentType(documentType)
@@ -427,7 +453,7 @@ export default function HalDeposit() {
         )}
         {has('supervisor') && (
           <ReviewRow
-            label={t`hal_deposit_field_supervisor`}
+            label={supervisorLabel}
             value={conditional.supervisor ?? ''}
           />
         )}
@@ -790,13 +816,11 @@ export default function HalDeposit() {
         ) : (
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel>
-              {`${t`hal_deposit_field_supervisor`}${
-                isRequired('supervisor') ? ' *' : ''
-              }`}
+              {`${supervisorLabel}${isRequired('supervisor') ? ' *' : ''}`}
             </InputLabel>
             <Select
               value={conditional.supervisor ?? ''}
-              label={`${t`hal_deposit_field_supervisor`}${
+              label={`${supervisorLabel}${
                 isRequired('supervisor') ? ' *' : ''
               }`}
               onChange={(e) => setField('supervisor', e.target.value)}
