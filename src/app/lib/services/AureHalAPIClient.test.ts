@@ -170,9 +170,12 @@ describe('AureHalAPIClient', () => {
     const calledUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string
     const params = new URL(calledUrl).searchParams
     expect(calledUrl).toContain('https://api.archives-ouvertes.fr/ref/author/')
-    expect(params.get('q')).toBe('text:dupont AND valid_s:(PREFERRED OR OLD)')
+    expect(params.get('q')).toBe(
+      'text:dupont AND valid_s:(PREFERRED OR INCOMING)',
+    )
     expect(params.get('fl')).toContain('fullName_s')
     expect(params.get('fl')).toContain('idHal_s')
+    expect(params.get('fl')).toContain('valid_s')
     expect(params.get('sort')).toMatch(/^valid_s desc/)
   })
 
@@ -246,7 +249,7 @@ describe('AureHalAPIClient', () => {
       (global.fetch as jest.Mock).mock.calls[0][0] as string,
     ).searchParams
     expect(params.get('q')).toBe(
-      'text:Elodie Le Goff AND valid_s:(PREFERRED OR OLD)',
+      'text:Elodie Le Goff AND valid_s:(PREFERRED OR INCOMING)',
     )
   })
 

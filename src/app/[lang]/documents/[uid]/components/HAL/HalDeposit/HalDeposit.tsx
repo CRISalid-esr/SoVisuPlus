@@ -14,6 +14,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  CardContent,
   Chip,
   CircularProgress,
   Divider,
@@ -25,12 +26,15 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { Add } from '@mui/icons-material'
+import { CustomCard } from '@/components/Card'
 import useStore from '@/stores/global_store'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { isPerson } from '@/types/Person'
+import type { Document as DocumentClass } from '@/types/Document'
 import {
   defaultHalDocumentType,
   enabledHalDocumentTypes,
@@ -74,6 +78,7 @@ const SUBTITLE_SX = {
 }
 
 export default function HalDeposit() {
+  const theme = useTheme()
   const router = useRouter()
   const { uid } = useParams<{ uid: string }>()
   const { _ } = useLingui()
@@ -159,14 +164,49 @@ export default function HalDeposit() {
 
   if (!selectedDocument) return null
 
+  // Card chrome shared by every rendered state, so the tab matches the other document tabs
+  // (bordered card + titled header + padded body). The header title stays constant while the
+  // body swaps between loading / gate / form / review / status.
+  const wrap = (body: React.ReactNode) => (
+    <CustomCard
+      header={
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Typography
+            sx={{
+              color: theme.palette.primary.main,
+              fontSize: theme.utils.pxToRem(20),
+              fontStyle: 'normal',
+              fontWeight: theme.typography.fontWeightRegular,
+              lineHeight: 'normal',
+            }}
+          >
+            {step === 'review' ? (
+              <Trans>hal_deposit_review_heading</Trans>
+            ) : (
+              <Trans>hal_deposit_form_heading</Trans>
+            )}
+          </Typography>
+        </Box>
+      }
+    >
+      <CardContent>{body}</CardContent>
+    </CustomCard>
+  )
+
   // Wait for the latest-deposit fetch before deciding form vs status panel, so the form is not
   // briefly flashed on (re)load before an existing deposit's status is applied.
   const depositLoaded = !!uid && uid in byDocument && !loading[uid]
   if (!depositLoaded) {
-    return (
-      <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
+    return wrap(
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         <CircularProgress />
-      </Box>
+      </Box>,
     )
   }
 
@@ -197,16 +237,16 @@ export default function HalDeposit() {
 
   // Once a deposit exists (and the doc is not yet harvested back from HAL), show the status panel.
   if (deposit && !hasHalRecord) {
-    return (
-      <HalDepositStatusPanel deposit={deposit} onNavigateTab={navigateToTab} />
+    return wrap(
+      <HalDepositStatusPanel deposit={deposit} onNavigateTab={navigateToTab} />,
     )
   }
 
   if (!perspectiveUid) return null
 
   if (!hasHalIdentifiers) {
-    return (
-      <Box sx={{ p: 3 }}>
+    return wrap(
+      <>
         <Alert severity='info'>
           {ownPerspective ? (
             <Trans>hal_deposit_gate_no_hal_id</Trans>
@@ -223,17 +263,17 @@ export default function HalDeposit() {
             <Trans>hal_deposit_gate_go_my_account</Trans>
           </Button>
         )}
-      </Box>
+      </>,
     )
   }
 
   if (!selectedDocument.publicationDate) {
-    return (
+    return wrap(
       <GateAlert
         message={t`hal_deposit_gate_no_date`}
         actionLabel={t`hal_deposit_gate_go_biblio`}
         onAction={() => navigateToTab('bibliographic_information')}
-      />
+      />,
     )
   }
 
@@ -392,89 +432,183 @@ export default function HalDeposit() {
       ...(mainFile ? [{ ...mainFile, isMain: true }] : []),
       ...annexes.map((a) => ({ ...a, isMain: false })),
     ]
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography variant='h6' gutterBottom>
-          <Trans>hal_deposit_review_heading</Trans>
-        </Typography>
+    // Keywords go into the TEI but are not shown in the form; surface them here for review.
+    const keywords = (selectedDocument.subjects ?? [])
+      .map((s) => {
+        const labels = s.prefLabels.filter((l) => l.value?.trim())
+        const pref = labels.find((l) => l.language === lang) ?? labels[0]
+        return pref?.value ?? ''
+      })
+      .filter(Boolean)
+    return wrap(
+      <>
         {error && (
           <Alert severity='error' sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
-        <ReviewRow label={t`hal_deposit_field_title`} value={title} />
-        <ReviewRow
-          label={t`hal_deposit_field_document_type`}
-          value={renderLabel(labelOf(HAL_DOCUMENT_TYPE_OPTIONS, documentType))}
-        />
-        <ReviewRow
-          label={t`hal_deposit_field_language`}
-          value={renderLabel(labelOf(LANGUAGE_OPTIONS, language))}
-        />
-        {has('bookTitle') && (
-          <ReviewRow
-            label={t`hal_deposit_field_book_title`}
-            value={conditional.bookTitle ?? ''}
+
+        {/* Bibliographic information (sent in the TEI) */}
+        <Section title={t`hal_deposit_section_bibliographic`}>
+          <BiblioCardBody
+            title={title}
+            abstract={abstract}
+            publicationDate={selectedDocument.publicationDate}
+            journalTitle={selectedDocument.journal?.title}
+            lang={lang}
+            clampAbstract={false}
           />
-        )}
-        {has('conferenceTitle') && (
+        </Section>
+
+        {/* Authors and affiliations (sent in the TEI) */}
+        <Section title={t`hal_deposit_section_authors`}>
+          <AuthorsList contributions={sortedContributions} lang={lang} />
+        </Section>
+
+        {/* Deposit metadata (entered in the form) */}
+        <Section title={t`hal_deposit_section_metadata`}>
           <ReviewRow
-            label={t`hal_deposit_field_conference_title`}
-            value={conditional.conferenceTitle ?? ''}
+            label={t`hal_deposit_field_document_type`}
+            value={renderLabel(labelOf(HAL_DOCUMENT_TYPE_OPTIONS, documentType))}
           />
-        )}
-        {has('conferenceCity') && (
           <ReviewRow
-            label={t`hal_deposit_field_conference_city`}
-            value={conditional.conferenceCity ?? ''}
+            label={t`hal_deposit_field_language`}
+            value={renderLabel(labelOf(LANGUAGE_OPTIONS, language))}
           />
-        )}
-        {has('conferenceStartDate') && (
-          <ReviewRow
-            label={t`hal_deposit_field_conference_start_date`}
-            value={conditional.conferenceStartDate ?? ''}
-          />
-        )}
-        {has('conferenceCountry') && (
-          <ReviewRow
-            label={t`hal_deposit_field_conference_country`}
-            value={
-              conditional.conferenceCountry
-                ? countryLabel(conditional.conferenceCountry, lang)
-                : ''
-            }
-          />
-        )}
-        {has('institution') && (
-          <ReviewRow
-            label={t`hal_deposit_field_institution`}
-            value={conditional.institution ?? ''}
-          />
-        )}
-        {has('supervisor') && (
-          <ReviewRow
-            label={supervisorLabel}
-            value={conditional.supervisor ?? ''}
-          />
-        )}
-        <Box sx={{ mb: 1.5 }}>
-          <Typography variant='caption' color='text.secondary'>
-            <Trans>hal_deposit_field_domains</Trans>
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {domains.map((d) => (
-              <Chip key={d} size='small' label={d} />
-            ))}
+          {has('bookTitle') && (
+            <ReviewRow
+              label={t`hal_deposit_field_book_title`}
+              value={conditional.bookTitle ?? ''}
+            />
+          )}
+          {has('conferenceTitle') && (
+            <ReviewRow
+              label={t`hal_deposit_field_conference_title`}
+              value={conditional.conferenceTitle ?? ''}
+            />
+          )}
+          {has('conferenceCity') && (
+            <ReviewRow
+              label={t`hal_deposit_field_conference_city`}
+              value={conditional.conferenceCity ?? ''}
+            />
+          )}
+          {has('conferenceStartDate') && (
+            <ReviewRow
+              label={t`hal_deposit_field_conference_start_date`}
+              value={conditional.conferenceStartDate ?? ''}
+            />
+          )}
+          {has('conferenceCountry') && (
+            <ReviewRow
+              label={t`hal_deposit_field_conference_country`}
+              value={
+                conditional.conferenceCountry
+                  ? countryLabel(conditional.conferenceCountry, lang)
+                  : ''
+              }
+            />
+          )}
+          {has('institution') && (
+            <ReviewRow
+              label={t`hal_deposit_field_institution`}
+              value={conditional.institution ?? ''}
+            />
+          )}
+          {has('supervisor') && (
+            <ReviewRow
+              label={supervisorLabel}
+              value={conditional.supervisor ?? ''}
+            />
+          )}
+          <Box sx={{ mb: 1.5 }}>
+            <Typography variant='caption' color='text.secondary'>
+              <Trans>hal_deposit_field_domains</Trans>
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {domains.map((d) => (
+                <Chip key={d} size='small' label={d} />
+              ))}
+            </Box>
           </Box>
-        </Box>
-        <ReviewRow
-          label={t`hal_deposit_field_files`}
-          value={
-            files.length
-              ? files.map((f) => f.file.name).join(', ')
-              : t`hal_deposit_files_notice_only`
-          }
-        />
+        </Section>
+
+        {/* Keywords (sent in the TEI) */}
+        <Section title={t`hal_deposit_field_keywords`}>
+          {keywords.length ? (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {keywords.map((k, i) => (
+                <Chip key={`${k}-${i}`} size='small' label={k} />
+              ))}
+            </Box>
+          ) : (
+            <Typography variant='body2' color='text.secondary'>
+              —
+            </Typography>
+          )}
+        </Section>
+
+        {/* Files and their per-file metadata (entered in the form) */}
+        <Section title={t`hal_deposit_field_files`}>
+          {files.length === 0 ? (
+            <Typography variant='body2' color='text.secondary'>
+              <Trans>hal_deposit_files_notice_only</Trans>
+            </Typography>
+          ) : (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+              {files.map((f, i) => (
+                <Paper
+                  key={i}
+                  variant='outlined'
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    bgcolor: f.isMain ? '#E8F5F4' : '#F5F7F6',
+                  }}
+                >
+                  <Typography variant='body2' sx={{ fontWeight: 600, mb: 1 }}>
+                    {f.file.name}
+                    <Typography
+                      component='span'
+                      variant='caption'
+                      color='text.secondary'
+                      sx={{ ml: 1, fontStyle: 'italic' }}
+                    >
+                      {f.isMain ? (
+                        <Trans>hal_deposit_file_main</Trans>
+                      ) : (
+                        <Trans>hal_deposit_file_complementary</Trans>
+                      )}
+                    </Typography>
+                  </Typography>
+                  <ReviewRow
+                    label={t`hal_deposit_field_file_source`}
+                    value={renderLabel(labelOf(FILE_SOURCE_OPTIONS, f.source))}
+                  />
+                  <ReviewRow
+                    label={t`hal_deposit_field_file_type`}
+                    value={renderLabel(labelOf(FILE_TYPE_OPTIONS, f.kind))}
+                  />
+                  <ReviewRow
+                    label={t`hal_deposit_field_file_visibility`}
+                    value={renderLabel(
+                      labelOf(VISIBILITY_OPTIONS, f.visibility),
+                    )}
+                  />
+                  <ReviewRow
+                    label={t`hal_deposit_field_license`}
+                    value={
+                      f.license
+                        ? renderLabel(labelOf(LICENSE_OPTIONS, f.license))
+                        : '—'
+                    }
+                  />
+                </Paper>
+              ))}
+            </Box>
+          )}
+        </Section>
+
         <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
           <Button onClick={() => setStep('form')} disabled={submitting}>
             <Trans>hal_deposit_button_back</Trans>
@@ -491,21 +625,13 @@ export default function HalDeposit() {
             )}
           </Button>
         </Box>
-      </Box>
+      </>,
     )
   }
 
   // ─── Form step ─────────────────────────────────────────────────────────────
-  return (
-    <Box sx={{ p: 3 }}>
-      <Typography
-        variant='h6'
-        gutterBottom
-        sx={{ fontWeight: 700, color: 'primary.main' }}
-      >
-        <Trans>hal_deposit_form_heading</Trans>
-      </Typography>
-
+  return wrap(
+    <>
       <Alert
         severity='info'
         sx={{ mb: 2, bgcolor: 'transparent', border: 'none', px: 0, py: 0 }}
@@ -559,51 +685,13 @@ export default function HalDeposit() {
             <Trans>hal_deposit_gate_no_journal</Trans>
           </Alert>
         )}
-        <Paper
-          variant='outlined'
-          sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F7F6' }}
-        >
-          <Typography sx={{ fontWeight: 600, mb: 0.5 }}>
-            {title || <Trans>hal_deposit_no_title</Trans>}
-          </Typography>
-          <Typography
-            variant='body2'
-            color='text.secondary'
-            sx={{
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
-          >
-            {abstract || <Trans>hal_deposit_no_abstract</Trans>}
-          </Typography>
-
-          <Box sx={{ mt: 1.5, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-            <Typography variant='body2'>
-              <Typography component='span' variant='caption' color='text.secondary'>
-                <Trans>hal_deposit_field_publication_date</Trans>
-              </Typography>
-              {': '}
-              {selectedDocument.publicationDate
-                ? formatPublicationDate(selectedDocument.publicationDate, lang)
-                : '—'}
-            </Typography>
-            {selectedDocument.journal?.title && (
-              <Typography variant='body2'>
-                <Typography
-                  component='span'
-                  variant='caption'
-                  color='text.secondary'
-                >
-                  <Trans>hal_deposit_field_journal</Trans>
-                </Typography>
-                {': '}
-                {selectedDocument.journal.title}
-              </Typography>
-            )}
-          </Box>
-        </Paper>
+        <BiblioCardBody
+          title={title}
+          abstract={abstract}
+          publicationDate={selectedDocument.publicationDate}
+          journalTitle={selectedDocument.journal?.title}
+          lang={lang}
+        />
       </Section>
 
       <Section
@@ -623,49 +711,7 @@ export default function HalDeposit() {
             <Trans>hal_deposit_gate_no_affiliation</Trans>
           </Alert>
         )}
-        <Paper
-          variant='outlined'
-          sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F7F6' }}
-        >
-          {sortedContributions.length === 0 ? (
-            <Typography variant='body2' color='text.secondary'>
-              <Trans>hal_deposit_no_authors</Trans>
-            </Typography>
-          ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {sortedContributions.map((c, i) => {
-                const roles = c.getRoleLabels().join(', ')
-                const affiliations = c.affiliations
-                  .map((o) => o.displayNames[0])
-                  .filter(Boolean)
-                  .join(', ')
-                return (
-                  <Box key={i}>
-                    <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                      {c.rank != null && `${c.rank}. `}
-                      {c.person?.getDisplayName(lang) || '—'}
-                      {roles && (
-                        <Typography
-                          component='span'
-                          variant='caption'
-                          color='text.secondary'
-                          sx={{ ml: 1, fontStyle: 'italic' }}
-                        >
-                          {`(${roles})`}
-                        </Typography>
-                      )}
-                    </Typography>
-                    {affiliations && (
-                      <Typography variant='caption' color='text.secondary'>
-                        {affiliations}
-                      </Typography>
-                    )}
-                  </Box>
-                )
-              })}
-            </Box>
-          )}
-        </Paper>
+        <AuthorsList contributions={sortedContributions} lang={lang} />
       </Section>
 
       {hasDroppedAffiliations && (
@@ -923,7 +969,7 @@ export default function HalDeposit() {
           <Trans>hal_deposit_button_review</Trans>
         </Button>
       </Box>
-    </Box>
+    </>,
   )
 }
 
@@ -939,7 +985,7 @@ function GateAlert({
   severity?: 'info' | 'error'
 }) {
   return (
-    <Box sx={{ p: 3 }}>
+    <Box>
       <Alert severity={severity}>{message}</Alert>
       <Button sx={{ mt: 2 }} variant='outlined' onClick={onAction}>
         {actionLabel}
@@ -956,6 +1002,121 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
       </Typography>
       <Typography>{value}</Typography>
     </Box>
+  )
+}
+
+/** Grey read-only card mirroring the document's bibliographic data (title, abstract, publication
+ *  date, journal). Shared by the form's read-only section and the review recap. */
+function BiblioCardBody({
+  title,
+  abstract,
+  publicationDate,
+  journalTitle,
+  lang,
+  clampAbstract = true,
+}: {
+  title: string
+  abstract: string
+  publicationDate: string | null | undefined
+  journalTitle: string | null | undefined
+  lang: ExtendedLanguageCode
+  /** Clamp the abstract to 3 lines (form preview). The review recap shows it in full. */
+  clampAbstract?: boolean
+}) {
+  return (
+    <Paper variant='outlined' sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F7F6' }}>
+      <Typography sx={{ fontWeight: 600, mb: 0.5 }}>
+        {title || <Trans>hal_deposit_no_title</Trans>}
+      </Typography>
+      <Typography
+        variant='body2'
+        color='text.secondary'
+        sx={
+          clampAbstract
+            ? {
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }
+            : { whiteSpace: 'pre-line' }
+        }
+      >
+        {abstract || <Trans>hal_deposit_no_abstract</Trans>}
+      </Typography>
+
+      <Box sx={{ mt: 1.5, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Typography variant='body2'>
+          <Typography component='span' variant='caption' color='text.secondary'>
+            <Trans>hal_deposit_field_publication_date</Trans>
+          </Typography>
+          {': '}
+          {publicationDate ? formatPublicationDate(publicationDate, lang) : '—'}
+        </Typography>
+        {journalTitle && (
+          <Typography variant='body2'>
+            <Typography component='span' variant='caption' color='text.secondary'>
+              <Trans>hal_deposit_field_journal</Trans>
+            </Typography>
+            {': '}
+            {journalTitle}
+          </Typography>
+        )}
+      </Box>
+    </Paper>
+  )
+}
+
+/** Grey read-only card listing contributors (sorted by rank) with role and affiliation labels.
+ *  Shared by the form's read-only section and the review recap. */
+function AuthorsList({
+  contributions,
+  lang,
+}: {
+  contributions: DocumentClass['contributions']
+  lang: ExtendedLanguageCode
+}) {
+  return (
+    <Paper variant='outlined' sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F7F6' }}>
+      {contributions.length === 0 ? (
+        <Typography variant='body2' color='text.secondary'>
+          <Trans>hal_deposit_no_authors</Trans>
+        </Typography>
+      ) : (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {contributions.map((c, i) => {
+            const roles = c.getRoleLabels().join(', ')
+            const affiliations = c.affiliations
+              .map((o) => o.displayNames[0])
+              .filter(Boolean)
+              .join(', ')
+            return (
+              <Box key={i}>
+                <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                  {c.rank != null && `${c.rank}. `}
+                  {c.person?.getDisplayName(lang) || '—'}
+                  {roles && (
+                    <Typography
+                      component='span'
+                      variant='caption'
+                      color='text.secondary'
+                      sx={{ ml: 1, fontStyle: 'italic' }}
+                    >
+                      {`(${roles})`}
+                    </Typography>
+                  )}
+                </Typography>
+                {affiliations && (
+                  <Typography variant='caption' color='text.secondary'>
+                    {affiliations}
+                  </Typography>
+                )}
+              </Box>
+            )
+          })}
+        </Box>
+      )}
+    </Paper>
   )
 }
 

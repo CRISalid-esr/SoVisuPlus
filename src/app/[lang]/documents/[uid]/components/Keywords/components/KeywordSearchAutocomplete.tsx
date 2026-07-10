@@ -28,7 +28,9 @@ import {
 import { Vocab } from '@/types/Vocab'
 import Image from 'next/image'
 import { VOCABS } from '@/lib/services/Vocabs'
-import { Trans } from '@lingui/react'
+import { Trans, useLingui } from '@lingui/react'
+import { defineMessage } from '@lingui/core/macro'
+import { MessageDescriptor } from '@lingui/core'
 import { Concept } from '@/types/Concept'
 import { Literal } from '@/types/Literal'
 import useStore from '@/stores/global_store'
@@ -144,6 +146,7 @@ const KeywordSearchAutocomplete = ({
   fetchKeywords = fetchWrapper,
   selectedVocabs,
 }: KeywordSearchAutocompleteProps) => {
+  const { _ } = useLingui()
   const [keywordInput, setKeywordInput] = useState<string>('')
   const [keywords, setKeywords] = useState<SuggestedKeywordsData[]>([])
   const [loading, setLoading] = useState<boolean>(false)
@@ -151,7 +154,12 @@ const KeywordSearchAutocomplete = ({
   const [add, setAdd] = useState<boolean>(false)
   const [selectedKeyword, setSelectedKeyword] = useState<SuggestedKeyword>()
   const [open, setOpen] = useState<boolean>(false)
-  const [idMessage, setIdMessage] = useState<string | null>(null)
+  // Feedback shown in the snackbar after adding a concept. Stored as a Lingui
+  // MessageDescriptor (built with `defineMessage`) so the ids are discoverable by the
+  // extractor here — the render site below selects the id dynamically, which the
+  // extractor cannot see.
+  const [feedbackMessage, setFeedbackMessage] =
+    useState<MessageDescriptor | null>(null)
   const { data: session } = useSession()
 
   const ability = useMemo(
@@ -186,9 +194,9 @@ const KeywordSearchAutocomplete = ({
     if (selectedKeyword?.concept) {
       try {
         await addConcepts([selectedKeyword.concept])
-        setIdMessage('keywords_concept_added_success')
+        setFeedbackMessage(defineMessage`keywords_concept_added_success`)
       } catch (e) {
-        setIdMessage('keywords_concept_added_failure')
+        setFeedbackMessage(defineMessage`keywords_concept_added_failure`)
       } finally {
         setOpen(true)
       }
@@ -402,7 +410,7 @@ const KeywordSearchAutocomplete = ({
       <Snackbar
         open={open}
         autoHideDuration={3000}
-        message={<Trans id={idMessage ?? ''} />}
+        message={feedbackMessage ? _(feedbackMessage) : ''}
         onClose={handleClose}
       />
     </Box>

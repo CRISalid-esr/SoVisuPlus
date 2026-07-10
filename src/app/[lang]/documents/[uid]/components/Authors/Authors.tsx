@@ -1,10 +1,13 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Paper } from '@mui/material'
+import { Box, CardContent, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { t } from '@lingui/core/macro'
+import { Trans } from '@lingui/react'
 import { useSnackbar } from 'notistack'
 import { useSession } from 'next-auth/react'
+import { CustomCard } from '@/components/Card'
 import useStore from '@/stores/global_store'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
@@ -15,6 +18,7 @@ import UnsavedBanner from './components/UnsavedBanner'
 import ContributorList from './components/ContributorList'
 
 const Authors = () => {
+  const theme = useTheme()
   const { selectedDocument = null } = useStore((state) => state.document)
   // Read-only unless the user is authorized to update this document's
   // contributors (CASL ability, perimeter-scoped) — same check the Save API
@@ -56,16 +60,9 @@ const Authors = () => {
   }
 
   return (
-    <Paper elevation={0} sx={{ p: 2 }}>
-      <AuthorsToolbar
-        rankingMode={editor.rankingMode}
-        disabled={editor.isFrozen}
-        readOnly={readOnly}
-        contributorCount={editor.contributorCount}
-        affiliationCount={affiliationCount}
-        onToggleRankingMode={editor.setRankingMode}
-      />
-
+    <>
+      {/* Rendered outside CustomCard: MUI Card sets `overflow: hidden`, which would
+          clip the banner and disable its `position: sticky`. */}
       {!readOnly && editor.isDirty && (
         <UnsavedBanner
           saving={saving}
@@ -73,9 +70,43 @@ const Authors = () => {
           onCancel={editor.cancel}
         />
       )}
+      <CustomCard
+        header={
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Typography
+              sx={{
+                color: theme.palette.primary.main,
+                fontSize: theme.utils.pxToRem(20),
+                fontStyle: 'normal',
+                fontWeight: theme.typography.fontWeightRegular,
+                lineHeight: 'normal',
+              }}
+            >
+              <Trans id='documents_details_page_authors_tab_title' />
+            </Typography>
+          </Box>
+        }
+      >
+        <CardContent>
+          <AuthorsToolbar
+            rankingMode={editor.rankingMode}
+            disabled={editor.isFrozen}
+            readOnly={readOnly}
+            contributorCount={editor.contributorCount}
+            affiliationCount={affiliationCount}
+            onToggleRankingMode={editor.setRankingMode}
+          />
 
-      <ContributorList editor={editor} readOnly={readOnly} />
-    </Paper>
+          <ContributorList editor={editor} readOnly={readOnly} />
+        </CardContent>
+      </CustomCard>
+    </>
   )
 }
 

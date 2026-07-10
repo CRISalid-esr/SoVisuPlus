@@ -62,7 +62,7 @@ export function HalDepositStatusPanel({ deposit }: Props) {
   const view = STATUS_VIEWS[deposit.status] ?? STATUS_VIEWS.pending
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
         {view.icon}
         <Typography variant='h6' sx={{ color: view.color }}>

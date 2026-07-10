@@ -27,6 +27,7 @@ export type AureHalAuthorDoc = {
   emailDomain_s?: string[]
   idHal_s?: string
   idrefId_s?: string[]
+  valid_s?: string
 }
 
 /**
@@ -206,7 +207,7 @@ export class AureHalAPIClient {
 
   /**
    * Run a HAL author-reference search for a free-text token. The token is wrapped
-   * in `text:<token> AND valid_s:(PREFERRED OR OLD)` and results are sorted with
+   * in `text:<token> AND valid_s:(PREFERRED OR INCOMING)` and results are sorted with
    * valid (PREFERRED) profiles first. Shared by the autocomplete and the
    * name-based profile suggestions.
    */
@@ -214,11 +215,11 @@ export class AureHalAPIClient {
     const url = new URL(`${this.AUREHAL_API_BASE_URL}/ref/author/`)
     url.searchParams.set(
       'q',
-      `text:${queryText} AND valid_s:(PREFERRED OR OLD)`,
+      `text:${queryText} AND valid_s:(PREFERRED OR INCOMING)`,
     )
     url.searchParams.set(
       'fl',
-      'person_i,form_i,firstName_s,lastName_s,middleName_s,fullName_s,orcidId_s,emailDomain_s,idHal_s,idrefId_s',
+      'person_i,form_i,firstName_s,lastName_s,middleName_s,fullName_s,orcidId_s,emailDomain_s,idHal_s,idrefId_s,valid_s',
     )
     url.searchParams.set(
       'sort',

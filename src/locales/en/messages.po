@@ -125,7 +125,6 @@ msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr "{name}'s publication list has changed"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/page.test.tsx:236
 #: src/app/[lang]/documents/page.tsx:217
 msgid "documents_page_synchronize_button"
 msgstr "Update all publications"
@@ -174,81 +173,9 @@ msgid "documents_merge_dialog_box_merge_button"
 msgstr "Confirm merge ({nbDocs})"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:154
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:188
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:228
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:269
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:306
-#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:64
-#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:90
-#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:118
-#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:144
-msgid "documents_page_hal_status_outside_hal"
-msgstr "Out of HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:334
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:358
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:391
-#: src/app/[lang]/documents/components/HalStatusCell.test.tsx:422
-#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:182
-#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:217
-#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:250
-#: src/app/[lang]/documents/components/HalStatusCellBadge.test.tsx:282
-msgid "documents_page_hal_status_in_hal"
-msgstr "In HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/documentsSyncModal/DocumentSyncDialog.test.tsx:78
-msgid "documents_page_synchronize_modal_synchronize_button"
-msgstr "Synchronize"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/DocumentDetailsHeader.test.tsx:54
-msgid "document_details_page_back_to_my_publications"
-msgstr "Back to my publications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.test.tsx:220
-#: src/app/[lang]/documents/[uid]/page.test.tsx:271
-msgid "document_details_bibliographic_information_tab"
-msgstr "Bibliographic information"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/page.test.tsx:224
-#: src/app/[lang]/documents/[uid]/page.test.tsx:275
-msgid "document_details_keywords_tab"
-msgstr "Keywords"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
 msgid "document_details_page_source_tab_card_title"
 msgstr "Sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:60
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:225
-msgid "concept_chips_free_keyword"
-msgstr "Loose keyword"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:68
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:242
-msgid "concept_chips_pref_label"
-msgstr "Main variations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:71
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:271
-msgid "concept_chips_alt_label"
-msgstr "Other variations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:86
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.test.tsx:122
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:343
-msgid "concept_chip_action_delete"
-msgstr "Delete"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:105
@@ -266,6 +193,11 @@ msgid "document_details_page_keywords_search_field_title"
 msgstr "Select one or more controlled vocabulary"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
+msgid "document_details_page_update_in_hal_tab_card_title"
+msgstr "Update in HAL"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.tsx:204
 msgid "documents_page_refresh_document_alert"
 msgstr "Data concerning this publication has changed"
@@ -274,54 +206,6 @@ msgstr "Data concerning this publication has changed"
 #: src/app/[lang]/documents/[uid]/page.tsx:227
 msgid "document_details_page_frozen_notice"
 msgstr "This document is waiting to be updated from the graph and cannot be edited right now."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
-msgid "document_details_page_update_in_hal_tab_card_title"
-msgstr "Update in HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:140
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:255
-msgid "document_details_page_keywords_input_default"
-msgstr "Please enter at least 3 characters"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:164
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:259
-msgid "document_details_page_keywords_input_options_no_options"
-msgstr "No options"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:366
-msgid "keywords_concept_added_success"
-msgstr "Keyword successfully added."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.test.tsx:391
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
-msgid "document_details_page_keywords_input_options_no_vocabs"
-msgstr "Please select one vocabulary at least"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:249
-msgid "document_details_page_keywords_input_options_loading"
-msgstr "Loading..."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:253
-msgid "document_details_page_keywords_input_options_fetch_error"
-msgstr "An error occurs"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:288
-msgid "document_details_page_keywords_input_fetch_error_label"
-msgstr "Error loading suggestions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr "Disciplines"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:402
@@ -340,75 +224,80 @@ msgid "document_details_page_source_tab_select_action_unmerge_label"
 msgstr "Dissociate"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:225
+msgid "concept_chips_free_keyword"
+msgstr "Loose keyword"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:242
+msgid "concept_chips_pref_label"
+msgstr "Main variations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:271
+msgid "concept_chips_alt_label"
+msgstr "Other variations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:343
+msgid "concept_chip_action_delete"
+msgstr "Delete"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
+msgid "document_details_page_keywords_input_options_loading"
+msgstr "Loading..."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:261
+msgid "document_details_page_keywords_input_options_fetch_error"
+msgstr "An error occurs"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:263
+msgid "document_details_page_keywords_input_default"
+msgstr "Please enter at least 3 characters"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:265
+msgid "document_details_page_keywords_input_options_no_vocabs"
+msgstr "Please select one vocabulary at least"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:267
+msgid "document_details_page_keywords_input_options_no_options"
+msgstr "No options"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:296
+msgid "document_details_page_keywords_input_fetch_error_label"
+msgstr "Error loading suggestions"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
 msgid "document_details_page_add_in_hal_tab_card_title"
 msgstr "Add in HAL"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Sources.test.tsx:214
-msgid "document_details_page_sources_row_update_source"
-msgstr "Compare sources"
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr "Disciplines"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:128
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:101
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:163
-msgid "document_details_page_titles_row_label"
-msgstr "Title"
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
+msgid "bibliographic_information_update_success"
+msgstr "Bibliographic information updated."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:102
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:132
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:186
-msgid "document_details_page_no_title_available"
-msgstr "N/C"
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
+msgid "bibliographic_information_update_failure"
+msgstr "Failed to update bibliographic information."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:131
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Row.test.tsx:131
-msgid "document_details_page_type_row_label"
-msgstr "Type of document"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.test.tsx:128
-msgid "documents_page_publication_date_column_no_date_available"
-msgstr "No date available"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:120
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
 msgid "document_details_page_card_title"
 msgstr "Bibliographic information"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:134
-msgid "document_details_page_authors_row_label"
-msgstr "Authors"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:138
-msgid "document_details_page_publication_date_row_label"
-msgstr "Publication date"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:142
-msgid "document_details_page_identifiers_row_label"
-msgstr "Identifiers"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:145
-msgid "document_details_page_journal_row_label"
-msgstr "Published in"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:148
-msgid "document_details_page_abstracts_row_label"
-msgstr "Summary"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.test.tsx:151
-msgid "document_details_page_sources_row_label"
-msgstr "Sources"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:114
@@ -421,15 +310,9 @@ msgid "document_details_page_publication_date_update_failure"
 msgstr "Failed to update publication date."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
-msgid "bibliographic_information_update_success"
-msgstr "Bibliographic information updated."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
-msgid "bibliographic_information_update_failure"
-msgstr "Failed to update bibliographic information."
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:91
+msgid "documents_details_page_authors_tab_title"
+msgstr "Authors"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:154
@@ -445,6 +328,16 @@ msgstr "Back to home page"
 #: src/app/[lang]/components/ErrorFallback.tsx:103
 msgid "internal_server_page_description"
 msgstr "The server detected an internal error and was unable to process your request. Please try again later!"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:34
+msgid "profile_affiliations_card_title"
+msgstr "My affiliations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:36
+msgid "profile_affiliations_card_title_other"
+msgstr "Affiliations"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/notification/index.tsx:27
@@ -488,19 +381,14 @@ msgid "profile_affiliations_card_title_other"
 msgstr "Affiliations"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:59
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:215
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:215
-msgid "orcid_button_update_identifier"
-msgstr "Update ORCID authorizations"
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
+msgid "hal_button_update_identifier"
+msgstr "Link my Hal identifier"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:69
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.test.tsx:117
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:217
-msgid "orcid_button_provide_identifier"
-msgstr "Sign-in to ORCID"
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
+msgid "hal_button_provide_identifier"
+msgstr "Provide my Hal identifier"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
@@ -533,91 +421,16 @@ msgid "orcid_permissions_none"
 msgstr "You are not granting any permissions to {institutionName}."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:151
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:278
-msgid "orcid_identifier_no_orcid_provided"
-msgstr "No orcid identifier provided"
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:215
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:215
+msgid "orcid_button_update_identifier"
+msgstr "Update ORCID authorizations"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:169
-msgid "orcid_authentication_success"
-msgstr "ORCID validation successful"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:171
-msgid "orcid_authentication_failure"
-msgstr "ORCID validation failed. Try again or contact support"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:173
-msgid "orcid_authentication_failure_no_code"
-msgstr "No authentication code delivered from ORCID. Please try again or contact support"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:175
-msgid "orcid_authentication_failure_no_session"
-msgstr "ORCID validation failure : no session. Please try again or contact support"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:177
-msgid "orcid_authentication_failure_user_not_found"
-msgstr "ORCID validation failure : user not found. Please try again or contact support"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:179
-msgid "orcid_insert_failure"
-msgstr "Unable to add ORCID to database. Please try again or contact support."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:213
-msgid "orcid_account_linked_tooltip"
-msgstr "Your ORCID account is linked to your SoVisu+ account"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:291
-msgid "orcid_control_helper"
-msgstr "ORCID is a free, unique, persistent identifier (PID) for individuals to use as they engage in research, scholarship, and innovation activities. It can also help you save time when you use your ORCID to sign into systems like this one. Link your ORCID iD to uniquely identify your research outputs and improve metadata quality. Learn more about how ORCID helps you spend more time conducting your research and less time managing it at <0>orcid.org</0>."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:34
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
-msgid "hal_button_update_identifier"
-msgstr "Link my Hal identifier"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.test.tsx:44
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
-msgid "hal_button_provide_identifier"
-msgstr "Provide my Hal identifier"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:82
-msgid "profile_affiliations_units_label"
-msgstr "Research units"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.test.tsx:117
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
-msgid "profile_affiliations_no_units"
-msgstr "No related research unit"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:89
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
-msgid "profile_affiliations_signature_label"
-msgstr "My signature"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:180
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:64
-msgid "profile_affiliations_no_signature_message"
-msgstr "No signature"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.test.tsx:110
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
-msgid "profile_affiliations_signature_copied_message_confirmation"
-msgstr "Signature added to clipboard."
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrciLoginButton.tsx:217
+msgid "orcid_button_provide_identifier"
+msgstr "Sign-in to ORCID"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:118
@@ -625,9 +438,6 @@ msgid "hal_control_not_available"
 msgstr "No HAL identifier set"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:200
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:226
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:307
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:136
 msgid "hal_authentication_success"
 msgstr "HAL authentication successful"
@@ -678,7 +488,6 @@ msgid "hal_identifier_insert_failure"
 msgstr "Failed to insert HAL identifier into the database"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:214
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:156
 msgid "hal_authentication_failure_wrong_protocol"
 msgstr "To link your SoVisu+ account, do not use the ORCID option when authenticating on HAL"
@@ -694,12 +503,29 @@ msgid "hal_account_linked_tooltip"
 msgstr "Your SoVisu+ account is linked to your HAL account"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:125
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:237
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.test.tsx:295
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:225
 msgid "hal_control_helper"
 msgstr "By linking your Hal account to your Sovisu+ account, you will make your Hal ID more reliable and you will be able to easily submit missing publications to Hal."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
+msgid "profile_affiliations_no_units"
+msgstr "No related research unit"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
+msgid "profile_affiliations_signature_label"
+msgstr "My signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:64
+msgid "profile_affiliations_no_signature_message"
+msgstr "No signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
+msgid "profile_affiliations_signature_copied_message_confirmation"
+msgstr "Signature added to clipboard."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
@@ -733,7 +559,7 @@ msgstr "Source type: {0}"
 msgid "document_details_page_journal_publisher"
 msgstr "Publisher: {0}"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/HalProfileSuggestionCard.tsx:22
+#: src/app/[lang]/documents/[uid]/components/Authors/components/HalProfileSuggestionCard.tsx:23
 msgid "{count, plural, one {# publication in HAL} other {# publications in HAL}}"
 msgstr "{count, plural, one {# publication in HAL} other {# publications in HAL}}"
 
@@ -1060,7 +886,7 @@ msgstr "Department"
 msgid "documents_details_page_authors_tab_affiliation_type_institution"
 msgstr "Institution"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationCard.tsx:119
+#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationCard.tsx:127
 msgid "documents_details_page_authors_tab_affiliation_type_label"
 msgstr "Type"
 
@@ -1068,7 +894,7 @@ msgstr "Type"
 msgid "documents_details_page_authors_tab_affiliation_type_laboratory"
 msgstr "Laboratory"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationCard.tsx:131
+#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationCard.tsx:139
 msgid "documents_details_page_authors_tab_affiliation_type_none"
 msgstr "None"
 
@@ -1080,7 +906,7 @@ msgstr "Group of laboratories"
 msgid "documents_details_page_authors_tab_affiliation_type_researchteam"
 msgstr "Research Team"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/AuthorsToolbar.tsx:59
+#: src/app/[lang]/documents/[uid]/components/Authors/components/AuthorsToolbar.tsx:49
 msgid "documents_details_page_authors_tab_affiliations_count"
 msgstr "Affiliations"
 
@@ -1092,11 +918,11 @@ msgstr "Align"
 msgid "documents_details_page_authors_tab_cancel"
 msgstr "Cancel"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/HalProfileSuggestionCard.tsx:144
+#: src/app/[lang]/documents/[uid]/components/Authors/components/HalProfileSuggestionCard.tsx:146
 msgid "documents_details_page_authors_tab_confirm_profile"
 msgstr "Confirm"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/AuthorsToolbar.tsx:53
+#: src/app/[lang]/documents/[uid]/components/Authors/components/AuthorsToolbar.tsx:43
 msgid "documents_details_page_authors_tab_contributors_count"
 msgstr "Contributors"
 
@@ -1112,23 +938,23 @@ msgstr "Drag to reorder"
 msgid "documents_details_page_authors_tab_edit_identification"
 msgstr "Change the identification"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/HalAuthorAutocomplete.tsx:94
+#: src/app/[lang]/documents/[uid]/components/Authors/components/HalAuthorAutocomplete.tsx:95
 msgid "documents_details_page_authors_tab_hal_add_contributor"
 msgstr "Add contributor"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/HalAuthorAutocomplete.tsx:55
+#: src/app/[lang]/documents/[uid]/components/Authors/components/HalAuthorAutocomplete.tsx:56
 #: src/app/[lang]/documents/[uid]/components/Authors/components/HalStructureAutocomplete.tsx:42
 #: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalInstitutionAutocomplete.tsx:66
 msgid "documents_details_page_authors_tab_hal_error"
 msgstr "The HAL request failed. Please try again."
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/HalAuthorAutocomplete.tsx:53
+#: src/app/[lang]/documents/[uid]/components/Authors/components/HalAuthorAutocomplete.tsx:54
 #: src/app/[lang]/documents/[uid]/components/Authors/components/HalStructureAutocomplete.tsx:40
 #: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalInstitutionAutocomplete.tsx:64
 msgid "documents_details_page_authors_tab_hal_min_chars"
 msgstr "Type at least 2 characters to search"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/HalAuthorAutocomplete.tsx:57
+#: src/app/[lang]/documents/[uid]/components/Authors/components/HalAuthorAutocomplete.tsx:58
 msgid "documents_details_page_authors_tab_hal_no_results"
 msgstr "No matching HAL profile"
 
@@ -1137,7 +963,7 @@ msgstr "No matching HAL profile"
 msgid "documents_details_page_authors_tab_hal_not_found"
 msgstr "Not found"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/HalAuthorAutocomplete.tsx:135
+#: src/app/[lang]/documents/[uid]/components/Authors/components/HalAuthorAutocomplete.tsx:140
 msgid "documents_details_page_authors_tab_hal_search_placeholder"
 msgstr "Search a profile in HAL"
 
@@ -1150,6 +976,14 @@ msgstr "Search an organization in HAL"
 msgid "documents_details_page_authors_tab_hal_suggestion"
 msgstr "HAL suggestion"
 
+#: src/app/[lang]/documents/[uid]/components/Authors/components/HalValidityLabel.tsx:15
+msgid "documents_details_page_authors_tab_hal_validity_incoming"
+msgstr "INCOMING"
+
+#: src/app/[lang]/documents/[uid]/components/Authors/components/HalValidityLabel.tsx:14
+msgid "documents_details_page_authors_tab_hal_validity_preferred"
+msgstr "PREFERRED"
+
 #: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationSuggestions.tsx:204
 #: src/app/[lang]/documents/[uid]/components/Authors/components/HalProfileSuggestions.tsx:94
 msgid "documents_details_page_authors_tab_hide"
@@ -1159,7 +993,7 @@ msgstr "Hide"
 msgid "documents_details_page_authors_tab_hide_hal_search"
 msgstr "Hide search in HAL autocomplete"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationCard.tsx:176
+#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationCard.tsx:184
 msgid "documents_details_page_authors_tab_imported_text"
 msgstr "Imported text:"
 
@@ -1167,7 +1001,7 @@ msgstr "Imported text:"
 msgid "documents_details_page_authors_tab_insert_contributor"
 msgstr "Insert contributor here"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationCard.tsx:168
+#: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationCard.tsx:176
 msgid "documents_details_page_authors_tab_missing_affiliation"
 msgstr "Missing HAL affiliation"
 
@@ -1199,11 +1033,11 @@ msgstr "Unsaved changes"
 msgid "documents_details_page_authors_tab_new_contributor"
 msgstr "New contributor"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/HalProfileSuggestionCard.tsx:21
+#: src/app/[lang]/documents/[uid]/components/Authors/components/HalProfileSuggestionCard.tsx:22
 msgid "documents_details_page_authors_tab_no_publication"
 msgstr "No publication found on HAL"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/components/AuthorsToolbar.tsx:49
+#: src/app/[lang]/documents/[uid]/components/Authors/components/AuthorsToolbar.tsx:39
 msgid "documents_details_page_authors_tab_ranking_mode"
 msgstr "Ranking mode"
 
@@ -1228,7 +1062,7 @@ msgstr "Select roles"
 msgid "documents_details_page_authors_tab_save"
 msgstr "Save"
 
-#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:49
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:53
 msgid "documents_details_page_authors_tab_save_error"
 msgstr "Failed to save the contributions. Please try again."
 
@@ -1265,10 +1099,6 @@ msgstr "Supervised by:"
 #: src/app/[lang]/documents/[uid]/components/Authors/components/AffiliationSuggestions.tsx:105
 msgid "documents_details_page_authors_tab_supervised_by_other"
 msgstr "Supervised by:"
-
-#: src/app/[lang]/documents/[uid]/components/Authors/components/AuthorsToolbar.tsx:30
-msgid "documents_details_page_authors_tab_title"
-msgstr "Authors"
 
 #: src/app/[lang]/documents/[uid]/components/Authors/components/UnsavedBanner.tsx:36
 msgid "documents_details_page_authors_tab_unsaved_changes"
@@ -1604,55 +1434,55 @@ msgstr "This page will allow you to characterize your research objects in order 
 msgid "expertise_page_wip_title"
 msgstr "Research areas : work in progress"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:894
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:939
 msgid "hal_deposit_add_complementary_file"
 msgstr "Add a complementary file"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:480
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:613
 msgid "hal_deposit_button_back"
 msgstr "Back"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:490
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:623
 msgid "hal_deposit_button_confirm"
 msgstr "Confirm deposit"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:923
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:968
 msgid "hal_deposit_button_review"
 msgstr "Review"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:488
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:621
 msgid "hal_deposit_button_submitting"
 msgstr "Submitting…"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:875
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:920
 msgid "hal_deposit_complementary_files_heading"
 msgstr "Complementary files (optional)"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:712
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:757
 msgid "hal_deposit_domains_placeholder"
 msgstr "Select domains"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:369
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:409
 msgid "hal_deposit_error_failed"
 msgstr "Deposit failed"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:416
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:739
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:479
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:784
 msgid "hal_deposit_field_book_title"
 msgstr "Book title"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:428
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:761
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:491
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:806
 msgid "hal_deposit_field_conference_city"
 msgstr "Conference city"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:440
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:794
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:503
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:839
 msgid "hal_deposit_field_conference_country"
 msgstr "Conference country"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:434
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:770
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:497
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:815
 msgid "hal_deposit_field_conference_start_date"
 msgstr "Conference starting date"
 
@@ -1686,60 +1516,80 @@ msgstr "Month"
 msgid "hal_deposit_field_conference_start_date_step_year"
 msgstr "Year"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:422
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:750
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:485
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:795
 msgid "hal_deposit_field_conference_title"
 msgstr "Conference title"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:407
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:686
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:689
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:470
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:731
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:734
 msgid "hal_deposit_field_document_type"
 msgstr "Document type"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:462
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:711
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:525
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:756
 msgid "hal_deposit_field_domains"
 msgstr "HAL domains"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:471
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:584
+msgid "hal_deposit_field_file_source"
+msgstr "Source"
+
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:588
+msgid "hal_deposit_field_file_type"
+msgstr "Type"
+
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:592
+msgid "hal_deposit_field_file_visibility"
+msgstr "Visibility"
+
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:551
 msgid "hal_deposit_field_files"
 msgstr "Files"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:450
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:803
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:513
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:848
 msgid "hal_deposit_field_institution"
 msgstr "Institution"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:599
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:1051
 msgid "hal_deposit_field_journal"
 msgstr "Journal"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:411
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:719
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:722
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:536
+msgid "hal_deposit_field_keywords"
+msgstr "Keywords"
+
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:474
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:764
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:767
 msgid "hal_deposit_field_language"
 msgstr "Language"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:585
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:598
+msgid "hal_deposit_field_license"
+msgstr "License"
+
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:1043
 msgid "hal_deposit_field_publication_date"
 msgstr "Publication date"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:309
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:349
 msgid "hal_deposit_field_supervisor_hdr"
 msgstr "Jury president"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:310
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:350
 msgid "hal_deposit_field_supervisor_these"
 msgstr "Thesis supervisor"
-
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:405
-msgid "hal_deposit_field_title"
-msgstr "Title"
 
 #: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/AttachedFileRow.tsx:72
 msgid "hal_deposit_file_choose"
 msgstr "Choose a file"
+
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:579
+msgid "hal_deposit_file_complementary"
+msgstr "Complementary file"
 
 #: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/AttachedFileRow.tsx:134
 msgid "hal_deposit_file_license"
@@ -1748,6 +1598,10 @@ msgstr "License"
 #: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/AttachedFileRow.tsx:134
 msgid "hal_deposit_file_license_required"
 msgstr "License *"
+
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:577
+msgid "hal_deposit_file_main"
+msgstr "Main file"
 
 #: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/AttachedFileRow.tsx:103
 msgid "hal_deposit_file_remove"
@@ -1765,7 +1619,7 @@ msgstr "File's type"
 msgid "hal_deposit_file_visibility"
 msgstr "File visibility"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:475
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:554
 msgid "hal_deposit_files_notice_only"
 msgstr "Notice only (no file)"
 
@@ -1781,55 +1635,55 @@ msgstr "Document (pdf, jpg…)"
 msgid "hal_deposit_filetype_source"
 msgstr "Source file (docx, tex…)"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:673
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:718
 msgid "hal_deposit_form_affiliations_note"
 msgstr "Some contributor's affiliations are not recognized by HAL and won't be submitted. Go to the Author tab if you want to change it."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:506
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:192
 msgid "hal_deposit_form_heading"
 msgstr "Deposit in HAL"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:513
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:638
 msgid "hal_deposit_form_metadata_note"
 msgstr "Title, abstract, date, journal and authors are taken from the other tabs."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:234
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:274
 msgid "hal_deposit_gate_go_biblio"
 msgstr "Go to Bibliographic information"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:223
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:263
 msgid "hal_deposit_gate_go_my_account"
 msgstr "Go to My Account"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:554
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:679
 msgid "hal_deposit_gate_missing_bilingual_abstract"
 msgstr "This document must have both a French and an English abstract before it can be deposited. Please add the missing abstract."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:530
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:655
 msgid "hal_deposit_gate_missing_bilingual_keywords"
 msgstr "This document must have at least one French and one English keyword before a thesis or HDR can be deposited. Please add the missing keywords in the Keywords tab."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:549
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:674
 msgid "hal_deposit_gate_missing_bilingual_title"
 msgstr "This document must have both a French and an English title before it can be deposited. Please add the missing title."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:623
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:710
 msgid "hal_deposit_gate_no_affiliation"
 msgstr "HAL requires at least one identified affiliation across the publication's contributors. Please go to the Author tab to complete the information."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:233
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:273
 msgid "hal_deposit_gate_no_date"
 msgstr "This document has no publication date. Please add one before depositing."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:212
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:252
 msgid "hal_deposit_gate_no_hal_id"
 msgstr "A HAL login or identifier is necessary to perform a submission. If you would like to do so, please complete your HAL information on the MyAccount page."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:214
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:254
 msgid "hal_deposit_gate_no_hal_id_other"
 msgstr "A HAL login or identifier is necessary to perform a submission. To do so, the HAL information must be completed on the MyAccount page."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:559
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:684
 msgid "hal_deposit_gate_no_journal"
 msgstr "This article has no journal. Please add one before depositing."
 
@@ -1865,51 +1719,54 @@ msgstr "Copyright – All rights reserved"
 msgid "hal_deposit_license_etalab"
 msgstr "ETALAB – Open Licence"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:849
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:894
 msgid "hal_deposit_main_file_heading"
 msgstr "Main file (optional, PDF)"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:845
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:890
 msgid "hal_deposit_main_file_heading_required"
 msgstr "Main file (PDF)"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:617
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:704
 msgid "hal_deposit_modify_in_authors"
 msgstr "Edit in the Authors tab"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:543
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:668
 msgid "hal_deposit_modify_in_biblio"
 msgstr "Edit in Bibliographic information"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:526
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:651
 msgid "hal_deposit_modify_in_keywords"
 msgstr "Edit in the Keywords tab"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:579
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:1037
 msgid "hal_deposit_no_abstract"
 msgstr "No abstract provided"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:632
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:1075
 msgid "hal_deposit_no_authors"
 msgstr "No author provided"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:567
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:1025
 msgid "hal_deposit_no_title"
 msgstr "No title provided"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:398
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:190
 msgid "hal_deposit_review_heading"
-msgstr "Review your deposit"
+msgstr "Deposit recap"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:610
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:463
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:697
 msgid "hal_deposit_section_authors"
 msgstr "Authors and affiliations"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:536
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:452
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:661
 msgid "hal_deposit_section_bibliographic"
 msgstr "Bibliographic information"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:682
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:468
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:727
 msgid "hal_deposit_section_metadata"
 msgstr "Deposit metadata"
 
@@ -2008,7 +1865,7 @@ msgstr "Replaced"
 msgid "hal_deposit_status_submitted_on"
 msgstr "Submitted on"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:814
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit.tsx:859
 msgid "hal_deposit_supervisor_none"
 msgstr "No contributor has the required role for this field. Please add or tag a contributor with the relevant role in the Authors tab."
 
@@ -2076,27 +1933,13 @@ msgstr "Immediately"
 msgid "hal_submit_type_annex"
 msgstr "Annex"
 
-#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.test.tsx:45
-#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.test.tsx:105
-#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.test.tsx:57
-#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.test.tsx:140
-#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.test.tsx:166
-#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.test.tsx:202
-#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.test.tsx:233
 #: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:16
 msgid "hal_submit_type_file"
 msgstr "File"
 
-#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.test.tsx:84
 #: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:18
 msgid "hal_submit_type_notice"
 msgstr "Notice"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/LanguageProvider.test.tsx:13
-#: src/app/[lang]/LanguageProvider.test.tsx:29
-msgid "hello"
-msgstr "Hello"
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdentifierPill.tsx:66
 msgid "identifier_pill_collapse"
@@ -2189,6 +2032,14 @@ msgstr "Recent publications"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx:101
 msgid "idref_info_box_title"
 msgstr "IdRef Information"
+
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:199
+msgid "keywords_concept_added_failure"
+msgstr "Failed to add the keyword. Please try again."
+
+#: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:197
+msgid "keywords_concept_added_success"
+msgstr "Keyword successfully added."
 
 #: src/app/[lang]/components/LanguageSwitcher/LanguageSwitcher.tsx:32
 msgid "language_en"
@@ -2312,9 +2163,6 @@ msgstr "Help"
 msgid "sidebar_logout"
 msgstr "Logout"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:118
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:195
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:214
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:83
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:94
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:98
@@ -2324,14 +2172,10 @@ msgstr "Logout"
 msgid "sidebar_search_people"
 msgstr "Researchers"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:129
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:432
 msgid "sidebar_search_placeholder"
 msgstr "Search"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:120
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:161
-#: src/app/[lang]/components/SearchInput/SearchInput.test.tsx:217
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:85
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:100
 #: src/app/[lang]/components/SearchInput/SearchInput.tsx:194

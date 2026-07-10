@@ -3,6 +3,7 @@ import { Avatar, Box, Button, Stack, Typography } from '@mui/material'
 import { t, plural } from '@lingui/core/macro'
 import { AureHalAuthorDoc } from '@/lib/services/AureHalAPIClient'
 import { authorInitials } from '../lib/halAuthorProfile'
+import HalValidityLabel from './HalValidityLabel'
 
 interface HalProfileSuggestionCardProps {
   doc: AureHalAuthorDoc
@@ -126,6 +127,7 @@ const HalProfileSuggestionCard = ({
               sx={{ width: 14, height: 14, objectFit: 'contain' }}
             />
           ) : null}
+          <HalValidityLabel validity={doc.valid_s} />
         </Stack>
         {secondLine && (
           <Typography variant='caption' color='textSecondary' component='div'>
