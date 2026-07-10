@@ -20,7 +20,10 @@ export type HalSearchState<T> = {
  * surfaces as `error`.
  */
 export function useDebouncedHalSearch<T>(
-  endpoint: '/api/hal/authors' | '/api/hal/structures',
+  endpoint:
+    | '/api/hal/authors'
+    | '/api/hal/structures'
+    | '/api/hal/institutions',
 ): HalSearchState<T> {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)

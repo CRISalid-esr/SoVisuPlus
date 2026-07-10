@@ -17,9 +17,11 @@ export interface CreateHalDepositParams {
   language: string
   conferenceTitle?: string | null
   conferenceCity?: string | null
+  conferenceStartDate?: string | null
   conferenceCountry?: string | null
   institution?: string | null
   bookTitle?: string | null
+  supervisor?: string | null
 }
 
 export interface HalDepositFileInput {
@@ -54,9 +56,11 @@ export class HalDepositDAO extends AbstractDAO {
         language: params.language,
         conferenceTitle: params.conferenceTitle ?? null,
         conferenceCity: params.conferenceCity ?? null,
+        conferenceStartDate: params.conferenceStartDate ?? null,
         conferenceCountry: params.conferenceCountry ?? null,
         institution: params.institution ?? null,
         bookTitle: params.bookTitle ?? null,
+        supervisor: params.supervisor ?? null,
       },
       include: depositInclude,
     })

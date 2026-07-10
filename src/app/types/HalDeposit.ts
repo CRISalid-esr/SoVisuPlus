@@ -1,4 +1,7 @@
-import { HalDepositStatus, HalDepositFile as DbHalDepositFile } from '@prisma/client'
+import {
+  HalDepositStatus,
+  HalDepositFile as DbHalDepositFile,
+} from '@prisma/client'
 import { HalDepositWithRelations as DbHalDeposit } from '@/prisma-schema/extended-client'
 
 export { HalDepositStatus }
@@ -76,9 +79,11 @@ interface HalDepositJson {
   language: string
   conferenceTitle: string | null
   conferenceCity: string | null
+  conferenceStartDate: string | null
   conferenceCountry: string | null
   institution: string | null
   bookTitle: string | null
+  supervisor: string | null
   files: HalDepositFileJson[]
   createdAt: string
   updatedAt: string
@@ -105,9 +110,11 @@ class HalDeposit {
     public language: string,
     public conferenceTitle: string | null,
     public conferenceCity: string | null,
+    public conferenceStartDate: string | null,
     public conferenceCountry: string | null,
     public institution: string | null,
     public bookTitle: string | null,
+    public supervisor: string | null,
     public files: HalDepositFile[],
     public createdAt: Date,
     public updatedAt: Date,
@@ -134,9 +141,11 @@ class HalDeposit {
       db.language,
       db.conferenceTitle,
       db.conferenceCity,
+      db.conferenceStartDate,
       db.conferenceCountry,
       db.institution,
       db.bookTitle,
+      db.supervisor,
       (db.files ?? []).map((f) => HalDepositFile.fromDb(f)),
       db.createdAt,
       db.updatedAt,
@@ -167,9 +176,11 @@ class HalDeposit {
       language: this.language,
       conferenceTitle: this.conferenceTitle,
       conferenceCity: this.conferenceCity,
+      conferenceStartDate: this.conferenceStartDate,
       conferenceCountry: this.conferenceCountry,
       institution: this.institution,
       bookTitle: this.bookTitle,
+      supervisor: this.supervisor,
       files: this.files.map((f) => f.toJson()),
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt.toISOString(),

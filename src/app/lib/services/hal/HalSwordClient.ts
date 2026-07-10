@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import { DepositArtifact } from '@/lib/services/hal/HalDepositPackager'
 
-const DEFAULT_ENDPOINT = 'https://api-preprod.archives-ouvertes.fr/sword/hal/'
+const DEFAULT_HAL_ENDPOINT = 'https://api.archives-ouvertes.fr'
 const PACKAGING = 'http://purl.org/net/sword-types/AOfr'
 
 export interface SwordResponse {
@@ -12,15 +12,24 @@ export interface SwordResponse {
 /**
  * Thin HTTP layer over the HAL SWORD API. The only class that performs network I/O against HAL.
  * No database access, no XML parsing, no domain logic. Credentials and endpoint come from the
- * environment (`HAL_SWORD_ENDPOINT`, `HAL_SERVICE_ACCOUNT_LOGIN`, `HAL_SERVICE_ACCOUNT_PASSWORD`).
+ * environment (`HAL_ENDPOINT`, `HAL_SERVICE_ACCOUNT_LOGIN`, `HAL_SERVICE_ACCOUNT_PASSWORD`). The
+ * SWORD collection URL is derived as `HAL_ENDPOINT` + `/sword/hal/`.
  */
 export class HalSwordClient {
-  private readonly endpoint: string
+  /** SWORD deposit collection URL — `HAL_ENDPOINT` + `/sword/hal/`. */
+  private readonly swordEndpoint: string
+  /** SWORD base one level above the collection — `HAL_ENDPOINT` + `/sword/` — used for status reads. */
+  private readonly swordBase: string
   private readonly login: string
   private readonly password: string
 
   constructor() {
-    this.endpoint = process.env.HAL_SWORD_ENDPOINT ?? DEFAULT_ENDPOINT
+    const base = (process.env.HAL_ENDPOINT ?? DEFAULT_HAL_ENDPOINT).replace(
+      /\/+$/,
+      '',
+    )
+    this.swordBase = `${base}/sword/`
+    this.swordEndpoint = `${this.swordBase}hal/`
     this.login = process.env.HAL_SERVICE_ACCOUNT_LOGIN ?? ''
     this.password = process.env.HAL_SERVICE_ACCOUNT_PASSWORD ?? ''
   }
@@ -42,7 +51,7 @@ export class HalSwordClient {
       headers['Content-Disposition'] = artifact.contentDisposition
     }
 
-    const res = await fetch(this.endpoint, {
+    const res = await fetch(this.swordEndpoint, {
       method: 'POST',
       headers,
       body,
@@ -71,7 +80,6 @@ export class HalSwordClient {
    * `.../sword/hal/` but status is read from `.../sword/<hal-id>`.
    */
   private statusUrl(halId: string): string {
-    const base = this.endpoint.replace(/\/hal\/?$/, '/')
-    return `${base.endsWith('/') ? base : `${base}/`}${halId}`
+    return `${this.swordBase}${halId}`
   }
 }

@@ -5,6 +5,7 @@ import path from 'node:path'
 import { HalTEIInterchangeService } from '@/lib/services/hal/HalTEIInterchangeService'
 import { DocumentType, Document as DocumentClass } from '@/types/Document'
 import { Literal } from '@/types/Literal'
+import { Concept } from '@/types/Concept'
 import { Journal } from '@/types/Journal'
 import { Contribution } from '@/types/Contribution'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
@@ -181,6 +182,48 @@ describe('HalTEIInterchangeService', () => {
       // doctype
       expect(out).toContain('scheme="halTypology"')
       expect(out).toContain('n="ART"')
+    })
+
+    it('emits fr+en subject keywords for a THESE (other languages dropped)', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.subjects = [
+        new Concept('c-1', [
+          new Literal('mécanique quantique', 'fr'),
+          new Literal('quantum mechanics', 'en'),
+          new Literal('Quantenmechanik', 'de'),
+        ]),
+      ]
+
+      const out = service.toHalTEI(doc, { halDocumentType: 'THESE' })
+
+      expect(out).toContain('<keywords scheme="author">')
+      expect(out).toContain('<term xml:lang="fr">mécanique quantique</term>')
+      expect(out).toContain('<term xml:lang="en">quantum mechanics</term>')
+      expect(out).not.toContain('Quantenmechanik')
+    })
+
+    it('emits one term per subject for non-thesis types (fr preferred, en fallback)', () => {
+      const doc = makeDoc(DocumentType.Article)
+      doc.subjects = [
+        new Concept('c-fr', [
+          new Literal('physique', 'fr'),
+          new Literal('physics', 'en'),
+        ]),
+        new Concept('c-en', [new Literal('astronomy', 'en')]),
+      ]
+
+      const out = service.toHalTEI(doc)
+
+      // French subject → French term only (English preferred label dropped).
+      expect(out).toContain('<term xml:lang="fr">physique</term>')
+      expect(out).not.toContain('physics')
+      // English-only subject → English term as fallback.
+      expect(out).toContain('<term xml:lang="en">astronomy</term>')
+    })
+
+    it('emits no keywords element when the document has no subjects', () => {
+      const out = service.toHalTEI(makeDoc(DocumentType.Article))
+      expect(out).not.toContain('<keywords')
     })
 
     it('writes monogr journal title + imprint volume/issue/pages/datePub when journal is provided', () => {
@@ -419,7 +462,7 @@ describe('HalTEIInterchangeService', () => {
         [DocumentType.Monograph, 'OUV'],
         [DocumentType.BookChapter, 'COUV'],
         [DocumentType.BookOfChapters, 'OUV'],
-        [DocumentType.Presentation, 'PRESCONF'],
+        [DocumentType.Presentation, 'COMM'],
         [DocumentType.Comment, 'NOTE'],
         [DocumentType.Document, 'UNDEFINED'],
         [DocumentType.ScholarlyPublication, 'UNDEFINED'],
@@ -482,6 +525,100 @@ describe('HalTEIInterchangeService', () => {
       const out = service.toHalTEI(makeDoc(DocumentType.Article))
       expect(out).not.toContain('editionStmt')
       expect(out).not.toContain('publicationStmt')
+    })
+
+    describe('per-type conditional metadata', () => {
+      it('emits the book title as monogr/title[@level="m"] for COUV', () => {
+        const doc = makeDoc(DocumentType.BookChapter)
+        doc.publicationDate = '2016'
+        const out = service.toHalTEI(doc, {
+          halDocumentType: 'COUV',
+          bookTitle: 'Titre ouvrage',
+        })
+        expect(out).toContain('<title level="m">Titre ouvrage</title>')
+        // the skeleton's empty journal title must not linger
+        expect(out).not.toContain('<title level="j"/>')
+        expect(out).not.toContain('<title level="j"></title>')
+      })
+
+      it('emits monogr/meeting with title, start date (text), settlement and country key', () => {
+        const doc = makeDoc(DocumentType.ConferenceArticle)
+        doc.publicationDate = '2016'
+        const out = service.toHalTEI(doc, {
+          halDocumentType: 'COMM',
+          conferenceTitle: 'My Conference',
+          conferenceStartDate: '2016-01',
+          conferenceCity: 'Prague',
+          conferenceCountry: 'CZ',
+        })
+        expect(out).toContain('<meeting>')
+        expect(out).toContain('<title>My Conference</title>')
+        expect(out).toContain('<date type="start">2016-01</date>')
+        expect(out).toContain('<settlement>Prague</settlement>')
+        expect(out).toContain('<country key="CZ"/>')
+        // meeting child order: title < date < settlement < country
+        const m = out.slice(out.indexOf('<meeting>'), out.indexOf('</meeting>'))
+        expect(m.indexOf('<title>')).toBeLessThan(m.indexOf('<date'))
+        expect(m.indexOf('<date')).toBeLessThan(m.indexOf('<settlement>'))
+        expect(m.indexOf('<settlement>')).toBeLessThan(m.indexOf('<country'))
+        // meeting sits before imprint in monogr
+        expect(out.indexOf('<meeting>')).toBeLessThan(out.indexOf('<imprint>'))
+      })
+
+      it('emits monogr/authority[@type="institution"] for REPORT', () => {
+        const doc = makeDoc(DocumentType.ScholarlyPublication)
+        doc.publicationDate = '2016'
+        const out = service.toHalTEI(doc, {
+          halDocumentType: 'REPORT',
+          institution: 'Some University',
+        })
+        expect(out).toContain(
+          '<authority type="institution">Some University</authority>',
+        )
+      })
+
+      it('emits institution + supervisor authorities and dateDefended for THESE', () => {
+        const doc = makeDoc(DocumentType.ScholarlyPublication)
+        doc.publicationDate = '2014-03-26'
+        const out = service.toHalTEI(doc, {
+          halDocumentType: 'THESE',
+          institution: "Université d'appartenance",
+          supervisor: 'Superviseur',
+        })
+        expect(out).toContain(
+          '<authority type="institution">Université d\'appartenance</authority>',
+        )
+        expect(out).toContain(
+          '<authority type="supervisor">Superviseur</authority>',
+        )
+        // institution authority appears before supervisor authority
+        expect(out.indexOf('type="institution"')).toBeLessThan(
+          out.indexOf('type="supervisor"'),
+        )
+        // both datePub and dateDefended are emitted for a thesis
+        expect(out).toContain('<date type="datePub">2014-03-26</date>')
+        expect(out).toContain('<date type="dateDefended">2014-03-26</date>')
+        // authority is the last monogr child (after imprint)
+        expect(out.indexOf('<imprint>')).toBeLessThan(
+          out.indexOf('type="institution"'),
+        )
+      })
+
+      it('leaves ART output free of meeting/authority/book-title elements', () => {
+        const doc = makeDoc(DocumentType.Article)
+        doc.journal = new Journal(
+          'Foundations of Physics',
+          '1234-5678',
+          'Springer',
+          [],
+        )
+        doc.publicationDate = '2001'
+        const out = service.toHalTEI(doc, { halDocumentType: 'ART' })
+        expect(out).not.toContain('<meeting>')
+        expect(out).not.toContain('<authority type="supervisor"')
+        expect(out).not.toContain('type="dateDefended"')
+        expect(out).not.toContain('level="m"')
+      })
     })
 
     it('keeps biblFull child order: editionStmt before publicationStmt before sourceDesc', () => {

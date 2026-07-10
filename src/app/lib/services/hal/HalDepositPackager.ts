@@ -32,7 +32,10 @@ export class HalDepositPackager {
     private readonly tei: HalTEIInterchangeService = new HalTEIInterchangeService(),
   ) {}
 
-  async package(deposit: HalDeposit, document: Document): Promise<DepositArtifact> {
+  async package(
+    deposit: HalDeposit,
+    document: Document,
+  ): Promise<DepositArtifact> {
     const files = this.orderFiles(deposit.files)
     const xml = this.tei.toHalTEI(document, this.buildOptions(deposit, files))
 
@@ -87,9 +90,11 @@ export class HalDepositPackager {
       files: fileDescriptors.length ? fileDescriptors : undefined,
       conferenceTitle: deposit.conferenceTitle,
       conferenceCity: deposit.conferenceCity,
+      conferenceStartDate: deposit.conferenceStartDate,
       conferenceCountry: deposit.conferenceCountry,
       institution: deposit.institution,
       bookTitle: deposit.bookTitle,
+      supervisor: deposit.supervisor,
     }
   }
 }

@@ -12,6 +12,9 @@ export type DepositIneligibilityReason =
   | 'missing_identifiers'
   | 'missing_publication_date'
   | 'missing_journal'
+  | 'missing_bilingual_title'
+  | 'missing_bilingual_abstract'
+  | 'missing_bilingual_keywords'
   | 'no_hal_affiliation'
 
 export type DepositEligibility =
@@ -35,19 +38,55 @@ const hasRequiredHalIdentifiers = (
     person.hasIdentifier(PersonIdentifierType.idhals) ||
     person.hasIdentifier(PersonIdentifierType.idhali)
   if (!hasIdhal) return false
-  return allowUnauthenticated || person.hasIdentifier(PersonIdentifierType.hal_login)
+  return (
+    allowUnauthenticated || person.hasIdentifier(PersonIdentifierType.hal_login)
+  )
 }
 
 /** Org identifier types HAL recognises for an affiliation (RNSR/ROR/ISNI/IdRef). */
 const HAL_RECOGNISED_ORG_IDENTIFIERS = new Set(['nns', 'ror', 'isni', 'idref'])
+
+/** HAL requires a thesis/HDR to carry a bilingual (fr+en) title and keywords. */
+const THESIS_TYPES = new Set(['THESE', 'HDR'])
+
+/** A bilingual (fr+en) abstract is mandatory for a THESE, but not for an HDR. */
+const ABSTRACT_REQUIRED_TYPES = new Set(['THESE'])
+
+const hasBilingual = (
+  entries: { language: string; value?: string | null }[] | undefined,
+): boolean => {
+  const hasLang = (lang: string) =>
+    (entries ?? []).some((e) => e.language === lang && !!e.value?.trim())
+  return hasLang('fr') && hasLang('en')
+}
+
+const hasBilingualTitle = (document: Document): boolean =>
+  hasBilingual(document.titles)
+
+const hasBilingualAbstract = (document: Document): boolean =>
+  hasBilingual(document.abstracts)
+
+/**
+ * HAL requires a thesis/HDR to carry bilingual keywords: at least one subject preferred label in
+ * French and at least one in English. Keywords come from the document subjects (`Concept` labels).
+ */
+const hasBilingualKeywords = (document: Document): boolean => {
+  const langs = new Set(
+    (document.subjects ?? []).flatMap((subject) =>
+      subject.prefLabels
+        .filter((label) => label.value?.trim())
+        .map((label) => label.language),
+    ),
+  )
+  return langs.has('fr') && langs.has('en')
+}
 
 const hasHalRecognisedAffiliation = (document: Document): boolean =>
   (document.contributions ?? []).some((contribution) =>
     contribution.affiliations.some((org) =>
       org.identifiers.some(
         (id) =>
-          HAL_RECOGNISED_ORG_IDENTIFIERS.has(id.type) &&
-          !!id.value?.trim(),
+          HAL_RECOGNISED_ORG_IDENTIFIERS.has(id.type) && !!id.value?.trim(),
       ),
     ),
   )
@@ -77,6 +116,18 @@ export const validateDepositEligibility = (
 
   if (halType === 'ART' && !document.journal?.title?.trim()) {
     return { ok: false, reason: 'missing_journal' }
+  }
+
+  if (THESIS_TYPES.has(halType) && !hasBilingualTitle(document)) {
+    return { ok: false, reason: 'missing_bilingual_title' }
+  }
+
+  if (ABSTRACT_REQUIRED_TYPES.has(halType) && !hasBilingualAbstract(document)) {
+    return { ok: false, reason: 'missing_bilingual_abstract' }
+  }
+
+  if (THESIS_TYPES.has(halType) && !hasBilingualKeywords(document)) {
+    return { ok: false, reason: 'missing_bilingual_keywords' }
   }
 
   if (!hasHalRecognisedAffiliation(document)) {

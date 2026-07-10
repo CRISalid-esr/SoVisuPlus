@@ -8,7 +8,7 @@ The TEI-XML conversion from the internal database schema is already implemented 
 
 **Scope for this iteration: POST only** (new deposits). PUT (updating an existing HAL record) is deferred — it requires downloading the existing XML-TEI from HAL, pushing a new version, and using a HAL account with impersonation rights.
 
-The SWORD endpoint is configurable via `HAL_SWORD_ENDPOINT` (default: `https://api-preprod.archives-ouvertes.fr/sword/hal/`).
+The HAL API base is configurable via `HAL_ENDPOINT` (default: `https://api-preprod.archives-ouvertes.fr`); the SWORD collection URL is derived as `HAL_ENDPOINT` + `/sword/hal/`.
 
 ---
 
@@ -51,7 +51,7 @@ Example response body:
 
 Fields to extract and store: `<id>` (HAL identifier), `<hal:password>`, `<hal:version>`, href value in `<link rel="alternate">` (public URL).
 
-The document's internal UID is sent as `<idno type="localRef">` in the TEI before submission.
+The document's internal UID is sent as `monogr/idno[@type="localRef"]` in the TEI before submission.
 
 ---
 
@@ -178,6 +178,8 @@ One document can have multiple deposit attempts (1-n).
 | `createdAt`          | datetime  |                                                                                        |
 | `updatedAt`          | datetime  |                                                                                        |
 
+This table lists only the lifecycle columns. `HalDeposit` **also** stores the form's deposit metadata (`halDocumentType`, `halDomains`, `language`, and the per-type conditional fields) — those columns are defined in [Deposit-specific metadata stored on `HalDeposit`](#deposit-specific-metadata-stored-on-haldeposit) below, alongside their TEI mapping, rather than duplicated here.
+
 #### `HalDepositFile`
 
 Attached files for a deposit (0-n per deposit). One file is flagged as main; the rest are complementary. The HAL deposit form carries the source, type, visibility and license **per file**, so these are stored on `HalDepositFile` (not on `HalDeposit`).
@@ -192,7 +194,7 @@ Attached files for a deposit (0-n per deposit). One file is flagged as main; the
 | `mimeType`     | string   |                                                                                                                               |
 | `fileSource`   | string   | File's source code → TEI `ref/@subtype` (`author`, `greenPublisher`, `publisherAgreement`, `publisherPaid`)                   |
 | `fileType`     | string   | File's type code → TEI `ref/@type` (`file`, `src`, `annex`)                                                                   |
-| `visibility`   | string   | Embargo option (`now`, `15d`, `1m`, `3m`, `6m`, `1y`, `2y`); the listener computes `ref` `@notBefore` = deposit date + offset |
+| `visibility`   | string   | Embargo option (`now`, `15d`, `1m`, `3m`, `6m`, `1y`, `2y`); the listener emits the embargo as a `<date notBefore>` child of the file's `<ref>`, dated deposit date + offset (`now` → no date) |
 | `license`      | string?  | CC/ETALAB/Copyright code → TEI `availability/licence/@target`; required for the main file, nullable for complementary         |
 | `createdAt`    | datetime |                                                                                                                               |
 
@@ -245,7 +247,7 @@ Accepts a **multipart form** containing both deposit metadata fields and the fil
 - Creates the `HalDeposit` row with `status: pending`, linked to the document and to the **perspective person** (`personUid`, the person the deposit is made on behalf of — see HAL credentials), which the request carries.
 - Writes each uploaded file to `uploads/hal-files/<depositId>/<filename>` and creates the corresponding `HalDepositFile` rows (with their `fileSource`, `fileType`, `visibility`, `license`). At most one file may be flagged `isMain: true`.
 
-Authorization: requires `deposit_hal` permission for the perspective person, plus that person must have both `hal_login` and `idhals`/`idhali` identifiers stored. The endpoint also rejects deposits when: the submitted document type is not `enabled` in `halDepositFormConfig`; the document has no `publicationDate`; no author has a HAL-recognized affiliation; or (for `ART`) the document has no `journal`. The same validations the form runs client-side are re-checked here from the shared config.
+Authorization: requires `deposit_hal` permission for the perspective person, plus that person must have both `hal_login` and `idhals`/`idhali` identifiers stored. The endpoint also rejects deposits when: the submitted document type is not `enabled` in `halDepositFormConfig`; the document has no `publicationDate`; no author has a HAL-recognized affiliation; (for `ART`) the document has no `journal`; any `required` field for the type (per `halDepositFormConfig`) is missing; or (for `THESE`/`HDR`) the document does not have both a French and an English title (either one missing) or both a French and an English set of keywords, or (for `THESE` only) both a French and an English abstract (either one missing), or no main file was uploaded (`requiresMainFile`). The same validations the form runs client-side are re-checked here from the shared config.
 
 #### Status refresh endpoint
 
@@ -261,7 +263,7 @@ The deposit business logic is **not** implemented inline in the listener script.
 
 #### `HalSwordClient`
 
-Pure HTTP layer over the SWORD API — no database access, no domain logic. Reads `HAL_SWORD_ENDPOINT`, `HAL_SERVICE_ACCOUNT_LOGIN`, `HAL_SERVICE_ACCOUNT_PASSWORD` from the environment. Two methods:
+Pure HTTP layer over the SWORD API — no database access, no domain logic. Reads `HAL_ENDPOINT` (deriving the SWORD collection URL as `HAL_ENDPOINT` + `/sword/hal/`), `HAL_SERVICE_ACCOUNT_LOGIN`, `HAL_SERVICE_ACCOUNT_PASSWORD` from the environment. Two methods:
 
 - `deposit(payload)` — POSTs either the XML body (`Content-Type: text/xml`) or the ZIP (`Content-Type: application/zip` + `Content-Disposition`), with the `Packaging` and `On-Behalf-Of` headers. Returns the raw HTTP status code and body.
 - `getStatus(halId)` — GETs `<endpoint>/<halId>` and returns the raw body.
@@ -277,7 +279,7 @@ Parses HAL's XML responses into typed objects — no I/O. One method parses the 
 Turns a deposit and its `HalDepositFile` rows into the on-disk artifacts under `uploads/hal-tei/<depositId>/`. It:
 
 - Calls `HalTEIInterchangeService.toHalTEI()`, passing `halDeposit.halDocumentType` as `options.halDocumentType` (the conversion from `document.documentType` is only the fallback when this field is absent) and the other deposit-specific overrides.
-- Injects `<idno type="localRef">` with the document UID.
+- Injects the document UID as `monogr/idno[@type="localRef"]`.
 - When files exist, injects one `<ref .../>` element per file (with `@type` `file`/`src`/`annex` and `@subtype` the file source — see the file block) and builds `art.zip` (copying from `uploads/hal-files/`); otherwise writes only `art.xml`.
 
 Returns a descriptor (payload location, content type, xml-vs-zip) consumed by `HalSwordClient`. This class owns all filesystem concerns.
@@ -374,7 +376,10 @@ The component checks the following conditions before rendering the form. All are
 | Has permission but the perspective person is missing `hal_login` or `idhals`/`idhali`         | Info alert inviting the user to link the HAL account to the institutional account, with a direct link to the account page (`/[lang]/account`). No form is shown.                                                                                                                                                                  |
 | Has permission and HAL identifiers, but document has no `publicationDate`                     | Info alert: "This document has no publication date. Please add one before depositing." with a link to the Bibliographic information tab (`?tab=bibliographic_information`). No form is shown. The deposit creation endpoint also rejects such deposits server-side.                                                               |
 | No author has at least one affiliation with a HAL-recognized identifier (RNSR/ROR/ISNI/IdRef) | Error alert: "No author has an affiliation with a complying HAL identifier. Please go to the Author tab to complete the information." with a link to the Authors tab (`?tab=authors`). No form is shown. Also enforced server-side.                                                                                               |
-| Document type is `ART` but the document has no `journal`                                      | Info alert: "This article has no journal. Please add one before depositing." with a link to the Bibliographic information tab (`?tab=bibliographic_information`). No form is shown. Also rejected server-side. (Journal editing in that tab is a later iteration, so for now this is a hard prerequisite met via harvested data.) |
+
+> The **ART missing-journal rule is _not_ a form-hiding gate.** The form is shown for every document type. The deposit type is **pre-filled from the document's own (CERIF→HAL) type** (falling back to the first enabled type when the mapping is too coarse to be depositable), and the user can refine it. Only when `ART` is the selected type and the document has no `journal` does an inline warning appear (in the Bibliographic information section) and the **Review button is disabled**; for any non-`ART` type there is no journal requirement at all. It is still rejected server-side (`missing_journal`, ART-only). Journal editing in the Bibliographic information tab (with ISSN autocompletion) is a later iteration.
+
+> The **THESE/HDR bilingual-title, bilingual-abstract and bilingual-keywords rules are _not_ form-hiding gates** — unlike the rows above, the form is still shown. They are handled inline in Step 1 (see the read-only Title/abstract section): the form stays visible, an alert appears in the relevant section, and the **Review button is disabled** until both a French and an English title **and** a French and an English set of keywords exist (and, **for `THESE` only**, both a French and an English abstract — an HDR does not require an abstract). They are still rejected server-side (`missing_bilingual_title` / `missing_bilingual_abstract` / `missing_bilingual_keywords`) as a safety net.
 
 If the user doesn't have hal_login or idhals/idhali, the tab should displays following text : `A HAL login or identifier is necessary to perform a submission. If you would like to do so, please complete your HAL information on the MyAccount page.` and a button bellow 'Go to My Account' that opens the MyAccount page.
 Otherwise, the UI behaves according to following description.
@@ -387,49 +392,51 @@ The form is pre-populated from the document's existing data where possible.
 
 **Read-only sections** (data pulled from other tabs, with a link to edit there):
 
-- Title, abstract and date (from the _Bibliographic information_ tab)
-- For `ART`: the journal, read from the document's `journal` (also from the _Bibliographic information_ tab). It is shown read-only and is **not** an editable deposit field — it must already be present on the document (see the missing-journal gate above). Making the journal editable in the Bibliographic information tab (with ISSN autocompletion) is a later iteration.
+- **Bibliographic information** (from the _Bibliographic information_ tab) — a single read-only card showing the title, abstract, **publication date** and **journal title** (the journal row is shown only when the document has one). **For `THESE`/`HDR`, both a French and an English title _and_ a French and an English set of keywords are required; a French and an English abstract are additionally required for `THESE` only (an `HDR` does not require an abstract).** When any required item is missing, the form is **still shown**, but a warning alert appears at the top of this card (inviting the user to add the missing title/abstract/keywords) and the **Review button is disabled** until the required items exist. The deposit endpoint also rejects such deposits server-side (`missing_bilingual_title` / `missing_bilingual_abstract` / `missing_bilingual_keywords`). None of these fields is an editable deposit field — they must already be present on the document. For `ART` the journal is required (see the inline ART missing-journal check above). Making the journal editable in the Bibliographic information tab (with ISSN autocompletion) is a later iteration.
 - Authors and affiliations (from the _Authors_ tab). If any author has affiliations that will be silently dropped at submission time (affiliations with no HAL-recognized identifier), show an inline warning: "Some contributor's affiliations are not recognized by HAL and won't be submitted. Go to Author tab if you want to change it." This is a soft warning — it does not block submission.
 
 Presentation of the read-only sections:
 
 - Each section has a header with a right-aligned **Modify** action button (its label is **bold**) that navigates to the corresponding tab — "Edit in Bibliographic information" → `bibliographic_information`, "Edit in the Authors tab" → `authors`. The body is a neutral grey surface (`#F5F7F6`).
-- The title/abstract section shows the localized title (bold) and a 3-line-clamped abstract, with "No title provided" / "No abstract provided" fallbacks.
+- The **Bibliographic information** section (titled "Bibliographic information") shows the localized title (bold), a 3-line-clamped abstract with "No title provided" / "No abstract provided" fallbacks, then the publication date and — when present — the journal title as small labelled read-only rows.
 - The authors section lists contributors **sorted by rank** (ascending). The **rank value is displayed only when it exists** (not null) — never fabricate a positional index. Each row shows the contributor's display name (bold), their role label(s) in parentheses, and their affiliation name(s). The affiliation name uses the organization's `displayNames[0]` (language-tagged organization names are not yet exposed to the client). When there are no contributors, show "No author provided".
+- The banner explaining that these fields come from the other tabs is rendered as a **borderless, background-less** info alert (icon + message only), not a filled alert box.
+- The form's main heading ("HAL Deposit") is rendered **bold and teal** (`primary.main`).
 
 **Deposit metadata** (editable, submitted with the deposit):
 
+The editable fields below are introduced by a **"Deposit metadata"** section heading, rendered above the document-type selector. The three **section subtitles** — Bibliographic information, Authors, Deposit metadata — share one style: **uppercase**, semibold, letter-spaced, muted colour, with uniform vertical spacing around each (same top/bottom margins). The **file labels** (Main file, Complementary files) are _not_ styled as subtitles — they keep normal casing and the files block is set off by a top divider.
+
 | Field         | Type                      | Required | Notes                                                                                                                                                                                                                                                |
 | ------------- | ------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Document type | Select                    | Yes      | HAL typology (ART, COMM, THESE, HDR, OUV, COUV, REPORT, POSTER, PRESCONF). Pre-populated from the CERIF→HAL mapping but the user can refine it — this is the primary purpose of this field, since the internal CERIF typology is coarser than HAL's. |
+| Document type | Select                    | Yes      | HAL typology (ART, COMM, THESE, HDR, OUV, COUV, REPORT, POSTER). Pre-populated from the CERIF→HAL mapping but the user can refine it — this is the primary purpose of this field, since the internal CERIF typology is coarser than HAL's. |
 | HAL domains   | Multi-select autocomplete | Yes (≥1) | Populated from `halDomainsByCode` generated by `generate_hal_domains.ts` → `src/app/types/HalDomains.ts`. The script fetches the authoritative list from the HAL reference API at build/generate time.                                               |
 | Language      | Select                    | Yes      | Language of the deposited file (not of the metadata). Must be set explicitly by the user; defaults to French.                                                                                                                                        |
 
 **Conditional fields** (appear based on selected document type):
 
-| Document type            | Extra fields                                                                            |
-| ------------------------ | --------------------------------------------------------------------------------------- |
-| ART                      | _(none editable)_ — the journal is read from the document; see the missing-journal gate |
-| COMM / POSTER / PRESCONF | Conference title (required), city, country                                              |
-| THESE / HDR              | Issuing body (required)                                                                 |
-| REPORT                   | Institution (required)                                                                  |
-| COUV                     | Book title (required)                                                                   |
+| Document type            | Extra fields                                                                                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ART                      | _(none editable)_ — the journal is read from the document; see the inline ART missing-journal check                                                 |
+| OUV                      | _(none)_ — baseline type; unlike `ART` it does not even require a journal                                                                          |
+| COUV                     | Book title (required)                                                                                                                              |
+| COMM / POSTER | Conference title, city, starting date, country — **all required**. Starting date supports `YYYY`/`YYYY-MM`/`YYYY-MM-DD` precision via the publication-date control (see the conference fields below) |
+| REPORT                   | Institution (required) — HAL facet autocomplete (see _Per-type field sources_)                                                                     |
+| THESE / HDR              | Issuing body (required) **and** supervisor (required) — main file required + in-form bilingual-title and bilingual-keywords checks, plus a bilingual-abstract check for `THESE` only (see the THESE/HDR rules below)          |
 
-> **First-iteration scope.** The first implementation only needs to be functional for **ART** (article) end to end; the conditional metadata and TEI mapping for the other types (COMM/POSTER/PRESCONF, THESE/HDR, REPORT, COUV) are completed in follow-up issues.
+> **Iteration scope.** The first implementation was functional for **ART** (article) end to end. The remaining types — **OUV**, **COUV**, **COMM/POSTER**, **REPORT** and **THESE/HDR** — are **now implemented and enabled**, with their conditional metadata and TEI mapping specified in the sections below.
 >
-> Two fields are explicitly deferred and **not implemented now**:
->
-> - **THESE/HDR director / jury president** — the field is left out of the form and the TEI for this iteration; it will be added later.
-> - **Conference country** — rendered as a plain free-text input whose value is **not processed** (not mapped to the TEI `country/@key`); a later issue will turn it into a country-code selector.
+> The **conference starting date** is captured as a calendar field and the **conference country** as a country-code selector mapped to `meeting/country/@key` (both previously deferred — see _Per-type field sources_). The **THESE/HDR supervisor** (thesis advisor / chair of jury) is mapped to `authority[@type="supervisor"]` (previously deferred — see _THESE/HDR supervisor field_).
 
 ##### Form configuration
 
 The conditional-fields table above is **not** hard-coded in the component. It is declared once in a dedicated TypeScript config file — `src/app/lib/services/hal/halDepositFormConfig.ts` — so the type→fields mapping and the set of depositable types can evolve without touching the form or the API route. No YAML; a plain typed module.
 
-The config does two things:
+The config does three things:
 
-1. **Limits which HAL document types are depositable.** Not every type is ready in early iterations; a type marked `enabled: false` is omitted from the document-type `Select` and rejected server-side. In the first iteration **only `ART` is enabled**.
+1. **Limits which HAL document types are depositable.** A type marked `enabled: false` is omitted from the document-type `Select` and rejected server-side. **All supported types are now enabled** — `ART`, `OUV`, `COUV`, `COMM`, `POSTER`, `REPORT`, `THESE` and `HDR`; the flag remains so a type can be held back for QA with a one-line change.
 2. **Declares the type-specific fields and whether each is required or optional.** The base fields (document type, ≥1 domain, language, and — when a main file is attached — its license) are always present and are not part of this per-type map.
+3. **Flags type-level requirements that are not a single field** — currently whether the type requires a main file (`requiresMainFile`, true for THESE/HDR). The form and the server validation both read this flag.
 
 Shape (illustrative):
 
@@ -437,14 +444,17 @@ Shape (illustrative):
 export type HalFieldKey =
   | 'conferenceTitle'
   | 'conferenceCity'
+  | 'conferenceStartDate'
   | 'conferenceCountry'
   | 'institution'
   | 'bookTitle'
+  | 'supervisor'
 // 'journalName' is intentionally absent — the journal is read from the document, not entered here
-// 'director' is intentionally absent — deferred (see first-iteration scope)
+// THESE/HDR titles are not fields either — an inline bilingual-title check enforces them (Step 1)
 
 export type HalDepositTypeConfig = {
   enabled: boolean
+  requiresMainFile?: boolean
   fields: Partial<Record<HalFieldKey, 'required' | 'optional'>>
 }
 
@@ -453,43 +463,73 @@ export const halDepositFormConfig: Record<
   HalDepositTypeConfig
 > = {
   ART: { enabled: true, fields: {} },
+  OUV: { enabled: true, fields: {} },
+  COUV: { enabled: true, fields: { bookTitle: 'required' } },
   COMM: {
-    enabled: false,
+    enabled: true,
     fields: {
       conferenceTitle: 'required',
-      conferenceCity: 'optional',
-      conferenceCountry: 'optional',
+      conferenceCity: 'required',
+      conferenceStartDate: 'required',
+      conferenceCountry: 'required',
     },
   },
   POSTER: {
-    enabled: false,
+    enabled: true,
     fields: {
       conferenceTitle: 'required',
-      conferenceCity: 'optional',
-      conferenceCountry: 'optional',
+      conferenceCity: 'required',
+      conferenceStartDate: 'required',
+      conferenceCountry: 'required',
     },
   },
-  PRESCONF: {
-    enabled: false,
-    fields: {
-      conferenceTitle: 'required',
-      conferenceCity: 'optional',
-      conferenceCountry: 'optional',
-    },
+  REPORT: { enabled: true, fields: { institution: 'required' } },
+  // THESE/HDR: the shared `supervisor` field is labelled per type — thesis advisor for THESE,
+  // chair of jury for HDR (see the THESE/HDR supervisor field section).
+  THESE: {
+    enabled: true,
+    requiresMainFile: true,
+    fields: { institution: 'required', supervisor: 'required' },
   },
-  THESE: { enabled: false, fields: { institution: 'required' } },
-  HDR: { enabled: false, fields: { institution: 'required' } },
-  REPORT: { enabled: false, fields: { institution: 'required' } },
-  COUV: { enabled: false, fields: { bookTitle: 'required' } },
-  OUV: { enabled: false, fields: {} },
+  HDR: {
+    enabled: true,
+    requiresMainFile: true,
+    fields: { institution: 'required', supervisor: 'required' },
+  },
 }
 ```
 
 The module also exposes small helpers derived from the map (e.g. `enabledHalDocumentTypes()`, `fieldsForType(type)`, `requiredFieldsForType(type)`). **Both the client form and the server-side creation endpoint import this single config** so the rendered fields, the client-side validation, and the server-side validation can never drift apart. If the document's CERIF→HAL pre-mapped type is not `enabled`, the form falls back to the first enabled type (or shows a "not yet supported" notice if none applies).
 
+##### Per-type field sources
+
+Some conditional fields are not plain free-text inputs:
+
+**Conference start date** (COMM / POSTER). Supports **partial precision** — `YYYY`, `YYYY-MM` or `YYYY-MM-DD` — exactly like the document publication date. Reuse the existing publication-date control `PublicationDate.tsx` (`src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx`), a year→month→day stepper, or extract its self-contained precision logic into a shared component. Build on the existing utilities in `src/app/utils/publicationDate.ts` (`DatePrecision`, `parsePublicationDate`, `serializePublicationDate`, `formatPublicationDate`) — do not invent a new date format. The value is stored as the partial ISO string on `HalDeposit.conferenceStartDate` and emitted as the **text content** of `meeting/date[@type="start"]` (e.g. `<date type="start">2024-06</date>`), consistent with how the publication `datePub` is emitted.
+
+**Country selector** (COMM / POSTER). Backed by a static, hand-authored TypeScript module (e.g. `src/app/types/HalCountries.ts`) that lists each country's **ISO code** and its **English and French** display names, so the picker can label options in either supported locale. There is no runtime API call — the list is not expected to change. Only the **code** is written to the TEI (`meeting/country/@key`); the name is UI-only. (This may later be replaced by a generated module, following the `generate_hal_domains.ts` → `src/app/types/HalDomains.ts` precedent.)
+
+**Institution autocomplete** (REPORT institution **and** THESE/HDR issuing body — same field, same source). Distinct from the affiliation autocomplete used in the Authors tab (`HalStructureAutocomplete` → `/ref/structure/`). Options come from the HAL facet search, with the user input substituted for `[input]`:
+
+```
+https://api.archives-ouvertes.fr/search/?q=*%3A*&rows=0&indent=true&facet=true&facet.field=authorityInstitution_s&facet.limit=30&facet.contains.ignoreCase=true&facet.contains=[input]
+```
+
+Read the values at `facet_counts/facet_fields/authorityInstitution_s`. This is a Solr facet array that **interleaves each facet value with its integer count**, so filter to keep **only the string entries** (drop the numbers). The selected string is stored on the deposit and emitted to the TEI at `monogr/authority[@type="institution"]`.
+
+##### THESE/HDR supervisor field
+
+THESE and HDR each require one supervisor — a **thesis advisor** for THESE, a **chair of the jury** for HDR. Both are emitted to the same TEI slot, `monogr/authority[@type="supervisor"]` (content = the person's name). The field is **labelled per type**: "Thesis supervisor" / "Directeur / Directrice de thèse" for THESE, "Jury president" / "Président du jury" for HDR.
+
+The picker is a **select** whose options are **only** the document's contributors (`Document.contributions`, each a `Contribution { person, roles: LocRelator[] }`) whose `roles` include the relevant relator — `LocRelator.THESIS_ADVISOR` for THESE, `LocRelator.DEGREE_COMMITTEE_MEMBER` for HDR. Contributors without that role are **not** listed. When **exactly one** contributor holds the relevant role, that contributor is **selected by default** (the user can still change it; a manual choice is never overwritten).
+
+If **no** contributor holds the relevant role, the options are replaced by a message prompting the user to add a contributor with the relevant role (or tag an existing contributor with it) before a supervisor can be selected.
+
+The selected contributor is stored on `HalDeposit.supervisor` as the **display name**, which is emitted as the `authority[@type="supervisor"]` content. No `idHal` is persisted or emitted in this iteration.
+
 **File upload** (at the bottom of the form):
 
-- **Main file** (optional, PDF): one file. Triggers a ZIP deposit (Case 2 in SWORD section). When omitted, the deposit is a metadata-only **notice** (XML-only, Case 1) — depositing the PDF is never mandatory.
+- **Main file** (PDF): one file. Triggers a ZIP deposit (Case 2 in SWORD section). When omitted, the deposit is a metadata-only **notice** (XML-only, Case 1). It is **optional for every type except THESE/HDR**, where it is **required** (`requiresMainFile` in the form config): those types always produce a ZIP/moderated deposit, the picker carries a required asterisk, and a missing main file blocks submission both client-side and server-side.
 - **Complementary files** (optional, multiple): appended to the ZIP alongside the main file.
 
 When at least one file is attached, each file (main **and** complementary) expands a grid of four selectors, with the codes shown in parentheses (UI codes that also drive the TEI — see the TEI mapping section):
@@ -501,9 +541,9 @@ When at least one file is attached, each file (main **and** complementary) expan
 | File visibility | Select | Yes (default 'Immediately')                                      | Immediately (`now`), In 15 days (`15d`), In 1 month (`1m`), In 3 months (`3m`), In 6 months (`6m`), In 1 year (`1y`), In 2 years (`2y`)                                                                                           |
 | License         | Select | Yes for main file, No for others (no default value in both case) | CC BY, CC BY-SA, CC BY-NC, CC BY-NC-SA, CC BY-ND, CC BY-NC-ND, ETALAB (Open Licence), Copyright (all rights reserved)                                                                                                             |
 
-The form validates client-side before advancing: document type, language and at least one domain are always required; when a main file is attached its license is also required (complementary files may stay license-less). Journal/conference/etc. fields are required conditionally per type.
+The form validates client-side before advancing: document type, language and at least one domain are always required; when a main file is attached its license is also required (complementary files may stay license-less); for THESE/HDR a main file must be attached (`requiresMainFile`). Conditional fields (book title, conference title / city / start date / country, institution / issuing body, supervisor) are required per `halDepositFormConfig` for the selected type. The same checks are re-run server-side on the creation endpoint.
 
-**Required-field markers.** Every field that is required gets a trailing asterisk (` *`) on its label, derived from the Required columns above — **not** from the design mockup. This covers: document type, HAL domains, language, and the per-file source / type / visibility selectors (always required); the license selector shows the asterisk **only for the main file**. The **main file itself is optional and carries no asterisk** (depositing the PDF is never mandatory). The asterisk is a literal character appended in the UI — it is language-neutral and is not part of any translation string.
+**Required-field markers.** Every field that is required gets a trailing asterisk (` *`) on its label, derived from the Required columns above and from `halDepositFormConfig` (for conditional fields) — **not** from the design mockup. This covers: document type, HAL domains, language, and the per-file source / type / visibility selectors (always required); every conditional field marked `required` for the selected type (book title; conference title / city / start date / country; institution / issuing body; supervisor); and the license selector **only for the main file**. The **main file** carries an asterisk **only for THESE/HDR** (where it is required via `requiresMainFile`); for every other type it is optional and carries no asterisk. The asterisk is a literal character appended in the UI — it is language-neutral and is not part of any translation string.
 
 **File upload affordances.**
 
@@ -554,23 +594,30 @@ These two statuses mean the deposit is **stuck on the HAL side**, and crucially 
 
 The form fields that are not already on the `Document` model must be persisted on `HalDeposit` so the listener can use them when generating the TEI:
 
-| Field                       | Column                                          |
-| --------------------------- | ----------------------------------------------- |
-| HAL document type (refined) | `halDocumentType` (string)                      |
-| HAL domain codes            | `halDomains` (string array / JSON)              |
-| Language                    | `language` (string)                             |
-| Conference title            | `conferenceTitle` (string?)                     |
-| Conference city / country   | `conferenceCity`, `conferenceCountry` (string?) |
-| Institution                 | `institution` (string?)                         |
-| Book title                  | `bookTitle` (string?)                           |
+| Field                          | Column                                                                              |
+| ------------------------------ | ---------------------------------------------------------------------------------- |
+| HAL document type (refined)    | `halDocumentType` (string)                                                          |
+| HAL domain codes               | `halDomains` (string array / JSON)                                                 |
+| Language                       | `language` (string)                                                                |
+| Conference title               | `conferenceTitle` (string?)                                                         |
+| Conference city                | `conferenceCity` (string?)                                                          |
+| Conference start date          | `conferenceStartDate` (string?) — partial ISO 8601 (`YYYY` / `YYYY-MM` / `YYYY-MM-DD`), same format as the document publication date |
+| Conference country             | `conferenceCountry` (string?) — stores the **ISO country code**, not the name      |
+| Institution / issuing body     | `institution` (string?)                                                            |
+| Book title                     | `bookTitle` (string?)                                                               |
+| Supervisor (THESE/HDR)         | `supervisor` (string?) — selected contributor's display name (emitted as the `authority[@type="supervisor"]` content; no `idHal` stored this iteration) |
 
-The **journal is not stored here** — it lives on the `Document` (`document.journal`) and `toHalTEI` reads it directly. License, file source, file type and visibility are **per file** and live on `HalDepositFile`. The director / jury-president field is deferred (not stored or emitted in this iteration).
+The **journal is not stored here** — it lives on the `Document` (`document.journal`) and `toHalTEI` reads it directly. License, file source, file type and visibility are **per file** and live on `HalDepositFile`. THESE/HDR titles are not stored either — they come from `Document.titles` and are guarded by the inline bilingual-title check.
 
-`HalTEIInterchangeService.toHalTEI()` will need to be extended to accept these deposit-specific overrides in addition to the base `DocumentClass`. `HalTEIOptions` (currently `{ domains, language, halDocumentType }`) is widened to carry `conferenceTitle`, `conferenceCity`, `conferenceCountry`, `institution`, `bookTitle`, and the per-file descriptors (source, type, visibility, license — see below). The journal is **not** an option — it already comes from `document.journal`.
+`HalTEIInterchangeService.toHalTEI()` will need to be extended to accept these deposit-specific overrides in addition to the base `DocumentClass`. `HalTEIOptions` (currently `{ domains, language, halDocumentType }`) is widened to carry `conferenceTitle`, `conferenceCity`, `conferenceStartDate`, `conferenceCountry`, `institution`, `bookTitle`, `supervisor`, and the per-file descriptors (source, type, visibility, license — see below). The journal is **not** an option — it already comes from `document.journal`.
 
 #### TEI mapping of deposit metadata (AOfr profile)
 
 Element paths below are taken from the AOfr schema (`aofr.xsd`) and confirmed against real preprod deposits. All elements are in the TEI namespace; `<biblFull>` children must keep schema order: `titleStmt`, `editionStmt`, `publicationStmt`, `seriesStmt`, `notesStmt`, `sourceDesc`, `profileDesc`.
+
+`<monogr>` children must likewise follow the XSD sequence: `idno`, `title` (journal `level="j"` / book `level="m"`), `meeting`, `respStmt`, `settlement`, `country`, `editor`, `imprint`, `authority` (institution then supervisor). The packager already emits the journal `title` + `imprint`; the new `meeting` and `authority` elements must be **inserted at their schema position**, not appended — HAL rejects out-of-order children. (Inside `<meeting>` the order is `title`, `date`, `settlement`, `country`.)
+
+> **`<notesStmt>` metadata notes are not emitted in this iteration.** The official example deposits carry notes such as `audience`, `peerReviewing`, `popularLevel`, `invitedCommunication` and `proceedings` marked "%%mandatory", but HAL only requires them when the depositor adds publication comments — which is out of scope here. SoVisuPlus omits the `<notesStmt>` metadata notes; they are not forgotten fields.
 
 | Field                     | TEI location                                                                                                                         |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -579,16 +626,17 @@ Element paths below are taken from the AOfr schema (`aofr.xsd`) and confirmed ag
 | Language (of the file)    | `profileDesc/langUsage/language/@ident` _(already emitted)_                                                                          |
 | License (per file)        | `publicationStmt/availability/licence/@target` = the CC/ETALAB URL (see table); one `<licence>` per distinct file license            |
 | Journal name (ART)        | `sourceDesc/biblStruct/monogr/title[@level="j"]` — read from `document.journal` (already emitted by `toHalTEI`), not a deposit field |
-| Book title (COUV)         | `sourceDesc/biblStruct/monogr/title[@level="m"]`                                                                                     |
+| Book title (COUV)         | `sourceDesc/biblStruct/monogr/title[@level="m"]` (same slot as the ART journal, which uses `level="j"`)                              |
 | Conference title (COMM/…) | `sourceDesc/biblStruct/monogr/meeting/title`                                                                                         |
 | Conference city           | `sourceDesc/biblStruct/monogr/meeting/settlement`                                                                                    |
-| Conference country        | _Deferred_ — captured as free text, **not** mapped to `meeting/country/@key` in this iteration                                       |
-| Issuing body (THESE/HDR)  | `sourceDesc/biblStruct/monogr/authority[@type="institution"]`                                                                        |
-| Director / jury president | _Deferred_ — field not implemented in this iteration (would map to `monogr/authority[@type="supervisor"]` / `[@type="jury"]`)        |
-| Institution (REPORT)      | `sourceDesc/biblStruct/monogr/authority[@type="institution"]`                                                                        |
+| Conference start date     | `sourceDesc/biblStruct/monogr/meeting/date[@type="start"]` — partial ISO value as **element text** (`<date type="start">YYYY[-MM[-DD]]</date>`), matching how `datePub` is emitted (not the `@when` attribute) |
+| Conference country        | `sourceDesc/biblStruct/monogr/meeting/country/@key` = the ISO country code (the name is UI-only and **not** emitted)                  |
+| Institution / issuing body (REPORT / THESE / HDR) | `sourceDesc/biblStruct/monogr/authority[@type="institution"]`                                                    |
+| Supervisor (THESE thesis advisor / HDR chair of jury) | `sourceDesc/biblStruct/monogr/authority[@type="supervisor"]` (content = the person's name) — the required supervisor field for THESE/HDR |
+| Publication date (THESE / HDR) | `monogr/imprint/date[@type="datePub"]` **and** `monogr/imprint/date[@type="dateDefended"]`, both set to the document's publication date (for a thesis the publication date is the defense date). Other types emit only `datePub`. |
 | Attached files            | `editionStmt/edition/ref` (see file block; `@type` = `file`/`src`/`annex`)                                                           |
-| File embargo / visibility | `editionStmt/edition/date/@notBefore` (XSD: "%embargo sur chaque fichier")                                                           |
-| Document internal UID     | `<idno type="localRef">` with the document UID (already injected by the packager)                                                    |
+| File embargo / visibility | `editionStmt/edition/ref/date/@notBefore` — a `<date>` **child of each file's `<ref>`** (XSD: "%embargo sur chaque fichier")          |
+| Document internal UID     | `sourceDesc/biblStruct/monogr/idno[@type="localRef"]` with the document UID (injected by the packager)                               |
 
 **License → `@target` URL** (`availability/licence/@target`):
 
@@ -603,14 +651,15 @@ Element paths below are taken from the AOfr schema (`aofr.xsd`) and confirmed ag
 | ETALAB      | _To confirm_ against HAL's licence reference list                                                                          |
 | Copyright   | _To confirm_ — likely **no** `<licence>` element (closed/copyright is expressed differently); resolve before relying on it |
 
-**File block** — files and their embargo live in `editionStmt/edition`. Each file is one `<ref>` whose `@type` is the file kind (`file` for a document, `src` for a source file, `annex` for additional data) and `@subtype` is the file source; the embargo date (derived from the file-visibility delay relative to the deposit date) is a sibling `<date notBefore="…">`:
+**File block** — files and their embargo live in `editionStmt/edition`. Each file is one `<ref>` whose `@type` is the file kind (`file` for a document, `src` for a source file, `annex` for additional data) and `@subtype` is the file source; the per-file embargo date (derived from the file-visibility delay relative to the deposit date) is a **child** `<date notBefore="…">` of that `<ref>` (confirmed against the official SWORD examples):
 
 ```xml
 <editionStmt>
   <edition>
-    <date notBefore="2026-12-24"/>                                  <!-- omitted when visibility = now -->
-    <ref type="file" target="doc.pdf" subtype="author" n="1"/>      <!-- main file (Document) -->
-    <ref type="annex" target="data.csv" subtype="author" n="2"/>    <!-- complementary (Additional data) -->
+    <ref type="file" target="doc.pdf" subtype="author" n="1">       <!-- main file (Document) -->
+      <date notBefore="2026-12-24"/>                                <!-- omitted when visibility = now -->
+    </ref>
+    <ref type="annex" target="data.csv" subtype="author" n="2"/>    <!-- complementary (Additional data), no embargo -->
   </edition>
 </editionStmt>
 ```
@@ -619,7 +668,7 @@ Element paths below are taken from the AOfr schema (`aofr.xsd`) and confirmed ag
 - `@type` = the **file type** code (`file` / `src` / `annex`), from `HalDepositFile.fileType`.
 - `@subtype` = the **file source** code (`author` / `greenPublisher` / `publisherAgreement` / `publisherPaid`), from `HalDepositFile.fileSource`.
 - `n` = 1-based sequence index.
-- `@notBefore` (embargo) maps from `HalDepositFile.visibility`: `now` → no date; `15d / 1m / 3m / 6m / 1y / 2y` → deposit date + offset.
+- `@notBefore` (embargo) maps from `HalDepositFile.visibility`: `now` → no `<date>` child; `15d / 1m / 3m / 6m / 1y / 2y` → a `<date notBefore="…">` child of the file's `<ref>`, dated deposit date + offset. The embargo date is always a child of the `<ref>` it applies to (per the official examples), so each file carries its own embargo independently.
 - **License** is per file (`HalDepositFile.license`). Structurally the AOfr schema only exposes `publicationStmt/availability/licence` (document-level), but `<licence>` is repeatable with `@target` and may contain `<ref>` elements pointing back to specific files. **The exact per-file association is the one remaining open point** — confirm against HAL before relying on more than one distinct license per deposit; the article-first case (single main PDF) needs only one `<licence>`.
 
 ---

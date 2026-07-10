@@ -10,6 +10,23 @@ import { MessageDescriptor } from '@lingui/core'
 
 export type OptionLabel = string | MessageDescriptor
 
+/**
+ * User-facing labels for the depositable HAL document types. The `value` codes are the HAL
+ * typology contract (see `HAL_DOCUMENT_TYPES` in `halDepositFormConfig.ts`) and flow into the
+ * TEI; only the label is localized. The order mirrors `HAL_DOCUMENT_TYPES`.
+ */
+export const HAL_DOCUMENT_TYPE_OPTIONS: { value: string; label: OptionLabel }[] =
+  [
+    { value: 'ART', label: defineMessage`hal_deposit_type_art` },
+    { value: 'COMM', label: defineMessage`hal_deposit_type_comm` },
+    { value: 'POSTER', label: defineMessage`hal_deposit_type_poster` },
+    { value: 'THESE', label: defineMessage`hal_deposit_type_these` },
+    { value: 'HDR', label: defineMessage`hal_deposit_type_hdr` },
+    { value: 'REPORT', label: defineMessage`hal_deposit_type_report` },
+    { value: 'COUV', label: defineMessage`hal_deposit_type_couv` },
+    { value: 'OUV', label: defineMessage`hal_deposit_type_ouv` },
+  ]
+
 export const LANGUAGE_OPTIONS: { value: string; label: OptionLabel }[] = [
   { value: 'fr', label: defineMessage`hal_deposit_lang_fr` },
   { value: 'en', label: defineMessage`hal_deposit_lang_en` },

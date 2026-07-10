@@ -130,14 +130,16 @@ model HalDeposit {
   refreshRequestedAt DateTime?
 
   // Deposit-specific metadata used to generate the TEI
-  halDocumentType   String
-  halDomains        String[]
-  language          String
-  conferenceTitle   String?
-  conferenceCity    String?
-  conferenceCountry String?
-  institution       String?
-  bookTitle         String?
+  halDocumentType     String
+  halDomains          String[]
+  language            String
+  conferenceTitle     String?
+  conferenceCity      String?
+  conferenceStartDate String? // partial ISO 8601 (YYYY / YYYY-MM / YYYY-MM-DD)
+  conferenceCountry   String? // ISO 3166-1 alpha-2 country code
+  institution         String?
+  bookTitle           String?
+  supervisor          String? // THESE thesis advisor / HDR chair of jury display name
 
   files     HalDepositFile[]
   createdAt DateTime         @default(now())

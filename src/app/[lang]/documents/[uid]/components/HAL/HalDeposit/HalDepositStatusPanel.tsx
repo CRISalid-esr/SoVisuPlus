@@ -19,10 +19,25 @@ import {
   OpenInNew,
   WarningAmber,
 } from '@mui/icons-material'
+import DOMPurify from 'dompurify'
 import useStore from '@/stores/global_store'
 import type { HalDepositView } from '@/stores/halDepositSlice'
+import {
+  parseHalDepositError,
+  type HalDepositErrorNode,
+} from './halDepositErrorFormat'
 
 const REFRESHABLE = ['verify', 'update', 'delete']
+
+// Force HAL's message links to open safely in a new tab. Registered once at module scope.
+if (typeof DOMPurify.addHook === 'function') {
+  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    if (node.tagName === 'A') {
+      node.setAttribute('target', '_blank')
+      node.setAttribute('rel', 'noopener noreferrer')
+    }
+  })
+}
 
 interface Props {
   deposit: HalDepositView
@@ -63,6 +78,9 @@ export function HalDepositStatusPanel({ deposit }: Props) {
 
       <Alert severity={view.severity} sx={{ mb: 2 }}>
         {view.message}
+        {deposit.status === 'error' && deposit.lastError && (
+          <HalDepositErrorDetail lastError={deposit.lastError} />
+        )}
       </Alert>
 
       {deposit.halId && (
@@ -84,12 +102,6 @@ export function HalDepositStatusPanel({ deposit }: Props) {
         </Alert>
       )}
 
-      {deposit.status === 'error' && deposit.lastError && (
-        <Alert severity='error' sx={{ mb: 2 }}>
-          {deposit.lastError}
-        </Alert>
-      )}
-
       {REFRESHABLE.includes(deposit.status) && (
         <Button
           variant='outlined'
@@ -103,6 +115,70 @@ export function HalDepositStatusPanel({ deposit }: Props) {
           )}
         </Button>
       )}
+    </Box>
+  )
+}
+
+/**
+ * Renders the stored `lastError` of a failed deposit. For a HAL SWORD rejection it shows the
+ * summary followed by a bulleted list of reasons, each `key: message`, with the HAL-provided HTML
+ * message sanitised and rendered so it displays correctly. Any other error string is shown as-is.
+ */
+function HalDepositErrorDetail({ lastError }: { lastError: string }) {
+  const { summary, reasons } = parseHalDepositError(lastError)
+
+  if (!reasons) {
+    return (
+      <Typography
+        variant='body2'
+        sx={{ mt: 0.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+      >
+        <Trans>hal_deposit_status_error_message_label</Trans> {lastError}
+      </Typography>
+    )
+  }
+
+  return (
+    <Box sx={{ mt: 0.5 }}>
+      <Typography variant='body2'>
+        <Trans>hal_deposit_status_error_message_label</Trans>
+        {summary ? ` ${summary.replace(/\.?$/, '.')}` : ''}
+      </Typography>
+      <ErrorReasonList nodes={reasons} />
+    </Box>
+  )
+}
+
+/**
+ * Renders reason nodes as a bulleted list. A leaf shows `key: <sanitised HTML message>`; a branch
+ * (nested object) shows a bold `key:` followed by a nested sub-list of its children, recursively.
+ */
+function ErrorReasonList({ nodes }: { nodes: HalDepositErrorNode[] }) {
+  return (
+    <Box component='ul' sx={{ my: 0.5, pl: 3, '& li': { mt: 0.5 } }}>
+      {nodes.map((node) => (
+        <Typography key={node.key} component='li' variant='body2'>
+          <Box component='span' sx={{ fontWeight: 600 }}>
+            {node.key}:
+          </Box>
+          {'children' in node ? (
+            <ErrorReasonList nodes={node.children} />
+          ) : (
+            <>
+              {' '}
+              <Box
+                component='span'
+                sx={{ wordBreak: 'break-word' }}
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(node.valueHtml, {
+                    USE_PROFILES: { html: true },
+                  }),
+                }}
+              />
+            </>
+          )}
+        </Typography>
+      ))}
     </Box>
   )
 }

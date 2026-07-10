@@ -7,6 +7,11 @@ import { DocumentService } from '@/lib/services/DocumentService'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { validateDepositEligibility } from '@/lib/services/hal/validateDepositEligibility'
+import {
+  isHalDocumentType,
+  requiresMainFile,
+  validateConditionalFields,
+} from '@/lib/services/hal/halDepositFormConfig'
 import { halFilesDir } from '@/lib/services/hal/halUploadsRoot'
 import { HalDepositFileInput } from '@/lib/daos/HalDepositDAO'
 
@@ -30,6 +35,14 @@ interface DepositPayload {
   halDomains: string[]
   language: string
   files: DepositFileMeta[]
+  // Per-type conditional metadata (validated below against halDepositFormConfig).
+  conferenceTitle?: string | null
+  conferenceCity?: string | null
+  conferenceStartDate?: string | null
+  conferenceCountry?: string | null
+  institution?: string | null
+  bookTitle?: string | null
+  supervisor?: string | null
 }
 
 const bad = (error: string, reason?: string, status = 400) =>
@@ -91,7 +104,10 @@ export const POST = async (request: Request) => {
       PermissionAction.deposit_hal_unauthenticated,
       person,
     )
-    if (!ability.can(PermissionAction.deposit_hal, person) && !canUnauthenticated) {
+    if (
+      !ability.can(PermissionAction.deposit_hal, person) &&
+      !canUnauthenticated
+    ) {
       return bad(
         'Not allowed to deposit on behalf of this person',
         undefined,
@@ -112,12 +128,41 @@ export const POST = async (request: Request) => {
     if (!eligibility.ok)
       return bad('Document is not eligible', eligibility.reason)
 
+    // Per-type conditional metadata (shared config with the client form).
+    const conditionalValues = {
+      conferenceTitle: payload.conferenceTitle,
+      conferenceCity: payload.conferenceCity,
+      conferenceStartDate: payload.conferenceStartDate,
+      conferenceCountry: payload.conferenceCountry,
+      institution: payload.institution,
+      bookTitle: payload.bookTitle,
+      supervisor: payload.supervisor,
+    }
+    if (isHalDocumentType(payload.halDocumentType)) {
+      const missing = validateConditionalFields(
+        payload.halDocumentType,
+        conditionalValues,
+      )
+      if (missing.length > 0) {
+        return bad('Missing required field', `missing_field:${missing[0]}`)
+      }
+    }
+
     // File-metadata invariants: at most one main file; a main file requires a license.
     const files = payload.files ?? []
     const mains = files.filter((f) => f.isMain)
     if (mains.length > 1) return bad('At most one main file is allowed')
     if (mains.length === 1 && !mains[0].license) {
       return bad('The main file requires a license')
+    }
+
+    // THESE/HDR always require a main file (moderated ZIP deposit).
+    if (
+      isHalDocumentType(payload.halDocumentType) &&
+      requiresMainFile(payload.halDocumentType) &&
+      mains.length === 0
+    ) {
+      return bad('A main file is required', 'missing_main_file')
     }
 
     // Create the deposit row first to get its id, then write files, then record file rows.
@@ -127,6 +172,13 @@ export const POST = async (request: Request) => {
       halDocumentType: payload.halDocumentType,
       halDomains: payload.halDomains,
       language: payload.language,
+      conferenceTitle: payload.conferenceTitle ?? null,
+      conferenceCity: payload.conferenceCity ?? null,
+      conferenceStartDate: payload.conferenceStartDate ?? null,
+      conferenceCountry: payload.conferenceCountry ?? null,
+      institution: payload.institution ?? null,
+      bookTitle: payload.bookTitle ?? null,
+      supervisor: payload.supervisor ?? null,
     })
 
     const fileInputs: HalDepositFileInput[] = []

@@ -15,6 +15,42 @@ describe('AureHalAPIClient', () => {
     jest.resetAllMocks()
   })
 
+  it('searchInstitutions returns [] for a query shorter than 2 chars without calling HAL', async () => {
+    await expect(client.searchInstitutions('a')).resolves.toEqual([])
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it('searchInstitutions keeps only the facet string values (drops interleaved counts)', async () => {
+    const mockResponse = {
+      facet_counts: {
+        facet_fields: {
+          authorityInstitution_s: ['Université A', 42, 'Institut B', 7],
+        },
+      },
+    }
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue(mockResponse),
+    })
+
+    await expect(client.searchInstitutions('univ')).resolves.toEqual([
+      'Université A',
+      'Institut B',
+    ])
+
+    const calledUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string
+    expect(calledUrl).toContain('facet.field=authorityInstitution_s')
+    expect(decodeURIComponent(calledUrl)).toContain('facet.contains=univ')
+  })
+
+  it('searchInstitutions returns [] when the facet field is absent', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ facet_counts: { facet_fields: {} } }),
+    })
+    await expect(client.searchInstitutions('xyz')).resolves.toEqual([])
+  })
+
   it('findAuthorByUid throws if uid is empty', async () => {
     await expect(client.findAuthorByUid('')).rejects.toThrow(
       'AureHalAPIClient.findAuthorByUid: uid is empty',
@@ -228,7 +264,9 @@ describe('AureHalAPIClient', () => {
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: jest.fn().mockResolvedValue({
-        response: { docs: [withIdHal, noId, withOrcid, emptyArrays, withIdref] },
+        response: {
+          docs: [withIdHal, noId, withOrcid, emptyArrays, withIdref],
+        },
       }),
     })
 
@@ -243,7 +281,9 @@ describe('AureHalAPIClient', () => {
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: jest.fn().mockResolvedValue({
-        response: { docs: [{ fullName_s: 'A NoId' }, { fullName_s: 'B NoId' }] },
+        response: {
+          docs: [{ fullName_s: 'A NoId' }, { fullName_s: 'B NoId' }],
+        },
       }),
     })
 
