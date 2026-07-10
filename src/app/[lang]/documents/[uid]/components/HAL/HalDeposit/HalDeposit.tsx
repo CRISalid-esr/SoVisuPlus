@@ -14,6 +14,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  CardContent,
   Chip,
   CircularProgress,
   Divider,
@@ -25,7 +26,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { Add } from '@mui/icons-material'
+import { CustomCard } from '@/components/Card'
 import useStore from '@/stores/global_store'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
@@ -74,6 +77,7 @@ const SUBTITLE_SX = {
 }
 
 export default function HalDeposit() {
+  const theme = useTheme()
   const router = useRouter()
   const { uid } = useParams<{ uid: string }>()
   const { _ } = useLingui()
@@ -159,14 +163,49 @@ export default function HalDeposit() {
 
   if (!selectedDocument) return null
 
+  // Card chrome shared by every rendered state, so the tab matches the other document tabs
+  // (bordered card + titled header + padded body). The header title stays constant while the
+  // body swaps between loading / gate / form / review / status.
+  const wrap = (body: React.ReactNode) => (
+    <CustomCard
+      header={
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Typography
+            sx={{
+              color: theme.palette.primary.main,
+              fontSize: theme.utils.pxToRem(20),
+              fontStyle: 'normal',
+              fontWeight: theme.typography.fontWeightRegular,
+              lineHeight: 'normal',
+            }}
+          >
+            {step === 'review' ? (
+              <Trans>hal_deposit_review_heading</Trans>
+            ) : (
+              <Trans>hal_deposit_form_heading</Trans>
+            )}
+          </Typography>
+        </Box>
+      }
+    >
+      <CardContent>{body}</CardContent>
+    </CustomCard>
+  )
+
   // Wait for the latest-deposit fetch before deciding form vs status panel, so the form is not
   // briefly flashed on (re)load before an existing deposit's status is applied.
   const depositLoaded = !!uid && uid in byDocument && !loading[uid]
   if (!depositLoaded) {
-    return (
-      <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
+    return wrap(
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
         <CircularProgress />
-      </Box>
+      </Box>,
     )
   }
 
@@ -197,16 +236,16 @@ export default function HalDeposit() {
 
   // Once a deposit exists (and the doc is not yet harvested back from HAL), show the status panel.
   if (deposit && !hasHalRecord) {
-    return (
-      <HalDepositStatusPanel deposit={deposit} onNavigateTab={navigateToTab} />
+    return wrap(
+      <HalDepositStatusPanel deposit={deposit} onNavigateTab={navigateToTab} />,
     )
   }
 
   if (!perspectiveUid) return null
 
   if (!hasHalIdentifiers) {
-    return (
-      <Box sx={{ p: 3 }}>
+    return wrap(
+      <>
         <Alert severity='info'>
           {ownPerspective ? (
             <Trans>hal_deposit_gate_no_hal_id</Trans>
@@ -223,17 +262,17 @@ export default function HalDeposit() {
             <Trans>hal_deposit_gate_go_my_account</Trans>
           </Button>
         )}
-      </Box>
+      </>,
     )
   }
 
   if (!selectedDocument.publicationDate) {
-    return (
+    return wrap(
       <GateAlert
         message={t`hal_deposit_gate_no_date`}
         actionLabel={t`hal_deposit_gate_go_biblio`}
         onAction={() => navigateToTab('bibliographic_information')}
-      />
+      />,
     )
   }
 
@@ -392,11 +431,8 @@ export default function HalDeposit() {
       ...(mainFile ? [{ ...mainFile, isMain: true }] : []),
       ...annexes.map((a) => ({ ...a, isMain: false })),
     ]
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography variant='h6' gutterBottom>
-          <Trans>hal_deposit_review_heading</Trans>
-        </Typography>
+    return wrap(
+      <>
         {error && (
           <Alert severity='error' sx={{ mb: 2 }}>
             {error}
@@ -491,21 +527,13 @@ export default function HalDeposit() {
             )}
           </Button>
         </Box>
-      </Box>
+      </>,
     )
   }
 
   // ─── Form step ─────────────────────────────────────────────────────────────
-  return (
-    <Box sx={{ p: 3 }}>
-      <Typography
-        variant='h6'
-        gutterBottom
-        sx={{ fontWeight: 700, color: 'primary.main' }}
-      >
-        <Trans>hal_deposit_form_heading</Trans>
-      </Typography>
-
+  return wrap(
+    <>
       <Alert
         severity='info'
         sx={{ mb: 2, bgcolor: 'transparent', border: 'none', px: 0, py: 0 }}
@@ -923,7 +951,7 @@ export default function HalDeposit() {
           <Trans>hal_deposit_button_review</Trans>
         </Button>
       </Box>
-    </Box>
+    </>,
   )
 }
 
@@ -939,7 +967,7 @@ function GateAlert({
   severity?: 'info' | 'error'
 }) {
   return (
-    <Box sx={{ p: 3 }}>
+    <Box>
       <Alert severity={severity}>{message}</Alert>
       <Button sx={{ mt: 2 }} variant='outlined' onClick={onAction}>
         {actionLabel}

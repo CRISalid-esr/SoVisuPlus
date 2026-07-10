@@ -21,21 +21,11 @@ const AuthorsToolbar = ({
   <Stack
     direction='row'
     alignItems='center'
-    justifyContent='space-between'
+    justifyContent='flex-end'
     flexWrap='wrap'
     spacing={2}
     sx={{ mb: 2 }}
   >
-    <Typography variant='h6' sx={{ fontWeight: 700 }}>
-      {t`documents_details_page_authors_tab_title`}
-      {/* The asterisk marks the tab as editable; hide it in read-only mode. */}
-      {!readOnly && (
-        <Box component='span' sx={{ color: 'error.main', ml: 0.5 }}>
-          *
-        </Box>
-      )}
-    </Typography>
-
     <Stack direction='row' alignItems='center' spacing={2}>
       {!readOnly && (
         <FormControlLabel
