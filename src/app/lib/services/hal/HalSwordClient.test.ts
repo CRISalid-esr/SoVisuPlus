@@ -4,7 +4,8 @@ import path from 'node:path'
 import { HalSwordClient } from './HalSwordClient'
 import { DepositArtifact } from './HalDepositPackager'
 
-const ENDPOINT = 'https://api-preprod.archives-ouvertes.fr/sword/hal/'
+const BASE = 'https://api-preprod.archives-ouvertes.fr'
+const ENDPOINT = `${BASE}/sword/hal/`
 
 let tmpDir: string
 let xmlArtifact: DepositArtifact
@@ -33,7 +34,7 @@ beforeAll(() => {
 afterAll(() => fs.rmSync(tmpDir, { recursive: true, force: true }))
 
 beforeEach(() => {
-  process.env.HAL_SWORD_ENDPOINT = ENDPOINT
+  process.env.HAL_ENDPOINT = BASE
   process.env.HAL_SERVICE_ACCOUNT_LOGIN = 'svc'
   process.env.HAL_SERVICE_ACCOUNT_PASSWORD = 'pw'
   global.fetch = jest.fn().mockResolvedValue({

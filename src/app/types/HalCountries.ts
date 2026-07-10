@@ -1,12 +1,14 @@
 /**
  * Static ISO 3166-1 alpha-2 country list with English and French display names.
  *
- * Backs the conference country selector for COMM/POSTER deposits. Only the `code`
- * is written to the TEI (`meeting/country/@key`); the localized name is UI-only. There is no
- * runtime API call — the list is not expected to change. (It may later be replaced by a
- * generated module, following the generate_hal_domains.ts precedent.)
+ * Backs the conference country selector for COMM/POSTER deposits. Only the (uppercase) `code` is
+ * written to the TEI (`meeting/country/@key`, per HAL's convention); the localized name is UI-only.
  *
- * Generated once from Intl.DisplayNames (en, fr); edit by hand if a name needs adjusting.
+ * Codes are ISO 3166-1 alpha-2; names were generated once from `Intl.DisplayNames` (en, fr). Unlike
+ * HAL domains (fetched from HAL's `/ref/domain/` API), HAL publishes **no** country referential — its
+ * schema defines `country/@key` as a plain ISO 3166-1 code — so this list is intentionally static and
+ * hand-maintained: add a code on the rare ISO addition, or adjust a name by hand. No generator, no
+ * runtime API call.
  */
 
 export interface HalCountry {

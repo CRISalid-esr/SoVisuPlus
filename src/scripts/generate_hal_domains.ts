@@ -1,6 +1,9 @@
+import * as dotenv from 'dotenv'
 import fs from 'node:fs'
 import path from 'node:path'
 import { XMLParser } from 'fast-xml-parser'
+
+dotenv.config()
 
 type HalDoc = {
   docid?: number
@@ -19,8 +22,10 @@ export type HalDomainNode = {
   children: string[]
 }
 
-const SOURCE_URL =
-  'https://api-preprod.archives-ouvertes.fr/ref/domain/?fl=*&wt=xml&rows=1000'
+const HAL_ENDPOINT = (
+  process.env.HAL_ENDPOINT ?? 'https://api.archives-ouvertes.fr'
+).replace(/\/+$/, '')
+const SOURCE_URL = `${HAL_ENDPOINT}/ref/domain/?fl=*&wt=xml&rows=1000`
 
 const OUT_FILE = path.join(process.cwd(), 'src/app/types/HalDomains.ts')
 

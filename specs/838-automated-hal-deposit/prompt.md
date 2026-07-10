@@ -8,7 +8,7 @@ The TEI-XML conversion from the internal database schema is already implemented 
 
 **Scope for this iteration: POST only** (new deposits). PUT (updating an existing HAL record) is deferred — it requires downloading the existing XML-TEI from HAL, pushing a new version, and using a HAL account with impersonation rights.
 
-The SWORD endpoint is configurable via `HAL_SWORD_ENDPOINT` (default: `https://api-preprod.archives-ouvertes.fr/sword/hal/`).
+The HAL API base is configurable via `HAL_ENDPOINT` (default: `https://api.archives-ouvertes.fr`); the SWORD collection URL is derived as `HAL_ENDPOINT` + `/sword/hal/`.
 
 ---
 
@@ -263,7 +263,7 @@ The deposit business logic is **not** implemented inline in the listener script.
 
 #### `HalSwordClient`
 
-Pure HTTP layer over the SWORD API — no database access, no domain logic. Reads `HAL_SWORD_ENDPOINT`, `HAL_SERVICE_ACCOUNT_LOGIN`, `HAL_SERVICE_ACCOUNT_PASSWORD` from the environment. Two methods:
+Pure HTTP layer over the SWORD API — no database access, no domain logic. Reads `HAL_ENDPOINT` (deriving the SWORD collection URL as `HAL_ENDPOINT` + `/sword/hal/`), `HAL_SERVICE_ACCOUNT_LOGIN`, `HAL_SERVICE_ACCOUNT_PASSWORD` from the environment. Two methods:
 
 - `deposit(payload)` — POSTs either the XML body (`Content-Type: text/xml`) or the ZIP (`Content-Type: application/zip` + `Content-Disposition`), with the `Packaging` and `On-Behalf-Of` headers. Returns the raw HTTP status code and body.
 - `getStatus(halId)` — GETs `<endpoint>/<halId>` and returns the raw body.
