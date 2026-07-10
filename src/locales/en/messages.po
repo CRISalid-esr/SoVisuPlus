@@ -145,6 +145,29 @@ msgid "documents_page_missing_identifiers_warning_suffix"
 msgstr "page to fill in your {identifiers} identifiers."
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:232
+#: src/app/[lang]/documents/page.test.tsx:255
+msgid "documents_page_main_title_first_person"
+msgstr "My publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:274
+msgid "documents_page_main_title"
+msgstr "Publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:326
+msgid "documents_page_incomplete_hal_repository_filter"
+msgstr "HAL incomplete filling"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.test.tsx:410
+#: src/app/[lang]/documents/page.test.tsx:422
+#: src/app/[lang]/documents/page.test.tsx:431
+msgid "documents_page_merge_selected_documents_button"
+msgstr "Merge selected documents"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/components/MergeDialog.tsx:209
 msgid "documents_merge_dialog_box_merge_button"
 msgstr "Confirm merge ({nbDocs})"
@@ -292,6 +315,11 @@ msgid "documents_details_page_authors_tab_title"
 msgstr "Authors"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Authors.test.tsx:154
+msgid "document_details_page_authors_row_update_author"
+msgstr "Change authors"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Back to home page"
@@ -342,50 +370,15 @@ msgid "profile_identifiers_card_title_other"
 msgstr "Identifiers"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:151
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:278
-msgid "orcid_identifier_no_orcid_provided"
-msgstr "No orcid identifier provided"
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.test.tsx:102
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:34
+msgid "profile_affiliations_card_title"
+msgstr "My affiliations"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:169
-msgid "orcid_authentication_success"
-msgstr "ORCID validation successful"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:171
-msgid "orcid_authentication_failure"
-msgstr "ORCID validation failed. Try again or contact support"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:173
-msgid "orcid_authentication_failure_no_code"
-msgstr "No authentication code delivered from ORCID. Please try again or contact support"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:175
-msgid "orcid_authentication_failure_no_session"
-msgstr "ORCID validation failure : no session. Please try again or contact support"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:177
-msgid "orcid_authentication_failure_user_not_found"
-msgstr "ORCID validation failure : user not found. Please try again or contact support"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:179
-msgid "orcid_insert_failure"
-msgstr "Unable to add ORCID to database. Please try again or contact support."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:213
-msgid "orcid_account_linked_tooltip"
-msgstr "Your ORCID account is linked to your SoVisu+ account"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:291
-msgid "orcid_control_helper"
-msgstr "ORCID is a free, unique, persistent identifier (PID) for individuals to use as they engage in research, scholarship, and innovation activities. It can also help you save time when you use your ORCID to sign into systems like this one. Link your ORCID iD to uniquely identify your research outputs and improve metadata quality. Learn more about how ORCID helps you spend more time conducting your research and less time managing it at <0>orcid.org</0>."
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:36
+msgid "profile_affiliations_card_title_other"
+msgstr "Affiliations"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
