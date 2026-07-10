@@ -96,10 +96,18 @@ const AffiliationCard = ({
               alignItems='center'
               sx={{ minWidth: 0 }}
             >
-              <CheckCircle color='success' fontSize='small' />
+              <CheckCircle
+                color='success'
+                fontSize='small'
+                sx={{ flexShrink: 0 }}
+              />
               <Typography
-                noWrap
-                sx={{ color: 'primary.main', fontWeight: 700 }}
+                sx={{
+                  color: 'primary.main',
+                  fontWeight: 700,
+                  minWidth: 0,
+                  overflowWrap: 'anywhere',
+                }}
               >
                 {name}
               </Typography>

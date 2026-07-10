@@ -8,6 +8,7 @@ import {
 import { t } from '@lingui/core/macro'
 import { AureHalAuthorDoc } from '@/lib/services/AureHalAPIClient'
 import { useDebouncedHalSearch } from '../hooks/useDebouncedHalSearch'
+import HalValidityLabel from './HalValidityLabel'
 
 type AddOption = { kind: 'add' }
 type DocOption = { kind: 'doc'; doc: AureHalAuthorDoc }
@@ -107,8 +108,15 @@ const HalAuthorAutocomplete = ({
           doc.idrefId_s?.length ? `IdRef: ${stripUrl(doc.idrefId_s[0])}` : null,
         ].filter(Boolean)
         return (
-          <Box component='li' {...props} key={key}>
-            <Box>
+          <Box component='li' {...props} key={key} sx={{ display: 'block' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 1,
+              }}
+            >
               <Typography
                 component='span'
                 fontWeight={highlighted ? 700 : 400}
@@ -116,16 +124,13 @@ const HalAuthorAutocomplete = ({
               >
                 {doc.fullName_s}
               </Typography>
-              {parts.length > 0 && (
-                <Typography
-                  variant='caption'
-                  color='textSecondary'
-                  component='div'
-                >
-                  {parts.join(' · ')}
-                </Typography>
-              )}
+              <HalValidityLabel validity={doc.valid_s} />
             </Box>
+            {parts.length > 0 && (
+              <Typography variant='caption' color='textSecondary' component='div'>
+                {parts.join(' · ')}
+              </Typography>
+            )}
           </Box>
         )
       }}
