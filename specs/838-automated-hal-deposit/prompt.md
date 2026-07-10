@@ -8,7 +8,7 @@ The TEI-XML conversion from the internal database schema is already implemented 
 
 **Scope for this iteration: POST only** (new deposits). PUT (updating an existing HAL record) is deferred — it requires downloading the existing XML-TEI from HAL, pushing a new version, and using a HAL account with impersonation rights.
 
-The HAL API base is configurable via `HAL_ENDPOINT` (default: `https://api.archives-ouvertes.fr`); the SWORD collection URL is derived as `HAL_ENDPOINT` + `/sword/hal/`.
+The HAL API base is configurable via `HAL_ENDPOINT` (default: `https://api-preprod.archives-ouvertes.fr`); the SWORD collection URL is derived as `HAL_ENDPOINT` + `/sword/hal/`.
 
 ---
 
