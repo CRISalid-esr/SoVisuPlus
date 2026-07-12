@@ -2,7 +2,7 @@ import { getServerSession, Session } from 'next-auth'
 import authOptions from '@/app/auth/auth_options'
 import { NextResponse } from 'next/server'
 import { PersonService } from '@/lib/services/PersonService'
-import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { IdentifierConflictError, PersonDAO } from '@/lib/daos/PersonDAO'
 import {
   abilityFromAuthzContext,
   hasWiderThanSelfPersonScope,
@@ -12,11 +12,27 @@ import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
+import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
+import {
+  computeIdentifierCapabilities,
+  identifierSupportsAuth,
+} from '@/lib/identifiers/identifierCapabilities'
 
-// Identifier types that can be updated through this route and their validation rules
+// Identifier types that can be added/removed through this route and their
+// validation rules. ORCID is validated after ORCIDIdentifier.normalize().
 const ALLOWED_TYPES: Partial<Record<PersonIdentifierType, RegExp>> = {
   [PersonIdentifierType.idref]: /^\d{8}[\dX]$/i,
+  [PersonIdentifierType.orcid]: /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/i,
+  [PersonIdentifierType.idhals]: /^[a-z0-9-]+$/i,
+  [PersonIdentifierType.idhali]: /^\d+$/,
 }
+
+// idHAL is a single logical identity: adding one variant is rejected while the
+// other is present (remove-before-add), so a person never holds both.
+const IDHAL_TYPES: PersonIdentifierType[] = [
+  PersonIdentifierType.idhals,
+  PersonIdentifierType.idhali,
+]
 
 type RouteContext = { params: Promise<{ uid: string; type: string }> }
 
@@ -52,6 +68,20 @@ const resolveContext = async (
   return { uid, identifierType }
 }
 
+// Normalise the value to how it is stored, before validation. IdRef and ORCID
+// carry an uppercase 'X' check digit; idHAL (idhals) is case-sensitive and kept
+// as entered.
+const normaliseValue = (type: PersonIdentifierType, raw: string): string => {
+  switch (type) {
+    case PersonIdentifierType.orcid:
+      return ORCIDIdentifier.normalize(raw).toUpperCase()
+    case PersonIdentifierType.idref:
+      return raw.toUpperCase()
+    default:
+      return raw
+  }
+}
+
 export const PUT = async (request: Request, context: RouteContext) => {
   const session = (await getServerSession(authOptions)) as Session
   const resolved = await resolveContext(context, session)
@@ -65,7 +95,7 @@ export const PUT = async (request: Request, context: RouteContext) => {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const value = body.value?.trim()
+  const value = normaliseValue(identifierType, body.value?.trim() ?? '')
   const validationRegex = ALLOWED_TYPES[identifierType]!
   if (!value || !validationRegex.test(value)) {
     return NextResponse.json(
@@ -80,12 +110,12 @@ export const PUT = async (request: Request, context: RouteContext) => {
     return NextResponse.json({ error: 'Person not found' }, { status: 404 })
   }
 
+  // Adding without authenticating is a wide-scoped-only capability (self-scoped
+  // editors can only remove / authenticate — never add non-authenticated).
   const ability = abilityFromAuthzContext(session.user.authz)
   if (!ability.can(PermissionAction.update, person, 'identifiers')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
-  // IdRef editing requires a wider-than-self-Person scope.
-  // Self-scoped account_editors (Person:<own uid>) may not edit IdRef.
   if (
     !hasWiderThanSelfPersonScope(
       session.user.authz,
@@ -97,16 +127,34 @@ export const PUT = async (request: Request, context: RouteContext) => {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  // Remove-before-add: an existing identifier must be removed first. idHAL
+  // variants share one slot.
+  const conflictTypes = IDHAL_TYPES.includes(identifierType)
+    ? IDHAL_TYPES
+    : [identifierType]
+  const alreadyPresent = conflictTypes.some((t) => person.hasIdentifier(t))
+  if (alreadyPresent) {
+    return NextResponse.json(
+      { error: 'identifier_already_exists' },
+      { status: 409 },
+    )
+  }
+
   try {
     const personService = new PersonService()
-    await personService.addOrUpdateIdentifier(
+    await personService.addIdentifier(
       uid,
-      identifierType,
-      value.toUpperCase(),
+      new PersonIdentifier(identifierType, value),
     )
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error(`❌ Error updating ${identifierType} identifier:`, error)
+    if (error instanceof IdentifierConflictError) {
+      return NextResponse.json(
+        { error: 'identifier_already_exists' },
+        { status: 409 },
+      )
+    }
+    console.error(`❌ Error adding ${identifierType} identifier:`, error)
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 },
@@ -130,14 +178,22 @@ export const DELETE = async (_request: Request, context: RouteContext) => {
   if (!ability.can(PermissionAction.update, person, 'identifiers')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
-  if (
-    !hasWiderThanSelfPersonScope(
+
+  // An authenticated identifier can only be removed on the owner's own account.
+  // A non-authenticated one can also be removed by a wide-scoped editor.
+  const { canRemove } = computeIdentifierCapabilities({
+    canManage: true, // already checked above
+    isOwn: session.user.authz?.personUid === person.uid,
+    isWide: hasWiderThanSelfPersonScope(
       session.user.authz,
       'update',
       'Person',
       'identifiers',
-    )
-  ) {
+    ),
+    isAuthenticated: person.isIdentifierAuthenticated(identifierType),
+    supportsAuth: identifierSupportsAuth(identifierType),
+  })
+  if (!canRemove) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

@@ -102,7 +102,7 @@ describe('WebSocketListener', () => {
         setPerspective: jest.fn(),
         setPerspectiveBySlug: jest.fn(),
         refreshPerspective: jest.fn(),
-        updatePersonIdentifier: jest.fn(),
+        addPersonIdentifier: jest.fn(),
         removePersonIdentifier: jest.fn(),
       },
       document: {

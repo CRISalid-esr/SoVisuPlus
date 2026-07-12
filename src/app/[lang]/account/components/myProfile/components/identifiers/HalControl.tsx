@@ -3,41 +3,42 @@
 import useStore from '@/stores/global_store'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Alert, Box, Paper, Snackbar, Tooltip, Typography } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Paper,
+  Snackbar,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { Trans } from '@lingui/react'
 import { HalLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton'
+import ManualIdentifierAddForm from './ManualIdentifierAddForm'
+import HalInfoBox from './HalInfoBox'
+import { useIdentifierCapabilities } from './useIdentifierCapabilities'
 import LinkIcon from '@mui/icons-material/Link'
 import { PersonIdentifierType } from '@prisma/client'
 import { isPerson } from '@/types/Person'
 import IdentifierPill from './IdentifierPill'
-import { useSession } from 'next-auth/react'
-import { abilityFromAuthzContext } from '@/app/auth/ability'
-import { PermissionAction } from '@/types/Permission'
+
+const IDHAL_S_REGEX = /^[a-z0-9-]+$/i
+const IDHAL_I_REGEX = /^\d+$/
 
 const HalControl = () => {
-  const { connectedUser, currentPerspective, ownPerspective } = useStore(
-    (state) => state.user,
-  )
+  const {
+    connectedUser,
+    currentPerspective,
+    ownPerspective,
+    removePersonIdentifier,
+  } = useStore((state) => state.user)
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { data: session } = useSession()
-  const ability = useMemo(
-    () => abilityFromAuthzContext(session?.user?.authz),
-    [session?.user?.authz],
-  )
-
-  // Auth controls (HalLoginButton) are shown only when the user is viewing their
-  // own account AND holds an identifier-update permission on their own person.
-  const canAuthenticate = useMemo(
-    () =>
-      ownPerspective &&
-      !!connectedUser?.person &&
-      ability.can(PermissionAction.update, connectedUser.person, 'identifiers'),
-    [ownPerspective, connectedUser?.person, ability],
-  )
-  const [open, setOpen] = useState(false)
-  const [severity, setSeverity] = useState<'success' | 'error'>('success')
-  const [messageKey, setMessageKey] = useState<string | null>(null)
 
   // When viewing another person's account, read their identifiers from currentPerspective
   const person =
@@ -46,29 +47,51 @@ const HalControl = () => {
       : currentPerspective
   const identifiers = person?.getIdentifiers() ?? []
 
-  const { halValue, halKind, halLogin } = useMemo(() => {
+  const { halValue, halType, halLogin } = useMemo(() => {
     const idHalS = identifiers.find(
       (identifier) => identifier.type === PersonIdentifierType.idhals,
     )?.value
-
     const idHalI = identifiers.find(
       (identifier) => identifier.type === PersonIdentifierType.idhali,
     )?.value
-
     const halLogin = identifiers.find(
       (identifier) => identifier.type === PersonIdentifierType.hal_login,
     )?.value
 
     return {
       halValue: idHalS ?? idHalI ?? null,
-      halKind: idHalS ? 'idHal_s' : idHalI ? 'idHal_i' : null,
+      halType: idHalS
+        ? PersonIdentifierType.idhals
+        : idHalI
+          ? PersonIdentifierType.idhali
+          : null,
       halLogin: halLogin ?? null,
     }
   }, [identifiers])
 
+  const halKind =
+    halType === PersonIdentifierType.idhals ? 'idHal_s' : 'idHal_i'
+
+  const { isAuthenticated, canAuthenticate, canAddUnauthenticated, canRemove } =
+    useIdentifierCapabilities(
+      person,
+      halType ?? PersonIdentifierType.idhals,
+      ownPerspective,
+    )
+
   const hasHalIdentifier = Boolean(halValue)
-  const hasHalLogin = Boolean(halLogin)
-  const isLinked = hasHalIdentifier && hasHalLogin
+  const isLinked = hasHalIdentifier && isAuthenticated
+
+  const [open, setOpen] = useState(false)
+  const [severity, setSeverity] = useState<'success' | 'error'>('success')
+  const [messageKey, setMessageKey] = useState<string | null>(null)
+  const [openConfirm, setOpenConfirm] = useState(false)
+
+  const notify = (success: boolean, key: string) => {
+    setSeverity(success ? 'success' : 'error')
+    setMessageKey(key)
+    setOpen(true)
+  }
 
   useEffect(() => {
     if (!ownPerspective) return
@@ -89,36 +112,15 @@ const HalControl = () => {
     }
   }, [searchParams, ownPerspective])
 
-  // Read-only view: no auth controls if not own perspective or no permission
-  if (!canAuthenticate) {
-    return (
-      <Paper
-        elevation={1}
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 1.5,
-          p: 2,
-          width: '100%',
-          borderRadius: 2,
-        }}
-      >
-        <Typography variant='subtitle1' fontWeight='bold'>
-          HAL
-        </Typography>
-        {hasHalIdentifier && halValue ? (
-          <IdentifierPill
-            value={halValue}
-            iconLabel='HAL'
-            iconColor='#4A90D9'
-            subLabel={halKind ?? undefined}
-          />
-        ) : (
-          <Typography variant='body2' color='text.secondary'>
-            <Trans id='hal_control_not_available' />
-          </Typography>
-        )}
-      </Paper>
+  const hasAnyCapability = canAuthenticate || canAddUnauthenticated || canRemove
+
+  const remove = async () => {
+    if (!person?.uid || !halType) return
+    setOpenConfirm(false)
+    const result = await removePersonIdentifier(person.uid, halType)
+    notify(
+      result.success,
+      result.success ? 'hal_remove_success' : 'hal_remove_failure',
     )
   }
 
@@ -144,6 +146,8 @@ const HalControl = () => {
         return <Trans id='hal_authentication_failure_user_not_found' />
       case 'hal_authentication_failure_misconfig':
         return <Trans id='hal_authentication_failure_misconfig' />
+      case 'hal_authentication_value_mismatch':
+        return <Trans id='hal_authentication_value_mismatch' />
       case 'hal_auth_missing_data':
         return <Trans id='hal_auth_missing_data' />
       case 'hal_unavailable_data':
@@ -156,9 +160,52 @@ const HalControl = () => {
         return <Trans id='hal_authentication_failure_wrong_protocol' />
       case 'hal_authentication_failure_account_creation':
         return <Trans id='hal_authentication_failure_account_creation' />
+      case 'hal_manual_add_success':
+        return <Trans id='hal_manual_add_success' />
+      case 'hal_manual_add_failure':
+        return <Trans id='hal_manual_add_failure' />
+      case 'hal_manual_add_conflict':
+        return <Trans id='hal_manual_add_conflict' />
+      case 'hal_remove_success':
+        return <Trans id='hal_remove_success' />
+      case 'hal_remove_failure':
+        return <Trans id='hal_remove_failure' />
       default:
         return null
     }
+  }
+
+  // Read-only view: viewer has no capability on this identifier
+  if (!hasAnyCapability) {
+    return (
+      <Paper
+        elevation={1}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1.5,
+          p: 2,
+          width: '100%',
+          borderRadius: 2,
+        }}
+      >
+        <Typography variant='subtitle1' fontWeight='bold'>
+          HAL
+        </Typography>
+        {hasHalIdentifier && halValue ? (
+          <IdentifierPill
+            value={halValue}
+            iconLabel='HAL'
+            iconColor='#4A90D9'
+            subLabel={halKind}
+          />
+        ) : (
+          <Typography variant='body2' color='text.secondary'>
+            <Trans id='hal_control_not_available' />
+          </Typography>
+        )}
+      </Paper>
+    )
   }
 
   return (
@@ -200,7 +247,7 @@ const HalControl = () => {
               value={halValue}
               iconLabel='HAL'
               iconColor='#4A90D9'
-              subLabel={halKind ?? undefined}
+              subLabel={halKind}
             />
           )}
 
@@ -213,18 +260,86 @@ const HalControl = () => {
             />
           )}
 
-          {/* Button rules:
-              - If identifier present but no login => show button
-              - If no identifier and no login => show button
-              - If identifier + login => no button
-          */}
-          {!isLinked && <HalLoginButton halProvided={hasHalIdentifier} />}
+          {/* Authenticate: own account, not yet authenticated */}
+          {!isLinked && canAuthenticate && (
+            <HalLoginButton halProvided={hasHalIdentifier} />
+          )}
         </Box>
+
+        {hasHalIdentifier && canRemove && (
+          <Button
+            color='error'
+            variant='outlined'
+            onClick={() => setOpenConfirm(true)}
+            sx={{ minWidth: 'fit-content', alignSelf: 'flex-start' }}
+          >
+            <Trans id='hal_control_remove_button' />
+          </Button>
+        )}
+
+        {/* Manual add without authenticating: wide-scoped editors, empty slot */}
+        {!hasHalIdentifier && canAddUnauthenticated && person?.uid && (
+          <ManualIdentifierAddForm
+            personUid={person.uid}
+            variants={[
+              {
+                type: PersonIdentifierType.idhals,
+                label: 'idHal_s',
+                regex: IDHAL_S_REGEX,
+              },
+              {
+                type: PersonIdentifierType.idhali,
+                label: 'idHal_i',
+                regex: IDHAL_I_REGEX,
+              },
+            ]}
+            inputLabel='idHAL'
+            renderPreview={({ value, type, onReady }) => (
+              <HalInfoBox
+                value={value}
+                kind={
+                  type === PersonIdentifierType.idhali ? 'idhali' : 'idhals'
+                }
+                forceOpen
+                onReady={onReady}
+              />
+            )}
+            onResult={(r) =>
+              notify(
+                r.success,
+                r.success
+                  ? 'hal_manual_add_success'
+                  : r.conflict
+                    ? 'hal_manual_add_conflict'
+                    : 'hal_manual_add_failure',
+              )
+            }
+          />
+        )}
 
         <Typography variant='caption' color='text.secondary'>
           <Trans id='hal_control_helper' />
         </Typography>
       </Paper>
+
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+        <DialogTitle>
+          <Trans id='hal_control_remove_dialog_title' />
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            <Trans id='hal_control_remove_dialog_text' />
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)}>
+            <Trans id='identifier_dialog_cancel_button' />
+          </Button>
+          <Button color='error' onClick={remove}>
+            <Trans id='hal_control_remove_dialog_confirm' />
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={open}

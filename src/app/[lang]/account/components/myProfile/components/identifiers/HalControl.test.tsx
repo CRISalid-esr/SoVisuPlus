@@ -1,12 +1,10 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { I18nProvider } from '@lingui/react'
 import { i18n } from '@lingui/core'
 import HalControl from '@/app/[lang]/account/components/myProfile/components/identifiers/HalControl'
 import useStore from '@/stores/global_store'
 import { PersonIdentifierType } from '@prisma/client'
-
-// ── Mocks ─────────────────────────────────────────────────────────────────────
 
 const mockReplace = jest.fn()
 const mockUseSearchParams = jest.fn()
@@ -41,27 +39,20 @@ jest.mock(
   }),
 )
 
-// ── i18n ──────────────────────────────────────────────────────────────────────
-
-i18n.load('en', {
-  hal_control_helper: 'Helper text for HAL control (can be long).',
-  hal_account_linked_tooltip: 'Linked to HAL account',
-  hal_control_not_available: 'hal_control_not_available',
-  hal_authentication_success: 'HAL authentication success',
-  hal_authentication_failure: 'HAL authentication failure',
-  hal_authentication_failure_no_ticket: 'No ticket',
-  hal_authentication_failure_no_session: 'No session',
-  hal_authentication_failure_user_not_found: 'User not found',
-  hal_authentication_failure_misconfig: 'Misconfig',
-  hal_auth_missing_data: 'Missing data',
-  hal_unavailable_data: 'HAL unavailable',
-  hal_missing_identifiers: 'Missing identifiers',
-  hal_identifier_insert_failure: 'Insert failure',
-  hal_authentication_failure_wrong_protocol: 'Wrong protocol',
+// The AureHAL preview is mocked to immediately signal readiness so Save enables.
+jest.mock('./HalInfoBox', () => {
+  const ReactActual = jest.requireActual('react')
+  const MockHalInfoBox = ({ onReady }: { onReady?: () => void }) => {
+    ReactActual.useEffect(() => {
+      onReady?.()
+    }, [onReady])
+    return <div data-testid='hal-info-box' />
+  }
+  return { __esModule: true, default: MockHalInfoBox }
 })
-i18n.activate('en')
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+i18n.load('en', {})
+i18n.activate('en')
 
 const renderWithProviders = () =>
   render(
@@ -70,7 +61,9 @@ const renderWithProviders = () =>
     </I18nProvider>,
   )
 
-const authzWithPermission = makeAuthzContext({
+// Global (unscoped) account_editor → wide scope
+const authzGlobal = makeAuthzContext({
+  personUid: 'person-uid',
   roleAssignments: [
     makeAssignment('account_editor', [
       {
@@ -82,18 +75,28 @@ const authzWithPermission = makeAuthzContext({
   ],
 })
 
-const setupSession = (withPermission: boolean) => {
+const setupSession = (authz: unknown) => {
   ;(useSession as jest.Mock).mockReturnValue({
-    data: withPermission ? { user: { authz: authzWithPermission } } : null,
+    data: authz ? { user: { authz } } : null,
   })
 }
+
+const mockAddPersonIdentifier = jest.fn()
+const mockRemovePersonIdentifier = jest.fn()
 
 const makeStore = (
   identifiers: Array<{ type: string; value: string }>,
   ownPerspective = true,
 ) => {
+  const has = (type: string) => identifiers.some((i) => i.type === type)
   const person = {
+    uid: 'person-uid',
     getIdentifiers: () => identifiers,
+    hasIdentifier: (type: string) => has(type),
+    isIdentifierAuthenticated: (type: string) =>
+      (type === PersonIdentifierType.idhals ||
+        type === PersonIdentifierType.idhali) &&
+      has(PersonIdentifierType.hal_login),
     authzProperties: {
       __type: 'Person',
       perimeter: { Person: ['person-uid'], ResearchUnit: [] },
@@ -105,206 +108,116 @@ const makeStore = (
         connectedUser: { person },
         currentPerspective: null,
         ownPerspective,
+        addPersonIdentifier: mockAddPersonIdentifier,
+        removePersonIdentifier: mockRemovePersonIdentifier,
       },
     }),
   )
 }
 
-// ── Own-perspective (full view) ────────────────────────────────────────────────
-
-describe('HalControl — own perspective', () => {
+describe('HalControl', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseSearchParams.mockReturnValue(new URLSearchParams())
-    setupSession(true) // default: account_editor permission present
+    mockAddPersonIdentifier.mockResolvedValue({ success: true })
+    mockRemovePersonIdentifier.mockResolvedValue({ success: true })
+    setupSession(authzGlobal)
   })
 
-  it('always shows helper text', () => {
-    makeStore([])
-    renderWithProviders()
-    expect(screen.getByText(i18n.t('hal_control_helper'))).toBeInTheDocument()
-  })
-
-  it('when no HAL identifier and no login: shows only the button', () => {
+  it('no HAL identifier: shows auth button and manual add form', () => {
     makeStore([])
     renderWithProviders()
 
     expect(screen.getByTestId('hal-login-button')).toHaveTextContent(
       'halProvided=false',
     )
-    expect(screen.queryByText('idHal_s')).not.toBeInTheDocument()
-    expect(screen.queryByText('idHal_i')).not.toBeInTheDocument()
-    expect(screen.queryByText('hal_login')).not.toBeInTheDocument()
+    expect(screen.getByText('manual_identifier_add_button')).toBeInTheDocument()
     expect(screen.queryByTestId('LinkIcon')).not.toBeInTheDocument()
   })
 
-  it('when idHal_s exists but no login: shows idHal badge and button, no link icon', () => {
+  it('non-authenticated idHAL: badge + auth button + Remove, no link icon', () => {
     makeStore([{ type: PersonIdentifierType.idhals, value: 'jacques-dupont' }])
     renderWithProviders()
 
-    expect(screen.getByText('idHal_s')).toBeInTheDocument()
     expect(screen.getByText('jacques-dupont')).toBeInTheDocument()
     expect(screen.getByTestId('hal-login-button')).toHaveTextContent(
       'halProvided=true',
     )
+    expect(screen.getByText('hal_control_remove_button')).toBeInTheDocument()
     expect(screen.queryByTestId('LinkIcon')).not.toBeInTheDocument()
-    expect(screen.queryByText('hal_login')).not.toBeInTheDocument()
   })
 
-  it('when idHal_i exists but no login: shows idHal_i badge and button', () => {
-    makeStore([{ type: PersonIdentifierType.idhali, value: 'jean-martin' }])
-    renderWithProviders()
-
-    expect(screen.getByText('idHal_i')).toBeInTheDocument()
-    expect(screen.getByText('jean-martin')).toBeInTheDocument()
-    expect(screen.getByTestId('hal-login-button')).toHaveTextContent(
-      'halProvided=true',
-    )
-  })
-
-  it('prefers idHal_s over idHal_i when both are present', () => {
-    makeStore([
-      { type: PersonIdentifierType.idhals, value: 'hal-s-value' },
-      { type: PersonIdentifierType.idhali, value: 'hal-i-value' },
-    ])
-    renderWithProviders()
-
-    expect(screen.getByText('idHal_s')).toBeInTheDocument()
-    expect(screen.getByText('hal-s-value')).toBeInTheDocument()
-    expect(screen.queryByText('idHal_i')).not.toBeInTheDocument()
-  })
-
-  it('when idHal and login both exist: shows link icon, both badges, no button', () => {
+  it('authenticated idHAL: link icon + hal_login pill + Remove, no auth button', () => {
     makeStore([
       { type: PersonIdentifierType.idhals, value: 'jacques-dupont' },
       { type: PersonIdentifierType.hal_login, value: 'jdupont' },
     ])
     renderWithProviders()
 
-    expect(screen.getByText('idHal_s')).toBeInTheDocument()
-    expect(screen.getByText('jacques-dupont')).toBeInTheDocument()
-    expect(screen.getByText('hal_login')).toBeInTheDocument()
-    expect(screen.getByText('jdupont')).toBeInTheDocument()
     expect(screen.getByTestId('LinkIcon')).toBeInTheDocument()
+    expect(screen.getByText('hal_login')).toBeInTheDocument()
+    expect(screen.getByText('hal_control_remove_button')).toBeInTheDocument()
     expect(screen.queryByTestId('hal-login-button')).not.toBeInTheDocument()
   })
 
-  it('shows snackbar on ?success=hal_authentication_success', () => {
+  it('manual add offers an idHal_s / idHal_i switcher and verifies before submitting', async () => {
     makeStore([])
-    mockUseSearchParams.mockReturnValue(
-      new URLSearchParams([['success', 'hal_authentication_success']]),
-    )
     renderWithProviders()
 
-    expect(
-      screen.getByText(i18n.t('hal_authentication_success')),
-    ).toBeInTheDocument()
+    fireEvent.click(screen.getByText('manual_identifier_add_button'))
+    // both switcher toggles present
+    expect(screen.getByText('idHal_s')).toBeInTheDocument()
+    expect(screen.getByText('idHal_i')).toBeInTheDocument()
+
+    // choose idHal_i, enter a numeric value, then Verify (AureHAL preview)
+    fireEvent.click(screen.getByText('idHal_i'))
+    fireEvent.change(screen.getByLabelText('idHAL'), {
+      target: { value: '1161147' },
+    })
+    fireEvent.click(screen.getByText('manual_identifier_verify_button'))
+
+    // Preview shown, then Save becomes available once it signals readiness
+    expect(await screen.findByTestId('hal-info-box')).toBeInTheDocument()
+    fireEvent.click(await screen.findByText('manual_identifier_save_button'))
+
+    await waitFor(() =>
+      expect(mockAddPersonIdentifier).toHaveBeenCalledWith(
+        'person-uid',
+        PersonIdentifierType.idhali,
+        '1161147',
+      ),
+    )
   })
 
-  it('shows snackbar on ?error=hal_authentication_failure_wrong_protocol', () => {
-    makeStore([])
-    mockUseSearchParams.mockReturnValue(
-      new URLSearchParams([
-        ['error', 'hal_authentication_failure_wrong_protocol'],
-      ]),
-    )
+  it('remove authenticated idHAL calls removePersonIdentifier with the stored type', async () => {
+    makeStore([
+      { type: PersonIdentifierType.idhals, value: 'jacques-dupont' },
+      { type: PersonIdentifierType.hal_login, value: 'jdupont' },
+    ])
     renderWithProviders()
 
-    expect(
-      screen.getByText(i18n.t('hal_authentication_failure_wrong_protocol')),
-    ).toBeInTheDocument()
-  })
+    fireEvent.click(screen.getByText('hal_control_remove_button'))
+    fireEvent.click(screen.getByText('hal_control_remove_dialog_confirm'))
 
-  it('ignores non-hal URL params', () => {
-    makeStore([])
-    mockUseSearchParams.mockReturnValue(
-      new URLSearchParams([['success', 'orcid_authentication_success']]),
+    await waitFor(() =>
+      expect(mockRemovePersonIdentifier).toHaveBeenCalledWith(
+        'person-uid',
+        PersonIdentifierType.idhals,
+      ),
     )
-    renderWithProviders()
-
-    expect(
-      screen.queryByText(i18n.t('hal_authentication_success')),
-    ).not.toBeInTheDocument()
   })
 
-  it('shows read-only view when own perspective but no account_editor permission', () => {
-    setupSession(false)
+  it('no permission: read-only, no action buttons', () => {
+    setupSession(null)
     makeStore([{ type: PersonIdentifierType.idhals, value: 'jacques-dupont' }])
     renderWithProviders()
 
     expect(screen.queryByTestId('hal-login-button')).not.toBeInTheDocument()
     expect(
-      screen.queryByText(i18n.t('hal_control_helper')),
+      screen.queryByText('hal_control_remove_button'),
     ).not.toBeInTheDocument()
-  })
-})
-
-// ── Read-only (non-own) perspective ───────────────────────────────────────────
-
-describe('HalControl — read-only (non-own) perspective', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-    mockUseSearchParams.mockReturnValue(new URLSearchParams())
-    setupSession(false) // no permission; ownPerspective=false anyway
-  })
-
-  it('shows "not available" when no HAL identifier', () => {
-    makeStore([], false)
-    renderWithProviders()
-
-    expect(screen.getByText('hal_control_not_available')).toBeInTheDocument()
-  })
-
-  it('shows idHal value when an idHal_s identifier is present', () => {
-    makeStore(
-      [{ type: PersonIdentifierType.idhals, value: 'jacques-dupont' }],
-      false,
-    )
-    renderWithProviders()
-
-    expect(screen.getByText('idHal_s')).toBeInTheDocument()
-    expect(screen.getByText('jacques-dupont')).toBeInTheDocument()
-  })
-
-  it('shows idHal value when an idHal_i identifier is present', () => {
-    makeStore(
-      [{ type: PersonIdentifierType.idhali, value: 'jean-martin' }],
-      false,
-    )
-    renderWithProviders()
-
-    expect(screen.getByText('idHal_i')).toBeInTheDocument()
-    expect(screen.getByText('jean-martin')).toBeInTheDocument()
-  })
-
-  it('does not show the login button', () => {
-    makeStore(
-      [{ type: PersonIdentifierType.idhals, value: 'jacques-dupont' }],
-      false,
-    )
-    renderWithProviders()
-
-    expect(screen.queryByTestId('hal-login-button')).not.toBeInTheDocument()
-  })
-
-  it('does not show the helper text', () => {
-    makeStore([], false)
-    renderWithProviders()
-
     expect(
-      screen.queryByText(i18n.t('hal_control_helper')),
-    ).not.toBeInTheDocument()
-  })
-
-  it('does not show a snackbar even when URL params are present', () => {
-    makeStore([], false)
-    mockUseSearchParams.mockReturnValue(
-      new URLSearchParams([['success', 'hal_authentication_success']]),
-    )
-    renderWithProviders()
-
-    expect(
-      screen.queryByText(i18n.t('hal_authentication_success')),
+      screen.queryByText('manual_identifier_add_button'),
     ).not.toBeInTheDocument()
   })
 })

@@ -17,11 +17,11 @@ export interface UserSlice {
     refreshPerspective: () => Promise<void>
     setPerspective: (perspective: IAgent) => void
     setPerspectiveBySlug: (uid: string) => void
-    updatePersonIdentifier: (
+    addPersonIdentifier: (
       personUid: string,
       type: string,
       value: string,
-    ) => Promise<{ success: boolean }>
+    ) => Promise<{ success: boolean; conflict?: boolean }>
     removePersonIdentifier: (
       personUid: string,
       type: string,
@@ -96,7 +96,9 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
         },
       }))
     },
-    updatePersonIdentifier: async (
+    // Add-only: a value change is a remove-then-add. A 409 means an identifier
+    // of that type already exists and must be removed first (conflict flag).
+    addPersonIdentifier: async (
       personUid: string,
       type: string,
       value: string,
@@ -110,11 +112,13 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
             body: JSON.stringify({ value }),
           },
         )
-        if (!response.ok) return { success: false }
+        if (!response.ok) {
+          return { success: false, conflict: response.status === 409 }
+        }
         await get().user.refreshPerspective()
         return { success: true }
       } catch (error) {
-        console.error('Failed to update identifier', error)
+        console.error('Failed to add identifier', error)
         return { success: false }
       }
     },

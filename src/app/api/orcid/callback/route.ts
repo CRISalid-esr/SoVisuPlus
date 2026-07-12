@@ -8,6 +8,7 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { PersonService } from '@/lib/services/PersonService'
+import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
@@ -114,9 +115,26 @@ export const GET = async (req: NextRequest) => {
     expiresAt,
   })
 
+  // Authentication only confirms an existing value. If an ORCID is already
+  // stored and the one returned by ORCID differs, the existing identifier must
+  // be removed first — we do not replace it in place.
+  const personDAO = new PersonDAO()
+  const storedOrcid = await personDAO.findIdentifierValue(
+    user.person.uid,
+    PersonIdentifierType.orcid,
+  )
+  if (
+    storedOrcid !== null &&
+    storedOrcid.toUpperCase() !== orcidIdentifier.value.toUpperCase()
+  ) {
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=orcid_authentication_value_mismatch`,
+    )
+  }
+
   const personService = new PersonService()
   try {
-    await personService.addOrUpdateOrcidIdentifier(
+    await personService.authenticateOrcidIdentifier(
       user.person.uid,
       orcidIdentifier,
     )
