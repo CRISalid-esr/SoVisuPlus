@@ -61,6 +61,18 @@ jest.mock(
   }),
 )
 
+// The ORCID preview is mocked to immediately signal readiness so Save enables.
+jest.mock('./OrcidInfoBox', () => {
+  const ReactActual = jest.requireActual('react')
+  const MockOrcidInfoBox = ({ onReady }: { onReady?: () => void }) => {
+    ReactActual.useEffect(() => {
+      onReady?.()
+    }, [onReady])
+    return <div data-testid='orcid-info-box' />
+  }
+  return { __esModule: true, default: MockOrcidInfoBox }
+})
+
 const renderWithProviders = () =>
   render(
     <I18nProvider i18n={i18n}>
@@ -178,7 +190,7 @@ describe('OrcidControl', () => {
     expect(screen.getByText('manual_identifier_add_button')).toBeInTheDocument()
   })
 
-  it('manual add submits addPersonIdentifier with the ORCID type', async () => {
+  it('manual add verifies (ORCID preview) before submitting', async () => {
     setupStore({ person: buildPerson([]) })
     renderWithProviders()
 
@@ -186,7 +198,11 @@ describe('OrcidControl', () => {
     fireEvent.change(screen.getByLabelText('ORCID'), {
       target: { value: '0000-0002-1825-0097' },
     })
-    fireEvent.click(screen.getByText('manual_identifier_save_button'))
+    fireEvent.click(screen.getByText('manual_identifier_verify_button'))
+
+    // Preview shown, then Save becomes available once it signals readiness
+    expect(await screen.findByTestId('orcid-info-box')).toBeInTheDocument()
+    fireEvent.click(await screen.findByText('manual_identifier_save_button'))
 
     await waitFor(() =>
       expect(mockAddPersonIdentifier).toHaveBeenCalledWith(

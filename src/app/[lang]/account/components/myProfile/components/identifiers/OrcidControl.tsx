@@ -20,6 +20,7 @@ import { PidComponent } from '@kit-data-manager/react-pid-component'
 import styles from './OrcidControl.module.css'
 import { OrcidLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton'
 import ManualIdentifierAddForm from './ManualIdentifierAddForm'
+import OrcidInfoBox from './OrcidInfoBox'
 import { useIdentifierCapabilities } from './useIdentifierCapabilities'
 import { Trans } from '@lingui/react'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
@@ -284,6 +285,9 @@ const OrcidControl = () => {
               },
             ]}
             inputLabel='ORCID'
+            renderPreview={({ value, onReady }) => (
+              <OrcidInfoBox orcid={value} forceOpen onReady={onReady} />
+            )}
             onResult={(r) =>
               notify(
                 r.success,
