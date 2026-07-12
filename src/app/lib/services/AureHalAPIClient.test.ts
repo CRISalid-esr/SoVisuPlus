@@ -400,3 +400,62 @@ describe('formatAuthorStructures', () => {
     ).toBe('IRD. Centre (CNRS)')
   })
 })
+
+describe('AureHalAPIClient.findAuthorByIdHal', () => {
+  const client = new AureHalAPIClient()
+
+  beforeEach(() => {
+    global.fetch = jest.fn()
+  })
+  afterEach(() => jest.resetAllMocks())
+
+  it('queries idHal_s exactly and returns the first doc', async () => {
+    const doc = { fullName_s: 'Elise Dupont', idHal_s: 'elise-dupont' }
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ response: { docs: [doc] } }),
+    })
+
+    await expect(
+      client.findAuthorByIdHal('elise-dupont', 'idhals'),
+    ).resolves.toEqual(doc)
+
+    const url = (global.fetch as jest.Mock).mock.calls[0][0] as string
+    expect(decodeURIComponent(url)).toContain('q=idHal_s:"elise-dupont"')
+  })
+
+  it('queries idHal_i for the numeric variant', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ response: { docs: [] } }),
+    })
+
+    await client.findAuthorByIdHal('752624', 'idhali')
+    const url = (global.fetch as jest.Mock).mock.calls[0][0] as string
+    expect(decodeURIComponent(url)).toContain('q=idHal_i:752624')
+  })
+
+  it('returns null when HAL finds no author', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ response: { docs: [] } }),
+    })
+    await expect(
+      client.findAuthorByIdHal('nobody-here', 'idhals'),
+    ).resolves.toBeNull()
+  })
+
+  it('rejects a non-numeric idHal_i without calling HAL', async () => {
+    await expect(client.findAuthorByIdHal('abc', 'idhali')).rejects.toThrow(
+      /numeric/,
+    )
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it('rejects an idHal_s with illegal characters (query injection guard)', async () => {
+    await expect(
+      client.findAuthorByIdHal('a" OR idHal_s:*', 'idhals'),
+    ).rejects.toThrow(/invalid format/)
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+})

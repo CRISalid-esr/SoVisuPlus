@@ -20,6 +20,7 @@ import {
 import { Trans } from '@lingui/react'
 import { HalLoginButton } from '@/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton'
 import ManualIdentifierAddForm from './ManualIdentifierAddForm'
+import HalInfoBox from './HalInfoBox'
 import { useIdentifierCapabilities } from './useIdentifierCapabilities'
 import LinkIcon from '@mui/icons-material/Link'
 import { PersonIdentifierType } from '@prisma/client'
@@ -293,6 +294,16 @@ const HalControl = () => {
               },
             ]}
             inputLabel='idHAL'
+            renderPreview={({ value, type, onReady }) => (
+              <HalInfoBox
+                value={value}
+                kind={
+                  type === PersonIdentifierType.idhali ? 'idhali' : 'idhals'
+                }
+                forceOpen
+                onReady={onReady}
+              />
+            )}
             onResult={(r) =>
               notify(
                 r.success,

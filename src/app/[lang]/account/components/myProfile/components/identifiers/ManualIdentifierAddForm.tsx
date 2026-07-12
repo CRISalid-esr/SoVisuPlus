@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import {
   Box,
   Button,
@@ -22,12 +22,25 @@ export type IdentifierVariant = {
   regex: RegExp
 }
 
+export type IdentifierPreviewArgs = {
+  value: string
+  type: PersonIdentifierType
+  onReady: () => void
+}
+
 type Props = {
   personUid: string
   /** One variant → no switcher; several → a switcher is shown at the line end. */
   variants: IdentifierVariant[]
   inputLabel: string
   onResult: (result: { success: boolean; conflict?: boolean }) => void
+  /**
+   * Optional confirmation step. When provided, the user must Verify before Save:
+   * the returned preview is rendered and Save stays disabled until it calls
+   * `onReady` (mirrors the IdRef verify flow). Used to preview the AureHAL author
+   * behind a manually entered idHAL.
+   */
+  renderPreview?: (args: IdentifierPreviewArgs) => ReactNode
 }
 
 /**
@@ -42,6 +55,7 @@ const ManualIdentifierAddForm = ({
   variants,
   inputLabel,
   onResult,
+  renderPreview,
 }: Props) => {
   const { addPersonIdentifier } = useStore((s) => s.user)
   const [open, setOpen] = useState(false)
@@ -50,6 +64,11 @@ const ManualIdentifierAddForm = ({
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
+  // Verify step (only when renderPreview is provided)
+  const [verifying, setVerifying] = useState(false)
+  const [canConfirm, setCanConfirm] = useState(false)
+  const [verifyingValue, setVerifyingValue] = useState('')
+
   const variant = variants[selected] ?? variants[0]
 
   const reset = () => {
@@ -57,14 +76,36 @@ const ManualIdentifierAddForm = ({
     setValue('')
     setError(null)
     setSelected(0)
+    setVerifying(false)
+    setCanConfirm(false)
+  }
+
+  const clearVerify = () => {
+    if (verifying) {
+      setVerifying(false)
+      setCanConfirm(false)
+    }
+  }
+
+  const validate = (v: string): boolean => {
+    if (!variant.regex.test(v)) {
+      setError(t`manual_identifier_invalid_format`)
+      return false
+    }
+    return true
+  }
+
+  const verify = () => {
+    const trimmed = value.trim()
+    if (!validate(trimmed)) return
+    setVerifyingValue(trimmed)
+    setCanConfirm(false)
+    setVerifying(true)
   }
 
   const save = async () => {
-    const trimmed = value.trim()
-    if (!variant.regex.test(trimmed)) {
-      setError(t`manual_identifier_invalid_format`)
-      return
-    }
+    const trimmed = renderPreview ? verifyingValue : value.trim()
+    if (!renderPreview && !validate(trimmed)) return
     setSaving(true)
     const result = await addPersonIdentifier(personUid, variant.type, trimmed)
     setSaving(false)
@@ -85,6 +126,8 @@ const ManualIdentifierAddForm = ({
     )
   }
 
+  const showSave = !renderPreview || verifying
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Box
@@ -100,11 +143,13 @@ const ManualIdentifierAddForm = ({
           onChange={(e) => {
             setValue(e.target.value)
             setError(null)
+            clearVerify()
           }}
           error={!!error}
           helperText={error}
           label={inputLabel}
           size='small'
+          disabled={verifying}
           sx={{ flexGrow: 1, minWidth: 180 }}
         />
         {variants.length > 1 && (
@@ -112,10 +157,12 @@ const ManualIdentifierAddForm = ({
             exclusive
             size='small'
             value={selected}
+            disabled={verifying}
             onChange={(_e, next) => {
               if (next !== null) {
                 setSelected(next)
                 setError(null)
+                clearVerify()
               }
             }}
           >
@@ -128,21 +175,37 @@ const ManualIdentifierAddForm = ({
         )}
       </Box>
 
+      {renderPreview &&
+        verifying &&
+        renderPreview({
+          value: verifyingValue,
+          type: variant.type,
+          onReady: () => setCanConfirm(true),
+        })}
+
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
         <Button variant='outlined' onClick={reset}>
           <Trans>edit_field_cancel_button_label</Trans>
         </Button>
-        <Button
-          variant='contained'
-          disableElevation
-          disabled={saving}
-          onClick={save}
-          startIcon={
-            saving ? <CircularProgress size={14} color='inherit' /> : undefined
-          }
-        >
-          <Trans>manual_identifier_save_button</Trans>
-        </Button>
+        {!showSave ? (
+          <Button variant='contained' disableElevation onClick={verify}>
+            <Trans>manual_identifier_verify_button</Trans>
+          </Button>
+        ) : (
+          <Button
+            variant='contained'
+            disableElevation
+            disabled={saving || (!!renderPreview && !canConfirm)}
+            onClick={save}
+            startIcon={
+              saving ? (
+                <CircularProgress size={14} color='inherit' />
+              ) : undefined
+            }
+          >
+            <Trans>manual_identifier_save_button</Trans>
+          </Button>
+        )}
       </Box>
     </Box>
   )

@@ -14,27 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:324
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:323
-msgid "identifier_dialog_cancel_button"
-msgstr "Annuler"
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:56
-msgid "user_action_outcome_technical_details"
-msgstr "Détails techniques"
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:84
-msgid "user_action_outcome_details_copied"
-msgstr "Copié !"
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:86
-msgid "user_action_outcome_copy_details"
-msgstr "Copier les détails"
-
-#. js-lingui-explicit-id
 #: src/app/lib/websocket/changeWarningMessages.tsx:22
 msgid "user_action_warning_unresolvable_person"
 msgstr "Le contributeur {displayName} n'a pas pu être identifié et a été ignoré"
@@ -63,6 +42,21 @@ msgstr "Une affiliation sans identifiant exploitable a été ignorée"
 #: src/app/lib/websocket/changeWarningMessages.tsx:52
 msgid "user_action_warning_unknown"
 msgstr "Un élément n'a pas pu être appliqué"
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:56
+msgid "user_action_outcome_technical_details"
+msgstr "Détails techniques"
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:84
+msgid "user_action_outcome_details_copied"
+msgstr "Copié !"
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:86
+msgid "user_action_outcome_copy_details"
+msgstr "Copier les détails"
 
 #. js-lingui-explicit-id
 #: src/app/lib/websocket/WebSocketListener.tsx:114
@@ -101,16 +95,6 @@ msgid "snackbar_user_action_applied_with_warnings"
 msgstr "Modification enregistrée avec des avertissements :"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/forbidden.tsx:43
-msgid "forbidden_page_back_home"
-msgstr "Retour"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/forbidden.tsx:108
-msgid "forbidden_page_description"
-msgstr "Vous n'êtes pas autorisé à accéder à cette ressource. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/not-found.tsx:45
 msgid "notfound_page_back_home"
 msgstr "Retour à la page d'accueil"
@@ -121,9 +105,14 @@ msgid "notfound_page_description"
 msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Contactez-nous à cette <0>adresse mail</0> si cela vous semble anormal."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/components/MergeDialog.tsx:209
-msgid "documents_merge_dialog_box_merge_button"
-msgstr "Confirmer la fusion ({nbDocs})"
+#: src/app/[lang]/forbidden.tsx:43
+msgid "forbidden_page_back_home"
+msgstr "Retour"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:108
+msgid "forbidden_page_description"
+msgstr "Vous n'êtes pas autorisé à accéder à cette ressource. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:169
@@ -156,9 +145,19 @@ msgid "documents_page_missing_identifiers_warning_suffix"
 msgstr "pour renseigner vos identifiants {identifiers}."
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/MergeDialog.tsx:209
+msgid "documents_merge_dialog_box_merge_button"
+msgstr "Confirmer la fusion ({nbDocs})"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
 msgid "document_details_page_source_tab_card_title"
 msgstr "Références bibliographiques sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
+msgid "document_details_page_update_in_hal_tab_card_title"
+msgstr "Mettre à jour dans HAL"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.tsx:204
@@ -171,25 +170,19 @@ msgid "document_details_page_frozen_notice"
 msgstr "Ce document est en attente de mise à jour depuis le graphe et ne peut pas être modifié pour le moment."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
-msgid "document_details_page_update_in_hal_tab_card_title"
-msgstr "Mettre à jour dans HAL"
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:105
+msgid "document_details_page_keywords_tab_card_title"
+msgstr "Mots-clés"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:402
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:413
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "Actions"
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:124
+msgid "document_details_page_keywords_tab_card_empty_content"
+msgstr "Aucun mot-clé"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:430
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalider"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:448
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissocier"
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:138
+msgid "document_details_page_keywords_search_field_title"
+msgstr "Sélectionner un ou plusieurs vocabulaires contrôlés"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:225
@@ -212,19 +205,30 @@ msgid "concept_chip_action_delete"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:105
-msgid "document_details_page_keywords_tab_card_title"
-msgstr "Mots-clés"
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:402
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:413
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "Actions"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:124
-msgid "document_details_page_keywords_tab_card_empty_content"
-msgstr "Aucun mot-clé"
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:430
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalider"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:138
-msgid "document_details_page_keywords_search_field_title"
-msgstr "Sélectionner un ou plusieurs vocabulaires contrôlés"
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:448
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissocier"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
+msgid "document_details_page_add_in_hal_tab_card_title"
+msgstr "Déposer dans HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr "Domaines"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
@@ -257,19 +261,20 @@ msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Erreur lors du chargement des données"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
-msgid "document_details_page_add_in_hal_tab_card_title"
-msgstr "Déposer dans HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr "Domaines"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:91
 msgid "documents_details_page_authors_tab_title"
 msgstr "Auteurs"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
+msgid "bibliographic_information_update_success"
+msgstr "Informations bibliographiques mises à jour."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
+msgid "bibliographic_information_update_failure"
+msgstr "Erreur lors de la mise à jour des informations bibliographiques."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:114
@@ -285,17 +290,6 @@ msgstr "Échec de la mise à jour de la date de publication."
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
 msgid "document_details_page_card_title"
 msgstr "Informations bibliographiques"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
-msgid "bibliographic_information_update_success"
-msgstr "Informations bibliographiques mises à jour."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
-msgid "bibliographic_information_update_failure"
-msgstr "Erreur lors de la mise à jour des informations bibliographiques."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
@@ -328,6 +322,16 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "Une nouvelle expertise est en attente de validation"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:34
+msgid "profile_affiliations_card_title"
+msgstr "Mes affiliations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:36
+msgid "profile_affiliations_card_title_other"
+msgstr "Affiliations"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:34
 msgid "profile_identifiers_card_title"
 msgstr "Mes identifiants"
@@ -338,14 +342,105 @@ msgid "profile_identifiers_card_title_other"
 msgstr "Identifiants"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:34
-msgid "profile_affiliations_card_title"
-msgstr "Mes affiliations"
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:119
+msgid "orcid_authentication_success"
+msgstr "Compte ORCID authentifié avec succès."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:36
-msgid "profile_affiliations_card_title_other"
-msgstr "Affiliations"
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:121
+msgid "orcid_authentication_failure"
+msgstr "Échec de l'authentification ORCID."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:123
+msgid "orcid_authentication_failure_no_code"
+msgstr "Échec de l'authentification ORCID : aucun code d'autorisation reçu."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:125
+msgid "orcid_authentication_failure_no_session"
+msgstr "Échec de l'authentification ORCID : aucune session active."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:127
+msgid "orcid_authentication_failure_user_not_found"
+msgstr "Échec de l'authentification ORCID : utilisateur introuvable."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:129
+msgid "orcid_authentication_value_mismatch"
+msgstr "L'ORCID authentifié diffère de celui déjà enregistré. Supprimez l'ORCID existant avant d'en authentifier un autre."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:131
+msgid "orcid_insert_failure"
+msgstr "Échec de l'enregistrement de l'identifiant ORCID."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:133
+msgid "orcid_manual_add_success"
+msgstr "Identifiant ORCID ajouté."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:135
+msgid "orcid_manual_add_failure"
+msgstr "Échec de l'ajout de l'identifiant ORCID."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:137
+msgid "orcid_manual_add_conflict"
+msgstr "Un identifiant ORCID existe déjà. Supprimez-le avant d'en ajouter un nouveau."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:139
+msgid "orcid_remove_success"
+msgstr "Identifiant ORCID supprimé."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:141
+msgid "orcid_remove_failure"
+msgstr "Échec de la suppression de l'identifiant ORCID."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:196
+msgid "orcid_identifier_no_orcid_provided"
+msgstr "Aucun ORCID renseigné."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:245
+msgid "orcid_account_linked_tooltip"
+msgstr "Compte ORCID authentifié"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:262
+msgid "orcid_control_remove_button"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:302
+msgid "orcid_control_helper"
+msgstr "Gérez votre identifiant <0>ORCID</0>."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:319
+msgid "orcid_control_remove_dialog_title"
+msgstr "Supprimer l'identifiant ORCID ?"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:323
+msgid "orcid_control_remove_dialog_text"
+msgstr "Cette action supprimera l'identifiant ORCID de ce compte."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:336
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:328
+msgid "identifier_dialog_cancel_button"
+msgstr "Annuler"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:331
+msgid "orcid_control_remove_dialog_confirm"
+msgstr "Supprimer"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
@@ -383,229 +478,19 @@ msgid "orcid_button_provide_identifier"
 msgstr "Fournir mon identifiant ORCID"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:120
-msgid "orcid_authentication_success"
-msgstr "Compte ORCID authentifié avec succès."
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
+msgid "hal_button_update_identifier"
+msgstr "Lier mon compte HAL"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:122
-msgid "orcid_authentication_failure"
-msgstr "Échec de l'authentification ORCID."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:124
-msgid "orcid_authentication_failure_no_code"
-msgstr "Échec de l'authentification ORCID : aucun code d'autorisation reçu."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:126
-msgid "orcid_authentication_failure_no_session"
-msgstr "Échec de l'authentification ORCID : aucune session active."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:128
-msgid "orcid_authentication_failure_user_not_found"
-msgstr "Échec de l'authentification ORCID : utilisateur introuvable."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:130
-msgid "orcid_authentication_value_mismatch"
-msgstr "L'ORCID authentifié diffère de celui déjà enregistré. Supprimez l'ORCID existant avant d'en authentifier un autre."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:132
-msgid "orcid_insert_failure"
-msgstr "Échec de l'enregistrement de l'identifiant ORCID."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:134
-msgid "orcid_manual_add_success"
-msgstr "Identifiant ORCID ajouté."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:136
-msgid "orcid_manual_add_failure"
-msgstr "Échec de l'ajout de l'identifiant ORCID."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:138
-msgid "orcid_manual_add_conflict"
-msgstr "Un identifiant ORCID existe déjà. Supprimez-le avant d'en ajouter un nouveau."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:140
-msgid "orcid_remove_success"
-msgstr "Identifiant ORCID supprimé."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:142
-msgid "orcid_remove_failure"
-msgstr "Échec de la suppression de l'identifiant ORCID."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:193
-msgid "orcid_identifier_no_orcid_provided"
-msgstr "Aucun ORCID renseigné."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:240
-msgid "orcid_account_linked_tooltip"
-msgstr "Compte ORCID authentifié"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:257
-msgid "orcid_control_remove_button"
-msgstr "Supprimer"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:297
-msgid "orcid_control_helper"
-msgstr "Gérez votre identifiant <0>ORCID</0>."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:314
-msgid "orcid_control_remove_dialog_title"
-msgstr "Supprimer l'identifiant ORCID ?"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:318
-msgid "orcid_control_remove_dialog_text"
-msgstr "Cette action supprimera l'identifiant ORCID de ce compte."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:326
-msgid "orcid_control_remove_dialog_confirm"
-msgstr "Supprimer"
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
+msgid "hal_button_provide_identifier"
+msgstr "Fournir mon identifiant Hal"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
 msgid "profile_affiliations_no_units"
 msgstr "Pas de unité(s) de recherche associée(s)"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:136
-msgid "hal_authentication_success"
-msgstr "Authentification HAL réussie"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:138
-msgid "hal_authentication_failure"
-msgstr "Échec de l'authentification HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:140
-msgid "hal_authentication_failure_no_ticket"
-msgstr "Échec de l'authentification HAL : information non retournée par HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:142
-msgid "hal_authentication_failure_no_session"
-msgstr "Utilisateur non authentifié"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:144
-msgid "hal_authentication_failure_user_not_found"
-msgstr "Utilisateur non trouvé"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:146
-msgid "hal_authentication_failure_misconfig"
-msgstr "Mauvaise configuration de l'authentification HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:148
-msgid "hal_authentication_value_mismatch"
-msgstr "L'idHAL authentifié diffère de celui déjà enregistré. Supprimez l'idHAL existant avant d'en authentifier un autre."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:150
-msgid "hal_auth_missing_data"
-msgstr "Données manquantes sur HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:152
-msgid "hal_unavailable_data"
-msgstr "Données HAL indisponibles"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:154
-msgid "hal_missing_identifiers"
-msgstr "Aucun identifiant HAL trouvé"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:156
-msgid "hal_identifier_insert_failure"
-msgstr "Échec de l'insertion de l'identifiant HAL en base de données"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:158
-msgid "hal_authentication_failure_wrong_protocol"
-msgstr "Pour lier votre compte SoVisu+, n'utilisez pas l'option ORCID lors de l'authentification sur HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:160
-msgid "hal_authentication_failure_account_creation"
-msgstr "Veuillez vous rendre sur le site de HAL pour d'abord créer votre compte, puis revenez ici pour le lier à SoVisu+"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:162
-msgid "hal_manual_add_success"
-msgstr "Identifiant idHAL ajouté."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:164
-msgid "hal_manual_add_failure"
-msgstr "Échec de l'ajout de l'identifiant idHAL."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:166
-msgid "hal_manual_add_conflict"
-msgstr "Un identifiant idHAL existe déjà. Supprimez-le avant d'en ajouter un nouveau."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:168
-msgid "hal_remove_success"
-msgstr "Identifiant HAL supprimé."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:170
-msgid "hal_remove_failure"
-msgstr "Échec de la suppression de l'identifiant HAL."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:202
-msgid "hal_control_not_available"
-msgstr "Aucun identifiant HAL renseigné"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:227
-msgid "hal_account_linked_tooltip"
-msgstr "Votre compte SoVisu+ est lié à votre compte Hal"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:274
-msgid "hal_control_remove_button"
-msgstr "Supprimer"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:309
-msgid "hal_control_helper"
-msgstr "En liant votre compte Hal à votre compte Sovisu+, vous fiabilisez votre identifiant Hal et vous pourrez aisément déposer sur Hal les publications manquantes."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:315
-msgid "hal_control_remove_dialog_title"
-msgstr "Supprimer l'identifiant HAL ?"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:319
-msgid "hal_control_remove_dialog_text"
-msgstr "Cette action supprimera l'idHAL et son identifiant de connexion HAL de ce compte."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:327
-msgid "hal_control_remove_dialog_confirm"
-msgstr "Supprimer"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
@@ -628,16 +513,6 @@ msgid "authorizations_page_my_expertise"
 msgstr "Mes expertises"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
-msgid "hal_button_update_identifier"
-msgstr "Lier mon compte HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
-msgid "hal_button_provide_identifier"
-msgstr "Fournir mon identifiant Hal"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
 msgid "profile_affiliations_signature_label"
 msgstr "Ma signature"
@@ -651,6 +526,131 @@ msgstr "Aucune signature"
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
 msgid "profile_affiliations_signature_copied_message_confirmation"
 msgstr "Signature ajoutée au presse-papier."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:138
+msgid "hal_authentication_success"
+msgstr "Authentification HAL réussie"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:140
+msgid "hal_authentication_failure"
+msgstr "Échec de l'authentification HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:142
+msgid "hal_authentication_failure_no_ticket"
+msgstr "Échec de l'authentification HAL : information non retournée par HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:144
+msgid "hal_authentication_failure_no_session"
+msgstr "Utilisateur non authentifié"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:146
+msgid "hal_authentication_failure_user_not_found"
+msgstr "Utilisateur non trouvé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:148
+msgid "hal_authentication_failure_misconfig"
+msgstr "Mauvaise configuration de l'authentification HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:150
+msgid "hal_authentication_value_mismatch"
+msgstr "L'idHAL authentifié diffère de celui déjà enregistré. Supprimez l'idHAL existant avant d'en authentifier un autre."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:152
+msgid "hal_auth_missing_data"
+msgstr "Données manquantes sur HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:154
+msgid "hal_unavailable_data"
+msgstr "Données HAL indisponibles"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:156
+msgid "hal_missing_identifiers"
+msgstr "Aucun identifiant HAL trouvé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:158
+msgid "hal_identifier_insert_failure"
+msgstr "Échec de l'insertion de l'identifiant HAL en base de données"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:160
+msgid "hal_authentication_failure_wrong_protocol"
+msgstr "Pour lier votre compte SoVisu+, n'utilisez pas l'option ORCID lors de l'authentification sur HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:162
+msgid "hal_authentication_failure_account_creation"
+msgstr "Veuillez vous rendre sur le site de HAL pour d'abord créer votre compte, puis revenez ici pour le lier à SoVisu+"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:164
+msgid "hal_manual_add_success"
+msgstr "Identifiant idHAL ajouté."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:166
+msgid "hal_manual_add_failure"
+msgstr "Échec de l'ajout de l'identifiant idHAL."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:168
+msgid "hal_manual_add_conflict"
+msgstr "Un identifiant idHAL existe déjà. Supprimez-le avant d'en ajouter un nouveau."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:170
+msgid "hal_remove_success"
+msgstr "Identifiant HAL supprimé."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:172
+msgid "hal_remove_failure"
+msgstr "Échec de la suppression de l'identifiant HAL."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:204
+msgid "hal_control_not_available"
+msgstr "Aucun identifiant HAL renseigné"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:229
+msgid "hal_account_linked_tooltip"
+msgstr "Votre compte SoVisu+ est lié à votre compte Hal"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:276
+msgid "hal_control_remove_button"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:321
+msgid "hal_control_helper"
+msgstr "En liant votre compte Hal à votre compte Sovisu+, vous fiabilisez votre identifiant Hal et vous pourrez aisément déposer sur Hal les publications manquantes."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:327
+msgid "hal_control_remove_dialog_title"
+msgstr "Supprimer l'identifiant HAL ?"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:331
+msgid "hal_control_remove_dialog_text"
+msgstr "Cette action supprimera l'idHAL et son identifiant de connexion HAL de ce compte."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:339
+msgid "hal_control_remove_dialog_confirm"
+msgstr "Supprimer"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: import { t } from '@lingui/core/macro' import { Trans } from '@lingui/react/macro' import { useRef, useState } from 'react' import useStore from '@/stores/global_store' import { Box, Button, Card, CardContent, ClickAwayListener, Grow, Link, Popper, Typography, } from '@mui/material' import { useTheme } from '@mui/material/styles' const Journal = () => { const titleRef = useRef(null) const [isPopperOpen, setIsPopperOpen] = useState(false) const theme = useTheme() const { selectedDocument = null } = useStore((state) => state.document) const journal = selectedDocument?.journal const title = journal?.title const handleClick = () => { setIsPopperOpen(!isPopperOpen) } const handleClickAway = () => { setIsPopperOpen(false) } return ( title && ( <ClickAwayListener onClickAway={handleClickAway}> <Box> <Button variant='text' ref={titleRef} onClick={handleClick} sx={{ p: 0 }} > {title} </Button> <Popper open={isPopperOpen} anchorEl={titleRef.current} placement='bottom-start' transition disablePortal sx={{ zIndex: 1, }} > {({ TransitionProps }) => ( <Grow {...TransitionProps} timeout={200}> <Card> <CardContent> <Typography gutterBottom variant='h6' sx={{ color: theme.palette.primary.main }} > {title} </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_issn'> <Link href={`https://portal.issn.org/resource/ISSN/${journal.issnL}`} target='_blank' rel='noopener noreferrer' > {journal.issnL} </Link> </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_source_type'> {t`document_details_page_journal_journal`} </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_publisher'> {journal.publisher} </Trans> </Typography> </CardContent> </Card> </Grow> )} </Popper> </Box> </ClickAwayListener> ) ) } export default Journal 
@@ -1485,7 +1485,7 @@ msgstr "Ajouter une langue"
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx:241
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx:278
-#: src/app/[lang]/account/components/myProfile/components/identifiers/ManualIdentifierAddForm.tsx:133
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ManualIdentifierAddForm.tsx:188
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:354
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:379
 msgid "edit_field_cancel_button_label"
@@ -2034,6 +2034,22 @@ msgstr "Dans 6 mois"
 msgid "hal_deposit_visibility_now"
 msgstr "Immédiatement"
 
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx:134
+msgid "hal_info_box_error"
+msgstr "Impossible de charger l'auteur HAL."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx:158
+msgid "hal_info_box_linked_identifiers"
+msgstr "Identifiants liés"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx:128
+msgid "hal_info_box_not_found"
+msgstr "Aucun auteur HAL trouvé pour cet idHAL."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx:111
+msgid "hal_info_box_title"
+msgstr "Auteur HAL"
+
 #: src/app/[lang]/documents/components/HalStatusCellBadge.tsx:14
 msgid "hal_submit_type_annex"
 msgstr "Annexe"
@@ -2158,17 +2174,21 @@ msgstr "Anglais"
 msgid "language_fr"
 msgstr "Français"
 
-#: src/app/[lang]/account/components/myProfile/components/identifiers/ManualIdentifierAddForm.tsx:83
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ManualIdentifierAddForm.tsx:124
 msgid "manual_identifier_add_button"
 msgstr "Ajouter"
 
-#: src/app/[lang]/account/components/myProfile/components/identifiers/ManualIdentifierAddForm.tsx:65
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ManualIdentifierAddForm.tsx:92
 msgid "manual_identifier_invalid_format"
 msgstr "Format d'identifiant invalide."
 
-#: src/app/[lang]/account/components/myProfile/components/identifiers/ManualIdentifierAddForm.tsx:144
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ManualIdentifierAddForm.tsx:206
 msgid "manual_identifier_save_button"
 msgstr "Enregistrer"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ManualIdentifierAddForm.tsx:192
+msgid "manual_identifier_verify_button"
+msgstr "Vérifier"
 
 #: src/app/[lang]/dashboard/components/CollaborationMap/CollaborationMap.tsx:424
 msgid "map_collaborations_tooltip_remaining_orgs {nbRemainingOrgs}"

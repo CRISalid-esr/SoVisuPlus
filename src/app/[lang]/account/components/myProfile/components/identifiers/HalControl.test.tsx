@@ -39,6 +39,18 @@ jest.mock(
   }),
 )
 
+// The AureHAL preview is mocked to immediately signal readiness so Save enables.
+jest.mock('./HalInfoBox', () => {
+  const ReactActual = jest.requireActual('react')
+  const MockHalInfoBox = ({ onReady }: { onReady?: () => void }) => {
+    ReactActual.useEffect(() => {
+      onReady?.()
+    }, [onReady])
+    return <div data-testid='hal-info-box' />
+  }
+  return { __esModule: true, default: MockHalInfoBox }
+})
+
 i18n.load('en', {})
 i18n.activate('en')
 
@@ -148,7 +160,7 @@ describe('HalControl', () => {
     expect(screen.queryByTestId('hal-login-button')).not.toBeInTheDocument()
   })
 
-  it('manual add offers an idHal_s / idHal_i switcher and submits the chosen type', async () => {
+  it('manual add offers an idHal_s / idHal_i switcher and verifies before submitting', async () => {
     makeStore([])
     renderWithProviders()
 
@@ -157,12 +169,16 @@ describe('HalControl', () => {
     expect(screen.getByText('idHal_s')).toBeInTheDocument()
     expect(screen.getByText('idHal_i')).toBeInTheDocument()
 
-    // choose idHal_i and submit a numeric value
+    // choose idHal_i, enter a numeric value, then Verify (AureHAL preview)
     fireEvent.click(screen.getByText('idHal_i'))
     fireEvent.change(screen.getByLabelText('idHAL'), {
       target: { value: '1161147' },
     })
-    fireEvent.click(screen.getByText('manual_identifier_save_button'))
+    fireEvent.click(screen.getByText('manual_identifier_verify_button'))
+
+    // Preview shown, then Save becomes available once it signals readiness
+    expect(await screen.findByTestId('hal-info-box')).toBeInTheDocument()
+    fireEvent.click(await screen.findByText('manual_identifier_save_button'))
 
     await waitFor(() =>
       expect(mockAddPersonIdentifier).toHaveBeenCalledWith(

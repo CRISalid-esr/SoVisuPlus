@@ -26,9 +26,13 @@ export type AureHalAuthorDoc = {
   orcidId_s?: string[]
   emailDomain_s?: string[]
   idHal_s?: string
+  idHal_i?: number
   idrefId_s?: string[]
   valid_s?: string
 }
+
+/** The two idHAL identifier variants a manual author lookup can target. */
+export type IdHalKind = 'idhals' | 'idhali'
 
 /**
  * True when a HAL author profile carries at least one usable identifier
@@ -359,6 +363,50 @@ export class AureHalAPIClient {
     const facet = data?.facet_counts?.facet_fields?.authorityInstitution_s ?? []
     // Keep only the facet values (strings); drop the interleaved integer counts.
     return facet.filter((entry): entry is string => typeof entry === 'string')
+  }
+
+  /**
+   * Resolve a HAL author profile from an idHAL value, for manual verification
+   * before an idHAL identifier is added. `kind` selects the exact query field:
+   * `idhals` → `idHal_s:"<value>"`, `idhali` → `idHal_i:<value>`. Returns the
+   * matching author doc (name + linked ORCID/IdRef + validity) or null.
+   */
+  async findAuthorByIdHal(
+    value: string,
+    kind: IdHalKind,
+  ): Promise<AureHalAuthorDoc | null> {
+    const normalized = value?.trim() ?? ''
+    if (!normalized) {
+      throw new Error('AureHalAPIClient.findAuthorByIdHal: value is empty')
+    }
+    // Guard against Solr query injection: idHal_i is numeric, idHal_s is a
+    // slug (letters, digits, hyphens).
+    if (kind === 'idhali' && !/^\d+$/.test(normalized)) {
+      throw new Error(
+        `AureHalAPIClient.findAuthorByIdHal: idHal_i must be numeric, got "${value}"`,
+      )
+    }
+    if (kind === 'idhals' && !/^[a-z0-9-]+$/i.test(normalized)) {
+      throw new Error(
+        `AureHalAPIClient.findAuthorByIdHal: idHal_s has an invalid format: "${value}"`,
+      )
+    }
+
+    const q =
+      kind === 'idhali' ? `idHal_i:${normalized}` : `idHal_s:"${normalized}"`
+
+    const url = new URL(`${this.AUREHAL_API_BASE_URL}/ref/author/`)
+    url.searchParams.set('q', q)
+    url.searchParams.set(
+      'fl',
+      'person_i,form_i,firstName_s,lastName_s,middleName_s,fullName_s,orcidId_s,idHal_s,idHal_i,idrefId_s,valid_s',
+    )
+
+    const data = await this.getJson<AureHalAuthorSearchResponse>(
+      url.toString(),
+      'AureHalAPIClient.findAuthorByIdHal',
+    )
+    return data?.response?.docs?.[0] ?? null
   }
 
   /**
