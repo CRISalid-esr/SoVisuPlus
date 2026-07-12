@@ -85,7 +85,7 @@ describe('OrcidPublicClient.fetchPerson', () => {
 
   beforeEach(() => {
     global.fetch = jest.fn()
-    process.env.NEXT_PUBLIC_ORCID_URL = 'https://orcid.org'
+    delete process.env.ORCID_PUBLIC_API_URL
   })
   afterEach(() => jest.resetAllMocks())
 
@@ -100,7 +100,7 @@ describe('OrcidPublicClient.fetchPerson', () => {
     expect(global.fetch).not.toHaveBeenCalled()
   })
 
-  it('queries the derived pub host and merges person + employments', async () => {
+  it('queries the production pub host by default and merges person + employments', async () => {
     ;(global.fetch as jest.Mock)
       .mockResolvedValueOnce(
         okJson({
@@ -159,11 +159,14 @@ describe('OrcidPublicClient.fetchPerson', () => {
     expect(data?.givenNames).toBe('Jane')
   })
 
-  it('derives the sandbox pub host from NEXT_PUBLIC_ORCID_URL', async () => {
-    process.env.NEXT_PUBLIC_ORCID_URL = 'https://sandbox.orcid.org'
+  it('uses ORCID_PUBLIC_API_URL when set (e.g. a sandbox deployment)', async () => {
+    process.env.ORCID_PUBLIC_API_URL = 'https://pub.sandbox.orcid.org/'
     ;(global.fetch as jest.Mock).mockResolvedValue(okJson({ name: {} }))
     await client.fetchPerson('0000-0002-1825-0097')
     const url = (global.fetch as jest.Mock).mock.calls[0][0] as string
-    expect(url.startsWith('https://pub.sandbox.orcid.org/')).toBe(true)
+    // trailing slash stripped, no double slash before /v3.0
+    expect(url).toBe(
+      'https://pub.sandbox.orcid.org/v3.0/0000-0002-1825-0097/person',
+    )
   })
 })

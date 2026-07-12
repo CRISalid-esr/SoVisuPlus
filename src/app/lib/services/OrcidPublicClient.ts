@@ -68,16 +68,16 @@ export function parseOrcidEmployments(
 
 export class OrcidPublicClient {
   /**
-   * Public-API host derived from the OAuth host (`NEXT_PUBLIC_ORCID_URL`):
-   * `orcid.org` → `pub.orcid.org`, `sandbox.orcid.org` → `pub.sandbox.orcid.org`.
+   * ORCID public data-API base URL. Deliberately decoupled from the OAuth host
+   * (`NEXT_PUBLIC_ORCID_URL`): manual ORCID confirmation previews a real person,
+   * whose record lives in the **production** registry regardless of which ORCID
+   * environment the app authenticates against. Defaults to `https://pub.orcid.org`;
+   * override with `ORCID_PUBLIC_API_URL` (e.g. a fully-sandboxed deployment sets
+   * `https://pub.sandbox.orcid.org`).
    */
   private baseUrl(): string {
-    const oauthUrl = process.env.NEXT_PUBLIC_ORCID_URL ?? 'https://orcid.org'
-    try {
-      return `https://pub.${new URL(oauthUrl).host}`
-    } catch {
-      return 'https://pub.orcid.org'
-    }
+    const base = process.env.ORCID_PUBLIC_API_URL ?? 'https://pub.orcid.org'
+    return base.replace(/\/+$/, '')
   }
 
   private async getJson(
