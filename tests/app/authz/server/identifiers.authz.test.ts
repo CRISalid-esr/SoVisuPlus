@@ -10,6 +10,12 @@ import type { RolesFileSeed } from '@/lib/services/RoleConfigService'
 import { PermissionAction } from '@/types/Permission'
 import { EntityType } from '@/types/UserRoleScope'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { hasWiderThanSelfPersonScope } from '@/app/auth/ability'
+import {
+  computeIdentifierCapabilities,
+  identifierSupportsAuth,
+} from '@/lib/identifiers/identifierCapabilities'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
 const ROLES_SEED: RolesFileSeed = {
   roles: [
@@ -155,5 +161,181 @@ describe('AuthZ (Person identifiers) – integration', () => {
     expect(
       ability.can(PermissionAction.update, charlieDomain!, 'identifiers'),
     ).toBe(false)
+  })
+})
+
+/**
+ * Full capability matrix from
+ * specs/872-refactor-account-edition-workflow/prompt.md, wiring the real
+ * ability + scope helpers into computeIdentifierCapabilities. `isAuthenticated`
+ * is passed explicitly to cover the non-authenticated / authenticated columns
+ * without persisting OAuth rows.
+ */
+describe('AuthZ (identifier capability matrix) – integration', () => {
+  const personDAO = new PersonDAO()
+
+  beforeEach(async () => {
+    await resetAuthzDb()
+    await seedRoles(ROLES_SEED)
+  })
+
+  afterAll(async () => {
+    await prisma.$disconnect()
+  })
+
+  const capsFor = async (
+    actorUid: string,
+    targetUid: string,
+    type: PersonIdentifierType,
+    isAuthenticated: boolean,
+  ) => {
+    const { ability, ctx } = await abilityForPersonUid(actorUid)
+    const target = await personDAO.fetchPersonByUid(targetUid)
+    return computeIdentifierCapabilities({
+      canManage: ability.can(PermissionAction.update, target!, 'identifiers'),
+      isOwn: ctx.personUid === target!.uid,
+      isWide: hasWiderThanSelfPersonScope(
+        ctx,
+        'update',
+        'Person',
+        'identifiers',
+      ),
+      isAuthenticated,
+      supportsAuth: identifierSupportsAuth(type),
+    })
+  }
+
+  test('self-scoped editor, own account: remove + authenticate, no unauth add', async () => {
+    await createPersonWithUser('local-alice')
+    await assignRoleToPersonUid('account_editor', 'local-alice', {
+      entityType: EntityType.Person,
+      entityUid: 'local-alice',
+    })
+
+    const nonAuth = await capsFor(
+      'local-alice',
+      'local-alice',
+      PersonIdentifierType.orcid,
+      false,
+    )
+    expect(nonAuth).toEqual({
+      canAuthenticate: true,
+      canAddUnauthenticated: false,
+      canRemove: true,
+    })
+
+    const auth = await capsFor(
+      'local-alice',
+      'local-alice',
+      PersonIdentifierType.orcid,
+      true,
+    )
+    expect(auth.canRemove).toBe(true)
+    expect(auth.canAddUnauthenticated).toBe(false)
+  })
+
+  test('self-scoped editor, own IdRef: can remove but cannot add (no auth workflow)', async () => {
+    await createPersonWithUser('local-alice')
+    await assignRoleToPersonUid('account_editor', 'local-alice', {
+      entityType: EntityType.Person,
+      entityUid: 'local-alice',
+    })
+
+    const caps = await capsFor(
+      'local-alice',
+      'local-alice',
+      PersonIdentifierType.idref,
+      false,
+    )
+    expect(caps).toEqual({
+      canAuthenticate: false,
+      canAddUnauthenticated: false,
+      canRemove: true,
+    })
+  })
+
+  test('wide editor, own account: can add unauthenticated and authenticate', async () => {
+    await createPersonWithUser('local-librarian')
+    await assignRoleToPersonUid('account_editor', 'local-librarian', null)
+
+    const caps = await capsFor(
+      'local-librarian',
+      'local-librarian',
+      PersonIdentifierType.orcid,
+      false,
+    )
+    expect(caps).toEqual({
+      canAuthenticate: true,
+      canAddUnauthenticated: true,
+      canRemove: true,
+    })
+  })
+
+  test('wide editor, another account: add/remove non-authenticated, but no action on authenticated', async () => {
+    await createPersonWithUser('local-librarian')
+    await createPersonWithUser('local-bob')
+    await assignRoleToPersonUid('account_editor', 'local-librarian', null)
+
+    const nonAuth = await capsFor(
+      'local-librarian',
+      'local-bob',
+      PersonIdentifierType.orcid,
+      false,
+    )
+    expect(nonAuth).toEqual({
+      canAuthenticate: false,
+      canAddUnauthenticated: true,
+      canRemove: true,
+    })
+
+    const auth = await capsFor(
+      'local-librarian',
+      'local-bob',
+      PersonIdentifierType.orcid,
+      true,
+    )
+    expect(auth).toEqual({
+      canAuthenticate: false,
+      canAddUnauthenticated: true, // slot is occupied → UI won't offer add; remove is blocked
+      canRemove: false,
+    })
+  })
+
+  test('self-scoped editor on someone else’s account: no capability at all', async () => {
+    await createPersonWithUser('local-alice')
+    await createPersonWithUser('local-bob')
+    await assignRoleToPersonUid('account_editor', 'local-alice', {
+      entityType: EntityType.Person,
+      entityUid: 'local-alice',
+    })
+
+    const caps = await capsFor(
+      'local-alice',
+      'local-bob',
+      PersonIdentifierType.orcid,
+      false,
+    )
+    expect(caps).toEqual({
+      canAuthenticate: false,
+      canAddUnauthenticated: false,
+      canRemove: false,
+    })
+  })
+
+  test('user with no role: no capability at all', async () => {
+    await createPersonWithUser('local-nobody')
+    await createPersonWithUser('local-target')
+
+    const caps = await capsFor(
+      'local-nobody',
+      'local-target',
+      PersonIdentifierType.orcid,
+      false,
+    )
+    expect(caps).toEqual({
+      canAuthenticate: false,
+      canAddUnauthenticated: false,
+      canRemove: false,
+    })
   })
 })

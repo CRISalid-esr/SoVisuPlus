@@ -7,7 +7,11 @@ import {
 } from '@/utils/crypto/fieldEncryption'
 import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
+import { IdentifierConflictError } from '@/lib/daos/PersonDAO'
 import { ActionType, ActionTargetType } from '@/types/Action'
 
 describe('PersonService Integration Tests', () => {
@@ -107,7 +111,7 @@ describe('PersonService Integration Tests', () => {
     })
 
     // Act
-    await personService.addOrUpdateOrcidIdentifier(person.uid, identifier)
+    await personService.authenticateOrcidIdentifier(person.uid, identifier)
 
     // Assert: base identifier exists
     const dbPerson = await prisma.person.findUnique({
@@ -183,8 +187,8 @@ describe('PersonService Integration Tests', () => {
     })
 
     // Act
-    await personService.addOrUpdateOrcidIdentifier(person.uid, first)
-    await personService.addOrUpdateOrcidIdentifier(person.uid, second)
+    await personService.authenticateOrcidIdentifier(person.uid, first)
+    await personService.authenticateOrcidIdentifier(person.uid, second)
 
     // Assert: still only one ORCID base identifier for that person
     const dbPerson = await prisma.person.findUnique({
@@ -233,10 +237,9 @@ describe('PersonService Integration Tests', () => {
       },
     })
 
-    await personService.addOrUpdateIdentifier(
+    await personService.addIdentifier(
       person.uid,
-      PersonIdentifierType.idref,
-      '127220747',
+      new PersonIdentifier(PersonIdentifierType.idref, '127220747'),
     )
 
     const identifier = await prisma.personIdentifier.findFirst({
@@ -253,7 +256,7 @@ describe('PersonService Integration Tests', () => {
     expect(action!.targetType).toBe(ActionTargetType.PERSON)
   })
 
-  test('should update an existing idref identifier in place', async () => {
+  test('addIdentifier rejects a second identifier of the same type (remove-before-add)', async () => {
     const person = await prisma.person.create({
       data: {
         uid: 'person-idref-2',
@@ -265,22 +268,23 @@ describe('PersonService Integration Tests', () => {
       },
     })
 
-    await personService.addOrUpdateIdentifier(
+    await personService.addIdentifier(
       person.uid,
-      PersonIdentifierType.idref,
-      '111111111',
+      new PersonIdentifier(PersonIdentifierType.idref, '111111111'),
     )
-    await personService.addOrUpdateIdentifier(
-      person.uid,
-      PersonIdentifierType.idref,
-      '127220747',
-    )
+    await expect(
+      personService.addIdentifier(
+        person.uid,
+        new PersonIdentifier(PersonIdentifierType.idref, '127220747'),
+      ),
+    ).rejects.toBeInstanceOf(IdentifierConflictError)
 
+    // The original value is untouched (no in-place replacement)
     const identifiers = await prisma.personIdentifier.findMany({
       where: { personId: person.id, type: PersonIdentifierType.idref },
     })
     expect(identifiers).toHaveLength(1)
-    expect(identifiers[0].value).toBe('127220747')
+    expect(identifiers[0].value).toBe('111111111')
   })
 
   test('should remove an idref identifier and write a REMOVE action', async () => {
@@ -325,10 +329,9 @@ describe('PersonService Integration Tests', () => {
       },
     })
 
-    await personService.addOrUpdateIdentifier(
+    await personService.addIdentifier(
       person.uid,
-      PersonIdentifierType.idref,
-      '127220747',
+      new PersonIdentifier(PersonIdentifierType.idref, '127220747'),
     )
 
     const action = await prisma.action.findFirst({
@@ -336,11 +339,12 @@ describe('PersonService Integration Tests', () => {
     })
     expect(action).not.toBeNull()
     const params = action!.parameters as {
-      identifier: { type: string; value: string }
+      identifier: { type: string; value: string; authenticated: boolean }
     }
     expect(params.identifier).toMatchObject({
       type: PersonIdentifierType.idref,
       value: '127220747',
+      authenticated: false,
     })
   })
 
@@ -408,7 +412,7 @@ describe('PersonService Integration Tests', () => {
     const identifier = new ORCIDIdentifier('0000-0001-2345-6789') // no oauth
 
     await expect(
-      personService.addOrUpdateOrcidIdentifier(person.uid, identifier),
-    ).rejects.toThrow(/Error adding\/updating ORCID identifier/i)
+      personService.authenticateOrcidIdentifier(person.uid, identifier),
+    ).rejects.toThrow(/Error authenticating ORCID identifier/i)
   })
 })

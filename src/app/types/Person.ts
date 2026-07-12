@@ -129,6 +129,28 @@ class Person implements IAgent, Authorizable {
     return this.identifiers.some((id) => id.type === type)
   }
 
+  /**
+   * Whether the identifier of the given type is authenticated. Derived, never
+   * stored (see specs/872-refactor-account-edition-workflow/prompt.md): ORCID →
+   * an OAuth grant exists; idHAL → a companion hal_login exists; every other
+   * type (IdRef, …) is never authenticated.
+   */
+  isIdentifierAuthenticated(type: PersonIdentifierType): boolean {
+    if (type === PersonIdentifierType.orcid) {
+      const orcid = this.identifiers.find(
+        (id) => id.type === PersonIdentifierType.orcid,
+      )
+      return orcid instanceof ORCIDIdentifier && !!orcid.oauth
+    }
+    if (
+      type === PersonIdentifierType.idhals ||
+      type === PersonIdentifierType.idhali
+    ) {
+      return this.hasIdentifier(PersonIdentifierType.hal_login)
+    }
+    return false
+  }
+
   private static computeDisplayName(
     firstName?: string | null,
     lastName?: string | null,

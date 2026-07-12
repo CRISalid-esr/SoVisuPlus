@@ -3,9 +3,10 @@ import { GET } from './route'
 import { parseCasTicketValidationResult } from '@/utils/parseCasTicketValidationResult'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
-const mockAddOrUpdateIdentifier = jest.fn()
+const mockAuthenticateHalIdentifier = jest.fn()
 const mockGetUserByPersonIdentifier = jest.fn()
 const mockFindAuthorByUid = jest.fn()
+const mockFindIdentifierValue = jest.fn()
 
 jest.mock('@/lib/services/UserService', () => ({
   UserService: jest.fn().mockImplementation(() => ({
@@ -15,7 +16,13 @@ jest.mock('@/lib/services/UserService', () => ({
 
 jest.mock('@/lib/services/PersonService', () => ({
   PersonService: jest.fn().mockImplementation(() => ({
-    addOrUpdateIdentifier: mockAddOrUpdateIdentifier,
+    authenticateHalIdentifier: mockAuthenticateHalIdentifier,
+  })),
+}))
+
+jest.mock('@/lib/daos/PersonDAO', () => ({
+  PersonDAO: jest.fn().mockImplementation(() => ({
+    findIdentifierValue: mockFindIdentifierValue,
   })),
 }))
 
@@ -74,6 +81,18 @@ const mockPerson = (uid: string) => ({
   },
 })
 
+const casTicket = () => ({
+  success: true,
+  user: 'jdupont',
+  attributes: {
+    uid: '119773',
+    lastName: 'Dupont',
+    firstName: 'Jacques',
+    email: 'jacques.dupont@myuniv.edu',
+    userName: 'jdupont',
+  },
+})
+
 global.fetch = jest.fn()
 
 describe('GET /api/cas/[action] stores HAL identifiers', () => {
@@ -83,28 +102,19 @@ describe('GET /api/cas/[action] stores HAL identifiers', () => {
       getServerSession: jest.Mock
     }
     getServerSession.mockResolvedValue(mockSession)
+    // Default: no idHAL stored yet → add-through-authentication
+    mockFindIdentifierValue.mockResolvedValue(null)
   })
 
-  it('should use lang param in redirect URL, validate ticket, resolve idHal by uid, and store HAL_LOGIN + ID_HAL_S', async () => {
-    const user = { person: mockPerson('person-uid') }
-
-    mockGetUserByPersonIdentifier.mockResolvedValue(user)
+  it('validates the ticket, resolves idHal, and authenticates the idHAL', async () => {
+    mockGetUserByPersonIdentifier.mockResolvedValue({
+      person: mockPerson('person-uid'),
+    })
     ;(fetch as jest.Mock).mockResolvedValue({
       ok: true,
       text: jest.fn().mockResolvedValue('<xml>ok</xml>'),
     })
-    ;(parseCasTicketValidationResult as jest.Mock).mockReturnValue({
-      success: true,
-      user: 'jdupont',
-      attributes: {
-        uid: '119773',
-        lastName: 'Dupont',
-        firstName: 'Jacques',
-        email: 'jacques.dupont@myuniv.edu',
-        userName: 'jdupont',
-      },
-    })
-
+    ;(parseCasTicketValidationResult as jest.Mock).mockReturnValue(casTicket())
     mockFindAuthorByUid.mockResolvedValue({
       idHal_s: 'jacques-dupont',
       idHal_i: 1161147,
@@ -115,59 +125,55 @@ describe('GET /api/cas/[action] stores HAL identifiers', () => {
         'https://example.com/api/cas/login?ticket=ST-abc123&lang=en',
       ),
     } as unknown as NextRequest
-
     const ctx = { params: Promise.resolve({ action: 'login' }) }
 
     const response = await GET(req, ctx)
 
-    const redirectUrl = response.headers.get('location')
-    const expectedUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/en/account?success=hal_authentication_success`
-    expect(redirectUrl).toBe(expectedUrl)
-
-    // Ticket validation fetch called with expected URL structure
-    expect(fetch).toHaveBeenCalledTimes(1)
-    const calledUrl = (fetch as jest.Mock).mock.calls[0][0] as string
-    expect(decodeURIComponent(calledUrl)).toContain('/serviceValidate?service=')
-    expect(decodeURIComponent(calledUrl)).toContain('/api/cas/login')
-    expect(decodeURIComponent(calledUrl)).toContain('ticket=ST-abc123')
-
-    // AureHAL called by UID
+    expect(response.headers.get('location')).toBe(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/en/account?success=hal_authentication_success`,
+    )
     expect(mockFindAuthorByUid).toHaveBeenCalledWith('119773')
 
-    // Stored HAL login + idHal_s
-    expect(mockAddOrUpdateIdentifier).toHaveBeenNthCalledWith(
-      1,
-      'person-uid',
-      PersonIdentifierType.hal_login,
-      'jdupont',
-    )
-    expect(mockAddOrUpdateIdentifier).toHaveBeenNthCalledWith(
-      2,
-      'person-uid',
-      PersonIdentifierType.idhals,
-      'jacques-dupont',
-    )
+    // A single authentication call carrying the idHAL + hal_login
+    expect(mockAuthenticateHalIdentifier).toHaveBeenCalledTimes(1)
+    expect(mockAuthenticateHalIdentifier).toHaveBeenCalledWith('person-uid', {
+      type: PersonIdentifierType.idhals,
+      value: 'jacques-dupont',
+      halLogin: 'jdupont',
+    })
   })
 
-  it('should default to fr when lang is missing', async () => {
-    const user = { person: { uid: 'person-uid' } }
-
-    mockGetUserByPersonIdentifier.mockResolvedValue(user)
+  it('fails with a mismatch error when the stored idHAL differs', async () => {
+    mockGetUserByPersonIdentifier.mockResolvedValue({
+      person: mockPerson('person-uid'),
+    })
     ;(fetch as jest.Mock).mockResolvedValue({
       ok: true,
       text: jest.fn().mockResolvedValue('<xml>ok</xml>'),
     })
-    ;(parseCasTicketValidationResult as jest.Mock).mockReturnValue({
-      success: true,
-      user: 'jdupont',
-      attributes: {
-        uid: '119773',
-        lastName: 'Dupont',
-        firstName: 'Jacques',
-        email: 'jacques.dupont@myuniv.edu',
-        userName: 'jdupont',
-      },
+    ;(parseCasTicketValidationResult as jest.Mock).mockReturnValue(casTicket())
+    mockFindAuthorByUid.mockResolvedValue({
+      idHal_s: 'jacques-dupont',
+      idHal_i: 1161147,
     })
+    // stored idhals differs from the resolved value
+    mockFindIdentifierValue
+      .mockResolvedValueOnce('someone-else') // idhals
+      .mockResolvedValueOnce(null) // idhali
+
+    const req: NextRequest = {
+      nextUrl: new URL(
+        'https://example.com/api/cas/login?ticket=ST-abc123&lang=en',
+      ),
+    } as unknown as NextRequest
+    const ctx = { params: Promise.resolve({ action: 'login' }) }
+
+    const response = await GET(req, ctx)
+
+    expect(response.headers.get('location')).toBe(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/en/account?error=hal_authentication_value_mismatch`,
+    )
+    expect(mockAuthenticateHalIdentifier).not.toHaveBeenCalled()
   })
 
   it('should redirect with missing-data error if uid is missing', async () => {
@@ -193,16 +199,14 @@ describe('GET /api/cas/[action] stores HAL identifiers', () => {
     const req: NextRequest = {
       nextUrl: new URL('https://example.com/api/cas/login?ticket=ST-abc123'),
     } as unknown as NextRequest
-
     const ctx = { params: Promise.resolve({ action: 'login' }) }
 
     const response = await GET(req, ctx)
 
-    const redirectUrl = response.headers.get('location')
-    const expectedUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/fr/account?error=hal_auth_missing_data`
-    expect(redirectUrl).toBe(expectedUrl)
-
+    expect(response.headers.get('location')).toBe(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/fr/account?error=hal_auth_missing_data`,
+    )
     expect(mockFindAuthorByUid).not.toHaveBeenCalled()
-    expect(mockAddOrUpdateIdentifier).not.toHaveBeenCalled()
+    expect(mockAuthenticateHalIdentifier).not.toHaveBeenCalled()
   })
 })

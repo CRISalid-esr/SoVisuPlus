@@ -17,20 +17,14 @@ import {
 } from '@mui/material'
 import useStore from '@/stores/global_store'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
-import { useMemo, useState } from 'react'
-import { useSession } from 'next-auth/react'
-import {
-  abilityFromAuthzContext,
-  hasWiderThanSelfPersonScope,
-  EMPTY_PRINCIPAL,
-} from '@/app/auth/ability'
-import { PermissionAction } from '@/types/Permission'
+import { useState } from 'react'
 import { isPerson } from '@/types/Person'
-import EditIcon from '@mui/icons-material/Edit'
+import AddIcon from '@mui/icons-material/Add'
 import { Trans } from '@lingui/react/macro'
 import { t } from '@lingui/core/macro'
 import IdRefInfoBox from './IdRefInfoBox'
 import IdentifierPill from './IdentifierPill'
+import { useIdentifierCapabilities } from './useIdentifierCapabilities'
 
 const IDREF_REGEX = /^\d{8}[\dX]$/i
 
@@ -39,14 +33,9 @@ const IdrefControl = () => {
     connectedUser,
     currentPerspective,
     ownPerspective,
-    updatePersonIdentifier,
+    addPersonIdentifier,
     removePersonIdentifier,
   } = useStore((s) => s.user)
-  const { data: session } = useSession()
-  const ability = useMemo(
-    () => abilityFromAuthzContext(session?.user?.authz),
-    [session?.user?.authz],
-  )
 
   // When viewing another person's account, use that person as the subject
   const person =
@@ -54,19 +43,10 @@ const IdrefControl = () => {
       ? connectedUser?.person
       : currentPerspective
 
-  // IdRef may only be edited by wide-scoped account editors (global, ResearchUnit, …).
-  // Self-scoped account_editors (Person:<own uid>) are intentionally excluded.
-  const canEditIdref = useMemo(
-    () =>
-      !!person &&
-      hasWiderThanSelfPersonScope(
-        session?.user?.authz ?? EMPTY_PRINCIPAL,
-        'update',
-        'Person',
-        'identifiers',
-      ) &&
-      ability.can(PermissionAction.update, person, 'identifiers'),
-    [session?.user?.authz, ability, person],
+  const { canAddUnauthenticated, canRemove } = useIdentifierCapabilities(
+    person,
+    PersonIdentifierType.idref,
+    ownPerspective,
   )
 
   const idref = person
@@ -74,7 +54,7 @@ const IdrefControl = () => {
     .find((i) => i.type === PersonIdentifierType.idref)
   const idrefUrl = idref?.getUrl() ?? null
 
-  const [edit, setEdit] = useState(false)
+  const [adding, setAdding] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const [validationError, setValidationError] = useState<string | null>(null)
   const [openConfirm, setOpenConfirm] = useState(false)
@@ -84,22 +64,22 @@ const IdrefControl = () => {
     messageId: string
   } | null>(null)
 
-  // Confirm flow state: after clicking Save, show info box before DB write
+  // Confirm flow: after Verify, show the IdRef info box before the DB write
   const [verifying, setVerifying] = useState(false)
   const [canConfirm, setCanConfirm] = useState(false)
   const [verifyingValue, setVerifyingValue] = useState('')
   const [saving, setSaving] = useState(false)
 
-  const startEdit = () => {
-    setInputValue(idref?.value ?? '')
+  const startAdd = () => {
+    setInputValue('')
     setValidationError(null)
     setVerifying(false)
     setCanConfirm(false)
-    setEdit(true)
+    setAdding(true)
   }
 
   const cancel = () => {
-    setEdit(false)
+    setAdding(false)
     setVerifying(false)
     setCanConfirm(false)
     setValidationError(null)
@@ -119,25 +99,27 @@ const IdrefControl = () => {
   const save = async () => {
     if (!person?.uid) return
     setSaving(true)
-    const result = await updatePersonIdentifier(
+    const result = await addPersonIdentifier(
       person.uid,
       PersonIdentifierType.idref,
       verifyingValue,
     )
     setSaving(false)
     if (result.success) {
-      setEdit(false)
+      setAdding(false)
       setVerifying(false)
       setSnackbar({
         open: true,
         success: true,
-        messageId: 'idref_control_update_success',
+        messageId: 'idref_control_add_success',
       })
     } else {
       setSnackbar({
         open: true,
         success: false,
-        messageId: 'idref_control_update_failure',
+        messageId: result.conflict
+          ? 'idref_control_add_conflict'
+          : 'idref_control_add_failure',
       })
     }
   }
@@ -149,20 +131,13 @@ const IdrefControl = () => {
       person.uid,
       PersonIdentifierType.idref,
     )
-    if (result.success) {
-      setEdit(false)
-      setSnackbar({
-        open: true,
-        success: true,
-        messageId: 'idref_control_remove_success',
-      })
-    } else {
-      setSnackbar({
-        open: true,
-        success: false,
-        messageId: 'idref_control_remove_failure',
-      })
-    }
+    setSnackbar({
+      open: true,
+      success: result.success,
+      messageId: result.success
+        ? 'idref_control_remove_success'
+        : 'idref_control_remove_failure',
+    })
   }
 
   return (
@@ -182,7 +157,7 @@ const IdrefControl = () => {
           IdRef
         </Typography>
 
-        {!edit ? (
+        {idref ? (
           <>
             <Box
               sx={{
@@ -192,7 +167,7 @@ const IdrefControl = () => {
                 flexWrap: 'wrap',
               }}
             >
-              {idref && idrefUrl ? (
+              {idrefUrl ? (
                 <IdentifierPill
                   value={idref.value}
                   iconLabel='iD'
@@ -201,20 +176,35 @@ const IdrefControl = () => {
                 />
               ) : (
                 <Typography variant='body2' color='text.secondary'>
-                  <Trans>idref_control_not_available</Trans>
+                  {idref.value}
                 </Typography>
               )}
             </Box>
-            {idref && <IdRefInfoBox idrefId={idref.value} />}
-            {person && (
+            <IdRefInfoBox idrefId={idref.value} />
+            {canRemove && (
               <Button
-                disabled={!canEditIdref}
+                color='error'
                 variant='outlined'
-                startIcon={<EditIcon />}
-                onClick={startEdit}
+                onClick={() => setOpenConfirm(true)}
                 sx={{ minWidth: 'fit-content', alignSelf: 'flex-start' }}
               >
-                <Trans>idref_control_edit_button</Trans>
+                <Trans>idref_control_remove_button</Trans>
+              </Button>
+            )}
+          </>
+        ) : !adding ? (
+          <>
+            <Typography variant='body2' color='text.secondary'>
+              <Trans>idref_control_not_available</Trans>
+            </Typography>
+            {canAddUnauthenticated && (
+              <Button
+                variant='outlined'
+                startIcon={<AddIcon />}
+                onClick={startAdd}
+                sx={{ minWidth: 'fit-content', alignSelf: 'flex-start' }}
+              >
+                <Trans>idref_control_add_button</Trans>
               </Button>
             )}
           </>
@@ -247,15 +237,6 @@ const IdrefControl = () => {
             )}
 
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-              {idref && !verifying && (
-                <Button
-                  color='error'
-                  variant='outlined'
-                  onClick={() => setOpenConfirm(true)}
-                >
-                  <Trans>idref_control_remove_button</Trans>
-                </Button>
-              )}
               <Button variant='outlined' onClick={cancel}>
                 <Trans>edit_field_cancel_button_label</Trans>
               </Button>
@@ -313,11 +294,14 @@ const IdrefControl = () => {
           severity={snackbar?.success ? 'success' : 'error'}
           sx={{ width: '100%' }}
         >
-          {snackbar?.messageId === 'idref_control_update_success' && (
-            <Trans>idref_control_update_success</Trans>
+          {snackbar?.messageId === 'idref_control_add_success' && (
+            <Trans>idref_control_add_success</Trans>
           )}
-          {snackbar?.messageId === 'idref_control_update_failure' && (
-            <Trans>idref_control_update_failure</Trans>
+          {snackbar?.messageId === 'idref_control_add_failure' && (
+            <Trans>idref_control_add_failure</Trans>
+          )}
+          {snackbar?.messageId === 'idref_control_add_conflict' && (
+            <Trans>idref_control_add_conflict</Trans>
           )}
           {snackbar?.messageId === 'idref_control_remove_success' && (
             <Trans>idref_control_remove_success</Trans>

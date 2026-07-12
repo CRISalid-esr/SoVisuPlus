@@ -19,6 +19,19 @@ import removeAccents from 'remove-accents'
 import { ORCIDIdentifier, OrcidOAuthData } from '@/types/OrcidIdentifier'
 import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
 import { decryptString, encryptString } from '@/utils/crypto/fieldEncryption'
+/**
+ * Thrown when an identifier cannot be created because one already exists —
+ * either the person already has an identifier of that type, or the value is
+ * already used by another person (`@@unique([type, value])`). Callers translate
+ * this into a 409 (remove-before-add).
+ */
+export class IdentifierConflictError extends Error {
+  constructor(message = 'Identifier already exists') {
+    super(message)
+    this.name = 'IdentifierConflictError'
+  }
+}
+
 /** PersonDAO: Handles operations related to Person and PersonIdentifiers */
 export class PersonDAO extends AbstractDAO {
   static ORCID_IDENTIFIER_AAD_PREFIX = 'orcidIdentifier:id='
@@ -333,6 +346,61 @@ export class PersonDAO extends AbstractDAO {
     }
   }
 
+  /**
+   * Create an identifier row for a person. Unlike {@link upsertIdentifier} this
+   * never overwrites an existing value: identifier changes are handled as
+   * remove-then-add. Throws {@link IdentifierConflictError} when a row of that
+   * type already exists for the person, or the value is already used elsewhere.
+   */
+  public async createIdentifier(
+    identifier: PersonIdentifier,
+    personUid: string,
+  ): Promise<DbPersonIdentifier> {
+    const person = await this.prismaClient.person.findUnique({
+      where: { uid: personUid },
+      select: { id: true },
+    })
+    if (!person) {
+      throw new Error(`Person with UID ${personUid} not found`)
+    }
+
+    try {
+      return await this.prismaClient.personIdentifier.create({
+        data: {
+          personId: person.id,
+          type: identifier.type as PersonIdentifierType,
+          value: identifier.value,
+        },
+      })
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new IdentifierConflictError()
+      }
+      throw new Error(
+        `Failed to create identifier: ${(error as Error).message}`,
+      )
+    }
+  }
+
+  /**
+   * Returns the stored value of a person's identifier of the given type, or
+   * null if the person has none. Used by the authentication consistency check
+   * and to carry the value on REMOVE messages.
+   */
+  public async findIdentifierValue(
+    personUid: string,
+    type: PersonIdentifierType,
+  ): Promise<string | null> {
+    const row = await this.prismaClient.personIdentifier.findFirst({
+      where: { person: { uid: personUid }, type },
+      select: { value: true },
+    })
+    return row?.value ?? null
+  }
+
   public async upsertOrcidIdentifierExtension(
     personIdentifierId: number,
     identifier: ORCIDIdentifier,
@@ -621,8 +689,15 @@ export class PersonDAO extends AbstractDAO {
     if (!person) {
       throw new Error(`Person with UID ${personUid} not found`)
     }
+    // Removing an idHAL also removes its companion hal_login: hal_login is not a
+    // user-managed identifier, it only marks the idHAL as authenticated.
+    const types: PersonIdentifierType[] =
+      type === PersonIdentifierType.idhals ||
+      type === PersonIdentifierType.idhali
+        ? [type, PersonIdentifierType.hal_login]
+        : [type]
     await this.prismaClient.personIdentifier.deleteMany({
-      where: { personId: person.id, type },
+      where: { personId: person.id, type: { in: types } },
     })
   }
 

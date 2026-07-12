@@ -257,6 +257,54 @@ describe('PersonDAO Integration Tests', () => {
     ).rejects.toThrow('Person with UID nonexistent-uid not found')
   })
 
+  test('deleting an idHAL cascades to its companion hal_login', async () => {
+    const dbPerson = await prisma.person.create({
+      data: {
+        uid: 'local-halcascade',
+        email: 'halcascade@example.com',
+        firstName: 'Hal',
+        lastName: 'Cascade',
+        identifiers: {
+          createMany: {
+            data: [
+              { type: PersonIdentifierType.idhals, value: 'jacques-dupont' },
+              { type: PersonIdentifierType.hal_login, value: 'jdupont' },
+            ],
+          },
+        },
+      },
+    })
+
+    await personDAO.deleteIdentifier(dbPerson.uid, PersonIdentifierType.idhals)
+
+    const remaining = await prisma.personIdentifier.findMany({
+      where: { personId: dbPerson.id },
+    })
+    expect(remaining).toHaveLength(0)
+  })
+
+  test('createIdentifier throws IdentifierConflictError when the type already exists', async () => {
+    const { IdentifierConflictError } = await import('@/lib/daos/PersonDAO')
+    const dbPerson = await prisma.person.create({
+      data: {
+        uid: 'local-createconflict',
+        email: 'createconflict@example.com',
+        firstName: 'Create',
+        lastName: 'Conflict',
+        identifiers: {
+          create: { type: PersonIdentifierType.idref, value: '127220747' },
+        },
+      },
+    })
+
+    await expect(
+      personDAO.createIdentifier(
+        new PersonIdentifier(PersonIdentifierType.idref, '111111111'),
+        dbPerson.uid,
+      ),
+    ).rejects.toBeInstanceOf(IdentifierConflictError)
+  })
+
   test('should append -1 to the slug when a second person with the same name is added', async () => {
     const person1 = new Person(
       'local-johndoe-1',

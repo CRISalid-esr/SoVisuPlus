@@ -5,6 +5,7 @@ import authOptions from '@/app/auth/auth_options'
 
 import { AureHalAPIClient } from '@/lib/services/AureHalAPIClient'
 import { PersonService } from '@/lib/services/PersonService'
+import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { UserService } from '@/lib/services/UserService'
 import {
   PersonIdentifier,
@@ -150,27 +151,45 @@ export async function GET(
     )
   }
 
+  const resolvedType = idHalDoc.idHal_s
+    ? PersonIdentifierType.idhals
+    : PersonIdentifierType.idhali
+  const resolvedValue = idHalDoc.idHal_s ?? String(idHalDoc.idHal_i)
+
+  // Authentication only confirms an existing idHAL. If a (non-authenticated)
+  // idHAL is already stored and the one HAL returns differs — in type or value —
+  // the existing identifier must be removed first; we never replace it in place.
+  const personDAO = new PersonDAO()
+  const storedIdhals = await personDAO.findIdentifierValue(
+    user.person.uid,
+    PersonIdentifierType.idhals,
+  )
+  const storedIdhali = await personDAO.findIdentifierValue(
+    user.person.uid,
+    PersonIdentifierType.idhali,
+  )
+  const existingType = storedIdhals
+    ? PersonIdentifierType.idhals
+    : storedIdhali
+      ? PersonIdentifierType.idhali
+      : null
+  const existingValue = storedIdhals ?? storedIdhali
+  if (
+    existingValue !== null &&
+    (existingType !== resolvedType || existingValue !== resolvedValue)
+  ) {
+    return NextResponse.redirect(
+      `${userRedirectionUrl}?error=hal_authentication_value_mismatch`,
+    )
+  }
+
   const personService = new PersonService()
   try {
-    await personService.addOrUpdateIdentifier(
-      user.person.uid,
-      PersonIdentifierType.hal_login,
+    await personService.authenticateHalIdentifier(user.person.uid, {
+      type: resolvedType,
+      value: resolvedValue,
       halLogin,
-    )
-
-    if (idHalDoc.idHal_s) {
-      await personService.addOrUpdateIdentifier(
-        user.person.uid,
-        PersonIdentifierType.idhals,
-        idHalDoc.idHal_s,
-      )
-    } else {
-      await personService.addOrUpdateIdentifier(
-        user.person.uid,
-        PersonIdentifierType.idhali,
-        String(idHalDoc.idHal_i),
-      )
-    }
+    })
   } catch (e) {
     console.error('[HAL] DB write failed', e)
     return NextResponse.redirect(

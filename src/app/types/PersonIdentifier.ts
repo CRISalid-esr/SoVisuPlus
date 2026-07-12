@@ -6,6 +6,16 @@ export type PersonIdentifierJson = {
   value: string
 }
 
+/**
+ * Identifier shape carried by outgoing (graph) messages. The `authenticated`
+ * flag is stamped by the service from the operation that produced the change
+ * (manual add → false, authentication → true); it is never persisted as a
+ * column — see specs/872-refactor-account-edition-workflow/prompt.md.
+ */
+export type IdentifierMessagePayload = PersonIdentifierJson & {
+  authenticated: boolean
+}
+
 export class PersonIdentifier {
   constructor(
     public type: DbPersonIdentifierType,
