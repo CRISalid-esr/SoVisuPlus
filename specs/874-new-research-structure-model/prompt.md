@@ -35,14 +35,14 @@ application needs for perspectives, dashboards, and the future tree navigation.
 
 ## Decisions (validated 2026-07-13)
 
-| Question                                 | Decision                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Menu mapping                             | **Five groups** (updated 2026-07-14): Researchers / Institutions / Research units / Other structures / Teams. "Research units" = units whose concrete graph type is `ResearchUnit` (main_mission = research). "Teams" = generic_type `team` (national types `TEAM`, `THEME`). "Other structures" = institution subdivisions and unit subdivisions. **Support / administrative / teaching units are imported but do not appear in the perspective menu**: they are needed to display the organizational tree — they often have research units or institution subdivisions as children — but are not selectable perspectives.       |
-| External structures (`external = true`)  | **Store them, hide them from the perspective menu.** They are needed as relationship targets for the future tree page but have no displayable labels.                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Institution / other-structure dashboards | **One-hop expansion through org relationships** (updated 2026-07-14, supersedes the earlier "identity only" decision). Publication data per perspective group: **institutions** → documents of the members of the **research units** that are `member_of` the institution (any supervision position; no direct institution memberships, no employments until they exist); **institution subdivisions** (and unit subdivisions) → documents of their **direct members plus** the members of the units that are `member_of` **or** `part_of` the subdivision; **research units** and **teams** → documents of their direct members. |
-| Employments                              | **Model now.** Add an `Employment` table and hydrate `employmentsConnection` (already fetched by `person.graphql`, currently dropped by `PersonGraphQLClient.hydrate`).                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| Authorization scopes                     | **Same one-hop expansion as the dashboards** (added 2026-07-14). Role scopes can target all four organization types: `Institution`, `ResearchUnit`, `InstitutionDivision` (institution & unit subdivisions), and a new `Team` entity type. A scope matches the people (and the documents of the people) in the organization's dashboard perimeter: institution → members of research units `member_of` it; subdivision → direct members + members of units `member_of`/`part_of` it; research unit / team → direct members. Employments still play no role.                                                                       |
-| Research structures view                 | **Flat table + hierarchical navigation** (added 2026-07-14, see §6, mockup in `SVP-mockups`). The hierarchical tab follows **both** `member_of` and `part_of`: the graph is a DAG, not a tree, so a structure may appear several times — once fully expanded under its primary placement, as dimmed reference nodes under its other parents. The structure detail page ships as a **title-only placeholder** in this issue.                                                                                                                                                                                                       |
+| Question                                 | Decision                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Menu mapping                             | **Five groups** (updated 2026-07-14): Researchers / Institutions / Research units / Other structures / Teams. "Research units" = units whose concrete graph type is `ResearchUnit` (main_mission = research). "Teams" = generic_type `team` (national types `TEAM`, `THEME`). "Other structures" = institution subdivisions and unit subdivisions. **Support / administrative / teaching units are imported but do not appear in the perspective menu**: they are needed to display the organizational tree — they often have research units or institution subdivisions as children — but are not selectable perspectives.                                             |
+| External structures (`external = true`)  | **Store them, hide them from the perspective menu.** They are needed as relationship targets for the future tree page but have no displayable labels.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Institution / other-structure dashboards | **One-hop expansion through org relationships** (updated 2026-07-14, supersedes the earlier "identity only" decision). Publication data per perspective group: **institutions** → documents of the members of the **research units** that are `member_of` the institution (any supervision position; no direct institution memberships, no employments until they exist); **institution subdivisions** (and unit subdivisions) → documents of their **direct members plus** the members of the units that are `member_of` **or** `part_of` the subdivision; **research units** and **teams** → documents of their direct members.                                       |
+| Employments                              | **Model now.** Add an `Employment` table and hydrate `employmentsConnection` (already fetched by `person.graphql`, currently dropped by `PersonGraphQLClient.hydrate`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Authorization scopes                     | **Same one-hop expansion as the dashboards** (added 2026-07-14). Role scopes can target all four organization types: `Institution`, `ResearchUnit`, `InstitutionDivision` (institution & unit subdivisions), and a new `Team` entity type. A scope matches the people (and the documents of the people) in the organization's dashboard perimeter: institution → members of research units `member_of` it; subdivision → direct members + members of units `member_of`/`part_of` it; research unit / team → direct members. Employments still play no role.                                                                                                             |
+| Research structures view                 | **Flat table + hierarchical navigation** (added 2026-07-14, see §6, mockup in `SVP-mockups`). The hierarchical tab follows **both** `member_of` and `part_of`: the graph is a DAG, not a tree, so a structure may appear several times — once fully expanded under its primary placement, as dimmed reference nodes under its other parents. Two switches (not in the mockup): **Include external** (external institutions appear, as top-level roots in the tree, visually distinct) and **Display old structures** (structures/placements with a past `end_date` appear, visually distinct). **No detail page**: all detail links point to the structure's dashboard. |
 
 ---
 
@@ -223,6 +223,7 @@ model OrganizationUnit {
   external     Boolean                 @default(false)
   acronym      String?                 // first short label, as today
   slug         String?                 @unique
+  endDate      DateTime?               // reserved for upstream lifecycle — currently never populated (see §6 switches)
 
   labels        OrganizationUnitLabel[]
   descriptions  OrganizationUnitDescription[]
@@ -582,27 +583,54 @@ the real implementation, and national-type chips go through
 
 A directory of all organization structures at
 `/[lang]/research-structures`, reached from a new sidebar entry. The page
-has a title, a CSV export button, and **two tabs**:
+has a title, a CSV export button, **two switches** (a difference from the
+mockup, which has none), and **two tabs**:
+
+#### Display switches (not in the mockup)
+
+Two switches above the table, applying to both tabs as client-side filters
+over the single directory payload:
+
+- **Include external** (default off) — shows the `external = true`
+  institutions (registry-created co-supervisors). In the hierarchical view
+  they appear **at top level** (roots) with their supervised units beneath
+  them. External structures are **visually distinct** (e.g. muted style plus
+  an outlined "external"/"registre" chip). When the switch is off, external
+  institutions disappear entirely and placements are computed against the
+  visible nodes only (a unit whose parents are all hidden becomes a root).
+- **Display old structures** (default off) — also shows structures whose
+  `end_date` is in the past, **visually distinct** (dimmed, with an
+  "closed"/"fermée" chip). ⚠ Data-model dependency: structures carry no
+  lifecycle field yet — neither in Postgres nor in the graph GraphQL API
+  (upstream lifecycle is explicitly deferred in the IKG spec). This issue
+  adds a nullable `endDate` column on `OrganizationUnit` and wires the
+  switch; the value stays `null` (nothing filtered) until the IKG exposes
+  lifecycle fields and the sync fills it. The same switch also governs
+  **expired placements** in the hierarchical view: an attachment whose
+  relationship `endDate` is past (this data exists today) is hidden by
+  default and shown visually distinct when the switch is on.
 
 #### Flat view ("Vue à plat")
 
 A `MaterialReactTable` (same library as the documents table) listing every
-**non-external** structure — all categories, including the
+structure allowed by the switches — all categories, including the
 support/administrative/teaching units that the perspective menu hides.
 Columns, per the mockup:
 
-- **Structure** — acronym (bold, primary color, click → detail page) with a
-  national-type chip (translated), full name underneath (ellipsized).
-  Text filter matches acronym or name.
+- **Structure** — acronym (bold, primary color, click → the structure's
+  dashboard) with a national-type chip (translated), full name underneath
+  (ellipsized). Text filter matches acronym or name.
 - **Tutelles** — names of the supervising institutions (the structure's
-  `member_of` parents with category `institution`, external ones included);
+  `member_of` parents with category `institution`, external ones included
+  regardless of the switch — they are an attribute here, not a row);
   multi-select filter.
 - **Membres** — direct member count.
 - **Publications** — publication count of the structure's perimeter (§4
   one-hop rules) over the **last 24 months**, with a tooltip.
 - **OA** / **HAL** — progress-bar cells: percentage of those publications
   that are open access / present in HAL.
-- **Détail** — link to the detail page.
+- **Dashboard** — link to `/[lang]/dashboard?perspective=<org slug>`
+  (replaces the mockup's detail-page link).
 
 Pagination (25/page), global filter, column filters + reset, column
 show/hide, density and fullscreen toggles, row selection. The CSV export
@@ -612,8 +640,8 @@ show/hide, density and fullscreen toggles, row selection. The CSV export
 
 An expandable tree table (expanded by default, sticky header, no
 pagination) with the same KPI columns, built from the stored
-`OrganizationRelationship` rows and including **external** institutions
-(they supervise units and must appear as parents).
+`OrganizationRelationship` rows. External institutions appear as roots when
+the **Include external** switch is on.
 
 **The structure graph is a DAG, not a tree**: the view follows **both**
 `part_of` and `member_of`, so a structure appears under **every** parent it
@@ -628,18 +656,23 @@ children) under exactly **one primary placement** and appears as a
   chip plus an outlined dashed chip naming the secondary relationship
   ("co-tutelle" for institution `member_of`, a generic "rattachement"
   otherwise); they carry no children and no own uid in the row model
-  (`<uid>__ref__<parentUid>`), and clicking one navigates to the original
-  structure's detail page.
+  (`<uid>__ref__<parentUid>`), and clicking one opens the original
+  structure's dashboard.
 - Structures with no relationships at all (the current orphans) appear as
   roots.
+- Placement is computed against the **visible** node set: hiding external
+  institutions or old structures/placements (switches above) re-evaluates
+  primary placements and roots.
 
 #### Data endpoint
 
 One request feeds both tabs: `GET /api/organizations/directory` returns the
-full structure list (~300 rows — no pagination server-side) with, per
+full structure list (~300 rows — no pagination server-side, external and
+old structures included since the switches filter client-side) with, per
 structure: uid, slug, acronym, names, category, genericType, nationalType
-(raw code), external, `parents: [{ parentUid, kind, position }]`, and the
-KPIs (membersCount, publicationsCount over 24 months, oaRate, halRate,
+(raw code), external, endDate,
+`parents: [{ parentUid, kind, position, endDate }]`, and the KPIs
+(membersCount, publicationsCount over 24 months, oaRate, halRate,
 supervising institution names). KPI aggregation happens server-side in a
 dedicated service/DAO method using grouped queries (not one perimeter query
 per structure).
@@ -651,19 +684,27 @@ API route; it is fetched once and reused across the two tabs and revisits
 (refetch only on explicit reload). The flat rows and the DAG placement are
 derived client-side (memoized) from the slice data.
 
-#### Structure detail page
+#### No structure detail page (cancelled 2026-07-14)
 
-`/[lang]/research-structures/[uid]` — **placeholder only in this issue**: it
-resolves the structure (404 when unknown, `__ref__` uids resolved to the
-original) and displays its title (display name, acronym, translated type
-chip). The full mockup content (hero, KPIs, members/publications/teams
-tabs, perimeter editor, sidebars) is a later issue.
+The mockup's `[uid]` detail page is **not retained**: every "detail" link
+(flat table, tree nodes, reference nodes) points to the structure's
+**dashboard** (`/[lang]/dashboard?perspective=<org slug>`), which already
+carries the identity card and the perimeter's publication widgets. Note
+this makes structures that are absent from the perspective _menu_
+(support/administrative/teaching units, external institutions) reachable as
+dashboard perspectives through the directory — deliberate: the menu filter
+is a search-UX choice, not an access restriction.
 
 ### 7. Out of scope (later issues)
 
-- The **full structure detail page** (hero, KPIs, members and publications
-  tabs, perimeter editor, sidebars — see mockup `[uid]/` components); this
-  issue ships only the title placeholder.
+- The mockup's **rich structure page content** (hero, KPIs, members and
+  publications tabs, perimeter editor, sidebars — see mockup `[uid]/`
+  components): the dedicated detail page is cancelled, dashboards fill that
+  role; if richer structure pages are wanted later they will be a dashboard
+  evolution, not a separate route.
+- **Structure lifecycle data**: the `endDate` column ships with this issue
+  but stays null until the IKG exposes lifecycle fields (upstream
+  dependency).
 - **Recursive roll-up** deeper than one hop (dashboards and scopes both stop
   at the direct organization relationships).
 - Structure **lifecycle** (`deleted` events, end dates).
