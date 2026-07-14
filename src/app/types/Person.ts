@@ -18,6 +18,7 @@ import { SourcePerson, SourcePersonJson } from '@/types/SourcePerson'
 import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
 import removeAccents from 'remove-accents'
 import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
+import { organizationPerimeterFromMemberships } from '@/types/organizationScopes'
 
 interface PersonJson extends IAgentJson {
   uid: string
@@ -247,16 +248,11 @@ class Person implements IAgent, Authorizable {
   }
 
   get authzProperties(): AuthorizationProperties {
-    const rs =
-      this.memberships
-        ?.filter((m) => m.organizationUnit?.category === 'research_unit')
-        .map((m) => m.organizationUnit?.uid)
-        .filter((x): x is string => !!x) ?? []
     return {
       __type: 'Person',
       perimeter: {
         Person: [this.uid],
-        ResearchUnit: Array.from(new Set(rs)),
+        ...organizationPerimeterFromMemberships(this.memberships),
       },
     }
   }

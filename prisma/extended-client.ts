@@ -42,9 +42,25 @@ export const organizationUnitInclude = {
   identifiers: true,
 } satisfies Prisma.OrganizationUnitInclude
 
+/**
+ * Include used where the organization's parent relationships matter
+ * (authorization perimeters computed from person memberships).
+ */
+export const organizationUnitParentsInclude = {
+  parents: { include: { parent: true } },
+} satisfies Prisma.OrganizationUnitInclude
+
+export type OrganizationRelationshipWithParent =
+  Prisma.OrganizationRelationshipGetPayload<{
+    include: { parent: true }
+  }>
+
 export type OrganizationUnitWithRelations = Prisma.OrganizationUnitGetPayload<{
   include: typeof organizationUnitInclude
-}>
+}> & {
+  // present only when the query includes organizationUnitParentsInclude
+  parents?: OrganizationRelationshipWithParent[]
+}
 
 export type ContributionWithRelations = Contribution & {
   person: PersonWithRelations

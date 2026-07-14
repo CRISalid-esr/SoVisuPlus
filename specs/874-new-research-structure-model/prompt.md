@@ -40,6 +40,7 @@ application needs for perspectives, dashboards, and the future tree navigation.
 | External structures (`external = true`)  | **Store them, hide them from the perspective menu.** They are needed as relationship targets for the future tree page but have no displayable labels.                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | Institution / other-structure dashboards | **One-hop expansion through org relationships** (updated 2026-07-14, supersedes the earlier "identity only" decision). Publication data per perspective group: **institutions** → documents of the members of the **research units** that are `member_of` the institution (any supervision position; no direct institution memberships, no employments until they exist); **institution subdivisions** (and unit subdivisions) → documents of their **direct members plus** the members of the units that are `member_of` **or** `part_of` the subdivision; **research units** and **teams** → documents of their direct members. |
 | Employments                              | **Model now.** Add an `Employment` table and hydrate `employmentsConnection` (already fetched by `person.graphql`, currently dropped by `PersonGraphQLClient.hydrate`).                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Authorization scopes                     | **Same one-hop expansion as the dashboards** (added 2026-07-14). Role scopes can target all four organization types: `Institution`, `ResearchUnit`, `InstitutionDivision` (institution & unit subdivisions), and a new `Team` entity type. A scope matches the people (and the documents of the people) in the organization's dashboard perimeter: institution → members of research units `member_of` it; subdivision → direct members + members of units `member_of`/`part_of` it; research unit / team → direct members. Employments still play no role.                                                                       |
 
 ---
 
@@ -476,11 +477,27 @@ Slug generation: keep the current collision-retry mechanism, with a single
   `PersonGraphQLClient.hydrate` maps `employmentsConnection` the same way it
   maps memberships (and switches from the stale singular `type` field to the
   `types` array for organization nodes).
-- `Person.authzProperties.perimeter.ResearchUnit` is now built from memberships
-  whose organization `category === 'research_unit'` — same effective content
-  as today. Extending perimeters to institutions (via employments) is
-  deferred; `EntityType` / `PermissionSubject` enums are **unchanged** in this
-  issue.
+- **Authorization perimeters** (updated 2026-07-14): role scopes use the same
+  one-hop expansion as the dashboard perimeters, for all four organization
+  entity types. `Person.authzProperties.perimeter` and
+  `Document.computeScope` publish, from the person's / the contributors'
+  memberships (including the membership organizations' `parents`
+  relationships, which the DAO includes must fetch):
+  - `ResearchUnit`: uids of research units the person is a direct member of;
+  - `Team`: uids of teams the person is a direct member of (**new
+    `EntityType.Team`** enum value — migration required);
+  - `Institution`: uids of the institutions that the person's research units
+    are `member_of` (any supervision position);
+  - `InstitutionDivision`: uids of institution/unit subdivisions the person
+    is a direct member of, plus subdivisions that any of their membership
+    organizations are `member_of` or `part_of`.
+
+  A scope `Institution:<uid>` therefore matches the members of the
+  institution's supervised research units, and the documents having at least
+  one such contributor — consistent with what the institution dashboard
+  displays. Employments feed no perimeter. `PermissionSubject` is unchanged.
+  A shared helper (`src/app/types/organizationScopes.ts`) implements the
+  membership → perimeter mapping for both `Person` and `Document`.
 
 ### 4. API routes, services, stores
 
@@ -550,10 +567,12 @@ render empty when that perimeter holds no one.
 
 - Organizational **tree navigation page** (will use the
   `OrganizationRelationship` rows stored here).
-- **Hierarchical document roll-up** for institutions / other structures.
+- **Recursive roll-up** deeper than one hop (dashboards and scopes both stop
+  at the direct organization relationships).
 - Structure **lifecycle** (`deleted` events, end dates).
 - **Contacts / hal_collection / research areas** (not exposed by Apollo yet).
-- Institution-level **authorization perimeters** from employments.
+- **Employment-based** perimeters (dashboards and authorization) — waiting for
+  employment data to exist.
 
 ---
 

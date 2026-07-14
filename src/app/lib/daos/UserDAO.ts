@@ -71,6 +71,7 @@ export class UserDAO extends AbstractDAO {
                   organizationUnit: {
                     include: {
                       labels: true,
+                      parents: { include: { parent: true } },
                       descriptions: true,
                       identifiers: true,
                     },

@@ -5,7 +5,7 @@ import {
 } from '@/types/OrganizationUnitIdentifier'
 import { AgentType, IAgent } from '@/types/IAgent'
 import { Literal } from '@/types/Literal'
-import type { OrganizationRelation } from '@/types/OrganizationRelation'
+import { OrganizationRelation } from '@/types/OrganizationRelation'
 import { ExtendedLanguageCode } from './ExtendLanguageCode'
 import {
   OrganizationCategory,
@@ -145,7 +145,7 @@ class OrganizationUnit implements IAgent {
   static fromDbOrganizationUnit(
     organizationUnit: DbOrganizationUnit,
   ): OrganizationUnit {
-    return new OrganizationUnit(
+    const hydrated = new OrganizationUnit(
       organizationUnit.uid,
       organizationUnit.acronym,
       organizationUnit.labels
@@ -158,6 +158,47 @@ class OrganizationUnit implements IAgent {
       'identifiers' in organizationUnit
         ? (organizationUnit.identifiers as OrganizationUnitIdentifier[])
         : [],
+      organizationUnit.slug,
+      organizationUnit.external,
+      Array.isArray(organizationUnit.localTypes)
+        ? (organizationUnit.localTypes as unknown as Array<Literal>).map(
+            Literal.fromObject,
+          )
+        : [],
+    )
+    hydrated.parents =
+      organizationUnit.parents?.map(
+        (relation) =>
+          new OrganizationRelation(
+            OrganizationUnit.fromDbScalarRow(relation.parent),
+            relation.kind,
+            relation.position,
+            relation.startDate?.toDateString() ?? null,
+            relation.endDate?.toDateString() ?? null,
+          ),
+      ) ?? []
+    return hydrated
+  }
+
+  /**
+   * Hydrate from a bare OrganizationUnit row (no joined relations) —
+   * used for relationship parents, where only scalar data is fetched.
+   */
+  private static fromDbScalarRow(
+    organizationUnit: Omit<
+      DbOrganizationUnit,
+      'labels' | 'descriptions' | 'identifiers' | 'parents'
+    >,
+  ): OrganizationUnit {
+    return new OrganizationUnit(
+      organizationUnit.uid,
+      organizationUnit.acronym,
+      [],
+      [],
+      organizationUnit.category,
+      organizationUnit.genericType,
+      organizationUnit.nationalType,
+      [],
       organizationUnit.slug,
       organizationUnit.external,
       Array.isArray(organizationUnit.localTypes)

@@ -375,6 +375,21 @@ describe('PersonDAO Integration Tests', () => {
       ])
     })
 
+    test('fetched person publishes one-hop authorization perimeters', async () => {
+      const fetched = await personDAO.fetchPersonByUid('p-ru1')
+      expect(fetched!.authzProperties.perimeter).toMatchObject({
+        Person: ['p-ru1'],
+        ResearchUnit: ['local-RU1'],
+        Institution: ['local-UP1'],
+      })
+
+      const teamMember = await personDAO.fetchPersonByUid('p-t1')
+      expect(teamMember!.authzProperties.perimeter).toMatchObject({
+        Team: ['local-T1'],
+        InstitutionDivision: ['local-FAC1'],
+      })
+    })
+
     test('research_unit and team: direct members only', async () => {
       const researchUnitPeople =
         await personDAO.fetchPeopleByOrganizationPerimeter(

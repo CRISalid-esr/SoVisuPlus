@@ -917,6 +917,7 @@ export class DocumentDAO extends AbstractDAO {
                     organizationUnit: {
                       include: {
                         labels: true,
+                        parents: { include: { parent: true } },
                         identifiers: true,
                         descriptions: true,
                       },
@@ -1117,6 +1118,7 @@ export class DocumentDAO extends AbstractDAO {
                     organizationUnit: {
                       include: {
                         labels: true,
+                        parents: { include: { parent: true } },
                         descriptions: true,
                         identifiers: true,
                       },

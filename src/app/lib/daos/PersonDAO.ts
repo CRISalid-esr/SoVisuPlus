@@ -590,6 +590,7 @@ export class PersonDAO extends AbstractDAO {
             organizationUnit: {
               include: {
                 labels: true,
+                parents: { include: { parent: true } },
                 identifiers: true,
                 descriptions: true,
               },
@@ -601,6 +602,7 @@ export class PersonDAO extends AbstractDAO {
             organizationUnit: {
               include: {
                 labels: true,
+                parents: { include: { parent: true } },
                 identifiers: true,
                 descriptions: true,
               },
@@ -641,6 +643,7 @@ export class PersonDAO extends AbstractDAO {
               organizationUnit: {
                 include: {
                   labels: true,
+                  parents: { include: { parent: true } },
                   identifiers: true,
                   descriptions: true,
                 },
@@ -652,6 +655,7 @@ export class PersonDAO extends AbstractDAO {
               organizationUnit: {
                 include: {
                   labels: true,
+                  parents: { include: { parent: true } },
                   identifiers: true,
                   descriptions: true,
                 },
@@ -753,6 +757,7 @@ export class PersonDAO extends AbstractDAO {
             organizationUnit: {
               include: {
                 labels: true,
+                parents: { include: { parent: true } },
                 identifiers: true,
                 descriptions: true,
               },
@@ -764,6 +769,7 @@ export class PersonDAO extends AbstractDAO {
             organizationUnit: {
               include: {
                 labels: true,
+                parents: { include: { parent: true } },
                 identifiers: true,
                 descriptions: true,
               },
@@ -792,6 +798,7 @@ export class PersonDAO extends AbstractDAO {
               organizationUnit: {
                 include: {
                   labels: true,
+                  parents: { include: { parent: true } },
                   identifiers: true,
                   descriptions: true,
                 },
@@ -803,6 +810,7 @@ export class PersonDAO extends AbstractDAO {
               organizationUnit: {
                 include: {
                   labels: true,
+                  parents: { include: { parent: true } },
                   identifiers: true,
                   descriptions: true,
                 },
@@ -871,6 +879,7 @@ export class PersonDAO extends AbstractDAO {
               organizationUnit: {
                 include: {
                   labels: true,
+                  parents: { include: { parent: true } },
                   identifiers: true,
                   descriptions: true,
                 },
@@ -882,6 +891,7 @@ export class PersonDAO extends AbstractDAO {
               organizationUnit: {
                 include: {
                   labels: true,
+                  parents: { include: { parent: true } },
                   identifiers: true,
                   descriptions: true,
                 },

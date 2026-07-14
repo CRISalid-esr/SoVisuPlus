@@ -724,6 +724,7 @@ enum EntityType {
   ResearchUnit
   Institution
   InstitutionDivision
+  Team
 }
 
 model Role {

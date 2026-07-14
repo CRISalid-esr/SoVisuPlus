@@ -136,6 +136,7 @@ describe('UserDAO', () => {
                 organizationUnit: {
                   include: {
                     labels: true,
+                    parents: { include: { parent: true } },
                     descriptions: true,
                     identifiers: true,
                   },
@@ -224,6 +225,7 @@ describe('UserDAO', () => {
                 organizationUnit: {
                   include: {
                     labels: true,
+                    parents: { include: { parent: true } },
                     descriptions: true,
                     identifiers: true,
                   },

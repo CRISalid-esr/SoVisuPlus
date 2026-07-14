@@ -190,4 +190,62 @@ describe('Ability on Document (unit, no DB)', () => {
     const docOnlyRS = makeAuthzDoc([], ['RS-777'])
     expect(ability.can(PermissionAction.merge, docOnlyRS)).toBe(false)
   })
+
+  test('one-hop organization scopes: Institution, InstitutionDivision and Team perimeters', () => {
+    const makeCtx = (scopes: Scope[]): AuthzContext => ({
+      userId: 'u-6',
+      personUid: null,
+      roleAssignments: [
+        makeAssignment(
+          'document_merger',
+          [
+            {
+              action: PermissionAction.merge,
+              subject: PermissionSubject.Document,
+            },
+          ],
+          scopes,
+        ),
+      ],
+      roles: ['document_merger'],
+      scopes: scopes.map((s) => ({ ...s, role: 'document_merger' })),
+    })
+
+    // Document whose contributor is a member of a research unit supervised
+    // by local-UP1 and attached to local-FAC1, and of the team local-T1
+    // (perimeter as published by Document.computeScope)
+    const doc = makeAuthzDoc([], ['local-RU1'], {
+      perimeter: {
+        Person: [],
+        ResearchUnit: ['local-RU1'],
+        Institution: ['local-UP1'],
+        InstitutionDivision: ['local-FAC1'],
+        Team: ['local-T1'],
+      },
+    })
+
+    expect(
+      abilityFromAuthzContext(
+        makeCtx([{ entityType: 'Institution', entityUid: 'local-UP1' }]),
+      ).can(PermissionAction.merge, doc),
+    ).toBe(true)
+    expect(
+      abilityFromAuthzContext(
+        makeCtx([
+          { entityType: 'InstitutionDivision', entityUid: 'local-FAC1' },
+        ]),
+      ).can(PermissionAction.merge, doc),
+    ).toBe(true)
+    expect(
+      abilityFromAuthzContext(
+        makeCtx([{ entityType: 'Team', entityUid: 'local-T1' }]),
+      ).can(PermissionAction.merge, doc),
+    ).toBe(true)
+    // a scope on another institution does not match
+    expect(
+      abilityFromAuthzContext(
+        makeCtx([{ entityType: 'Institution', entityUid: 'local-OTHER' }]),
+      ).can(PermissionAction.merge, doc),
+    ).toBe(false)
+  })
 })

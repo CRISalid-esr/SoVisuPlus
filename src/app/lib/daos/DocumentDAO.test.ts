@@ -961,6 +961,7 @@ describe('DocumentDAO', () => {
                     organizationUnit: {
                       include: {
                         labels: true,
+                        parents: { include: { parent: true } },
                         identifiers: true,
                         descriptions: true,
                       },
@@ -1084,6 +1085,7 @@ describe('DocumentDAO', () => {
                     organizationUnit: {
                       include: {
                         labels: true,
+                        parents: { include: { parent: true } },
                         identifiers: true,
                         descriptions: true,
                       },
@@ -1202,6 +1204,7 @@ describe('DocumentDAO', () => {
                     organizationUnit: {
                       include: {
                         labels: true,
+                        parents: { include: { parent: true } },
                         identifiers: true,
                         descriptions: true,
                       },
@@ -1324,6 +1327,7 @@ describe('DocumentDAO', () => {
                     organizationUnit: {
                       include: {
                         labels: true,
+                        parents: { include: { parent: true } },
                         identifiers: true,
                         descriptions: true,
                       },
@@ -1544,6 +1548,7 @@ describe('DocumentDAO', () => {
                     organizationUnit: {
                       include: {
                         labels: true,
+                        parents: { include: { parent: true } },
                         identifiers: true,
                         descriptions: true,
                       },
