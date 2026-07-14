@@ -2,6 +2,7 @@ import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 import prisma from '@/lib/daos/prisma'
 import { PersonMembership } from '@/types/PersonMembership'
+import { PersonEmployment } from '@/types/PersonEmployment'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { Literal } from '@/types/Literal'
 import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
@@ -92,6 +93,110 @@ describe('PersonDAO Integration Tests', () => {
       organizationUnitId: organizationUnit.id,
       positionCode: 'MCF',
     })
+  })
+
+  test('should create a new person with employments', async () => {
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    const institution =
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(
+        new OrganizationUnit(
+          'local-UP1',
+          'UP1',
+          [new Literal('Université Paris 1', 'fr')],
+          [],
+          OrganizationCategory.institution,
+          OrganizationGenericType.institution,
+        ),
+      )
+    // membership organization also present so both relations resolve
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      new OrganizationUnit(
+        'local-unit',
+        'ACR',
+        [new Literal('JD Laboratory', 'en')],
+        [],
+        OrganizationCategory.research_unit,
+        OrganizationGenericType.unit,
+      ),
+    )
+
+    const employedPerson = new Person(
+      'local-johndoe',
+      false,
+      'johndoe@example.com',
+      'John',
+      'Doe',
+      'John Doe',
+      [],
+      person.memberships,
+    )
+    employedPerson.employments = [
+      new PersonEmployment(
+        new OrganizationUnit(
+          'local-UP1',
+          'UP1',
+          [new Literal('Université Paris 1', 'fr')],
+          [],
+          OrganizationCategory.institution,
+          OrganizationGenericType.institution,
+        ),
+        '2018-09-01T00:00:00.000Z',
+        null,
+        'MCF',
+      ),
+    ]
+
+    const dbPerson = await personDAO.createOrUpdatePerson(employedPerson)
+
+    const savedEmployments = await prisma.employment.findMany({
+      where: { personId: dbPerson.id },
+    })
+    expect(savedEmployments).toHaveLength(1)
+    expect(savedEmployments[0]).toMatchObject({
+      personId: dbPerson.id,
+      organizationUnitId: institution.id,
+      positionCode: 'MCF',
+    })
+
+    // round-trip through fetchPersonByUid
+    const fetched = await personDAO.fetchPersonByUid('local-johndoe')
+    expect(fetched!.employments).toHaveLength(1)
+    expect(fetched!.employments[0].organizationUnit.uid).toBe('local-UP1')
+    expect(fetched!.employments[0].organizationUnit.category).toBe(
+      OrganizationCategory.institution,
+    )
+  })
+
+  test('should skip employments whose organization is unknown', async () => {
+    const employedPerson = new Person(
+      'local-johndoe',
+      false,
+      'johndoe@example.com',
+      'John',
+      'Doe',
+      'John Doe',
+      [],
+      [],
+    )
+    employedPerson.employments = [
+      new PersonEmployment(
+        new OrganizationUnit(
+          'local-MISSING',
+          null,
+          [],
+          [],
+          OrganizationCategory.institution,
+          OrganizationGenericType.institution,
+        ),
+      ),
+    ]
+
+    const dbPerson = await personDAO.createOrUpdatePerson(employedPerson)
+
+    const savedEmployments = await prisma.employment.findMany({
+      where: { personId: dbPerson.id },
+    })
+    expect(savedEmployments).toHaveLength(0)
   })
 
   test('should update an existing person and replace identifiers', async () => {

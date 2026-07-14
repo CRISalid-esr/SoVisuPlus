@@ -4,14 +4,12 @@ import { Person } from '@/types/Person'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
 import { ExternalPerson } from '@/types/ExternalPerson'
 import { InternalPerson } from '@/types/InternalPerson'
-import { OrganizationUnit } from '@/types/OrganizationUnit'
-import { Literal } from '@/types/Literal'
-import { organizationIdentifierTypeFromString } from '@/types/OrganizationUnitIdentifier'
 import {
-  categoryFromGraphNode,
-  genericTypeFromCategory,
+  GraphOrganizationUnitNode,
+  hydrateOrganizationNode,
 } from '@/lib/graphql/organizationHydration'
 import { PersonMembership } from '@/types/PersonMembership'
+import { PersonEmployment } from '@/types/PersonEmployment'
 import { SourcePerson } from '@/types/SourcePerson'
 import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
 
@@ -44,27 +42,6 @@ interface GraphPersonName {
   }[]
 }
 
-interface GraphOrganizationIdentifier {
-  type: string
-  value: string
-}
-
-interface GraphOrganizationName {
-  language?: string
-  value: string
-}
-
-interface GraphOrganization {
-  acronym?: string
-  identifiers: GraphOrganizationIdentifier[]
-  names: GraphOrganizationName[]
-  types?: string[]
-  generic_type?: string
-  national_type?: string | null
-  external?: boolean
-  uid: string
-}
-
 interface GraphMembershipProperties {
   start_date?: string
   end_date?: string
@@ -73,7 +50,7 @@ interface GraphMembershipProperties {
 
 interface GraphMembershipEdge {
   properties: GraphMembershipProperties
-  node: GraphOrganization
+  node: GraphOrganizationUnitNode
 }
 
 interface GraphMembershipConnection {
@@ -88,7 +65,9 @@ export interface GraphPersonResponse {
   names: GraphPersonName[]
   membershipsConnection?: GraphMembershipConnection
   employmentsConnection?: GraphMembershipConnection
-  recorded_by: GraphSourcePersonResponse[]
+  // Not exposed by the graph GraphQL API since the organization model
+  // refactoring — source-person records stay empty until it is re-exposed.
+  recorded_by?: GraphSourcePersonResponse[]
 }
 
 export interface GraphPeopleResponse {
@@ -181,7 +160,11 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
       this.hydrateMemberships(personData.membershipsConnection),
     )
 
-    person.records = personData.recorded_by.map(
+    person.employments = this.hydrateEmployments(
+      personData.employmentsConnection,
+    )
+
+    person.records = (personData.recorded_by ?? []).map(
       (record: GraphSourcePersonResponse) =>
         new SourcePerson(
           record.uid,
@@ -216,54 +199,61 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
   private hydrateMemberships(
     connection: GraphMembershipConnection | undefined,
   ): PersonMembership[] {
+    return this.hydrateAffiliationEdges(
+      connection,
+      (organizationUnit, startDate, endDate, positionCode) =>
+        new PersonMembership(
+          organizationUnit,
+          startDate,
+          endDate,
+          positionCode,
+        ),
+    )
+  }
+
+  /**
+   * Hydrate employment edges into PersonEmployment objects.
+   * Edges whose organization category cannot be determined are skipped.
+   */
+  private hydrateEmployments(
+    connection: GraphMembershipConnection | undefined,
+  ): PersonEmployment[] {
+    return this.hydrateAffiliationEdges(
+      connection,
+      (organizationUnit, startDate, endDate, positionCode) =>
+        new PersonEmployment(
+          organizationUnit,
+          startDate,
+          endDate,
+          positionCode,
+        ),
+    )
+  }
+
+  private hydrateAffiliationEdges<T>(
+    connection: GraphMembershipConnection | undefined,
+    factory: (
+      organizationUnit: NonNullable<ReturnType<typeof hydrateOrganizationNode>>,
+      startDate: string | null,
+      endDate: string | null,
+      positionCode: string | null,
+    ) => T,
+  ): T[] {
     return (
       connection?.edges
         ?.map((edge) => {
-          const organizationUnit = this.hydrateOrganization(edge.node)
+          const organizationUnit = hydrateOrganizationNode(edge.node)
           if (!organizationUnit) {
             return null
           }
-          return new PersonMembership(
+          return factory(
             organizationUnit,
             edge.properties.start_date ?? null,
             edge.properties.end_date ?? null,
             edge.properties.position_code ?? null,
           )
         })
-        .filter((membership) => membership !== null) ?? []
-    )
-  }
-
-  private hydrateOrganization(
-    node: GraphOrganization,
-  ): OrganizationUnit | null {
-    const category = categoryFromGraphNode(node.types, node.generic_type)
-    if (!category) {
-      console.error(
-        `Cannot determine category of organization ${node.uid} ` +
-          `(labels: [${node.types?.join(', ') ?? ''}], generic_type: ${node.generic_type ?? 'unknown'}), skipping`,
-      )
-      return null
-    }
-    return new OrganizationUnit(
-      node.uid,
-      node.acronym ?? null,
-      node.names.map((name) =>
-        Literal.fromObject({
-          language: name.language ?? null,
-          value: name.value,
-        }),
-      ),
-      [],
-      category,
-      genericTypeFromCategory(category),
-      node.national_type ?? null,
-      node.identifiers.map((identifier) => ({
-        type: organizationIdentifierTypeFromString(identifier.type),
-        value: identifier.value,
-      })),
-      null,
-      node.external ?? false,
+        .filter((item) => item !== null) ?? []
     )
   }
 }

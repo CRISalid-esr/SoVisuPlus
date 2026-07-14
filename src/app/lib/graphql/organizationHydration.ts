@@ -1,4 +1,32 @@
 import { OrganizationCategory, OrganizationGenericType } from '@prisma/client'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
+import { OrganizationUnitIdentifier } from '@/types/OrganizationUnitIdentifier'
+import { organizationIdentifierTypeFromString } from '@/types/OrganizationUnitIdentifier'
+import { Literal } from '@/types/Literal'
+
+interface GraphLiteral {
+  value: string
+  language?: string | null
+}
+
+interface GraphIdentifier {
+  type: string
+  value: string
+}
+
+/** Shape of an OrganizationUnit node as returned by the graph GraphQL API */
+export interface GraphOrganizationUnitNode {
+  uid: string
+  external?: boolean | null
+  generic_type?: string | null
+  national_type?: string | null
+  types: string[]
+  long_labels: GraphLiteral[]
+  short_labels: GraphLiteral[]
+  local_types?: GraphLiteral[]
+  descriptions?: GraphLiteral[]
+  identifiers: GraphIdentifier[]
+}
 
 /**
  * Concrete category from the Neo4j node labels. The graph does not expose
@@ -61,3 +89,66 @@ const GENERIC_TYPE_BY_CATEGORY: Record<
 export const genericTypeFromCategory = (
   category: OrganizationCategory,
 ): OrganizationGenericType => GENERIC_TYPE_BY_CATEGORY[category]
+
+/**
+ * Hydrate a graph node into a shallow OrganizationUnit (no relationships).
+ * Returns null when the concrete category cannot be determined
+ * (a unit node without mission label) — callers must skip the node.
+ */
+export const hydrateOrganizationNode = (
+  node: GraphOrganizationUnitNode,
+): OrganizationUnit | null => {
+  const category = categoryFromGraphNode(node.types, node.generic_type)
+  if (!category) {
+    console.error(
+      `Cannot determine category of organization ${node.uid} ` +
+        `(labels: [${node.types?.join(', ') ?? ''}], generic_type: ${node.generic_type ?? 'unknown'}), skipping`,
+    )
+    return null
+  }
+
+  const identifiers = (node.identifiers ?? [])
+    .map((identifier): OrganizationUnitIdentifier | null => {
+      try {
+        return {
+          type: organizationIdentifierTypeFromString(identifier.type),
+          value: identifier.value,
+        }
+      } catch {
+        console.warn(
+          `Unsupported organization identifier type for ${identifier.value}: ${identifier.type}`,
+        )
+        return null // Skip unsupported identifiers
+      }
+    })
+    .filter((identifier) => identifier !== null)
+
+  return new OrganizationUnit(
+    node.uid,
+    node.short_labels?.[0]?.value ?? null,
+    (node.long_labels ?? []).map((label) =>
+      Literal.fromObject({
+        language: label.language ?? null,
+        value: label.value,
+      }),
+    ),
+    (node.descriptions ?? []).map((description) =>
+      Literal.fromObject({
+        language: description.language ?? null,
+        value: description.value,
+      }),
+    ),
+    category,
+    genericTypeFromCategory(category),
+    node.national_type ?? null,
+    identifiers,
+    null,
+    node.external ?? false,
+    (node.local_types ?? []).map((localType) =>
+      Literal.fromObject({
+        language: localType.language ?? null,
+        value: localType.value,
+      }),
+    ),
+  )
+}

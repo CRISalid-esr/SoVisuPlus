@@ -13,6 +13,7 @@ import { IAgent, IAgentJson } from '@/types/IAgent'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { PersonIdentifier as DbPersonIdentifier } from '@prisma/client'
 import { PersonMembership } from '@/types/PersonMembership'
+import { PersonEmployment } from '@/types/PersonEmployment'
 import { SourcePerson, SourcePersonJson } from '@/types/SourcePerson'
 import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
 import removeAccents from 'remove-accents'
@@ -28,6 +29,7 @@ interface PersonJson extends IAgentJson {
   lastName?: string
   identifiers?: Array<PersonIdentifierJson | ORCIDIdentifierJson>
   memberships?: PersonMembership[]
+  employments?: PersonEmployment[]
   records: SourcePersonJson[]
 }
 
@@ -35,6 +37,8 @@ type IdentifierHydrationJson = PersonIdentifierJson | ORCIDIdentifierJson
 
 class Person implements IAgent, Authorizable {
   public normalizedName: string
+  /** EMPLOYED_AT relationships — populated alongside memberships */
+  public employments: PersonEmployment[] = []
 
   constructor(
     public uid: string,
@@ -164,7 +168,7 @@ class Person implements IAgent, Authorizable {
       person.lastName,
       person.displayName,
     )
-    return new Person(
+    const hydrated = new Person(
       person.uid,
       person.external,
       person.email,
@@ -185,6 +189,11 @@ class Person implements IAgent, Authorizable {
       person.slug,
       person.records.map((record) => SourcePerson.fromDbSourcePerson(record)),
     )
+    hydrated.employments =
+      person.employments?.map((employment) =>
+        PersonEmployment.fromDbPersonEmployment(employment),
+      ) ?? []
+    return hydrated
   }
 
   private static identifiersFromJson(
@@ -220,7 +229,7 @@ class Person implements IAgent, Authorizable {
       json.lastName,
       json.displayName ?? null,
     )
-    return new Person(
+    const hydrated = new Person(
       json.uid,
       json.external,
       json.email ?? null,
@@ -233,6 +242,8 @@ class Person implements IAgent, Authorizable {
       json.slug ?? null,
       json.records.map((record) => SourcePerson.fromJson(record)),
     )
+    hydrated.employments = json.employments ?? []
+    return hydrated
   }
 
   get authzProperties(): AuthorizationProperties {

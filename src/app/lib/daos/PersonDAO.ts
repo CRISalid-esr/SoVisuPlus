@@ -12,6 +12,7 @@ import {
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
+import { PersonEmployment } from '@/types/PersonEmployment'
 import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
 import { SourcePersonDAO } from '@/lib/daos/SourcePersonDAO'
 import { SourcePerson } from '@/types/SourcePerson'
@@ -99,6 +100,8 @@ export class PersonDAO extends AbstractDAO {
 
           await this.upsertMemberships(person.memberships, dbPerson.id)
 
+          await this.upsertEmployments(person.employments, dbPerson.id)
+
           await this.upsertRecords(person.records, dbPerson.id)
 
           // The upsert result carries every scalar column callers read (id, external,
@@ -175,6 +178,50 @@ export class PersonDAO extends AbstractDAO {
           startDate: membership.startDate,
           endDate: membership.endDate,
           positionCode: membership.positionCode,
+        },
+      })
+    }
+  }
+
+  /**
+   * Upsert employments for a given person
+   * @param employments - List of employments to upsert
+   * @param personId - The ID of the person in the database
+   */
+  private async upsertEmployments(
+    employments: PersonEmployment[],
+    personId: number,
+  ): Promise<void> {
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    for (const employment of employments) {
+      const dbOrganizationUnit =
+        await organizationUnitDAO.getOrganizationUnitByUid(
+          employment.organizationUnit.uid,
+        )
+      if (!dbOrganizationUnit) {
+        console.error(
+          `Organization unit not found for UID: ${employment.organizationUnit.uid}`,
+        )
+        continue
+      }
+      await this.prismaClient.employment.upsert({
+        where: {
+          personId_organizationUnitId: {
+            personId,
+            organizationUnitId: dbOrganizationUnit.id,
+          },
+        },
+        update: {
+          startDate: employment.startDate,
+          endDate: employment.endDate,
+          positionCode: employment.positionCode,
+        },
+        create: {
+          personId,
+          organizationUnitId: dbOrganizationUnit.id,
+          startDate: employment.startDate,
+          endDate: employment.endDate,
+          positionCode: employment.positionCode,
         },
       })
     }
@@ -546,6 +593,17 @@ export class PersonDAO extends AbstractDAO {
             },
           },
         },
+        employments: {
+          include: {
+            organizationUnit: {
+              include: {
+                labels: true,
+                identifiers: true,
+                descriptions: true,
+              },
+            },
+          },
+        },
         identifiers: true,
         records: {
           include: {
@@ -576,6 +634,17 @@ export class PersonDAO extends AbstractDAO {
         where: { slug },
         include: {
           memberships: {
+            include: {
+              organizationUnit: {
+                include: {
+                  labels: true,
+                  identifiers: true,
+                  descriptions: true,
+                },
+              },
+            },
+          },
+          employments: {
             include: {
               organizationUnit: {
                 include: {
@@ -631,6 +700,17 @@ export class PersonDAO extends AbstractDAO {
             },
           },
         },
+        employments: {
+          include: {
+            organizationUnit: {
+              include: {
+                labels: true,
+                identifiers: true,
+                descriptions: true,
+              },
+            },
+          },
+        },
         identifiers: true,
         records: {
           include: {
@@ -649,6 +729,17 @@ export class PersonDAO extends AbstractDAO {
         where: { uid },
         include: {
           memberships: {
+            include: {
+              organizationUnit: {
+                include: {
+                  labels: true,
+                  identifiers: true,
+                  descriptions: true,
+                },
+              },
+            },
+          },
+          employments: {
             include: {
               organizationUnit: {
                 include: {
@@ -717,6 +808,17 @@ export class PersonDAO extends AbstractDAO {
         },
         include: {
           memberships: {
+            include: {
+              organizationUnit: {
+                include: {
+                  labels: true,
+                  identifiers: true,
+                  descriptions: true,
+                },
+              },
+            },
+          },
+          employments: {
             include: {
               organizationUnit: {
                 include: {

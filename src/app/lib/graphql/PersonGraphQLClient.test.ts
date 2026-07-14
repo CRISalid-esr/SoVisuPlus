@@ -6,6 +6,7 @@ import {
 } from '@/types/PersonIdentifier'
 import { Person } from '@/types/Person'
 import { PersonMembership } from '@/types/PersonMembership'
+import { PersonEmployment } from '@/types/PersonEmployment'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { OrganizationIdentifierType } from '@/types/OrganizationUnitIdentifier'
 import { Literal } from '@/types/Literal'
@@ -142,8 +143,8 @@ describe('PersonGraphQLClient', () => {
                 },
                 node: {
                   uid: 'unit-1',
-                  acronym: 'ACR',
-                  names: [{ value: 'JD Laboratory', language: 'en' }],
+                  short_labels: [{ value: 'ACR' }],
+                  long_labels: [{ value: 'JD Laboratory', language: 'en' }],
                   identifiers: [{ type: 'nns', value: '001234567Z' }],
                   types: ['OrganizationUnit', 'Unit', 'ResearchUnit'],
                   generic_type: 'unit',
@@ -195,6 +196,65 @@ describe('PersonGraphQLClient', () => {
     expect(person).toEqual(expectedPerson)
   })
 
+  test('should hydrate employments as PersonEmployments toward institutions', async () => {
+    const mockResponse = {
+      people: [
+        {
+          uid: 'person-123',
+          external: false,
+          display_name: 'John Doe',
+          identifiers: [],
+          names: [
+            {
+              first_names: [{ value: 'John' }],
+              last_names: [{ value: 'Doe' }],
+            },
+          ],
+          employmentsConnection: {
+            edges: [
+              {
+                properties: {
+                  start_date: '2018-09-01',
+                  end_date: null,
+                  position_code: 'MCF',
+                },
+                node: {
+                  uid: 'local-UP1',
+                  short_labels: [{ value: 'UP1', language: 'fr' }],
+                  long_labels: [
+                    { value: 'Université Paris 1', language: 'fr' },
+                  ],
+                  identifiers: [{ type: 'local', value: 'UP1' }],
+                  types: ['OrganizationUnit', 'Institution'],
+                  generic_type: 'institution',
+                  national_type: 'UNIV',
+                  external: false,
+                },
+              },
+            ],
+          },
+        },
+      ],
+    }
+
+    mockQuery.mockResolvedValue(mockResponse)
+
+    const person = await client.getPersonByUid('person-123')
+
+    expect(person!.employments).toHaveLength(1)
+    const employment = person!.employments[0]
+    expect(employment).toBeInstanceOf(PersonEmployment)
+    expect(employment.organizationUnit.uid).toBe('local-UP1')
+    expect(employment.organizationUnit.category).toBe(
+      OrganizationCategory.institution,
+    )
+    expect(employment.organizationUnit.type).toBe('institution')
+    expect(employment.startDate).toBe('2018-09-01')
+    expect(employment.positionCode).toBe('MCF')
+    // memberships untouched
+    expect(person!.memberships).toEqual([])
+  })
+
   test('should skip membership edges whose node has no recognizable type labels', async () => {
     const mockResponse = {
       people: [
@@ -215,8 +275,8 @@ describe('PersonGraphQLClient', () => {
                 properties: {},
                 node: {
                   uid: 'unit-untyped',
-                  acronym: 'UNT',
-                  names: [{ value: 'Untyped Unit', language: 'en' }],
+                  short_labels: [{ value: 'UNT' }],
+                  long_labels: [{ value: 'Untyped Unit', language: 'en' }],
                   identifiers: [],
                   // bare unit without mission label: category cannot be derived
                   types: ['OrganizationUnit', 'Unit'],
@@ -227,8 +287,8 @@ describe('PersonGraphQLClient', () => {
                 properties: {},
                 node: {
                   uid: 'institution-1',
-                  acronym: 'UNIV',
-                  names: [{ value: 'Some University', language: 'en' }],
+                  short_labels: [{ value: 'UNIV' }],
+                  long_labels: [{ value: 'Some University', language: 'en' }],
                   identifiers: [],
                   types: ['OrganizationUnit', 'Institution'],
                   generic_type: 'institution',

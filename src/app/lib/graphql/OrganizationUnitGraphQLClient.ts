@@ -2,37 +2,13 @@ import { AbstractGraphQLClient } from './AbstractGraphQLClient'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { OrganizationRelation } from '@/types/OrganizationRelation'
-import { OrganizationUnitIdentifier } from '@/types/OrganizationUnitIdentifier'
-import { Literal } from '@/types/Literal'
-import { organizationIdentifierTypeFromString } from '@/types/OrganizationUnitIdentifier'
 import {
-  categoryFromGraphNode,
-  genericTypeFromCategory,
+  GraphOrganizationUnitNode,
+  hydrateOrganizationNode,
 } from '@/lib/graphql/organizationHydration'
 import { OrganizationRelationKind } from '@prisma/client'
 
-interface GraphLiteral {
-  value: string
-  language?: string | null
-}
-
-interface GraphIdentifier {
-  type: string
-  value: string
-}
-
-export interface GraphOrganizationUnitNode {
-  uid: string
-  external?: boolean | null
-  generic_type: string
-  national_type?: string | null
-  types: string[]
-  long_labels: GraphLiteral[]
-  short_labels: GraphLiteral[]
-  local_types?: GraphLiteral[]
-  descriptions?: GraphLiteral[]
-  identifiers: GraphIdentifier[]
-}
+export type { GraphOrganizationUnitNode }
 
 interface GraphInclusionProperties {
   start_date?: string | null
@@ -93,7 +69,7 @@ export class OrganizationUnitGraphQLClient extends AbstractGraphQLClient {
   public hydrate(
     organizationUnitData: GraphOrganizationUnitResponse,
   ): OrganizationUnit | null {
-    const organizationUnit = this.hydrateNode(organizationUnitData)
+    const organizationUnit = hydrateOrganizationNode(organizationUnitData)
     if (!organizationUnit) {
       return null
     }
@@ -119,7 +95,7 @@ export class OrganizationUnitGraphQLClient extends AbstractGraphQLClient {
     edge: GraphRelationshipEdge<GraphMembershipProperties>,
     kind: OrganizationRelationKind,
   ): OrganizationRelation | null {
-    const parent = this.hydrateNode(edge.node)
+    const parent = hydrateOrganizationNode(edge.node)
     if (!parent) {
       return null
     }
@@ -129,69 +105,6 @@ export class OrganizationUnitGraphQLClient extends AbstractGraphQLClient {
       edge.properties.position ?? null,
       edge.properties.start_date ?? null,
       edge.properties.end_date ?? null,
-    )
-  }
-
-  /**
-   * Hydrate a graph node into a shallow OrganizationUnit (no relationships).
-   * Returns null when the concrete category cannot be determined
-   * (a unit node without mission label) — callers must skip the node.
-   */
-  private hydrateNode(
-    node: GraphOrganizationUnitNode,
-  ): OrganizationUnit | null {
-    const category = categoryFromGraphNode(node.types, node.generic_type)
-    if (!category) {
-      console.error(
-        `Cannot determine category of organization ${node.uid} ` +
-          `(labels: [${node.types?.join(', ') ?? ''}], generic_type: ${node.generic_type ?? 'unknown'}), skipping`,
-      )
-      return null
-    }
-
-    const identifiers = (node.identifiers ?? [])
-      .map((identifier): OrganizationUnitIdentifier | null => {
-        try {
-          return {
-            type: organizationIdentifierTypeFromString(identifier.type),
-            value: identifier.value,
-          }
-        } catch {
-          console.warn(
-            `Unsupported organization identifier type for ${identifier.value}: ${identifier.type}`,
-          )
-          return null // Skip unsupported identifiers
-        }
-      })
-      .filter((identifier) => identifier !== null)
-
-    return new OrganizationUnit(
-      node.uid,
-      node.short_labels?.[0]?.value ?? null,
-      (node.long_labels ?? []).map((label) =>
-        Literal.fromObject({
-          language: label.language ?? null,
-          value: label.value,
-        }),
-      ),
-      (node.descriptions ?? []).map((description) =>
-        Literal.fromObject({
-          language: description.language ?? null,
-          value: description.value,
-        }),
-      ),
-      category,
-      genericTypeFromCategory(category),
-      node.national_type ?? null,
-      identifiers,
-      null,
-      node.external ?? false,
-      (node.local_types ?? []).map((localType) =>
-        Literal.fromObject({
-          language: localType.language ?? null,
-          value: localType.value,
-        }),
-      ),
     )
   }
 }
