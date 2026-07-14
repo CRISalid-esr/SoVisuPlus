@@ -44,21 +44,6 @@ msgid "user_action_warning_unknown"
 msgstr "An item could not be applied"
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:56
-msgid "user_action_outcome_technical_details"
-msgstr "Technical details"
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:84
-msgid "user_action_outcome_details_copied"
-msgstr "Copied!"
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:86
-msgid "user_action_outcome_copy_details"
-msgstr "Copy details"
-
-#. js-lingui-explicit-id
 #: src/app/lib/websocket/WebSocketListener.tsx:114
 msgid "snackbar_document_created"
 msgstr "New publication: "
@@ -93,6 +78,21 @@ msgstr "Your change could not be saved:"
 #: src/app/lib/websocket/WebSocketListener.tsx:207
 msgid "snackbar_user_action_applied_with_warnings"
 msgstr "Change saved with warnings:"
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:56
+msgid "user_action_outcome_technical_details"
+msgstr "Technical details"
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:84
+msgid "user_action_outcome_details_copied"
+msgstr "Copied!"
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:86
+msgid "user_action_outcome_copy_details"
+msgstr "Copy details"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/not-found.tsx:45
@@ -150,6 +150,11 @@ msgid "documents_merge_dialog_box_merge_button"
 msgstr "Confirm merge ({nbDocs})"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
+msgid "document_details_page_source_tab_card_title"
+msgstr "Sources"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.tsx:204
 msgid "documents_page_refresh_document_alert"
 msgstr "Data concerning this publication has changed"
@@ -160,75 +165,9 @@ msgid "document_details_page_frozen_notice"
 msgstr "This document is waiting to be updated from the graph and cannot be edited right now."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:105
-msgid "document_details_page_keywords_tab_card_title"
-msgstr "Keywords"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:124
-msgid "document_details_page_keywords_tab_card_empty_content"
-msgstr "No keywords"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:138
-msgid "document_details_page_keywords_search_field_title"
-msgstr "Select one or more controlled vocabulary"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
-msgid "document_details_page_source_tab_card_title"
-msgstr "Sources"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
 msgid "document_details_page_update_in_hal_tab_card_title"
 msgstr "Update in HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:225
-msgid "concept_chips_free_keyword"
-msgstr "Loose keyword"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:242
-msgid "concept_chips_pref_label"
-msgstr "Main variations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:271
-msgid "concept_chips_alt_label"
-msgstr "Other variations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:343
-msgid "concept_chip_action_delete"
-msgstr "Delete"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
-msgid "document_details_page_add_in_hal_tab_card_title"
-msgstr "Add in HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr "Disciplines"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:402
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:413
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "action"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:430
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalidate"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:448
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissociate"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
@@ -261,6 +200,72 @@ msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:105
+msgid "document_details_page_keywords_tab_card_title"
+msgstr "Keywords"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:124
+msgid "document_details_page_keywords_tab_card_empty_content"
+msgstr "No keywords"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:138
+msgid "document_details_page_keywords_search_field_title"
+msgstr "Select one or more controlled vocabulary"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:225
+msgid "concept_chips_free_keyword"
+msgstr "Loose keyword"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:242
+msgid "concept_chips_pref_label"
+msgstr "Main variations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:271
+msgid "concept_chips_alt_label"
+msgstr "Other variations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:343
+msgid "concept_chip_action_delete"
+msgstr "Delete"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:402
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:413
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "action"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:430
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalidate"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:448
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissociate"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
+msgid "document_details_page_add_in_hal_tab_card_title"
+msgstr "Add in HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr "Disciplines"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
+msgid "document_details_page_card_title"
+msgstr "Bibliographic information"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:114
 msgid "document_details_page_publication_date_update_success"
 msgstr "Publication date updated."
@@ -285,11 +290,6 @@ msgstr "Bibliographic information updated."
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
 msgid "bibliographic_information_update_failure"
 msgstr "Failed to update bibliographic information."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
-msgid "document_details_page_card_title"
-msgstr "Bibliographic information"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
@@ -478,6 +478,51 @@ msgid "orcid_button_provide_identifier"
 msgstr "Sign-in to ORCID"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
+msgid "hal_button_update_identifier"
+msgstr "Link my Hal identifier"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
+msgid "hal_button_provide_identifier"
+msgstr "Provide my Hal identifier"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:28
+msgid "authorizations_page_authorizations_title"
+msgstr "Authorizations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:50
+msgid "authorizations_page_description"
+msgstr "I allow SoVisu+ to share my data with Idya application: "
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:54
+msgid "authorizations_page_list_publications"
+msgstr "Publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:58
+msgid "authorizations_page_my_expertise"
+msgstr "My expertise"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
+msgid "profile_affiliations_signature_label"
+msgstr "My signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:64
+msgid "profile_affiliations_no_signature_message"
+msgstr "No signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
+msgid "profile_affiliations_signature_copied_message_confirmation"
+msgstr "Signature added to clipboard."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
 msgid "profile_affiliations_no_units"
 msgstr "No related research unit"
@@ -606,51 +651,6 @@ msgstr "This will remove the idHAL and its HAL login from this account."
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:339
 msgid "hal_control_remove_dialog_confirm"
 msgstr "Remove"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
-msgid "hal_button_update_identifier"
-msgstr "Link my Hal identifier"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
-msgid "hal_button_provide_identifier"
-msgstr "Provide my Hal identifier"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:28
-msgid "authorizations_page_authorizations_title"
-msgstr "Authorizations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:50
-msgid "authorizations_page_description"
-msgstr "I allow SoVisu+ to share my data with Idya application: "
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:54
-msgid "authorizations_page_list_publications"
-msgstr "Publications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:58
-msgid "authorizations_page_my_expertise"
-msgstr "My expertise"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
-msgid "profile_affiliations_signature_label"
-msgstr "My signature"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:64
-msgid "profile_affiliations_no_signature_message"
-msgstr "No signature"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
-msgid "profile_affiliations_signature_copied_message_confirmation"
-msgstr "Signature added to clipboard."
 
 #. js-lingui-explicit-id
 #. placeholder {0}: import { t } from '@lingui/core/macro' import { Trans } from '@lingui/react/macro' import { useRef, useState } from 'react' import useStore from '@/stores/global_store' import { Box, Button, Card, CardContent, ClickAwayListener, Grow, Link, Popper, Typography, } from '@mui/material' import { useTheme } from '@mui/material/styles' const Journal = () => { const titleRef = useRef(null) const [isPopperOpen, setIsPopperOpen] = useState(false) const theme = useTheme() const { selectedDocument = null } = useStore((state) => state.document) const journal = selectedDocument?.journal const title = journal?.title const handleClick = () => { setIsPopperOpen(!isPopperOpen) } const handleClickAway = () => { setIsPopperOpen(false) } return ( title && ( <ClickAwayListener onClickAway={handleClickAway}> <Box> <Button variant='text' ref={titleRef} onClick={handleClick} sx={{ p: 0 }} > {title} </Button> <Popper open={isPopperOpen} anchorEl={titleRef.current} placement='bottom-start' transition disablePortal sx={{ zIndex: 1, }} > {({ TransitionProps }) => ( <Grow {...TransitionProps} timeout={200}> <Card> <CardContent> <Typography gutterBottom variant='h6' sx={{ color: theme.palette.primary.main }} > {title} </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_issn'> <Link href={`https://portal.issn.org/resource/ISSN/${journal.issnL}`} target='_blank' rel='noopener noreferrer' > {journal.issnL} </Link> </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_source_type'> {t`document_details_page_journal_journal`} </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_publisher'> {journal.publisher} </Trans> </Typography> </CardContent> </Card> </Grow> )} </Popper> </Box> </ClickAwayListener> ) ) } export default Journal 
@@ -2250,6 +2250,58 @@ msgstr "Read limited access to my ORCID record"
 msgid "orcid_scope_read_limited_tooltip"
 msgstr "Allows reading your limited-access data on ORCID"
 
+#: src/app/[lang]/components/organizationTypeLabels.ts:16
+msgid "organization_national_type_comue"
+msgstr "University and institution community (COMUE)"
+
+#: src/app/[lang]/components/organizationTypeLabels.ts:13
+msgid "organization_national_type_epe"
+msgstr "Experimental public institution (EPE)"
+
+#: src/app/[lang]/components/organizationTypeLabels.ts:14
+msgid "organization_national_type_epst"
+msgstr "Public scientific and technological institution (EPST)"
+
+#: src/app/[lang]/components/organizationTypeLabels.ts:22
+msgid "organization_national_type_fac"
+msgstr "Faculty"
+
+#: src/app/[lang]/components/organizationTypeLabels.ts:15
+msgid "organization_national_type_ge"
+msgstr "Grand établissement"
+
+#: src/app/[lang]/components/organizationTypeLabels.ts:20
+msgid "organization_national_type_irl"
+msgstr "International research laboratory (IRL)"
+
+#: src/app/[lang]/components/organizationTypeLabels.ts:23
+msgid "organization_national_type_team"
+msgstr "Team"
+
+#: src/app/[lang]/components/organizationTypeLabels.ts:24
+msgid "organization_national_type_theme"
+msgstr "Research theme"
+
+#: src/app/[lang]/components/organizationTypeLabels.ts:18
+msgid "organization_national_type_uar"
+msgstr "Support and research unit (UAR)"
+
+#: src/app/[lang]/components/organizationTypeLabels.ts:21
+msgid "organization_national_type_ufr"
+msgstr "Teaching and research department (UFR)"
+
+#: src/app/[lang]/components/organizationTypeLabels.ts:17
+msgid "organization_national_type_umr"
+msgstr "Joint research unit (UMR)"
+
+#: src/app/[lang]/components/organizationTypeLabels.ts:12
+msgid "organization_national_type_univ"
+msgstr "University"
+
+#: src/app/[lang]/components/organizationTypeLabels.ts:19
+msgid "organization_national_type_ur"
+msgstr "Research unit (UR)"
+
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/page.tsx:26
 msgid "account_page_profile_tab"
@@ -2305,7 +2357,7 @@ msgstr "Research activities"
 msgid "sidebar_account"
 msgstr "See my account"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:514
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:510
 msgid "sidebar_back_to_my_perspective"
 msgstr "Back to my page"
 
@@ -2318,35 +2370,35 @@ msgstr "Help"
 msgid "sidebar_logout"
 msgstr "Logout"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:91
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:90
 msgid "sidebar_search_institutions"
 msgstr "Institutions"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:93
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:92
 msgid "sidebar_search_other_structures"
 msgstr "Other structures"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:101
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:117
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:200
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:312
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:430
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:100
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:116
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:199
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:310
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:426
 msgid "sidebar_search_people"
 msgstr "Researchers"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:457
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:453
 msgid "sidebar_search_placeholder"
 msgstr "Search"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:92
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:91
 msgid "sidebar_search_research_units"
 msgstr "Research units"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:94
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:93
 msgid "sidebar_search_teams"
 msgstr "Teams"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:269
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:267
 msgid "sidebar_search_unknown_label"
 msgstr "N/C"
 

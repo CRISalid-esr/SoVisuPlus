@@ -6,6 +6,7 @@ import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { IAgent } from '@/types/IAgent'
 import { isOrganizationUnit, OrganizationUnit } from '@/types/OrganizationUnit'
+import { nationalTypeLabel } from '@/app/[lang]/components/organizationTypeLabels'
 
 const OrganizationUnitIdentityCard = ({
   organizationUnit,
@@ -21,10 +22,17 @@ const OrganizationUnitIdentityCard = ({
   const lang = (Lingui.i18n.locale || 'ul') as ExtendedLanguageCode
   const displayName = organization.getDisplayName(lang) || ''
   // Local type first, national type as fallback — never the generic type.
-  const displayType = organization.getDisplayType(lang)
+  // Local types are multilingual data from the graph; national types are
+  // vocabulary codes (UNIV, UMR, THEME…) translated through the UI catalog.
+  const resolvedType = organization.getDisplayType(lang)
   const localTypeUsed =
-    displayType !== null && displayType !== organization.nationalType
-  const secondaryType = localTypeUsed ? organization.nationalType : null
+    resolvedType !== null && resolvedType !== organization.nationalType
+  const displayType = localTypeUsed
+    ? resolvedType
+    : nationalTypeLabel(Lingui.i18n, resolvedType)
+  const secondaryType = localTypeUsed
+    ? nationalTypeLabel(Lingui.i18n, organization.nationalType)
+    : null
   return (
     <Card sx={{ borderRadius: 1, boxShadow: 1, width: '100%' }}>
       <CardContent sx={{ py: 3 }}>

@@ -455,6 +455,13 @@ Slug generation: keep the current collision-retry mechanism, with a single
   (the new French standard). The domain class provides a
   `getDisplayType(locale)` helper: first `localTypes` literal matching the
   current locale (fallback to any language), else `nationalType`, else `null`.
+- **National types are never displayed raw** (added 2026-07-14): local types
+  are multilingual data from the graph and display as-is, but national types
+  are vocabulary codes (`UNIV`, `UMR`, `THEME`, …) translated through the UI
+  catalog. `organizationTypeLabels.ts` holds one static Lingui `msg` entry
+  per known code (the extractor cannot see dynamic ids); unknown codes —
+  the national list evolves upstream — fall back to the raw code until a
+  translation is added.
 - `IAgent.ts`: `AgentType` becomes the five perspective groups:
 
   ```ts

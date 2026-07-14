@@ -24,7 +24,7 @@ const makeTeam = ({
   )
 
 describe('OrganizationUnitIdentityCard type chip', () => {
-  it('displays the local type first, with the national type as secondary mention', () => {
+  it('displays the local type first, with the translated national type as secondary mention', () => {
     render(
       <OrganizationUnitIdentityCard
         organizationUnit={makeTeam({
@@ -35,17 +35,33 @@ describe('OrganizationUnitIdentityCard type chip', () => {
     )
 
     expect(screen.getByText('Axe')).toBeInTheDocument()
-    expect(screen.getByText('THEME')).toBeInTheDocument()
+    // no catalog is loaded in tests: the translated label renders as its id
+    expect(
+      screen.getByText('organization_national_type_theme'),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('THEME')).not.toBeInTheDocument()
   })
 
-  it('falls back to the national type when no local type exists', () => {
+  it('falls back to the translated national type when no local type exists', () => {
     render(
       <OrganizationUnitIdentityCard
         organizationUnit={makeTeam({ nationalType: 'TEAM' })}
       />,
     )
 
-    expect(screen.getByText('TEAM')).toBeInTheDocument()
+    expect(
+      screen.getByText('organization_national_type_team'),
+    ).toBeInTheDocument()
+  })
+
+  it('displays unknown national type codes as-is', () => {
+    render(
+      <OrganizationUnitIdentityCard
+        organizationUnit={makeTeam({ nationalType: 'NEWCODE' })}
+      />,
+    )
+
+    expect(screen.getByText('NEWCODE')).toBeInTheDocument()
   })
 
   it('never displays the generic type, and no chip without any type', () => {
