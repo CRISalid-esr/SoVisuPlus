@@ -582,7 +582,10 @@ the real implementation, and national-type chips go through
 `organizationTypeLabels.ts` (§3 display rule: raw codes are never shown).
 
 A directory of all organization structures at
-`/[lang]/research-structures`, reached from a new sidebar entry. The page
+`/[lang]/research-structures`, reached from a new sidebar entry that
+**replaces the two existing "My groups" (`/groups`) and "Institutions"
+(`/institutions`) entries** — both placeholder routes and their sidebar
+items are removed. The page
 has a title, a CSV export button, **two switches** (a difference from the
 mockup, which has none), and **two tabs**:
 
