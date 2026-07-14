@@ -10,6 +10,7 @@ Each major feature is backed by a spec document in `specs/<branch-name>/prompt.m
 | `send-global-contributor-update-message`         | [`specs/send-global-contributor-update-message/prompt.md`](specs/send-global-contributor-update-message/prompt.md)                 |
 | `868-improve-graph-error-reporting-user-actions` | [`specs/868-improve-graph-error-reporting-user-actions/prompt.md`](specs/868-improve-graph-error-reporting-user-actions/prompt.md) |
 | `872-refactor-account-edition-workflow`          | [`specs/872-refactor-account-edition-workflow/prompt.md`](specs/872-refactor-account-edition-workflow/prompt.md)                   |
+| `874-new-research-structure-model`               | [`specs/874-new-research-structure-model/prompt.md`](specs/874-new-research-structure-model/prompt.md)                             |
 
 ## Git commits
 
