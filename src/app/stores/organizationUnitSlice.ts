@@ -4,6 +4,7 @@ import {
   OrganizationUnitJson,
 } from '@/types/OrganizationUnit'
 import { OrganizationGroup, ORGANIZATION_GROUPS } from '@/types/IAgent'
+import { OrganizationDirectoryEntry } from '@/types/OrganizationDirectory'
 import { i18n } from '@lingui/core'
 import { BaseQuery } from '@/types/BaseQuery'
 import { toQueryString } from '@/utils/query'
@@ -32,11 +33,21 @@ const initialByGroup = (): Record<OrganizationGroup, OrganizationGroupState> =>
     ORGANIZATION_GROUPS.map((group) => [group, emptyGroupState()]),
   ) as Record<OrganizationGroup, OrganizationGroupState>
 
+interface DirectoryState {
+  structures: OrganizationDirectoryEntry[]
+  loading: boolean
+  loaded: boolean
+  error: string | null
+}
+
 export interface OrganizationUnitSlice {
   organization: {
     byGroup: Record<OrganizationGroup, OrganizationGroupState>
     error: string | null | unknown
     fetchOrganizationsByName: (obj: OrganizationsByNameQuery) => Promise<void>
+    directory: DirectoryState
+    /** Fetched once and reused; pass force to refetch explicitly. */
+    fetchDirectory: (options?: { force?: boolean }) => Promise<void>
   }
 }
 
@@ -45,10 +56,50 @@ export const addOrganizationUnitSlice: StateCreator<
   [], // Middlewares (if any)
   [], // Additional options (if any)
   OrganizationUnitSlice // The slice being created
-> = (set) => ({
+> = (set, get) => ({
   organization: {
     byGroup: initialByGroup(),
     error: null,
+    directory: {
+      structures: [],
+      loading: false,
+      loaded: false,
+      error: null,
+    },
+    fetchDirectory: async (options?: { force?: boolean }) => {
+      const { directory } = get().organization
+      if (directory.loading || (directory.loaded && !options?.force)) {
+        return
+      }
+      const setDirectory = (directoryState: Partial<DirectoryState>) =>
+        set((state) => ({
+          organization: {
+            ...state.organization,
+            directory: { ...state.organization.directory, ...directoryState },
+          },
+        }))
+
+      setDirectory({ loading: true, error: null })
+      try {
+        const response = await fetch('/api/organizations/directory', {
+          headers: { 'accept-language': i18n.locale },
+        })
+        if (!response.ok) {
+          throw new Error(`Failed to fetch: ${response.statusText}`)
+        }
+        const jsonData = (await response.json()) as {
+          structures: OrganizationDirectoryEntry[]
+        }
+        setDirectory({ structures: jsonData.structures, loaded: true })
+      } catch (error) {
+        setDirectory({
+          structures: [],
+          error: error instanceof Error ? error.message : 'Unknown error',
+        })
+      } finally {
+        setDirectory({ loading: false })
+      }
+    },
     fetchOrganizationsByName: async (queryObject: OrganizationsByNameQuery) => {
       const { group } = queryObject
       const queryString = toQueryString(queryObject)

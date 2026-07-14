@@ -624,11 +624,14 @@ Columns, per the mockup:
   `member_of` parents with category `institution`, external ones included
   regardless of the switch — they are an attribute here, not a row);
   multi-select filter.
-- **Membres** — direct member count.
+- **Membres** — the structure's **perimeter** member count (§4 one-hop
+  rules — consistent with the Publications column).
 - **Publications** — publication count of the structure's perimeter (§4
   one-hop rules) over the **last 24 months**, with a tooltip.
 - **OA** / **HAL** — progress-bar cells: percentage of those publications
-  that are open access / present in HAL.
+  that are open access (any OA colour — green, diamond, gold, bronze,
+  hybrid — in either the harvested or the Unpaywall status) / that have a
+  HAL source record.
 - **Dashboard** — link to `/[lang]/dashboard?perspective=<org slug>`
   (replaces the mockup's detail-page link).
 

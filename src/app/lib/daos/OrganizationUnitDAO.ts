@@ -358,6 +358,46 @@ export class OrganizationUnitDAO extends AbstractDAO {
   }
 
   /**
+   * All organization units with their labels and parent relationships —
+   * the raw material of the research-structures directory. External and
+   * hidden-category structures included: filtering is a display concern.
+   */
+  public async fetchDirectoryUnits() {
+    return this.prismaClient.organizationUnit.findMany({
+      include: {
+        labels: true,
+        parents: {
+          select: {
+            kind: true,
+            position: true,
+            parent: { select: { uid: true } },
+          },
+        },
+      },
+    })
+  }
+
+  /**
+   * All person-to-organization membership pairs, used to compute the
+   * directory perimeters in one pass.
+   */
+  public async fetchMembershipPairs(): Promise<
+    { personId: number; orgUid: string; orgCategory: OrganizationCategory }[]
+  > {
+    const memberships = await this.prismaClient.membership.findMany({
+      select: {
+        personId: true,
+        organizationUnit: { select: { uid: true, category: true } },
+      },
+    })
+    return memberships.map((membership) => ({
+      personId: membership.personId,
+      orgUid: membership.organizationUnit.uid,
+      orgCategory: membership.organizationUnit.category,
+    }))
+  }
+
+  /**
    * Search where-clause for a perspective group: matches on label values,
    * restricted to the group's categories, always excluding external
    * structures (registry-created relationship targets without labels).

@@ -29,13 +29,12 @@ import { useTheme } from '@mui/material/styles'
 import { Box, useMediaQuery } from '@mui/system'
 import {
   BarChartSquare02 as BarChartSquare,
+  Building07 as Building,
   CheckDone01 as CheckDone,
   LayersThree01 as LayerThere,
-  LifeBuoy01 as LifeBuoy,
   LogOut01 as Logout,
   SearchSm,
   Settings01 as Settings,
-  User01 as Users,
   XClose as Close,
 } from '@untitled-ui/icons-react'
 import Image from 'next/image'
@@ -557,7 +556,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                     justifyContent: 'center',
                     alignItems: 'center',
                     color: theme.palette.primaryContainer,
-                    ...(pathname === `/${lang}/groups`
+                    ...(pathname === `/${lang}/research-structures`
                       ? {
                           backgroundColor: theme.palette.primaryContainer,
                           borderRadius: theme.utils.pxToRem(8),
@@ -571,7 +570,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                     },
                   }}
                   component={GuardedLink}
-                  href={`/${lang}/groups?${navSearchParams}`}
+                  href={`/${lang}/research-structures?${navSearchParams}`}
                   onClick={() => isMobile && handleToggleDrawerAction()}
                 >
                   <ListItemIcon
@@ -583,7 +582,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                       color: 'inherit',
                     }}
                   >
-                    <Users />
+                    <Building />
                   </ListItemIcon>
                   {open && (
                     <ListItemText
@@ -596,57 +595,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                             theme.typography.lineHeight.lineHeight24px,
                         },
                       }}
-                      primary={<Trans>side_bar_my_groups</Trans>}
-                    />
-                  )}
-                </ListItem>
-                <ListItem
-                  sx={{
-                    marginBottom: theme.utils.pxToRem(4),
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    color: theme.palette.primaryContainer,
-                    ...(pathname === `/${lang}/institutions`
-                      ? {
-                          backgroundColor: theme.palette.primaryContainer,
-                          borderRadius: theme.utils.pxToRem(8),
-                          color: theme.palette.onPrimaryContainer,
-                        }
-                      : {}),
-                    '&:hover': {
-                      backgroundColor: theme.palette.sidebarItemHover,
-                      borderRadius: theme.utils.pxToRem(8),
-                      color: theme.palette.primaryContainer,
-                    },
-                  }}
-                  component={GuardedLink}
-                  href={`/${lang}/institutions?${navSearchParams}`}
-                  onClick={() => isMobile && handleToggleDrawerAction()}
-                >
-                  <ListItemIcon
-                    sx={{
-                      height: theme.utils.pxToRem(24),
-                      width: theme.utils.pxToRem(24),
-                      minWidth: 'unset',
-                      marginRight: open ? theme.utils.pxToRem(12) : 0,
-                      color: 'inherit',
-                    }}
-                  >
-                    <LifeBuoy />
-                  </ListItemIcon>
-                  {open && (
-                    <ListItemText
-                      sx={{
-                        '& .MuiTypography-root': {
-                          fontFamily: 'Inter, Roboto, sans-serif',
-                          fontSize: theme.utils.pxToRem(16),
-                          fontWeight: theme.typography.fontWeightMedium,
-                          lineHeight:
-                            theme.typography.lineHeight.lineHeight24px,
-                        },
-                      }}
-                      primary={<Trans>side_bar_institutions</Trans>}
+                      primary={<Trans>side_bar_research_structures</Trans>}
                     />
                   )}
                 </ListItem>
