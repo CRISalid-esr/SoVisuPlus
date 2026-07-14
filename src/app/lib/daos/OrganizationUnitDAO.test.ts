@@ -31,6 +31,10 @@ jest.mock('@prisma/client', () => {
       deleteMany: jest.fn(),
       create: jest.fn(),
     },
+    organizationRelationship: {
+      deleteMany: jest.fn(),
+      create: jest.fn(),
+    },
   }
   return {
     ...actualPrismaClient,

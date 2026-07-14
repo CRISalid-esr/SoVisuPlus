@@ -85,6 +85,10 @@ export class OrganizationUnitDAO extends AbstractDAO {
           await this.upsertLabels(organizationUnit, dbOrganizationUnit.id)
           await this.upsertDescriptions(organizationUnit, dbOrganizationUnit.id)
           await this.upsertIdentifiers(organizationUnit, dbOrganizationUnit.id)
+          await this.upsertRelationships(
+            organizationUnit,
+            dbOrganizationUnit.id,
+          )
 
           return dbOrganizationUnit
         } catch (error) {
@@ -211,6 +215,75 @@ export class OrganizationUnitDAO extends AbstractDAO {
           value: identifier.value,
         },
       })
+    }
+  }
+
+  /**
+   * Replace the organization-to-organization relationships where this unit
+   * is the child. Incoming data is authoritative: relationships absent from
+   * it are removed. Rows where the unit is the parent belong to the
+   * children's own sync and are untouched, as are person-to-organization
+   * rows (Membership, Employment).
+   */
+  private async upsertRelationships(
+    organizationUnit: OrganizationUnit,
+    childId: number,
+  ): Promise<void> {
+    await this.prismaClient.organizationRelationship.deleteMany({
+      where: { childId },
+    })
+
+    for (const relation of organizationUnit.parents) {
+      const parentId = await this.resolveParentId(relation.parent)
+      if (parentId === null) {
+        continue
+      }
+      await this.prismaClient.organizationRelationship.create({
+        data: {
+          childId,
+          parentId,
+          kind: relation.kind,
+          position: relation.position,
+          startDate: relation.startDate ? new Date(relation.startDate) : null,
+          endDate: relation.endDate ? new Date(relation.endDate) : null,
+        },
+      })
+    }
+  }
+
+  /**
+   * Resolve a relationship parent to a database id. When the parent is not
+   * yet known (out-of-order messages, or external registry institutions
+   * which never get their own message), it is shallow-created from the data
+   * carried by the relationship edge. An existing parent is never
+   * overwritten — its own message owns its data.
+   */
+  private async resolveParentId(
+    parent: OrganizationUnit,
+  ): Promise<number | null> {
+    const existing = await this.prismaClient.organizationUnit.findUnique({
+      where: { uid: parent.uid },
+    })
+    if (existing) {
+      return existing.id
+    }
+    try {
+      const created = await this.createOrUpdateOrganizationUnit(parent)
+      return created.id
+    } catch (error) {
+      // Two structures can shallow-create the same parent concurrently: on
+      // any failure, re-check before giving up on the relationship.
+      const refetched = await this.prismaClient.organizationUnit.findUnique({
+        where: { uid: parent.uid },
+      })
+      if (refetched) {
+        return refetched.id
+      }
+      console.error(
+        `Failed to create parent organization ${parent.uid}, skipping relationship`,
+        error,
+      )
+      return null
     }
   }
 

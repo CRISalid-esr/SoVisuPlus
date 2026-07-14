@@ -1,201 +1,137 @@
 import { OrganizationUnitWorker } from '@/lib/amqp/workers/OrganizationUnitWorker'
 import { AMQPOrganizationUnitMessage } from '@/types/AMQPOrganizationUnitMessage'
 import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
+import { OrganizationUnitGraphQLClient } from '@/lib/graphql/OrganizationUnitGraphQLClient'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
-import { Literal } from '@/types/Literal'
 import { OrganizationCategory, OrganizationGenericType } from '@prisma/client'
+import { Literal } from '@/types/Literal'
 
-jest.mock('@/lib/daos/OrganizationUnitDAO', () => {
-  return {
-    OrganizationUnitDAO: jest.fn().mockImplementation(() => {
-      return {
-        createOrUpdateOrganizationUnit: jest.fn(),
-      }
-    }),
-  }
+jest.mock('@/lib/daos/OrganizationUnitDAO', () => ({
+  OrganizationUnitDAO: jest.fn().mockImplementation(() => ({
+    createOrUpdateOrganizationUnit: jest.fn(),
+  })),
+}))
+
+jest.mock('@/lib/graphql/OrganizationUnitGraphQLClient', () => ({
+  OrganizationUnitGraphQLClient: jest.fn().mockImplementation(() => ({
+    getOrganizationUnitByUid: jest.fn(),
+  })),
+}))
+
+const makeMessage = (
+  event: AMQPOrganizationUnitMessage['event'] = 'created',
+): AMQPOrganizationUnitMessage => ({
+  type: 'unit',
+  event,
+  fields: {
+    uid: 'local-RS001',
+    identifiers: [{ type: 'local', value: 'RS001' }],
+  },
 })
 
-const mockDAO = new OrganizationUnitDAO()
+const makeOrganizationUnit = (): OrganizationUnit =>
+  new OrganizationUnit(
+    'local-RS001',
+    'RS',
+    [Literal.fromObject({ value: 'Research team', language: 'en' })],
+    [],
+    OrganizationCategory.research_unit,
+    OrganizationGenericType.unit,
+  )
 
 describe('OrganizationUnitWorker', () => {
-  let worker: OrganizationUnitWorker
+  let organizationUnitDAO: jest.Mocked<OrganizationUnitDAO>
+  let organizationUnitGraphQLClient: jest.Mocked<OrganizationUnitGraphQLClient>
 
   beforeEach(() => {
     jest.clearAllMocks()
+    organizationUnitDAO =
+      new OrganizationUnitDAO() as jest.Mocked<OrganizationUnitDAO>
+    organizationUnitGraphQLClient =
+      new OrganizationUnitGraphQLClient() as jest.Mocked<OrganizationUnitGraphQLClient>
   })
 
-  it('should process a valid organization unit message', async () => {
-    const message: AMQPOrganizationUnitMessage = {
-      type: 'unit',
-      event: 'updated',
-      fields: {
-        uid: 'rs-123',
-        national_type: 'UMR',
-        identifiers: [
-          { type: 'nns', value: '12345' },
-          { type: 'ror', value: 'https://ror.org/01' },
-        ],
-        long_labels: [{ value: 'Research Unit', language: 'en' }],
-        short_labels: [{ value: 'RS', language: 'en' }],
-        descriptions: [{ value: 'A description', language: 'en' }],
-        local_types: [{ value: 'Unité mixte', language: 'fr' }],
-        main_mission: 'research',
-      },
-    }
+  const makeWorker = (message: AMQPOrganizationUnitMessage) =>
+    new OrganizationUnitWorker(
+      message,
+      organizationUnitDAO,
+      organizationUnitGraphQLClient,
+    )
 
-    worker = new OrganizationUnitWorker(message, mockDAO)
+  it.each(['created', 'updated', 'unchanged'] as const)(
+    'fetches the structure from the graph and upserts it on %s events',
+    async (event) => {
+      const organizationUnit = makeOrganizationUnit()
+      organizationUnitGraphQLClient.getOrganizationUnitByUid.mockResolvedValue(
+        organizationUnit,
+      )
 
-    await worker.process()
+      const events = await makeWorker(makeMessage(event)).process()
 
-    const expectedOrganizationUnit = new OrganizationUnit(
-      'rs-123',
-      'RS',
-      [new Literal('Research Unit', 'en')],
-      [new Literal('A description', 'en')],
-      OrganizationCategory.research_unit,
-      OrganizationGenericType.unit,
-      'UMR',
-      [
-        { type: 'nns', value: '12345' },
-        { type: 'ror', value: 'https://ror.org/01' },
-      ],
+      expect(
+        organizationUnitGraphQLClient.getOrganizationUnitByUid,
+      ).toHaveBeenCalledWith('local-RS001')
+      expect(
+        organizationUnitDAO.createOrUpdateOrganizationUnit,
+      ).toHaveBeenCalledWith(organizationUnit)
+      expect(events).toEqual([])
+    },
+  )
+
+  it('ignores deleted events without touching the graph or the database', async () => {
+    const events = await makeWorker(makeMessage('deleted')).process()
+
+    expect(
+      organizationUnitGraphQLClient.getOrganizationUnitByUid,
+    ).not.toHaveBeenCalled()
+    expect(
+      organizationUnitDAO.createOrUpdateOrganizationUnit,
+    ).not.toHaveBeenCalled()
+    expect(events).toEqual([])
+  })
+
+  it('logs an error and skips when the structure is not found in the graph', async () => {
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {})
+    organizationUnitGraphQLClient.getOrganizationUnitByUid.mockResolvedValue(
       null,
-      false,
-      [new Literal('Unité mixte', 'fr')],
     )
 
-    expect(mockDAO.createOrUpdateOrganizationUnit).toHaveBeenCalledWith(
-      expectedOrganizationUnit,
+    const events = await makeWorker(makeMessage()).process()
+
+    expect(
+      organizationUnitDAO.createOrUpdateOrganizationUnit,
+    ).not.toHaveBeenCalled()
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('local-RS001 not found in the graph'),
+    )
+    expect(events).toEqual([])
+    consoleErrorSpy.mockRestore()
+  })
+
+  it('propagates GraphQL client errors', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {})
+    organizationUnitGraphQLClient.getOrganizationUnitByUid.mockRejectedValue(
+      new Error('GraphQL error'),
+    )
+
+    await expect(makeWorker(makeMessage()).process()).rejects.toThrow(
+      'GraphQL error',
     )
   })
 
-  it.each([
-    ['research', OrganizationCategory.research_unit],
-    ['scientific_services', OrganizationCategory.support_unit],
-    ['administrative_services', OrganizationCategory.administrative_unit],
-    ['teaching', OrganizationCategory.teaching_unit],
-    ['unknown_mission', OrganizationCategory.research_unit],
-    [undefined, OrganizationCategory.research_unit],
-  ])(
-    'should derive the category of a unit from main_mission %s',
-    async (mainMission, expectedCategory) => {
-      const message: AMQPOrganizationUnitMessage = {
-        type: 'unit',
-        event: 'updated',
-        fields: {
-          uid: 'rs-123',
-          identifiers: [],
-          long_labels: [{ value: 'Some Unit', language: 'en' }],
-          main_mission: mainMission,
-        },
-      }
-
-      worker = new OrganizationUnitWorker(message, mockDAO)
-
-      await worker.process()
-
-      expect(mockDAO.createOrUpdateOrganizationUnit).toHaveBeenCalledWith(
-        expect.objectContaining({
-          uid: 'rs-123',
-          category: expectedCategory,
-          genericType: OrganizationGenericType.unit,
-        }),
-      )
-    },
-  )
-
-  it.each([
-    ['institution', OrganizationCategory.institution],
-    ['institution_subdivision', OrganizationCategory.institution_subdivision],
-    ['unit_subdivision', OrganizationCategory.unit_subdivision],
-    ['team', OrganizationCategory.team],
-  ] as const)(
-    'should use the message type as category for %s messages',
-    async (type, expectedCategory) => {
-      const message: AMQPOrganizationUnitMessage = {
-        type,
-        event: 'updated',
-        fields: {
-          uid: 'org-123',
-          identifiers: [],
-          long_labels: [{ value: 'Some Structure', language: 'en' }],
-        },
-      }
-
-      worker = new OrganizationUnitWorker(message, mockDAO)
-
-      await worker.process()
-
-      expect(mockDAO.createOrUpdateOrganizationUnit).toHaveBeenCalledWith(
-        expect.objectContaining({
-          uid: 'org-123',
-          category: expectedCategory,
-          genericType: type,
-        }),
-      )
-    },
-  )
-
-  it('should log and throw an error if processing fails', async () => {
-    const message: AMQPOrganizationUnitMessage = {
-      type: 'unit',
-      event: 'updated',
-      fields: {
-        uid: 'rs-123',
-        national_type: null,
-        identifiers: [{ type: 'nns', value: '12345' }],
-        long_labels: [{ value: 'Research Unit', language: 'en' }],
-        short_labels: [{ value: 'RS', language: 'en' }],
-        descriptions: [{ value: 'A description', language: 'en' }],
-        main_mission: 'research',
-      },
-    }
-
-    worker = new OrganizationUnitWorker(message, mockDAO)
-    ;(mockDAO.createOrUpdateOrganizationUnit as jest.Mock).mockRejectedValue(
+  it('propagates DAO errors', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {})
+    organizationUnitGraphQLClient.getOrganizationUnitByUid.mockResolvedValue(
+      makeOrganizationUnit(),
+    )
+    organizationUnitDAO.createOrUpdateOrganizationUnit.mockRejectedValue(
       new Error('Database error'),
     )
 
-    await expect(worker.process()).rejects.toThrow('Database error')
-
-    const expectedOrganizationUnit = new OrganizationUnit(
-      'rs-123',
-      'RS',
-      [new Literal('Research Unit', 'en')],
-      [new Literal('A description', 'en')],
-      OrganizationCategory.research_unit,
-      OrganizationGenericType.unit,
-      null,
-      [{ type: 'nns', value: '12345' }],
-      null,
-      false,
-      [],
-    )
-
-    expect(mockDAO.createOrUpdateOrganizationUnit).toHaveBeenCalledWith(
-      expectedOrganizationUnit,
-    )
-  })
-
-  it('should throw an error if an invalid identifier type is provided', async () => {
-    const message: AMQPOrganizationUnitMessage = {
-      type: 'unit',
-      event: 'updated',
-      fields: {
-        uid: 'rs-123',
-        national_type: null,
-        identifiers: [{ type: 'INVALID', value: '12345' }],
-        long_labels: [{ value: 'Research Unit', language: 'en' }],
-        short_labels: [{ value: 'RS', language: 'en' }],
-        descriptions: [{ value: 'A description', language: 'en' }],
-        main_mission: 'research',
-      },
-    }
-
-    worker = new OrganizationUnitWorker(message, mockDAO)
-
-    await expect(worker.process()).rejects.toThrow(
-      'Unsupported identifier type: INVALID',
+    await expect(makeWorker(makeMessage()).process()).rejects.toThrow(
+      'Database error',
     )
   })
 })

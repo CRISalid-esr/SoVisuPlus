@@ -24,6 +24,7 @@ import { UserDAO } from '@/lib/daos/UserDAO'
 
 import { DocumentGraphQLClient } from '@/lib/graphql/DocumentGraphQLClient'
 import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
+import { OrganizationUnitGraphQLClient } from '@/lib/graphql/OrganizationUnitGraphQLClient'
 
 export class MessageProcessingWorkerFactory {
   createWorker(message: AMQPMessage): MessageProcessingWorker<AMQPMessage> {
@@ -37,7 +38,11 @@ export class MessageProcessingWorkerFactory {
     }
 
     if (isOrganizationUnitMessage(message)) {
-      return new OrganizationUnitWorker(message, new OrganizationUnitDAO())
+      return new OrganizationUnitWorker(
+        message,
+        new OrganizationUnitDAO(),
+        new OrganizationUnitGraphQLClient(),
+      )
     }
 
     if (isDocumentMessage(message)) {

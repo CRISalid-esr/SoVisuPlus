@@ -5,6 +5,7 @@ import {
 } from '@/types/OrganizationUnitIdentifier'
 import { AgentType, IAgent } from '@/types/IAgent'
 import { Literal } from '@/types/Literal'
+import type { OrganizationRelation } from '@/types/OrganizationRelation'
 import { ExtendedLanguageCode } from './ExtendLanguageCode'
 import {
   OrganizationCategory,
@@ -34,6 +35,13 @@ const ORGANIZATION_AGENT_TYPES = new Set<AgentType>([
 ])
 
 class OrganizationUnit implements IAgent {
+  /**
+   * Organization-to-organization relationships (child → parent).
+   * Populated by the graph GraphQL client; parents are shallow
+   * (no recursive relationships).
+   */
+  public parents: OrganizationRelation[] = []
+
   constructor(
     public uid: string,
     public acronym: string | null,
