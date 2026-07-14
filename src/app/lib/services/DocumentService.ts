@@ -167,11 +167,14 @@ export class DocumentService {
       case 'research_unit':
       case 'other_structure':
       case 'team':
-        // Direct-membership expansion. Hierarchical roll-up (institution →
-        // member units → people) is deferred to the tree-navigation issue.
+        // One-hop expansion through organization relationships; the
+        // per-group perimeter rules live in the DAO.
         contributorUids = (
           contributorUid
-            ? await this.personDAO.fetchPeopleByOrganizationUid(contributorUid)
+            ? await this.personDAO.fetchPeopleByOrganizationPerimeter(
+                contributorUid,
+                contributorType,
+              )
             : []
         ).map((person) => person.uid)
         break

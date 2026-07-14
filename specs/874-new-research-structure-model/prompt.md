@@ -34,12 +34,12 @@ application needs for perspectives, dashboards, and the future tree navigation.
 
 ## Decisions (validated 2026-07-13)
 
-| Question                                 | Decision                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Menu mapping                             | **Five groups** (updated 2026-07-14): Researchers / Institutions / Research units / Other structures / Teams. "Research units" = units whose concrete graph type is `ResearchUnit` (main_mission = research). "Teams" = generic_type `team` (national types `TEAM`, `THEME`). "Other structures" = institution subdivisions and unit subdivisions. **Support / administrative / teaching units are imported but do not appear in the perspective menu**: they are needed to display the organizational tree — they often have research units or institution subdivisions as children — but are not selectable perspectives. |
-| External structures (`external = true`)  | **Store them, hide them from the perspective menu.** They are needed as relationship targets for the future tree page but have no displayable labels.                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Institution / other-structure dashboards | **Identity only for now.** They are selectable perspectives with an identity card; document aggregation only works through direct person-memberships. Hierarchical roll-up (institution → member units → people) is deferred to the tree-navigation issue.                                                                                                                                                                                                                                                                                                                                                                  |
-| Employments                              | **Model now.** Add an `Employment` table and hydrate `employmentsConnection` (already fetched by `person.graphql`, currently dropped by `PersonGraphQLClient.hydrate`).                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Question                                 | Decision                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Menu mapping                             | **Five groups** (updated 2026-07-14): Researchers / Institutions / Research units / Other structures / Teams. "Research units" = units whose concrete graph type is `ResearchUnit` (main_mission = research). "Teams" = generic_type `team` (national types `TEAM`, `THEME`). "Other structures" = institution subdivisions and unit subdivisions. **Support / administrative / teaching units are imported but do not appear in the perspective menu**: they are needed to display the organizational tree — they often have research units or institution subdivisions as children — but are not selectable perspectives.       |
+| External structures (`external = true`)  | **Store them, hide them from the perspective menu.** They are needed as relationship targets for the future tree page but have no displayable labels.                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Institution / other-structure dashboards | **One-hop expansion through org relationships** (updated 2026-07-14, supersedes the earlier "identity only" decision). Publication data per perspective group: **institutions** → documents of the members of the **research units** that are `member_of` the institution (any supervision position; no direct institution memberships, no employments until they exist); **institution subdivisions** (and unit subdivisions) → documents of their **direct members plus** the members of the units that are `member_of` **or** `part_of` the subdivision; **research units** and **teams** → documents of their direct members. |
+| Employments                              | **Model now.** Add an `Employment` table and hydrate `employmentsConnection` (already fetched by `person.graphql`, currently dropped by `PersonGraphQLClient.hydrate`).                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ---
 
@@ -501,11 +501,20 @@ Slug generation: keep the current collision-retry mechanism, with a single
   (single organization endpoint; the returned entity carries its own group).
   `refreshPerspective` must refresh organization perspectives too, not only
   Person ones.
-- `DocumentService.buildContributorUidArray`: `person` unchanged;
-  `research_unit` unchanged (members of the org);
-  `institution` / `other_structure` / `team` → same direct-membership
-  expansion (will usually be empty until members arrive or roll-up lands; the
-  "not implemented yet" institution branch disappears).
+- `DocumentService.buildContributorUidArray`: `person` unchanged; the four
+  organization groups expand to person uids through
+  `PersonDAO.fetchPeopleByOrganizationPerimeter(uid, group)`:
+  - `research_unit`, `team` → people with a direct membership to the org;
+  - `institution` → people who are members of a **research unit** that is
+    `member_of` the institution (any position, one hop). Direct institution
+    memberships and employments are **not** used (employments don't exist
+    yet);
+  - `other_structure` (institution & unit subdivisions) → people with a
+    direct membership to the subdivision, **plus** members of any unit that
+    is `member_of` or `part_of` it (one hop).
+
+  Deeper recursion through the tree stays out of scope for this issue.
+
 - `/api/documents/dataviz` and `/api/wordstream` accept the new `AgentType`
   values.
 
@@ -532,8 +541,10 @@ else → `OrganizationUnitIdentityCard` (generalized from
 `ResearchUnitIdentityCard`: labels, acronym, identifiers, descriptions, and a
 type chip following the display rule of §3 — **local type first, national type
 as a secondary mention when space allows, never the generic type**). No other
-dashboard change: identity works for all groups; document widgets simply
-render empty when the perspective has no direct members.
+dashboard change: identity works for all groups; document widgets show the
+publications of the perspective's perimeter as defined in §4 (one-hop
+expansion for institutions and subdivisions, direct members otherwise) and
+render empty when that perimeter holds no one.
 
 ### 6. Out of scope (later issues)
 
