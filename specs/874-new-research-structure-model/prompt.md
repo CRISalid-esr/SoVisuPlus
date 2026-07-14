@@ -642,7 +642,14 @@ structure: uid, slug, acronym, names, category, genericType, nationalType
 KPIs (membersCount, publicationsCount over 24 months, oaRate, halRate,
 supervising institution names). KPI aggregation happens server-side in a
 dedicated service/DAO method using grouped queries (not one perimeter query
-per structure); the client builds the flat rows and the DAG placement.
+per structure).
+
+The page consumes it through the Zustand store, per the store rules: the
+`organization` slice gains a `directory` sub-state
+(`{ structures, loading, error, fetchDirectory }`), whose action calls the
+API route; it is fetched once and reused across the two tabs and revisits
+(refetch only on explicit reload). The flat rows and the DAG placement are
+derived client-side (memoized) from the slice data.
 
 #### Structure detail page
 
