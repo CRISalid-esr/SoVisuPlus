@@ -24,8 +24,9 @@ SoVisuPlus must follow:
 3. **Replace the two-entry perspective switcher** (Researchers / Research
    units) with a **five-entry menu**: Researchers, Institutions, Research
    units, Other structures, Teams.
-4. Prepare the ground (relationships, employments) for a later issue: a page to
-   **navigate the organizational tree** and open unit dashboards from it.
+4. Add a **research structures view** (§6): a directory of all structures
+   with a flat table and a hierarchical navigation of the organizational
+   graph, following both `part_of` and `member_of` relationships.
 
 The aim is **not** to copy the whole graph exhaustively — only what the
 application needs for perspectives, dashboards, and the future tree navigation.
@@ -41,6 +42,7 @@ application needs for perspectives, dashboards, and the future tree navigation.
 | Institution / other-structure dashboards | **One-hop expansion through org relationships** (updated 2026-07-14, supersedes the earlier "identity only" decision). Publication data per perspective group: **institutions** → documents of the members of the **research units** that are `member_of` the institution (any supervision position; no direct institution memberships, no employments until they exist); **institution subdivisions** (and unit subdivisions) → documents of their **direct members plus** the members of the units that are `member_of` **or** `part_of` the subdivision; **research units** and **teams** → documents of their direct members. |
 | Employments                              | **Model now.** Add an `Employment` table and hydrate `employmentsConnection` (already fetched by `person.graphql`, currently dropped by `PersonGraphQLClient.hydrate`).                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | Authorization scopes                     | **Same one-hop expansion as the dashboards** (added 2026-07-14). Role scopes can target all four organization types: `Institution`, `ResearchUnit`, `InstitutionDivision` (institution & unit subdivisions), and a new `Team` entity type. A scope matches the people (and the documents of the people) in the organization's dashboard perimeter: institution → members of research units `member_of` it; subdivision → direct members + members of units `member_of`/`part_of` it; research unit / team → direct members. Employments still play no role.                                                                       |
+| Research structures view                 | **Flat table + hierarchical navigation** (added 2026-07-14, see §6, mockup in `SVP-mockups`). The hierarchical tab follows **both** `member_of` and `part_of`: the graph is a DAG, not a tree, so a structure may appear several times — once fully expanded under its primary placement, as dimmed reference nodes under its other parents. The structure detail page ships as a **title-only placeholder** in this issue.                                                                                                                                                                                                       |
 
 ---
 
@@ -570,10 +572,91 @@ publications of the perspective's perimeter as defined in §4 (one-hop
 expansion for institutions and subdivisions, direct members otherwise) and
 render empty when that perimeter holds no one.
 
-### 6. Out of scope (later issues)
+### 6. Research structures view
 
-- Organizational **tree navigation page** (will use the
-  `OrganizationRelationship` rows stored here).
+Added 2026-07-14. Mockup: `/home/joachim/SVP-mockups/src/app/[lang]/research-structures`
+(rendered as a static view on `http://localhost:3000/fr/research-structures`).
+The mockup wording is hardcoded French — every label goes through Lingui in
+the real implementation, and national-type chips go through
+`organizationTypeLabels.ts` (§3 display rule: raw codes are never shown).
+
+A directory of all organization structures at
+`/[lang]/research-structures`, reached from a new sidebar entry. The page
+has a title, a CSV export button, and **two tabs**:
+
+#### Flat view ("Vue à plat")
+
+A `MaterialReactTable` (same library as the documents table) listing every
+**non-external** structure — all categories, including the
+support/administrative/teaching units that the perspective menu hides.
+Columns, per the mockup:
+
+- **Structure** — acronym (bold, primary color, click → detail page) with a
+  national-type chip (translated), full name underneath (ellipsized).
+  Text filter matches acronym or name.
+- **Tutelles** — names of the supervising institutions (the structure's
+  `member_of` parents with category `institution`, external ones included);
+  multi-select filter.
+- **Membres** — direct member count.
+- **Publications** — publication count of the structure's perimeter (§4
+  one-hop rules) over the **last 24 months**, with a tooltip.
+- **OA** / **HAL** — progress-bar cells: percentage of those publications
+  that are open access / present in HAL.
+- **Détail** — link to the detail page.
+
+Pagination (25/page), global filter, column filters + reset, column
+show/hide, density and fullscreen toggles, row selection. The CSV export
+(semicolon-separated, BOM-prefixed, as in the mockup) covers the flat data.
+
+#### Hierarchical view ("Vue hiérarchique")
+
+An expandable tree table (expanded by default, sticky header, no
+pagination) with the same KPI columns, built from the stored
+`OrganizationRelationship` rows and including **external** institutions
+(they supervise units and must appear as parents).
+
+**The structure graph is a DAG, not a tree**: the view follows **both**
+`part_of` and `member_of`, so a structure appears under **every** parent it
+has. To keep the table finite each structure is fully expanded (with its
+children) under exactly **one primary placement** and appears as a
+**reference node** everywhere else:
+
+- Primary placement priority: first `part_of` parent (strong inclusion);
+  else the `member_of` parent with position `main_supervision`; else the
+  first `member_of` parent; else the structure is a root.
+- Reference nodes (mockup style): dimmed and italic, ↗ icon, national-type
+  chip plus an outlined dashed chip naming the secondary relationship
+  ("co-tutelle" for institution `member_of`, a generic "rattachement"
+  otherwise); they carry no children and no own uid in the row model
+  (`<uid>__ref__<parentUid>`), and clicking one navigates to the original
+  structure's detail page.
+- Structures with no relationships at all (the current orphans) appear as
+  roots.
+
+#### Data endpoint
+
+One request feeds both tabs: `GET /api/organizations/directory` returns the
+full structure list (~300 rows — no pagination server-side) with, per
+structure: uid, slug, acronym, names, category, genericType, nationalType
+(raw code), external, `parents: [{ parentUid, kind, position }]`, and the
+KPIs (membersCount, publicationsCount over 24 months, oaRate, halRate,
+supervising institution names). KPI aggregation happens server-side in a
+dedicated service/DAO method using grouped queries (not one perimeter query
+per structure); the client builds the flat rows and the DAG placement.
+
+#### Structure detail page
+
+`/[lang]/research-structures/[uid]` — **placeholder only in this issue**: it
+resolves the structure (404 when unknown, `__ref__` uids resolved to the
+original) and displays its title (display name, acronym, translated type
+chip). The full mockup content (hero, KPIs, members/publications/teams
+tabs, perimeter editor, sidebars) is a later issue.
+
+### 7. Out of scope (later issues)
+
+- The **full structure detail page** (hero, KPIs, members and publications
+  tabs, perimeter editor, sidebars — see mockup `[uid]/` components); this
+  issue ships only the title placeholder.
 - **Recursive roll-up** deeper than one hop (dashboards and scopes both stop
   at the direct organization relationships).
 - Structure **lifecycle** (`deleted` events, end dates).
@@ -597,4 +680,9 @@ render empty when that perimeter holds no one.
   labels/identifiers/relationships, shallow-upsert of missing parents,
   no-overwrite of existing parents, search filtered by group/external),
   `PersonDAO` membership + employment upserts.
+- Structures view (§6): unit tests for the DAG placement (primary-parent
+  priority, reference nodes under secondary parents, orphan roots, no
+  infinite expansion on multiple placements) and for the directory endpoint
+  shape; integration test for the KPI aggregation (member/publication counts
+  per structure perimeter).
 - Existing `ResearchUnit*` tests are renamed/absorbed accordingly.
