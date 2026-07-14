@@ -37,8 +37,15 @@ jest.mock('next/navigation', () => ({
 
 describe('SearchInput Component', () => {
   const mockFetchPeopleByName = jest.fn()
-  const mockFetchResearchUnitsByName = jest.fn()
+  const mockFetchOrganizationsByName = jest.fn()
   ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
+
+  const emptyGroupState = () => ({
+    organizations: [],
+    loading: false,
+    total: 0,
+    hasMore: true,
+  })
 
   const mockState = {
     person: {
@@ -56,19 +63,39 @@ describe('SearchInput Component', () => {
       hasMore: true,
       total: 1,
     },
-    researchUnit: {
-      fetchResearchUnitsByName: mockFetchResearchUnitsByName,
-      loading: false,
-      researchUnits: [
-        {
-          id: '2',
-          names: [{ value: 'Lab X', language: 'en', slug: 'lab-x' }],
-          type: 'researchUnits',
-          slug: 'research-unit:lab-x',
+    organization: {
+      fetchOrganizationsByName: mockFetchOrganizationsByName,
+      error: null,
+      byGroup: {
+        institution: {
+          organizations: [
+            {
+              uid: '3',
+              names: [{ value: 'Uni Y', language: 'en' }],
+              acronym: 'UY',
+              slug: 'org:uni-y',
+            },
+          ],
+          loading: false,
+          total: 1,
+          hasMore: true,
         },
-      ],
-      hasMore: true,
-      total: 1,
+        research_unit: {
+          organizations: [
+            {
+              uid: '2',
+              names: [{ value: 'Lab X', language: 'en' }],
+              acronym: 'LX',
+              slug: 'org:lab-x',
+            },
+          ],
+          loading: false,
+          total: 1,
+          hasMore: true,
+        },
+        other_structure: emptyGroupState(),
+        team: emptyGroupState(),
+      },
     },
     user: {
       setPerspective: jest.fn(),
@@ -113,12 +140,18 @@ describe('SearchInput Component', () => {
     expect(searchInput).toBeInTheDocument()
 
     // Simulate a click on the input to trigger the rendering of the <Paper>
+    fireEvent.focus(searchInput)
     fireEvent.change(searchInput, { target: { value: 'John' } })
 
     expect(screen.getByText(t`sidebar_search_people`)).toBeInTheDocument()
+    expect(screen.getByText(t`sidebar_search_institutions`)).toBeInTheDocument()
     expect(
       screen.getByText(t`sidebar_search_research_units`),
     ).toBeInTheDocument()
+    expect(
+      screen.getByText(t`sidebar_search_other_structures`),
+    ).toBeInTheDocument()
+    expect(screen.getByText(t`sidebar_search_teams`)).toBeInTheDocument()
   })
 
   it('fetches people on typing', async () => {
@@ -130,12 +163,14 @@ describe('SearchInput Component', () => {
     )
     await waitFor(
       () =>
-        expect(mockFetchResearchUnitsByName).toHaveBeenCalledWith({
+        expect(mockFetchOrganizationsByName).toHaveBeenCalledWith({
           searchTerm: '',
           page: 1,
+          group: 'research_unit',
         }),
       { timeout: 4000 }, // Extend timeout to wait for useEffect
     )
+    fireEvent.focus(searchInput)
     fireEvent.change(searchInput, { target: { value: 'John' } })
     await waitFor(
       () =>
@@ -148,13 +183,43 @@ describe('SearchInput Component', () => {
     )
   }, 10000)
 
-  it('fetches research units when scrolled to bottom', async () => {
+  it('fetches every organization group on typing', async () => {
+    ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
+    renderComponent()
+
+    const searchInput = screen.getByPlaceholderText(
+      t`sidebar_search_placeholder`,
+    )
+    fireEvent.focus(searchInput)
+    fireEvent.change(searchInput, { target: { value: 'Lab' } })
+
+    await waitFor(
+      () => {
+        for (const group of [
+          'institution',
+          'research_unit',
+          'other_structure',
+          'team',
+        ]) {
+          expect(mockFetchOrganizationsByName).toHaveBeenCalledWith({
+            searchTerm: 'Lab',
+            page: 1,
+            group,
+          })
+        }
+      },
+      { timeout: 4000 },
+    )
+  }, 10000)
+
+  it('fetches the next research unit page when scrolled to bottom', async () => {
     ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
     renderComponent()
     const searchInput = screen.getByPlaceholderText(
       'sidebar_search_placeholder',
     )
     expect(searchInput).toBeInTheDocument()
+    fireEvent.focus(searchInput)
     fireEvent.change(searchInput, { target: { value: 'Lab X' } })
 
     const researchGroup = screen
@@ -175,13 +240,14 @@ describe('SearchInput Component', () => {
 
     await waitFor(
       () =>
-        expect(mockFetchResearchUnitsByName).toHaveBeenCalledWith({
+        expect(mockFetchOrganizationsByName).toHaveBeenCalledWith({
           searchTerm: 'Lab X',
-          page: 1,
+          page: 2,
+          group: 'research_unit',
         }),
       { timeout: 4000 },
     )
-  })
+  }, 10000)
 
   it('toggles chip selection on click', () => {
     ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
@@ -190,6 +256,7 @@ describe('SearchInput Component', () => {
       'sidebar_search_placeholder',
     )
     expect(searchInput).toBeInTheDocument()
+    fireEvent.focus(searchInput)
     fireEvent.change(searchInput, { target: { value: 'John' } })
 
     const peopleChip = screen.getByText(t`sidebar_search_people`)
@@ -208,16 +275,21 @@ describe('SearchInput Component', () => {
       'sidebar_search_placeholder',
     )
     expect(searchInput).toBeInTheDocument()
+    fireEvent.focus(searchInput)
     fireEvent.change(searchInput, { target: { value: 'John Doe' } })
     // Check for grouped headers
     expect(
       screen.getByText(`${t`sidebar_search_people`} (1)`),
     ).toBeInTheDocument()
     expect(
+      screen.getByText(`${t`sidebar_search_institutions`} (1)`),
+    ).toBeInTheDocument()
+    expect(
       screen.getByText(`${t`sidebar_search_research_units`} (1)`),
     ).toBeInTheDocument()
 
     // Check for options
+    expect(screen.getByText('Uni Y')).toBeInTheDocument()
     expect(screen.getByText('Lab X')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()
   })
@@ -229,6 +301,7 @@ describe('SearchInput Component', () => {
       'sidebar_search_placeholder',
     )
     expect(searchInput).toBeInTheDocument()
+    fireEvent.focus(searchInput)
     fireEvent.change(searchInput, { target: { value: 'John Doe' } })
 
     const peopleItem = screen.getByText('John Doe')
@@ -241,13 +314,14 @@ describe('SearchInput Component', () => {
     )
   })
 
-  it('sets perspective to research unit on selecting a research unit menu item', () => {
+  it('sets perspective to organization on selecting an organization menu item', () => {
     ;(usePathname as jest.Mock).mockReturnValue('/fr/documents')
     renderComponent()
     const searchInput = screen.getByPlaceholderText(
       'sidebar_search_placeholder',
     )
     expect(searchInput).toBeInTheDocument()
+    fireEvent.focus(searchInput)
     fireEvent.change(searchInput, { target: { value: 'Lab X' } })
 
     const researchUnitItem = screen.getByText('Lab X')
@@ -255,7 +329,7 @@ describe('SearchInput Component', () => {
     // check if perpective param is set
     expect(pushMock).toHaveBeenCalledTimes(1)
     expect(pushMock).toHaveBeenCalledWith(
-      expect.stringContaining('perspective=research-unit%3Alab-x'),
+      expect.stringContaining('perspective=org%3Alab-x'),
       { scroll: false },
     )
   })

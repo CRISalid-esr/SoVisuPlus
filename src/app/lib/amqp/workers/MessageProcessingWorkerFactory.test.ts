@@ -1,8 +1,11 @@
 import { MessageProcessingWorkerFactory } from '@/lib/amqp/workers/MessageProcessingWorkerFactory'
 import { PersonWorker } from '@/lib/amqp/workers/PersonWorker'
-import { ResearchUnitWorker } from '@/lib/amqp/workers/ResearchUnitWorker'
+import { OrganizationUnitWorker } from '@/lib/amqp/workers/OrganizationUnitWorker'
 import { AMQPPersonMessage } from '@/types/AMQPPersonMessage'
-import { AMQPResearchUnitMessage } from '@/types/AMQPResearchUnitMessage'
+import {
+  AMQPOrganizationUnitMessage,
+  ORGANIZATION_MESSAGE_TYPES,
+} from '@/types/AMQPOrganizationUnitMessage'
 import { DocumentWorker } from '@/lib/amqp/workers/DocumentWorker'
 import { HarvestingStateEventWorker } from '@/lib/amqp/workers/HarvestingStateEventWorker'
 import { HarvestingResultEventWorker } from '@/lib/amqp/workers/HarvestingResultEventWorker'
@@ -41,24 +44,46 @@ describe('MessageProcessingWorkerFactory', () => {
     expect(worker).toBeInstanceOf(PersonWorker)
   })
 
-  it('should create a ResearchUnitWorker for unit messages with main_mission=research', () => {
-    const message: AMQPResearchUnitMessage = {
+  it.each(ORGANIZATION_MESSAGE_TYPES)(
+    'should create an OrganizationUnitWorker for %s messages',
+    (type) => {
+      const message: AMQPOrganizationUnitMessage = {
+        type,
+        event: 'updated',
+        fields: {
+          uid: 'org-123',
+          national_type: 'UMR',
+          long_labels: [{ value: 'Some Structure', language: 'en' }],
+          short_labels: [{ value: 'ST', language: 'en' }],
+          descriptions: [{ value: 'A description', language: 'en' }],
+          identifiers: [{ type: 'nns', value: '12345' }],
+        },
+      }
+
+      const worker = factory.createWorker(message)
+
+      expect(worker).toBeInstanceOf(OrganizationUnitWorker)
+    },
+  )
+
+  it('should create an OrganizationUnitWorker for unit messages regardless of main_mission', () => {
+    const message: AMQPOrganizationUnitMessage = {
       type: 'unit',
       event: 'updated',
       fields: {
         uid: 'rs-123',
-        national_type: 'UMR',
-        long_labels: [{ value: 'Research Unit', language: 'en' }],
-        short_labels: [{ value: 'RS', language: 'en' }],
+        national_type: 'UFR',
+        long_labels: [{ value: 'Teaching Unit', language: 'en' }],
+        short_labels: [{ value: 'TU', language: 'en' }],
         descriptions: [{ value: 'A description', language: 'en' }],
         identifiers: [{ type: 'nns', value: '12345' }],
-        main_mission: 'research',
+        main_mission: 'teaching',
       },
     }
 
     const worker = factory.createWorker(message)
 
-    expect(worker).toBeInstanceOf(ResearchUnitWorker)
+    expect(worker).toBeInstanceOf(OrganizationUnitWorker)
   })
 
   it('should create a DocumentWorker for document messages', () => {

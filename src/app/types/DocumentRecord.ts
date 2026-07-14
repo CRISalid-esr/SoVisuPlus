@@ -6,7 +6,7 @@ import {
 import { Literal } from '@/types/Literal'
 import { IAgent } from '@/types/IAgent'
 import { Person } from '@/types/Person'
-import { ResearchUnit } from '@/types/ResearchUnit'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 import {
   SourceRecordType,
@@ -106,7 +106,7 @@ export class DocumentRecord {
         const { memberships } = perspective as Person
 
         const collections = memberships
-          .map(({ researchUnit: { acronym } }) => acronym)
+          .map(({ organizationUnit: { acronym } }) => acronym)
           .filter((acronym) =>
             acronym ? this.halCollectionCodes.includes(acronym) : false,
           )
@@ -115,7 +115,7 @@ export class DocumentRecord {
         return collections.length > 0 ? collections : null
       }
       case 'research_unit': {
-        const { acronym } = perspective as ResearchUnit
+        const { acronym } = perspective as OrganizationUnit
 
         return acronym && this.halCollectionCodes.includes(acronym)
           ? [acronym]

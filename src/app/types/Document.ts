@@ -143,7 +143,11 @@ class Document implements Authorizable {
   private computeScope() {
     const rs =
       this.contributions
-        ?.flatMap((c) => c.person?.memberships?.map((m) => m.researchUnit?.uid))
+        ?.flatMap((c) =>
+          c.person?.memberships
+            ?.filter((m) => m.organizationUnit?.category === 'research_unit')
+            .map((m) => m.organizationUnit?.uid),
+        )
         ?.filter((x): x is string => !!x) ?? []
     const persons =
       this.contributions

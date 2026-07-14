@@ -45,7 +45,7 @@ export type DocumentData = {
       uid: string
       displayName: string | null
       memberships: {
-        researchUnit: {
+        organizationUnit: {
           uid: string
         }
       }[]
@@ -123,7 +123,7 @@ const DashboardPage = () => {
                 uid: string
                 displayName: string | null
                 memberships: {
-                  researchUnit: {
+                  organizationUnit: {
                     uid: string
                   }
                 }[]

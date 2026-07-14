@@ -69,7 +69,8 @@ function filterData(
             })
           } else if (currentPerspective?.type == 'research_unit') {
             const isMember = contributor.memberships.some(
-              ({ researchUnit }) => researchUnit.uid == currentPerspective?.uid,
+              ({ organizationUnit }) =>
+                organizationUnit.uid == currentPerspective?.uid,
             )
             if (!isMember) {
               contribution.affiliations.map((affiliation) => {

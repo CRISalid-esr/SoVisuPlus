@@ -39,7 +39,7 @@ The listener is a standalone Node.js process that starts three concurrent sub-sy
 Subscribes to RabbitMQ and processes inbound messages. These messages are emitted by external systems (an ETL pipeline, etc.) whenever a Person, ResearchUnit, or Document is created, updated, or deleted. Each message is dispatched to a typed worker via `MessageProcessingWorkerFactory` (`src/app/lib/amqp/workers/MessageProcessingWorkerFactory.ts`):
 
 - `PersonWorker` — syncs the person and their data to the Neo4j graph via `PersonGraphQLClient`
-- `ResearchUnitWorker` — syncs the research unit
+- `OrganizationUnitWorker` — syncs organization structures (institutions, units, subdivisions, teams)
 - `DocumentWorker` — syncs the document via `DocumentGraphQLClient`
 - `HarvestingStateEventWorker` / `HarvestingResultEventWorker` — handle harvesting lifecycle events
 
@@ -104,13 +104,13 @@ const { currentPerspective } = useStore((state) => state.user)
 
 Each slice owns a top-level key on the store:
 
-| Slice file             | Key            | What it manages                                                           |
-| ---------------------- | -------------- | ------------------------------------------------------------------------- |
-| `documentSlice.ts`     | `document`     | Document list, selected document, pagination, filters, merge/edit actions |
-| `personSlice.ts`       | `person`       | People search results and pagination (used for autocomplete)              |
-| `researchUnitSlice.ts` | `researchUnit` | Research-unit search results and pagination                               |
-| `userSlice.ts`         | `user`         | Authenticated user profile, current perspective (Person or ResearchUnit)  |
-| `harvestingSlice.ts`   | `harvesting`   | Harvesting status and result counters, keyed by `personUid → platform`    |
+| Slice file                 | Key            | What it manages                                                           |
+| -------------------------- | -------------- | ------------------------------------------------------------------------- |
+| `documentSlice.ts`         | `document`     | Document list, selected document, pagination, filters, merge/edit actions |
+| `personSlice.ts`           | `person`       | People search results and pagination (used for autocomplete)              |
+| `organizationUnitSlice.ts` | `organization` | Organization search results and pagination, keyed by perspective group    |
+| `userSlice.ts`             | `user`         | Authenticated user profile, current perspective (Person or ResearchUnit)  |
+| `harvestingSlice.ts`       | `harvesting`   | Harvesting status and result counters, keyed by `personUid → platform`    |
 
 **Rules:**
 

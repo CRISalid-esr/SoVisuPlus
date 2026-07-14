@@ -2,9 +2,10 @@ import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 import prisma from '@/lib/daos/prisma'
 import { PersonMembership } from '@/types/PersonMembership'
-import { ResearchUnit } from '@/types/ResearchUnit'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { Literal } from '@/types/Literal'
-import { ResearchUnitDAO } from '@/lib/daos/ResearchUnitDAO'
+import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
+import { OrganizationCategory, OrganizationGenericType } from '@prisma/client'
 import {
   PersonIdentifier,
   PersonIdentifierType,
@@ -27,13 +28,13 @@ describe('PersonDAO Integration Tests', () => {
     [new PersonIdentifier(PersonIdentifierType.orcid, '0000-0001-2345-6789')],
     [
       new PersonMembership(
-        new ResearchUnit(
+        new OrganizationUnit(
           'local-unit',
           'ACR',
           [new Literal('JD Laboratory', 'en')],
           [new Literal('Laboratory of John Doe', 'en')],
-          'ACR_signature',
-          [],
+          OrganizationCategory.research_unit,
+          OrganizationGenericType.unit,
         ),
         null,
         null,
@@ -62,17 +63,18 @@ describe('PersonDAO Integration Tests', () => {
   })
 
   test('should create a new person with memberships', async () => {
-    const researchUnitDAO = new ResearchUnitDAO()
-    const researchUnit = await researchUnitDAO.createOrUpdateResearchUnit(
-      new ResearchUnit(
-        'local-unit',
-        'ACR',
-        [new Literal('JD Laboratory', 'en')],
-        [new Literal('Laboratory of John Doe', 'en')],
-        'ACR_signature',
-        [],
-      ),
-    )
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    const organizationUnit =
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(
+        new OrganizationUnit(
+          'local-unit',
+          'ACR',
+          [new Literal('JD Laboratory', 'en')],
+          [new Literal('Laboratory of John Doe', 'en')],
+          OrganizationCategory.research_unit,
+          OrganizationGenericType.unit,
+        ),
+      )
     const dbPerson = await personDAO.createOrUpdatePerson(person)
 
     expect(dbPerson).toHaveProperty('id')
@@ -81,13 +83,13 @@ describe('PersonDAO Integration Tests', () => {
 
     const savedMemberships = await prisma.membership.findMany({
       where: { personId: dbPerson.id },
-      include: { researchUnit: true },
+      include: { organizationUnit: true },
     })
 
     expect(savedMemberships).toHaveLength(1)
     expect(savedMemberships[0]).toMatchObject({
       personId: dbPerson.id,
-      researchUnitId: researchUnit.id,
+      organizationUnitId: organizationUnit.id,
       positionCode: 'MCF',
     })
   })

@@ -6,7 +6,11 @@ export class DataEvent extends EventBase {
   readonly type = 'data'
 
   constructor(
-    public readonly objectType: 'Document' | 'Person' | 'ResearchUnit' | 'User',
+    public readonly objectType:
+      | 'Document'
+      | 'Person'
+      | 'OrganizationUnit'
+      | 'User',
     public readonly objectUid: string,
     public readonly eventType: DataEventType,
     public readonly objectLabels: Record<string, string> = {},

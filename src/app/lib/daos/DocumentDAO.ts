@@ -914,9 +914,9 @@ export class DocumentDAO extends AbstractDAO {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchUnit: {
+                    organizationUnit: {
                       include: {
-                        names: true,
+                        labels: true,
                         identifiers: true,
                         descriptions: true,
                       },
@@ -972,7 +972,7 @@ export class DocumentDAO extends AbstractDAO {
           uid: string
           displayName: string | null
           memberships: {
-            researchUnit: {
+            organizationUnit: {
               uid: string
             }
           }[]
@@ -1006,7 +1006,7 @@ export class DocumentDAO extends AbstractDAO {
                 displayName: true,
                 memberships: {
                   select: {
-                    researchUnit: {
+                    organizationUnit: {
                       select: {
                         uid: true,
                       },
@@ -1114,9 +1114,9 @@ export class DocumentDAO extends AbstractDAO {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchUnit: {
+                    organizationUnit: {
                       include: {
-                        names: true,
+                        labels: true,
                         descriptions: true,
                         identifiers: true,
                       },

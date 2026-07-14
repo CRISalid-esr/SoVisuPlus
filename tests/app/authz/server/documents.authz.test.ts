@@ -4,7 +4,7 @@ import {
   assignRoleToPersonUid,
   createDocumentWithContributors,
   createPersonWithUser,
-  createResearchUnit,
+  createOrganizationUnit,
   resetAuthzDb,
   seedRoles,
 } from '../helpers/db'
@@ -49,7 +49,7 @@ describe('AuthZ (Document) – integration', () => {
   })
 
   test('person-scoped merger can merge in-scope document, not out-of-scope', async () => {
-    const rs = await createResearchUnit('RS-1', 'RS ONE')
+    const rs = await createOrganizationUnit('RS-1', 'RS ONE')
     const { person: alice } = await createPersonWithUser('local-alice')
     const { person: bob } = await createPersonWithUser('local-bob')
 
@@ -73,7 +73,7 @@ describe('AuthZ (Document) – integration', () => {
   })
 
   test('RS-scoped merger can merge any doc that involves that RS', async () => {
-    const rs = await createResearchUnit('RS-42', 'RS FortyTwo')
+    const rs = await createOrganizationUnit('RS-42', 'RS FortyTwo')
 
     const { person: p1 } = await createPersonWithUser('local-p1')
     const { person: p2 } = await createPersonWithUser('local-p2')
@@ -150,7 +150,7 @@ describe('AuthZ (Document) – integration', () => {
   })
   test('multi-type scopes work as OR across rules', async () => {
     const { person: a } = await createPersonWithUser('local-a')
-    const rs = await createResearchUnit('RS-X', 'RS X')
+    const rs = await createOrganizationUnit('RS-X', 'RS X')
     await addMembership(a.id, rs.id)
 
     const docByA = await createDocumentWithContributors('doc-a', [a.id])

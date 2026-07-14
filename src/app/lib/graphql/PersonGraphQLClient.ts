@@ -4,9 +4,14 @@ import { Person } from '@/types/Person'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
 import { ExternalPerson } from '@/types/ExternalPerson'
 import { InternalPerson } from '@/types/InternalPerson'
-import { ResearchUnit } from '@/types/ResearchUnit'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { Literal } from '@/types/Literal'
-import { researchUnitIdentifierTypeFromString } from '@/types/ResearchUnitIdentifier'
+import { organizationIdentifierTypeFromString } from '@/types/OrganizationUnitIdentifier'
+import {
+  categoryFromGraphNode,
+  genericTypeFromCategory,
+} from '@/lib/graphql/organizationHydration'
+import { PersonMembership } from '@/types/PersonMembership'
 import { SourcePerson } from '@/types/SourcePerson'
 import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
 
@@ -51,10 +56,12 @@ interface GraphOrganizationName {
 
 interface GraphOrganization {
   acronym?: string
-  signature?: string
   identifiers: GraphOrganizationIdentifier[]
   names: GraphOrganizationName[]
-  type: string
+  types?: string[]
+  generic_type?: string
+  national_type?: string | null
+  external?: boolean
   uid: string
 }
 
@@ -171,28 +178,7 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
           }
         })
         .filter((identifier) => identifier !== null), // Remove null entries
-      personData.membershipsConnection?.edges?.map((edge) => ({
-        researchUnit: new ResearchUnit(
-          edge.node.uid,
-          edge.node.acronym ?? null,
-          edge.node.names.map((name) =>
-            Literal.fromObject({
-              language: name.language ?? null,
-              value: name.value,
-            }),
-          ),
-          [],
-          edge.node.signature ?? null,
-          edge.node.identifiers.map((identifier) => ({
-            type: researchUnitIdentifierTypeFromString(identifier.type),
-            value: identifier.value,
-          })),
-          'research_unit',
-        ),
-        startDate: edge.properties.start_date ?? null,
-        endDate: edge.properties.end_date ?? null,
-        positionCode: edge.properties.position_code ?? null,
-      })) ?? [],
+      this.hydrateMemberships(personData.membershipsConnection),
     )
 
     person.records = personData.recorded_by.map(
@@ -221,5 +207,63 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
     )
 
     return person
+  }
+
+  /**
+   * Hydrate membership edges into PersonMembership objects.
+   * Edges whose organization category cannot be determined are skipped.
+   */
+  private hydrateMemberships(
+    connection: GraphMembershipConnection | undefined,
+  ): PersonMembership[] {
+    return (
+      connection?.edges
+        ?.map((edge) => {
+          const organizationUnit = this.hydrateOrganization(edge.node)
+          if (!organizationUnit) {
+            return null
+          }
+          return new PersonMembership(
+            organizationUnit,
+            edge.properties.start_date ?? null,
+            edge.properties.end_date ?? null,
+            edge.properties.position_code ?? null,
+          )
+        })
+        .filter((membership) => membership !== null) ?? []
+    )
+  }
+
+  private hydrateOrganization(
+    node: GraphOrganization,
+  ): OrganizationUnit | null {
+    const category = categoryFromGraphNode(node.types, node.generic_type)
+    if (!category) {
+      console.error(
+        `Cannot determine category of organization ${node.uid} ` +
+          `(labels: [${node.types?.join(', ') ?? ''}], generic_type: ${node.generic_type ?? 'unknown'}), skipping`,
+      )
+      return null
+    }
+    return new OrganizationUnit(
+      node.uid,
+      node.acronym ?? null,
+      node.names.map((name) =>
+        Literal.fromObject({
+          language: name.language ?? null,
+          value: name.value,
+        }),
+      ),
+      [],
+      category,
+      genericTypeFromCategory(category),
+      node.national_type ?? null,
+      node.identifiers.map((identifier) => ({
+        type: organizationIdentifierTypeFromString(identifier.type),
+        value: identifier.value,
+      })),
+      null,
+      node.external ?? false,
+    )
   }
 }

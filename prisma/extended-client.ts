@@ -9,6 +9,7 @@ import {
   DocumentRecord,
   DocumentState,
   DocumentTitle,
+  Employment,
   HalDeposit,
   HalDepositFile,
   HalSubmitType,
@@ -20,13 +21,9 @@ import {
   Permission,
   Person,
   PersonIdentifier,
+  Prisma,
   PrismaClient,
   PublicationIdentifier,
-  ResearchUnit,
-  ResearchUnitDescription,
-  ResearchUnitIdentifier,
-  ResearchUnitIdentifierType,
-  ResearchUnitName,
   Role,
   RolePermission,
   SourceContribution,
@@ -39,15 +36,15 @@ import {
 } from '@prisma/client'
 const prisma = new PrismaClient()
 
-export type ResearchUnitIdentifierWithRelations = ResearchUnitIdentifier & {
-  type: ResearchUnitIdentifierType
-}
+export const organizationUnitInclude = {
+  labels: true,
+  descriptions: true,
+  identifiers: true,
+} satisfies Prisma.OrganizationUnitInclude
 
-export type ResearchUnitWithRelations = ResearchUnit & {
-  names: ResearchUnitName[]
-  descriptions: ResearchUnitDescription[]
-  identifiers: ResearchUnitIdentifierWithRelations[]
-}
+export type OrganizationUnitWithRelations = Prisma.OrganizationUnitGetPayload<{
+  include: typeof organizationUnitInclude
+}>
 
 export type ContributionWithRelations = Contribution & {
   person: PersonWithRelations
@@ -111,7 +108,11 @@ export type UserRoleWithRelations = UserRole & {
 }
 
 export type MembershipWithRelations = Membership & {
-  researchUnit: ResearchUnitWithRelations
+  organizationUnit: OrganizationUnitWithRelations
+}
+
+export type EmploymentWithRelations = Employment & {
+  organizationUnit: OrganizationUnitWithRelations
 }
 
 export type SourcePersonWithRelations = SourcePerson & {
@@ -121,6 +122,7 @@ export type SourcePersonWithRelations = SourcePerson & {
 export type PersonWithRelations = Person & {
   identifiers: PersonIdentifierWithRelations[]
   memberships: MembershipWithRelations[]
+  employments?: EmploymentWithRelations[]
   records: SourcePersonWithRelations[]
 }
 

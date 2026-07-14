@@ -1,7 +1,10 @@
 import { AMQPMessage } from '@/types/AMQPMessage'
 import { AMQPPersonMessage } from '@/types/AMQPPersonMessage'
 import { AMQPDocumentMessage } from '@/types/AMQPDocumentMessage'
-import { AMQPResearchUnitMessage } from '@/types/AMQPResearchUnitMessage'
+import {
+  AMQPOrganizationUnitMessage,
+  ORGANIZATION_MESSAGE_TYPES,
+} from '@/types/AMQPOrganizationUnitMessage'
 import { AMQPHarvestingStateEventMessage } from '@/types/AMQPHarvestingStateEventMessage'
 import { AMQPHarvestingResultEventMessage } from '@/types/AMQPHarvestingResultEventMessage'
 import { AMQPChangeEventMessage } from '@/types/AMQPChangeEventMessage'
@@ -9,11 +12,10 @@ import { AMQPChangeEventMessage } from '@/types/AMQPChangeEventMessage'
 export const isPersonMessage = (msg: AMQPMessage): msg is AMQPPersonMessage =>
   msg.type === 'person'
 
-export const isResearchUnitMessage = (
+export const isOrganizationUnitMessage = (
   msg: AMQPMessage,
-): msg is AMQPResearchUnitMessage =>
-  msg.type === 'unit' &&
-  (msg as AMQPResearchUnitMessage).fields?.main_mission === 'research'
+): msg is AMQPOrganizationUnitMessage =>
+  (ORGANIZATION_MESSAGE_TYPES as readonly string[]).includes(msg.type)
 
 export const isDocumentMessage = (
   msg: AMQPMessage,

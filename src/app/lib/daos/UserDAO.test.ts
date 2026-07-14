@@ -132,22 +132,10 @@ describe('UserDAO', () => {
               },
             },
             memberships: {
-              select: {
-                startDate: true,
-                endDate: true,
-                positionCode: true,
-                id: true,
-                personId: true,
-                researchUnitId: true,
-                researchUnit: {
-                  select: {
-                    uid: true,
-                    acronym: true,
-                    signature: true,
-                    slug: true,
-                    external: true,
-                    id: true,
-                    names: true,
+              include: {
+                organizationUnit: {
+                  include: {
+                    labels: true,
                     descriptions: true,
                     identifiers: true,
                   },
@@ -232,24 +220,12 @@ describe('UserDAO', () => {
               },
             },
             memberships: {
-              select: {
-                startDate: true,
-                endDate: true,
-                id: true,
-                personId: true,
-                positionCode: true,
-                researchUnitId: true,
-                researchUnit: {
-                  select: {
-                    uid: true,
-                    id: true,
-                    acronym: true,
+              include: {
+                organizationUnit: {
+                  include: {
+                    labels: true,
                     descriptions: true,
                     identifiers: true,
-                    names: true,
-                    signature: true,
-                    slug: true,
-                    external: true,
                   },
                 },
               },

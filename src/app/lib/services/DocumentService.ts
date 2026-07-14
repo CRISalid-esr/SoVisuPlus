@@ -163,15 +163,17 @@ export class DocumentService {
       case 'person':
         contributorUids = contributorUid ? [contributorUid] : []
         break
+      case 'institution':
       case 'research_unit':
+      case 'other_structure':
+      case 'team':
+        // Direct-membership expansion. Hierarchical roll-up (institution →
+        // member units → people) is deferred to the tree-navigation issue.
         contributorUids = (
           contributorUid
-            ? await this.personDAO.fetchPeopleByResearchUnitUid(contributorUid)
+            ? await this.personDAO.fetchPeopleByOrganizationUid(contributorUid)
             : []
         ).map((person) => person.uid)
-        break
-      case 'institution':
-        console.error('Institution filter not implemented yet')
         break
     }
 
@@ -241,7 +243,7 @@ export class DocumentService {
                 uid: string
                 displayName: string | null
                 memberships: {
-                  researchUnit: {
+                  organizationUnit: {
                     uid: string
                   }
                 }[]

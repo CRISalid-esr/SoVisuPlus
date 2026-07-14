@@ -958,9 +958,9 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchUnit: {
+                    organizationUnit: {
                       include: {
-                        names: true,
+                        labels: true,
                         identifiers: true,
                         descriptions: true,
                       },
@@ -1081,9 +1081,9 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchUnit: {
+                    organizationUnit: {
                       include: {
-                        names: true,
+                        labels: true,
                         identifiers: true,
                         descriptions: true,
                       },
@@ -1199,9 +1199,9 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchUnit: {
+                    organizationUnit: {
                       include: {
-                        names: true,
+                        labels: true,
                         identifiers: true,
                         descriptions: true,
                       },
@@ -1321,9 +1321,9 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchUnit: {
+                    organizationUnit: {
                       include: {
-                        names: true,
+                        labels: true,
                         identifiers: true,
                         descriptions: true,
                       },
@@ -1433,7 +1433,7 @@ describe('DocumentDAO', () => {
                 displayName: true,
                 memberships: {
                   select: {
-                    researchUnit: {
+                    organizationUnit: {
                       select: {
                         uid: true,
                       },
@@ -1541,9 +1541,9 @@ describe('DocumentDAO', () => {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchUnit: {
+                    organizationUnit: {
                       include: {
-                        names: true,
+                        labels: true,
                         identifiers: true,
                         descriptions: true,
                       },

@@ -1,8 +1,13 @@
-import { Person as DbPerson, PrismaClient } from '@prisma/client'
+import {
+  Person as DbPerson,
+  PrismaClient,
+  OrganizationCategory,
+  OrganizationGenericType,
+} from '@prisma/client'
 import { Person } from '@/types/Person'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { PersonMembership } from '@/types/PersonMembership'
-import { ResearchUnit } from '@/types/ResearchUnit'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { Literal } from '@/types/Literal'
 import {
   PersonIdentifier,
@@ -19,14 +24,16 @@ jest.mock('@prisma/client', () => {
   // avoid PersonIdentifierType to be mocked
   const actualPrismaClient: PrismaClient = jest.requireActual('@prisma/client')
 
-  const mockResearchUnitFindUnique = jest.fn()
+  const mockOrganizationUnitFindUnique = jest.fn()
 
-  mockResearchUnitFindUnique.mockResolvedValue({
+  mockOrganizationUnitFindUnique.mockResolvedValue({
     id: 1,
-    slug: 'local-unit',
-    type: 'ACR',
-    names: [{ value: 'JD Laboratory', language: 'en' }],
+    uid: 'local-unit',
+    slug: 'org:acr',
+    acronym: 'ACR',
+    labels: [{ kind: 'long', value: 'JD Laboratory', language: 'en' }],
     descriptions: [{ value: 'Laboratory of John Doe', language: 'en' }],
+    identifiers: [],
   })
 
   const mockPrismaClient = {
@@ -49,8 +56,8 @@ jest.mock('@prisma/client', () => {
     membership: {
       upsert: jest.fn(),
     },
-    researchUnit: {
-      findUnique: mockResearchUnitFindUnique,
+    organizationUnit: {
+      findUnique: mockOrganizationUnitFindUnique,
     },
   }
 
@@ -77,13 +84,13 @@ describe('PersonDAO', () => {
     [new PersonIdentifier(PersonIdentifierType.orcid, '0000-0001-2345-6789')],
     [
       new PersonMembership(
-        new ResearchUnit(
+        new OrganizationUnit(
           'local-unit',
           'ACR',
           [new Literal('JD Laboratory', 'en')],
           [new Literal('Laboratory of John Doe', 'en')],
-          'ACR_signature',
-          [],
+          OrganizationCategory.research_unit,
+          OrganizationGenericType.unit,
         ),
       ),
     ],
@@ -160,9 +167,9 @@ describe('PersonDAO', () => {
 
     expect(mockPrisma.membership.upsert).toHaveBeenCalledWith({
       where: {
-        personId_researchUnitId: {
+        personId_organizationUnitId: {
           personId: 1,
-          researchUnitId: 1,
+          organizationUnitId: 1,
         },
       },
       update: {
@@ -172,7 +179,7 @@ describe('PersonDAO', () => {
       },
       create: {
         personId: 1,
-        researchUnitId: 1,
+        organizationUnitId: 1,
         endDate: undefined,
         positionCode: undefined,
         startDate: undefined,

@@ -7,7 +7,7 @@ import HalStatusCellBadge, { HalStatusCellType } from './HalStatusCellBadge'
 import AttachFileOffIcon from '@/app/theme/icons/AttachFileOffIcon'
 import { isPerson, Person } from '@/types/Person'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
-import { isResearchUnit, ResearchUnit } from '@/types/ResearchUnit'
+import { isResearchUnit, OrganizationUnit } from '@/types/OrganizationUnit'
 
 const halSubmitTypeToHalSubmitTypeIcon = (halSubmitType: string | null) => {
   switch (halSubmitType) {
@@ -41,7 +41,7 @@ const HalStatusCell = ({ row }: { row: { original: Document } }) => {
       )
     }
     if (isResearchUnit(currentPerspective)) {
-      const unit = currentPerspective as ResearchUnit
+      const unit = currentPerspective as OrganizationUnit
       return unit.hasIdHAL() ? (
         <HalStatusCellBadge
           type={HalStatusCellType.OutsideHal}
