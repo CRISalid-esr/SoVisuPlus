@@ -326,6 +326,8 @@ function TreeTable({
     columns,
     data: treeData,
     enableExpanding: true,
+    // closed by default, opened level by level (no expand-all shortcut)
+    enableExpandAll: false,
     getSubRows: (row) => row.subRows,
     getRowId: (row) => row.uid,
     enableColumnResizing: true,
@@ -335,7 +337,7 @@ function TreeTable({
     layoutMode: 'grid',
     localization: Localization[lang],
     initialState: {
-      expanded: true,
+      expanded: {},
     },
     muiTablePaperProps: { sx: { width: '100%' } },
     muiTableContainerProps: { sx: { width: '100%', maxHeight: '70vh' } },

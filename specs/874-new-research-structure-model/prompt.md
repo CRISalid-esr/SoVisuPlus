@@ -641,8 +641,9 @@ show/hide, density and fullscreen toggles, row selection. The CSV export
 
 #### Hierarchical view ("Vue hiérarchique")
 
-An expandable tree table (expanded by default, sticky header, no
-pagination) with the same KPI columns, built from the stored
+An expandable tree table (collapsed by default and opened level by level —
+no expand-all shortcut; sticky header, no pagination) with the same KPI
+columns, built from the stored
 `OrganizationRelationship` rows. External institutions appear as roots when
 the **Include external** switch is on.
 
