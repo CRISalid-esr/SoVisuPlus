@@ -674,14 +674,16 @@ full structure list (~300 rows — no pagination server-side, external
 structures included since the switch filters client-side) with, per
 structure: uid, slug, acronym, names, category, genericType, nationalType
 (raw code), external, `parents: [{ parentUid, kind, position }]`, and the KPIs
-(membersCount, publicationsCount over 24 months, oaRate, halRate,
-supervising institution names). KPI aggregation happens server-side in a
-dedicated service/DAO method using grouped queries (not one perimeter query
-per structure).
+(membersCount, publicationsCount over 24 months, oaRate, halRate). KPI
+aggregation happens server-side in a dedicated service method over three bulk
+queries (units + parents, membership pairs, 24-month document stats — not one
+perimeter query per structure). The supervising institution names (Tutelles)
+are resolved client-side by looking the `parents` uids up in the same
+payload, so they display regardless of the external switch.
 
 The page consumes it through the Zustand store, per the store rules: the
 `organization` slice gains a `directory` sub-state
-(`{ structures, loading, error, fetchDirectory }`), whose action calls the
+(`{ structures, loading, loaded, error, fetchDirectory }`), whose action calls the
 API route; it is fetched once and reused across the two tabs and revisits
 (refetch only on explicit reload). The flat rows and the DAG placement are
 derived client-side (memoized) from the slice data.
@@ -730,9 +732,9 @@ is a search-UX choice, not an access restriction.
   labels/identifiers/relationships, shallow-upsert of missing parents,
   no-overwrite of existing parents, search filtered by group/external),
   `PersonDAO` membership + employment upserts.
-- Structures view (§6): unit tests for the DAG placement (primary-parent
-  priority, reference nodes under secondary parents, orphan roots, no
-  infinite expansion on multiple placements) and for the directory endpoint
-  shape; integration test for the KPI aggregation (member/publication counts
-  per structure perimeter).
+- Structures view (§6): unit tests for the row building and DAG placement
+  (primary-parent priority, reference nodes under secondary parents, orphan
+  roots, visible-set recomputation, cycle rescue); integration test for the
+  directory service (payload shape and KPI aggregation — perimeter members,
+  24-month window, OA/HAL rates, institution inheritance).
 - Existing `ResearchUnit*` tests are renamed/absorbed accordingly.
