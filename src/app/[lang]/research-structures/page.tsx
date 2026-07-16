@@ -3,6 +3,7 @@
 import { t } from '@lingui/core/macro'
 import * as Lingui from '@lingui/core'
 import AccountTreeIcon from '@mui/icons-material/AccountTree'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import FileDownloadIcon from '@mui/icons-material/FileDownload'
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff'
 import TableRowsIcon from '@mui/icons-material/TableRows'
@@ -330,12 +331,18 @@ function TreeTable({
     enableExpandAll: false,
     getSubRows: (row) => row.subRows,
     getRowId: (row) => row.uid,
-    // chevron points right when the row is closed, down when it is open
+    // Own the chevron so MRT's built-in rotation doesn't stack on ours:
+    // points down when open, right when closed; disabled rows keep the closed
+    // orientation (getIsExpanded() is false).
     muiExpandButtonProps: ({ row }) => ({
-      sx: {
-        transform: row.getIsExpanded() ? 'rotate(0deg)' : 'rotate(-90deg)',
-        transition: 'transform 0.2s',
-      },
+      children: (
+        <ExpandMoreIcon
+          sx={{
+            transition: 'transform 0.2s',
+            transform: row.getIsExpanded() ? 'rotate(0deg)' : 'rotate(-90deg)',
+          }}
+        />
+      ),
     }),
     enableColumnResizing: true,
     enablePagination: false,

@@ -490,6 +490,7 @@ const SearchInput: React.FC = () => {
         sx={{ mb: 2 }}
         loading={peopleLoading || organizationsLoading} // Display loading when data is being fetched
         loadingText={<CircularProgress size={24} />} // Show spinner when loading
+        noOptionsText={t`sidebar_search_no_options`}
       />
       {connectedUser?.person?.uid !== currentPerspective?.uid && (
         <Button
