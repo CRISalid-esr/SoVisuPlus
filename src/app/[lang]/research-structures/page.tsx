@@ -330,6 +330,13 @@ function TreeTable({
     enableExpandAll: false,
     getSubRows: (row) => row.subRows,
     getRowId: (row) => row.uid,
+    // chevron points right when the row is closed, down when it is open
+    muiExpandButtonProps: ({ row }) => ({
+      sx: {
+        transform: row.getIsExpanded() ? 'rotate(0deg)' : 'rotate(-90deg)',
+        transition: 'transform 0.2s',
+      },
+    }),
     enableColumnResizing: true,
     enablePagination: false,
     enableGlobalFilter: true,
