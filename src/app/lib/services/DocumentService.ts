@@ -163,15 +163,20 @@ export class DocumentService {
       case 'person':
         contributorUids = contributorUid ? [contributorUid] : []
         break
+      case 'institution':
       case 'research_unit':
+      case 'other_structure':
+      case 'team':
+        // One-hop expansion through organization relationships; the
+        // per-group perimeter rules live in the DAO.
         contributorUids = (
           contributorUid
-            ? await this.personDAO.fetchPeopleByResearchUnitUid(contributorUid)
+            ? await this.personDAO.fetchPeopleByOrganizationPerimeter(
+                contributorUid,
+                contributorType,
+              )
             : []
         ).map((person) => person.uid)
-        break
-      case 'institution':
-        console.error('Institution filter not implemented yet')
         break
     }
 
@@ -241,7 +246,7 @@ export class DocumentService {
                 uid: string
                 displayName: string | null
                 memberships: {
-                  researchUnit: {
+                  organizationUnit: {
                     uid: string
                   }
                 }[]

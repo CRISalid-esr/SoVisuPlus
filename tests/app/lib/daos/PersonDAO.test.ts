@@ -2,9 +2,12 @@ import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 import prisma from '@/lib/daos/prisma'
 import { PersonMembership } from '@/types/PersonMembership'
-import { ResearchUnit } from '@/types/ResearchUnit'
+import { PersonEmployment } from '@/types/PersonEmployment'
+import { OrganizationRelation } from '@/types/OrganizationRelation'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { Literal } from '@/types/Literal'
-import { ResearchUnitDAO } from '@/lib/daos/ResearchUnitDAO'
+import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
+import { OrganizationCategory, OrganizationGenericType } from '@prisma/client'
 import {
   PersonIdentifier,
   PersonIdentifierType,
@@ -27,13 +30,13 @@ describe('PersonDAO Integration Tests', () => {
     [new PersonIdentifier(PersonIdentifierType.orcid, '0000-0001-2345-6789')],
     [
       new PersonMembership(
-        new ResearchUnit(
+        new OrganizationUnit(
           'local-unit',
           'ACR',
           [new Literal('JD Laboratory', 'en')],
           [new Literal('Laboratory of John Doe', 'en')],
-          'ACR_signature',
-          [],
+          OrganizationCategory.research_unit,
+          OrganizationGenericType.unit,
         ),
         null,
         null,
@@ -62,17 +65,18 @@ describe('PersonDAO Integration Tests', () => {
   })
 
   test('should create a new person with memberships', async () => {
-    const researchUnitDAO = new ResearchUnitDAO()
-    const researchUnit = await researchUnitDAO.createOrUpdateResearchUnit(
-      new ResearchUnit(
-        'local-unit',
-        'ACR',
-        [new Literal('JD Laboratory', 'en')],
-        [new Literal('Laboratory of John Doe', 'en')],
-        'ACR_signature',
-        [],
-      ),
-    )
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    const organizationUnit =
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(
+        new OrganizationUnit(
+          'local-unit',
+          'ACR',
+          [new Literal('JD Laboratory', 'en')],
+          [new Literal('Laboratory of John Doe', 'en')],
+          OrganizationCategory.research_unit,
+          OrganizationGenericType.unit,
+        ),
+      )
     const dbPerson = await personDAO.createOrUpdatePerson(person)
 
     expect(dbPerson).toHaveProperty('id')
@@ -81,14 +85,324 @@ describe('PersonDAO Integration Tests', () => {
 
     const savedMemberships = await prisma.membership.findMany({
       where: { personId: dbPerson.id },
-      include: { researchUnit: true },
+      include: { organizationUnit: true },
     })
 
     expect(savedMemberships).toHaveLength(1)
     expect(savedMemberships[0]).toMatchObject({
       personId: dbPerson.id,
-      researchUnitId: researchUnit.id,
+      organizationUnitId: organizationUnit.id,
       positionCode: 'MCF',
+    })
+  })
+
+  test('should create a new person with employments', async () => {
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    const institution =
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(
+        new OrganizationUnit(
+          'local-UP1',
+          'UP1',
+          [new Literal('Université Paris 1', 'fr')],
+          [],
+          OrganizationCategory.institution,
+          OrganizationGenericType.institution,
+        ),
+      )
+    // membership organization also present so both relations resolve
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      new OrganizationUnit(
+        'local-unit',
+        'ACR',
+        [new Literal('JD Laboratory', 'en')],
+        [],
+        OrganizationCategory.research_unit,
+        OrganizationGenericType.unit,
+      ),
+    )
+
+    const employedPerson = new Person(
+      'local-johndoe',
+      false,
+      'johndoe@example.com',
+      'John',
+      'Doe',
+      'John Doe',
+      [],
+      person.memberships,
+    )
+    employedPerson.employments = [
+      new PersonEmployment(
+        new OrganizationUnit(
+          'local-UP1',
+          'UP1',
+          [new Literal('Université Paris 1', 'fr')],
+          [],
+          OrganizationCategory.institution,
+          OrganizationGenericType.institution,
+        ),
+        '2018-09-01T00:00:00.000Z',
+        null,
+        'MCF',
+      ),
+    ]
+
+    const dbPerson = await personDAO.createOrUpdatePerson(employedPerson)
+
+    const savedEmployments = await prisma.employment.findMany({
+      where: { personId: dbPerson.id },
+    })
+    expect(savedEmployments).toHaveLength(1)
+    expect(savedEmployments[0]).toMatchObject({
+      personId: dbPerson.id,
+      organizationUnitId: institution.id,
+      positionCode: 'MCF',
+    })
+
+    // round-trip through fetchPersonByUid
+    const fetched = await personDAO.fetchPersonByUid('local-johndoe')
+    expect(fetched!.employments).toHaveLength(1)
+    expect(fetched!.employments[0].organizationUnit.uid).toBe('local-UP1')
+    expect(fetched!.employments[0].organizationUnit.category).toBe(
+      OrganizationCategory.institution,
+    )
+  })
+
+  test('should skip employments whose organization is unknown', async () => {
+    const employedPerson = new Person(
+      'local-johndoe',
+      false,
+      'johndoe@example.com',
+      'John',
+      'Doe',
+      'John Doe',
+      [],
+      [],
+    )
+    employedPerson.employments = [
+      new PersonEmployment(
+        new OrganizationUnit(
+          'local-MISSING',
+          null,
+          [],
+          [],
+          OrganizationCategory.institution,
+          OrganizationGenericType.institution,
+        ),
+      ),
+    ]
+
+    const dbPerson = await personDAO.createOrUpdatePerson(employedPerson)
+
+    const savedEmployments = await prisma.employment.findMany({
+      where: { personId: dbPerson.id },
+    })
+    expect(savedEmployments).toHaveLength(0)
+  })
+
+  describe('fetchPeopleByOrganizationPerimeter', () => {
+    const makeOrg = (
+      uid: string,
+      acronym: string,
+      category: OrganizationCategory,
+      genericType: OrganizationGenericType,
+    ) =>
+      new OrganizationUnit(
+        uid,
+        acronym,
+        [new Literal(`Org ${acronym}`, 'en')],
+        [],
+        category,
+        genericType,
+      )
+
+    const makeMember = (uid: string, lastName: string, orgUid: string) => {
+      const member = new Person(
+        uid,
+        false,
+        null,
+        `P ${lastName}`,
+        'P',
+        lastName,
+        [],
+        [
+          new PersonMembership(
+            makeOrg(
+              orgUid,
+              'X',
+              OrganizationCategory.research_unit,
+              OrganizationGenericType.unit,
+            ),
+          ),
+        ],
+      )
+      return member
+    }
+
+    beforeEach(async () => {
+      const organizationUnitDAO = new OrganizationUnitDAO()
+      // institution supervising a research unit and a support unit
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(
+        makeOrg(
+          'local-UP1',
+          'UP1',
+          OrganizationCategory.institution,
+          OrganizationGenericType.institution,
+        ),
+      )
+      const ru1 = makeOrg(
+        'local-RU1',
+        'RU1',
+        OrganizationCategory.research_unit,
+        OrganizationGenericType.unit,
+      )
+      ru1.parents = [
+        new OrganizationRelation(
+          makeOrg(
+            'local-UP1',
+            'UP1',
+            OrganizationCategory.institution,
+            OrganizationGenericType.institution,
+          ),
+          'member_of',
+          'associated_supervision',
+        ),
+      ]
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(ru1)
+      const su1 = makeOrg(
+        'local-SU1',
+        'SU1',
+        OrganizationCategory.support_unit,
+        OrganizationGenericType.unit,
+      )
+      su1.parents = [
+        new OrganizationRelation(
+          makeOrg(
+            'local-UP1',
+            'UP1',
+            OrganizationCategory.institution,
+            OrganizationGenericType.institution,
+          ),
+          'member_of',
+        ),
+      ]
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(su1)
+
+      // subdivision with an attached research unit (part_of) and team (member_of)
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(
+        makeOrg(
+          'local-FAC1',
+          'FAC1',
+          OrganizationCategory.institution_subdivision,
+          OrganizationGenericType.institution_subdivision,
+        ),
+      )
+      const ru2 = makeOrg(
+        'local-RU2',
+        'RU2',
+        OrganizationCategory.research_unit,
+        OrganizationGenericType.unit,
+      )
+      ru2.parents = [
+        new OrganizationRelation(
+          makeOrg(
+            'local-FAC1',
+            'FAC1',
+            OrganizationCategory.institution_subdivision,
+            OrganizationGenericType.institution_subdivision,
+          ),
+          'part_of',
+        ),
+      ]
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(ru2)
+      const team1 = makeOrg(
+        'local-T1',
+        'T1',
+        OrganizationCategory.team,
+        OrganizationGenericType.team,
+      )
+      team1.parents = [
+        new OrganizationRelation(
+          makeOrg(
+            'local-FAC1',
+            'FAC1',
+            OrganizationCategory.institution_subdivision,
+            OrganizationGenericType.institution_subdivision,
+          ),
+          'member_of',
+        ),
+      ]
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(team1)
+
+      // people: one member per structure + a direct institution member
+      await personDAO.createOrUpdatePerson(
+        makeMember('p-ru1', 'Aru', 'local-RU1'),
+      )
+      await personDAO.createOrUpdatePerson(
+        makeMember('p-su1', 'Bsu', 'local-SU1'),
+      )
+      await personDAO.createOrUpdatePerson(
+        makeMember('p-up1', 'Cdirect', 'local-UP1'),
+      )
+      await personDAO.createOrUpdatePerson(
+        makeMember('p-fac1', 'Dfac', 'local-FAC1'),
+      )
+      await personDAO.createOrUpdatePerson(
+        makeMember('p-ru2', 'Eru', 'local-RU2'),
+      )
+      await personDAO.createOrUpdatePerson(
+        makeMember('p-t1', 'Fteam', 'local-T1'),
+      )
+    })
+
+    test('institution: members of research units member_of it, no direct members, no support units', async () => {
+      const people = await personDAO.fetchPeopleByOrganizationPerimeter(
+        'local-UP1',
+        'institution',
+      )
+      expect(people.map((p) => p.uid).sort()).toEqual(['p-ru1'])
+    })
+
+    test('other_structure: direct members plus members of attached units', async () => {
+      const people = await personDAO.fetchPeopleByOrganizationPerimeter(
+        'local-FAC1',
+        'other_structure',
+      )
+      expect(people.map((p) => p.uid).sort()).toEqual([
+        'p-fac1',
+        'p-ru2',
+        'p-t1',
+      ])
+    })
+
+    test('fetched person publishes one-hop authorization perimeters', async () => {
+      const fetched = await personDAO.fetchPersonByUid('p-ru1')
+      expect(fetched!.authzProperties.perimeter).toMatchObject({
+        Person: ['p-ru1'],
+        ResearchUnit: ['local-RU1'],
+        Institution: ['local-UP1'],
+      })
+
+      const teamMember = await personDAO.fetchPersonByUid('p-t1')
+      expect(teamMember!.authzProperties.perimeter).toMatchObject({
+        Team: ['local-T1'],
+        InstitutionDivision: ['local-FAC1'],
+      })
+    })
+
+    test('research_unit and team: direct members only', async () => {
+      const researchUnitPeople =
+        await personDAO.fetchPeopleByOrganizationPerimeter(
+          'local-RU1',
+          'research_unit',
+        )
+      expect(researchUnitPeople.map((p) => p.uid)).toEqual(['p-ru1'])
+
+      const teamPeople = await personDAO.fetchPeopleByOrganizationPerimeter(
+        'local-T1',
+        'team',
+      )
+      expect(teamPeople.map((p) => p.uid)).toEqual(['p-t1'])
     })
   })
 

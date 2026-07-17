@@ -40,31 +40,31 @@ const mockState = {
         {
           id: 1,
           personId: 1,
-          researchUnitId: 1,
+          organizationUnitId: 1,
           startDate: null,
           endDate: null,
           positionCode: null,
-          researchUnit: {
+          organizationUnit: {
             id: 1,
             uid: '12345',
             acronym: 'ABC',
             external: false,
-            slug: 'research-unit:abc',
+            slug: 'org:abc',
           },
         },
         {
           id: 2,
           personId: 1,
-          researchUnitId: 2,
+          organizationUnitId: 2,
           startDate: null,
           endDate: null,
           positionCode: null,
-          researchUnit: {
+          organizationUnit: {
             id: 2,
             uid: '67890',
             acronym: 'DEF',
             external: false,
-            slug: 'research-unit:def',
+            slug: 'org:def',
           },
         },
       ],
@@ -207,7 +207,7 @@ describe('HalStatusCell Component', () => {
             uid: '12345',
             acronym: 'ABC',
             external: false,
-            slug: 'research-unit:abc',
+            slug: 'org:abc',
             type: 'research_unit',
             names: [],
             hasIdentifier: () => true,
@@ -248,7 +248,7 @@ describe('HalStatusCell Component', () => {
             uid: '12345',
             acronym: 'ABC',
             external: false,
-            slug: 'research-unit:abc',
+            slug: 'org:abc',
             type: 'research_unit',
             names: [],
             hasIdentifier: () => false,
@@ -286,8 +286,8 @@ describe('HalStatusCell Component', () => {
         isPerson: () => false,
       }
     })
-    jest.mock('@/types/ResearchUnit', () => {
-      const actual = jest.requireActual('@/types/ResearchUnit')
+    jest.mock('@/types/OrganizationUnit', () => {
+      const actual = jest.requireActual('@/types/OrganizationUnit')
       return {
         __esModule: true,
         ...actual,
@@ -318,7 +318,10 @@ describe('HalStatusCell Component', () => {
     jest.spyOn(Document.prototype, 'hasBeenUpdated').mockReturnValue(false)
     const document = createDocument(
       true,
-      [mockState.user.currentPerspective.memberships[0].researchUnit.acronym],
+      [
+        mockState.user.currentPerspective.memberships[0].organizationUnit
+          .acronym,
+      ],
       'file',
     )
 
@@ -375,7 +378,10 @@ describe('HalStatusCell Component', () => {
     jest.spyOn(Document.prototype, 'hasBeenUpdated').mockReturnValue(true)
     const document = createDocument(
       true,
-      [mockState.user.currentPerspective.memberships[0].researchUnit.acronym],
+      [
+        mockState.user.currentPerspective.memberships[0].organizationUnit
+          .acronym,
+      ],
       'file',
     )
 
@@ -407,7 +413,10 @@ describe('HalStatusCell Component', () => {
   it('displays the alternate icon', async () => {
     const document = createDocument(
       true,
-      [mockState.user.currentPerspective.memberships[0].researchUnit.acronym],
+      [
+        mockState.user.currentPerspective.memberships[0].organizationUnit
+          .acronym,
+      ],
       'notice',
     )
 

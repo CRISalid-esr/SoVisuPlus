@@ -30,7 +30,7 @@ export const GET = async (req: NextRequest) => {
       return NextResponse.json(
         {
           error:
-            "Invalid or missing 'entityType'. Allowed values: 'person'|'research_unit'|'institution'.",
+            "Invalid or missing 'entityType'. Allowed values: 'person'|'institution'|'research_unit'|'other_structure'|'team'.",
         },
         { status: 400 },
       )

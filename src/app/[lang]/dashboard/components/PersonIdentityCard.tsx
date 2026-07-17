@@ -102,10 +102,11 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
               >
                 {person.memberships
                   .filter(
-                    (m) => m.researchUnit?.acronym && m.researchUnit?.slug,
+                    (m) =>
+                      m.organizationUnit?.acronym && m.organizationUnit?.slug,
                   )
                   .map((m, index, arr) => {
-                    const rs = m.researchUnit!
+                    const rs = m.organizationUnit!
                     return (
                       <Box
                         key={rs.uid}

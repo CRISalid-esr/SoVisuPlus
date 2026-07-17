@@ -17,12 +17,14 @@ beforeAll(() => {
 const clearDatabase = async () => {
   console.log('****Clearing database...')
   await prisma.$executeRawUnsafe(`
-    TRUNCATE TABLE 
-      "PersonIdentifier", 
-      "User", 
+    TRUNCATE TABLE
+      "PersonIdentifier",
+      "User",
       "Person",
-      "ResearchUnit",
-      "ResearchUnitIdentifier"
+      "OrganizationUnit",
+      "OrganizationUnitIdentifier",
+      "OrganizationRelationship",
+      "Employment"
     RESTART IDENTITY CASCADE;
   `)
   console.log('****Database cleared')

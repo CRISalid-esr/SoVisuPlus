@@ -1,8 +1,10 @@
 import {
   DocumentType,
   HalSubmitType,
+  OrganizationCategory,
+  OrganizationGenericType,
+  OrganizationIdentifierType,
   PublicationIdentifierType,
-  ResearchUnitIdentifierType,
   SourceRecordType,
 } from '@prisma/client'
 import { DocumentRecord } from '@/types/DocumentRecord'
@@ -17,8 +19,23 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { PersonMembership } from '@/types/PersonMembership'
-import { ResearchUnit } from '@/types/ResearchUnit'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { Literal } from '@/types/Literal'
+
+const makeResearchUnit = (uid: string, acronym: string) =>
+  new OrganizationUnit(
+    uid,
+    acronym,
+    [new Literal('Valid Research Unit', 'en')],
+    [new Literal('Valid Description', 'en')],
+    OrganizationCategory.research_unit,
+    OrganizationGenericType.unit,
+    null,
+    [
+      { type: OrganizationIdentifierType.hal, value: '12345' },
+      { type: OrganizationIdentifierType.ror, value: '67890' },
+    ],
+  )
 
 describe('DocumentRecord type', () => {
   it('should convert source record type from string to the right SourceRecordType or to SourceRecordType.Document if unknown', async () => {
@@ -150,32 +167,8 @@ describe('DocumentRecord type', () => {
         new PersonIdentifier(PersonIdentifierType.local, '12345'),
       ],
       [
-        new PersonMembership(
-          new ResearchUnit(
-            'RS123',
-            'ABC',
-            [new Literal('Valid Research Unit', 'en')],
-            [new Literal('Valid Description', 'en')],
-            'ABC_signature',
-            [
-              { type: ResearchUnitIdentifierType.hal, value: '12345' },
-              { type: ResearchUnitIdentifierType.ror, value: '67890' },
-            ],
-          ),
-        ),
-        new PersonMembership(
-          new ResearchUnit(
-            'RS123',
-            'DEF',
-            [new Literal('Valid Research Unit', 'en')],
-            [new Literal('Valid Description', 'en')],
-            'DEF_signature',
-            [
-              { type: ResearchUnitIdentifierType.hal, value: '12345' },
-              { type: ResearchUnitIdentifierType.ror, value: '67890' },
-            ],
-          ),
-        ),
+        new PersonMembership(makeResearchUnit('RS123', 'ABC')),
+        new PersonMembership(makeResearchUnit('RS123', 'DEF')),
       ],
     )
 
@@ -190,21 +183,7 @@ describe('DocumentRecord type', () => {
         new PersonIdentifier(PersonIdentifierType.orcid, '0000-0002-1825-0097'),
         new PersonIdentifier(PersonIdentifierType.local, '12345'),
       ],
-      [
-        new PersonMembership(
-          new ResearchUnit(
-            'RS123',
-            'GHI',
-            [new Literal('Valid Research Unit', 'en')],
-            [new Literal('Valid Description', 'en')],
-            'GHI_signature',
-            [
-              { type: ResearchUnitIdentifierType.hal, value: '12345' },
-              { type: ResearchUnitIdentifierType.ror, value: '67890' },
-            ],
-          ),
-        ),
-      ],
+      [new PersonMembership(makeResearchUnit('RS123', 'GHI'))],
     )
 
     expect(mockDocument.isResearchUnitInCollectionCodes(mockPerson1)).toEqual([
@@ -215,29 +194,9 @@ describe('DocumentRecord type', () => {
       null,
     )
 
-    const mockResearchUnit1 = new ResearchUnit(
-      'RS123',
-      'DEF',
-      [new Literal('Valid Research Unit', 'en')],
-      [new Literal('Valid Description', 'en')],
-      'DEF_signature',
-      [
-        { type: ResearchUnitIdentifierType.hal, value: '12345' },
-        { type: ResearchUnitIdentifierType.ror, value: '67890' },
-      ],
-    )
+    const mockResearchUnit1 = makeResearchUnit('RS123', 'DEF')
 
-    const mockResearchUnit2 = new ResearchUnit(
-      'RS123',
-      'GHI',
-      [new Literal('Valid Research Unit', 'en')],
-      [new Literal('Valid Description', 'en')],
-      'GHI_signature',
-      [
-        { type: ResearchUnitIdentifierType.hal, value: '12345' },
-        { type: ResearchUnitIdentifierType.ror, value: '67890' },
-      ],
-    )
+    const mockResearchUnit2 = makeResearchUnit('RS123', 'GHI')
 
     expect(
       mockDocument.isResearchUnitInCollectionCodes(mockResearchUnit1),

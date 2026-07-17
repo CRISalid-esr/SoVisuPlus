@@ -4,9 +4,12 @@ import { Person } from '@/types/Person'
 import { loadQuery } from '@/lib/graphql/queries/loadQuery'
 import { ExternalPerson } from '@/types/ExternalPerson'
 import { InternalPerson } from '@/types/InternalPerson'
-import { ResearchUnit } from '@/types/ResearchUnit'
-import { Literal } from '@/types/Literal'
-import { researchUnitIdentifierTypeFromString } from '@/types/ResearchUnitIdentifier'
+import {
+  GraphOrganizationUnitNode,
+  hydrateOrganizationNode,
+} from '@/lib/graphql/organizationHydration'
+import { PersonMembership } from '@/types/PersonMembership'
+import { PersonEmployment } from '@/types/PersonEmployment'
 import { SourcePerson } from '@/types/SourcePerson'
 import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
 
@@ -39,25 +42,6 @@ interface GraphPersonName {
   }[]
 }
 
-interface GraphOrganizationIdentifier {
-  type: string
-  value: string
-}
-
-interface GraphOrganizationName {
-  language?: string
-  value: string
-}
-
-interface GraphOrganization {
-  acronym?: string
-  signature?: string
-  identifiers: GraphOrganizationIdentifier[]
-  names: GraphOrganizationName[]
-  type: string
-  uid: string
-}
-
 interface GraphMembershipProperties {
   start_date?: string
   end_date?: string
@@ -66,7 +50,7 @@ interface GraphMembershipProperties {
 
 interface GraphMembershipEdge {
   properties: GraphMembershipProperties
-  node: GraphOrganization
+  node: GraphOrganizationUnitNode
 }
 
 interface GraphMembershipConnection {
@@ -81,7 +65,9 @@ export interface GraphPersonResponse {
   names: GraphPersonName[]
   membershipsConnection?: GraphMembershipConnection
   employmentsConnection?: GraphMembershipConnection
-  recorded_by: GraphSourcePersonResponse[]
+  // Not exposed by the graph GraphQL API since the organization model
+  // refactoring — source-person records stay empty until it is re-exposed.
+  recorded_by?: GraphSourcePersonResponse[]
 }
 
 export interface GraphPeopleResponse {
@@ -171,31 +157,14 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
           }
         })
         .filter((identifier) => identifier !== null), // Remove null entries
-      personData.membershipsConnection?.edges?.map((edge) => ({
-        researchUnit: new ResearchUnit(
-          edge.node.uid,
-          edge.node.acronym ?? null,
-          edge.node.names.map((name) =>
-            Literal.fromObject({
-              language: name.language ?? null,
-              value: name.value,
-            }),
-          ),
-          [],
-          edge.node.signature ?? null,
-          edge.node.identifiers.map((identifier) => ({
-            type: researchUnitIdentifierTypeFromString(identifier.type),
-            value: identifier.value,
-          })),
-          'research_unit',
-        ),
-        startDate: edge.properties.start_date ?? null,
-        endDate: edge.properties.end_date ?? null,
-        positionCode: edge.properties.position_code ?? null,
-      })) ?? [],
+      this.hydrateMemberships(personData.membershipsConnection),
     )
 
-    person.records = personData.recorded_by.map(
+    person.employments = this.hydrateEmployments(
+      personData.employmentsConnection,
+    )
+
+    person.records = (personData.recorded_by ?? []).map(
       (record: GraphSourcePersonResponse) =>
         new SourcePerson(
           record.uid,
@@ -221,5 +190,70 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
     )
 
     return person
+  }
+
+  /**
+   * Hydrate membership edges into PersonMembership objects.
+   * Edges whose organization category cannot be determined are skipped.
+   */
+  private hydrateMemberships(
+    connection: GraphMembershipConnection | undefined,
+  ): PersonMembership[] {
+    return this.hydrateAffiliationEdges(
+      connection,
+      (organizationUnit, startDate, endDate, positionCode) =>
+        new PersonMembership(
+          organizationUnit,
+          startDate,
+          endDate,
+          positionCode,
+        ),
+    )
+  }
+
+  /**
+   * Hydrate employment edges into PersonEmployment objects.
+   * Edges whose organization category cannot be determined are skipped.
+   */
+  private hydrateEmployments(
+    connection: GraphMembershipConnection | undefined,
+  ): PersonEmployment[] {
+    return this.hydrateAffiliationEdges(
+      connection,
+      (organizationUnit, startDate, endDate, positionCode) =>
+        new PersonEmployment(
+          organizationUnit,
+          startDate,
+          endDate,
+          positionCode,
+        ),
+    )
+  }
+
+  private hydrateAffiliationEdges<T>(
+    connection: GraphMembershipConnection | undefined,
+    factory: (
+      organizationUnit: NonNullable<ReturnType<typeof hydrateOrganizationNode>>,
+      startDate: string | null,
+      endDate: string | null,
+      positionCode: string | null,
+    ) => T,
+  ): T[] {
+    return (
+      connection?.edges
+        ?.map((edge) => {
+          const organizationUnit = hydrateOrganizationNode(edge.node)
+          if (!organizationUnit) {
+            return null
+          }
+          return factory(
+            organizationUnit,
+            edge.properties.start_date ?? null,
+            edge.properties.end_date ?? null,
+            edge.properties.position_code ?? null,
+          )
+        })
+        .filter((item) => item !== null) ?? []
+    )
   }
 }

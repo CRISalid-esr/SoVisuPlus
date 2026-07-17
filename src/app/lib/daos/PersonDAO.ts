@@ -1,7 +1,9 @@
 import slugify from 'slugify'
 import {
-  PersonIdentifier as DbPersonIdentifier,
+  OrganizationCategory,
+  OrganizationRelationKind,
   Person as DbPerson,
+  PersonIdentifier as DbPersonIdentifier,
   Prisma,
 } from '@prisma/client'
 import { Person } from '@/types/Person'
@@ -12,7 +14,9 @@ import {
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
-import { ResearchUnitDAO } from '@/lib/daos/ResearchUnitDAO'
+import { PersonEmployment } from '@/types/PersonEmployment'
+import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
+import { OrganizationGroup } from '@/types/IAgent'
 import { SourcePersonDAO } from '@/lib/daos/SourcePersonDAO'
 import { SourcePerson } from '@/types/SourcePerson'
 import removeAccents from 'remove-accents'
@@ -99,6 +103,8 @@ export class PersonDAO extends AbstractDAO {
 
           await this.upsertMemberships(person.memberships, dbPerson.id)
 
+          await this.upsertEmployments(person.employments, dbPerson.id)
+
           await this.upsertRecords(person.records, dbPerson.id)
 
           // The upsert result carries every scalar column callers read (id, external,
@@ -145,22 +151,23 @@ export class PersonDAO extends AbstractDAO {
     memberships: PersonMembership[],
     personId: number,
   ): Promise<void> {
-    const researchUnitDAO = new ResearchUnitDAO()
+    const organizationUnitDAO = new OrganizationUnitDAO()
     for (const membership of memberships) {
-      const dbResearchUnit = await researchUnitDAO.getResearchUnitByUid(
-        membership.researchUnit.uid,
-      )
-      if (!dbResearchUnit) {
+      const dbOrganizationUnit =
+        await organizationUnitDAO.getOrganizationUnitByUid(
+          membership.organizationUnit.uid,
+        )
+      if (!dbOrganizationUnit) {
         console.error(
-          `Research unit not found for UID: ${membership.researchUnit.uid}`,
+          `Organization unit not found for UID: ${membership.organizationUnit.uid}`,
         )
         continue
       }
       await this.prismaClient.membership.upsert({
         where: {
-          personId_researchUnitId: {
+          personId_organizationUnitId: {
             personId,
-            researchUnitId: dbResearchUnit.id,
+            organizationUnitId: dbOrganizationUnit.id,
           },
         },
         update: {
@@ -170,10 +177,54 @@ export class PersonDAO extends AbstractDAO {
         },
         create: {
           personId,
-          researchUnitId: dbResearchUnit.id,
+          organizationUnitId: dbOrganizationUnit.id,
           startDate: membership.startDate,
           endDate: membership.endDate,
           positionCode: membership.positionCode,
+        },
+      })
+    }
+  }
+
+  /**
+   * Upsert employments for a given person
+   * @param employments - List of employments to upsert
+   * @param personId - The ID of the person in the database
+   */
+  private async upsertEmployments(
+    employments: PersonEmployment[],
+    personId: number,
+  ): Promise<void> {
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    for (const employment of employments) {
+      const dbOrganizationUnit =
+        await organizationUnitDAO.getOrganizationUnitByUid(
+          employment.organizationUnit.uid,
+        )
+      if (!dbOrganizationUnit) {
+        console.error(
+          `Organization unit not found for UID: ${employment.organizationUnit.uid}`,
+        )
+        continue
+      }
+      await this.prismaClient.employment.upsert({
+        where: {
+          personId_organizationUnitId: {
+            personId,
+            organizationUnitId: dbOrganizationUnit.id,
+          },
+        },
+        update: {
+          startDate: employment.startDate,
+          endDate: employment.endDate,
+          positionCode: employment.positionCode,
+        },
+        create: {
+          personId,
+          organizationUnitId: dbOrganizationUnit.id,
+          startDate: employment.startDate,
+          endDate: employment.endDate,
+          positionCode: employment.positionCode,
         },
       })
     }
@@ -536,9 +587,22 @@ export class PersonDAO extends AbstractDAO {
       include: {
         memberships: {
           include: {
-            researchUnit: {
+            organizationUnit: {
               include: {
-                names: true,
+                labels: true,
+                parents: { include: { parent: true } },
+                identifiers: true,
+                descriptions: true,
+              },
+            },
+          },
+        },
+        employments: {
+          include: {
+            organizationUnit: {
+              include: {
+                labels: true,
+                parents: { include: { parent: true } },
                 identifiers: true,
                 descriptions: true,
               },
@@ -576,9 +640,22 @@ export class PersonDAO extends AbstractDAO {
         include: {
           memberships: {
             include: {
-              researchUnit: {
+              organizationUnit: {
                 include: {
-                  names: true,
+                  labels: true,
+                  parents: { include: { parent: true } },
+                  identifiers: true,
+                  descriptions: true,
+                },
+              },
+            },
+          },
+          employments: {
+            include: {
+              organizationUnit: {
+                include: {
+                  labels: true,
+                  parents: { include: { parent: true } },
                   identifiers: true,
                   descriptions: true,
                 },
@@ -605,25 +682,94 @@ export class PersonDAO extends AbstractDAO {
     }
   }
 
-  fetchPeopleByResearchUnitUid = async (
-    researchUnitUid: string,
-  ): Promise<Person[]> => {
-    const people = await this.prismaClient.person.findMany({
-      where: {
-        memberships: {
-          some: {
-            researchUnit: {
-              uid: researchUnitUid,
+  /**
+   * Membership condition defining an organization perspective's perimeter:
+   * - research_unit / team: direct members of the organization;
+   * - institution: members of the research units that are member_of the
+   *   institution (any supervision position, one hop) — no direct
+   *   institution memberships, no employments until they exist;
+   * - other_structure (institution & unit subdivisions): direct members,
+   *   plus members of the units that are member_of or part_of it (one hop).
+   */
+  private organizationPerimeterWhereClause(
+    organizationUid: string,
+    group: OrganizationGroup,
+  ): Prisma.PersonWhereInput {
+    const directMembership: Prisma.PersonWhereInput = {
+      memberships: {
+        some: { organizationUnit: { uid: organizationUid } },
+      },
+    }
+    const childMembership = (
+      kinds: OrganizationRelationKind[],
+      childCategories?: OrganizationCategory[],
+    ): Prisma.PersonWhereInput => ({
+      memberships: {
+        some: {
+          organizationUnit: {
+            ...(childCategories ? { category: { in: childCategories } } : {}),
+            parents: {
+              some: {
+                kind: { in: kinds },
+                parent: { uid: organizationUid },
+              },
             },
           },
         },
       },
+    })
+
+    switch (group) {
+      case 'institution':
+        return childMembership(
+          [OrganizationRelationKind.member_of],
+          [OrganizationCategory.research_unit],
+        )
+      case 'other_structure':
+        return {
+          OR: [
+            directMembership,
+            childMembership([
+              OrganizationRelationKind.member_of,
+              OrganizationRelationKind.part_of,
+            ]),
+          ],
+        }
+      case 'research_unit':
+      case 'team':
+        return directMembership
+    }
+  }
+
+  /**
+   * Fetch the people whose documents make up an organization perspective
+   * (see organizationPerimeterWhereClause for the per-group rules).
+   */
+  fetchPeopleByOrganizationPerimeter = async (
+    organizationUid: string,
+    group: OrganizationGroup,
+  ): Promise<Person[]> => {
+    const people = await this.prismaClient.person.findMany({
+      where: this.organizationPerimeterWhereClause(organizationUid, group),
       include: {
         memberships: {
           include: {
-            researchUnit: {
+            organizationUnit: {
               include: {
-                names: true,
+                labels: true,
+                parents: { include: { parent: true } },
+                identifiers: true,
+                descriptions: true,
+              },
+            },
+          },
+        },
+        employments: {
+          include: {
+            organizationUnit: {
+              include: {
+                labels: true,
+                parents: { include: { parent: true } },
                 identifiers: true,
                 descriptions: true,
               },
@@ -649,9 +795,22 @@ export class PersonDAO extends AbstractDAO {
         include: {
           memberships: {
             include: {
-              researchUnit: {
+              organizationUnit: {
                 include: {
-                  names: true,
+                  labels: true,
+                  parents: { include: { parent: true } },
+                  identifiers: true,
+                  descriptions: true,
+                },
+              },
+            },
+          },
+          employments: {
+            include: {
+              organizationUnit: {
+                include: {
+                  labels: true,
+                  parents: { include: { parent: true } },
                   identifiers: true,
                   descriptions: true,
                 },
@@ -717,9 +876,22 @@ export class PersonDAO extends AbstractDAO {
         include: {
           memberships: {
             include: {
-              researchUnit: {
+              organizationUnit: {
                 include: {
-                  names: true,
+                  labels: true,
+                  parents: { include: { parent: true } },
+                  identifiers: true,
+                  descriptions: true,
+                },
+              },
+            },
+          },
+          employments: {
+            include: {
+              organizationUnit: {
+                include: {
+                  labels: true,
+                  parents: { include: { parent: true } },
                   identifiers: true,
                   descriptions: true,
                 },

@@ -35,22 +35,38 @@ model Person {
   user           User?
   contributions  Contribution[]
   memberships    Membership[]
+  employments    Employment[]
   records        SourcePerson[]
   deposits       HalDeposit[]
 }
 
 model Membership {
-  id             Int          @id @default(autoincrement())
-  personId       Int
-  researchUnitId Int
-  startDate      DateTime?
-  endDate        DateTime?
-  positionCode   String?
-  person         Person       @relation(fields: [personId], references: [id], onDelete: Cascade)
-  researchUnit   ResearchUnit @relation(fields: [researchUnitId], references: [id], onDelete: Cascade)
+  id                 Int              @id @default(autoincrement())
+  personId           Int
+  organizationUnitId Int
+  startDate          DateTime?
+  endDate            DateTime?
+  positionCode       String?
+  person             Person           @relation(fields: [personId], references: [id], onDelete: Cascade)
+  organizationUnit   OrganizationUnit @relation(fields: [organizationUnitId], references: [id], onDelete: Cascade)
 
-  @@unique([personId, researchUnitId])
-  @@index([researchUnitId])
+  @@unique([personId, organizationUnitId])
+  @@index([organizationUnitId])
+  @@index([personId])
+}
+
+model Employment {
+  id                 Int              @id @default(autoincrement())
+  personId           Int
+  organizationUnitId Int
+  startDate          DateTime?
+  endDate            DateTime?
+  positionCode       String?
+  person             Person           @relation(fields: [personId], references: [id], onDelete: Cascade)
+  organizationUnit   OrganizationUnit @relation(fields: [organizationUnitId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, organizationUnitId])
+  @@index([organizationUnitId])
   @@index([personId])
 }
 
@@ -533,50 +549,90 @@ model OrcidIdentifier {
   updatedAt DateTime @updatedAt
 }
 
-model ResearchUnit {
-  id           Int                       @id @default(autoincrement())
-  uid          String                    @unique
+enum OrganizationGenericType {
+  institution
+  institution_subdivision
+  unit
+  unit_subdivision
+  team
+}
+
+// Concrete category, derived from the graph labels at sync time.
+enum OrganizationCategory {
+  institution
+  institution_subdivision
+  research_unit
+  support_unit
+  administrative_unit
+  teaching_unit
+  unit_subdivision
+  team
+}
+
+enum OrganizationLabelKind {
+  short
+  long
+}
+
+enum OrganizationRelationKind {
+  part_of
+  member_of
+}
+
+model OrganizationUnit {
+  id           Int                     @id @default(autoincrement())
+  uid          String                  @unique
+  genericType  OrganizationGenericType
+  category     OrganizationCategory
+  nationalType String? // open national list (UNIV, EPE, UMR, UAR, UFR, …) — evolves upstream
+  external     Boolean                 @default(false)
   acronym      String?
-  names        ResearchUnitName[]
-  descriptions ResearchUnitDescription[]
-  signature    String?
-  identifiers  ResearchUnitIdentifier[]
-  external     Boolean                   @default(false)
-  slug         String?                   @unique
-  memberships  Membership[]
+  slug         String?                 @unique
+  localTypes   Json? // [{ value, language }] — display only
+
+  labels       OrganizationUnitLabel[]
+  descriptions OrganizationUnitDescription[]
+  identifiers  OrganizationUnitIdentifier[]
+
+  parents  OrganizationRelationship[] @relation("child")
+  children OrganizationRelationship[] @relation("parent")
+
+  memberships Membership[]
+  employments Employment[]
 }
 
-model ResearchUnitName {
-  id             Int          @id @default(autoincrement())
-  researchUnitId Int
-  language       String // ISO 639-1 code
-  value          String       @db.VarChar(255)
-  researchUnit   ResearchUnit @relation(fields: [researchUnitId], references: [id], onDelete: Cascade)
+model OrganizationUnitLabel {
+  id                 Int                   @id @default(autoincrement())
+  organizationUnitId Int
+  kind               OrganizationLabelKind
+  language           String // ISO 639-1 code
+  value              String                @db.VarChar(255)
+  organizationUnit   OrganizationUnit      @relation(fields: [organizationUnitId], references: [id], onDelete: Cascade)
 
-  @@unique([researchUnitId, language])
+  @@unique([organizationUnitId, kind, language])
 }
 
-model ResearchUnitDescription {
-  id             Int          @id @default(autoincrement())
-  researchUnitId Int
-  language       String // ISO 639-1 code
-  value          String       @db.VarChar(2000)
-  researchUnit   ResearchUnit @relation(fields: [researchUnitId], references: [id], onDelete: Cascade)
+model OrganizationUnitDescription {
+  id                 Int              @id @default(autoincrement())
+  organizationUnitId Int
+  language           String // ISO 639-1 code
+  value              String           @db.VarChar(2000)
+  organizationUnit   OrganizationUnit @relation(fields: [organizationUnitId], references: [id], onDelete: Cascade)
 
-  @@unique([researchUnitId, language])
+  @@unique([organizationUnitId, language])
 }
 
-model ResearchUnitIdentifier {
-  id             Int                        @id @default(autoincrement())
-  type           ResearchUnitIdentifierType
-  value          String
-  researchUnit   ResearchUnit               @relation(fields: [researchUnitId], references: [id], onDelete: Cascade)
-  researchUnitId Int
+model OrganizationUnitIdentifier {
+  id                 Int                        @id @default(autoincrement())
+  type               OrganizationIdentifierType
+  value              String
+  organizationUnit   OrganizationUnit           @relation(fields: [organizationUnitId], references: [id], onDelete: Cascade)
+  organizationUnitId Int
 
   @@unique([type, value])
 }
 
-enum ResearchUnitIdentifierType {
+enum OrganizationIdentifierType {
   hal
   idref
   isni
@@ -590,6 +646,22 @@ enum ResearchUnitIdentifierType {
   uai
   viaf
   wikidata
+}
+
+model OrganizationRelationship {
+  id        Int                      @id @default(autoincrement())
+  childId   Int
+  parentId  Int
+  kind      OrganizationRelationKind
+  position  String? // main_supervision | associated_supervision | participating_supervision
+  startDate DateTime?
+  endDate   DateTime?
+
+  child  OrganizationUnit @relation("child", fields: [childId], references: [id], onDelete: Cascade)
+  parent OrganizationUnit @relation("parent", fields: [parentId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, parentId, kind])
+  @@index([parentId])
 }
 
 enum ActionType {
@@ -652,6 +724,7 @@ enum EntityType {
   ResearchUnit
   Institution
   InstitutionDivision
+  Team
 }
 
 model Role {

@@ -7,6 +7,7 @@ import { getStringInLocale } from '@/utils/getStringInLocale'
 import { Journal, JournalJson } from '@/types/Journal'
 import { DocumentState, DocumentType, OAStatus } from '@prisma/client'
 import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
+import { organizationPerimeterFromMemberships } from '@/types/organizationScopes'
 
 interface DocumentJson {
   uid: string
@@ -141,17 +142,15 @@ class Document implements Authorizable {
   }
 
   private computeScope() {
-    const rs =
-      this.contributions
-        ?.flatMap((c) => c.person?.memberships?.map((m) => m.researchUnit?.uid))
-        ?.filter((x): x is string => !!x) ?? []
+    const contributorMemberships =
+      this.contributions?.flatMap((c) => c.person?.memberships ?? []) ?? []
     const persons =
       this.contributions
         ?.map((c) => c.person?.uid)
         .filter((x): x is string => !!x) ?? []
     return {
-      ResearchUnit: Array.from(new Set(rs)),
       Person: Array.from(new Set(persons)),
+      ...organizationPerimeterFromMemberships(contributorMemberships),
     }
   }
 

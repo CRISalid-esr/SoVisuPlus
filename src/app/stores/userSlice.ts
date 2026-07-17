@@ -2,7 +2,7 @@ import { StateCreator } from 'zustand'
 import { User } from '@/types/User'
 import { IAgent, IAgentClass } from '@/types/IAgent'
 import { Person } from '@/types/Person'
-import { ResearchUnit } from '@/types/ResearchUnit'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
 
 export interface UserSlice {
   user: {
@@ -73,12 +73,16 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
       }
       if (!currentPerspective?.slug) return
       try {
-        const response = await fetch(
-          `/api/person/slug/${currentPerspective.slug}`,
-        )
+        const isPersonPerspective = currentPerspective.type === 'person'
+        const endpoint = isPersonPerspective
+          ? `/api/person/slug/${currentPerspective.slug}`
+          : `/api/organizations/slug/${currentPerspective.slug}`
+        const response = await fetch(endpoint)
         if (!response.ok) return
         const json = await response.json()
-        const entity = Person.fromJson(json)
+        const entity = isPersonPerspective
+          ? Person.fromJson(json)
+          : OrganizationUnit.fromJson(json)
         set((state) => ({
           user: { ...state.user, currentPerspective: entity },
         }))
@@ -146,9 +150,9 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
         if (slug.startsWith('person:')) {
           endpoint = `/api/person/slug/${slug}`
           EntityClass = Person
-        } else if (slug.startsWith('research-unit:')) {
-          endpoint = `/api/researchUnits/slug/${slug}`
-          EntityClass = ResearchUnit
+        } else if (slug.startsWith('org:')) {
+          endpoint = `/api/organizations/slug/${slug}`
+          EntityClass = OrganizationUnit
         } else {
           throw new Error(`Unknown slug type: ${slug}`)
         }

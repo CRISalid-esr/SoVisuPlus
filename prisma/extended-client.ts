@@ -9,6 +9,7 @@ import {
   DocumentRecord,
   DocumentState,
   DocumentTitle,
+  Employment,
   HalDeposit,
   HalDepositFile,
   HalSubmitType,
@@ -20,13 +21,9 @@ import {
   Permission,
   Person,
   PersonIdentifier,
+  Prisma,
   PrismaClient,
   PublicationIdentifier,
-  ResearchUnit,
-  ResearchUnitDescription,
-  ResearchUnitIdentifier,
-  ResearchUnitIdentifierType,
-  ResearchUnitName,
   Role,
   RolePermission,
   SourceContribution,
@@ -39,14 +36,30 @@ import {
 } from '@prisma/client'
 const prisma = new PrismaClient()
 
-export type ResearchUnitIdentifierWithRelations = ResearchUnitIdentifier & {
-  type: ResearchUnitIdentifierType
-}
+export const organizationUnitInclude = {
+  labels: true,
+  descriptions: true,
+  identifiers: true,
+} satisfies Prisma.OrganizationUnitInclude
 
-export type ResearchUnitWithRelations = ResearchUnit & {
-  names: ResearchUnitName[]
-  descriptions: ResearchUnitDescription[]
-  identifiers: ResearchUnitIdentifierWithRelations[]
+/**
+ * Include used where the organization's parent relationships matter
+ * (authorization perimeters computed from person memberships).
+ */
+export const organizationUnitParentsInclude = {
+  parents: { include: { parent: true } },
+} satisfies Prisma.OrganizationUnitInclude
+
+export type OrganizationRelationshipWithParent =
+  Prisma.OrganizationRelationshipGetPayload<{
+    include: { parent: true }
+  }>
+
+export type OrganizationUnitWithRelations = Prisma.OrganizationUnitGetPayload<{
+  include: typeof organizationUnitInclude
+}> & {
+  // present only when the query includes organizationUnitParentsInclude
+  parents?: OrganizationRelationshipWithParent[]
 }
 
 export type ContributionWithRelations = Contribution & {
@@ -111,7 +124,11 @@ export type UserRoleWithRelations = UserRole & {
 }
 
 export type MembershipWithRelations = Membership & {
-  researchUnit: ResearchUnitWithRelations
+  organizationUnit: OrganizationUnitWithRelations
+}
+
+export type EmploymentWithRelations = Employment & {
+  organizationUnit: OrganizationUnitWithRelations
 }
 
 export type SourcePersonWithRelations = SourcePerson & {
@@ -121,6 +138,7 @@ export type SourcePersonWithRelations = SourcePerson & {
 export type PersonWithRelations = Person & {
   identifiers: PersonIdentifierWithRelations[]
   memberships: MembershipWithRelations[]
+  employments?: EmploymentWithRelations[]
   records: SourcePersonWithRelations[]
 }
 

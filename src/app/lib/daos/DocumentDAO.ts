@@ -914,9 +914,10 @@ export class DocumentDAO extends AbstractDAO {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchUnit: {
+                    organizationUnit: {
                       include: {
-                        names: true,
+                        labels: true,
+                        parents: { include: { parent: true } },
                         identifiers: true,
                         descriptions: true,
                       },
@@ -961,6 +962,43 @@ export class DocumentDAO extends AbstractDAO {
     }
   }
 
+  /**
+   * Per-document facts needed by the research-structures directory KPIs:
+   * contributor person ids, OA statuses and HAL-record presence of every
+   * document published since the cutoff.
+   */
+  public async fetchDocumentStatsSince(cutoff: Date): Promise<
+    {
+      id: number
+      oaStatus: OAStatus | null
+      upwOAStatus: OAStatus | null
+      hasHalRecord: boolean
+      personIds: number[]
+    }[]
+  > {
+    const documents = await this.prismaClient.document.findMany({
+      where: { publicationDateStart: { gte: cutoff } },
+      select: {
+        id: true,
+        oaStatus: true,
+        upwOAStatus: true,
+        records: { select: { platform: true } },
+        contributions: { select: { personId: true } },
+      },
+    })
+    return documents.map((document) => ({
+      id: document.id,
+      oaStatus: document.oaStatus,
+      upwOAStatus: document.upwOAStatus,
+      hasHalRecord: document.records.some(
+        (record) => record.platform === 'hal',
+      ),
+      personIds: document.contributions.map(
+        (contribution) => contribution.personId,
+      ),
+    }))
+  }
+
   public async fetchOAYearDocuments(contributorUids: string[]): Promise<{
     documents: {
       uid: string
@@ -972,7 +1010,7 @@ export class DocumentDAO extends AbstractDAO {
           uid: string
           displayName: string | null
           memberships: {
-            researchUnit: {
+            organizationUnit: {
               uid: string
             }
           }[]
@@ -1006,7 +1044,7 @@ export class DocumentDAO extends AbstractDAO {
                 displayName: true,
                 memberships: {
                   select: {
-                    researchUnit: {
+                    organizationUnit: {
                       select: {
                         uid: true,
                       },
@@ -1114,9 +1152,10 @@ export class DocumentDAO extends AbstractDAO {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchUnit: {
+                    organizationUnit: {
                       include: {
-                        names: true,
+                        labels: true,
+                        parents: { include: { parent: true } },
                         descriptions: true,
                         identifiers: true,
                       },
