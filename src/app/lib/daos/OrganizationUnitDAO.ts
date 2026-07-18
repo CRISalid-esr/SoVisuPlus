@@ -27,6 +27,7 @@ const GROUP_CATEGORIES: Record<OrganizationGroup, OrganizationCategory[]> = {
   research_unit: [OrganizationCategory.research_unit],
   other_structure: [
     OrganizationCategory.institution_subdivision,
+    OrganizationCategory.doctoral_school,
     OrganizationCategory.unit_subdivision,
   ],
   team: [OrganizationCategory.team],
