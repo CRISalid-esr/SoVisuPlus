@@ -4,6 +4,7 @@ import { ScopeMap } from '@/types/authorizable'
 
 const SUBDIVISION_CATEGORIES: OrganizationCategory[] = [
   OrganizationCategory.institution_subdivision,
+  OrganizationCategory.doctoral_school,
   OrganizationCategory.unit_subdivision,
 ]
 

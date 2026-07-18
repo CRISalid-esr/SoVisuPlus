@@ -25,6 +25,7 @@ const DIRECTORY_KPI_MONTHS = 24
 
 const SUBDIVISION_CATEGORIES: OrganizationCategory[] = [
   OrganizationCategory.institution_subdivision,
+  OrganizationCategory.doctoral_school,
   OrganizationCategory.unit_subdivision,
 ]
 

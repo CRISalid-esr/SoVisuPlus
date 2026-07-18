@@ -40,6 +40,7 @@ const CATEGORY_BY_LABEL: Record<string, OrganizationCategory> = {
   TeachingUnit: OrganizationCategory.teaching_unit,
   Institution: OrganizationCategory.institution,
   InstitutionSubdivision: OrganizationCategory.institution_subdivision,
+  DoctoralSchool: OrganizationCategory.doctoral_school,
   UnitSubdivision: OrganizationCategory.unit_subdivision,
   Team: OrganizationCategory.team,
 }
@@ -48,6 +49,7 @@ const CATEGORY_BY_LABEL: Record<string, OrganizationCategory> = {
 const CATEGORY_BY_GENERIC_TYPE: Record<string, OrganizationCategory> = {
   institution: OrganizationCategory.institution,
   institution_subdivision: OrganizationCategory.institution_subdivision,
+  doctoral_school: OrganizationCategory.doctoral_school,
   unit_subdivision: OrganizationCategory.unit_subdivision,
   team: OrganizationCategory.team,
 }
@@ -78,6 +80,7 @@ const GENERIC_TYPE_BY_CATEGORY: Record<
 > = {
   institution: OrganizationGenericType.institution,
   institution_subdivision: OrganizationGenericType.institution_subdivision,
+  doctoral_school: OrganizationGenericType.doctoral_school,
   research_unit: OrganizationGenericType.unit,
   support_unit: OrganizationGenericType.unit,
   administrative_unit: OrganizationGenericType.unit,

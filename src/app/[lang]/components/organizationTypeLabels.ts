@@ -20,6 +20,7 @@ const NATIONAL_TYPE_LABELS: Record<string, MessageDescriptor> = {
   IRL: msg`organization_national_type_irl`,
   UFR: msg`organization_national_type_ufr`,
   FAC: msg`organization_national_type_fac`,
+  ED: msg`organization_national_type_ed`,
   TEAM: msg`organization_national_type_team`,
   THEME: msg`organization_national_type_theme`,
 }

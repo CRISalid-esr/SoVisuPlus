@@ -63,6 +63,7 @@ describe('OrganizationUnitGraphQLClient hydration', () => {
     [['OrganizationUnit', 'Unit', 'TeachingUnit'], 'teaching_unit'],
     [['OrganizationUnit', 'Institution'], 'institution'],
     [['OrganizationUnit', 'InstitutionSubdivision'], 'institution_subdivision'],
+    [['OrganizationUnit', 'DoctoralSchool'], 'doctoral_school'],
     [['OrganizationUnit', 'UnitSubdivision'], 'unit_subdivision'],
     [['OrganizationUnit', 'Team'], 'team'],
   ])('derives the category from labels %j → %s', (types, category) => {

@@ -552,6 +552,7 @@ model OrcidIdentifier {
 enum OrganizationGenericType {
   institution
   institution_subdivision
+  doctoral_school
   unit
   unit_subdivision
   team
@@ -561,6 +562,7 @@ enum OrganizationGenericType {
 enum OrganizationCategory {
   institution
   institution_subdivision
+  doctoral_school
   research_unit
   support_unit
   administrative_unit
