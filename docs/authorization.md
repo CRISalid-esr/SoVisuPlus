@@ -170,6 +170,38 @@ npm run seed:self-scoped-default:js
 
 ---
 
+## 5) Manually create a user
+
+Creates a person (with a `local` identifier and uid `local-<username>`), the attached user account,
+and grants the default self-scoped roles — so the user can sign in through Keycloak
+(matched on `preferred_username`) before their person arrives through AMQP.
+
+```bash
+npm run create_user -- \
+  --username jdupont \
+  --first-name Jean \
+  --last-name Dupont \
+  [--email jean.dupont@my-univ.fr] \
+  [--display-name "Jean Dupont"] \
+  [--role admin]
+```
+
+- `--username` — the local username (an EPPN like `jdupont@my-univ.fr` is reduced to its local part, mirroring the sign-in behaviour)
+- `--role` — optional, repeatable; assigns additional **global** roles (use `npm run assign_role` for scoped assignments)
+- Self-scoped roles come from `DEFAULT_SELF_SCOPED_ROLES` (defaults: `document_editor`, `document_fetcher`, `document_merger`)
+
+The command is **idempotent**. When the same person is later synced through AMQP,
+the graph message carries the same uid (`local-<username>`), so it updates the
+provisioned row in place — the user account and role assignments are preserved.
+
+In production (compiled image):
+
+```bash
+npm run create_user:js -- --username jdupont --first-name Jean --last-name Dupont
+```
+
+---
+
 ## Development
 
 ### Example: add a new permission to **fetch documents** for a **Person**

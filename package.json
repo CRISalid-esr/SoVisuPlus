@@ -26,6 +26,8 @@
     "init_roles:js": "node dist-listener/src/scripts/init_roles.js",
     "assign_role": "ts-node --project tsconfig.listener.json src/scripts/assign_role.ts",
     "assign_role:js": "node dist-listener/src/scripts/assign_role.js",
+    "create_user": "ts-node --project tsconfig.listener.json src/scripts/create_user.ts",
+    "create_user:js": "node dist-listener/src/scripts/create_user.js",
     "seed:self-scoped-defaults": "ts-node --project tsconfig.listener.json src/scripts/seed_self_scoped_defaults.ts",
     "seed:self-scoped-defaults:js": "node dist-listener/src/scripts/seed_self_scoped_defaults.js",
     "dispatch_actions": "ts-node --project tsconfig.listener.json src/scripts/dispatch_actions.ts",
