@@ -19,6 +19,7 @@ import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
 import { OrganizationGroup } from '@/types/IAgent'
 import { SourcePersonDAO } from '@/lib/daos/SourcePersonDAO'
 import { SourcePerson } from '@/types/SourcePerson'
+import { StructureMember } from '@/types/StructureMember'
 import removeAccents from 'remove-accents'
 import { ORCIDIdentifier, OrcidOAuthData } from '@/types/OrcidIdentifier'
 import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
@@ -786,6 +787,63 @@ export class PersonDAO extends AbstractDAO {
     })
 
     return people.map((person) => Person.fromDbPerson(person))
+  }
+
+  /**
+   * People directly attached to a structure: Membership rows for research
+   * structures, Employment rows for institutions. Returns the link dates and
+   * the person's identifiers; KPI fields are left for the service to fill.
+   */
+  public async fetchStructureMembers(
+    organizationUid: string,
+    kind: 'membership' | 'employment',
+  ): Promise<StructureMember[]> {
+    const where = { organizationUnit: { uid: organizationUid } }
+    const select = {
+      startDate: true,
+      endDate: true,
+      positionCode: true,
+      person: {
+        select: {
+          id: true,
+          uid: true,
+          slug: true,
+          displayName: true,
+          firstName: true,
+          lastName: true,
+          identifiers: { select: { type: true, value: true } },
+        },
+      },
+    } as const
+    const rows =
+      kind === 'employment'
+        ? await this.prismaClient.employment.findMany({ where, select })
+        : await this.prismaClient.membership.findMany({ where, select })
+    return rows.map(StructureMember.fromDb)
+  }
+
+  /**
+   * First non-null employment position code per person. Most people have a
+   * single employment; when there are several, the first row wins.
+   */
+  public async fetchFirstEmploymentPositions(
+    personIds: number[],
+  ): Promise<Map<number, string>> {
+    if (personIds.length === 0) {
+      return new Map()
+    }
+    const rows = await this.prismaClient.employment.findMany({
+      where: { personId: { in: personIds }, positionCode: { not: null } },
+      select: { personId: true, positionCode: true },
+      orderBy: { id: 'asc' },
+    })
+    const byPerson = new Map<number, string>()
+    for (const row of rows) {
+      if (!byPerson.has(row.personId)) {
+        byPerson.set(row.personId, row.positionCode!)
+      }
+    }
+    return byPerson
   }
 
   public async fetchPersonByUid(uid: string): Promise<Person | null> {

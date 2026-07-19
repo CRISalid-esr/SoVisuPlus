@@ -358,6 +358,17 @@ export class OrganizationUnitDAO extends AbstractDAO {
       : null
   }
 
+  /** Lightweight category lookup, without the directory includes. */
+  public async fetchCategoryByUid(
+    uid: string,
+  ): Promise<OrganizationCategory | null> {
+    const unit = await this.prismaClient.organizationUnit.findUnique({
+      where: { uid },
+      select: { category: true },
+    })
+    return unit?.category ?? null
+  }
+
   /**
    * All organization units with their labels and parent relationships —
    * the raw material of the research-structures directory. External and

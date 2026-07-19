@@ -6,13 +6,13 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import FileDownloadIcon from '@mui/icons-material/FileDownload'
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff'
+import TableChartIcon from '@mui/icons-material/TableChart'
 import TableRowsIcon from '@mui/icons-material/TableRows'
 import {
   Box,
   Button,
   CircularProgress,
   FormControlLabel,
-  LinearProgress,
   Switch,
   Tab,
   Tabs,
@@ -41,29 +41,9 @@ import {
   filterVisible,
   StructureRow,
 } from './components/directoryRows'
+import RateBar from './components/RateBar'
 import StructureNameCell from './components/StructureNameCell'
-
-function RateBar({ value, color }: { value: number; color: string }) {
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      <Box sx={{ width: 54 }}>
-        <LinearProgress
-          variant='determinate'
-          value={value}
-          sx={{
-            height: 6,
-            borderRadius: 3,
-            backgroundColor: 'action.disabledBackground',
-            '& .MuiLinearProgress-bar': { backgroundColor: color },
-          }}
-        />
-      </Box>
-      <Typography variant='caption' fontWeight='bold'>
-        {value > 0 ? `${value} %` : '—'}
-      </Typography>
-    </Box>
-  )
-}
+import StructureTreeExplorer from './components/StructureTreeExplorer'
 
 function exportToCsv(rows: StructureRow[]) {
   const headers = [
@@ -462,12 +442,17 @@ const ResearchStructuresPage = () => {
         sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}
       >
         <Tab
+          icon={<AccountTreeIcon fontSize='small' />}
+          iconPosition='start'
+          label={t`research_structures_tab_tree`}
+        />
+        <Tab
           icon={<TableRowsIcon fontSize='small' />}
           iconPosition='start'
           label={t`research_structures_tab_flat`}
         />
         <Tab
-          icon={<AccountTreeIcon fontSize='small' />}
+          icon={<TableChartIcon fontSize='small' />}
           iconPosition='start'
           label={t`research_structures_tab_hierarchical`}
         />
@@ -479,8 +464,15 @@ const ResearchStructuresPage = () => {
         </Box>
       ) : (
         <>
-          {tab === 0 && <FlatTable data={visibleRows} {...tableProps} />}
-          {tab === 1 && (
+          {tab === 0 && (
+            <StructureTreeExplorer
+              data={rows}
+              includeExternal={includeExternal}
+              onNavigate={navigateToDashboard}
+            />
+          )}
+          {tab === 1 && <FlatTable data={visibleRows} {...tableProps} />}
+          {tab === 2 && (
             <TreeTable
               data={rows}
               includeExternal={includeExternal}
