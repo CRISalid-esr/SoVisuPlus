@@ -6,6 +6,7 @@ import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { StructureMember } from '@/types/StructureMember'
+import { employeeTypeLabel } from '@/lib/employeeTypes'
 import removeAccents from 'remove-accents'
 import { OrganizationDirectoryEntry } from '@/types/OrganizationDirectory'
 import { Literal } from '@/types/Literal'
@@ -43,6 +44,7 @@ const isOpenAccess = (document: {
 
 export const STRUCTURE_MEMBER_SORT_KEYS = [
   'name',
+  'position',
   'startDate',
   'endDate',
   'publicationsCount',
@@ -226,7 +228,8 @@ export class OrganizationUnitService {
       category === OrganizationCategory.institution
         ? 'employment'
         : 'membership'
-    let members = await new PersonDAO().fetchStructureMembers(query.uid, kind)
+    const personDAO = new PersonDAO()
+    let members = await personDAO.fetchStructureMembers(query.uid, kind)
 
     if (query.present) {
       const today = new Date().toISOString().slice(0, 10)
@@ -243,6 +246,21 @@ export class OrganizationUnitService {
           .toLowerCase()
           .includes(search),
       )
+    }
+
+    // Position: the corps code of the member's employment — the row itself
+    // for institutions, the person's first employment otherwise (memberships
+    // carry no position). A person rarely has several employments; when they
+    // do, the first row wins.
+    const withoutPosition = members
+      .filter((member) => member.positionCode === null)
+      .map((member) => member.personId)
+    const positionByPersonId =
+      await personDAO.fetchFirstEmploymentPositions(withoutPosition)
+    for (const member of members) {
+      const code =
+        member.positionCode ?? positionByPersonId.get(member.personId) ?? null
+      member.position = code === null ? null : employeeTypeLabel(code)
     }
 
     if (members.length > 0) {
@@ -293,6 +311,17 @@ export class OrganizationUnitService {
     }
     members.sort((a, b) => {
       switch (query.sortBy) {
+        case 'position':
+          if (a.position === b.position) return 0
+          // members without a position sink to the bottom either way
+          if (a.position === null) return 1
+          if (b.position === null) return -1
+          return (
+            direction *
+            a.position.localeCompare(b.position, undefined, {
+              sensitivity: 'base',
+            })
+          )
         case 'startDate':
           return compareNullableDates(a.startDate, b.startDate)
         case 'endDate':

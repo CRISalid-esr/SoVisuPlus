@@ -7,6 +7,7 @@ export interface StructureMemberJson {
   displayName: string
   startDate: string | null
   endDate: string | null
+  position: string | null
   publicationsCount: number
   oaRate: number
   halRate: number
@@ -25,6 +26,8 @@ export class StructureMember {
   public publicationsCount = 0
   public oaRate = 0
   public halRate = 0
+  /** Position label resolved by the service from the corps code. */
+  public position: string | null = null
 
   constructor(
     public personId: number,
@@ -36,12 +39,15 @@ export class StructureMember {
     /** ISO date (yyyy-mm-dd) or null when the ETL has no date yet. */
     public startDate: string | null,
     public endDate: string | null,
+    /** Raw corps code of the row this member came from (employments only). */
+    public positionCode: string | null,
     public identifiers: PersonIdentifier[],
   ) {}
 
   static fromDb(row: {
     startDate: Date | null
     endDate: Date | null
+    positionCode: string | null
     person: {
       id: number
       uid: string
@@ -65,6 +71,7 @@ export class StructureMember {
       person.lastName ?? '',
       toIsoDate(row.startDate),
       toIsoDate(row.endDate),
+      row.positionCode,
       person.identifiers
         .filter((identifier) => identifier.value.trim() !== '')
         .map(
@@ -81,6 +88,7 @@ export class StructureMember {
       displayName: this.displayName,
       startDate: this.startDate,
       endDate: this.endDate,
+      position: this.position,
       publicationsCount: this.publicationsCount,
       oaRate: this.oaRate,
       halRate: this.halRate,

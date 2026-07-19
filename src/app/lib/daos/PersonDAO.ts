@@ -802,6 +802,7 @@ export class PersonDAO extends AbstractDAO {
     const select = {
       startDate: true,
       endDate: true,
+      positionCode: true,
       person: {
         select: {
           id: true,
@@ -819,6 +820,30 @@ export class PersonDAO extends AbstractDAO {
         ? await this.prismaClient.employment.findMany({ where, select })
         : await this.prismaClient.membership.findMany({ where, select })
     return rows.map(StructureMember.fromDb)
+  }
+
+  /**
+   * First non-null employment position code per person. Most people have a
+   * single employment; when there are several, the first row wins.
+   */
+  public async fetchFirstEmploymentPositions(
+    personIds: number[],
+  ): Promise<Map<number, string>> {
+    if (personIds.length === 0) {
+      return new Map()
+    }
+    const rows = await this.prismaClient.employment.findMany({
+      where: { personId: { in: personIds }, positionCode: { not: null } },
+      select: { personId: true, positionCode: true },
+      orderBy: { id: 'asc' },
+    })
+    const byPerson = new Map<number, string>()
+    for (const row of rows) {
+      if (!byPerson.has(row.personId)) {
+        byPerson.set(row.personId, row.positionCode!)
+      }
+    }
+    return byPerson
   }
 
   public async fetchPersonByUid(uid: string): Promise<Person | null> {

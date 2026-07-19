@@ -168,6 +168,20 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
         },
       },
       {
+        id: 'position',
+        accessorKey: 'position',
+        header: t`research_structures_members_column_position`,
+        size: 160,
+        grow: 1,
+        Cell({ row }) {
+          return (
+            <Typography variant='body2'>
+              {row.original.position ?? '—'}
+            </Typography>
+          )
+        },
+      },
+      {
         id: 'startDate',
         accessorKey: 'startDate',
         header: t`research_structures_members_column_arrival`,

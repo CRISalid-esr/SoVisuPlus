@@ -185,7 +185,11 @@ describe('OrganizationUnitService.getStructureMembers (integration)', () => {
       data: { personId: elodie.id, organizationUnitId: ru1!.id },
     })
     await prisma.employment.create({
-      data: { personId: elodie.id, organizationUnitId: up1!.id },
+      data: {
+        personId: elodie.id,
+        organizationUnitId: up1!.id,
+        positionCode: 'MCF',
+      },
     })
 
     // Bob: departed member of ru1 (endDate in the past), no employment
@@ -241,6 +245,8 @@ describe('OrganizationUnitService.getStructureMembers (integration)', () => {
     expect(member.oaRate).toBe(100)
     expect(member.halRate).toBe(100)
     expect(member.identifiers.map((i) => i.type)).toEqual(['idref'])
+    // membership row carries no position: resolved from the employment
+    expect(member.position).toBe('Maître de conférences')
   })
 
   it('includes departed members when present is off, sorted by name', async () => {
@@ -255,6 +261,8 @@ describe('OrganizationUnitService.getStructureMembers (integration)', () => {
     expect(bob.startDate).toBe('2015-01-01')
     expect(bob.endDate).toBe('2020-12-31')
     expect(bob.publicationsCount).toBe(0)
+    // no employment anywhere: no position
+    expect(bob.position).toBeNull()
   })
 
   it('lists employments for institutions, not child-unit memberships', async () => {
@@ -264,6 +272,8 @@ describe('OrganizationUnitService.getStructureMembers (integration)', () => {
       present: false,
     })
     expect(result!.members.map((m) => m.uid)).toEqual(['p-elodie'])
+    // position comes straight from the employment row's corps code
+    expect(result!.members[0].position).toBe('Maître de conférences')
   })
 
   it('searches names without case or diacritics sensitivity', async () => {
