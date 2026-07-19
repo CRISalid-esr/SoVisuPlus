@@ -17,6 +17,7 @@ import { useTheme } from '@mui/material/styles'
 import { nationalTypeLabel } from '@/app/[lang]/components/organizationTypeLabels'
 import { StructureRow } from './directoryRows'
 import RateBar from './RateBar'
+import StructureMembersTable from './StructureMembersTable'
 
 const Kpi = ({
   label,
@@ -34,8 +35,8 @@ const Kpi = ({
 )
 
 /**
- * Right panel of the Arborescence view: header, KPIs and direct children of
- * the selected structure. A members section will be added below later.
+ * Right panel of the Arborescence view: header, KPIs, direct children and
+ * members of the selected structure.
  */
 const StructureDetail = ({
   row,
@@ -143,6 +144,17 @@ const StructureDetail = ({
           </List>
         </Box>
       )}
+
+      <Box>
+        <Typography variant='h6' sx={{ mb: 1 }}>
+          {t`research_structures_members_title`}
+        </Typography>
+        {/* Keyed by structure so pagination/sorting reset on selection change */}
+        <StructureMembersTable
+          key={row.originalUid ?? row.uid}
+          structureUid={row.originalUid ?? row.uid}
+        />
+      </Box>
     </Stack>
   )
 }

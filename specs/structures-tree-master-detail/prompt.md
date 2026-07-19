@@ -53,7 +53,7 @@ Master-detail layout filling the available height.
   - KPI cards: members count, publications count, OA rate and HAL rate (reuse `RateBar`).
   - Direct children: if the selected structure has `subRows`, list them (simple list or small
     table); clicking a child selects it in the tree and expands the path to it.
-  - Leave vertical space below — a members list will be added later.
+  - Members table (phase 2, below the children list) — see next section.
 
 ### Behavior details
 
@@ -69,6 +69,65 @@ Master-detail layout filling the available height.
   behavior.
 - The page-level "include external" switch keeps applying to the Arborescence view (it feeds
   `buildDirectoryForest` already).
+
+## Members table (phase 2)
+
+A paginated members table at the bottom of the detail panel showing the people attached to the
+selected structure.
+
+### Who is listed
+
+- **`OrganizationCategory.institution`** → people with an **`Employment`** row on the
+  institution (NOT the memberships of included structures).
+- **Every other category** → people with a **direct `Membership`** row on the structure itself
+  (no perimeter/sub-structure aggregation — children's members are seen by selecting the
+  child). The count may therefore be smaller than the KPI card's `membersCount`, which uses
+  the directory perimeter rules.
+
+### "Actuellement présents" switch
+
+Above the table, default **ON**. A person is present when the membership/employment `endDate`
+is null **or** in the future. Start/end dates are mostly missing in today's data, so with the
+switch on everyone shows — the filter becomes meaningful when the ETL provides dates.
+
+### Table
+
+Material React Table with **server-side** pagination (10/20/50, default 10), sorting and
+name search (manual\* flags + `rowCount`, following the publications-table pattern). Columns:
+
+| Column       | Content                                                                                                                                                     | Sortable                  |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| Name         | Display name, linking to `/[lang]/dashboard?perspective=<slug>` when the person has a slug                                                                  | yes (lastName, firstName) |
+| Arrival      | membership/employment `startDate`, locale-formatted, `—` when null                                                                                          | yes (nulls last)          |
+| Departure    | `endDate`, same formatting                                                                                                                                  | yes (nulls last)          |
+| Publications | count over the directory KPI window, linking to `/[lang]/documents?perspective=<slug>` (the `perspective` query param is resolved globally by `MainLayout`) | yes                       |
+| HAL          | `RateBar`, same computation as the structure KPIs but for the single person                                                                                 | yes                       |
+| OA           | `RateBar`, idem                                                                                                                                             | yes                       |
+| Identifiers  | icon links via `PersonIdentifier.getIcon()`/`getUrl()` — orcid, idref, idhals/idhali                                                                        | no                        |
+
+### Backend
+
+- **API**: `GET /api/organizations/[uid]/members?page&pageSize&present&search&sortBy&sortDesc`
+  → `{ members: StructureMemberJson[], total }`. No auth check, consistent with
+  `/api/organizations/directory`.
+- **Service**: `OrganizationUnitService.getStructureMembers(...)` — resolves the structure's
+  category, picks the employment/membership source, applies the present filter and the
+  (case/diacritics-insensitive) name search, computes per-person publications/OA/HAL KPIs by
+  reusing `DocumentDAO.fetchDocumentStatsSince` over the same 24-month window as the
+  directory, sorts, then paginates in memory (member sets are at most a few thousand rows).
+- **DAO**: `PersonDAO.fetchStructureMembers(orgUid, kind)` — the only Prisma access; maps to a
+  new `StructureMember` domain class (`src/app/types/StructureMember.ts`) carrying person
+  fields, link dates (ISO strings), identifiers and KPI slots.
+- **Store**: `organizationUnitSlice` gains `members` state + `fetchStructureMembers` action;
+  the table component drives pagination/sorting state and re-fetches through the store.
+
+### Decisions (confirmed)
+
+1. Direct members only for non-institutions (no perimeter aggregation).
+2. Server-side pagination/sorting/search.
+3. Present switch defaults ON; null `endDate` counts as present.
+4. Employments apply to the `institution` category only; `institution_subdivision` and the
+   rest list memberships.
 
 ## Decisions
 

@@ -19,6 +19,7 @@ import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
 import { OrganizationGroup } from '@/types/IAgent'
 import { SourcePersonDAO } from '@/lib/daos/SourcePersonDAO'
 import { SourcePerson } from '@/types/SourcePerson'
+import { StructureMember } from '@/types/StructureMember'
 import removeAccents from 'remove-accents'
 import { ORCIDIdentifier, OrcidOAuthData } from '@/types/OrcidIdentifier'
 import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
@@ -786,6 +787,38 @@ export class PersonDAO extends AbstractDAO {
     })
 
     return people.map((person) => Person.fromDbPerson(person))
+  }
+
+  /**
+   * People directly attached to a structure: Membership rows for research
+   * structures, Employment rows for institutions. Returns the link dates and
+   * the person's identifiers; KPI fields are left for the service to fill.
+   */
+  public async fetchStructureMembers(
+    organizationUid: string,
+    kind: 'membership' | 'employment',
+  ): Promise<StructureMember[]> {
+    const where = { organizationUnit: { uid: organizationUid } }
+    const select = {
+      startDate: true,
+      endDate: true,
+      person: {
+        select: {
+          id: true,
+          uid: true,
+          slug: true,
+          displayName: true,
+          firstName: true,
+          lastName: true,
+          identifiers: { select: { type: true, value: true } },
+        },
+      },
+    } as const
+    const rows =
+      kind === 'employment'
+        ? await this.prismaClient.employment.findMany({ where, select })
+        : await this.prismaClient.membership.findMany({ where, select })
+    return rows.map(StructureMember.fromDb)
   }
 
   public async fetchPersonByUid(uid: string): Promise<Person | null> {
