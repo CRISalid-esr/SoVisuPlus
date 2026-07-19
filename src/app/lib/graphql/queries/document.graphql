@@ -60,14 +60,33 @@ query Documents($where: DocumentWhere) {
             value
           }
         }
-        memberships {
-          uid
-          acronym
-          names {
-            language
-            value
+        membershipsConnection {
+          edges {
+            properties {
+              start_date
+              end_date
+              position_code
+            }
+            node {
+              uid
+              external
+              generic_type
+              national_type
+              types
+              identifiers {
+                type
+                value
+              }
+              short_labels {
+                language
+                value
+              }
+              long_labels {
+                language
+                value
+              }
+            }
           }
-          types
         }
         recorded_by {
           uid
