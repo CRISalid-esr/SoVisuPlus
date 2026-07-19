@@ -14,6 +14,21 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:56
+msgid "user_action_outcome_technical_details"
+msgstr "Technical details"
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:84
+msgid "user_action_outcome_details_copied"
+msgstr "Copied!"
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:86
+msgid "user_action_outcome_copy_details"
+msgstr "Copy details"
+
+#. js-lingui-explicit-id
 #: src/app/lib/websocket/changeWarningMessages.tsx:22
 msgid "user_action_warning_unresolvable_person"
 msgstr "Contributor {displayName} could not be identified and was skipped"
@@ -42,21 +57,6 @@ msgstr "An affiliation without a usable identifier was skipped"
 #: src/app/lib/websocket/changeWarningMessages.tsx:52
 msgid "user_action_warning_unknown"
 msgstr "An item could not be applied"
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:56
-msgid "user_action_outcome_technical_details"
-msgstr "Technical details"
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:84
-msgid "user_action_outcome_details_copied"
-msgstr "Copied!"
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:86
-msgid "user_action_outcome_copy_details"
-msgstr "Copy details"
 
 #. js-lingui-explicit-id
 #: src/app/lib/websocket/WebSocketListener.tsx:114
@@ -95,16 +95,6 @@ msgid "snackbar_user_action_applied_with_warnings"
 msgstr "Change saved with warnings:"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/forbidden.tsx:43
-msgid "forbidden_page_back_home"
-msgstr "Back to home page"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/forbidden.tsx:108
-msgid "forbidden_page_description"
-msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/not-found.tsx:45
 msgid "notfound_page_back_home"
 msgstr "Back to home page"
@@ -113,6 +103,16 @@ msgstr "Back to home page"
 #: src/app/[lang]/not-found.tsx:110
 msgid "notfound_page_description"
 msgstr "We couldn't find the page you were looking for. If you reached this page unexpectedly, please contact us at following <0>email adress</0>."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:43
+msgid "forbidden_page_back_home"
+msgstr "Back to home page"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:108
+msgid "forbidden_page_description"
+msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:169
@@ -160,16 +160,6 @@ msgid "document_details_page_frozen_notice"
 msgstr "This document is waiting to be updated from the graph and cannot be edited right now."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
-msgid "document_details_page_source_tab_card_title"
-msgstr "Sources"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
-msgid "document_details_page_update_in_hal_tab_card_title"
-msgstr "Update in HAL"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:105
 msgid "document_details_page_keywords_tab_card_title"
 msgstr "Keywords"
@@ -205,14 +195,19 @@ msgid "concept_chip_action_delete"
 msgstr "Delete"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
+msgid "document_details_page_source_tab_card_title"
+msgstr "Sources"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
+msgid "document_details_page_update_in_hal_tab_card_title"
+msgstr "Update in HAL"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
 msgid "document_details_page_add_in_hal_tab_card_title"
 msgstr "Add in HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr "Disciplines"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
@@ -245,6 +240,11 @@ msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr "Disciplines"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:402
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:413
 msgid "document_details_page_source_tab_select_action_label"
@@ -261,24 +261,9 @@ msgid "document_details_page_source_tab_select_action_unmerge_label"
 msgstr "Dissociate"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:114
-msgid "document_details_page_publication_date_update_success"
-msgstr "Publication date updated."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:116
-msgid "document_details_page_publication_date_update_failure"
-msgstr "Failed to update publication date."
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:91
 msgid "documents_details_page_authors_tab_title"
 msgstr "Authors"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
-msgid "document_details_page_card_title"
-msgstr "Bibliographic information"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
@@ -290,6 +275,21 @@ msgstr "Bibliographic information updated."
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
 msgid "bibliographic_information_update_failure"
 msgstr "Failed to update bibliographic information."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:114
+msgid "document_details_page_publication_date_update_success"
+msgstr "Publication date updated."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:116
+msgid "document_details_page_publication_date_update_failure"
+msgstr "Failed to update publication date."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
+msgid "document_details_page_card_title"
+msgstr "Bibliographic information"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
@@ -322,16 +322,6 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "A new expertise is awaiting validation"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:34
-msgid "profile_identifiers_card_title"
-msgstr "My identifiers"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:36
-msgid "profile_identifiers_card_title_other"
-msgstr "Identifiers"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:34
 msgid "profile_affiliations_card_title"
 msgstr "My affiliations"
@@ -342,6 +332,16 @@ msgid "profile_affiliations_card_title_other"
 msgstr "Affiliations"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:34
+msgid "profile_identifiers_card_title"
+msgstr "My identifiers"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:36
+msgid "profile_identifiers_card_title_other"
+msgstr "Identifiers"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
 msgid "hal_button_update_identifier"
 msgstr "Link my Hal identifier"
@@ -350,6 +350,41 @@ msgstr "Link my Hal identifier"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
 msgid "hal_button_provide_identifier"
 msgstr "Provide my Hal identifier"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
+msgid "orcid_permission_read_limited"
+msgstr "Read your information with visibility set to 'Trusted Organizations'"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:49
+msgid "orcid_permission_activities_update"
+msgstr "Create or update your research activities (publications, etc.)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
+msgid "orcid_permission_person_update"
+msgstr "Update your biographical information (name, affiliation, etc.)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:163
+msgid "orcid_permissions_intro"
+msgstr "Here are the permissions you are granting to {institutionName} on your ORCID profile:"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:179
+msgid "orcid_permissions_none"
+msgstr "You are not granting any permissions to {institutionName}."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:215
+msgid "orcid_button_update_identifier"
+msgstr "Update ORCID authorizations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
+msgid "orcid_button_provide_identifier"
+msgstr "Sign-in to ORCID"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:120
@@ -453,39 +488,9 @@ msgid "orcid_control_remove_dialog_confirm"
 msgstr "Remove"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
-msgid "orcid_permission_read_limited"
-msgstr "Read your information with visibility set to 'Trusted Organizations'"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:49
-msgid "orcid_permission_activities_update"
-msgstr "Create or update your research activities (publications, etc.)"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
-msgid "orcid_permission_person_update"
-msgstr "Update your biographical information (name, affiliation, etc.)"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:163
-msgid "orcid_permissions_intro"
-msgstr "Here are the permissions you are granting to {institutionName} on your ORCID profile:"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:179
-msgid "orcid_permissions_none"
-msgstr "You are not granting any permissions to {institutionName}."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:215
-msgid "orcid_button_update_identifier"
-msgstr "Update ORCID authorizations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
-msgid "orcid_button_provide_identifier"
-msgstr "Sign-in to ORCID"
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
+msgid "profile_affiliations_no_units"
+msgstr "No related research unit"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
@@ -521,11 +526,6 @@ msgstr "No signature"
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
 msgid "profile_affiliations_signature_copied_message_confirmation"
 msgstr "Signature added to clipboard."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
-msgid "profile_affiliations_no_units"
-msgstr "No related research unit"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:138
@@ -2311,15 +2311,7 @@ msgstr "Research unit (UR)"
 msgid "account_page_profile_tab"
 msgstr "Profile"
 
-#: src/app/[lang]/research-structures/components/StructureNameCell.tsx:51
-msgid "research_structures_chip_attachment"
-msgstr "attachment"
-
-#: src/app/[lang]/research-structures/components/StructureNameCell.tsx:50
-msgid "research_structures_chip_co_supervision"
-msgstr "co-supervision"
-
-#: src/app/[lang]/research-structures/components/StructureNameCell.tsx:106
+#: src/app/[lang]/research-structures/components/StructureNameCell.tsx:52
 msgid "research_structures_chip_external"
 msgstr "external"
 
@@ -2340,7 +2332,7 @@ msgstr "Publications"
 
 #: src/app/[lang]/research-structures/page.tsx:70
 #: src/app/[lang]/research-structures/page.tsx:208
-#: src/app/[lang]/research-structures/page.tsx:311
+#: src/app/[lang]/research-structures/page.tsx:319
 msgid "research_structures_column_structure"
 msgstr "Structure"
 
@@ -2356,11 +2348,11 @@ msgstr "Type"
 msgid "research_structures_dashboard_link"
 msgstr "Dashboard"
 
-#: src/app/[lang]/research-structures/page.tsx:428
+#: src/app/[lang]/research-structures/page.tsx:435
 msgid "research_structures_export"
 msgstr "Export"
 
-#: src/app/[lang]/research-structures/page.tsx:422
+#: src/app/[lang]/research-structures/page.tsx:429
 msgid "research_structures_page_title"
 msgstr "Research structures"
 
@@ -2372,23 +2364,23 @@ msgstr "Last 24 months"
 msgid "research_structures_reset_filters"
 msgstr "Reset filters"
 
-#: src/app/[lang]/research-structures/page.tsx:447
+#: src/app/[lang]/research-structures/page.tsx:454
 msgid "research_structures_switch_display_old"
 msgstr "Display old structures"
 
-#: src/app/[lang]/research-structures/page.tsx:443
+#: src/app/[lang]/research-structures/page.tsx:450
 msgid "research_structures_switch_display_old_tooltip"
 msgstr "Available once structure lifecycle data is provided by the graph"
 
-#: src/app/[lang]/research-structures/page.tsx:441
+#: src/app/[lang]/research-structures/page.tsx:448
 msgid "research_structures_switch_include_external"
 msgstr "Include external institutions"
 
-#: src/app/[lang]/research-structures/page.tsx:460
+#: src/app/[lang]/research-structures/page.tsx:467
 msgid "research_structures_tab_flat"
 msgstr "Flat view"
 
-#: src/app/[lang]/research-structures/page.tsx:465
+#: src/app/[lang]/research-structures/page.tsx:472
 msgid "research_structures_tab_hierarchical"
 msgstr "Hierarchical view"
 
@@ -2402,19 +2394,18 @@ msgstr "see less co-authors"
 msgid "see_more_contributors"
 msgstr "see more co-authors"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:439
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:438
 msgid "side_bar_dashboard"
 msgstr "Dashboard"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:488
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:487
 msgid "side_bar_documents"
 msgstr "Publications"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:537
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:536
 msgid "side_bar_expertise"
 msgstr "Expertise"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:648
 #: src/app/[lang]/laboratories/page.tsx:9
 msgid "side_bar_laboratories"
 msgstr "Laboratories"
@@ -2427,12 +2418,12 @@ msgstr "Account manager"
 msgid "side_bar_my_research_activities"
 msgstr "Research activities"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:598
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:597
 msgid "side_bar_research_structures"
 msgstr "Structures"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:961
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:1049
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:910
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:998
 msgid "sidebar_account"
 msgstr "See my account"
 
@@ -2440,12 +2431,12 @@ msgstr "See my account"
 msgid "sidebar_back_to_my_perspective"
 msgstr "Back to my page"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:866
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:815
 msgid "sidebar_help_button"
 msgstr "Help"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:986
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:1074
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:935
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:1023
 msgid "sidebar_logout"
 msgstr "Logout"
 
@@ -2485,18 +2476,18 @@ msgstr "Teams"
 msgid "sidebar_search_unknown_label"
 msgstr "N/C"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:133
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:156
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:725
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:132
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:155
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:674
 msgid "sidebar_theme_dark"
 msgstr "Dark theme"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:110
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:706
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:109
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:655
 msgid "sidebar_theme_light"
 msgstr "Light theme"
 
-#: src/app/[lang]/components/Sidebar/Sidebar.tsx:744
+#: src/app/[lang]/components/Sidebar/Sidebar.tsx:693
 msgid "sidebar_theme_system"
 msgstr "Auto Theme"
 
