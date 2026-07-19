@@ -36,7 +36,7 @@ import useStore from '@/stores/global_store'
 import { Localization } from '@/types/Localization'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import {
-  buildDirectoryDag,
+  buildDirectoryForest,
   buildRows,
   filterVisible,
   StructureRow,
@@ -293,16 +293,24 @@ function FlatTable({
 
 function TreeTable({
   data,
+  includeExternal,
   lang,
   theme,
   onNavigate,
 }: {
   data: StructureRow[]
+  includeExternal: boolean
   lang: ExtendedLanguageCode
   theme: Theme
   onNavigate: (row: StructureRow) => void
 }) {
-  const treeData = useMemo(() => buildDirectoryDag(data), [data])
+  // The forest is built on the full dataset: the external switch only
+  // decides which rows are rendered (with orphan promotion), not the
+  // topology.
+  const treeData = useMemo(
+    () => buildDirectoryForest(data, includeExternal),
+    [data, includeExternal],
+  )
 
   const columns = useMemo<MRT_ColumnDef<StructureRow>[]>(
     () => [
@@ -403,7 +411,6 @@ const ResearchStructuresPage = () => {
   )
 
   const tableProps = {
-    data: visibleRows,
     lang,
     theme,
     onNavigate: navigateToDashboard,
@@ -472,8 +479,14 @@ const ResearchStructuresPage = () => {
         </Box>
       ) : (
         <>
-          {tab === 0 && <FlatTable {...tableProps} />}
-          {tab === 1 && <TreeTable {...tableProps} />}
+          {tab === 0 && <FlatTable data={visibleRows} {...tableProps} />}
+          {tab === 1 && (
+            <TreeTable
+              data={rows}
+              includeExternal={includeExternal}
+              {...tableProps}
+            />
+          )}
         </>
       )}
     </Box>

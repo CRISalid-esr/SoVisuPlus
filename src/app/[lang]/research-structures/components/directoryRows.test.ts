@@ -1,5 +1,5 @@
 import {
-  buildDirectoryDag,
+  buildDirectoryForest,
   buildRows,
   filterVisible,
   StructureRow,
@@ -68,20 +68,28 @@ describe('buildRows', () => {
   })
 })
 
-describe('buildDirectoryDag', () => {
-  const dagRows = (entries: OrganizationDirectoryEntry[], external = true) =>
-    buildDirectoryDag(filterVisible(buildRows(entries, 'en'), external))
+describe('buildDirectoryForest', () => {
+  const forest = (
+    entries: OrganizationDirectoryEntry[],
+    includeExternal = true,
+  ) => buildDirectoryForest(buildRows(entries, 'en'), includeExternal)
 
   const flatten = (
     nodes: StructureRow[],
     depth = 0,
-  ): { uid: string; depth: number; isReference?: boolean }[] =>
+  ): { uid: string; originalUid: string | undefined; depth: number }[] =>
     nodes.flatMap((node) => [
-      { uid: node.uid, depth, isReference: node.isReference },
+      { uid: node.uid, originalUid: node.originalUid, depth },
       ...flatten(node.subRows ?? [], depth + 1),
     ])
 
-  it('places each structure under its primary parent and references elsewhere', () => {
+  const childUids = (node: StructureRow): string[] =>
+    (node.subRows ?? []).map((child) => child.originalUid!)
+
+  const findChild = (node: StructureRow, uid: string): StructureRow =>
+    node.subRows!.find((child) => child.originalUid === uid)!
+
+  it('expands a co-supervised unit fully under every supervising institution', () => {
     const entries = [
       institution('up1'),
       institution('cnrs'),
@@ -92,91 +100,192 @@ describe('buildDirectoryDag', () => {
           { parentUid: 'cnrs', kind: 'member_of', position: null },
         ],
       }),
+      makeEntry({
+        uid: 'team1',
+        category: OrganizationCategory.team,
+        genericType: OrganizationGenericType.team,
+        parents: [{ parentUid: 'ru1', kind: 'part_of', position: null }],
+      }),
     ]
-    const tree = dagRows(entries)
-    const all = flatten(tree)
-
-    // fully expanded under the main supervision
-    expect(all).toContainEqual({ uid: 'ru1', depth: 1, isReference: undefined })
-    // reference node under the co-supervisor
-    const reference = all.find((node) => node.uid === 'ru1__ref__cnrs')
-    expect(reference).toMatchObject({ depth: 1, isReference: true })
+    const roots = forest(entries)
+    expect(roots.map((root) => root.uid).sort()).toEqual(['cnrs', 'up1'])
+    for (const root of roots) {
+      const ru1 = findChild(root, 'ru1')
+      expect(childUids(ru1)).toEqual(['team1'])
+    }
+    // row ids stay unique despite the duplication across roots
+    const ids = flatten(roots).map((node) => node.uid)
+    expect(new Set(ids).size).toBe(ids.length)
   })
 
-  it('prefers part_of over member_of for the primary placement', () => {
+  it('keeps a structure once per root, at its deepest part_of placement', () => {
     const entries = [
-      makeEntry({
-        uid: 'axis',
-        category: OrganizationCategory.unit_subdivision,
-        genericType: OrganizationGenericType.unit_subdivision,
-      }),
       institution('up1'),
+      makeEntry({
+        uid: 'dept',
+        category: OrganizationCategory.institution_subdivision,
+        genericType: OrganizationGenericType.institution_subdivision,
+        parents: [{ parentUid: 'up1', kind: 'part_of', position: null }],
+      }),
+      makeEntry({
+        uid: 'ru1',
+        parents: [
+          { parentUid: 'up1', kind: 'part_of', position: null },
+          { parentUid: 'dept', kind: 'part_of', position: null },
+        ],
+      }),
+    ]
+    const [up1] = forest(entries)
+    expect(childUids(up1)).toEqual(['dept'])
+    expect(childUids(findChild(up1, 'dept'))).toEqual(['ru1'])
+  })
+
+  it('places member_of attachments at their deepest path too', () => {
+    const entries = [
+      institution('up1'),
+      makeEntry({
+        uid: 'ed',
+        category: OrganizationCategory.doctoral_school,
+        genericType: OrganizationGenericType.doctoral_school,
+        parents: [{ parentUid: 'up1', kind: 'member_of', position: null }],
+      }),
+      makeEntry({
+        uid: 'ru1',
+        parents: [
+          { parentUid: 'up1', kind: 'member_of', position: null },
+          { parentUid: 'ed', kind: 'member_of', position: null },
+        ],
+      }),
+    ]
+    const [up1] = forest(entries)
+    expect(childUids(up1)).toEqual(['ed'])
+    expect(childUids(findChild(up1, 'ed'))).toEqual(['ru1'])
+  })
+
+  it('lets part_of placement win over a member_of alternative', () => {
+    const entries = [
+      institution('up1'),
+      makeEntry({
+        uid: 'ru1',
+        parents: [{ parentUid: 'up1', kind: 'member_of', position: null }],
+      }),
       makeEntry({
         uid: 'team1',
         category: OrganizationCategory.team,
         genericType: OrganizationGenericType.team,
         parents: [
           { parentUid: 'up1', kind: 'member_of', position: null },
-          { parentUid: 'axis', kind: 'part_of', position: null },
+          { parentUid: 'ru1', kind: 'part_of', position: null },
         ],
       }),
     ]
-    const tree = dagRows(entries)
-    const axis = tree.find((node) => node.uid === 'axis')!
-    expect(axis.subRows!.map((node) => node.uid)).toEqual(['team1'])
-    const up1 = tree.find((node) => node.uid === 'up1')!
-    expect(up1.subRows!.map((node) => node.uid)).toEqual(['team1__ref__up1'])
+    const [up1] = forest(entries)
+    expect(childUids(up1)).toEqual(['ru1'])
+    expect(childUids(findChild(up1, 'ru1'))).toEqual(['team1'])
   })
 
-  it('tags references under institutions as co-supervision, others as attachment', () => {
+  it('ignores main_supervision when a deeper path exists', () => {
     const entries = [
       institution('up1'),
       makeEntry({
-        uid: 'fac',
-        category: OrganizationCategory.institution_subdivision,
-        genericType: OrganizationGenericType.institution_subdivision,
+        uid: 'ed',
+        category: OrganizationCategory.doctoral_school,
+        genericType: OrganizationGenericType.doctoral_school,
+        parents: [{ parentUid: 'up1', kind: 'member_of', position: null }],
       }),
       makeEntry({
         uid: 'ru1',
-        parents: [
-          { parentUid: 'fac', kind: 'part_of', position: null },
-          { parentUid: 'up1', kind: 'member_of', position: null },
-        ],
-      }),
-      makeEntry({
-        uid: 'ru2',
         parents: [
           { parentUid: 'up1', kind: 'member_of', position: 'main_supervision' },
-          { parentUid: 'fac', kind: 'member_of', position: null },
+          { parentUid: 'ed', kind: 'member_of', position: null },
         ],
       }),
     ]
-    const tree = dagRows(entries)
-    const up1 = tree.find((node) => node.uid === 'up1')!
-    expect(
-      up1.subRows!.find((node) => node.uid === 'ru1__ref__up1')?.referenceKind,
-    ).toBe('co_supervision')
-    const fac = tree.find((node) => node.uid === 'fac')!
-    expect(
-      fac.subRows!.find((node) => node.uid === 'ru2__ref__fac')?.referenceKind,
-    ).toBe('attachment')
+    const [up1] = forest(entries)
+    expect(childUids(up1)).toEqual(['ed'])
+    expect(childUids(findChild(up1, 'ed'))).toEqual(['ru1'])
   })
 
-  it('recomputes placement against the visible set when externals are hidden', () => {
+  it('breaks equal-depth ties by data order', () => {
     const entries = [
-      institution('ror-x', true),
+      institution('up1'),
+      makeEntry({
+        uid: 'dept1',
+        parents: [{ parentUid: 'up1', kind: 'part_of', position: null }],
+      }),
+      makeEntry({
+        uid: 'dept2',
+        parents: [{ parentUid: 'up1', kind: 'part_of', position: null }],
+      }),
       makeEntry({
         uid: 'ru1',
-        parents: [{ parentUid: 'ror-x', kind: 'member_of', position: null }],
+        parents: [
+          { parentUid: 'dept1', kind: 'part_of', position: null },
+          { parentUid: 'dept2', kind: 'part_of', position: null },
+        ],
       }),
     ]
-    const withExternal = dagRows(entries, true)
-    expect(withExternal.map((node) => node.uid)).toEqual(['ror-x'])
-    expect(withExternal[0].subRows!.map((node) => node.uid)).toEqual(['ru1'])
+    const [up1] = forest(entries)
+    expect(childUids(findChild(up1, 'dept1'))).toEqual(['ru1'])
+    expect(findChild(up1, 'dept2').subRows).toBeUndefined()
+  })
 
-    const withoutExternal = dagRows(entries, false)
-    expect(withoutExternal.map((node) => node.uid)).toEqual(['ru1'])
-    expect(withoutExternal[0].subRows).toBeUndefined()
+  it('keeps external roots in the topology and shows them when the switch is on', () => {
+    const entries = [
+      institution('cnrs', true),
+      makeEntry({
+        uid: 'ru1',
+        parents: [{ parentUid: 'cnrs', kind: 'member_of', position: null }],
+      }),
+      makeEntry({
+        uid: 'team1',
+        category: OrganizationCategory.team,
+        genericType: OrganizationGenericType.team,
+        parents: [{ parentUid: 'ru1', kind: 'part_of', position: null }],
+      }),
+    ]
+    const roots = forest(entries, true)
+    expect(roots.map((root) => root.uid)).toEqual(['cnrs'])
+    expect(childUids(roots[0])).toEqual(['ru1'])
+  })
+
+  it('promotes internal structures stranded under hidden externals, with their subtree', () => {
+    const entries = [
+      institution('cnrs', true),
+      makeEntry({
+        uid: 'ru1',
+        parents: [{ parentUid: 'cnrs', kind: 'member_of', position: null }],
+      }),
+      makeEntry({
+        uid: 'team1',
+        category: OrganizationCategory.team,
+        genericType: OrganizationGenericType.team,
+        parents: [{ parentUid: 'ru1', kind: 'part_of', position: null }],
+      }),
+    ]
+    const roots = forest(entries, false)
+    expect(roots.map((root) => root.originalUid)).toEqual(['ru1'])
+    expect(childUids(roots[0])).toEqual(['team1'])
+  })
+
+  it('does not promote a structure already visible elsewhere', () => {
+    const entries = [
+      institution('up1'),
+      institution('cnrs', true),
+      makeEntry({
+        uid: 'ru1',
+        parents: [
+          { parentUid: 'up1', kind: 'member_of', position: null },
+          { parentUid: 'cnrs', kind: 'member_of', position: null },
+        ],
+      }),
+    ]
+    const roots = forest(entries, false)
+    expect(roots.map((root) => root.originalUid)).toEqual(['up1'])
+    const occurrences = flatten(roots).filter(
+      (node) => node.originalUid === 'ru1',
+    )
+    expect(occurrences).toHaveLength(1)
   })
 
   it('keeps orphans as roots and survives relationship cycles', () => {
@@ -191,12 +300,10 @@ describe('buildDirectoryDag', () => {
         parents: [{ parentUid: 'a', kind: 'part_of', position: null }],
       }),
     ]
-    const tree = dagRows(entries)
-    const rootUids = tree.map((node) => node.uid)
-    expect(rootUids).toContain('orphan')
-    // the cycle is rescued as a root instead of disappearing
-    expect(rootUids.some((uid) => uid === 'a' || uid === 'b')).toBe(true)
-    // and the expansion terminates
-    expect(flatten(tree).length).toBeLessThan(10)
+    const roots = forest(entries)
+    expect(roots.map((root) => root.originalUid)).toEqual(['orphan', 'a'])
+    // the cycle is rescued as a finite branch instead of disappearing
+    expect(childUids(roots[1])).toEqual(['b'])
+    expect(flatten(roots)).toHaveLength(3)
   })
 })
