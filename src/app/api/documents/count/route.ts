@@ -10,14 +10,7 @@ export const GET = async (req: NextRequest) => {
       urlParams.get('searchLang') ||
       process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0] ||
       ''
-    // The tabs share the search term but keep their own column filters, so
-    // each badge is counted against its own tab's set.
-    const allDocumentsFilters = JSON.parse(
-      urlParams.get('allDocumentsFilters') || '[]',
-    )
-    const outsideHalFilters = JSON.parse(
-      urlParams.get('outsideHalFilters') || '[]',
-    )
+    const columnFilters = JSON.parse(urlParams.get('columnFilters') || '[]')
     const contributorUid = urlParams.get('contributorUid') || ''
     const contributorType: AgentType | null = agentTypeFromString(
       urlParams.get('contributorType'),
@@ -25,6 +18,8 @@ export const GET = async (req: NextRequest) => {
     const halCollectionCodes = JSON.parse(
       urlParams.get('halCollectionCodes') || '[]',
     )
+    const areHalCollectionCodesOmitted =
+      urlParams.get('areHalCollectionCodesOmitted') === 'true'
 
     if (!contributorType) {
       return NextResponse.json(
@@ -34,20 +29,20 @@ export const GET = async (req: NextRequest) => {
     }
 
     const documentService = new DocumentService()
-    const { allItems, outsideHalItems } = await documentService.countDocuments({
+    // Same number the list route returns as `totalItems`, for a different set
+    // of filters — this endpoint serves the badge of a tab that is not on
+    // screen, so no rows are fetched.
+    const totalItems = await documentService.countDocuments({
       searchTerm,
       searchLang: searchlang,
-      allDocumentsFilters,
-      outsideHalFilters,
+      columnFilters,
       contributorUid,
       contributorType,
       halCollectionCodes,
+      areHalCollectionCodesOmitted,
     })
 
-    return NextResponse.json({
-      allItems,
-      outsideHalItems,
-    })
+    return NextResponse.json({ totalItems })
   } catch (error) {
     console.error('Error counting documents:', error)
     return NextResponse.json(

@@ -44,14 +44,14 @@ interface FetchDocumentsFromDBParams {
   areHalCollectionCodesOmitted: boolean
 }
 
+// Mirrors FetchDocumentsFromDBParams minus paging and sorting.
 interface CountDocumentsFromDBParams {
   searchTerm: string
   searchLang: string
-  // One filter set per tab — each badge counts what its own tab would list.
-  allDocumentsFilters: DbColumnFilters[]
-  outsideHalFilters: DbColumnFilters[]
+  columnFilters: DbColumnFilters[]
   contributorUids: string[]
   halCollectionCodes: string[]
+  areHalCollectionCodesOmitted: boolean
 }
 
 export class DocumentDAO extends AbstractDAO {
@@ -1112,39 +1112,18 @@ export class DocumentDAO extends AbstractDAO {
     }
   }
 
-  public async countDocuments(params: CountDocumentsFromDBParams): Promise<{
-    allItems: number
-    outsideHalItems: number
-  }> {
-    // One count per tab badge. The tabs share the search term but keep their
-    // own column filters, so each count gets its own set. The outside-HAL set
-    // already carries the tab's halStatus scope, applied by the caller through
-    // the same helper the list query uses — so a badge and its table can never
-    // disagree.
-    const { allDocumentsFilters, outsideHalFilters, ...base } = params
-
-    const allWhere = this.createFetchDocumentsWhere({
-      ...base,
-      columnFilters: allDocumentsFilters,
-      areHalCollectionCodesOmitted: false,
+  /**
+   * The count half of {@link fetchDocuments}: same where clause, no paging and
+   * no sorting. Used for the badge of a tab the user is not currently on — the
+   * active tab's badge comes from the `totalItems` the list query already
+   * returns.
+   */
+  public async countDocuments(
+    params: CountDocumentsFromDBParams,
+  ): Promise<number> {
+    return this.prismaClient.document.count({
+      where: this.createFetchDocumentsWhere(params),
     })
-    const outsideHalWhere = this.createFetchDocumentsWhere({
-      ...base,
-      columnFilters: outsideHalFilters,
-      areHalCollectionCodesOmitted: false,
-    })
-
-    const allItems = await this.prismaClient.document.count({
-      where: allWhere,
-    })
-    const outsideHalItems = await this.prismaClient.document.count({
-      where: outsideHalWhere,
-    })
-
-    return {
-      allItems,
-      outsideHalItems,
-    }
   }
 
   async fetchDocumentById(uid: string): Promise<Document | null> {

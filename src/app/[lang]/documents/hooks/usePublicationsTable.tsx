@@ -78,8 +78,8 @@ import {
   readInitialStructuresFilter,
 } from '@/app/[lang]/documents/hooks/documentTable/utils/persistence'
 import {
-  ALL_DOCUMENTS_TAB,
   OUTSIDE_HAL_TAB,
+  PUBLICATION_TABS,
 } from '@/app/[lang]/documents/hooks/documentTable/utils/tabs'
 import {
   HalStatusFilterValue,
@@ -311,6 +311,7 @@ const usePublicationsTableDataFetching = (
 
     const nextRequestId = ++requestIdRef.current
     fetchDocuments({
+      tab: selectedTab,
       page: pagination.pageIndex + 1,
       pageSize: pagination.pageSize,
       searchTerm: globalFilter,
@@ -340,24 +341,30 @@ const usePublicationsTableDataFetching = (
     triggerReloadList,
   ])
 
-  // Every badge is recounted whenever any tab's filters change, so an inactive
-  // tab's badge still reflects the filters that tab holds.
+  // Only the tabs the user is NOT on need counting: the selected tab's badge is
+  // fed by the totalItems the list query already returns. The inactive tabs are
+  // recounted too, because they share the search term and structures filter.
   useEffect(() => {
     const contributorType = currentPerspective?.type
     if (!contributorType) return
 
-    const nextCountDocumentsRequestId = ++countDocumentsRequestIdRef.current
-    countDocuments({
-      searchTerm: globalFilter,
-      searchLang: lang,
-      allDocumentsFilters: JSON.stringify(buildTabFilters(ALL_DOCUMENTS_TAB)),
-      outsideHalFilters: JSON.stringify(buildTabFilters(OUTSIDE_HAL_TAB)),
-      contributorUid: currentPerspective?.uid || '',
-      contributorType: contributorType,
-      requestId: nextCountDocumentsRequestId,
-      halCollectionCodes: JSON.stringify(currentPerspective.membershipAcronyms),
-    }).catch((error) => {
-      console.error('Error counting documents:', error)
+    PUBLICATION_TABS.filter((tab) => tab !== selectedTab).forEach((tab) => {
+      const nextCountDocumentsRequestId = ++countDocumentsRequestIdRef.current
+      countDocuments({
+        tab,
+        searchTerm: globalFilter,
+        searchLang: lang,
+        columnFilters: JSON.stringify(buildTabFilters(tab)),
+        contributorUid: currentPerspective?.uid || '',
+        contributorType: contributorType,
+        requestId: nextCountDocumentsRequestId,
+        halCollectionCodes: JSON.stringify(
+          currentPerspective.membershipAcronyms,
+        ),
+        areHalCollectionCodesOmitted: false,
+      }).catch((error) => {
+        console.error('Error counting documents:', error)
+      })
     })
   }, [
     buildTabFilters,
@@ -365,6 +372,7 @@ const usePublicationsTableDataFetching = (
     lang,
     countDocuments,
     currentPerspective,
+    selectedTab,
     triggerReloadList,
   ])
 }

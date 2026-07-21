@@ -90,7 +90,7 @@ const DocumentsPage = () => {
   const searchParams = useSearchParams()
 
   const {
-    count: { allItems, outsideHalItems },
+    count: { byTab: countByTab },
     listHasChanged,
     setListHasChanged,
     mergeDocuments,
@@ -100,13 +100,13 @@ const DocumentsPage = () => {
     {
       label: t`documents_page_all_documents_filter`,
       value: ALL_DOCUMENTS_TAB,
-      numberOfItems: allItems,
+      numberOfItems: countByTab[ALL_DOCUMENTS_TAB],
       color: theme.palette.primary.main,
     },
     {
       label: t`documents_page_incomplete_hal_repository_filter`,
       value: OUTSIDE_HAL_TAB,
-      numberOfItems: outsideHalItems,
+      numberOfItems: countByTab[OUTSIDE_HAL_TAB],
       color: theme.palette.error.main,
     },
   ]

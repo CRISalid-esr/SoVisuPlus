@@ -1481,43 +1481,35 @@ describe('DocumentDAO', () => {
     const countParams = {
       searchTerm: 'Sample',
       searchLang: 'en',
-      allDocumentsFilters: [{ id: 'titles', value: 'Sample Document Title' }],
-      outsideHalFilters: [{ id: 'halStatus', value: ['outside_hal'] }],
+      columnFilters: [{ id: 'titles', value: 'Sample Document Title' }],
       contributorUids: ['local-123'],
-      contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
     }
 
     const result = await documentDAO.countDocuments(countParams)
 
-    expect(result.allItems).toBe(1)
-    expect(result.outsideHalItems).toBe(1)
-    // One count per tab badge, no more.
-    expect(mockPrisma.document.count).toHaveBeenCalledTimes(2)
+    expect(result).toBe(1)
+    // One count for the one filter set it was given, no more.
+    expect(mockPrisma.document.count).toHaveBeenCalledTimes(1)
   })
 
-  it('counts each tab against its own filters', async () => {
+  it('builds the count where clause from the filters it is given', async () => {
     ;(mockPrisma.document.count as jest.Mock).mockResolvedValue(1)
 
     await documentDAO.countDocuments({
       searchTerm: '',
       searchLang: 'en',
-      allDocumentsFilters: [{ id: 'type', value: ['Book'] }],
-      outsideHalFilters: [{ id: 'halStatus', value: ['outside_hal'] }],
+      columnFilters: [{ id: 'halStatus', value: ['outside_hal'] }],
       contributorUids: ['local-123'],
       halCollectionCodes: [],
+      areHalCollectionCodesOmitted: false,
     })
 
-    const wheres = (mockPrisma.document.count as jest.Mock).mock.calls.map(
-      ([{ where }]) => JSON.stringify(where),
-    )
+    const [{ where }] = (mockPrisma.document.count as jest.Mock).mock.calls[0]
 
-    // allItems uses the first tab's filters, outsideHalItems the second tab's
-    // — no filter set leaks across tabs.
-    expect(wheres[0]).toContain('Book')
-    expect(wheres[0]).not.toContain('"platform"')
-    expect(wheres[1]).toContain('"platform"')
-    expect(wheres[1]).not.toContain('Book')
+    // Same clause the list query builds for that filter set.
+    expect(JSON.stringify(where)).toContain('"platform"')
   })
 
   it('should fetch a document by UID', async () => {

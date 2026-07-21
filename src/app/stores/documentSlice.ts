@@ -19,20 +19,23 @@ export interface DocumentQuery extends BaseQuery {
   requestId: number
   halCollectionCodes: string
   areHalCollectionCodesOmitted: boolean
+  // Which tab this result belongs to. Client-side routing metadata: stripped
+  // before the query string is built, like `requestId`.
+  tab: string
 }
 
-// Each badge counts what its own tab would list. The tabs share the search term
-// but keep their own column filters, hence one filter set per tab. Counting is
-// not paginated, so unlike the other queries this one does not extend BaseQuery.
+// Mirrors DocumentQuery minus paging and sorting: counting a tab that is not on
+// screen, so no rows are fetched. Not paginated, hence no BaseQuery.
 export interface CountDocumentQuery {
   searchTerm: string
   searchLang: string
-  allDocumentsFilters: string
-  outsideHalFilters: string
+  columnFilters: string
   contributorUid: string | null
   contributorType: AgentType
   requestId: number
   halCollectionCodes: string
+  areHalCollectionCodesOmitted: boolean
+  tab: string
 }
 
 export interface DocumentSlice {
@@ -42,9 +45,10 @@ export interface DocumentSlice {
     selectedDocument: Document | null
     totalItems?: number
     count: {
-      latestCountDocumentsRequestId?: number
-      allItems?: number
-      outsideHalItems?: number
+      // Tab badge counts, keyed by tab. The active tab's entry is written by
+      // fetchDocuments from the list's totalItems; the others by countDocuments.
+      byTab: Record<string, number | undefined>
+      latestRequestIdByTab: Record<string, number>
       loading: boolean
       error: string | null | unknown
     }
@@ -92,8 +96,8 @@ export const addDocumentSlice: StateCreator<
     count: {
       loading: true,
       error: null,
-      allItems: 0,
-      outsideHalItems: 0,
+      byTab: {},
+      latestRequestIdByTab: {},
     },
     hasFetched: false,
     setHasFetched: (flag: boolean) =>
@@ -112,7 +116,7 @@ export const addDocumentSlice: StateCreator<
         },
       })),
     fetchDocuments: async (queryObject: DocumentQuery) => {
-      const { requestId, ...rest } = queryObject
+      const { requestId, tab, ...rest } = queryObject
       const queryString = toQueryString(rest)
 
       // Mark the request as the latest before the async call
@@ -139,6 +143,12 @@ export const addDocumentSlice: StateCreator<
               ...state.document,
               documents,
               totalItems,
+              // The active tab's badge: the list query already counted its own
+              // where clause, so no separate count request is needed for it.
+              count: {
+                ...state.document.count,
+                byTab: { ...state.document.count.byTab, [tab]: totalItems },
+              },
               error: null,
               loading: false,
             },
@@ -213,17 +223,22 @@ export const addDocumentSlice: StateCreator<
     },
 
     countDocuments: async (queryObject: CountDocumentQuery) => {
-      const { requestId, ...rest } = queryObject
+      const { requestId, tab, ...rest } = queryObject
       const queryString = toQueryString(rest)
 
-      // Mark the request as the latest before the async call
+      // Mark the request as the latest for this tab before the async call.
+      // The guard is per tab so counts for different tabs, which may be in
+      // flight at the same time, cannot reject each other.
       set((state) => ({
         document: {
           ...state.document,
           count: {
             ...state.document.count,
             loading: true,
-            latestCountDocumentsRequestId: requestId,
+            latestRequestIdByTab: {
+              ...state.document.count.latestRequestIdByTab,
+              [tab]: requestId,
+            },
           },
         },
       }))
@@ -231,11 +246,11 @@ export const addDocumentSlice: StateCreator<
       try {
         const response = await fetch(`/api/documents/count?${queryString}`)
         const jsonData = await response.json()
-        const { allItems, outsideHalItems } = jsonData
+        const totalItems = jsonData.totalItems
 
         set((state) => {
-          // Ignore if a newer request was made since this one started
-          if (state.document.count.latestCountDocumentsRequestId !== requestId)
+          // Ignore if a newer request for this tab was made since this started
+          if (state.document.count.latestRequestIdByTab[tab] !== requestId)
             return state
 
           return {
@@ -243,8 +258,7 @@ export const addDocumentSlice: StateCreator<
               ...state.document,
               count: {
                 ...state.document.count,
-                allItems,
-                outsideHalItems,
+                byTab: { ...state.document.count.byTab, [tab]: totalItems },
                 error: null,
                 loading: false,
               },
@@ -254,7 +268,7 @@ export const addDocumentSlice: StateCreator<
       } catch (error) {
         console.error('Failed to count documents', error)
         set((state) => {
-          if (state.document.count.latestCountDocumentsRequestId !== requestId)
+          if (state.document.count.latestRequestIdByTab[tab] !== requestId)
             return state
 
           return {

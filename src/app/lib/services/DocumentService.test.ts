@@ -94,22 +94,19 @@ describe('DocumentService', () => {
   })
 
   it('should return document count when countDocuments succeeds', async () => {
-    const mockCount = { allItems: 1, outsideHalItems: 1 }
-    mockCountDocuments.mockResolvedValue(mockCount)
+    mockCountDocuments.mockResolvedValue(7)
 
     const params = {
       searchTerm: 'test',
       searchLang: 'en',
-      allDocumentsFilters: [{ id: 'category', value: 'reports' }],
-      outsideHalFilters: [{ id: 'halStatus', value: ['outside_hal'] }],
+      columnFilters: [{ id: 'category', value: 'reports' }],
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
     }
 
-    await expect(documentService.countDocuments(params)).resolves.toEqual(
-      mockCount,
-    )
+    await expect(documentService.countDocuments(params)).resolves.toBe(7)
 
     // Replace contributorUid with contributorUids
     const dbParams = {
@@ -128,11 +125,11 @@ describe('DocumentService', () => {
     const params = {
       searchTerm: 'test',
       searchLang: 'en',
-      allDocumentsFilters: [{ id: 'category', value: 'reports' }],
-      outsideHalFilters: [{ id: 'halStatus', value: ['outside_hal'] }],
+      columnFilters: [{ id: 'category', value: 'reports' }],
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
     }
 
     await expect(documentService.countDocuments(params)).rejects.toThrow(

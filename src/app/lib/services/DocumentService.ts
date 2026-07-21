@@ -42,16 +42,15 @@ interface FetchDocumentsParams {
   areHalCollectionCodesOmitted: boolean
 }
 
-// Each tab badge counts what its own tab would list: the tabs share the search
-// term but keep their own column filters, hence one filter set per tab.
+// Mirrors FetchDocumentsParams minus paging and sorting.
 interface CountDocumentsParams {
   searchTerm: string
   searchLang: string
-  allDocumentsFilters: ColumnFilter[]
-  outsideHalFilters: ColumnFilter[]
+  columnFilters: ColumnFilter[]
   contributorUid: string | null
   contributorType: AgentType
   halCollectionCodes: string[]
+  areHalCollectionCodesOmitted: boolean
 }
 
 export class DocumentService {
@@ -299,35 +298,30 @@ export class DocumentService {
   async countDocuments({
     searchTerm,
     searchLang,
-    allDocumentsFilters,
-    outsideHalFilters,
+    columnFilters,
     contributorUid,
     contributorType,
     halCollectionCodes,
-  }: CountDocumentsParams) {
+    areHalCollectionCodesOmitted,
+  }: CountDocumentsParams): Promise<number> {
     const contributorUids = await this.buildContributorUidArray(
       contributorUid,
       contributorType,
     )
 
     if (contributorUids.length == 0) {
-      return {
-        allItems: 0,
-        outsideHalItems: 0,
-      }
+      return 0
     }
 
     try {
-      const { allItems, outsideHalItems } =
-        await this.documentDAO.countDocuments({
-          searchTerm,
-          searchLang,
-          allDocumentsFilters: this.expandedColumnFilters(allDocumentsFilters),
-          outsideHalFilters: this.expandedColumnFilters(outsideHalFilters),
-          contributorUids,
-          halCollectionCodes,
-        })
-      return { allItems, outsideHalItems }
+      return await this.documentDAO.countDocuments({
+        searchTerm,
+        searchLang,
+        columnFilters: this.expandedColumnFilters(columnFilters),
+        contributorUids,
+        halCollectionCodes,
+        areHalCollectionCodesOmitted,
+      })
     } catch (error) {
       console.error('Error in service layer:', error)
       throw new Error('Error counting documents from service')

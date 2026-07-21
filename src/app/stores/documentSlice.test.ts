@@ -101,6 +101,7 @@ describe('addDocumentSlice', () => {
     })
 
     const queryObject: DocumentQuery = {
+      tab: 'all_documents',
       searchTerm: 'test',
       page: 1,
       pageSize: 10,
@@ -123,10 +124,13 @@ describe('addDocumentSlice', () => {
     expect(state.documents).toMatchObject(mockDocuments)
     expect(state.totalItems).toBe(mockTotalItems)
     expect(state.error).toBeNull()
-    const queryObjectWithoutRequestId = Object.fromEntries(
-      Object.entries(queryObject).filter(([key]) => key !== 'requestId'),
+    // requestId and tab are client-side metadata, never sent to the API
+    const sentQuery = Object.fromEntries(
+      Object.entries(queryObject).filter(
+        ([key]) => key !== 'requestId' && key !== 'tab',
+      ),
     )
-    expect(toQueryString).toHaveBeenCalledWith(queryObjectWithoutRequestId)
+    expect(toQueryString).toHaveBeenCalledWith(sentQuery)
     expect(fetch).toHaveBeenCalledWith('/api/documents?mockQueryString') // Ensure fetch was called with the right URL
   })
 
@@ -137,6 +141,7 @@ describe('addDocumentSlice', () => {
     ;(fetch as jest.Mock).mockRejectedValueOnce(mockError)
 
     const queryObject: DocumentQuery = {
+      tab: 'all_documents',
       searchTerm: 'test',
       page: 1,
       pageSize: 10,
@@ -160,27 +165,22 @@ describe('addDocumentSlice', () => {
     expect(state.error).toBe(mockError)
   })
 
-  it('should count documents successfully', async () => {
-    const mockAllItems = 1
-    const mockOutsideHalItems = 1
-
+  it('should count documents successfully, keyed by tab', async () => {
     // Mock the response of fetch
     ;(fetch as jest.Mock).mockResolvedValueOnce({
-      json: jest.fn().mockResolvedValueOnce({
-        allItems: mockAllItems,
-        outsideHalItems: mockOutsideHalItems,
-      }),
+      json: jest.fn().mockResolvedValueOnce({ totalItems: 3 }),
     })
 
     const queryObject: CountDocumentQuery = {
+      tab: 'outside_hal',
       searchTerm: 'test',
       searchLang: 'en',
-      allDocumentsFilters: '[]',
-      outsideHalFilters: '[]',
+      columnFilters: '[]',
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,
       halCollectionCodes: '["ABC","DEF"]',
+      areHalCollectionCodesOmitted: false,
     }
 
     // Call the countDocuments method
@@ -189,13 +189,15 @@ describe('addDocumentSlice', () => {
     // Check if the state was updated correctly
     const state = useStore.getState().document
     expect(state.count.loading).toBe(false)
-    expect(state.count.allItems).toBe(mockAllItems)
-    expect(state.count.outsideHalItems).toBe(mockOutsideHalItems)
+    expect(state.count.byTab['outside_hal']).toBe(3)
     expect(state.count.error).toBeNull()
-    const queryObjectWithoutRequestId = Object.fromEntries(
-      Object.entries(queryObject).filter(([key]) => key !== 'requestId'),
+    // requestId and tab are client-side metadata, never sent to the API
+    const sentQuery = Object.fromEntries(
+      Object.entries(queryObject).filter(
+        ([key]) => key !== 'requestId' && key !== 'tab',
+      ),
     )
-    expect(toQueryString).toHaveBeenCalledWith(queryObjectWithoutRequestId)
+    expect(toQueryString).toHaveBeenCalledWith(sentQuery)
     expect(fetch).toHaveBeenCalledWith('/api/documents/count?mockQueryString') // Ensure fetch was called with the right URL
   })
 
@@ -206,14 +208,15 @@ describe('addDocumentSlice', () => {
     ;(fetch as jest.Mock).mockRejectedValueOnce(mockError)
 
     const queryObject: CountDocumentQuery = {
+      tab: 'outside_hal',
       searchTerm: 'test',
       searchLang: 'en',
-      allDocumentsFilters: '[]',
-      outsideHalFilters: '[]',
+      columnFilters: '[]',
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,
       halCollectionCodes: '["ABC","DEF"]',
+      areHalCollectionCodesOmitted: false,
     }
 
     // Call the countDocuments method
@@ -223,6 +226,72 @@ describe('addDocumentSlice', () => {
     const state = useStore.getState().document
     expect(state.count.loading).toBe(false)
     expect(state.count.error).toBe(mockError)
+  })
+
+  // The race guard is per tab, so counts for different tabs — which are issued
+  // together and resolve out of order — must not reject each other.
+  it('does not let one tab count clobber another tab request id', async () => {
+    ;(fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        json: jest.fn().mockResolvedValueOnce({ totalItems: 3 }),
+      })
+      .mockResolvedValueOnce({
+        json: jest.fn().mockResolvedValueOnce({ totalItems: 8 }),
+      })
+
+    const baseQuery = {
+      searchTerm: '',
+      searchLang: 'en',
+      columnFilters: '[]',
+      contributorUid: null,
+      contributorType: 'person' as const,
+      halCollectionCodes: '[]',
+      areHalCollectionCodesOmitted: false,
+    }
+
+    await Promise.all([
+      useStore.getState().document.countDocuments({
+        ...baseQuery,
+        tab: 'all_documents',
+        requestId: 1,
+      }),
+      useStore.getState().document.countDocuments({
+        ...baseQuery,
+        tab: 'outside_hal',
+        requestId: 2,
+      }),
+    ])
+
+    const state = useStore.getState().document
+    expect(state.count.byTab['all_documents']).toBe(3)
+    expect(state.count.byTab['outside_hal']).toBe(8)
+  })
+
+  // The list query already counts its own where clause, so the active tab's
+  // badge is fed from the list response rather than a second request.
+  it('records the active tab count from the list response', async () => {
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      json: jest.fn().mockResolvedValueOnce({ documents: [], totalItems: 42 }),
+    })
+
+    await useStore.getState().document.fetchDocuments({
+      tab: 'outside_hal',
+      searchTerm: '',
+      page: 1,
+      pageSize: 10,
+      columnFilters: '',
+      searchLang: 'en',
+      sorting: '',
+      contributorUid: null,
+      contributorType: 'person',
+      requestId: 1,
+      halCollectionCodes: '[]',
+      areHalCollectionCodesOmitted: false,
+    })
+
+    const state = useStore.getState().document
+    expect(state.totalItems).toBe(42)
+    expect(state.count.byTab['outside_hal']).toBe(42)
   })
 })
 
