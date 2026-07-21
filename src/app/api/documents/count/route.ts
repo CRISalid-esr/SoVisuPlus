@@ -4,9 +4,20 @@ import { AgentType, agentTypeFromString } from '@/types/IAgent'
 
 export const GET = async (req: NextRequest) => {
   try {
-    // These counts feed the tab badges, which are perspective totals: the
-    // table's search term and column filters are deliberately not applied.
     const urlParams = req.nextUrl.searchParams
+    const searchTerm = urlParams.get('searchTerm') || ''
+    const searchlang =
+      urlParams.get('searchLang') ||
+      process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0] ||
+      ''
+    // The tabs share the search term but keep their own column filters, so
+    // each badge is counted against its own tab's set.
+    const allDocumentsFilters = JSON.parse(
+      urlParams.get('allDocumentsFilters') || '[]',
+    )
+    const outsideHalFilters = JSON.parse(
+      urlParams.get('outsideHalFilters') || '[]',
+    )
     const contributorUid = urlParams.get('contributorUid') || ''
     const contributorType: AgentType | null = agentTypeFromString(
       urlParams.get('contributorType'),
@@ -23,16 +34,18 @@ export const GET = async (req: NextRequest) => {
     }
 
     const documentService = new DocumentService()
-    const { allItems, incompleteHalRepositoryItems, outsideHalItems } =
-      await documentService.countDocuments({
-        contributorUid,
-        contributorType,
-        halCollectionCodes,
-      })
+    const { allItems, outsideHalItems } = await documentService.countDocuments({
+      searchTerm,
+      searchLang: searchlang,
+      allDocumentsFilters,
+      outsideHalFilters,
+      contributorUid,
+      contributorType,
+      halCollectionCodes,
+    })
 
     return NextResponse.json({
       allItems,
-      incompleteHalRepositoryItems,
       outsideHalItems,
     })
   } catch (error) {

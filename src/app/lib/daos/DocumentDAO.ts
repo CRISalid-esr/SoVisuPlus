@@ -24,10 +24,7 @@ import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { Literal, LiteralJson } from '@/types/Literal'
 import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
-import {
-  HalStatusFilterValue,
-  OUTSIDE_HAL_TAB_STATUSES,
-} from '@/types/HalStatusFilter'
+import { HalStatusFilterValue } from '@/types/HalStatusFilter'
 
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
@@ -48,6 +45,11 @@ interface FetchDocumentsFromDBParams {
 }
 
 interface CountDocumentsFromDBParams {
+  searchTerm: string
+  searchLang: string
+  // One filter set per tab — each badge counts what its own tab would list.
+  allDocumentsFilters: DbColumnFilters[]
+  outsideHalFilters: DbColumnFilters[]
   contributorUids: string[]
   halCollectionCodes: string[]
 }
@@ -1112,49 +1114,35 @@ export class DocumentDAO extends AbstractDAO {
 
   public async countDocuments(params: CountDocumentsFromDBParams): Promise<{
     allItems: number
-    incompleteHalRepositoryItems: number
     outsideHalItems: number
   }> {
-    // Tab badges are perspective totals: they deliberately ignore the search
-    // term and the column filters currently applied to the table.
-    const base = {
-      ...params,
-      searchTerm: '',
-      searchLang: '',
-      areHalCollectionCodesOmitted: false,
-    }
+    // One count per tab badge. The tabs share the search term but keep their
+    // own column filters, so each count gets its own set. The outside-HAL set
+    // already carries the tab's halStatus scope, applied by the caller through
+    // the same helper the list query uses — so a badge and its table can never
+    // disagree.
+    const { allDocumentsFilters, outsideHalFilters, ...base } = params
 
     const allWhere = this.createFetchDocumentsWhere({
       ...base,
-      columnFilters: [],
+      columnFilters: allDocumentsFilters,
+      areHalCollectionCodesOmitted: false,
     })
-    const incompleteHalRepositoryWhere = this.createFetchDocumentsWhere({
-      ...base,
-      columnFilters: [],
-      areHalCollectionCodesOmitted: true,
-    })
-    // Counted through the very same halStatus clause the list query uses, so
-    // the badge and the table can never disagree.
     const outsideHalWhere = this.createFetchDocumentsWhere({
       ...base,
-      columnFilters: [{ id: 'halStatus', value: OUTSIDE_HAL_TAB_STATUSES }],
+      columnFilters: outsideHalFilters,
+      areHalCollectionCodesOmitted: false,
     })
 
     const allItems = await this.prismaClient.document.count({
       where: allWhere,
     })
-    const incompleteHalRepositoryItems = await this.prismaClient.document.count(
-      {
-        where: incompleteHalRepositoryWhere,
-      },
-    )
     const outsideHalItems = await this.prismaClient.document.count({
       where: outsideHalWhere,
     })
 
     return {
       allItems,
-      incompleteHalRepositoryItems,
       outsideHalItems,
     }
   }

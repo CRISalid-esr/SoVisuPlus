@@ -94,10 +94,14 @@ describe('DocumentService', () => {
   })
 
   it('should return document count when countDocuments succeeds', async () => {
-    const mockCount = { allItems: 1, incompleteHalRepositoryItems: 1 }
+    const mockCount = { allItems: 1, outsideHalItems: 1 }
     mockCountDocuments.mockResolvedValue(mockCount)
 
     const params = {
+      searchTerm: 'test',
+      searchLang: 'en',
+      allDocumentsFilters: [{ id: 'category', value: 'reports' }],
+      outsideHalFilters: [{ id: 'halStatus', value: ['outside_hal'] }],
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
@@ -122,6 +126,10 @@ describe('DocumentService', () => {
     mockCountDocuments.mockRejectedValue(new Error('DB error'))
 
     const params = {
+      searchTerm: 'test',
+      searchLang: 'en',
+      allDocumentsFilters: [{ id: 'category', value: 'reports' }],
+      outsideHalFilters: [{ id: 'halStatus', value: ['outside_hal'] }],
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],

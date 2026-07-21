@@ -21,10 +21,14 @@ export interface DocumentQuery extends BaseQuery {
   areHalCollectionCodesOmitted: boolean
 }
 
-// Tab badge counts are perspective totals — the table's search term, paging and
-// column filters are deliberately not part of the query, so unlike the other
-// queries this one does not extend BaseQuery.
+// Each badge counts what its own tab would list. The tabs share the search term
+// but keep their own column filters, hence one filter set per tab. Counting is
+// not paginated, so unlike the other queries this one does not extend BaseQuery.
 export interface CountDocumentQuery {
+  searchTerm: string
+  searchLang: string
+  allDocumentsFilters: string
+  outsideHalFilters: string
   contributorUid: string | null
   contributorType: AgentType
   requestId: number
@@ -40,7 +44,6 @@ export interface DocumentSlice {
     count: {
       latestCountDocumentsRequestId?: number
       allItems?: number
-      incompleteHalRepositoryItems?: number
       outsideHalItems?: number
       loading: boolean
       error: string | null | unknown
@@ -90,7 +93,6 @@ export const addDocumentSlice: StateCreator<
       loading: true,
       error: null,
       allItems: 0,
-      incompleteHalRepositoryItems: 0,
       outsideHalItems: 0,
     },
     hasFetched: false,
@@ -229,8 +231,7 @@ export const addDocumentSlice: StateCreator<
       try {
         const response = await fetch(`/api/documents/count?${queryString}`)
         const jsonData = await response.json()
-        const { allItems, incompleteHalRepositoryItems, outsideHalItems } =
-          jsonData
+        const { allItems, outsideHalItems } = jsonData
 
         set((state) => {
           // Ignore if a newer request was made since this one started
@@ -243,7 +244,6 @@ export const addDocumentSlice: StateCreator<
               count: {
                 ...state.document.count,
                 allItems,
-                incompleteHalRepositoryItems,
                 outsideHalItems,
                 error: null,
                 loading: false,

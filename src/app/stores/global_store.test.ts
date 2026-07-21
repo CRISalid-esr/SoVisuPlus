@@ -11,7 +11,7 @@ describe('Zustand Global Store - useStore with DocumentSlice', () => {
           loading: true,
           error: null,
           allItems: 0,
-          incompleteHalRepositoryItems: 0,
+          outsideHalItems: 0,
         },
         loading: true,
         error: null,

@@ -6,5 +6,8 @@
 export const ALL_DOCUMENTS_TAB = 'all_documents'
 export const OUTSIDE_HAL_TAB = 'outside_hal'
 
+/** Every tab, in display order. Each one holds its own column filters. */
+export const PUBLICATION_TABS = [ALL_DOCUMENTS_TAB, OUTSIDE_HAL_TAB]
+
 export const isPublicationTab = (value: string | null): boolean =>
-  value === ALL_DOCUMENTS_TAB || value === OUTSIDE_HAL_TAB
+  value !== null && PUBLICATION_TABS.includes(value)

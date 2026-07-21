@@ -77,7 +77,10 @@ import {
   readInitialSorting,
   readInitialStructuresFilter,
 } from '@/app/[lang]/documents/hooks/documentTable/utils/persistence'
-import { OUTSIDE_HAL_TAB } from '@/app/[lang]/documents/hooks/documentTable/utils/tabs'
+import {
+  ALL_DOCUMENTS_TAB,
+  OUTSIDE_HAL_TAB,
+} from '@/app/[lang]/documents/hooks/documentTable/utils/tabs'
 import {
   HalStatusFilterValue,
   OUTSIDE_HAL_TAB_STATUSES,
@@ -262,7 +265,7 @@ const usePublicationsTableStorage = (
 }
 
 const usePublicationsTableDataFetching = (
-  columnFilters: MRT_ColumnFiltersState,
+  columnFiltersByTab: ColumnFiltersByTab,
   structuresFilter: { uid: string; name: string }[],
   globalFilter: string,
   sorting: MRT_SortingState,
@@ -283,12 +286,26 @@ const usePublicationsTableDataFetching = (
   const requestIdRef = useRef(latestDocumentRequestId || 0)
   const countDocumentsRequestIdRef = useRef(0)
 
+  // The filters a given tab sends to the API: its own column filters, with the
+  // shared structures filter appended, dates normalised and the tab's HAL
+  // scope applied. Shared by the list and the badge counts so a badge always
+  // matches the list its tab would show.
+  const buildTabFilters = useCallback(
+    (tab: string) => {
+      const filters = normalizeDateFilters(
+        columnFiltersByTab[tab] ?? EMPTY_COLUMN_FILTERS,
+      )
+      filters.push({
+        id: 'structures',
+        value: structuresFilter.map((s) => s.uid),
+      })
+
+      return applyTabScope(filters, tab)
+    },
+    [columnFiltersByTab, structuresFilter],
+  )
+
   useEffect(() => {
-    const adjustedFilters = normalizeDateFilters(columnFilters)
-    adjustedFilters.push({
-      id: 'structures',
-      value: structuresFilter.map((s) => s.uid),
-    })
     const contributorType = currentPerspective?.type
     if (!contributorType) return
 
@@ -298,10 +315,7 @@ const usePublicationsTableDataFetching = (
       pageSize: pagination.pageSize,
       searchTerm: globalFilter,
       searchLang: lang,
-      // Adjusted date filters, plus the HAL statuses the selected tab covers
-      columnFilters: JSON.stringify(
-        applyTabScope(adjustedFilters, selectedTab),
-      ),
+      columnFilters: JSON.stringify(buildTabFilters(selectedTab)),
       sorting: JSON.stringify(sorting),
       contributorUid: currentPerspective?.uid || '',
       contributorType: contributorType,
@@ -314,7 +328,7 @@ const usePublicationsTableDataFetching = (
       console.error('Error fetching documents:', error)
     })
   }, [
-    columnFilters,
+    buildTabFilters,
     globalFilter,
     pagination.pageIndex,
     pagination.pageSize,
@@ -324,18 +338,20 @@ const usePublicationsTableDataFetching = (
     currentPerspective,
     selectedTab,
     triggerReloadList,
-    structuresFilter,
   ])
 
-  // The tab badges are perspective totals, so they only need refreshing when
-  // the perspective changes or the list is reloaded — not on every filter
-  // change or keystroke in the search box.
+  // Every badge is recounted whenever any tab's filters change, so an inactive
+  // tab's badge still reflects the filters that tab holds.
   useEffect(() => {
     const contributorType = currentPerspective?.type
     if (!contributorType) return
 
     const nextCountDocumentsRequestId = ++countDocumentsRequestIdRef.current
     countDocuments({
+      searchTerm: globalFilter,
+      searchLang: lang,
+      allDocumentsFilters: JSON.stringify(buildTabFilters(ALL_DOCUMENTS_TAB)),
+      outsideHalFilters: JSON.stringify(buildTabFilters(OUTSIDE_HAL_TAB)),
       contributorUid: currentPerspective?.uid || '',
       contributorType: contributorType,
       requestId: nextCountDocumentsRequestId,
@@ -343,7 +359,14 @@ const usePublicationsTableDataFetching = (
     }).catch((error) => {
       console.error('Error counting documents:', error)
     })
-  }, [countDocuments, currentPerspective, triggerReloadList])
+  }, [
+    buildTabFilters,
+    globalFilter,
+    lang,
+    countDocuments,
+    currentPerspective,
+    triggerReloadList,
+  ])
 }
 
 export const usePublicationsTable = (
@@ -499,7 +522,7 @@ export const usePublicationsTable = (
   }, [selectedTab])
 
   usePublicationsTableDataFetching(
-    columnFilters,
+    columnFiltersByTab,
     structuresFilter,
     globalFilter,
     sorting,

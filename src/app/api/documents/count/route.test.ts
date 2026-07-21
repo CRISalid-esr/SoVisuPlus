@@ -5,7 +5,7 @@ jest.mock('../../../lib/services/DocumentService', () => ({
   DocumentService: jest.fn().mockImplementation(() => ({
     countDocuments: jest.fn().mockResolvedValue({
       allItems: 1,
-      incompleteHalRepositoryItems: 1,
+      outsideHalItems: 1,
     }),
   })),
 }))
@@ -41,6 +41,6 @@ describe('GET handler', () => {
     expect(response.status).toBe(200)
     const jsonResponse = await response.json()
     expect(jsonResponse.allItems).toBe(1)
-    expect(jsonResponse.incompleteHalRepositoryItems).toBe(1)
+    expect(jsonResponse.outsideHalItems).toBe(1)
   })
 })

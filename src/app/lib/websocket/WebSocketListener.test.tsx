@@ -115,7 +115,7 @@ describe('WebSocketListener', () => {
         count: {
           latestCountDocumentsRequestId: undefined,
           allItems: undefined,
-          incompleteHalRepositoryItems: undefined,
+          outsideHalItems: undefined,
           loading: false,
           error: null,
         },

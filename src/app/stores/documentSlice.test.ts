@@ -162,17 +162,21 @@ describe('addDocumentSlice', () => {
 
   it('should count documents successfully', async () => {
     const mockAllItems = 1
-    const mockIncompleteHalRepositoryItems = 1
+    const mockOutsideHalItems = 1
 
     // Mock the response of fetch
     ;(fetch as jest.Mock).mockResolvedValueOnce({
       json: jest.fn().mockResolvedValueOnce({
         allItems: mockAllItems,
-        incompleteHalRepositoryItems: mockIncompleteHalRepositoryItems,
+        outsideHalItems: mockOutsideHalItems,
       }),
     })
 
     const queryObject: CountDocumentQuery = {
+      searchTerm: 'test',
+      searchLang: 'en',
+      allDocumentsFilters: '[]',
+      outsideHalFilters: '[]',
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,
@@ -186,9 +190,7 @@ describe('addDocumentSlice', () => {
     const state = useStore.getState().document
     expect(state.count.loading).toBe(false)
     expect(state.count.allItems).toBe(mockAllItems)
-    expect(state.count.incompleteHalRepositoryItems).toBe(
-      mockIncompleteHalRepositoryItems,
-    )
+    expect(state.count.outsideHalItems).toBe(mockOutsideHalItems)
     expect(state.count.error).toBeNull()
     const queryObjectWithoutRequestId = Object.fromEntries(
       Object.entries(queryObject).filter(([key]) => key !== 'requestId'),
@@ -204,6 +206,10 @@ describe('addDocumentSlice', () => {
     ;(fetch as jest.Mock).mockRejectedValueOnce(mockError)
 
     const queryObject: CountDocumentQuery = {
+      searchTerm: 'test',
+      searchLang: 'en',
+      allDocumentsFilters: '[]',
+      outsideHalFilters: '[]',
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,

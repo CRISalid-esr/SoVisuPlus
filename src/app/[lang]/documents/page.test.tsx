@@ -141,7 +141,7 @@ const mockState = {
     totalItems: 1,
     count: {
       allItems: 0,
-      incompleteHalRepositoryItems: 0,
+      outsideHalItems: 0,
     },
   },
   user: {
@@ -172,7 +172,7 @@ beforeEach(() => {
 
   mockCountDocuments.mockResolvedValue({
     allItems: 0,
-    incompleteHalRepositoryItems: 0,
+    outsideHalItems: 0,
   })
 })
 
@@ -302,13 +302,20 @@ describe('DocumentsPage Component', () => {
     })
   })
 
-  // Tab badge counts are perspective totals: no search term, no paging and no
-  // column filters take part in the query.
-  it('fetches tab badge counts on mount', async () => {
+  // Each badge is counted against its own tab's filters; only the outside-HAL
+  // set carries that tab's halStatus scope.
+  it('fetches tab badge counts on mount, one filter set per tab', async () => {
     renderComponent()
 
     await waitFor(() => {
       expect(mockCountDocuments).toHaveBeenCalledWith({
+        searchTerm: '',
+        searchLang: 'en',
+        allDocumentsFilters: JSON.stringify([{ id: 'structures', value: [] }]),
+        outsideHalFilters: JSON.stringify([
+          { id: 'structures', value: [] },
+          { id: 'halStatus', value: ['outside_hal'] },
+        ]),
         contributorType: 'person',
         contributorUid: '',
         requestId: 1,

@@ -42,8 +42,13 @@ interface FetchDocumentsParams {
   areHalCollectionCodesOmitted: boolean
 }
 
-// Tab badge counts are perspective totals — no search term, no column filters.
+// Each tab badge counts what its own tab would list: the tabs share the search
+// term but keep their own column filters, hence one filter set per tab.
 interface CountDocumentsParams {
+  searchTerm: string
+  searchLang: string
+  allDocumentsFilters: ColumnFilter[]
+  outsideHalFilters: ColumnFilter[]
   contributorUid: string | null
   contributorType: AgentType
   halCollectionCodes: string[]
@@ -292,6 +297,10 @@ export class DocumentService {
   }
 
   async countDocuments({
+    searchTerm,
+    searchLang,
+    allDocumentsFilters,
+    outsideHalFilters,
     contributorUid,
     contributorType,
     halCollectionCodes,
@@ -304,18 +313,21 @@ export class DocumentService {
     if (contributorUids.length == 0) {
       return {
         allItems: 0,
-        incompleteHalRepositoryItems: 0,
         outsideHalItems: 0,
       }
     }
 
     try {
-      const { allItems, incompleteHalRepositoryItems, outsideHalItems } =
+      const { allItems, outsideHalItems } =
         await this.documentDAO.countDocuments({
+          searchTerm,
+          searchLang,
+          allDocumentsFilters: this.expandedColumnFilters(allDocumentsFilters),
+          outsideHalFilters: this.expandedColumnFilters(outsideHalFilters),
           contributorUids,
           halCollectionCodes,
         })
-      return { allItems, incompleteHalRepositoryItems, outsideHalItems }
+      return { allItems, outsideHalItems }
     } catch (error) {
       console.error('Error in service layer:', error)
       throw new Error('Error counting documents from service')
