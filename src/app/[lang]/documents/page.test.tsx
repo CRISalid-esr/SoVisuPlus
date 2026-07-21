@@ -298,20 +298,17 @@ describe('DocumentsPage Component', () => {
         requestId: 1,
         halCollectionCodes: JSON.stringify(['ABC', 'DEF']),
         areHalCollectionCodesOmitted: false,
-        outsideHalOnly: false,
       })
     })
   })
 
-  it('fetches incomplete HAL repository document count on mount', async () => {
+  // Tab badge counts are perspective totals: no search term, no paging and no
+  // column filters take part in the query.
+  it('fetches tab badge counts on mount', async () => {
     renderComponent()
 
     await waitFor(() => {
       expect(mockCountDocuments).toHaveBeenCalledWith({
-        page: 1,
-        searchTerm: '',
-        columnFilters: JSON.stringify([{ id: 'structures', value: [] }]),
-        searchLang: 'en',
         contributorType: 'person',
         contributorUid: '',
         requestId: 1,

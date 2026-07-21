@@ -68,6 +68,8 @@ import {
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import InfoIcon from '@mui/icons-material/Info'
 import {
+  COLUMN_FILTERS_KEY,
+  ColumnFiltersByTab,
   DEFAULT_PAGINATION,
   readInitialColumnFilters,
   readInitialGlobalFilter,
@@ -75,10 +77,18 @@ import {
   readInitialSorting,
   readInitialStructuresFilter,
 } from '@/app/[lang]/documents/hooks/documentTable/utils/persistence'
+import { OUTSIDE_HAL_TAB } from '@/app/[lang]/documents/hooks/documentTable/utils/tabs'
+import {
+  HalStatusFilterValue,
+  OUTSIDE_HAL_TAB_STATUSES,
+} from '@/types/HalStatusFilter'
 import { useSession } from 'next-auth/react'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
-import { normalizeDateFilters } from '@/app/[lang]/documents/hooks/documentTable/utils/columns'
+import {
+  applyTabScope,
+  normalizeDateFilters,
+} from '@/app/[lang]/documents/hooks/documentTable/utils/columns'
 import utc from 'dayjs/plugin/utc'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import { ColumnFilter } from '@tanstack/table-core'
@@ -93,12 +103,9 @@ const DEFAULT_SORTING = [
   },
 ]
 
-export const ALL_DOCUMENTS_TAB = 'all_documents'
-export const OUTSIDE_HAL_TAB = 'outside_hal'
-
-// HAL statuses that still make sense once the list is already restricted to
-// publications outside HAL. Add 'in_moderation' here when that status lands.
-const OUTSIDE_HAL_TAB_STATUSES: string[] = ['outside_hal']
+// Stable reference for tabs with no filters yet: `columnFilters` feeds the
+// fetch effect and the tableOptions memo, so a fresh [] each render would loop.
+const EMPTY_COLUMN_FILTERS: MRT_ColumnFiltersState = []
 
 const createDocTypeTree = (
   _: (descriptor: Lingui.MessageDescriptor) => string,
@@ -147,7 +154,7 @@ const usePublicationsTableStorage = (
   globalFilter: string,
   sorting: MRT_SortingState,
   structuresFilter: { uid: string; name: string }[],
-  columnFilters: MRT_ColumnFiltersState,
+  columnFiltersByTab: ColumnFiltersByTab,
   pagination: {
     pageIndex: number
     pageSize: number
@@ -159,8 +166,8 @@ const usePublicationsTableStorage = (
     }>
   >,
   setGlobalFilter: React.Dispatch<React.SetStateAction<string>>,
-  setColumnFilters: React.Dispatch<
-    React.SetStateAction<MRT_ColumnFiltersState>
+  setColumnFiltersByTab: React.Dispatch<
+    React.SetStateAction<ColumnFiltersByTab>
   >,
   setStructuresFilter: React.Dispatch<
     React.SetStateAction<{ uid: string; name: string }[]>
@@ -197,12 +204,12 @@ const usePublicationsTableStorage = (
   useEffect(() => {
     const id = setTimeout(() => {
       sessionStorage.setItem(
-        'mrt_columnFilters_publication_table',
-        JSON.stringify(columnFilters),
+        COLUMN_FILTERS_KEY,
+        JSON.stringify(columnFiltersByTab),
       )
     }, 250)
     return () => clearTimeout(id)
-  }, [columnFilters])
+  }, [columnFiltersByTab])
 
   const { currentPerspective } = useStore((state) => state.user)
 
@@ -223,18 +230,16 @@ const usePublicationsTableStorage = (
           pageSize: DEFAULT_PAGINATION.pageSize,
         })
         // Clear all filters on perspective change: the partnership/affiliation
-        // context (and any other filter) is meaningless under a new perspective.
+        // context (and any other filter) is meaningless under a new
+        // perspective. Every tab is cleared, not just the one on screen.
         setStructuresFilter([])
-        setColumnFilters([])
+        setColumnFiltersByTab({})
         setGlobalFilter('')
         sessionStorage.setItem(
           'mrt_structuresFilter_publication_table',
           JSON.stringify([]),
         )
-        sessionStorage.setItem(
-          'mrt_columnFilters_publication_table',
-          JSON.stringify([]),
-        )
+        sessionStorage.setItem(COLUMN_FILTERS_KEY, JSON.stringify({}))
         sessionStorage.setItem(
           'mrt_global_publication_table',
           JSON.stringify(''),
@@ -251,7 +256,7 @@ const usePublicationsTableStorage = (
     pagination,
     setPagination,
     setGlobalFilter,
-    setColumnFilters,
+    setColumnFiltersByTab,
     setStructuresFilter,
   ])
 }
@@ -293,7 +298,10 @@ const usePublicationsTableDataFetching = (
       pageSize: pagination.pageSize,
       searchTerm: globalFilter,
       searchLang: lang,
-      columnFilters: JSON.stringify(adjustedFilters), // Use adjusted date filter
+      // Adjusted date filters, plus the HAL statuses the selected tab covers
+      columnFilters: JSON.stringify(
+        applyTabScope(adjustedFilters, selectedTab),
+      ),
       sorting: JSON.stringify(sorting),
       contributorUid: currentPerspective?.uid || '',
       contributorType: contributorType,
@@ -302,23 +310,8 @@ const usePublicationsTableDataFetching = (
       // Kept wired to false: the "incomplete HAL filling" filter is not exposed
       // by any tab for now, but the plumbing stays ready for a future tab.
       areHalCollectionCodesOmitted: false,
-      outsideHalOnly: selectedTab === OUTSIDE_HAL_TAB,
     }).catch((error) => {
       console.error('Error fetching documents:', error)
-    })
-
-    const nextCountDocumentsRequestId = ++countDocumentsRequestIdRef.current
-    countDocuments({
-      page: pagination.pageIndex + 1,
-      searchTerm: globalFilter,
-      searchLang: lang,
-      columnFilters: JSON.stringify(adjustedFilters), // Use adjusted date filter
-      contributorUid: currentPerspective?.uid || '',
-      contributorType: contributorType,
-      requestId: nextCountDocumentsRequestId,
-      halCollectionCodes: JSON.stringify(currentPerspective.membershipAcronyms),
-    }).catch((error) => {
-      console.error('Error counting documents:', error)
     })
   }, [
     columnFilters,
@@ -328,12 +321,29 @@ const usePublicationsTableDataFetching = (
     sorting,
     lang,
     fetchDocuments,
-    countDocuments,
     currentPerspective,
     selectedTab,
     triggerReloadList,
     structuresFilter,
   ])
+
+  // The tab badges are perspective totals, so they only need refreshing when
+  // the perspective changes or the list is reloaded — not on every filter
+  // change or keystroke in the search box.
+  useEffect(() => {
+    const contributorType = currentPerspective?.type
+    if (!contributorType) return
+
+    const nextCountDocumentsRequestId = ++countDocumentsRequestIdRef.current
+    countDocuments({
+      contributorUid: currentPerspective?.uid || '',
+      contributorType: contributorType,
+      requestId: nextCountDocumentsRequestId,
+      halCollectionCodes: JSON.stringify(currentPerspective.membershipAcronyms),
+    }).catch((error) => {
+      console.error('Error counting documents:', error)
+    })
+  }, [countDocuments, currentPerspective, triggerReloadList])
 }
 
 export const usePublicationsTable = (
@@ -366,9 +376,29 @@ export const usePublicationsTable = (
   const [selectedTitleLangs, setSelectedTitleLangs] = useState<
     Record<string, string>
   >({})
-  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
-    readInitialColumnFilters,
+  // Each tab keeps its own column filters. Deriving the current tab's filters
+  // from a map — rather than swapping a flat state on tab change — keeps them
+  // always consistent with `selectedTab`, with no ordering race between the
+  // "load the other tab's filters" and "persist the current filters" effects.
+  const [columnFiltersByTab, setColumnFiltersByTab] =
+    useState<ColumnFiltersByTab>(readInitialColumnFilters)
+
+  const columnFilters = columnFiltersByTab[selectedTab] ?? EMPTY_COLUMN_FILTERS
+
+  const setColumnFilters = useCallback<
+    React.Dispatch<React.SetStateAction<MRT_ColumnFiltersState>>
+  >(
+    (updater) =>
+      setColumnFiltersByTab((previous) => ({
+        ...previous,
+        [selectedTab]:
+          typeof updater === 'function'
+            ? updater(previous[selectedTab] ?? EMPTY_COLUMN_FILTERS)
+            : updater,
+      })),
+    [selectedTab],
   )
+
   const [globalFilter, setGlobalFilter] = useState(readInitialGlobalFilter)
 
   const [sorting, setSorting] = useState<MRT_SortingState>(readInitialSorting)
@@ -416,11 +446,11 @@ export const usePublicationsTable = (
     globalFilter,
     sorting,
     structuresFilter,
-    columnFilters,
+    columnFiltersByTab,
     pagination,
     setPagination,
     setGlobalFilter,
-    setColumnFilters,
+    setColumnFiltersByTab,
     setStructuresFilter,
   )
 
@@ -453,32 +483,19 @@ export const usePublicationsTable = (
       }
       setYearsFilter([])
     }
-  }, [columnFilters, yearsFilter])
+    // setColumnFilters is bound to the selected tab, so a stale copy would
+    // write these filters onto the wrong tab.
+  }, [columnFilters, yearsFilter, setColumnFilters])
 
-  // Column filters are persisted across reloads, so a halStatus filter set on
-  // another tab could survive here and silently empty the list — drop the
-  // values the "outside HAL" tab no longer offers.
+  // Each tab is its own result set with its own page count, so keeping the
+  // page index across a switch would land on an out-of-range page. The ref
+  // guard keeps the restored page index intact on mount.
+  const previousTabRef = useRef(selectedTab)
+
   useEffect(() => {
-    if (selectedTab !== OUTSIDE_HAL_TAB) return
-
-    setColumnFilters((previous) => {
-      const next = previous.flatMap((filter) => {
-        if (filter.id !== 'halStatus' || !Array.isArray(filter.value))
-          return [filter]
-
-        const kept = (filter.value as string[]).filter((value) =>
-          OUTSIDE_HAL_TAB_STATUSES.includes(value),
-        )
-
-        return kept.length ? [{ ...filter, value: kept }] : []
-      })
-
-      const unchanged =
-        next.length === previous.length &&
-        next.every((filter, index) => filter === previous[index])
-
-      return unchanged ? previous : next
-    })
+    if (previousTabRef.current === selectedTab) return
+    previousTabRef.current = selectedTab
+    setPagination((previous) => ({ ...previous, pageIndex: 0 }))
   }, [selectedTab])
 
   usePublicationsTableDataFetching(
@@ -507,7 +524,7 @@ export const usePublicationsTable = (
             isSingleLine
           />
         ),
-        value: 'in_collection',
+        value: HalStatusFilterValue.InCollection,
       },
       {
         label: (
@@ -522,7 +539,7 @@ export const usePublicationsTable = (
             documentUid={''}
           />
         ),
-        value: 'out_of_collection',
+        value: HalStatusFilterValue.OutOfCollection,
       },
       {
         label: (
@@ -532,7 +549,7 @@ export const usePublicationsTable = (
             documentUid={''}
           />
         ),
-        value: 'outside_hal',
+        value: HalStatusFilterValue.OutsideHal,
       },
     ]
 
@@ -973,6 +990,9 @@ export const usePublicationsTable = (
       hasSelectableRow,
       setOpenDialog,
       navigateToDetailsPage,
+      // Bound to the selected tab: without this the table would keep calling
+      // the previous tab's setter and write filters onto the wrong tab.
+      setColumnFilters,
     ],
   )
 

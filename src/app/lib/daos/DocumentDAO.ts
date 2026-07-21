@@ -24,6 +24,10 @@ import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { Literal, LiteralJson } from '@/types/Literal'
 import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
+import {
+  HalStatusFilterValue,
+  OUTSIDE_HAL_TAB_STATUSES,
+} from '@/types/HalStatusFilter'
 
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
@@ -41,13 +45,9 @@ interface FetchDocumentsFromDBParams {
   contributorUids: string[]
   halCollectionCodes: string[]
   areHalCollectionCodesOmitted: boolean
-  outsideHalOnly: boolean
 }
 
 interface CountDocumentsFromDBParams {
-  searchTerm: string
-  searchLang: string
-  columnFilters: DbColumnFilters[]
   contributorUids: string[]
   halCollectionCodes: string[]
 }
@@ -482,7 +482,6 @@ export class DocumentDAO extends AbstractDAO {
     columnFilters,
     halCollectionCodes,
     areHalCollectionCodesOmitted,
-    outsideHalOnly,
     contributorUids,
   }: {
     searchTerm: string
@@ -491,7 +490,6 @@ export class DocumentDAO extends AbstractDAO {
     contributorUids: string[]
     halCollectionCodes: string[]
     areHalCollectionCodesOmitted: boolean
-    outsideHalOnly?: boolean
   }): Prisma.DocumentWhereInput {
     const publicationListRolesFilter = parseStrArrayEnvVar(
       process.env.PUBLICATION_LIST_ROLES_FILTER,
@@ -742,13 +740,16 @@ export class DocumentDAO extends AbstractDAO {
 
       if (filter.id === 'halStatus' && Array.isArray(filter.value)) {
         const halStatusOr: Prisma.DocumentWhereInput[] = []
+        const halPlatform = getBibliographicPlatformDbValue(
+          BibliographicPlatform.HAL,
+        )
 
         filter.value.forEach((type) => {
-          if (type === 'in_collection') {
+          if (type === HalStatusFilterValue.InCollection) {
             halStatusOr.push({
               records: {
                 some: {
-                  platform: 'hal',
+                  platform: halPlatform,
                   halCollectionCodes: {
                     hasSome: halCollectionCodes,
                   },
@@ -757,11 +758,11 @@ export class DocumentDAO extends AbstractDAO {
             })
           }
 
-          if (type === 'out_of_collection') {
+          if (type === HalStatusFilterValue.OutOfCollection) {
             halStatusOr.push({
               records: {
                 some: {
-                  platform: 'hal',
+                  platform: halPlatform,
                 },
                 none: {
                   halCollectionCodes: {
@@ -772,11 +773,11 @@ export class DocumentDAO extends AbstractDAO {
             })
           }
 
-          if (type === 'outside_hal') {
+          if (type === HalStatusFilterValue.OutsideHal) {
             halStatusOr.push({
               records: {
                 none: {
-                  platform: 'hal',
+                  platform: halPlatform,
                 },
               },
             })
@@ -814,26 +815,6 @@ export class DocumentDAO extends AbstractDAO {
             },
           },
         },
-      }
-    }
-
-    // "Outside HAL": the document has no harvested HAL source record at all.
-    // Same predicate as the `outside_hal` halStatus column filter above.
-    if (outsideHalOnly) {
-      where = {
-        ...where,
-        AND: [
-          ...this.computeExistingAnd(where),
-          {
-            records: {
-              none: {
-                platform: getBibliographicPlatformDbValue(
-                  BibliographicPlatform.HAL,
-                ),
-              },
-            },
-          },
-        ],
       }
     }
 
@@ -1134,18 +1115,29 @@ export class DocumentDAO extends AbstractDAO {
     incompleteHalRepositoryItems: number
     outsideHalItems: number
   }> {
-    const allWhere = this.createFetchDocumentsWhere({
+    // Tab badges are perspective totals: they deliberately ignore the search
+    // term and the column filters currently applied to the table.
+    const base = {
       ...params,
+      searchTerm: '',
+      searchLang: '',
       areHalCollectionCodesOmitted: false,
+    }
+
+    const allWhere = this.createFetchDocumentsWhere({
+      ...base,
+      columnFilters: [],
     })
     const incompleteHalRepositoryWhere = this.createFetchDocumentsWhere({
-      ...params,
+      ...base,
+      columnFilters: [],
       areHalCollectionCodesOmitted: true,
     })
+    // Counted through the very same halStatus clause the list query uses, so
+    // the badge and the table can never disagree.
     const outsideHalWhere = this.createFetchDocumentsWhere({
-      ...params,
-      areHalCollectionCodesOmitted: false,
-      outsideHalOnly: true,
+      ...base,
+      columnFilters: [{ id: 'halStatus', value: OUTSIDE_HAL_TAB_STATUSES }],
     })
 
     const allItems = await this.prismaClient.document.count({

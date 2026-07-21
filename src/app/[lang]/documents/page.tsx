@@ -36,11 +36,12 @@ import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { Can } from '@casl/react'
 import NextLink from 'next/link'
+import { usePublicationsTable } from '@/app/[lang]/documents/hooks/usePublicationsTable'
 import {
   ALL_DOCUMENTS_TAB,
+  isPublicationTab,
   OUTSIDE_HAL_TAB,
-  usePublicationsTable,
-} from '@/app/[lang]/documents/hooks/usePublicationsTable'
+} from '@/app/[lang]/documents/hooks/documentTable/utils/tabs'
 import MergeDialog from '@/app/[lang]/documents/components/MergeDialog'
 
 dayjs.extend(utc)
@@ -110,18 +111,20 @@ const DocumentsPage = () => {
     },
   ]
 
-  const [selectedTab, setSelectedTab] = useState(tabs[0].value)
+  // Read on the first render rather than corrected in an effect: an initial
+  // all_documents -> outside_hal transition would register as a tab switch and
+  // discard the page index restored from sessionStorage.
+  const [selectedTab, setSelectedTab] = useState(() => {
+    const tab = searchParams.get('tab')
+    return isPublicationTab(tab) ? (tab as string) : ALL_DOCUMENTS_TAB
+  })
 
   useEffect(() => {
     const tab = searchParams.get('tab')
 
     // Fall back on the first tab for unknown values (stale bookmarks), which
     // would otherwise leave the Tabs component with no matching value.
-    setSelectedTab(
-      tab === ALL_DOCUMENTS_TAB || tab === OUTSIDE_HAL_TAB
-        ? tab
-        : ALL_DOCUMENTS_TAB,
-    )
+    setSelectedTab(isPublicationTab(tab) ? (tab as string) : ALL_DOCUMENTS_TAB)
   }, [searchParams])
 
   const handleTabChange = (newValue: string) => {

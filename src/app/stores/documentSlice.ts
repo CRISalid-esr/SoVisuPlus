@@ -19,14 +19,12 @@ export interface DocumentQuery extends BaseQuery {
   requestId: number
   halCollectionCodes: string
   areHalCollectionCodesOmitted: boolean
-  outsideHalOnly: boolean
 }
 
-export interface CountDocumentQuery extends BaseQuery {
-  searchTerm: string
-  page: number
-  columnFilters: string
-  searchLang: string
+// Tab badge counts are perspective totals — the table's search term, paging and
+// column filters are deliberately not part of the query, so unlike the other
+// queries this one does not extend BaseQuery.
+export interface CountDocumentQuery {
   contributorUid: string | null
   contributorType: AgentType
   requestId: number

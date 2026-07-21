@@ -4,13 +4,9 @@ import { AgentType, agentTypeFromString } from '@/types/IAgent'
 
 export const GET = async (req: NextRequest) => {
   try {
+    // These counts feed the tab badges, which are perspective totals: the
+    // table's search term and column filters are deliberately not applied.
     const urlParams = req.nextUrl.searchParams
-    const searchTerm = urlParams.get('searchTerm') || ''
-    const searchlang =
-      urlParams.get('searchLang') ||
-      process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0] ||
-      ''
-    const columnFilters = JSON.parse(urlParams.get('columnFilters') || '[]')
     const contributorUid = urlParams.get('contributorUid') || ''
     const contributorType: AgentType | null = agentTypeFromString(
       urlParams.get('contributorType'),
@@ -29,9 +25,6 @@ export const GET = async (req: NextRequest) => {
     const documentService = new DocumentService()
     const { allItems, incompleteHalRepositoryItems, outsideHalItems } =
       await documentService.countDocuments({
-        searchTerm,
-        searchLang: searchlang,
-        columnFilters,
         contributorUid,
         contributorType,
         halCollectionCodes,

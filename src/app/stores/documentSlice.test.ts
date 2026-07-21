@@ -112,7 +112,6 @@ describe('addDocumentSlice', () => {
       requestId: 1,
       halCollectionCodes: '["ABC","DEF"]',
       areHalCollectionCodesOmitted: false,
-      outsideHalOnly: false,
     }
 
     // Call the fetchDocuments method
@@ -149,7 +148,6 @@ describe('addDocumentSlice', () => {
       requestId: 1,
       halCollectionCodes: '["ABC","DEF"]',
       areHalCollectionCodesOmitted: false,
-      outsideHalOnly: false,
     }
 
     // Call the fetchDocuments method
@@ -175,10 +173,6 @@ describe('addDocumentSlice', () => {
     })
 
     const queryObject: CountDocumentQuery = {
-      searchTerm: 'test',
-      page: 1,
-      columnFilters: '',
-      searchLang: 'en',
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,
@@ -210,10 +204,6 @@ describe('addDocumentSlice', () => {
     ;(fetch as jest.Mock).mockRejectedValueOnce(mockError)
 
     const queryObject: CountDocumentQuery = {
-      searchTerm: 'test',
-      page: 1,
-      columnFilters: '',
-      searchLang: 'en',
       contributorUid: null,
       contributorType: 'person',
       requestId: 1,

@@ -40,13 +40,10 @@ interface FetchDocumentsParams {
   contributorType: AgentType
   halCollectionCodes: string[]
   areHalCollectionCodesOmitted: boolean
-  outsideHalOnly: boolean
 }
 
+// Tab badge counts are perspective totals — no search term, no column filters.
 interface CountDocumentsParams {
-  searchTerm: string
-  searchLang: string
-  columnFilters: ColumnFilter[]
   contributorUid: string | null
   contributorType: AgentType
   halCollectionCodes: string[]
@@ -195,7 +192,6 @@ export class DocumentService {
     contributorType,
     halCollectionCodes,
     areHalCollectionCodesOmitted,
-    outsideHalOnly,
   }: FetchDocumentsParams) {
     const contributorUids = await this.buildContributorUidArray(
       contributorUid,
@@ -219,7 +215,6 @@ export class DocumentService {
         contributorUids,
         halCollectionCodes,
         areHalCollectionCodesOmitted,
-        outsideHalOnly,
       })
       return { documents, totalItems }
     } catch (error) {
@@ -297,9 +292,6 @@ export class DocumentService {
   }
 
   async countDocuments({
-    searchTerm,
-    searchLang,
-    columnFilters,
     contributorUid,
     contributorType,
     halCollectionCodes,
@@ -317,14 +309,9 @@ export class DocumentService {
       }
     }
 
-    const expandedColumnFilters = this.expandedColumnFilters(columnFilters)
-
     try {
       const { allItems, incompleteHalRepositoryItems, outsideHalItems } =
         await this.documentDAO.countDocuments({
-          searchTerm,
-          searchLang: searchLang,
-          columnFilters: expandedColumnFilters,
           contributorUids,
           halCollectionCodes,
         })
