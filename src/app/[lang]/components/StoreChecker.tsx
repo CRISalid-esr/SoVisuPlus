@@ -20,6 +20,7 @@ const StoreChecker = () => {
       requestId: 1,
       halCollectionCodes: '["ABC","DEF"]',
       areHalCollectionCodesOmitted: false,
+      outsideHalOnly: false,
     }).then(() => {
       setFailure(false)
     })

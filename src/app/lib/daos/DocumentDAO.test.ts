@@ -827,6 +827,7 @@ describe('DocumentDAO', () => {
       contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
       areHalCollectionCodesOmitted: false,
+      outsideHalOnly: false,
     }
 
     const result = await documentDAO.fetchDocuments(fetchParams)
@@ -1009,6 +1010,7 @@ describe('DocumentDAO', () => {
       contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
       areHalCollectionCodesOmitted: false,
+      outsideHalOnly: false,
     }
 
     await documentDAO.fetchDocuments(fetchParams)
@@ -1133,6 +1135,7 @@ describe('DocumentDAO', () => {
       contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
       areHalCollectionCodesOmitted: false,
+      outsideHalOnly: false,
     }
 
     await documentDAO.fetchDocuments(fetchParams)
@@ -1252,6 +1255,7 @@ describe('DocumentDAO', () => {
       contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
       areHalCollectionCodesOmitted: true,
+      outsideHalOnly: false,
     }
 
     await documentDAO.fetchDocuments(fetchParams)

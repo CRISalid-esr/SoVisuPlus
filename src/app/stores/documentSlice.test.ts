@@ -112,6 +112,7 @@ describe('addDocumentSlice', () => {
       requestId: 1,
       halCollectionCodes: '["ABC","DEF"]',
       areHalCollectionCodesOmitted: false,
+      outsideHalOnly: false,
     }
 
     // Call the fetchDocuments method
@@ -148,6 +149,7 @@ describe('addDocumentSlice', () => {
       requestId: 1,
       halCollectionCodes: '["ABC","DEF"]',
       areHalCollectionCodesOmitted: false,
+      outsideHalOnly: false,
     }
 
     // Call the fetchDocuments method

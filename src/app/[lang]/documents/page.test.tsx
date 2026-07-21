@@ -298,6 +298,7 @@ describe('DocumentsPage Component', () => {
         requestId: 1,
         halCollectionCodes: JSON.stringify(['ABC', 'DEF']),
         areHalCollectionCodesOmitted: false,
+        outsideHalOnly: false,
       })
     })
   })

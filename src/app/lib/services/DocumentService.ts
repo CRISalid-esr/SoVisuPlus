@@ -40,6 +40,7 @@ interface FetchDocumentsParams {
   contributorType: AgentType
   halCollectionCodes: string[]
   areHalCollectionCodesOmitted: boolean
+  outsideHalOnly: boolean
 }
 
 interface CountDocumentsParams {
@@ -194,6 +195,7 @@ export class DocumentService {
     contributorType,
     halCollectionCodes,
     areHalCollectionCodesOmitted,
+    outsideHalOnly,
   }: FetchDocumentsParams) {
     const contributorUids = await this.buildContributorUidArray(
       contributorUid,
@@ -217,6 +219,7 @@ export class DocumentService {
         contributorUids,
         halCollectionCodes,
         areHalCollectionCodesOmitted,
+        outsideHalOnly,
       })
       return { documents, totalItems }
     } catch (error) {
@@ -307,13 +310,17 @@ export class DocumentService {
     )
 
     if (contributorUids.length == 0) {
-      return { allItems: 0, incompleteHalRepositoryItems: 0 }
+      return {
+        allItems: 0,
+        incompleteHalRepositoryItems: 0,
+        outsideHalItems: 0,
+      }
     }
 
     const expandedColumnFilters = this.expandedColumnFilters(columnFilters)
 
     try {
-      const { allItems, incompleteHalRepositoryItems } =
+      const { allItems, incompleteHalRepositoryItems, outsideHalItems } =
         await this.documentDAO.countDocuments({
           searchTerm,
           searchLang: searchLang,
@@ -321,7 +328,7 @@ export class DocumentService {
           contributorUids,
           halCollectionCodes,
         })
-      return { allItems, incompleteHalRepositoryItems }
+      return { allItems, incompleteHalRepositoryItems, outsideHalItems }
     } catch (error) {
       console.error('Error in service layer:', error)
       throw new Error('Error counting documents from service')

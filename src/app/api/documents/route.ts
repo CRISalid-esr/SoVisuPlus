@@ -23,6 +23,7 @@ export const GET = async (req: NextRequest) => {
     )
     const areHalCollectionCodesOmitted =
       urlParams.get('areHalCollectionCodesOmitted') === 'true'
+    const outsideHalOnly = urlParams.get('outsideHalOnly') === 'true'
 
     if (!contributorType) {
       return NextResponse.json(
@@ -42,6 +43,7 @@ export const GET = async (req: NextRequest) => {
       contributorType,
       halCollectionCodes,
       areHalCollectionCodesOmitted,
+      outsideHalOnly,
     })
 
     return NextResponse.json({

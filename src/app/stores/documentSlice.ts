@@ -19,6 +19,7 @@ export interface DocumentQuery extends BaseQuery {
   requestId: number
   halCollectionCodes: string
   areHalCollectionCodesOmitted: boolean
+  outsideHalOnly: boolean
 }
 
 export interface CountDocumentQuery extends BaseQuery {
@@ -42,6 +43,7 @@ export interface DocumentSlice {
       latestCountDocumentsRequestId?: number
       allItems?: number
       incompleteHalRepositoryItems?: number
+      outsideHalItems?: number
       loading: boolean
       error: string | null | unknown
     }
@@ -91,6 +93,7 @@ export const addDocumentSlice: StateCreator<
       error: null,
       allItems: 0,
       incompleteHalRepositoryItems: 0,
+      outsideHalItems: 0,
     },
     hasFetched: false,
     setHasFetched: (flag: boolean) =>
@@ -228,7 +231,8 @@ export const addDocumentSlice: StateCreator<
       try {
         const response = await fetch(`/api/documents/count?${queryString}`)
         const jsonData = await response.json()
-        const { allItems, incompleteHalRepositoryItems } = jsonData
+        const { allItems, incompleteHalRepositoryItems, outsideHalItems } =
+          jsonData
 
         set((state) => {
           // Ignore if a newer request was made since this one started
@@ -242,6 +246,7 @@ export const addDocumentSlice: StateCreator<
                 ...state.document.count,
                 allItems,
                 incompleteHalRepositoryItems,
+                outsideHalItems,
                 error: null,
                 loading: false,
               },

@@ -36,7 +36,11 @@ import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { Can } from '@casl/react'
 import NextLink from 'next/link'
-import { usePublicationsTable } from '@/app/[lang]/documents/hooks/usePublicationsTable'
+import {
+  ALL_DOCUMENTS_TAB,
+  OUTSIDE_HAL_TAB,
+  usePublicationsTable,
+} from '@/app/[lang]/documents/hooks/usePublicationsTable'
 import MergeDialog from '@/app/[lang]/documents/components/MergeDialog'
 
 dayjs.extend(utc)
@@ -85,7 +89,7 @@ const DocumentsPage = () => {
   const searchParams = useSearchParams()
 
   const {
-    count: { allItems, incompleteHalRepositoryItems },
+    count: { allItems, outsideHalItems },
     listHasChanged,
     setListHasChanged,
     mergeDocuments,
@@ -94,14 +98,14 @@ const DocumentsPage = () => {
   const tabs = [
     {
       label: t`documents_page_all_documents_filter`,
-      value: 'all_documents',
+      value: ALL_DOCUMENTS_TAB,
       numberOfItems: allItems,
       color: theme.palette.primary.main,
     },
     {
       label: t`documents_page_incomplete_hal_repository_filter`,
-      value: 'incomplete_hal_repository',
-      numberOfItems: incompleteHalRepositoryItems,
+      value: OUTSIDE_HAL_TAB,
+      numberOfItems: outsideHalItems,
       color: theme.palette.error.main,
     },
   ]
@@ -111,7 +115,13 @@ const DocumentsPage = () => {
   useEffect(() => {
     const tab = searchParams.get('tab')
 
-    setSelectedTab(tab ?? 'all_documents')
+    // Fall back on the first tab for unknown values (stale bookmarks), which
+    // would otherwise leave the Tabs component with no matching value.
+    setSelectedTab(
+      tab === ALL_DOCUMENTS_TAB || tab === OUTSIDE_HAL_TAB
+        ? tab
+        : ALL_DOCUMENTS_TAB,
+    )
   }, [searchParams])
 
   const handleTabChange = (newValue: string) => {

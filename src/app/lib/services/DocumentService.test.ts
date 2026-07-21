@@ -166,6 +166,7 @@ describe('DocumentService', () => {
       contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
       areHalCollectionCodesOmitted: false,
+      outsideHalOnly: false,
     }
 
     await expect(documentService.fetchDocuments(params)).resolves.toEqual(
@@ -197,6 +198,7 @@ describe('DocumentService', () => {
       contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
       areHalCollectionCodesOmitted: false,
+      outsideHalOnly: false,
     }
 
     await expect(documentService.fetchDocuments(params)).rejects.toThrow(
@@ -962,6 +964,7 @@ describe('DocumentService', () => {
       contributorType: 'person' as AgentType,
       halCollectionCodes: [],
       areHalCollectionCodesOmitted: false,
+      outsideHalOnly: false,
     }
 
     await expect(documentService.fetchDocuments(params)).resolves.toEqual(
@@ -1009,6 +1012,7 @@ describe('DocumentService', () => {
       contributorType: 'person' as AgentType,
       halCollectionCodes: [],
       areHalCollectionCodesOmitted: false,
+      outsideHalOnly: false,
     }
 
     await documentService.fetchDocuments(params)
@@ -1044,6 +1048,7 @@ describe('DocumentService', () => {
       contributorType: 'person' as AgentType,
       halCollectionCodes: [],
       areHalCollectionCodesOmitted: false,
+      outsideHalOnly: false,
     }
 
     await documentService.fetchDocuments(params)

@@ -41,6 +41,7 @@ interface FetchDocumentsFromDBParams {
   contributorUids: string[]
   halCollectionCodes: string[]
   areHalCollectionCodesOmitted: boolean
+  outsideHalOnly: boolean
 }
 
 interface CountDocumentsFromDBParams {
@@ -481,6 +482,7 @@ export class DocumentDAO extends AbstractDAO {
     columnFilters,
     halCollectionCodes,
     areHalCollectionCodesOmitted,
+    outsideHalOnly,
     contributorUids,
   }: {
     searchTerm: string
@@ -489,6 +491,7 @@ export class DocumentDAO extends AbstractDAO {
     contributorUids: string[]
     halCollectionCodes: string[]
     areHalCollectionCodesOmitted: boolean
+    outsideHalOnly?: boolean
   }): Prisma.DocumentWhereInput {
     const publicationListRolesFilter = parseStrArrayEnvVar(
       process.env.PUBLICATION_LIST_ROLES_FILTER,
@@ -814,6 +817,26 @@ export class DocumentDAO extends AbstractDAO {
       }
     }
 
+    // "Outside HAL": the document has no harvested HAL source record at all.
+    // Same predicate as the `outside_hal` halStatus column filter above.
+    if (outsideHalOnly) {
+      where = {
+        ...where,
+        AND: [
+          ...this.computeExistingAnd(where),
+          {
+            records: {
+              none: {
+                platform: getBibliographicPlatformDbValue(
+                  BibliographicPlatform.HAL,
+                ),
+              },
+            },
+          },
+        ],
+      }
+    }
+
     if (contributorUids && contributorUids.length > 0) {
       const rolesAndUidFilter: Prisma.DocumentWhereInput = {
         contributions: {
@@ -1109,6 +1132,7 @@ export class DocumentDAO extends AbstractDAO {
   public async countDocuments(params: CountDocumentsFromDBParams): Promise<{
     allItems: number
     incompleteHalRepositoryItems: number
+    outsideHalItems: number
   }> {
     const allWhere = this.createFetchDocumentsWhere({
       ...params,
@@ -1117,6 +1141,11 @@ export class DocumentDAO extends AbstractDAO {
     const incompleteHalRepositoryWhere = this.createFetchDocumentsWhere({
       ...params,
       areHalCollectionCodesOmitted: true,
+    })
+    const outsideHalWhere = this.createFetchDocumentsWhere({
+      ...params,
+      areHalCollectionCodesOmitted: false,
+      outsideHalOnly: true,
     })
 
     const allItems = await this.prismaClient.document.count({
@@ -1127,10 +1156,14 @@ export class DocumentDAO extends AbstractDAO {
         where: incompleteHalRepositoryWhere,
       },
     )
+    const outsideHalItems = await this.prismaClient.document.count({
+      where: outsideHalWhere,
+    })
 
     return {
       allItems,
       incompleteHalRepositoryItems,
+      outsideHalItems,
     }
   }
 

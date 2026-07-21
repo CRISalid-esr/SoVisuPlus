@@ -27,7 +27,7 @@ export const GET = async (req: NextRequest) => {
     }
 
     const documentService = new DocumentService()
-    const { allItems, incompleteHalRepositoryItems } =
+    const { allItems, incompleteHalRepositoryItems, outsideHalItems } =
       await documentService.countDocuments({
         searchTerm,
         searchLang: searchlang,
@@ -40,6 +40,7 @@ export const GET = async (req: NextRequest) => {
     return NextResponse.json({
       allItems,
       incompleteHalRepositoryItems,
+      outsideHalItems,
     })
   } catch (error) {
     console.error('Error counting documents:', error)

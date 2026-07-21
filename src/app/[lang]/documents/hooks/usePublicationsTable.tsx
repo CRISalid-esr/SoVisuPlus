@@ -93,6 +93,13 @@ const DEFAULT_SORTING = [
   },
 ]
 
+export const ALL_DOCUMENTS_TAB = 'all_documents'
+export const OUTSIDE_HAL_TAB = 'outside_hal'
+
+// HAL statuses that still make sense once the list is already restricted to
+// publications outside HAL. Add 'in_moderation' here when that status lands.
+const OUTSIDE_HAL_TAB_STATUSES: string[] = ['outside_hal']
+
 const createDocTypeTree = (
   _: (descriptor: Lingui.MessageDescriptor) => string,
 ) =>
@@ -292,7 +299,10 @@ const usePublicationsTableDataFetching = (
       contributorType: contributorType,
       requestId: nextRequestId,
       halCollectionCodes: JSON.stringify(currentPerspective.membershipAcronyms),
-      areHalCollectionCodesOmitted: selectedTab === 'incomplete_hal_repository',
+      // Kept wired to false: the "incomplete HAL filling" filter is not exposed
+      // by any tab for now, but the plumbing stays ready for a future tab.
+      areHalCollectionCodesOmitted: false,
+      outsideHalOnly: selectedTab === OUTSIDE_HAL_TAB,
     }).catch((error) => {
       console.error('Error fetching documents:', error)
     })
@@ -445,6 +455,32 @@ export const usePublicationsTable = (
     }
   }, [columnFilters, yearsFilter])
 
+  // Column filters are persisted across reloads, so a halStatus filter set on
+  // another tab could survive here and silently empty the list — drop the
+  // values the "outside HAL" tab no longer offers.
+  useEffect(() => {
+    if (selectedTab !== OUTSIDE_HAL_TAB) return
+
+    setColumnFilters((previous) => {
+      const next = previous.flatMap((filter) => {
+        if (filter.id !== 'halStatus' || !Array.isArray(filter.value))
+          return [filter]
+
+        const kept = (filter.value as string[]).filter((value) =>
+          OUTSIDE_HAL_TAB_STATUSES.includes(value),
+        )
+
+        return kept.length ? [{ ...filter, value: kept }] : []
+      })
+
+      const unchanged =
+        next.length === previous.length &&
+        next.every((filter, index) => filter === previous[index])
+
+      return unchanged ? previous : next
+    })
+  }, [selectedTab])
+
   usePublicationsTableDataFetching(
     columnFilters,
     structuresFilter,
@@ -456,6 +492,57 @@ export const usePublicationsTable = (
   )
 
   const typeOptions = useMemo(() => createDocTypeTree(_), [_])
+
+  // On the "outside HAL" tab the in-collection statuses can never match, so
+  // only the statuses listed in OUTSIDE_HAL_TAB_STATUSES are offered.
+  const halStatusFilterSelectOptions = useMemo(() => {
+    const options = [
+      {
+        label: (
+          <HalStatusCellBadge
+            type={HalStatusCellType.InCollection}
+            acronyms={[]}
+            halSubmitType={HalSubmitType.file}
+            halUrl={''}
+            isSingleLine
+          />
+        ),
+        value: 'in_collection',
+      },
+      {
+        label: (
+          <HalStatusCellBadge
+            type={HalStatusCellType.NotInSyncWithCollection}
+            halSubmitType={HalSubmitType.file}
+            acronyms={[]}
+            halUrl={''}
+            hasBeenUpdated={false}
+            isOutOfCollection={false}
+            isSingleLine
+            documentUid={''}
+          />
+        ),
+        value: 'out_of_collection',
+      },
+      {
+        label: (
+          <HalStatusCellBadge
+            type={HalStatusCellType.OutsideHal}
+            isSingleLine
+            documentUid={''}
+          />
+        ),
+        value: 'outside_hal',
+      },
+    ]
+
+    return selectedTab === OUTSIDE_HAL_TAB
+      ? options.filter((option) =>
+          OUTSIDE_HAL_TAB_STATUSES.includes(option.value),
+        )
+      : options
+  }, [selectedTab])
+
   const columns = useMemo<
     MRT_ColumnDef<Document>[]
   >((): MRT_ColumnDef<Document>[] => {
@@ -642,48 +729,8 @@ export const usePublicationsTable = (
           return <HalStatusCell row={row} />
         },
         filterVariant: 'multi-select',
-        filterSelectOptions: [
-          {
-            // @ts-expect-error: so that label accepts an Element
-            label: (
-              <HalStatusCellBadge
-                type={HalStatusCellType.InCollection}
-                acronyms={[]}
-                halSubmitType={HalSubmitType.file}
-                halUrl={''}
-                isSingleLine
-              />
-            ),
-            value: 'in_collection',
-          },
-          {
-            // @ts-expect-error: so that label accepts an Element
-            label: (
-              <HalStatusCellBadge
-                type={HalStatusCellType.NotInSyncWithCollection}
-                halSubmitType={HalSubmitType.file}
-                acronyms={[]}
-                halUrl={''}
-                hasBeenUpdated={false}
-                isOutOfCollection={false}
-                isSingleLine
-                documentUid={''}
-              />
-            ),
-            value: 'out_of_collection',
-          },
-          {
-            // @ts-expect-error: so that label accepts an Element
-            label: (
-              <HalStatusCellBadge
-                type={HalStatusCellType.OutsideHal}
-                isSingleLine
-                documentUid={''}
-              />
-            ),
-            value: 'outside_hal',
-          },
-        ],
+        // @ts-expect-error: so that label accepts an Element
+        filterSelectOptions: halStatusFilterSelectOptions,
       },
       {
         enableSorting: false,
@@ -809,6 +856,7 @@ export const usePublicationsTable = (
     navigateToDetailsPage,
     _,
     typeOptions,
+    halStatusFilterSelectOptions,
   ])
   // The user has any selectable row only if they can merge at least one listed
   // document that isn't waiting for an update — drives the toolbar "select all"
