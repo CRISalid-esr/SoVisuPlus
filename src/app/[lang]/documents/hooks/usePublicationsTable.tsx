@@ -385,13 +385,15 @@ export const usePublicationsTable = (
     const structures = Array.isArray(rawStructures)
       ? rawStructures
       : [rawStructures]
-    console.log(structures)
     const years = searchParams.get('years')
     if (structures && years) {
       setStructuresFilter(structures)
       const formattedYears = years
         .split(',')
         .map((year) => dayjs(year, 'YYYY', true))
+        .map((date, index) =>
+          index === 0 ? date.startOf('year') : date.endOf('year'),
+        )
       setYearsFilter(formattedYears)
       const params = new URLSearchParams(searchParams.toString())
       params.delete('years')
