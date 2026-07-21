@@ -147,6 +147,21 @@ function mergePoints(
   map: ECharts,
   zoom?: number,
 ): Point[] {
+  // convertToPixel yields nothing until the geo layout has been computed; in
+  // that case return the points unclustered at their raw coordinates rather
+  // than silently dropping them all.
+  if (!map.convertToPixel({ geoIndex: 0 }, [0, 0])) {
+    return Object.values(countryPoints)
+      .flat()
+      .map((point) => ({
+        longitude: point.longitude,
+        latitude: point.latitude,
+        count: 1,
+        data: {
+          [point.uid]: { name: point.name, documents: point.documents },
+        },
+      }))
+  }
   const gridSize = Math.max(
     8,
     Math.min(80, BASE_GRID_SIZE / Math.pow(zoom ? zoom : 1, 0.6)),

@@ -1,13 +1,12 @@
-import { ECElementEvent, registerMap } from 'echarts/core'
-import ReactEcharts, { EChartsOption } from 'echarts-for-react'
-import { GeoComponentOption } from 'echarts/components'
+import { registerMap } from 'echarts/core'
+import ReactEcharts from 'echarts-for-react'
 import geoJson from '@/public/countries.geo.json'
 import { useTheme } from '@mui/system'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { plural, t } from '@lingui/core/macro'
-import { Box, CircularProgress } from '@mui/material'
+import { alpha, Box, CircularProgress } from '@mui/material'
 
-import { ECharts } from 'echarts'
+import { ECElementEvent, ECharts } from 'echarts'
 import {
   AffiliationData,
   ChartOption,
@@ -25,6 +24,8 @@ import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { useSearchParams } from 'next/navigation'
 
+registerMap('world', JSON.stringify(geoJson))
+
 const CollaborationMap = ({
   yearRange,
   data = [],
@@ -36,9 +37,12 @@ const CollaborationMap = ({
 
   const chartRef = useRef<ReactEcharts>(null)
   const lockedPointRef = useRef<number[] | null>(null)
-
-  const map = JSON.stringify(geoJson)
-  registerMap('world', map)
+  // The ready echarts instance. echarts-for-react mounts asynchronously (it
+  // first measures the container with a temporary, option-less instance), so
+  // effects must not grab the instance through the ref at mount time — they
+  // key on this state instead, set once `onChartReady` delivers the real
+  // instance.
+  const [chartInstance, setChartInstance] = useState<ECharts | null>(null)
 
   const filteredData: AffiliationData[] = useFilteredData({
     data,
@@ -70,18 +74,26 @@ const CollaborationMap = ({
   )
 
   /**
-   * Smoothly zoom about a client-space point by replaying real mouse-wheel
+   * Smoothly zoom about a chart-space point by replaying real mouse-wheel
    * events — the same RoamController path scrolling uses, so the geo base and
    * the scatter stay in sync (no shift) and the merged points are recomputed
    * through the existing `georoam` -> `handleRoam` wiring. The ticks are spread
    * evenly over a short duration so the zoom glides. Each tick is echarts'
    * smallest step (factor 1.1, reached when the normalised |deltaY| <= 40);
    * wheel up (negative deltaY) zooms in.
+   *
+   * Dispatching the public `geoRoam` action instead does NOT work: its
+   * `updateTransform` pipeline deliberately re-renders only series ("Geo
+   * render cost a lot" — echarts core), so the scatter moves while the geo
+   * base keeps its stale transform. The base only moves in sync because the
+   * internal RoamController pre-applies the transform to MapDraw's private
+   * group before dispatching, which is unreachable from the public API —
+   * synthetic wheel events are the only public entry point exercising both.
    */
-  const smoothWheelZoom = useCallback(
+  const smoothZoom = useCallback(
     (
-      clientX: number,
-      clientY: number,
+      originX: number,
+      originY: number,
       totalTicks: number,
       out: boolean,
       interval = 45, // ms between ticks (lower = faster glide)
@@ -90,13 +102,14 @@ const CollaborationMap = ({
       if (!map) return
       const dom = map.getDom() as HTMLElement
       const target = (dom.querySelector('canvas') as HTMLElement | null) ?? dom
+      const rect = target.getBoundingClientRect()
       const deltaY = out ? 30 : -30
       const fireWheel = () =>
         target.dispatchEvent(
           new WheelEvent('wheel', {
             deltaY,
-            clientX,
-            clientY,
+            clientX: rect.left + originX,
+            clientY: rect.top + originY,
             bubbles: true,
             cancelable: true,
           }),
@@ -120,61 +133,53 @@ const CollaborationMap = ({
   )
 
   /**
-   * Update map on rendering
+   * Recompute the merged points at the map's current zoom and push them into
+   * the scatter series. Single population path shared by the initial render
+   * and data changes.
+   */
+  const populatePoints = useCallback((map: ECharts) => {
+    // A bare or disposed instance has no option to read — nothing to populate.
+    const option = map.getOption() as { geo?: { zoom?: number }[] } | undefined
+    if (!option) return
+    const zoom = option.geo?.[0]?.zoom || 1
+    const points = mergedFnRef.current(map, zoom)
+    map.setOption({
+      series: [
+        {
+          id: 'collaborations',
+          data: points.map((point) => [
+            point.longitude,
+            point.latitude,
+            point.count,
+            point.data,
+          ]),
+        },
+      ],
+    })
+  }, [])
+
+  /**
+   * Populate the scatter series once the first frame has been rendered — only
+   * then has the geo layout been computed, so points can be clustered through
+   * `convertToPixel`.
    * @param map the echarts component rendering the datavizualisation
    */
   const onChartReady = (map: ECharts) => {
-    requestAnimationFrame(() => {
-      const points = mergedFnRef.current(map, 1.15)
-      map.setOption({
-        series: [
-          {
-            id: 'collaborations',
-            data: points.map((point) => [
-              point.longitude,
-              point.latitude,
-              point.count,
-              point.data,
-            ]),
-          },
-        ],
-      })
-    })
+    const populateWhenReady = () => {
+      map.off('finished', populateWhenReady)
+      populatePoints(map)
+    }
+    map.on('finished', populateWhenReady)
+    setChartInstance(map)
   }
 
   useEffect(() => {
-    const map = chartRef.current?.getEchartsInstance() as EChartsOption & {
-      geo?: GeoComponentOption
-    }
-    if (!map) return
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const zoom = map.getOption()?.geo?.[0]?.zoom || 1
-
-        const points = mergedFnRef.current(map, zoom)
-
-        map.setOption({
-          series: [
-            {
-              id: 'collaborations',
-              data: points.map((p) => [
-                p.longitude,
-                p.latitude,
-                p.count,
-                p.data,
-              ]),
-            },
-          ],
-        })
-      })
-    })
-  }, [countryPoints])
+    if (!chartInstance) return
+    populatePoints(chartInstance)
+  }, [countryPoints, chartInstance, populatePoints])
 
   useEffect(() => {
-    const chart = chartRef.current?.getEchartsInstance() as EChartsOption & {
-      geo?: GeoComponentOption
-    }
+    const chart = chartInstance
     if (!chart) return
     const handleClick = (params: ECElementEvent) => {
       if (params.seriesType === 'scatter') {
@@ -198,10 +203,11 @@ const CollaborationMap = ({
           return
         }
 
-        // Smoothly zoom in towards the clicked country using the same wheel
-        // path as the toolbox buttons (geo base and points stay in sync, no
-        // shift). Aim for ~zoom 4: derive how many 1.1 ticks reach it from the
-        // current zoom, and zoom about the country's on-screen position.
+        // Smoothly zoom in towards the clicked country using the same
+        // `geoRoam` path as the toolbox buttons (geo base and points stay in
+        // sync, no shift). Aim for ~zoom 4: derive how many 1.1 ticks reach it
+        // from the current zoom, and zoom about the country's on-screen
+        // position.
         const instance = chartRef.current?.getEchartsInstance() as
           | ECharts
           | undefined
@@ -211,10 +217,6 @@ const CollaborationMap = ({
           center as number[],
         ) as number[] | undefined
         if (!px) return
-        const dom = instance.getDom() as HTMLElement
-        const target =
-          (dom.querySelector('canvas') as HTMLElement | null) ?? dom
-        const rect = target.getBoundingClientRect()
         const currentZoom =
           (instance.getOption() as { geo?: { zoom?: number }[] }).geo?.[0]
             ?.zoom || 1
@@ -223,13 +225,7 @@ const CollaborationMap = ({
           1,
           Math.round(Math.abs(Math.log(factor)) / Math.log(1.1)),
         )
-        smoothWheelZoom(
-          rect.left + px[0],
-          rect.top + px[1],
-          ticks,
-          factor < 1,
-          30,
-        )
+        smoothZoom(px[0], px[1], ticks, factor < 1, 30)
 
         return
       }
@@ -249,7 +245,7 @@ const CollaborationMap = ({
       document.removeEventListener('click', handleDocumentClick)
       chart.off('click', handleClick)
     }
-  }, [countryCenters, smoothWheelZoom])
+  }, [chartInstance, countryCenters, smoothZoom])
   /**
    * Zoom in or out action perform by custom toolbox zoom buttons.
    * Zooms about the centre of the map over 6 wheel ticks.
@@ -258,16 +254,7 @@ const CollaborationMap = ({
   const zoomInOut = (out: boolean) => {
     const map = chartRef.current?.getEchartsInstance() as ECharts | undefined
     if (!map) return
-    const dom = map.getDom() as HTMLElement
-    const target = (dom.querySelector('canvas') as HTMLElement | null) ?? dom
-    const rect = target.getBoundingClientRect()
-    smoothWheelZoom(
-      rect.left + rect.width / 2,
-      rect.top + rect.height / 2,
-      6,
-      out,
-      35,
-    )
+    smoothZoom(map.getWidth() / 2, map.getHeight() / 2, 6, out, 35)
   }
 
   const navigateToDetailsPage = useCallback(
@@ -450,27 +437,33 @@ const CollaborationMap = ({
     ],
   )
 
+  // The chart stays mounted while data loads: unmounting it would destroy the
+  // echarts instance, resetting the user's zoom/pan and re-running the initial
+  // layout race on every fetch. The spinner is overlaid instead.
   return (
-    <Box>
-      {loading ? (
+    <Box sx={{ position: 'relative', minHeight: '600px' }}>
+      <ReactEcharts
+        onChartReady={onChartReady}
+        onEvents={onEvents}
+        option={option}
+        lazyUpdate={true}
+        ref={chartRef}
+        style={{ height: '600px' }}
+      />
+      {loading && (
         <Box
           sx={{
+            position: 'absolute',
+            inset: 0,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
+            backgroundColor: alpha(theme.palette.background.default, 0.6),
+            zIndex: 1,
           }}
         >
           <CircularProgress />
         </Box>
-      ) : (
-        <ReactEcharts
-          onChartReady={onChartReady}
-          onEvents={onEvents}
-          option={option}
-          lazyUpdate={true}
-          ref={chartRef}
-          style={{ height: '600px' }}
-        />
       )}
     </Box>
   )

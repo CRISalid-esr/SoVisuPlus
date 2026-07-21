@@ -70,7 +70,7 @@ const DashboardPage = () => {
   )
   const [documents, setDocuments] = useState<Record<number, DocumentData[]>>([])
   const [oldestYear, setOldestYear] = useState<number | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const lang = (Lingui.i18n.locale || 'ul') as ExtendedLanguageCode
   const entityType = currentPerspective?.type
   const uid = currentPerspective?.uid
@@ -101,11 +101,13 @@ const DashboardPage = () => {
     const contributorUid = currentPerspective?.uid
     const contributorType = currentPerspective?.type
     if (!contributorType || !contributorUid) return
+    const controller = new AbortController()
     const fetchData = async () => {
       setLoading(true)
       try {
         const response = await fetch(
           `/api/documents/dataviz?contributorUid=${contributorUid}&contributorType=${contributorType}`,
+          { signal: controller.signal },
         )
         if (!response.ok) {
           throw new Error('Failed to fetch documents per year')
@@ -153,11 +155,15 @@ const DashboardPage = () => {
           initYearRangeForPerspective(contributorUid, [start, currentYear])
         setDocuments(documents)
       } catch (error) {
+        // An aborted fetch means a newer request (or unmount) superseded this
+        // one — leave the loading state to it.
+        if (error instanceof DOMException && error.name === 'AbortError') return
         console.error('Error while fetching documents per year', error)
       }
       setLoading(false)
     }
     fetchData()
+    return () => controller.abort()
   }, [currentPerspective, currentYear, initYearRangeForPerspective])
 
   const wsSliderHaveChanges = !(
