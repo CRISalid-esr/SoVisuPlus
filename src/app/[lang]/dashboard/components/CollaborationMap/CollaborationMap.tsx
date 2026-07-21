@@ -167,7 +167,10 @@ const CollaborationMap = ({
   const onChartReady = (map: ECharts) => {
     const populateWhenReady = () => {
       map.off('finished', populateWhenReady)
-      populatePoints(map)
+      // `finished` is emitted synchronously from inside echarts' update cycle,
+      // where `setOption` is rejected outright. Deferring lets that stack
+      // unwind first; the layout is already built, so nothing is being raced.
+      queueMicrotask(() => populatePoints(map))
     }
     map.on('finished', populateWhenReady)
     setChartInstance(map)
