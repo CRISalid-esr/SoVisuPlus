@@ -5,7 +5,7 @@ import {
   TooltipComponentOption,
 } from 'echarts/components'
 import { ScatterSeriesOption } from 'echarts/charts'
-import { DocumentData } from '@/app/[lang]/dashboard/page'
+import { DashboardDocumentData } from '@/types/DashboardDocumentData'
 import { ECharts } from 'echarts'
 
 export type AffiliationData = {
@@ -13,7 +13,7 @@ export type AffiliationData = {
   longitude: number
   latitude: number
   name: string
-  documents: Record<string, DocumentData>
+  documents: Record<string, DashboardDocumentData>
 }
 
 export type Point = {
@@ -22,7 +22,7 @@ export type Point = {
   count: number
   data: Record<
     string,
-    { name: string; documents: Record<string, DocumentData> }
+    { name: string; documents: Record<string, DashboardDocumentData> }
   >
 }
 
@@ -41,5 +41,7 @@ export type ChartOption = ComposeOption<
 export type MapCollaborationsProps = {
   yearRange: [number, number]
   loading: boolean
-  data: Record<number, DocumentData[]>
+  data: Record<number, DashboardDocumentData[]>
+  /** Person uids making up the perspective; contributors outside it are collaborators. */
+  perimeterUids: string[]
 }

@@ -104,6 +104,9 @@ const config: Config = {
     // routes for imports like `@/app/auth/...`). Must precede the generic rule below, which
     // assumes paths live directly under `src/app`.
     '^@/app/(.*)$': '<rootDir>/src/app/$1',
+    // `@/public/*` lives at the repo root, not under `src/app` — mirrors the
+    // tsconfig path of the same name. Must also precede the generic rule.
+    '^@/public/(.*)$': '<rootDir>/public/$1',
     '^@/(.*)$': '<rootDir>/src/app/$1',
   },
 
