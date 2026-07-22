@@ -425,10 +425,18 @@ export const useSourcesTable = () => {
                     table.resetRowSelection()
                   }}
                 >
-                  <Box display='flex' alignItems='center'>
-                    <DeleteIcon />
-                    <Trans id='document_details_page_source_tab_select_action_invalidate_label' />
-                  </Box>{' '}
+                  <Tooltip
+                    title={t`document_details_page_source_tab_action_upcoming_feature`}
+                  >
+                    <Box
+                      display='flex'
+                      alignItems='center'
+                      sx={{ pointerEvents: 'auto' }}
+                    >
+                      <DeleteIcon />
+                      <Trans id='document_details_page_source_tab_select_action_invalidate_label' />
+                    </Box>
+                  </Tooltip>
                 </MenuItem>
 
                 <MenuItem
@@ -443,10 +451,18 @@ export const useSourcesTable = () => {
                     table.resetRowSelection()
                   }}
                 >
-                  <Box display='flex' alignItems='center'>
-                    <CallMergeIcon />
-                    <Trans id='document_details_page_source_tab_select_action_unmerge_label' />
-                  </Box>
+                  <Tooltip
+                    title={t`document_details_page_source_tab_action_upcoming_feature`}
+                  >
+                    <Box
+                      display='flex'
+                      alignItems='center'
+                      sx={{ pointerEvents: 'auto' }}
+                    >
+                      <CallMergeIcon />
+                      <Trans id='document_details_page_source_tab_select_action_unmerge_label' />
+                    </Box>
+                  </Tooltip>
                 </MenuItem>
               </Select>
             </FormControl>
