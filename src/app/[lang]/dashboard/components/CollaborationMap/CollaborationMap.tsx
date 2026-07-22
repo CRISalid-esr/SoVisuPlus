@@ -19,7 +19,7 @@ import {
   useHandleRoam,
   useMergedPoints,
 } from '@/app/[lang]/dashboard/components/CollaborationMap/CollaborationMapHooks'
-import { DocumentData } from '@/app/[lang]/dashboard/page'
+import { DashboardDocumentData } from '@/types/DashboardDocumentData'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { useSearchParams } from 'next/navigation'
@@ -30,6 +30,7 @@ const CollaborationMap = ({
   yearRange,
   data = [],
   loading = false,
+  perimeterUids = [],
 }: MapCollaborationsProps) => {
   const theme = useTheme()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
@@ -47,6 +48,7 @@ const CollaborationMap = ({
   const filteredData: AffiliationData[] = useFilteredData({
     data,
     yearRange,
+    perimeterUids,
   })
 
   const [countryPoints, countryCenters] = useCountryPoints(filteredData)
@@ -386,7 +388,7 @@ const CollaborationMap = ({
                 number,
                 Record<
                   string,
-                  { name: string; documents: Record<string, DocumentData> }
+                  { name: string; documents: Record<string, DashboardDocumentData> }
                 >,
               ]
               let html = `<div style="margin:0; padding: 0"><ul style="padding:0; margin: 0">`
@@ -394,7 +396,7 @@ const CollaborationMap = ({
               orgs.some((org, index) => {
                 //stop iteration after reaching 5th element of list and display number of remaining organization
                 if (index == 4) {
-                  const remainingDocs: Record<string, DocumentData> = {}
+                  const remainingDocs: Record<string, DashboardDocumentData> = {}
                   for (let i = index; i < orgs.length; i++) {
                     const orgDocs = orgs[i][1].documents
                     Object.entries(orgDocs).forEach(

@@ -1435,15 +1435,6 @@ describe('DocumentDAO', () => {
               select: {
                 uid: true,
                 displayName: true,
-                memberships: {
-                  select: {
-                    organizationUnit: {
-                      select: {
-                        uid: true,
-                      },
-                    },
-                  },
-                },
               },
             },
             affiliations: {

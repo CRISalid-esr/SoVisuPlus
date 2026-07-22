@@ -25,6 +25,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { Literal, LiteralJson } from '@/types/Literal'
 import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
 import { HalStatusFilterValue } from '@/types/HalStatusFilter'
+import { DashboardDocumentData } from '@/types/DashboardDocumentData'
 
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
@@ -1005,33 +1006,9 @@ export class DocumentDAO extends AbstractDAO {
     }))
   }
 
-  public async fetchOAYearDocuments(contributorUids: string[]): Promise<{
-    documents: {
-      uid: string
-      oaStatus: OAStatus | null
-      publicationDate: string | null
-      upwOAStatus: OAStatus | null
-      contributions: {
-        person: {
-          uid: string
-          displayName: string | null
-          memberships: {
-            organizationUnit: {
-              uid: string
-            }
-          }[]
-        }
-        affiliations: {
-          uid: string
-          displayNames: string[]
-          places: {
-            latitude: number
-            longitude: number
-          }[]
-        }[]
-      }[]
-    }[]
-  }> {
+  public async fetchOAYearDocuments(
+    contributorUids: string[],
+  ): Promise<{ documents: DashboardDocumentData[] }> {
     const perspectiveRolesFilter: string[] = parseStrArrayEnvVar(
       process.env.PERSPECTIVE_ROLES_FILTER,
     )
@@ -1048,15 +1025,6 @@ export class DocumentDAO extends AbstractDAO {
               select: {
                 uid: true,
                 displayName: true,
-                memberships: {
-                  select: {
-                    organizationUnit: {
-                      select: {
-                        uid: true,
-                      },
-                    },
-                  },
-                },
               },
             },
             affiliations: {

@@ -20,10 +20,10 @@ import {
 import { HalDeposit } from '@/types/HalDeposit'
 import { Person } from '@/types/Person'
 import dayjs from 'dayjs'
-import { OAStatus } from '@prisma/client'
 import { Literal, LiteralJson } from '@/types/Literal'
 import { ContributionActionParameters } from '@/types/ContributionAction'
 import { InputJsonValue } from '@prisma/client/runtime/library'
+import { DashboardDocumentData } from '@/types/DashboardDocumentData'
 
 type ColumnFilter =
   | { id: 'date'; value: [string | null, string | null] }
@@ -236,34 +236,7 @@ export class DocumentService {
       const { documents } =
         await this.documentDAO.fetchOAYearDocuments(contributorUids)
       const publicationsPerYear = documents.reduce<
-        Record<
-          number,
-          {
-            uid: string
-            oaStatus: OAStatus | null
-            publicationDate: string | null
-            upwOAStatus: OAStatus | null
-            contributions: {
-              person: {
-                uid: string
-                displayName: string | null
-                memberships: {
-                  organizationUnit: {
-                    uid: string
-                  }
-                }[]
-              }
-              affiliations: {
-                uid: string
-                displayNames: string[]
-                places: {
-                  latitude: number
-                  longitude: number
-                }[]
-              }[]
-            }[]
-          }[]
-        >
+        Record<number, DashboardDocumentData[]>
       >((acc, doc) => {
         const publicationDate = doc.publicationDate
         if (publicationDate) {
@@ -276,7 +249,10 @@ export class DocumentService {
         }
         return acc
       }, {})
-      return { publicationsPerYear }
+      // The perimeter is what separates the perspective's own contributors from
+      // its collaborators; the client cannot derive it (the rules are one-hop
+      // expansions living in PersonDAO), so it travels with the documents.
+      return { publicationsPerYear, perimeterUids: contributorUids }
     } catch (error) {
       console.error('Error in service layer:', error)
       throw new Error('Error fetching documents from service')

@@ -275,6 +275,7 @@ describe('DocumentService', () => {
           },
         ],
       },
+      perimeterUids: ['local-124'],
     }
 
     mockFetchOAYearDocuments.mockResolvedValue(mockResponse)

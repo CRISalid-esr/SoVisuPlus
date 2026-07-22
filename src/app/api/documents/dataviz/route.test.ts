@@ -14,6 +14,7 @@ jest.mock('../../../lib/services/DocumentService', () => ({
           },
         ],
       },
+      perimeterUids: ['person-1', 'person-2'],
     }),
   })),
 }))
@@ -56,5 +57,12 @@ describe('GET handler', () => {
         },
       ],
     })
+  })
+
+  it('should return the perspective perimeter alongside the documents', async () => {
+    const response = await GET(req)
+
+    const jsonResponse = await response.json()
+    expect(jsonResponse.perimeterUids).toEqual(['person-1', 'person-2'])
   })
 })

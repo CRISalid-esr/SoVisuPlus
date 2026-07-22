@@ -25,41 +25,13 @@ import React, { useEffect, useState } from 'react'
 import { WordstreamTopic } from '@/types/WordStream'
 import PublicationCard from '@/app/[lang]/dashboard/components/PublicationCard'
 import AgentIdentityCard from '@/app/[lang]/dashboard/components/AgentIdentityCard'
-import {
-  OAStatus,
-  PersonIdentifierType as DbPersonIdentifierType,
-} from '@prisma/client'
+import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 import CollaborationMap from '@/app/[lang]/dashboard/components/CollaborationMap/CollaborationMap'
+import { DashboardDocumentData } from '@/types/DashboardDocumentData'
 
 const DEFAULT_TOP_N = 10
 const DEFAULT_MIN_FONT = 15
 const DEFAULT_MAX_FONT = 30
-
-export type DocumentData = {
-  uid: string
-  oaStatus: OAStatus | null
-  publicationDate: string | null
-  upwOAStatus: OAStatus | null
-  contributions: {
-    person: {
-      uid: string
-      displayName: string | null
-      memberships: {
-        organizationUnit: {
-          uid: string
-        }
-      }[]
-    }
-    affiliations: {
-      uid: string
-      displayNames: string[]
-      places: {
-        latitude: number
-        longitude: number
-      }[]
-    }[]
-  }[]
-}
 
 const DashboardPage = () => {
   const theme = useTheme()
@@ -68,7 +40,10 @@ const DashboardPage = () => {
   const { yearRange, setYearRange, initYearRangeForPerspective } = useStore(
     (state) => state.dashboard,
   )
-  const [documents, setDocuments] = useState<Record<number, DocumentData[]>>([])
+  const [documents, setDocuments] = useState<
+    Record<number, DashboardDocumentData[]>
+  >([])
+  const [perimeterUids, setPerimeterUids] = useState<string[]>([])
   const [oldestYear, setOldestYear] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const lang = (Lingui.i18n.locale || 'ul') as ExtendedLanguageCode
@@ -113,34 +88,8 @@ const DashboardPage = () => {
           throw new Error('Failed to fetch documents per year')
         }
         const res = await response.json()
-        const documents: Record<
-          number,
-          {
-            uid: string
-            oaStatus: OAStatus | null
-            publicationDate: string | null
-            upwOAStatus: OAStatus | null
-            contributions: {
-              person: {
-                uid: string
-                displayName: string | null
-                memberships: {
-                  organizationUnit: {
-                    uid: string
-                  }
-                }[]
-              }
-              affiliations: {
-                uid: string
-                displayNames: string[]
-                places: {
-                  latitude: number
-                  longitude: number
-                }[]
-              }[]
-            }[]
-          }[]
-        > = res.documents
+        const documents: Record<number, DashboardDocumentData[]> = res.documents
+        const perimeterUids: string[] = res.perimeterUids ?? []
         const years = Object.keys(documents)
           .map(Number)
           .filter((year) => !Number.isNaN(year))
@@ -154,6 +103,7 @@ const DashboardPage = () => {
         if (contributorUid)
           initYearRangeForPerspective(contributorUid, [start, currentYear])
         setDocuments(documents)
+        setPerimeterUids(perimeterUids)
       } catch (error) {
         // An aborted fetch means a newer request (or unmount) superseded this
         // one — leave the loading state to it.
@@ -439,6 +389,7 @@ const DashboardPage = () => {
               yearRange={yearRange}
               data={documents}
               loading={loading}
+              perimeterUids={perimeterUids}
             />
           </CardContent>
         </CustomCard>
