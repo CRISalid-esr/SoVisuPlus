@@ -1,9 +1,13 @@
+import { SearchQuery } from '@/types/BaseQuery'
+
 /**
  * Converts a QueryObject into a URL query string.
  * @param queryObject - The object containing query parameters.
  * @returns A URL-encoded query string.
  */
-export const toQueryString = <T extends object>(queryObject: T): string => {
+export const toQueryString = <T extends SearchQuery>(
+  queryObject: T,
+): string => {
   return new URLSearchParams(
     Object.entries(queryObject).reduce(
       (acc, [key, value]) => {

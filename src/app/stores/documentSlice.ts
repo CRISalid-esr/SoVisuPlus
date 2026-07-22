@@ -1,7 +1,7 @@
 import { StateCreator } from 'zustand'
 import { Document, DocumentState, DocumentType } from '@/types/Document'
 import { toQueryString } from '@/utils/query'
-import { BaseQuery } from '@/types/BaseQuery'
+import { BaseQuery, SearchQuery } from '@/types/BaseQuery'
 import { AgentType } from '@/types/IAgent'
 import { Concept } from '@/types/Concept'
 import { Literal } from '@/types/Literal'
@@ -25,9 +25,9 @@ export interface DocumentQuery extends BaseQuery {
 }
 
 // Mirrors DocumentQuery minus paging and sorting: counting a tab that is not on
-// screen, so no rows are fetched. Not paginated, hence no BaseQuery.
-export interface CountDocumentQuery {
-  searchTerm: string
+// screen, so no rows are fetched. Extends SearchQuery rather than BaseQuery
+// because it is not paginated.
+export interface CountDocumentQuery extends SearchQuery {
   searchLang: string
   columnFilters: string
   contributorUid: string | null
