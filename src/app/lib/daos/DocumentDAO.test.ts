@@ -1483,15 +1483,33 @@ describe('DocumentDAO', () => {
       searchLang: 'en',
       columnFilters: [{ id: 'titles', value: 'Sample Document Title' }],
       contributorUids: ['local-123'],
-      contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
     }
 
     const result = await documentDAO.countDocuments(countParams)
 
-    expect(result.allItems).toBe(1)
-    expect(result.incompleteHalRepositoryItems).toBe(1)
-    expect(mockPrisma.document.count).toHaveBeenCalled()
+    expect(result).toBe(1)
+    // One count for the one filter set it was given, no more.
+    expect(mockPrisma.document.count).toHaveBeenCalledTimes(1)
+  })
+
+  it('builds the count where clause from the filters it is given', async () => {
+    ;(mockPrisma.document.count as jest.Mock).mockResolvedValue(1)
+
+    await documentDAO.countDocuments({
+      searchTerm: '',
+      searchLang: 'en',
+      columnFilters: [{ id: 'halStatus', value: ['outside_hal'] }],
+      contributorUids: ['local-123'],
+      halCollectionCodes: [],
+      areHalCollectionCodesOmitted: false,
+    })
+
+    const [{ where }] = (mockPrisma.document.count as jest.Mock).mock.calls[0]
+
+    // Same clause the list query builds for that filter set.
+    expect(JSON.stringify(where)).toContain('"platform"')
   })
 
   it('should fetch a document by UID', async () => {

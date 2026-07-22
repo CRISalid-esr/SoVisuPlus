@@ -42,6 +42,7 @@ interface FetchDocumentsParams {
   areHalCollectionCodesOmitted: boolean
 }
 
+// Mirrors FetchDocumentsParams minus paging and sorting.
 interface CountDocumentsParams {
   searchTerm: string
   searchLang: string
@@ -49,6 +50,7 @@ interface CountDocumentsParams {
   contributorUid: string | null
   contributorType: AgentType
   halCollectionCodes: string[]
+  areHalCollectionCodesOmitted: boolean
 }
 
 export class DocumentService {
@@ -300,28 +302,26 @@ export class DocumentService {
     contributorUid,
     contributorType,
     halCollectionCodes,
-  }: CountDocumentsParams) {
+    areHalCollectionCodesOmitted,
+  }: CountDocumentsParams): Promise<number> {
     const contributorUids = await this.buildContributorUidArray(
       contributorUid,
       contributorType,
     )
 
     if (contributorUids.length == 0) {
-      return { allItems: 0, incompleteHalRepositoryItems: 0 }
+      return 0
     }
 
-    const expandedColumnFilters = this.expandedColumnFilters(columnFilters)
-
     try {
-      const { allItems, incompleteHalRepositoryItems } =
-        await this.documentDAO.countDocuments({
-          searchTerm,
-          searchLang: searchLang,
-          columnFilters: expandedColumnFilters,
-          contributorUids,
-          halCollectionCodes,
-        })
-      return { allItems, incompleteHalRepositoryItems }
+      return await this.documentDAO.countDocuments({
+        searchTerm,
+        searchLang,
+        columnFilters: this.expandedColumnFilters(columnFilters),
+        contributorUids,
+        halCollectionCodes,
+        areHalCollectionCodesOmitted,
+      })
     } catch (error) {
       console.error('Error in service layer:', error)
       throw new Error('Error counting documents from service')

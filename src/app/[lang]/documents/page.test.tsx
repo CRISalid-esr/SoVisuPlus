@@ -140,8 +140,8 @@ const mockState = {
     ],
     totalItems: 1,
     count: {
-      allItems: 0,
-      incompleteHalRepositoryItems: 0,
+      byTab: {},
+      latestRequestIdByTab: {},
     },
   },
   user: {
@@ -170,10 +170,7 @@ beforeEach(() => {
     totalItems: 0,
   })
 
-  mockCountDocuments.mockResolvedValue({
-    allItems: 0,
-    incompleteHalRepositoryItems: 0,
-  })
+  mockCountDocuments.mockResolvedValue({ totalItems: 0 })
 })
 
 const theme = createTheme({
@@ -282,6 +279,7 @@ describe('DocumentsPage Component', () => {
 
     await waitFor(() => {
       expect(mockFetchDocuments).toHaveBeenCalledWith({
+        tab: 'all_documents',
         page: 1,
         pageSize: 10,
         searchTerm: '',
@@ -302,21 +300,29 @@ describe('DocumentsPage Component', () => {
     })
   })
 
-  it('fetches incomplete HAL repository document count on mount', async () => {
+  // Only the tab that is NOT on screen is counted — the active tab's badge is
+  // fed by the totalItems the list request already returns.
+  it('counts only the inactive tab on mount', async () => {
     renderComponent()
 
     await waitFor(() => {
       expect(mockCountDocuments).toHaveBeenCalledWith({
-        page: 1,
+        tab: 'outside_hal',
         searchTerm: '',
-        columnFilters: JSON.stringify([{ id: 'structures', value: [] }]),
         searchLang: 'en',
+        columnFilters: JSON.stringify([
+          { id: 'structures', value: [] },
+          { id: 'halStatus', value: ['outside_hal'] },
+        ]),
         contributorType: 'person',
         contributorUid: '',
         requestId: 1,
         halCollectionCodes: JSON.stringify(['ABC', 'DEF']),
+        areHalCollectionCodesOmitted: false,
       })
     })
+
+    expect(mockCountDocuments).toHaveBeenCalledTimes(1)
   })
 
   it('switches tabs when a tab is clicked', async () => {

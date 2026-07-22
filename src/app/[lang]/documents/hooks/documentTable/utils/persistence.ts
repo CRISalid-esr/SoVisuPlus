@@ -9,6 +9,7 @@ import {
 import { ColumnFilter } from '@tanstack/table-core'
 import dayjs from 'dayjs'
 import { getColumnIds } from '@/app/[lang]/documents/hooks/documentTable/utils/columns'
+import { ALL_DOCUMENTS_TAB } from '@/app/[lang]/documents/hooks/documentTable/utils/tabs'
 
 export const DEFAULT_PAGINATION = {
   slug: null,
@@ -32,24 +33,42 @@ export const readInitialPagination = (): typeof DEFAULT_PAGINATION => {
   }
 }
 
-export const readInitialColumnFilters = (): MRT_ColumnFiltersState => {
+export const COLUMN_FILTERS_KEY = 'mrt_columnFilters_publication_table'
+
+/** Column filters are kept per tab, so each tab filters independently. */
+export type ColumnFiltersByTab = Record<string, MRT_ColumnFiltersState>
+
+const reviveDateFilters = (filters: ColumnFilter[]): MRT_ColumnFiltersState =>
+  filters.map((filter) => {
+    if (filter.id === 'date' && Array.isArray(filter.value)) {
+      return {
+        ...filter,
+        value: filter.value.map((v: string | null) => (v ? dayjs(v) : null)),
+      }
+    }
+    return filter
+  })
+
+export const readInitialColumnFilters = (): ColumnFiltersByTab => {
   try {
-    const raw = sessionStorage.getItem('mrt_columnFilters_publication_table')
-    if (!raw) return []
+    const raw = sessionStorage.getItem(COLUMN_FILTERS_KEY)
+    if (!raw) return {}
 
     const parsed = JSON.parse(raw)
 
-    return parsed.map((filter: ColumnFilter) => {
-      if (filter.id === 'date' && Array.isArray(filter.value)) {
-        return {
-          ...filter,
-          value: filter.value.map((v: string | null) => (v ? dayjs(v) : null)),
-        }
-      }
-      return filter
-    })
+    // Legacy shape: a single array shared by every tab. Hand it to the first
+    // tab rather than dropping the user's filters.
+    if (Array.isArray(parsed)) {
+      return { [ALL_DOCUMENTS_TAB]: reviveDateFilters(parsed) }
+    }
+
+    return Object.fromEntries(
+      Object.entries(parsed as Record<string, ColumnFilter[]>).map(
+        ([tab, filters]) => [tab, reviveDateFilters(filters)],
+      ),
+    )
   } catch {
-    return []
+    return {}
   }
 }
 

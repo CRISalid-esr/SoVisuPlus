@@ -24,6 +24,7 @@ import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { Literal, LiteralJson } from '@/types/Literal'
 import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
+import { HalStatusFilterValue } from '@/types/HalStatusFilter'
 
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
@@ -43,12 +44,14 @@ interface FetchDocumentsFromDBParams {
   areHalCollectionCodesOmitted: boolean
 }
 
+// Mirrors FetchDocumentsFromDBParams minus paging and sorting.
 interface CountDocumentsFromDBParams {
   searchTerm: string
   searchLang: string
   columnFilters: DbColumnFilters[]
   contributorUids: string[]
   halCollectionCodes: string[]
+  areHalCollectionCodesOmitted: boolean
 }
 
 export class DocumentDAO extends AbstractDAO {
@@ -739,13 +742,16 @@ export class DocumentDAO extends AbstractDAO {
 
       if (filter.id === 'halStatus' && Array.isArray(filter.value)) {
         const halStatusOr: Prisma.DocumentWhereInput[] = []
+        const halPlatform = getBibliographicPlatformDbValue(
+          BibliographicPlatform.HAL,
+        )
 
         filter.value.forEach((type) => {
-          if (type === 'in_collection') {
+          if (type === HalStatusFilterValue.InCollection) {
             halStatusOr.push({
               records: {
                 some: {
-                  platform: 'hal',
+                  platform: halPlatform,
                   halCollectionCodes: {
                     hasSome: halCollectionCodes,
                   },
@@ -754,11 +760,11 @@ export class DocumentDAO extends AbstractDAO {
             })
           }
 
-          if (type === 'out_of_collection') {
+          if (type === HalStatusFilterValue.OutOfCollection) {
             halStatusOr.push({
               records: {
                 some: {
-                  platform: 'hal',
+                  platform: halPlatform,
                 },
                 none: {
                   halCollectionCodes: {
@@ -769,11 +775,11 @@ export class DocumentDAO extends AbstractDAO {
             })
           }
 
-          if (type === 'outside_hal') {
+          if (type === HalStatusFilterValue.OutsideHal) {
             halStatusOr.push({
               records: {
                 none: {
-                  platform: 'hal',
+                  platform: halPlatform,
                 },
               },
             })
@@ -1106,32 +1112,18 @@ export class DocumentDAO extends AbstractDAO {
     }
   }
 
-  public async countDocuments(params: CountDocumentsFromDBParams): Promise<{
-    allItems: number
-    incompleteHalRepositoryItems: number
-  }> {
-    const allWhere = this.createFetchDocumentsWhere({
-      ...params,
-      areHalCollectionCodesOmitted: false,
+  /**
+   * The count half of {@link fetchDocuments}: same where clause, no paging and
+   * no sorting. Used for the badge of a tab the user is not currently on — the
+   * active tab's badge comes from the `totalItems` the list query already
+   * returns.
+   */
+  public async countDocuments(
+    params: CountDocumentsFromDBParams,
+  ): Promise<number> {
+    return this.prismaClient.document.count({
+      where: this.createFetchDocumentsWhere(params),
     })
-    const incompleteHalRepositoryWhere = this.createFetchDocumentsWhere({
-      ...params,
-      areHalCollectionCodesOmitted: true,
-    })
-
-    const allItems = await this.prismaClient.document.count({
-      where: allWhere,
-    })
-    const incompleteHalRepositoryItems = await this.prismaClient.document.count(
-      {
-        where: incompleteHalRepositoryWhere,
-      },
-    )
-
-    return {
-      allItems,
-      incompleteHalRepositoryItems,
-    }
   }
 
   async fetchDocumentById(uid: string): Promise<Document | null> {

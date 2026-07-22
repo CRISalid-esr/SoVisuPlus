@@ -18,6 +18,8 @@ export const GET = async (req: NextRequest) => {
     const halCollectionCodes = JSON.parse(
       urlParams.get('halCollectionCodes') || '[]',
     )
+    const areHalCollectionCodesOmitted =
+      urlParams.get('areHalCollectionCodesOmitted') === 'true'
 
     if (!contributorType) {
       return NextResponse.json(
@@ -27,20 +29,20 @@ export const GET = async (req: NextRequest) => {
     }
 
     const documentService = new DocumentService()
-    const { allItems, incompleteHalRepositoryItems } =
-      await documentService.countDocuments({
-        searchTerm,
-        searchLang: searchlang,
-        columnFilters,
-        contributorUid,
-        contributorType,
-        halCollectionCodes,
-      })
-
-    return NextResponse.json({
-      allItems,
-      incompleteHalRepositoryItems,
+    // Same number the list route returns as `totalItems`, for a different set
+    // of filters — this endpoint serves the badge of a tab that is not on
+    // screen, so no rows are fetched.
+    const totalItems = await documentService.countDocuments({
+      searchTerm,
+      searchLang: searchlang,
+      columnFilters,
+      contributorUid,
+      contributorType,
+      halCollectionCodes,
+      areHalCollectionCodesOmitted,
     })
+
+    return NextResponse.json({ totalItems })
   } catch (error) {
     console.error('Error counting documents:', error)
     return NextResponse.json(

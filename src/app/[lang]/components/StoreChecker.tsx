@@ -2,6 +2,7 @@
 import useStore from 'src/app/stores/global_store'
 import { useEffect, useState } from 'react'
 import { Alert } from '@mui/material'
+import { ALL_DOCUMENTS_TAB } from '@/app/[lang]/documents/hooks/documentTable/utils/tabs'
 
 const StoreChecker = () => {
   const loading = useStore<boolean>((state) => state.document.loading)
@@ -9,6 +10,7 @@ const StoreChecker = () => {
   const [failure, setFailure] = useState<boolean>(false)
   useEffect(() => {
     fetchDocuments({
+      tab: ALL_DOCUMENTS_TAB,
       page: 1,
       searchTerm: '',
       pageSize: 0,

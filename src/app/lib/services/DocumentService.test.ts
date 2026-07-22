@@ -94,8 +94,7 @@ describe('DocumentService', () => {
   })
 
   it('should return document count when countDocuments succeeds', async () => {
-    const mockCount = { allItems: 1, incompleteHalRepositoryItems: 1 }
-    mockCountDocuments.mockResolvedValue(mockCount)
+    mockCountDocuments.mockResolvedValue(7)
 
     const params = {
       searchTerm: 'test',
@@ -104,11 +103,10 @@ describe('DocumentService', () => {
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
     }
 
-    await expect(documentService.countDocuments(params)).resolves.toEqual(
-      mockCount,
-    )
+    await expect(documentService.countDocuments(params)).resolves.toBe(7)
 
     // Replace contributorUid with contributorUids
     const dbParams = {
@@ -131,6 +129,7 @@ describe('DocumentService', () => {
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
     }
 
     await expect(documentService.countDocuments(params)).rejects.toThrow(
@@ -1056,49 +1055,10 @@ describe('DocumentService', () => {
     expect(typeFilter.value).toEqual([DocumentType.JournalArticle])
   })
 
-  it('expands hierarchical types for countDocuments as well', async () => {
-    mockCountDocuments.mockResolvedValue({
-      allItems: 0,
-      incompleteHalRepositoryItems: 0,
-    })
+  // No countDocuments equivalent: the tab badge counts are perspective totals
+  // and deliberately ignore the table's column filters, so there is no type
+  // filter left to expand.
 
-    const params = {
-      searchTerm: '',
-      searchLang: 'en',
-      columnFilters: [
-        { id: 'type', value: [DocumentType.ScholarlyPublication] },
-      ],
-      contributorUid: 'local-xyz',
-      contributorType: 'person' as AgentType,
-      halCollectionCodes: [],
-    }
-
-    await documentService.countDocuments(params)
-
-    const calledWith = mockCountDocuments.mock.calls[0][0]
-    const typeFilter = calledWith.columnFilters.find(
-      (f: { id: string; value: string }) => f.id === 'type',
-    )
-
-    const expected = [
-      DocumentType.ScholarlyPublication,
-      DocumentType.JournalArticle,
-      DocumentType.ConferenceArticle,
-      DocumentType.Book,
-      DocumentType.BookChapter,
-      DocumentType.Monograph,
-      DocumentType.Proceedings,
-      DocumentType.BookOfChapters,
-      DocumentType.Presentation,
-      DocumentType.Article,
-      DocumentType.ConferenceAbstract,
-      DocumentType.Preface,
-      DocumentType.Comment,
-    ]
-
-    expect(typeFilter.value).toEqual(expect.arrayContaining(expected))
-    expect(typeFilter.value.length).toBe(expected.length)
-  })
   it('updates document type and creates UPDATE action', async () => {
     mockUpdateDocumentTypeByUid.mockResolvedValue(undefined)
 

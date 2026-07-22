@@ -37,6 +37,11 @@ import { PermissionAction } from '@/types/Permission'
 import { Can } from '@casl/react'
 import NextLink from 'next/link'
 import { usePublicationsTable } from '@/app/[lang]/documents/hooks/usePublicationsTable'
+import {
+  ALL_DOCUMENTS_TAB,
+  isPublicationTab,
+  OUTSIDE_HAL_TAB,
+} from '@/app/[lang]/documents/hooks/documentTable/utils/tabs'
 import MergeDialog from '@/app/[lang]/documents/components/MergeDialog'
 
 dayjs.extend(utc)
@@ -85,7 +90,7 @@ const DocumentsPage = () => {
   const searchParams = useSearchParams()
 
   const {
-    count: { allItems, incompleteHalRepositoryItems },
+    count: { byTab: countByTab },
     listHasChanged,
     setListHasChanged,
     mergeDocuments,
@@ -94,24 +99,32 @@ const DocumentsPage = () => {
   const tabs = [
     {
       label: t`documents_page_all_documents_filter`,
-      value: 'all_documents',
-      numberOfItems: allItems,
+      value: ALL_DOCUMENTS_TAB,
+      numberOfItems: countByTab[ALL_DOCUMENTS_TAB],
       color: theme.palette.primary.main,
     },
     {
       label: t`documents_page_incomplete_hal_repository_filter`,
-      value: 'incomplete_hal_repository',
-      numberOfItems: incompleteHalRepositoryItems,
+      value: OUTSIDE_HAL_TAB,
+      numberOfItems: countByTab[OUTSIDE_HAL_TAB],
       color: theme.palette.error.main,
     },
   ]
 
-  const [selectedTab, setSelectedTab] = useState(tabs[0].value)
+  // Read on the first render rather than corrected in an effect: an initial
+  // all_documents -> outside_hal transition would register as a tab switch and
+  // discard the page index restored from sessionStorage.
+  const [selectedTab, setSelectedTab] = useState(() => {
+    const tab = searchParams.get('tab')
+    return isPublicationTab(tab) ? (tab as string) : ALL_DOCUMENTS_TAB
+  })
 
   useEffect(() => {
     const tab = searchParams.get('tab')
 
-    setSelectedTab(tab ?? 'all_documents')
+    // Fall back on the first tab for unknown values (stale bookmarks), which
+    // would otherwise leave the Tabs component with no matching value.
+    setSelectedTab(isPublicationTab(tab) ? (tab as string) : ALL_DOCUMENTS_TAB)
   }, [searchParams])
 
   const handleTabChange = (newValue: string) => {

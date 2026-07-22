@@ -113,9 +113,8 @@ describe('WebSocketListener', () => {
         documents: [],
         totalItems: undefined,
         count: {
-          latestCountDocumentsRequestId: undefined,
-          allItems: undefined,
-          incompleteHalRepositoryItems: undefined,
+          byTab: {},
+          latestRequestIdByTab: {},
           loading: false,
           error: null,
         },
