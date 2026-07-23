@@ -144,7 +144,12 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Upsert memberships for a given person
+   * Replace the memberships of a given person with the incoming ones.
+   *
+   * Incoming data is authoritative: memberships absent from it are removed.
+   * The person's message carries the person's complete membership set, whereas
+   * an organization unit's message never enumerates its members — so this is
+   * the only place that can prune them.
    * @param memberships - List of memberships to upsert
    * @param personId - The ID of the person in the database
    */
@@ -153,6 +158,8 @@ export class PersonDAO extends AbstractDAO {
     personId: number,
   ): Promise<void> {
     const organizationUnitDAO = new OrganizationUnitDAO()
+    const resolved: { unitId: number; membership: PersonMembership }[] = []
+
     for (const membership of memberships) {
       const dbOrganizationUnit =
         await organizationUnitDAO.getOrganizationUnitByUid(
@@ -164,11 +171,24 @@ export class PersonDAO extends AbstractDAO {
         )
         continue
       }
+      resolved.push({ unitId: dbOrganizationUnit.id, membership })
+    }
+
+    // Unresolved units are safe to leave out of the prune set: a membership row
+    // cannot reference an organization unit that is absent from the database.
+    await this.prismaClient.membership.deleteMany({
+      where: {
+        personId,
+        organizationUnitId: { notIn: resolved.map((r) => r.unitId) },
+      },
+    })
+
+    for (const { unitId, membership } of resolved) {
       await this.prismaClient.membership.upsert({
         where: {
           personId_organizationUnitId: {
             personId,
-            organizationUnitId: dbOrganizationUnit.id,
+            organizationUnitId: unitId,
           },
         },
         update: {
@@ -178,7 +198,7 @@ export class PersonDAO extends AbstractDAO {
         },
         create: {
           personId,
-          organizationUnitId: dbOrganizationUnit.id,
+          organizationUnitId: unitId,
           startDate: membership.startDate,
           endDate: membership.endDate,
           positionCode: membership.positionCode,
@@ -188,7 +208,8 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Upsert employments for a given person
+   * Replace the employments of a given person with the incoming ones.
+   * Incoming data is authoritative: employments absent from it are removed.
    * @param employments - List of employments to upsert
    * @param personId - The ID of the person in the database
    */
@@ -197,6 +218,8 @@ export class PersonDAO extends AbstractDAO {
     personId: number,
   ): Promise<void> {
     const organizationUnitDAO = new OrganizationUnitDAO()
+    const resolved: { unitId: number; employment: PersonEmployment }[] = []
+
     for (const employment of employments) {
       const dbOrganizationUnit =
         await organizationUnitDAO.getOrganizationUnitByUid(
@@ -208,11 +231,22 @@ export class PersonDAO extends AbstractDAO {
         )
         continue
       }
+      resolved.push({ unitId: dbOrganizationUnit.id, employment })
+    }
+
+    await this.prismaClient.employment.deleteMany({
+      where: {
+        personId,
+        organizationUnitId: { notIn: resolved.map((r) => r.unitId) },
+      },
+    })
+
+    for (const { unitId, employment } of resolved) {
       await this.prismaClient.employment.upsert({
         where: {
           personId_organizationUnitId: {
             personId,
-            organizationUnitId: dbOrganizationUnit.id,
+            organizationUnitId: unitId,
           },
         },
         update: {
@@ -222,7 +256,7 @@ export class PersonDAO extends AbstractDAO {
         },
         create: {
           personId,
-          organizationUnitId: dbOrganizationUnit.id,
+          organizationUnitId: unitId,
           startDate: employment.startDate,
           endDate: employment.endDate,
           positionCode: employment.positionCode,
@@ -232,7 +266,11 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Upsert the source-person records of a given person
+   * Upsert the source-person records of a given person.
+   *
+   * Incoming data is authoritative: records absent from it are unlinked. They
+   * are disconnected rather than deleted, because a source person is also
+   * referenced by the contributions of document records.
    * @param records - List of source persons to upsert
    * @param personId - The ID of the person in the database
    */
@@ -244,6 +282,14 @@ export class PersonDAO extends AbstractDAO {
     for (const record of records) {
       await sourcePersonDAO.createOrUpdateSourcePerson(record, personId)
     }
+
+    await this.prismaClient.sourcePerson.updateMany({
+      where: {
+        personId,
+        uid: { notIn: records.map((record) => record.uid) },
+      },
+      data: { personId: null },
+    })
   }
 
   /**

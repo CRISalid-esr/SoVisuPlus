@@ -55,6 +55,14 @@ jest.mock('@prisma/client', () => {
     },
     membership: {
       upsert: jest.fn(),
+      deleteMany: jest.fn(),
+    },
+    employment: {
+      upsert: jest.fn(),
+      deleteMany: jest.fn(),
+    },
+    sourcePerson: {
+      updateMany: jest.fn(),
     },
     organizationUnit: {
       findUnique: mockOrganizationUnitFindUnique,
@@ -186,6 +194,30 @@ describe('PersonDAO', () => {
       },
     })
   })
+
+  it('should prune memberships and employments absent from the incoming data', async () => {
+    await personDAO.createOrUpdatePerson(person)
+
+    // The person carries a single membership, resolved to organization unit 1.
+    expect(mockPrisma.membership.deleteMany).toHaveBeenCalledWith({
+      where: { personId: 1, organizationUnitId: { notIn: [1] } },
+    })
+
+    // No employment in the incoming data: every existing row is obsolete.
+    expect(mockPrisma.employment.deleteMany).toHaveBeenCalledWith({
+      where: { personId: 1, organizationUnitId: { notIn: [] } },
+    })
+  })
+
+  it('should unlink source person records absent from the incoming data', async () => {
+    await personDAO.createOrUpdatePerson(person)
+
+    expect(mockPrisma.sourcePerson.updateMany).toHaveBeenCalledWith({
+      where: { personId: 1, uid: { notIn: [] } },
+      data: { personId: null },
+    })
+  })
+
   describe('upsertOrcidIdentifierExtension', () => {
     it('should upsert ORCID oauth extension when base identifier exists and oauth is present', async () => {
       ;(mockPrisma.personIdentifier.findUnique as jest.Mock).mockResolvedValue({

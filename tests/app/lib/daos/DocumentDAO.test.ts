@@ -264,6 +264,65 @@ describe('DocumentDAO Integration Tests', () => {
     expect(updatedDbDocument2?.subjects).toHaveLength(1)
     expect(updatedDbDocument2?.subjects[0].uid).toBe(subject2.uid)
   })
+  test('should remove titles and abstracts whose language is no longer sent by the graph', async () => {
+    const buildDocument = (titles: Literal[], abstracts: Literal[]) =>
+      new Document(
+        'doc-languages',
+        Document.documentTypeFromString('JournalArticle'),
+        OAStatus.GREEN,
+        '2023-03-01',
+        new Date('2023-03-01T00:00:00.000Z'),
+        new Date('2023-03-01T23:59:59.000Z'),
+        OAStatus.DIAMOND,
+        titles,
+        abstracts,
+        [], // No subjects
+        [], // No contributions
+        [], // No records
+      )
+
+    // The graph first reports titles and abstracts in two languages
+    await documentDAO.createOrUpdateDocument(
+      buildDocument(
+        [
+          new Literal('Titre en français', 'fr'),
+          new Literal('English title', 'en'),
+        ],
+        [
+          new Literal('Résumé en français', 'fr'),
+          new Literal('English abstract', 'en'),
+        ],
+      ),
+    )
+
+    let dbDocument = await prisma.document.findUnique({
+      where: { uid: 'doc-languages' },
+      include: { titles: true, abstracts: true },
+    })
+    expect(dbDocument?.titles).toHaveLength(2)
+    expect(dbDocument?.abstracts).toHaveLength(2)
+
+    // A richer source record wins the merge: the graph now sends English only
+    await documentDAO.createOrUpdateDocument(
+      buildDocument(
+        [new Literal('Better English title', 'en')],
+        [new Literal('Better English abstract', 'en')],
+      ),
+    )
+
+    dbDocument = await prisma.document.findUnique({
+      where: { uid: 'doc-languages' },
+      include: { titles: true, abstracts: true },
+    })
+
+    expect(dbDocument?.titles).toHaveLength(1)
+    expect(dbDocument?.titles[0].language).toBe('en')
+    expect(dbDocument?.titles[0].value).toBe('Better English title')
+    expect(dbDocument?.abstracts).toHaveLength(1)
+    expect(dbDocument?.abstracts[0].language).toBe('en')
+    expect(dbDocument?.abstracts[0].value).toBe('Better English abstract')
+  })
+
   test('should persist document with HAL source record and custom fields', async () => {
     const halRecord = new DocumentRecord(
       'hal-doc-001',

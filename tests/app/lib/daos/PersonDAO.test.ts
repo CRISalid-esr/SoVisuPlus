@@ -200,6 +200,77 @@ describe('PersonDAO Integration Tests', () => {
     expect(savedEmployments).toHaveLength(0)
   })
 
+  test('should remove memberships and employments no longer sent by the graph', async () => {
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    const makeUnit = (uid: string, acronym: string) =>
+      new OrganizationUnit(
+        uid,
+        acronym,
+        [new Literal(`Lab ${acronym}`, 'en')],
+        [],
+        OrganizationCategory.research_unit,
+        OrganizationGenericType.unit,
+      )
+
+    const unitA = await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      makeUnit('local-unit-a', 'A'),
+    )
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      makeUnit('local-unit-b', 'B'),
+    )
+
+    // The graph first reports the person as a member of both units
+    const inBothUnits = new Person(
+      'local-johndoe',
+      false,
+      'johndoe@example.com',
+      'John',
+      'Doe',
+      'John Doe',
+      [],
+      [
+        new PersonMembership(makeUnit('local-unit-a', 'A')),
+        new PersonMembership(makeUnit('local-unit-b', 'B')),
+      ],
+    )
+    inBothUnits.employments = [
+      new PersonEmployment(makeUnit('local-unit-b', 'B'), null, null, 'MCF'),
+    ]
+
+    let dbPerson = await personDAO.createOrUpdatePerson(inBothUnits)
+
+    expect(
+      await prisma.membership.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(2)
+    expect(
+      await prisma.employment.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(1)
+
+    // The person leaves unit B: the graph now sends unit A only, and no employment
+    const inUnitAOnly = new Person(
+      'local-johndoe',
+      false,
+      'johndoe@example.com',
+      'John',
+      'Doe',
+      'John Doe',
+      [],
+      [new PersonMembership(makeUnit('local-unit-a', 'A'))],
+    )
+
+    dbPerson = await personDAO.createOrUpdatePerson(inUnitAOnly)
+
+    const savedMemberships = await prisma.membership.findMany({
+      where: { personId: dbPerson.id },
+    })
+    expect(savedMemberships).toHaveLength(1)
+    expect(savedMemberships[0].organizationUnitId).toBe(unitA.id)
+
+    expect(
+      await prisma.employment.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(0)
+  })
+
   describe('fetchPeopleByOrganizationPerimeter', () => {
     const makeOrg = (
       uid: string,
