@@ -71,7 +71,7 @@ describe('halStructureToAffiliation', () => {
     const aff = halStructureToAffiliation({
       docid: '302',
       name_s: 'Some Lab',
-      type_s: 'regroupinstitution',
+      type_s: 'unknown_type',
     })
     expect(aff.type).toBeNull()
   })

@@ -6,6 +6,7 @@ import { AuthorityOrganizationType } from '@prisma/client'
  * iterate this constant so the order stays consistent.
  */
 export const HAL_AFFILIATION_TYPES = [
+  'regroupinstitution',
   'institution',
   'department',
   'regrouplaboratory',
@@ -28,7 +29,7 @@ const DB_TYPE_TO_HAL: Partial<
   [AuthorityOrganizationType.institution]: 'institution',
   [AuthorityOrganizationType.laboratory]: 'laboratory',
   [AuthorityOrganizationType.research_team]: 'researchteam',
-  [AuthorityOrganizationType.institution_group]: 'institution',
+  [AuthorityOrganizationType.institution_group]: 'regroupinstitution',
   [AuthorityOrganizationType.laboratory_group]: 'regrouplaboratory',
   [AuthorityOrganizationType.research_team_group]: 'researchteam',
 }
