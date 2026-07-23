@@ -117,6 +117,12 @@ const StructureDetail = ({
         </Kpi>
       </Box>
 
+      {/* Negative top margin: the parent Stack's spacing would otherwise
+          detach the caption from the tiles it qualifies. */}
+      <Typography variant='caption' color='text.secondary' sx={{ mt: -2 }}>
+        {t`research_structures_kpi_period_note`}
+      </Typography>
+
       {children.length > 0 && (
         <Box>
           <Typography variant='h6' sx={{ mb: 1 }}>
