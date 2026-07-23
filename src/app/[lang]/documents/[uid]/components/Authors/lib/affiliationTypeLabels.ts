@@ -8,6 +8,8 @@ import { HalAffiliationType } from './affiliationType'
  */
 export function halAffiliationTypeLabel(type: HalAffiliationType): string {
   switch (type) {
+    case 'regroupinstitution':
+      return t`documents_details_page_authors_tab_affiliation_type_regroupinstitution`
     case 'institution':
       return t`documents_details_page_authors_tab_affiliation_type_institution`
     case 'department':

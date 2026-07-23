@@ -11,7 +11,7 @@ describe('dbTypeToHal', () => {
       'researchteam',
     )
     expect(dbTypeToHal(AuthorityOrganizationType.institution_group)).toBe(
-      'institution',
+      'regroupinstitution',
     )
     expect(dbTypeToHal(AuthorityOrganizationType.laboratory_group)).toBe(
       'regrouplaboratory',
@@ -31,7 +31,8 @@ describe('dbTypeToHal', () => {
 })
 
 describe('normalizeHalType', () => {
-  it('accepts the five supported HAL values (case/space-insensitive)', () => {
+  it('accepts the six supported HAL values (case/space-insensitive)', () => {
+    expect(normalizeHalType('regroupinstitution')).toBe('regroupinstitution')
     expect(normalizeHalType('institution')).toBe('institution')
     expect(normalizeHalType('department')).toBe('department')
     expect(normalizeHalType('regrouplaboratory')).toBe('regrouplaboratory')
@@ -40,7 +41,7 @@ describe('normalizeHalType', () => {
   })
 
   it('returns null for unknown / empty / nullish values', () => {
-    expect(normalizeHalType('regroupinstitution')).toBeNull()
+    expect(normalizeHalType('unknown_type')).toBeNull()
     expect(normalizeHalType('')).toBeNull()
     expect(normalizeHalType(null)).toBeNull()
     expect(normalizeHalType(undefined)).toBeNull()
