@@ -27,8 +27,8 @@ import { SourceRecordTypeService } from '@/lib/services/SourceRecordTypeService'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import Highlighter from 'react-highlight-words'
 import { LanguageChips } from '@/components/LanguageChips'
-import { LocRelator } from '@/types/LocRelator'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
+import { sourceContributorNames } from '@/utils/sourceContributorNames'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import dayjs from 'dayjs'
 import {
@@ -189,17 +189,10 @@ export const useSourcesTable = () => {
         },
       },
       {
+        enableSorting: false,
         accessorKey: 'contributions',
-        accessorFn: (row) => {
-          return row.contributions
-            .map((contribution) =>
-              contribution.role == LocRelator.AUTHOR
-                ? contribution.person.name
-                : '',
-            )
-            .sort()
-            .join(', ')
-        },
+        accessorFn: (row) =>
+          sourceContributorNames(row.contributions).join(', '),
         header: t`documents_page_contributors_column`,
         Cell({
           cell,
