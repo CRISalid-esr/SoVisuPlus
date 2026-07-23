@@ -416,6 +416,10 @@ const ResearchStructuresPage = () => {
         </Button>
       </Box>
 
+      <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
+        {t`research_structures_kpi_period_note`}
+      </Typography>
+
       <Box sx={{ display: 'flex', gap: 3, mb: 1 }}>
         <FormControlLabel
           control={
