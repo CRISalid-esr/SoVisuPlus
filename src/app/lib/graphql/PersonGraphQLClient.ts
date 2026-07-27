@@ -65,8 +65,6 @@ export interface GraphPersonResponse {
   names: GraphPersonName[]
   membershipsConnection?: GraphMembershipConnection
   employmentsConnection?: GraphMembershipConnection
-  // Not exposed by the graph GraphQL API since the organization model
-  // refactoring — source-person records stay empty until it is re-exposed.
   recorded_by?: GraphSourcePersonResponse[]
 }
 
@@ -136,6 +134,12 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
 
   public hydrate(personData: GraphPersonResponse): Person {
     const personType = personData.external ? ExternalPerson : InternalPerson
+    const memberships = this.hydrateMemberships(
+      personData.membershipsConnection,
+    )
+    const employments = this.hydrateEmployments(
+      personData.employmentsConnection,
+    )
     const person = new personType(
       personData.uid,
       null,
@@ -157,12 +161,12 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
           }
         })
         .filter((identifier) => identifier !== null), // Remove null entries
-      this.hydrateMemberships(personData.membershipsConnection),
+      memberships.items,
     )
+    person.unhydratedMembershipOrgUids = memberships.unhydratedOrgUids
 
-    person.employments = this.hydrateEmployments(
-      personData.employmentsConnection,
-    )
+    person.employments = employments.items
+    person.unhydratedEmploymentOrgUids = employments.unhydratedOrgUids
 
     person.records = (personData.recorded_by ?? []).map(
       (record: GraphSourcePersonResponse) =>
@@ -194,11 +198,12 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
 
   /**
    * Hydrate membership edges into PersonMembership objects.
-   * Edges whose organization category cannot be determined are skipped.
+   * Edges whose organization category cannot be determined are skipped and
+   * reported through `unhydratedOrgUids`.
    */
   private hydrateMemberships(
     connection: GraphMembershipConnection | undefined,
-  ): PersonMembership[] {
+  ): { items: PersonMembership[]; unhydratedOrgUids: string[] } {
     return this.hydrateAffiliationEdges(
       connection,
       (organizationUnit, startDate, endDate, positionCode) =>
@@ -213,11 +218,12 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
 
   /**
    * Hydrate employment edges into PersonEmployment objects.
-   * Edges whose organization category cannot be determined are skipped.
+   * Edges whose organization category cannot be determined are skipped and
+   * reported through `unhydratedOrgUids`.
    */
   private hydrateEmployments(
     connection: GraphMembershipConnection | undefined,
-  ): PersonEmployment[] {
+  ): { items: PersonEmployment[]; unhydratedOrgUids: string[] } {
     return this.hydrateAffiliationEdges(
       connection,
       (organizationUnit, startDate, endDate, positionCode) =>
@@ -238,22 +244,24 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
       endDate: string | null,
       positionCode: string | null,
     ) => T,
-  ): T[] {
-    return (
-      connection?.edges
-        ?.map((edge) => {
-          const organizationUnit = hydrateOrganizationNode(edge.node)
-          if (!organizationUnit) {
-            return null
-          }
-          return factory(
-            organizationUnit,
-            edge.properties.start_date ?? null,
-            edge.properties.end_date ?? null,
-            edge.properties.position_code ?? null,
-          )
-        })
-        .filter((item) => item !== null) ?? []
-    )
+  ): { items: T[]; unhydratedOrgUids: string[] } {
+    const items: T[] = []
+    const unhydratedOrgUids: string[] = []
+    for (const edge of connection?.edges ?? []) {
+      const organizationUnit = hydrateOrganizationNode(edge.node)
+      if (!organizationUnit) {
+        unhydratedOrgUids.push(edge.node.uid)
+        continue
+      }
+      items.push(
+        factory(
+          organizationUnit,
+          edge.properties.start_date ?? null,
+          edge.properties.end_date ?? null,
+          edge.properties.position_code ?? null,
+        ),
+      )
+    }
+    return { items, unhydratedOrgUids }
   }
 }
