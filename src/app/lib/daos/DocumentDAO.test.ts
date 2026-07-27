@@ -314,6 +314,20 @@ describe('DocumentDAO', () => {
       select: { id: true, uid: true },
     })
 
+    // Languages absent from the incoming payload are pruned before the upserts
+    expect(mockPrisma.documentTitle.deleteMany).toHaveBeenCalledWith({
+      where: {
+        documentId: 1,
+        NOT: { language: { in: ['en', 'fr'] } },
+      },
+    })
+    expect(mockPrisma.documentAbstract.deleteMany).toHaveBeenCalledWith({
+      where: {
+        documentId: 1,
+        NOT: { language: { in: ['fr'] } },
+      },
+    })
+
     expect(mockPrisma.documentTitle.upsert).toHaveBeenCalledTimes(2)
     expect(mockPrisma.documentTitle.upsert).toHaveBeenCalledWith({
       where: {

@@ -219,6 +219,24 @@ export class DocumentDAO extends AbstractDAO {
         })
       }
 
+      // Incoming data is authoritative: literals absent from it are removed.
+      // The graph rebuilds its title/abstract set from a single winning source
+      // record on every recomputation, so a language can disappear entirely.
+      await this.prismaClient.documentTitle.deleteMany({
+        where: {
+          documentId: dbDocument.id,
+          NOT: { language: { in: titles.map((title) => title.language) } },
+        },
+      })
+      await this.prismaClient.documentAbstract.deleteMany({
+        where: {
+          documentId: dbDocument.id,
+          NOT: {
+            language: { in: abstracts.map((abstract) => abstract.language) },
+          },
+        },
+      })
+
       for (const title of titles) {
         await this.prismaClient.documentTitle.upsert({
           where: {
