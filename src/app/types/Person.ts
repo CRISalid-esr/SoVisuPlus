@@ -40,6 +40,14 @@ class Person implements IAgent, Authorizable {
   public normalizedName: string
   /** EMPLOYED_AT relationships — populated alongside memberships */
   public employments: PersonEmployment[] = []
+  /**
+   * Uids of organization units whose affiliation edges could not be hydrated
+   * (undeterminable category). They are missing from memberships/employments
+   * but the graph still asserts them, so they must count toward the keep-set
+   * when affiliations are replaced rather than upserted.
+   */
+  public unhydratedMembershipOrgUids: string[] = []
+  public unhydratedEmploymentOrgUids: string[] = []
 
   constructor(
     public uid: string,

@@ -1,4 +1,4 @@
-import { UserService } from '@/lib/services/UserService'
+import { ProvisionConflictError, UserService } from '@/lib/services/UserService'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 import prisma from '@/lib/daos/prisma'
 import { Person } from '@/types/Person'
@@ -124,22 +124,61 @@ describe('UserService.provisionUser Integration Tests', () => {
     expect(authenticated).toBe(true)
   })
 
-  test('is idempotent', async () => {
-    const first = await userService.provisionUser({
+  test('refuses to provision an already provisioned username', async () => {
+    await userService.provisionUser({
       username: 'jdupont',
       firstName: 'Jean',
       lastName: 'Dupont',
-    })
-    const second = await userService.provisionUser({
-      username: 'jdupont',
-      firstName: 'Jean',
-      lastName: 'Dupont',
+      email: 'jean.dupont@example.com',
     })
 
-    expect(second.personId).toBe(first.personId)
-    expect(second.userId).toBe(first.userId)
+    await expect(
+      userService.provisionUser({
+        username: 'jdupont',
+        firstName: 'Jeanne',
+        lastName: 'Durand',
+      }),
+    ).rejects.toThrow(ProvisionConflictError)
+
+    // The existing person is left untouched
+    const person = await prisma.person.findUnique({
+      where: { uid: 'local-jdupont' },
+    })
+    expect(person!.firstName).toBe('Jean')
+    expect(person!.lastName).toBe('Dupont')
+    expect(person!.email).toBe('jean.dupont@example.com')
     expect(await prisma.person.count()).toBe(1)
     expect(await prisma.user.count()).toBe(1)
+  })
+
+  test('refuses to overwrite a person that arrived through AMQP', async () => {
+    // Simulate a graph-synced person carrying the same local identifier
+    const personDAO = new PersonDAO()
+    const synced = await personDAO.createOrUpdatePerson(
+      new Person(
+        'local-jdupont',
+        false,
+        'jean.dupont@my-univ.fr',
+        'Jean Dupont',
+        'Jean',
+        'Dupont',
+        [new PersonIdentifier(PersonIdentifierType.local, 'jdupont')],
+      ),
+    )
+
+    await expect(
+      userService.provisionUser({
+        username: 'jdupont',
+        firstName: 'Jeanne',
+        lastName: 'Durand',
+      }),
+    ).rejects.toThrow(ProvisionConflictError)
+
+    const person = await prisma.person.findUnique({
+      where: { uid: 'local-jdupont' },
+    })
+    expect(person!.id).toBe(synced.id)
+    expect(person!.email).toBe('jean.dupont@my-univ.fr')
   })
 
   test('a later AMQP person with the same uid merges into the provisioned row', async () => {

@@ -101,7 +101,9 @@ describe('PersonWorker', () => {
     await worker.process()
 
     expect(mockGraphQLClient.getPersonByUid).toHaveBeenCalledWith('person-123')
-    expect(mockPersonDAO.createOrUpdatePerson).toHaveBeenCalledWith(person)
+    expect(mockPersonDAO.createOrUpdatePerson).toHaveBeenCalledWith(person, {
+      authoritative: true,
+    })
     expect(mockUserDAO.createOrUpdateUser).toHaveBeenCalledWith(1)
   })
 
@@ -159,7 +161,9 @@ describe('PersonWorker', () => {
     await worker.process()
 
     expect(mockGraphQLClient.getPersonByUid).toHaveBeenCalledWith('person-123')
-    expect(mockPersonDAO.createOrUpdatePerson).toHaveBeenCalledWith(person)
+    expect(mockPersonDAO.createOrUpdatePerson).toHaveBeenCalledWith(person, {
+      authoritative: true,
+    })
     expect(mockUserDAO.createOrUpdateUser).not.toHaveBeenCalled()
   })
 

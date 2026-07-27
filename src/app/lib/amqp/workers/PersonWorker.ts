@@ -38,8 +38,12 @@ export class PersonWorker extends MessageProcessingWorker<AMQPPersonMessage> {
 
       if (person) {
         console.log(`Person data retrieved: ${JSON.stringify(person)}`)
-        const dbPerson: DbPerson =
-          await this.personDAO.createOrUpdatePerson(person)
+        // The person message carries the person's complete relation sets, so
+        // it is the one caller allowed to prune affiliations and source links.
+        const dbPerson: DbPerson = await this.personDAO.createOrUpdatePerson(
+          person,
+          { authoritative: true },
+        )
         if (dbPerson.external) {
           console.log(`Person {${uid}} is external, skipping user creation`)
           return events

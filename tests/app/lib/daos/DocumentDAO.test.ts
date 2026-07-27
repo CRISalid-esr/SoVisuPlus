@@ -16,11 +16,17 @@ import {
   AuthorityOrganizationIdentifierType,
   AuthorityOrganizationType,
   OAStatus,
+  OrganizationCategory,
+  OrganizationGenericType,
   PublicationIdentifierType,
 } from '@prisma/client'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
+import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
+import { PersonMembership } from '@/types/PersonMembership'
+import { PersonEmployment } from '@/types/PersonEmployment'
 
 describe('DocumentDAO Integration Tests', () => {
   let documentDAO: DocumentDAO
@@ -321,6 +327,80 @@ describe('DocumentDAO Integration Tests', () => {
     expect(dbDocument?.abstracts).toHaveLength(1)
     expect(dbDocument?.abstracts[0].language).toBe('en')
     expect(dbDocument?.abstracts[0].value).toBe('Better English abstract')
+  })
+
+  test('should not erase a contributor affiliations or source links', async () => {
+    // A person arrives through the authoritative person flow with a
+    // membership, an employment and a linked source person
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    const unit = new OrganizationUnit(
+      'contrib-unit',
+      'CU',
+      [new Literal('Contributor Unit', 'en')],
+      [],
+      OrganizationCategory.research_unit,
+      OrganizationGenericType.unit,
+    )
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(unit)
+
+    const syncedPerson = new Person(
+      'contrib-person',
+      false,
+      'contrib@example.com',
+      'Jane Roe',
+      'Jane',
+      'Roe',
+      [],
+      [new PersonMembership(unit)],
+    )
+    syncedPerson.employments = [new PersonEmployment(unit, null, null, 'PR')]
+    syncedPerson.records = [
+      new SourcePerson('contrib-src', 'J. Roe', 'hal', 'jroe'),
+    ]
+    const dbPerson = await personDAO.createOrUpdatePerson(syncedPerson, {
+      authoritative: true,
+    })
+
+    // A document message then names them as a contributor, with none of that data
+    const bareContributor = new Person(
+      'contrib-person',
+      false,
+      'contrib@example.com',
+      'Jane Roe',
+      'Jane',
+      'Roe',
+      [],
+    )
+    await documentDAO.createOrUpdateDocument(
+      new Document(
+        'doc-contrib',
+        Document.documentTypeFromString('JournalArticle'),
+        OAStatus.GREEN,
+        '2023-01-01',
+        new Date('2023-01-01T00:00:00.000Z'),
+        new Date('2023-01-01T23:59:59.000Z'),
+        OAStatus.DIAMOND,
+        [new Literal('Contributor Test', 'en')],
+        [],
+        [],
+        [
+          new Contribution(bareContributor, [
+            LocRelatorHelper.fromLabel('author') as LocRelator,
+          ]),
+        ],
+        [],
+      ),
+    )
+
+    expect(
+      await prisma.membership.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(1)
+    expect(
+      await prisma.employment.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(1)
+    expect(
+      await prisma.sourcePerson.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(1)
   })
 
   test('should persist document with HAL source record and custom fields', async () => {

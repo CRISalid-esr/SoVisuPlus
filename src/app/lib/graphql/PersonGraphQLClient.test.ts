@@ -312,11 +312,53 @@ describe('PersonGraphQLClient', () => {
     expect(person?.memberships[0].organizationUnit.category).toBe(
       OrganizationCategory.institution,
     )
+    // The skipped edge's unit uid is reported so it still counts toward the
+    // keep-set when affiliations are replaced
+    expect(person?.unhydratedMembershipOrgUids).toEqual(['unit-untyped'])
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       expect.stringContaining(
         'Cannot determine category of organization unit-untyped',
       ),
     )
+  })
+
+  test('should hydrate source-person records from recorded_by', async () => {
+    const mockResponse = {
+      people: [
+        {
+          uid: 'person-123',
+          external: false,
+          display_name: 'John Doe',
+          identifiers: [{ type: 'orcid', value: '12345' }],
+          names: [
+            {
+              first_names: [{ value: 'John' }],
+              last_names: [{ value: 'Doe' }],
+            },
+          ],
+          recorded_by: [
+            {
+              uid: 'hal-jdoe',
+              name: 'John Doe',
+              source: 'hal',
+              source_identifier: 'jdoe',
+              identifiers: [{ type: 'idhals', value: 'john-doe' }],
+            },
+          ],
+        },
+      ],
+    }
+
+    mockQuery.mockResolvedValue(mockResponse)
+
+    const person = await client.getPersonByIdentifier(
+      new PersonIdentifier(PersonIdentifierType.orcid, '12345'),
+    )
+
+    expect(person?.records).toHaveLength(1)
+    expect(person?.records[0].uid).toBe('hal-jdoe')
+    expect(person?.records[0].source).toBe('hal')
+    expect(person?.records[0].getIdentifiers()).toHaveLength(1)
   })
 
   test('should log a warning for unsupported identifier types and skip them', async () => {

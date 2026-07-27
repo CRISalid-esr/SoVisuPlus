@@ -12,6 +12,7 @@ Each major feature is backed by a spec document in `specs/<branch-name>/prompt.m
 | `872-refactor-account-edition-workflow`          | [`specs/872-refactor-account-edition-workflow/prompt.md`](specs/872-refactor-account-edition-workflow/prompt.md)                   |
 | `874-new-research-structure-model`               | [`specs/874-new-research-structure-model/prompt.md`](specs/874-new-research-structure-model/prompt.md)                             |
 | `structures-tree-master-detail`                  | [`specs/structures-tree-master-detail/prompt.md`](specs/structures-tree-master-detail/prompt.md)                                   |
+| `replace-person-affiliations-and-source-records` | [`specs/replace-person-affiliations-and-source-records/prompt.md`](specs/replace-person-affiliations-and-source-records/prompt.md) |
 
 ## Git commits
 

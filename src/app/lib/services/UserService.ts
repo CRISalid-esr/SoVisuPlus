@@ -1,6 +1,6 @@
 import { PersonIdentifier } from '@/app/types/PersonIdentifier'
 import { UserDAO } from '@/lib/daos/UserDAO'
-import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { PersonAlreadyExistsError, PersonDAO } from '@/lib/daos/PersonDAO'
 import { RoleService } from '@/lib/services/RoleService'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 import { User } from '@/types/User'
@@ -24,6 +24,21 @@ export type ProvisionUserResult = {
   personUid: string
   personId: number
   userId: number
+}
+
+/**
+ * Thrown when provisioning targets a person that already exists. Provisioning
+ * exists solely to pre-create an account before the person arrives through
+ * AMQP; roles for existing users are granted with `npm run assign_role`.
+ */
+export class ProvisionConflictError extends Error {
+  constructor(uid: string) {
+    super(
+      `Person ${uid} already exists — provisioning never overwrites an existing person. ` +
+        `Use "npm run assign_role" to grant roles to an existing user.`,
+    )
+    this.name = 'ProvisionConflictError'
+  }
 }
 
 /**
@@ -81,11 +96,28 @@ export class UserService {
    * The person is created with uid `local-<username>` and a local identifier,
    * following the graph's uid convention, so a later AMQP message for the same
    * person upserts the same row instead of conflicting.
+   *
+   * Provisioning is strictly create-only: it must never overwrite a person
+   * that already exists (whether previously provisioned or arrived through
+   * AMQP). Throws {@link ProvisionConflictError} when the uid or the local
+   * identifier is already taken.
    */
   public async provisionUser(
     params: ProvisionUserParams,
   ): Promise<ProvisionUserResult> {
     const uid = `local-${params.username}`
+    const localIdentifier = new PersonIdentifier(
+      PersonIdentifierType.local,
+      params.username,
+    )
+
+    const existing =
+      (await this.personDAO.fetchPersonByUid(uid)) ??
+      (await this.personDAO.fetchPersonByIdentifier(localIdentifier))
+    if (existing) {
+      throw new ProvisionConflictError(existing.uid)
+    }
+
     const person = new Person(
       uid,
       false,
@@ -93,9 +125,18 @@ export class UserService {
       params.displayName ?? null,
       params.firstName,
       params.lastName,
-      [new PersonIdentifier(PersonIdentifierType.local, params.username)],
+      [localIdentifier],
     )
-    const dbPerson = await this.personDAO.createOrUpdatePerson(person)
+    let dbPerson
+    try {
+      dbPerson = await this.personDAO.createPerson(person)
+    } catch (error) {
+      if (error instanceof PersonAlreadyExistsError) {
+        // Created between the check above and the insert (concurrent AMQP message)
+        throw new ProvisionConflictError(uid)
+      }
+      throw error
+    }
     const dbUser = await this.userDAO.createOrUpdateUser(dbPerson.id)
 
     const roleService = new RoleService()
