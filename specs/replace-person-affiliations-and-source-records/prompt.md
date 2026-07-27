@@ -55,7 +55,19 @@ data loss:
 3. **`UserService.provisionUser` builds a bare `Person`** (no memberships, employments or
    records) — provisioning a username whose person already arrived through AMQP would
    wipe their affiliations and unlink their source persons.
-   → The provisioning flow must never prune.
+   → `provisionUser` (sole caller: `src/scripts/create_user.ts`) exists solely to
+   pre-provision an account before the person arrives through AMQP, and must never
+   overwrite an existing person. Make it create-only, on two levels:
+   - **Guard check**: before creating anything, look up the person by uid
+     `local-<username>` and by the `local` identifier; if found, abort with an explicit
+     error pointing the operator at `assign_role` for granting roles to existing users.
+   - **Create-only persistence**: replace the `createOrUpdatePerson` call with a strict
+     create path (e.g. a `PersonDAO.createPerson` that uses Prisma `create`, not
+     upsert), translating the `P2002` unique-constraint error into the same friendly
+     abort message — this closes the check-then-create race with a concurrent AMQP
+     message.
+
+   Once fixed, the provisioning flow no longer participates in pruning at all.
 
 **Recommended design:** make pruning explicit per caller instead of implicit in
 `createOrUpdatePerson`. Only `PersonWorker` carries the person's complete relation set
@@ -87,5 +99,6 @@ paths where the original implementation failed:
 - Processing a document message must not erase a contributor's employments or unlink
   their source persons.
 - A person message with hydrated records must prune only stale source-person links.
-- `UserService.provisionUser` on an existing person must leave memberships, employments
-  and source-person links untouched.
+- `UserService.provisionUser` on an existing person (same `local-<username>` uid or
+  `local` identifier) must fail without modifying the person — including when the
+  conflict is only detected at the database level (unique-constraint path).
