@@ -1,5 +1,5 @@
 import { ReactElement } from 'react'
-import { Trans } from '@lingui/react'
+import { Trans, TransProps } from '@lingui/react'
 import { ChangeWarningFields } from '@/types/AMQPChangeEventMessage'
 
 type WarningContext = Record<string, unknown>
@@ -16,7 +16,7 @@ const str = (context: WarningContext, key: string) => String(context[key] ?? '')
  */
 const warningRenderers: Record<
   string,
-  (context: WarningContext) => ReactElement
+  (context: WarningContext) => ReactElement<TransProps>
 > = {
   UNRESOLVABLE_PERSON: (context) => (
     <Trans
@@ -46,7 +46,7 @@ const warningRenderers: Record<
 
 export const changeWarningMessage = (
   warning: ChangeWarningFields,
-): ReactElement => {
+): ReactElement<TransProps> => {
   const renderer = warningRenderers[warning.code]
   if (!renderer) {
     return <Trans id='user_action_warning_unknown' />
