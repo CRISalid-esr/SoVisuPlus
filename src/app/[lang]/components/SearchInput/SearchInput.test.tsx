@@ -259,13 +259,21 @@ describe('SearchInput Component', () => {
     fireEvent.focus(searchInput)
     fireEvent.change(searchInput, { target: { value: 'John' } })
 
-    const peopleChip = screen.getByText(t`sidebar_search_people`)
-    fireEvent.click(peopleChip)
+    // Selection is rendered through the Chip `color` prop, so the root
+    // element carries MuiChip-colorPrimary when selected and
+    // MuiChip-colorDefault when not. Re-query after each click: toggling a
+    // tag rebuilds the memoised paper component, so the chips are remounted
+    // rather than updated in place, and any node held across the click is stale.
+    const peopleChipRoot = () =>
+      screen.getByText(t`sidebar_search_people`).closest('.MuiChip-root')
+
+    expect(peopleChipRoot()).toHaveClass('MuiChip-colorPrimary')
+
+    fireEvent.click(screen.getByText(t`sidebar_search_people`))
 
     // Chip should now be unselected
-    expect(peopleChip).toHaveClass(
-      'MuiChip-label MuiChip-labelMedium css-1dybbl5-MuiChip-label',
-    )
+    expect(peopleChipRoot()).toHaveClass('MuiChip-colorDefault')
+    expect(peopleChipRoot()).not.toHaveClass('MuiChip-colorPrimary')
   })
 
   it('renders grouped options correctly', () => {

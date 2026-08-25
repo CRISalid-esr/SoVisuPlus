@@ -363,7 +363,11 @@ const KeywordSearchAutocomplete = ({
         renderOption={(props, option, state, ownerState) => {
           const { key, ...optionProps } = props
           return (
-            <Box key={key + option.num} component={'li'} {...optionProps}>
+            <Box
+              key={`${String(key)}${option.num}`}
+              component={'li'}
+              {...optionProps}
+            >
               <Icon />
               <Typography
                 dangerouslySetInnerHTML={{

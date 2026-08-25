@@ -143,7 +143,7 @@ const PartialDateField = ({
         required={required}
         error={error}
         value={displayValue}
-        InputProps={{ readOnly: true }}
+        slotProps={{ input: { readOnly: true } }}
         onClick={disabled ? undefined : handleOpen}
         sx={{ flex: 1, cursor: disabled ? 'default' : 'pointer' }}
       />
