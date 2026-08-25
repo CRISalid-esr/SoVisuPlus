@@ -3,6 +3,7 @@ import {
   AuthOptions,
   DefaultSession,
   Profile,
+  Session,
   User as NextAuthUser,
 } from 'next-auth'
 import KeycloakProvider, { KeycloakProfile } from 'next-auth/providers/keycloak'
@@ -10,7 +11,6 @@ import { UserService } from '@/lib/services/UserService'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { JWT } from 'next-auth/jwt'
-import { Session } from '@auth/core/types'
 import { userToAuthzContext } from '@/app/auth/ability'
 import {
   PersonIdentifier,
@@ -18,7 +18,7 @@ import {
 } from '@/types/PersonIdentifier'
 import { AuthzContext } from '@/types/authz'
 
-declare module '@auth/core/types' {
+declare module 'next-auth' {
   interface User {
     username?: string
     orcid?: string
@@ -109,10 +109,10 @@ const authOptions: AuthOptions = {
   },
   callbacks: {
     async signIn({
-                   user,
-                   account,
-                   profile,
-                 }: {
+      user,
+      account,
+      profile,
+    }: {
       user: NextAuthUser
       account: Account | null
       profile?: Profile
@@ -129,11 +129,11 @@ const authOptions: AuthOptions = {
       return await userService.submitProfile(authenticationProfile)
     },
     async jwt({
-                token,
-                account,
-                user,
-                profile,
-              }: {
+      token,
+      account,
+      user,
+      profile,
+    }: {
       token: JWT
       account?: Account | null
       user?: NextAuthUser
@@ -158,9 +158,9 @@ const authOptions: AuthOptions = {
           )
         : token.orcid
           ? new PersonIdentifier(
-            PersonIdentifierType.orcid,
-            String(token.orcid),
-          )
+              PersonIdentifierType.orcid,
+              String(token.orcid),
+            )
           : null
       console.info('resolving user for identifier', identifier)
 
