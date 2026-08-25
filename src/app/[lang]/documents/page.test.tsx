@@ -336,8 +336,6 @@ describe('DocumentsPage Component', () => {
 
     fireEvent.click(tab!)
 
-    // `Tabs` is controlled by the `tab` search param rather than local state,
-    // so selecting a tab is a navigation: assert the route the click pushes.
     await waitFor(() =>
       expect(pushMock).toHaveBeenCalledWith(
         expect.stringContaining('tab=outside_hal'),

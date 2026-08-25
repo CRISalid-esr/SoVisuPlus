@@ -259,11 +259,6 @@ describe('SearchInput Component', () => {
     fireEvent.focus(searchInput)
     fireEvent.change(searchInput, { target: { value: 'John' } })
 
-    // Selection is rendered through the Chip `color` prop, so the root
-    // element carries MuiChip-colorPrimary when selected and
-    // MuiChip-colorDefault when not. Re-query after each click: toggling a
-    // tag rebuilds the memoised paper component, so the chips are remounted
-    // rather than updated in place, and any node held across the click is stale.
     const peopleChipRoot = () =>
       screen.getByText(t`sidebar_search_people`).closest('.MuiChip-root')
 
