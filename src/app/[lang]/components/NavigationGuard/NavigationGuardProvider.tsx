@@ -3,7 +3,7 @@
 import {
   AnchorHTMLAttributes,
   createContext,
-  forwardRef,
+  Ref,
   ReactNode,
   useCallback,
   useContext,
@@ -167,6 +167,7 @@ export function useGuardedRouter() {
 type GuardedLinkProps = LinkProps &
   Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps> & {
     children?: ReactNode
+    ref?: Ref<HTMLAnchorElement>
   }
 
 const isModifiedEvent = (event: React.MouseEvent): boolean =>
@@ -180,36 +181,40 @@ const isModifiedEvent = (event: React.MouseEvent): boolean =>
  * Drop-in replacement for `next/link` that routes clicks through the navigation
  * guard. External hrefs, new-tab targets and modified clicks are left untouched.
  */
-export const GuardedLink = forwardRef<HTMLAnchorElement, GuardedLinkProps>(
-  function GuardedLink({ href, onClick, target, ...rest }, ref) {
-    const ctx = useContext(NavigationGuardContext)
-    const router = useRouter()
-    const url = href.toString()
-    const isExternal = /^https?:\/\//.test(url) || url.startsWith('mailto:')
+export function GuardedLink({
+  href,
+  onClick,
+  target,
+  ref,
+  ...rest
+}: GuardedLinkProps) {
+  const ctx = useContext(NavigationGuardContext)
+  const router = useRouter()
+  const url = href.toString()
+  const isExternal = /^https?:\/\//.test(url) || url.startsWith('mailto:')
 
-    const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-      onClick?.(event)
-      if (
-        !ctx ||
-        isExternal ||
-        (target && target !== '_self') ||
-        isModifiedEvent(event) ||
-        event.defaultPrevented
-      ) {
-        return
-      }
-      event.preventDefault()
-      ctx.guard(() => router.push(url))
+  const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    onClick?.(event)
+    if (
+      !ctx ||
+      isExternal ||
+      (target && target !== '_self') ||
+      isModifiedEvent(event) ||
+      event.defaultPrevented
+    ) {
+      return
     }
+    event.preventDefault()
+    ctx.guard(() => router.push(url))
+  }
 
-    return (
-      <Link
-        href={href}
-        target={target}
-        onClick={handleClick}
-        ref={ref}
-        {...rest}
-      />
-    )
-  },
-)
+  return (
+    <Link
+      href={href}
+      target={target}
+      onClick={handleClick}
+      ref={ref}
+      {...rest}
+    />
+  )
+}

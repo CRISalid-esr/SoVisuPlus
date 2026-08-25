@@ -158,7 +158,7 @@ describe('HalStatusCell Component', () => {
         type: HalStatusCellType.OutsideHal,
         documentUid: 'doc1',
       }),
-      {},
+      undefined,
     )
   })
 
@@ -191,7 +191,7 @@ describe('HalStatusCell Component', () => {
       expect.objectContaining({
         type: HalStatusCellType.OutsideHalMissingId,
       }),
-      {},
+      undefined,
     )
   })
 
@@ -232,7 +232,7 @@ describe('HalStatusCell Component', () => {
         type: HalStatusCellType.OutsideHal,
         documentUid: 'doc1',
       }),
-      {},
+      undefined,
     )
   })
 
@@ -272,7 +272,7 @@ describe('HalStatusCell Component', () => {
       expect.objectContaining({
         type: HalStatusCellType.OutsideHalMissingId,
       }),
-      {},
+      undefined,
     )
   })
 
@@ -310,7 +310,7 @@ describe('HalStatusCell Component', () => {
         type: HalStatusCellType.OutsideHal,
         documentUid: 'doc1',
       }),
-      {},
+      undefined,
     )
   })
 
@@ -342,7 +342,7 @@ describe('HalStatusCell Component', () => {
         halSubmitType: 'file',
         halUrl: 'https://url-to-record-1/',
       }),
-      {},
+      undefined,
     )
   })
 
@@ -370,7 +370,7 @@ describe('HalStatusCell Component', () => {
         hasBeenUpdated: false,
         halSubmitType: 'file',
       }),
-      {},
+      undefined,
     )
   })
 
@@ -406,7 +406,7 @@ describe('HalStatusCell Component', () => {
         hasBeenUpdated: true,
         halSubmitType: 'file',
       }),
-      {},
+      undefined,
     )
   })
 

@@ -3,13 +3,7 @@ import {
   MapCollaborationsProps,
   Point,
 } from '@/app/[lang]/dashboard/components/CollaborationMap/CollaborationMapTypes'
-import {
-  MutableRefObject,
-  RefObject,
-  useCallback,
-  useMemo,
-  useRef,
-} from 'react'
+import { RefObject, useCallback, useMemo, useRef } from 'react'
 import geoJson from '@/public/countries.geo.json'
 import { Feature, GeoJSON, MultiPolygon, Polygon } from 'geojson'
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon'
@@ -218,9 +212,9 @@ export function useMergedPoints(
  * Update merged points on zoom changes
  */
 function handleRoam(
-  chartRef: RefObject<ReactEcharts>,
-  zoomRef: MutableRefObject<number>,
-  mergedFnRef: MutableRefObject<(map: ECharts, zoom?: number) => Point[]>,
+  chartRef: RefObject<ReactEcharts | null>,
+  zoomRef: RefObject<number>,
+  mergedFnRef: RefObject<(map: ECharts, zoom?: number) => Point[]>,
 ) {
   const map = chartRef.current?.getEchartsInstance() as EChartsOption & {
     geo?: GeoComponentOption
@@ -251,8 +245,8 @@ function handleRoam(
 }
 
 export function useHandleRoam(
-  chartRef: RefObject<ReactEcharts>,
-  mergedFnRef: MutableRefObject<(map: ECharts, zoom?: number) => Point[]>,
+  chartRef: RefObject<ReactEcharts | null>,
+  mergedFnRef: RefObject<(map: ECharts, zoom?: number) => Point[]>,
 ) {
   const zoomRef = useRef<number>(1.15)
   return useMemo(
