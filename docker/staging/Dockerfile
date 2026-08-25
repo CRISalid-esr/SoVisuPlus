@@ -1,7 +1,7 @@
 # syntax=docker.io/docker/dockerfile:1
 
 
-FROM node:24-alpine AS base
+FROM node:24.19.0-alpine AS base
 
 
 FROM base AS deps
