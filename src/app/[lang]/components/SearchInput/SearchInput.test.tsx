@@ -259,13 +259,16 @@ describe('SearchInput Component', () => {
     fireEvent.focus(searchInput)
     fireEvent.change(searchInput, { target: { value: 'John' } })
 
-    const peopleChip = screen.getByText(t`sidebar_search_people`)
-    fireEvent.click(peopleChip)
+    const peopleChipRoot = () =>
+      screen.getByText(t`sidebar_search_people`).closest('.MuiChip-root')
+
+    expect(peopleChipRoot()).toHaveClass('MuiChip-colorPrimary')
+
+    fireEvent.click(screen.getByText(t`sidebar_search_people`))
 
     // Chip should now be unselected
-    expect(peopleChip).toHaveClass(
-      'MuiChip-label MuiChip-labelMedium css-1dybbl5-MuiChip-label',
-    )
+    expect(peopleChipRoot()).toHaveClass('MuiChip-colorDefault')
+    expect(peopleChipRoot()).not.toHaveClass('MuiChip-colorPrimary')
   })
 
   it('renders grouped options correctly', () => {

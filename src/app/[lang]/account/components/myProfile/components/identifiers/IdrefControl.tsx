@@ -224,7 +224,7 @@ const IdrefControl = () => {
               helperText={validationError}
               label={t`idref_control_input_label`}
               size='small'
-              inputProps={{ maxLength: 9 }}
+              slotProps={{ htmlInput: { maxLength: 9 } }}
               disabled={verifying}
             />
 

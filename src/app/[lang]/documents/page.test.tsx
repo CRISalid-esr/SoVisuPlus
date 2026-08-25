@@ -328,13 +328,19 @@ describe('DocumentsPage Component', () => {
   it('switches tabs when a tab is clicked', async () => {
     renderComponent()
 
-    const tab = screen.getByText(
-      i18n.t('documents_page_incomplete_hal_repository_filter'),
-    )
-    fireEvent.click(tab)
+    const tab = screen
+      .getByText(i18n.t('documents_page_incomplete_hal_repository_filter'))
+      .closest('[role="tab"]')
 
-    // Check that the tab gets selected
-    expect(tab).toHaveClass('MuiTypography-root')
+    expect(tab).toHaveAttribute('aria-selected', 'false')
+
+    fireEvent.click(tab!)
+
+    await waitFor(() =>
+      expect(pushMock).toHaveBeenCalledWith(
+        expect.stringContaining('tab=outside_hal'),
+      ),
+    )
   })
 
   it('renders the document list', async () => {

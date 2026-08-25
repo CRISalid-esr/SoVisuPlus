@@ -25,20 +25,20 @@ declare module '@mui/material/styles' {
       bodySmall?: React.CSSProperties // Allow customization for `bodySmall`
       headingSmall: React.CSSProperties // Allow customization for `headingSmall`
       lineHeight: {
-        lineHeight64px: number // "4rem", 64px
-        lineHeight52px: number // "3rem", 52px
-        lineHeight44px: number // "2.75rem", 44px
-        lineHeight40px: number // "2.5rem", 40px
-        lineHeight36px: number // "2.25rem", 36px
-        lineHeight32px: number // "2rem", 32px
-        lineHeight28px: number // "1.75rem", 28px
-        lineHeight24px: number // "1.5rem", 24px
-        lineHeight20px: number // "1.25rem", 20px
-        lineHeight18px: number // "1.125rem", 18px
-        lineHeight16px: number // "1rem", 16px
-        lineHeight14px: number // "0.875rem", 14px
-        lineHeight12px: number // "0.75rem", 12px
-        lineHeight10px: number // "0.625rem", 10px
+        lineHeight64px: string // "4rem", 64px
+        lineHeight52px: string // "3rem", 52px
+        lineHeight44px: string // "2.75rem", 44px
+        lineHeight40px: string // "2.5rem", 40px
+        lineHeight36px: string // "2.25rem", 36px
+        lineHeight32px: string // "2rem", 32px
+        lineHeight28px: string // "1.75rem", 28px
+        lineHeight24px: string // "1.5rem", 24px
+        lineHeight20px: string // "1.25rem", 20px
+        lineHeight18px: string // "1.125rem", 18px
+        lineHeight16px: string // "1rem", 16px
+        lineHeight14px: string // "0.875rem", 14px
+        lineHeight12px: string // "0.75rem", 12px
+        lineHeight10px: string // "0.625rem", 10px
       }
     }
   }
@@ -58,27 +58,27 @@ declare module '@mui/material/styles' {
     typography?: {
       bodyLarge?: React.CSSProperties
       bodySmall?: React.CSSProperties
-      displayLarge: React.CSSProperties
+      displayLarge?: React.CSSProperties
       headingSmall?: React.CSSProperties
       fontWeightLight?: number
       fontWeightRegular?: number
       fontWeightMedium?: number
       fontWeightBold?: number
       lineHeight?: {
-        lineHeight64px?: number // "4rem", 64px
-        lineHeight52px?: number // "3rem", 52px
-        lineHeight44px?: number // "2.75rem", 44px
-        lineHeight40px?: number // "2.5rem", 40px
-        lineHeight36px?: number // "2.25rem", 36px
-        lineHeight32px?: number // "2rem", 32px
-        lineHeight28px?: number // "1.75rem", 28px
-        lineHeight24px?: number // "1.5rem", 24px
-        lineHeight20px?: number // "1.25rem", 20px
-        lineHeight18px?: number // "1.125rem", 18px
-        lineHeight16px?: number // "1rem", 16px
-        lineHeight14px?: number // "0.875rem", 14px
-        lineHeight12px?: number // "0.75rem", 12px
-        lineHeight10px?: number // "0.625rem", 10px
+        lineHeight64px?: string // "4rem", 64px
+        lineHeight52px?: string // "3rem", 52px
+        lineHeight44px?: string // "2.75rem", 44px
+        lineHeight40px?: string // "2.5rem", 40px
+        lineHeight36px?: string // "2.25rem", 36px
+        lineHeight32px?: string // "2rem", 32px
+        lineHeight28px?: string // "1.75rem", 28px
+        lineHeight24px?: string // "1.5rem", 24px
+        lineHeight20px?: string // "1.25rem", 20px
+        lineHeight18px?: string // "1.125rem", 18px
+        lineHeight16px?: string // "1rem", 16px
+        lineHeight14px?: string // "0.875rem", 14px
+        lineHeight12px?: string // "0.75rem", 12px
+        lineHeight10px?: string // "0.625rem", 10px
       }
     }
   }

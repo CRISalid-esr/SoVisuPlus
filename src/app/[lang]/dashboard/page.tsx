@@ -7,7 +7,7 @@ import {
   Box,
   Button,
   CardContent,
-  Grid2 as Grid,
+  Grid,
   MenuItem,
   Select,
   Slider,
