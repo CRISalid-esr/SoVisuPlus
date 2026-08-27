@@ -12,6 +12,7 @@ import { useSearchParams } from 'next/navigation'
 import { SnackbarProvider } from 'notistack'
 import WebSocketListener from '@/lib/websocket/WebSocketListener'
 import { NavigationGuardProvider } from '@/app/[lang]/components/NavigationGuard/NavigationGuardProvider'
+import AiChatWidget from 'src/app/[lang]/components/AiChatWidget'
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const [open, setOpen] = useState(true) // Determines if the drawer is expanded or collapsed
@@ -106,6 +107,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               {children}
             </Box>
           </Box>
+          <AiChatWidget />
         </NavigationGuardProvider>
       </SnackbarProvider>
     </AuthenticatedRoute>

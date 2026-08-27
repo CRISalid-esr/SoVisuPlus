@@ -95,16 +95,6 @@ msgid "snackbar_user_action_applied_with_warnings"
 msgstr "Modification enregistrée avec des avertissements :"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:45
-msgid "notfound_page_back_home"
-msgstr "Retour à la page d'accueil"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:110
-msgid "notfound_page_description"
-msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Contactez-nous à cette <0>adresse mail</0> si cela vous semble anormal."
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/forbidden.tsx:43
 msgid "forbidden_page_back_home"
 msgstr "Retour"
@@ -113,6 +103,16 @@ msgstr "Retour"
 #: src/app/[lang]/forbidden.tsx:108
 msgid "forbidden_page_description"
 msgstr "Vous n'êtes pas autorisé à accéder à cette ressource. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:45
+msgid "notfound_page_back_home"
+msgstr "Retour à la page d'accueil"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:110
+msgid "notfound_page_description"
+msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Contactez-nous à cette <0>adresse mail</0> si cela vous semble anormal."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:182
@@ -205,6 +205,27 @@ msgid "concept_chip_action_delete"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:395
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:406
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "Actions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:430
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalider"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:456
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissocier"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
+msgid "document_details_page_add_in_hal_tab_card_title"
+msgstr "Déposer dans HAL"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "En cours de chargement..."
@@ -235,30 +256,14 @@ msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Erreur lors du chargement des données"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:395
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:406
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "Actions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:430
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalider"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:456
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissocier"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
 msgid "document_details_page_domains_tab_card_title"
 msgstr "Domaines"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
-msgid "document_details_page_add_in_hal_tab_card_title"
-msgstr "Déposer dans HAL"
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
+msgid "document_details_page_card_title"
+msgstr "Informations bibliographiques"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:114
@@ -271,16 +276,6 @@ msgid "document_details_page_publication_date_update_failure"
 msgstr "Échec de la mise à jour de la date de publication."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
-msgid "document_details_page_card_title"
-msgstr "Informations bibliographiques"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:91
-msgid "documents_details_page_authors_tab_title"
-msgstr "Auteurs"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
 msgid "bibliographic_information_update_success"
@@ -290,6 +285,11 @@ msgstr "Informations bibliographiques mises à jour."
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
 msgid "bibliographic_information_update_failure"
 msgstr "Erreur lors de la mise à jour des informations bibliographiques."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:91
+msgid "documents_details_page_authors_tab_title"
+msgstr "Auteurs"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
@@ -322,16 +322,6 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "Une nouvelle expertise est en attente de validation"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:34
-msgid "profile_identifiers_card_title"
-msgstr "Mes identifiants"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:36
-msgid "profile_identifiers_card_title_other"
-msgstr "Identifiants"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:34
 msgid "profile_affiliations_card_title"
 msgstr "Mes affiliations"
@@ -342,37 +332,47 @@ msgid "profile_affiliations_card_title_other"
 msgstr "Affiliations"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:48
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:34
+msgid "profile_identifiers_card_title"
+msgstr "Mes identifiants"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:36
+msgid "profile_identifiers_card_title_other"
+msgstr "Identifiants"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
 msgid "orcid_permission_read_limited"
 msgstr "Lire vos informations avec une visibilitée fixée sur «Organisations de confiance»"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:49
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:51
 msgid "orcid_permission_activities_update"
 msgstr "Créer ou mettre à jour vos activités scientifiques (publications, etc.)"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:52
 msgid "orcid_permission_person_update"
 msgstr "Mettre à jour vos informations biographiques (nom, affiliation, etc.)"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:163
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:165
 msgid "orcid_permissions_intro"
 msgstr "Voici les autorisations que vous accordez à {institutionName} sur votre profil ORCID :"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:179
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:181
 msgid "orcid_permissions_none"
 msgstr "Vous n’accordez aucune autorisation à {institutionName}."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:215
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
 msgid "orcid_button_update_identifier"
 msgstr "Modifier mes autorisations ORCID"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:219
 msgid "orcid_button_provide_identifier"
 msgstr "Fournir mon identifiant ORCID"
 
@@ -698,7 +698,89 @@ msgstr "{numberOfAcronyms, plural, one {Absent de la collection} other {Absent d
 msgid "document_details_page_journal_issn"
 msgstr "ISSN : <0>{0}</0>"
 
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:57
+#: src/app/[lang]/components/AiChatWidget.tsx:40
+msgid "ai_chat_assistant_avatar_alt"
+msgstr "Avatar de l'assistant"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:143
+msgid "ai_chat_author_assistant"
+msgstr "Assistant"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:142
+msgid "ai_chat_author_user"
+msgstr "Vous"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:144
+msgid "ai_chat_back_to_conversations"
+msgstr "Retour aux conversations"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:218
+msgid "ai_chat_close_label"
+msgstr "Fermer l'assistant"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:140
+msgid "ai_chat_composer_aria_label"
+msgstr "Écrire à l'assistant"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:139
+msgid "ai_chat_composer_placeholder"
+msgstr "Posez votre question à l'assistant…"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:141
+msgid "ai_chat_composer_send_label"
+msgstr "Envoyer"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:75
+#: src/app/[lang]/components/AiChatWidget.tsx:85
+msgid "ai_chat_new_conversation"
+msgstr "Nouvelle conversation"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:174
+msgid "ai_chat_open_label"
+msgstr "Ouvrir l'assistant"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:158
+msgid "ai_chat_suggestion_coauthors_label"
+msgstr "Mes co-auteurs"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:159
+msgid "ai_chat_suggestion_coauthors_value"
+msgstr "Qui sont mes principaux co-auteurs ?"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:154
+msgid "ai_chat_suggestion_publications_label"
+msgstr "Mes publications"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:155
+msgid "ai_chat_suggestion_publications_value"
+msgstr "Montre-moi mes publications les plus récentes."
+
+#: src/app/[lang]/components/AiChatWidget.tsx:162
+msgid "ai_chat_suggestion_structures_label"
+msgstr "Mes structures de recherche"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:163
+msgid "ai_chat_suggestion_structures_value"
+msgstr "À quelles structures de recherche suis-je rattaché·e ?"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:61
+msgid "ai_chat_user_avatar_alt"
+msgstr "Votre avatar"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:130
+msgid "ai_chat_welcome_message"
+msgstr "Bonjour ! Je suis votre assistant SoVisu+. Posez-moi des questions sur vos données — vos publications, vos structures de recherche et les personnes. Choisissez une conversation à gauche ou démarrez-en une nouvelle pour commencer."
+
+#: src/app/[lang]/components/AiChatWidget.tsx:129
+msgid "ai_chat_welcome_title"
+msgstr "Bienvenue"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/AiChatWidget.tsx:214
+msgid "ai_chat_title"
+msgstr "Assistant"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:59
 msgid "authenticate_tooltip"
 msgstr "S'authentifier uniquement avec ORCID"
 
@@ -2239,7 +2321,7 @@ msgstr "Fiche ORCID"
 msgid "orcid_scope_activities_update"
 msgstr "Mettre à jour mes activités"
 
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:56
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:58
 msgid "orcid_scope_activities_update_tooltip"
 msgstr "Permet de mettre à jour vos activités (publications, financements, etc.) sur ORCID"
 
@@ -2247,7 +2329,7 @@ msgstr "Permet de mettre à jour vos activités (publications, financements, etc
 msgid "orcid_scope_person_update"
 msgstr "Mettre à jour mes informations personnelles"
 
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:55
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:57
 msgid "orcid_scope_person_update_tooltip"
 msgstr "Permet de mettre à jour vos informations personnelles sur ORCID"
 
@@ -2255,7 +2337,7 @@ msgstr "Permet de mettre à jour vos informations personnelles sur ORCID"
 msgid "orcid_scope_read_limited"
 msgstr "Lire mes informations"
 
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:54
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:56
 msgid "orcid_scope_read_limited_tooltip"
 msgstr "Permet de lire vos données à accès limité sur ORCID"
 

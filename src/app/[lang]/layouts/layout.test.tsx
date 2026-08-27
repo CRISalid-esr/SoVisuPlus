@@ -1,5 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import { useMediaQuery } from '@mui/system'
+import { i18n } from '@lingui/core'
+import { I18nProvider } from '@lingui/react'
 import useStore from '@/stores/global_store' // Import the store
 import MainLayout from './MainLayout' // Adjust path as needed
 
@@ -39,12 +41,18 @@ describe('DashboardLayout', () => {
       fetchConnectedUser: jest.fn(),
       setPerspective: jest.fn(),
     })
+
+    // AiChatWidget (mounted by MainLayout) reads the Lingui locale via useLingui,
+    // which requires an active I18nProvider context.
+    act(() => {
+      i18n.activate('en')
+    })
   })
 
   // Helper function to render with the store (no need for SessionProvider anymore)
   const renderWithStore = (children: React.ReactNode) => {
     return render(
-      <div>{children}</div>, // No need for SessionProvider, as you're now using the store
+      <I18nProvider i18n={i18n}>{children}</I18nProvider>,
     )
   }
 
