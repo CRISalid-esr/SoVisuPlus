@@ -62,6 +62,7 @@ const RootLayout = async ({ params, children }: Props) => {
               process.env.NEXT_PUBLIC_COMMUNITY_PAGE_URL,
             NEXT_PUBLIC_TERMS_PAGE_URL: process.env.NEXT_PUBLIC_TERMS_PAGE_URL,
             NEXT_PUBLIC_HELP_URL: process.env.NEXT_PUBLIC_HELP_URL,
+            NEXT_PUBLIC_CRISALID_AGENTS_API_URL: process.env.NEXT_PUBLIC_CRISALID_AGENTS_API_URL,
           }}
         />
         <Script src='/vendor/d3.v4.min.js' strategy='beforeInteractive' />

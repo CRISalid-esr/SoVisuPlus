@@ -28,6 +28,7 @@ import { t } from '@lingui/core/macro'
 import { Trans } from '@lingui/react/macro'
 import { useLingui } from '@lingui/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
 import { createAiChatAdapter } from './aiChat/aiChatAdapter'
 
 const DRAWER_WIDTH = 'min(420px, 100vw)'
@@ -184,6 +185,13 @@ const AiChatWidget = () => {
     ],
     [],
   )
+
+  // Only surface the assistant when a Crisalid Agents API endpoint is
+  // configured; without it there is no backend to talk to.
+  const agentsApiUrl = getRuntimeEnv().NEXT_PUBLIC_CRISALID_AGENTS_API_URL
+  if (!agentsApiUrl) {
+    return null
+  }
 
   return (
     <>
