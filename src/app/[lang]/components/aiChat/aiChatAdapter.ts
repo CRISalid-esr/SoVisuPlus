@@ -5,25 +5,40 @@ import type {
   ChatMessageChunk,
   ChatRole,
 } from '@mui/x-chat-headless'
+import { t } from '@lingui/core/macro'
 
 /**
- * In-memory, multi-conversation `ChatAdapter` used to scaffold the AI chat UI
- * before the real backend exists. It echoes the user's message back.
+ * Client-side `ChatAdapter` for the AI chat widget. It is the ONLY module that knows the chat
+ * wire format, so `AiChatWidget.tsx` never changes.
  *
- * This module is the ONLY data-plane seam: every method maps 1:1 to a future
- * API endpoint (see the `TODO(api)` markers). To go live, replace the method
- * bodies with `fetch` calls — `AiChatWidget.tsx` does not need to change.
+ * The Crisalid Agents backend is stateless — it stores no conversations and exposes no
+ * list/history endpoints. So conversation and message state is owned here, in memory, for the
+ * lifetime of the adapter instance (it resets on a full page reload). `sendMessage` /
+ * `regenerate` POST to our own same-origin `/api/chat` proxy, which injects the secret API key
+ * and streams the backend's NDJSON response straight back.
  *
- * Note: state lives in closures, so it resets when the widget unmounts.
+ * The backend's NDJSON chunks are already exactly `ChatMessageChunk`-shaped
+ * (`start` / `text-start` / `text-delta` / `text-end` / `finish`, plus `tool-*`), so we parse
+ * each line and forward it unchanged, while tapping the text to persist the assistant reply for
+ * a later `listMessages` (conversation switch).
  */
 
-const defaultRespond = (text: string) =>
-  `You said: "${text || 'nothing'}". This is a demo assistant — replace the adapter with the real API.`
+const DEFAULT_API_PATH = '/api/chat'
 
 const getMessageText = (message: ChatMessage): string =>
   message.parts.map((part) => (part.type === 'text' ? part.text : '')).join('')
 
 const nowIso = () => new Date().toISOString()
+
+// Translated, status-appropriate message for a failed chat request. Each `t` call is a static
+// id so the extractor picks it up.
+const errorMessageForStatus = (status: number): string => {
+  if (status === 400) return t`ai_chat_error_bad_request`
+  if (status === 401 || status === 403) return t`ai_chat_error_unauthorized`
+  if (status === 404) return t`ai_chat_error_not_found`
+  if (status >= 500) return t`ai_chat_error_server`
+  return t`ai_chat_error_generic`
+}
 
 export interface AiChatSeedConversation {
   /** Stable id; a random one is generated when omitted. */
@@ -33,14 +48,13 @@ export interface AiChatSeedConversation {
 }
 
 export interface CreateAiChatAdapterOptions {
-  /** Build the assistant reply from the user's text. */
-  respond?: (text: string) => string
-  /** Latency before the reply is emitted, in ms. @default 400 */
-  delayMs?: number
   /**
-   * Conversations to pre-populate (e.g. a "Welcome" thread). At least one
-   * conversation is required for the split list / back-arrow UI to engage.
-   * TODO(api): the real backend returns these from GET /api/chat/conversations.
+   * Same-origin proxy path that forwards to the agents backend. @default '/api/chat'
+   */
+  apiPath?: string
+  /**
+   * Conversations to pre-populate (e.g. a "Welcome" thread). At least one conversation is
+   * required for the split list / back-arrow UI to engage.
    */
   seed?: AiChatSeedConversation[]
 }
@@ -48,8 +62,7 @@ export interface CreateAiChatAdapterOptions {
 export function createAiChatAdapter(
   options: CreateAiChatAdapterOptions = {},
 ): ChatAdapter {
-  const respond = options.respond ?? defaultRespond
-  const delayMs = options.delayMs ?? 400
+  const apiPath = options.apiPath ?? DEFAULT_API_PATH
 
   // Source of truth for what `listConversations` / `listMessages` return.
   const conversations = new Map<string, ChatConversation>()
@@ -91,70 +104,103 @@ export function createAiChatAdapter(
     }
   }
 
-  // Mirrors createEchoAdapter's streaming shape: a single text part emitted
-  // after `delayMs`, honouring the abort signal. On finish it persists the
-  // assistant reply so a later `listMessages` returns a coherent history.
-  const createReplyStream = (
+  /**
+   * POST a turn to the proxy and adapt the NDJSON response into a `ChatMessageChunk` stream.
+   * Every parsed chunk is forwarded unchanged; the assistant text is accumulated and persisted
+   * (via `appendMessage`) on `finish` so the thread survives a conversation switch. The upstream
+   * `signal` aborts the request; cancelling the returned stream cancels the reader.
+   */
+  const streamFromProxy = async (
+    body: unknown,
     conversationId: string,
-    userText: string,
-    replyId: string,
     signal: AbortSignal,
-  ): ReadableStream<ChatMessageChunk> => {
-    const reply = respond(userText)
-    const partId = `${replyId}-text`
-    let timer: ReturnType<typeof setTimeout> | null = null
-
-    const cleanup = () => {
-      if (timer != null) {
-        clearTimeout(timer)
-        timer = null
-      }
+  ): Promise<ReadableStream<ChatMessageChunk>> => {
+    let response: Response
+    try {
+      response = await fetch(apiPath, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal,
+      })
+    } catch (error) {
+      // A caller-initiated abort is a normal stop; anything else is a network failure.
+      if (signal.aborted) throw error
+      throw new Error(t`ai_chat_error_network`)
+    }
+    if (!response.ok || !response.body) {
+      throw new Error(errorMessageForStatus(response.status))
     }
 
+    let reader: ReadableStreamDefaultReader<Uint8Array> | undefined
+
     return new ReadableStream<ChatMessageChunk>({
-      start(controller) {
-        const handleAbort = () => {
-          cleanup()
-          try {
-            controller.close()
-          } catch {
-            // already closed
+      async start(controller) {
+        reader = response.body!.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+        let assistantMessageId: string | undefined
+        let assistantText = ''
+
+        const handleChunk = (chunk: ChatMessageChunk) => {
+          controller.enqueue(chunk)
+          if (chunk.type === 'start') {
+            assistantMessageId = chunk.messageId
+          } else if (chunk.type === 'text-delta') {
+            assistantText += chunk.delta
+          } else if (chunk.type === 'finish' && !assistantMessageId) {
+            assistantMessageId = chunk.messageId
           }
         }
-        if (signal.aborted) {
-          handleAbort()
+
+        const flushLine = (line: string) => {
+          const trimmed = line.trim()
+          if (trimmed) {
+            handleChunk(JSON.parse(trimmed) as ChatMessageChunk)
+          }
+        }
+
+        try {
+          for (;;) {
+            const { done, value } = await reader.read()
+            if (done) break
+            buffer += decoder.decode(value, { stream: true })
+            let newlineIndex = buffer.indexOf('\n')
+            while (newlineIndex !== -1) {
+              flushLine(buffer.slice(0, newlineIndex))
+              buffer = buffer.slice(newlineIndex + 1)
+              newlineIndex = buffer.indexOf('\n')
+            }
+          }
+          flushLine(buffer)
+        } catch (error) {
+          // A caller-initiated abort is a normal stop, not a stream error.
+          if (signal.aborted) {
+            controller.close()
+          } else {
+            console.error('AI chat stream error:', error)
+            controller.error(new Error(t`ai_chat_error_generic`))
+          }
           return
         }
-        signal.addEventListener('abort', handleAbort, { once: true })
-        timer = setTimeout(() => {
-          timer = null
-          signal.removeEventListener('abort', handleAbort)
+
+        if (assistantMessageId && assistantText) {
           appendMessage(conversationId, {
-            id: replyId,
+            id: assistantMessageId,
             role: 'assistant',
-            parts: [{ type: 'text', text: reply }],
+            parts: [{ type: 'text', text: assistantText }],
             createdAt: nowIso(),
           })
-          controller.enqueue({ type: 'start', messageId: replyId })
-          controller.enqueue({ type: 'text-start', id: partId })
-          controller.enqueue({ type: 'text-delta', id: partId, delta: reply })
-          controller.enqueue({ type: 'text-end', id: partId })
-          controller.enqueue({
-            type: 'finish',
-            messageId: replyId,
-            finishReason: 'stop',
-          })
-          controller.close()
-        }, delayMs)
+        }
+        controller.close()
       },
-      cancel() {
-        cleanup()
+      async cancel() {
+        await reader?.cancel().catch(() => undefined)
       },
     })
   }
 
   return {
-    // TODO(api): GET /api/chat/conversations
     async listConversations() {
       const list = [...conversations.values()].sort((a, b) =>
         (b.lastMessageAt ?? '').localeCompare(a.lastMessageAt ?? ''),
@@ -162,7 +208,6 @@ export function createAiChatAdapter(
       return { conversations: list, hasMore: false }
     },
 
-    // TODO(api): GET /api/chat/conversations/:conversationId/messages
     async listMessages({ conversationId }) {
       return {
         messages: messagesByConversation.get(conversationId) ?? [],
@@ -170,28 +215,21 @@ export function createAiChatAdapter(
       }
     },
 
-    // TODO(api): POST /api/chat/conversations/:conversationId/messages (streamed)
-    async sendMessage({ conversationId, message, signal }) {
-      const userText = getMessageText(message)
+    async sendMessage({ conversationId, message, messages, signal }) {
       // A brand-new conversation is only created optimistically in the store;
       // its first send is what makes it "real" here.
       const id = conversationId ?? crypto.randomUUID()
-      registerConversation(id, userText)
+      registerConversation(id, getMessageText(message))
       appendMessage(id, message)
-      return createReplyStream(id, userText, `reply-${message.id}`, signal)
+      return streamFromProxy({ conversationId: id, message, messages }, id, signal)
     },
 
-    // TODO(api): POST …/messages with trigger=regenerate-message
-    async regenerate({ conversationId, message, signal }) {
-      const userText = getMessageText(message)
+    async regenerate({ conversationId, message, messages, signal }) {
+      // Backend has no regenerate endpoint; resending the history is the mechanism. The user
+      // turn is already in `messages`, so it is not appended again.
       const id = conversationId ?? crypto.randomUUID()
-      registerConversation(id, userText)
-      return createReplyStream(
-        id,
-        userText,
-        `reply-${message.id}-${crypto.randomUUID()}`,
-        signal,
-      )
+      registerConversation(id, getMessageText(message))
+      return streamFromProxy({ conversationId: id, message, messages }, id, signal)
     },
   }
 }

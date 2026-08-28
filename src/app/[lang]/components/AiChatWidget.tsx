@@ -136,6 +136,32 @@ const NewConversationLifecycle = () => {
   return null
 }
 
+// Derive a conversation's title from its first user message, once, replacing the generic
+// "New conversation" placeholder. Guarded so it never overwrites a seeded title (e.g. Welcome).
+const ConversationTitleSync = () => {
+  const { activeConversationId, messages, conversations } = useChat()
+  const store = useChatStore()
+  const placeholder = t`ai_chat_new_conversation`
+  useEffect(() => {
+    if (!activeConversationId) return
+    const conversation = conversations.find(
+      (item) => item.id === activeConversationId,
+    )
+    if (!conversation) return
+    if (conversation.title && conversation.title !== placeholder) return
+    const firstUser = messages.find((message) => message.role === 'user')
+    const text = firstUser
+      ? firstUser.parts
+          .map((part) => (part.type === 'text' ? part.text : ''))
+          .join('')
+          .trim()
+      : ''
+    if (!text) return
+    store.updateConversation(activeConversationId, { title: text.slice(0, 60) })
+  }, [activeConversationId, conversations, messages, store, placeholder])
+  return null
+}
+
 const AiChatWidget = () => {
   const theme = useTheme()
   // Subscribe to locale changes so localised strings re-render on switch.
@@ -164,6 +190,7 @@ const AiChatWidget = () => {
       messageAuthorUserLabel: t`ai_chat_author_user`,
       messageAuthorAssistantLabel: t`ai_chat_author_assistant`,
       conversationHeaderBackLabel: t`ai_chat_back_to_conversations`,
+      retryButtonLabel: t`ai_chat_retry_label`,
     }),
     [],
   )
@@ -277,6 +304,7 @@ const AiChatWidget = () => {
             sx={{ height: '100%' }}
           >
             <NewConversationLifecycle />
+            <ConversationTitleSync />
           </ChatBox>
         </Box>
       </Drawer>

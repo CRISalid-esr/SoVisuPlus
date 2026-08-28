@@ -205,22 +205,6 @@ msgid "concept_chip_action_delete"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:395
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:406
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "Actions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:430
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalider"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:456
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissocier"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
 msgid "document_details_page_add_in_hal_tab_card_title"
 msgstr "Déposer dans HAL"
@@ -261,9 +245,30 @@ msgid "document_details_page_domains_tab_card_title"
 msgstr "Domaines"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:395
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:406
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "Actions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:430
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalider"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:456
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissocier"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
 msgid "document_details_page_card_title"
 msgstr "Informations bibliographiques"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:91
+msgid "documents_details_page_authors_tab_title"
+msgstr "Auteurs"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:114
@@ -285,11 +290,6 @@ msgstr "Informations bibliographiques mises à jour."
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
 msgid "bibliographic_information_update_failure"
 msgstr "Erreur lors de la mise à jour des informations bibliographiques."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:91
-msgid "documents_details_page_authors_tab_title"
-msgstr "Auteurs"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
@@ -340,41 +340,6 @@ msgstr "Mes identifiants"
 #: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:36
 msgid "profile_identifiers_card_title_other"
 msgstr "Identifiants"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
-msgid "orcid_permission_read_limited"
-msgstr "Lire vos informations avec une visibilitée fixée sur «Organisations de confiance»"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:51
-msgid "orcid_permission_activities_update"
-msgstr "Créer ou mettre à jour vos activités scientifiques (publications, etc.)"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:52
-msgid "orcid_permission_person_update"
-msgstr "Mettre à jour vos informations biographiques (nom, affiliation, etc.)"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:165
-msgid "orcid_permissions_intro"
-msgstr "Voici les autorisations que vous accordez à {institutionName} sur votre profil ORCID :"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:181
-msgid "orcid_permissions_none"
-msgstr "Vous n’accordez aucune autorisation à {institutionName}."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
-msgid "orcid_button_update_identifier"
-msgstr "Modifier mes autorisations ORCID"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:219
-msgid "orcid_button_provide_identifier"
-msgstr "Fournir mon identifiant ORCID"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:120
@@ -488,6 +453,11 @@ msgid "hal_button_provide_identifier"
 msgstr "Fournir mon identifiant Hal"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
+msgid "profile_affiliations_no_units"
+msgstr "Pas de unité(s) de recherche associée(s)"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
 msgid "profile_affiliations_signature_label"
 msgstr "Ma signature"
@@ -501,31 +471,6 @@ msgstr "Aucune signature"
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
 msgid "profile_affiliations_signature_copied_message_confirmation"
 msgstr "Signature ajoutée au presse-papier."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:28
-msgid "authorizations_page_authorizations_title"
-msgstr "Mes autorisations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:50
-msgid "authorizations_page_description"
-msgstr "J’autorise l’application SoVisu+ à transmettre ces informations à l’application Idya : "
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:54
-msgid "authorizations_page_list_publications"
-msgstr "Liste de mes publications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:58
-msgid "authorizations_page_my_expertise"
-msgstr "Mes expertises"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
-msgid "profile_affiliations_no_units"
-msgstr "Pas de unité(s) de recherche associée(s)"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:138
@@ -653,6 +598,61 @@ msgid "hal_control_remove_dialog_confirm"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:28
+msgid "authorizations_page_authorizations_title"
+msgstr "Mes autorisations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:50
+msgid "authorizations_page_description"
+msgstr "J’autorise l’application SoVisu+ à transmettre ces informations à l’application Idya : "
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:54
+msgid "authorizations_page_list_publications"
+msgstr "Liste de mes publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:58
+msgid "authorizations_page_my_expertise"
+msgstr "Mes expertises"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
+msgid "orcid_permission_read_limited"
+msgstr "Lire vos informations avec une visibilitée fixée sur «Organisations de confiance»"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:51
+msgid "orcid_permission_activities_update"
+msgstr "Créer ou mettre à jour vos activités scientifiques (publications, etc.)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:52
+msgid "orcid_permission_person_update"
+msgstr "Mettre à jour vos informations biographiques (nom, affiliation, etc.)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:165
+msgid "orcid_permissions_intro"
+msgstr "Voici les autorisations que vous accordez à {institutionName} sur votre profil ORCID :"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:181
+msgid "orcid_permissions_none"
+msgstr "Vous n’accordez aucune autorisation à {institutionName}."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
+msgid "orcid_button_update_identifier"
+msgstr "Modifier mes autorisations ORCID"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:219
+msgid "orcid_button_provide_identifier"
+msgstr "Fournir mon identifiant ORCID"
+
+#. js-lingui-explicit-id
 #. placeholder {0}: import { t } from '@lingui/core/macro' import { Trans } from '@lingui/react/macro' import { useRef, useState } from 'react' import useStore from '@/stores/global_store' import { Box, Button, Card, CardContent, ClickAwayListener, Grow, Link, Popper, Typography, } from '@mui/material' import { useTheme } from '@mui/material/styles' const Journal = () => { const titleRef = useRef(null) const [isPopperOpen, setIsPopperOpen] = useState(false) const theme = useTheme() const { selectedDocument = null } = useStore((state) => state.document) const journal = selectedDocument?.journal const title = journal?.title const handleClick = () => { setIsPopperOpen(!isPopperOpen) } const handleClickAway = () => { setIsPopperOpen(false) } return ( title && ( <ClickAwayListener onClickAway={handleClickAway}> <Box> <Button variant='text' ref={titleRef} onClick={handleClick} sx={{ p: 0 }} > {title} </Button> <Popper open={isPopperOpen} anchorEl={titleRef.current} placement='bottom-start' transition disablePortal sx={{ zIndex: 1, }} > {({ TransitionProps }) => ( <Grow {...TransitionProps} timeout={200}> <Card> <CardContent> <Typography gutterBottom variant='h6' sx={{ color: theme.palette.primary.main }} > {title} </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_issn'> <Link href={`https://portal.issn.org/resource/ISSN/${journal.issnL}`} target='_blank' rel='noopener noreferrer' > {journal.issnL} </Link> </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_source_type'> {t`document_details_page_journal_journal`} </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_publisher'> {journal.publisher} </Trans> </Typography> </CardContent> </Card> </Grow> )} </Popper> </Box> </ClickAwayListener> ) ) } export default Journal 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:85
 msgid "document_details_page_journal_source_type"
@@ -698,68 +698,98 @@ msgstr "{numberOfAcronyms, plural, one {Absent de la collection} other {Absent d
 msgid "document_details_page_journal_issn"
 msgstr "ISSN : <0>{0}</0>"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:40
+#: src/app/[lang]/components/AiChatWidget.tsx:43
 msgid "ai_chat_assistant_avatar_alt"
 msgstr "Avatar de l'assistant"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:143
+#: src/app/[lang]/components/AiChatWidget.tsx:191
 msgid "ai_chat_author_assistant"
 msgstr "Assistant"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:142
+#: src/app/[lang]/components/AiChatWidget.tsx:190
 msgid "ai_chat_author_user"
 msgstr "Vous"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:144
+#: src/app/[lang]/components/AiChatWidget.tsx:192
 msgid "ai_chat_back_to_conversations"
 msgstr "Retour aux conversations"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:218
+#: src/app/[lang]/components/AiChatWidget.tsx:272
 msgid "ai_chat_close_label"
 msgstr "Fermer l'assistant"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:140
+#: src/app/[lang]/components/AiChatWidget.tsx:188
 msgid "ai_chat_composer_aria_label"
 msgstr "Écrire à l'assistant"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:139
+#: src/app/[lang]/components/AiChatWidget.tsx:187
 msgid "ai_chat_composer_placeholder"
 msgstr "Posez votre question à l'assistant…"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:141
+#: src/app/[lang]/components/AiChatWidget.tsx:189
 msgid "ai_chat_composer_send_label"
 msgstr "Envoyer"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:75
+#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:36
+msgid "ai_chat_error_bad_request"
+msgstr "L'assistant n'a pas pu comprendre la requête."
+
+#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:40
+#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:182
+msgid "ai_chat_error_generic"
+msgstr "Une erreur est survenue lors de la communication avec l'assistant."
+
+#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:129
+msgid "ai_chat_error_network"
+msgstr "Échec réseau — impossible de joindre l'assistant."
+
+#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:38
+msgid "ai_chat_error_not_found"
+msgstr "Le service de l'assistant est introuvable."
+
+#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:39
+msgid "ai_chat_error_server"
+msgstr "Le service de l'assistant est temporairement indisponible."
+
+#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:37
+msgid "ai_chat_error_unauthorized"
+msgstr "Vous n'êtes pas autorisé à utiliser l'assistant."
+
 #: src/app/[lang]/components/AiChatWidget.tsx:85
+#: src/app/[lang]/components/AiChatWidget.tsx:112
+#: src/app/[lang]/components/AiChatWidget.tsx:144
 msgid "ai_chat_new_conversation"
 msgstr "Nouvelle conversation"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:174
+#: src/app/[lang]/components/AiChatWidget.tsx:228
 msgid "ai_chat_open_label"
 msgstr "Ouvrir l'assistant"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:158
+#: src/app/[lang]/components/AiChatWidget.tsx:193
+msgid "ai_chat_retry_label"
+msgstr "Réessayer"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:205
 msgid "ai_chat_suggestion_coauthors_label"
 msgstr "Mes co-auteurs"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:159
+#: src/app/[lang]/components/AiChatWidget.tsx:206
 msgid "ai_chat_suggestion_coauthors_value"
 msgstr "Qui sont mes principaux co-auteurs ?"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:154
+#: src/app/[lang]/components/AiChatWidget.tsx:201
 msgid "ai_chat_suggestion_publications_label"
 msgstr "Mes publications"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:155
+#: src/app/[lang]/components/AiChatWidget.tsx:202
 msgid "ai_chat_suggestion_publications_value"
 msgstr "Montre-moi mes publications les plus récentes."
 
-#: src/app/[lang]/components/AiChatWidget.tsx:162
+#: src/app/[lang]/components/AiChatWidget.tsx:209
 msgid "ai_chat_suggestion_structures_label"
 msgstr "Mes structures de recherche"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:163
+#: src/app/[lang]/components/AiChatWidget.tsx:210
 msgid "ai_chat_suggestion_structures_value"
 msgstr "À quelles structures de recherche suis-je rattaché·e ?"
 
@@ -767,16 +797,16 @@ msgstr "À quelles structures de recherche suis-je rattaché·e ?"
 msgid "ai_chat_user_avatar_alt"
 msgstr "Votre avatar"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:130
+#: src/app/[lang]/components/AiChatWidget.tsx:178
 msgid "ai_chat_welcome_message"
 msgstr "Bonjour ! Je suis votre assistant SoVisu+. Posez-moi des questions sur vos données — vos publications, vos structures de recherche et les personnes. Choisissez une conversation à gauche ou démarrez-en une nouvelle pour commencer."
 
-#: src/app/[lang]/components/AiChatWidget.tsx:129
+#: src/app/[lang]/components/AiChatWidget.tsx:177
 msgid "ai_chat_welcome_title"
 msgstr "Bienvenue"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/components/AiChatWidget.tsx:214
+#: src/app/[lang]/components/AiChatWidget.tsx:268
 msgid "ai_chat_title"
 msgstr "Assistant"
 
