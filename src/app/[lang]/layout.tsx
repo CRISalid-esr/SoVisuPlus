@@ -11,6 +11,8 @@ import DateProvider from './components/DateProvider'
 import ErrorFallback from './components/ErrorFallback'
 import { LanguageProvider } from './LanguageProvider'
 import { EnvInjector } from '@/components/EnvInjector'
+import { ChatConfigInjector } from '@/components/ChatConfigInjector'
+import { chatConfigService } from '@/lib/services/ChatConfigService'
 import Script from 'next/script'
 
 type Props = {
@@ -24,6 +26,11 @@ const RootLayout = async ({ params, children }: Props) => {
     fr: frMessages,
   }
   const { lang, selectedMessages } = await resolveLanguage(params, messages)
+
+  // The agents API URL stays server-side (the /api/chat proxy holds it); the browser only gets a
+  // boolean deciding whether to show the chat, plus the localised welcome/suggestions.
+  const chatEnabled = Boolean(process.env.CRISALID_AGENTS_API_URL)
+  const chatClientConfig = await chatConfigService.getClientConfig(lang)
 
   return (
     <html lang={lang}>
@@ -62,8 +69,10 @@ const RootLayout = async ({ params, children }: Props) => {
               process.env.NEXT_PUBLIC_COMMUNITY_PAGE_URL,
             NEXT_PUBLIC_TERMS_PAGE_URL: process.env.NEXT_PUBLIC_TERMS_PAGE_URL,
             NEXT_PUBLIC_HELP_URL: process.env.NEXT_PUBLIC_HELP_URL,
-            NEXT_PUBLIC_CRISALID_AGENTS_API_URL: process.env.NEXT_PUBLIC_CRISALID_AGENTS_API_URL,
           }}
+        />
+        <ChatConfigInjector
+          config={{ enabled: chatEnabled, ...chatClientConfig }}
         />
         <Script src='/vendor/d3.v4.min.js' strategy='beforeInteractive' />
         <Script src='/vendor/wordstream.js' strategy='afterInteractive' />

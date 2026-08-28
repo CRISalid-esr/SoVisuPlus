@@ -28,7 +28,7 @@ import { t } from '@lingui/core/macro'
 import { Trans } from '@lingui/react/macro'
 import { useLingui } from '@lingui/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { getRuntimeEnv } from '@/utils/runtimeEnv'
+import { getRuntimeChatConfig } from '@/utils/runtimeChatConfig'
 import { createAiChatAdapter } from './aiChat/aiChatAdapter'
 
 const DRAWER_WIDTH = 'min(420px, 100vw)'
@@ -168,18 +168,27 @@ const AiChatWidget = () => {
   useLingui()
   const [open, setOpen] = useState(false)
 
+  // Welcome seed, suggestions and the enable flag come from the runtime chat config injected by
+  // the layout (sourced from configs/chat.json). The reference is stable within a mount and the
+  // widget remounts on locale change (route change), so the memos pick up the right locale.
+  const chatConfig = getRuntimeChatConfig()
+
   const adapter = useMemo(
     () =>
       createAiChatAdapter({
-        seed: [
-          {
-            id: 'welcome',
-            title: t`ai_chat_welcome_title`,
-            messages: [{ role: 'assistant', text: t`ai_chat_welcome_message` }],
-          },
-        ],
+        seed: chatConfig.welcome
+          ? [
+              {
+                id: 'welcome',
+                title: chatConfig.welcome.title,
+                messages: [
+                  { role: 'assistant', text: chatConfig.welcome.message },
+                ],
+              },
+            ]
+          : [],
       }),
-    [],
+    [chatConfig.welcome],
   )
 
   const localeText = useMemo(
@@ -196,27 +205,13 @@ const AiChatWidget = () => {
   )
 
   const suggestions = useMemo(
-    () => [
-      {
-        label: t`ai_chat_suggestion_publications_label`,
-        value: t`ai_chat_suggestion_publications_value`,
-      },
-      {
-        label: t`ai_chat_suggestion_coauthors_label`,
-        value: t`ai_chat_suggestion_coauthors_value`,
-      },
-      {
-        label: t`ai_chat_suggestion_structures_label`,
-        value: t`ai_chat_suggestion_structures_value`,
-      },
-    ],
-    [],
+    () => chatConfig.suggestions,
+    [chatConfig.suggestions],
   )
 
-  // Only surface the assistant when a Crisalid Agents API endpoint is
-  // configured; without it there is no backend to talk to.
-  const agentsApiUrl = getRuntimeEnv().NEXT_PUBLIC_CRISALID_AGENTS_API_URL
-  if (!agentsApiUrl) {
+  // Only surface the assistant when a Crisalid Agents API endpoint is configured server-side
+  // (the layout resolves this into `enabled`); without it there is no backend to talk to.
+  if (!chatConfig.enabled) {
     return null
   }
 

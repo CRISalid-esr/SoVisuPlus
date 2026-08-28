@@ -2,7 +2,7 @@
  * Thin HTTP layer over the Crisalid Agents `chat_api` (`POST /chat`). The only class that
  * performs network I/O against that backend. No database access, no domain logic.
  *
- * The base URL comes from `NEXT_PUBLIC_CRISALID_AGENTS_API_URL` (e.g. `http://localhost:9100`
+ * The base URL comes from `CRISALID_AGENTS_API_URL` (e.g. `http://localhost:9100`
  * or the internal `http://crisalid-agents-chat-api:9100`); the `/chat` endpoint path is
  * appended here, so the env var holds only the base. The API key (`CRISALID_AGENTS_API_KEY`)
  * is optional: it is injected here, server-side only, so it never reaches the browser — the
@@ -18,9 +18,9 @@ export class CrisalidAgentsChatClient {
   private readonly apiKey: string | undefined
 
   constructor() {
-    const baseUrl = process.env.NEXT_PUBLIC_CRISALID_AGENTS_API_URL
+    const baseUrl = process.env.CRISALID_AGENTS_API_URL
     if (!baseUrl) {
-      throw new Error('NEXT_PUBLIC_CRISALID_AGENTS_API_URL is not configured')
+      throw new Error('CRISALID_AGENTS_API_URL is not configured')
     }
     // The env var is a base URL; the endpoint path lives in code.
     this.chatUrl = `${baseUrl.replace(/\/+$/, '')}/chat`

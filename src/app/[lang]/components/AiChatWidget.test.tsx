@@ -1,14 +1,27 @@
 import { act, render, screen } from '@testing-library/react'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
-import { getRuntimeEnv } from '@/utils/runtimeEnv'
+import { getRuntimeChatConfig } from '@/utils/runtimeChatConfig'
+import type { ChatClientConfig } from '@/types/ChatConfig'
 import AiChatWidget from './AiChatWidget'
 
-jest.mock('@/utils/runtimeEnv', () => ({
-  getRuntimeEnv: jest.fn(),
+jest.mock('@/utils/runtimeChatConfig', () => ({
+  getRuntimeChatConfig: jest.fn(),
 }))
 
-const mockGetRuntimeEnv = getRuntimeEnv as jest.Mock
+const mockGetRuntimeChatConfig = getRuntimeChatConfig as jest.Mock
+
+const disabledConfig: ChatClientConfig = {
+  enabled: false,
+  welcome: null,
+  suggestions: [],
+}
+
+const enabledConfig: ChatClientConfig = {
+  enabled: true,
+  welcome: { title: 'Welcome', message: 'Hi there!' },
+  suggestions: [{ label: 'My publications', value: 'Show my publications.' }],
+}
 
 const renderWidget = () =>
   render(
@@ -34,17 +47,18 @@ describe('AiChatWidget', () => {
     jest.clearAllMocks()
   })
 
-  it('does not render when the agents API URL is not configured', () => {
-    mockGetRuntimeEnv.mockReturnValue({})
+  it('does not render when the chat is not enabled', () => {
+    mockGetRuntimeChatConfig.mockReturnValue(disabledConfig)
 
     renderWidget()
 
     expect(openButton()).not.toBeInTheDocument()
   })
 
-  it('does not render when the agents API URL is an empty string', () => {
-    mockGetRuntimeEnv.mockReturnValue({
-      NEXT_PUBLIC_CRISALID_AGENTS_API_URL: '',
+  it('does not render when enabled is false even if welcome/suggestions exist', () => {
+    mockGetRuntimeChatConfig.mockReturnValue({
+      ...enabledConfig,
+      enabled: false,
     })
 
     renderWidget()
@@ -52,10 +66,8 @@ describe('AiChatWidget', () => {
     expect(openButton()).not.toBeInTheDocument()
   })
 
-  it('renders the chat launcher when the agents API URL is configured', () => {
-    mockGetRuntimeEnv.mockReturnValue({
-      NEXT_PUBLIC_CRISALID_AGENTS_API_URL: 'http://localhost:9100/chat',
-    })
+  it('renders the chat launcher when the chat is enabled', () => {
+    mockGetRuntimeChatConfig.mockReturnValue(enabledConfig)
 
     renderWidget()
 

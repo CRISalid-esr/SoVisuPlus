@@ -55,6 +55,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/dist-listener ./dist-listener
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/rbac.roles.sample.yaml /app/rbac.roles.yaml
 
+# Baked default AI chat config (welcome + suggestions + system prompt); overridable at runtime via
+# CHAT_CONFIG_FILE or a /config/chat.json mount (see docker-bootstrap-app.sh).
+COPY --from=builder --chown=nextjs:nodejs /app/configs/chat.json /app/configs/chat.json
+
 RUN touch .env && chown nextjs:nodejs .env
 
 # Pre-create HAL upload directories owned by the runtime user (container runs as nextjs)
