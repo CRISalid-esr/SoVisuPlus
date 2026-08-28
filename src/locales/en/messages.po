@@ -2847,3 +2847,119 @@ msgstr "Coming soon !"
 #: src/app/[lang]/components/WordStream/WordStream.tsx:187
 msgid "wordstream_no_data_to_display"
 msgstr "No data to display"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_status_pending"
+msgstr "Pending"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_status_sending"
+msgstr "Sending"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_status_streaming"
+msgstr "Streaming"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_status_sent"
+msgstr "Sent"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_status_read"
+msgstr "Read"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_status_error"
+msgstr "Error"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_status_cancelled"
+msgstr "Cancelled"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_tool_running"
+msgstr "Running…"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_tool_awaiting_approval"
+msgstr "Awaiting approval"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_tool_completed"
+msgstr "Completed"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_tool_failed"
+msgstr "Failed"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_tool_denied"
+msgstr "Denied"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_reconnect_label"
+msgstr "Reconnect"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_loading_label"
+msgstr "Loading…"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_generic_error_label"
+msgstr "Something went wrong"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_scroll_to_bottom_label"
+msgstr "Scroll to bottom"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_suggestions_label"
+msgstr "Suggested prompts"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_thread_empty_label"
+msgstr "No messages yet"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_thread_empty_helper"
+msgstr "Type a message to get started"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_no_conversations_label"
+msgstr "No conversations"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_search_conversations_placeholder"
+msgstr "Search conversations"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_unread_marker_label"
+msgstr "New messages"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_copy_label"
+msgstr "Copy"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_copy_code_label"
+msgstr "Copy code"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_copied_label"
+msgstr "Copied"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_tool_called_label"
+msgstr "Tool called"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_tool_result_label"
+msgstr "Tool result"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_reasoning_label"
+msgstr "Reasoning"
+
+#: src/app/[lang]/components/AiChatWidget.tsx
+msgid "ai_chat_reasoning_streaming_label"
+msgstr "Thinking…"

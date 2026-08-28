@@ -91,8 +91,24 @@ describe('resolveChatConfigPath', () => {
     expect(resolveChatConfigPath()).toBe('/config/chat.json')
   })
 
-  it('defaults to configs/chat.json under the cwd', () => {
+  it('defaults to configs/chat.json when the env var is an empty string', () => {
     process.env = { ...OLD_ENV, CHAT_CONFIG_FILE: '' }
+    expect(resolveChatConfigPath()).toBe(
+      path.resolve(process.cwd(), 'configs/chat.json'),
+    )
+  })
+
+  it('defaults to configs/chat.json when the env var is unset', () => {
+    const env = { ...OLD_ENV }
+    delete env.CHAT_CONFIG_FILE
+    process.env = env
+    expect(resolveChatConfigPath()).toBe(
+      path.resolve(process.cwd(), 'configs/chat.json'),
+    )
+  })
+
+  it('defaults to configs/chat.json when the env var is only whitespace', () => {
+    process.env = { ...OLD_ENV, CHAT_CONFIG_FILE: '   ' }
     expect(resolveChatConfigPath()).toBe(
       path.resolve(process.cwd(), 'configs/chat.json'),
     )

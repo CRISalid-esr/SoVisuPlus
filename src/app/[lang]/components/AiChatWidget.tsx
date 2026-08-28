@@ -29,7 +29,8 @@ import { Trans } from '@lingui/react/macro'
 import { useLingui } from '@lingui/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { getRuntimeChatConfig } from '@/utils/runtimeChatConfig'
-import { createAiChatAdapter } from './aiChat/aiChatAdapter'
+import useStore from '@/stores/global_store'
+import { createAiChatAdapter, type AiChatUser } from './aiChat/aiChatAdapter'
 
 const DRAWER_WIDTH = 'min(420px, 100vw)'
 
@@ -173,6 +174,15 @@ const AiChatWidget = () => {
   // widget remounts on locale change (route change), so the memos pick up the right locale.
   const chatConfig = getRuntimeChatConfig()
 
+  // The signed-in user's identity (name + uid) comes from the store's connected user. It may load
+  // after the adapter is created, so expose it through a ref the adapter reads at send time.
+  const { connectedUser } = useStore((state) => state.user)
+  const userRef = useRef<AiChatUser | null>(null)
+  const person = connectedUser?.person
+  userRef.current = person
+    ? { firstName: person.firstName, lastName: person.lastName, uid: person.uid }
+    : null
+
   const adapter = useMemo(
     () =>
       createAiChatAdapter({
@@ -187,12 +197,33 @@ const AiChatWidget = () => {
               },
             ]
           : [],
+        getUser: () => userRef.current,
       }),
     [chatConfig.welcome],
   )
 
-  const localeText = useMemo(
-    () => ({
+  const localeText = useMemo(() => {
+    // Message-status and tool-state labels are function-valued in the library; build lookup maps
+    // of static `t` ids the extractor can see, then map the incoming key.
+    const statusLabels: Record<string, string> = {
+      pending: t`ai_chat_status_pending`,
+      sending: t`ai_chat_status_sending`,
+      streaming: t`ai_chat_status_streaming`,
+      sent: t`ai_chat_status_sent`,
+      read: t`ai_chat_status_read`,
+      error: t`ai_chat_status_error`,
+      cancelled: t`ai_chat_status_cancelled`,
+    }
+    const toolStateLabels: Record<string, string> = {
+      'input-streaming': t`ai_chat_tool_running`,
+      'input-available': t`ai_chat_tool_running`,
+      'approval-requested': t`ai_chat_tool_awaiting_approval`,
+      'approval-responded': t`ai_chat_tool_running`,
+      'output-available': t`ai_chat_tool_completed`,
+      'output-error': t`ai_chat_tool_failed`,
+      'output-denied': t`ai_chat_tool_denied`,
+    }
+    return {
       composerInputPlaceholder: t`ai_chat_composer_placeholder`,
       composerInputAriaLabel: t`ai_chat_composer_aria_label`,
       composerSendButtonLabel: t`ai_chat_composer_send_label`,
@@ -200,9 +231,27 @@ const AiChatWidget = () => {
       messageAuthorAssistantLabel: t`ai_chat_author_assistant`,
       conversationHeaderBackLabel: t`ai_chat_back_to_conversations`,
       retryButtonLabel: t`ai_chat_retry_label`,
-    }),
-    [],
-  )
+      reconnectButtonLabel: t`ai_chat_reconnect_label`,
+      loadingLabel: t`ai_chat_loading_label`,
+      genericErrorLabel: t`ai_chat_generic_error_label`,
+      scrollToBottomLabel: t`ai_chat_scroll_to_bottom_label`,
+      suggestionsLabel: t`ai_chat_suggestions_label`,
+      threadNoMessagesLabel: t`ai_chat_thread_empty_label`,
+      threadNoMessagesHelperText: t`ai_chat_thread_empty_helper`,
+      conversationListNoConversationsLabel: t`ai_chat_no_conversations_label`,
+      conversationListSearchPlaceholder: t`ai_chat_search_conversations_placeholder`,
+      unreadMarkerLabel: t`ai_chat_unread_marker_label`,
+      messageCopyButtonLabel: t`ai_chat_copy_label`,
+      messageCopyCodeButtonLabel: t`ai_chat_copy_code_label`,
+      messageCopiedCodeButtonLabel: t`ai_chat_copied_label`,
+      messageToolInputLabel: t`ai_chat_tool_called_label`,
+      messageToolOutputLabel: t`ai_chat_tool_result_label`,
+      messageReasoningLabel: t`ai_chat_reasoning_label`,
+      messageReasoningStreamingLabel: t`ai_chat_reasoning_streaming_label`,
+      messageStatusLabel: (status: string) => statusLabels[status] ?? status,
+      toolStateLabel: (state: string) => toolStateLabels[state] ?? state,
+    }
+  }, [])
 
   const suggestions = useMemo(
     () => chatConfig.suggestions,
