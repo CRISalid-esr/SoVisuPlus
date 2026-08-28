@@ -52,6 +52,7 @@ next-env.d.ts
 .run
 
 .vscode/launch.json
+.mcp.json
 
 # generated Lingui catalogs (compiled in CI)
 src/locales/*/messages.js

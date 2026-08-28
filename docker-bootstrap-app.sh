@@ -15,6 +15,18 @@ GIT_COMMIT_VAL="${GIT_COMMIT:-$(git rev-parse HEAD 2>/dev/null || true)}"
 GIT_BRANCH_VAL="${GIT_BRANCH:-$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)}"
 [ -n "${GIT_BRANCH_VAL}" ] || GIT_BRANCH_VAL="unknown"
 
+# --- resolve AI chat config file (env > mounted > baked default) ------------
+CHAT_CONFIG_DEFAULT="/app/configs/chat.json"
+CHAT_CONFIG_MOUNTED="/config/chat.json"
+CHAT_CONFIG_RESOLVED=""
+if [ -n "${CHAT_CONFIG_FILE:-}" ] && [ -f "${CHAT_CONFIG_FILE}" ]; then
+  CHAT_CONFIG_RESOLVED="${CHAT_CONFIG_FILE}"
+elif [ -f "${CHAT_CONFIG_MOUNTED}" ]; then
+  CHAT_CONFIG_RESOLVED="${CHAT_CONFIG_MOUNTED}"
+elif [ -f "${CHAT_CONFIG_DEFAULT}" ]; then
+  CHAT_CONFIG_RESOLVED="${CHAT_CONFIG_DEFAULT}"
+fi
+
 # --- write .env (append to existing if present) -----------------------------
 # Quote values that may contain special chars/spaces
 cat <<EOF >> .env
@@ -70,6 +82,9 @@ NEXT_PUBLIC_TERMS_PAGE_URL="${NEXT_PUBLIC_TERMS_PAGE_URL}"
 NEXT_PUBLIC_COMMUNITY_PAGE_URL="${NEXT_PUBLIC_COMMUNITY_PAGE_URL:-https://crisalid.org}"
 NEXT_PUBLIC_HELP_URL="${NEXT_PUBLIC_HELP_URL}"
 NEXT_PUBLIC_WARN_MISSING_IDENTIFIER_TYPES="${NEXT_PUBLIC_WARN_MISSING_IDENTIFIER_TYPES:-idhals,orcid}"
+CRISALID_AGENTS_API_URL="${CRISALID_AGENTS_API_URL}"
+CRISALID_AGENTS_API_KEY="${CRISALID_AGENTS_API_KEY}"
+CHAT_CONFIG_FILE="${CHAT_CONFIG_RESOLVED}"
 EOF
 
 CUSTOM_THEME_MOUNT="/custom-theme"
