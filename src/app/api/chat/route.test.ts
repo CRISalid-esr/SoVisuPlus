@@ -2,10 +2,14 @@
  * @jest-environment node
  */
 import { getServerSession } from 'next-auth'
+import { chatConfigService } from '@/lib/services/ChatConfigService'
 import { POST } from './route'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@/app/auth/auth_options', () => ({ __esModule: true, default: {} }))
+jest.mock('@/lib/services/ChatConfigService', () => ({
+  chatConfigService: { getSystemPrompt: jest.fn().mockResolvedValue('') },
+}))
 jest.mock('next/server', () => ({
   NextResponse: {
     json: jest.fn((body: unknown, init?: { status?: number }) => ({
@@ -16,6 +20,7 @@ jest.mock('next/server', () => ({
 }))
 
 const mockSession = getServerSession as jest.Mock
+const mockGetSystemPrompt = chatConfigService.getSystemPrompt as jest.Mock
 
 // Minimal NextRequest stand-in exposing the two members the route reads.
 const makeReq = (body: unknown) =>
@@ -35,10 +40,12 @@ describe('POST /api/chat', () => {
     process.env = {
       ...OLD_ENV,
       // Base URL only — the client appends the `/chat` endpoint path.
-      NEXT_PUBLIC_CRISALID_AGENTS_API_URL: 'http://agents.test',
+      CRISALID_AGENTS_API_URL: 'http://agents.test',
       CRISALID_AGENTS_API_KEY: 'secret-key',
     }
     mockSession.mockResolvedValue({ user: { username: 'jdoe' } })
+    // Default: no system prompt configured (cleared by clearAllMocks above).
+    mockGetSystemPrompt.mockResolvedValue('')
   })
 
   afterEach(() => {
@@ -100,8 +107,43 @@ describe('POST /api/chat', () => {
   })
 
   it('returns 502 when the endpoint url is not configured', async () => {
-    delete process.env.NEXT_PUBLIC_CRISALID_AGENTS_API_URL
+    delete process.env.CRISALID_AGENTS_API_URL
     const res = await POST(makeReq({ message: {}, messages: [] }))
     expect(res.status).toBe(502)
+  })
+
+  it('prepends the configured system prompt to the forwarded messages', async () => {
+    mockGetSystemPrompt.mockResolvedValue('Be concise. No jokes.')
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(new Response('ok\n', { status: 200 })) as jest.Mock
+
+    const userMessage = {
+      id: 'u1',
+      role: 'user',
+      parts: [{ type: 'text', text: 'hi' }],
+    }
+    await POST(makeReq({ conversationId: 'c1', message: userMessage, messages: [] }))
+
+    const init = (global.fetch as jest.Mock).mock.calls[0][1]
+    const forwarded = JSON.parse(init.body)
+    expect(forwarded.messages[0]).toEqual({
+      role: 'system',
+      parts: [{ type: 'text', text: 'Be concise. No jokes.' }],
+    })
+    // The original user turn is preserved unchanged.
+    expect(forwarded.message).toEqual(userMessage)
+  })
+
+  it('does not add a system message when no system prompt is configured', async () => {
+    mockGetSystemPrompt.mockResolvedValue('')
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(new Response('ok\n', { status: 200 })) as jest.Mock
+
+    await POST(makeReq({ message: {}, messages: [] }))
+
+    const init = (global.fetch as jest.Mock).mock.calls[0][1]
+    expect(JSON.parse(init.body).messages).toEqual([])
   })
 })

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession, Session } from 'next-auth'
 import authOptions from '@/app/auth/auth_options'
 import { CrisalidAgentsChatClient } from '@/lib/services/CrisalidAgentsChatClient'
+import { chatConfigService } from '@/lib/services/ChatConfigService'
 
 /**
  * Backend proxy for the Crisalid Agents chat API. Keeps the browser from calling the agents
@@ -25,9 +26,22 @@ export const POST = async (request: NextRequest) => {
   }
 
   try {
-    // Forwarded verbatim: `{ conversationId?, message, messages }`. The backend rebuilds
+    // Forwarded (mostly) verbatim: `{ conversationId?, message, messages }`. The backend rebuilds
     // context from this body each turn (it is stateless).
     const body = await request.json()
+
+    // Inject the configured system prompt server-side so the browser never sees it. The agents
+    // API has no dedicated field; it is prepended as a `role:"system"` message (honoured, but
+    // layered after the agent's own prompt). The client rebuilds `messages` each turn without it,
+    // so there is no accumulation.
+    const systemPrompt = await chatConfigService.getSystemPrompt()
+    if (systemPrompt) {
+      body.messages = [
+        { role: 'system', parts: [{ type: 'text', text: systemPrompt }] },
+        ...(Array.isArray(body.messages) ? body.messages : []),
+      ]
+    }
+
     const upstream = await new CrisalidAgentsChatClient().streamChat(
       body,
       request.signal,

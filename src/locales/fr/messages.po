@@ -769,41 +769,9 @@ msgstr "Ouvrir l'assistant"
 msgid "ai_chat_retry_label"
 msgstr "Réessayer"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:205
-msgid "ai_chat_suggestion_coauthors_label"
-msgstr "Mes co-auteurs"
-
-#: src/app/[lang]/components/AiChatWidget.tsx:206
-msgid "ai_chat_suggestion_coauthors_value"
-msgstr "Qui sont mes principaux co-auteurs ?"
-
-#: src/app/[lang]/components/AiChatWidget.tsx:201
-msgid "ai_chat_suggestion_publications_label"
-msgstr "Mes publications"
-
-#: src/app/[lang]/components/AiChatWidget.tsx:202
-msgid "ai_chat_suggestion_publications_value"
-msgstr "Montre-moi mes publications les plus récentes."
-
-#: src/app/[lang]/components/AiChatWidget.tsx:209
-msgid "ai_chat_suggestion_structures_label"
-msgstr "Mes structures de recherche"
-
-#: src/app/[lang]/components/AiChatWidget.tsx:210
-msgid "ai_chat_suggestion_structures_value"
-msgstr "À quelles structures de recherche suis-je rattaché·e ?"
-
 #: src/app/[lang]/components/AiChatWidget.tsx:61
 msgid "ai_chat_user_avatar_alt"
 msgstr "Votre avatar"
-
-#: src/app/[lang]/components/AiChatWidget.tsx:178
-msgid "ai_chat_welcome_message"
-msgstr "Bonjour ! Je suis votre assistant SoVisu+. Posez-moi des questions sur vos données — vos publications, vos structures de recherche et les personnes. Choisissez une conversation à gauche ou démarrez-en une nouvelle pour commencer."
-
-#: src/app/[lang]/components/AiChatWidget.tsx:177
-msgid "ai_chat_welcome_title"
-msgstr "Bienvenue"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/components/AiChatWidget.tsx:268

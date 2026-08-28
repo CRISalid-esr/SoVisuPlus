@@ -769,41 +769,9 @@ msgstr "Open assistant"
 msgid "ai_chat_retry_label"
 msgstr "Retry"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:205
-msgid "ai_chat_suggestion_coauthors_label"
-msgstr "My co-authors"
-
-#: src/app/[lang]/components/AiChatWidget.tsx:206
-msgid "ai_chat_suggestion_coauthors_value"
-msgstr "Who are my main co-authors?"
-
-#: src/app/[lang]/components/AiChatWidget.tsx:201
-msgid "ai_chat_suggestion_publications_label"
-msgstr "My publications"
-
-#: src/app/[lang]/components/AiChatWidget.tsx:202
-msgid "ai_chat_suggestion_publications_value"
-msgstr "Show me my most recent publications."
-
-#: src/app/[lang]/components/AiChatWidget.tsx:209
-msgid "ai_chat_suggestion_structures_label"
-msgstr "My research structures"
-
-#: src/app/[lang]/components/AiChatWidget.tsx:210
-msgid "ai_chat_suggestion_structures_value"
-msgstr "Which research structures am I affiliated with?"
-
 #: src/app/[lang]/components/AiChatWidget.tsx:61
 msgid "ai_chat_user_avatar_alt"
 msgstr "Your avatar"
-
-#: src/app/[lang]/components/AiChatWidget.tsx:178
-msgid "ai_chat_welcome_message"
-msgstr "Hi! I'm your SoVisu+ assistant. Ask me questions about your data — your publications, research structures, and people. Pick a conversation on the left, or start a new one to begin."
-
-#: src/app/[lang]/components/AiChatWidget.tsx:177
-msgid "ai_chat_welcome_title"
-msgstr "Welcome"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/components/AiChatWidget.tsx:268
