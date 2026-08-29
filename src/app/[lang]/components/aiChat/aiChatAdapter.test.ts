@@ -137,13 +137,42 @@ describe('createAiChatAdapter', () => {
     ])
   })
 
+  it('parses SSE-framed events (data: lines) and skips comments', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(
+        piecedResponse([
+          'data: {"type":"start","messageId":"m1"}\n\n',
+          ': heartbeat\n\n',
+          'data: {"type":"text-start","id":"t1"}\n\ndata: {"type":"text-del',
+          'ta","id":"t1","delta":"Hi"}\n\n',
+          'data: {"type":"text-end","id":"t1"}\n\n',
+          'data: {"type":"finish","messageId":"m1"}\n\n',
+        ]),
+      ) as jest.Mock
+
+    const adapter = createAiChatAdapter()
+    const chunks = await drain(await send(adapter))
+    expect(chunks.map((c) => c.type)).toEqual([
+      'start',
+      'text-start',
+      'text-delta',
+      'text-end',
+      'finish',
+    ])
+    const { messages } = await adapter.listMessages!({ conversationId: 'c1' })
+    expect(messages[1].parts[0]).toEqual({ type: 'text', text: 'Hi' })
+  })
+
   it('buffers NDJSON lines split across reads', async () => {
-    global.fetch = jest.fn().mockResolvedValue(
-      piecedResponse([
-        '{"type":"start","messa',
-        'geId":"m1"}\n{"type":"finish","messageId":"m1"}\n',
-      ]),
-    ) as jest.Mock
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(
+        piecedResponse([
+          '{"type":"start","messa',
+          'geId":"m1"}\n{"type":"finish","messageId":"m1"}\n',
+        ]),
+      ) as jest.Mock
 
     const adapter = createAiChatAdapter()
     const chunks = await drain(await send(adapter))
