@@ -93,7 +93,9 @@ export const POST = async (request: NextRequest) => {
     //    and scope knowledge-graph queries to this person.
     systemMessages.push({
       role: 'system',
-      parts: [{ type: 'text', text: buildUserContext(clientUser, session.user) }],
+      parts: [
+        { type: 'text', text: buildUserContext(clientUser, session.user) },
+      ],
     })
 
     body.messages = [
@@ -107,7 +109,15 @@ export const POST = async (request: NextRequest) => {
     )
     return new Response(upstream.body, {
       status: upstream.status,
-      headers: { 'Content-Type': 'application/x-ndjson' },
+      headers: {
+        'Content-Type': 'application/x-ndjson',
+        // Reverse proxies (nginx & co.) buffer responses by default, which turns the
+        // token-by-token stream into multi-KB packs. `X-Accel-Buffering: no` disables
+        // nginx's per-response proxy buffering; `no-transform` forbids intermediaries
+        // from compressing (gzip buffers) or otherwise transforming the stream.
+        'Cache-Control': 'no-cache, no-transform',
+        'X-Accel-Buffering': 'no',
+      },
     })
   } catch (error) {
     console.error('❌ Error proxying chat request:', error)
