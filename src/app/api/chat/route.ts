@@ -8,7 +8,14 @@ import { chatConfigService } from '@/lib/services/ChatConfigService'
  * Backend proxy for the Crisalid Agents chat API. Keeps the browser from calling the agents
  * backend directly (it has no CORS and is server-to-server only) and keeps the secret
  * `CRISALID_AGENTS_API_KEY` on the server. Auth-only: a logged-in user is required to avoid an
- * open relay. The upstream response is streamed (NDJSON) straight through to the client.
+ * open relay.
+ *
+ * The upstream response (NDJSON, one chunk per line) is re-framed as Server-Sent Events
+ * (`data: <json>\n\n`, `text/event-stream`) before being streamed to the client. The payloads
+ * are unchanged — only the framing differs. Reverse proxies in front of the deployment buffer
+ * generic streamed responses (measured: 4 KB packs every ~1.2 s through the university front,
+ * which also rewrites `Cache-Control`, so response headers cannot disable its buffering), but
+ * pass `text/event-stream` through unbuffered — the same path OpenWebUI streams over.
  */
 
 // Never cache or buffer the streamed response.
@@ -24,6 +31,33 @@ type SessionUser = {
   username?: string
   name?: string | null
   personUid?: string | null
+}
+
+/**
+ * Re-frames the upstream NDJSON stream as SSE: each non-empty line becomes one
+ * `data: <json>\n\n` event. Lines split across network chunks are buffered until complete.
+ */
+const ndjsonToSse = (): TransformStream<Uint8Array, Uint8Array> => {
+  const decoder = new TextDecoder()
+  const encoder = new TextEncoder()
+  let buffer = ''
+  const frame = (line: string) => encoder.encode(`data: ${line}\n\n`)
+  return new TransformStream<Uint8Array, Uint8Array>({
+    transform(chunk, controller) {
+      buffer += decoder.decode(chunk, { stream: true })
+      let newlineIndex = buffer.indexOf('\n')
+      while (newlineIndex !== -1) {
+        const line = buffer.slice(0, newlineIndex).trim()
+        buffer = buffer.slice(newlineIndex + 1)
+        if (line) controller.enqueue(frame(line))
+        newlineIndex = buffer.indexOf('\n')
+      }
+    },
+    flush(controller) {
+      const line = (buffer + decoder.decode()).trim()
+      if (line) controller.enqueue(frame(line))
+    },
+  })
 }
 
 /**
@@ -107,14 +141,19 @@ export const POST = async (request: NextRequest) => {
       body,
       request.signal,
     )
-    return new Response(upstream.body, {
+    if (!upstream.ok) {
+      // Error responses are not streams — pass them through untouched so the client
+      // can map the status code to a user-facing message.
+      return new Response(upstream.body, { status: upstream.status })
+    }
+    return new Response(upstream.body?.pipeThrough(ndjsonToSse()) ?? null, {
       status: upstream.status,
       headers: {
-        'Content-Type': 'application/x-ndjson',
-        // Reverse proxies (nginx & co.) buffer responses by default, which turns the
-        // token-by-token stream into multi-KB packs. `X-Accel-Buffering: no` disables
-        // nginx's per-response proxy buffering; `no-transform` forbids intermediaries
-        // from compressing (gzip buffers) or otherwise transforming the stream.
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        // Belt and braces alongside the SSE content type: `X-Accel-Buffering: no`
+        // disables nginx per-response proxy buffering (consumed by the first nginx
+        // hop); `no-transform` forbids intermediaries from compressing (gzip
+        // buffers) or otherwise transforming the stream.
         'Cache-Control': 'no-cache, no-transform',
         'X-Accel-Buffering': 'no',
       },

@@ -17,10 +17,13 @@ import { t } from '@lingui/core/macro'
  * `regenerate` POST to our own same-origin `/api/chat` proxy, which injects the secret API key
  * and streams the backend's NDJSON response straight back.
  *
- * The backend's NDJSON chunks are already exactly `ChatMessageChunk`-shaped
- * (`start` / `text-start` / `text-delta` / `text-end` / `finish`, plus `tool-*`), so we parse
- * each line and forward it unchanged, while tapping the text to persist the assistant reply for
- * a later `listMessages` (conversation switch).
+ * The proxy re-frames the backend's NDJSON as SSE (`data: <json>\n\n`, `text/event-stream`) so
+ * reverse proxies in front of the deployment stream it unbuffered. Each event's payload is
+ * exactly `ChatMessageChunk`-shaped (`start` / `text-start` / `text-delta` / `text-end` /
+ * `finish`, plus `tool-*`), so we parse each `data:` line and forward it unchanged, while
+ * tapping the text to persist the assistant reply for a later `listMessages` (conversation
+ * switch). Bare NDJSON lines (no `data:` prefix) are still accepted for compatibility with a
+ * proxy that does not re-frame.
  */
 
 const DEFAULT_API_PATH = '/api/chat'
@@ -166,10 +169,17 @@ export function createAiChatAdapter(
           }
         }
 
+        // One event per line: the proxy emits single-line `data: <json>` SSE events, so
+        // splitting on newlines is sufficient (blank separator lines are skipped, `:`-prefixed
+        // SSE comments/heartbeats are ignored, bare JSON lines are accepted as NDJSON).
         const flushLine = (line: string) => {
           const trimmed = line.trim()
-          if (trimmed) {
-            handleChunk(JSON.parse(trimmed) as ChatMessageChunk)
+          if (!trimmed || trimmed.startsWith(':')) return
+          const payload = trimmed.startsWith('data:')
+            ? trimmed.slice('data:'.length).trim()
+            : trimmed
+          if (payload) {
+            handleChunk(JSON.parse(payload) as ChatMessageChunk)
           }
         }
 

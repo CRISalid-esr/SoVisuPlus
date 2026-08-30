@@ -70,7 +70,11 @@ describe('POST /api/chat', () => {
 
     const body = {
       conversationId: 'c1',
-      message: { id: 'u1', role: 'user', parts: [{ type: 'text', text: 'hi' }] },
+      message: {
+        id: 'u1',
+        role: 'user',
+        parts: [{ type: 'text', text: 'hi' }],
+      },
       messages: [],
     }
     const res = await POST(makeReq(body))
@@ -94,10 +98,48 @@ describe('POST /api/chat', () => {
     expect(identity).toContain('Jane Doe')
     expect(identity).toContain('person-123')
 
-    // The upstream body is streamed through unchanged as NDJSON.
+    // The upstream NDJSON is re-framed as SSE: one `data:` event per line, payload unchanged.
     expect(res.status).toBe(200)
-    expect(res.headers.get('content-type')).toBe('application/x-ndjson')
-    expect(await res.text()).toBe('{"type":"start","messageId":"m1"}\n')
+    expect(res.headers.get('content-type')).toBe(
+      'text/event-stream; charset=utf-8',
+    )
+    expect(res.headers.get('x-accel-buffering')).toBe('no')
+    expect(res.headers.get('cache-control')).toBe('no-cache, no-transform')
+    expect(await res.text()).toBe('data: {"type":"start","messageId":"m1"}\n\n')
+  })
+
+  it('re-frames NDJSON lines split across reads and flushes a trailing line', async () => {
+    const encoder = new TextEncoder()
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(encoder.encode('{"type":"start","messa'))
+        controller.enqueue(encoder.encode('geId":"m1"}\n'))
+        // Trailing line without a final newline must still be emitted on flush.
+        controller.enqueue(encoder.encode('{"type":"finish","messageId":"m1"}'))
+        controller.close()
+      },
+    })
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(new Response(body, { status: 200 })) as jest.Mock
+
+    const res = await POST(makeReq({ message: {}, messages: [] }))
+    expect(await res.text()).toBe(
+      'data: {"type":"start","messageId":"m1"}\n\n' +
+        'data: {"type":"finish","messageId":"m1"}\n\n',
+    )
+  })
+
+  it('passes upstream error responses through without SSE framing', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(
+        new Response('{"detail":"boom"}', { status: 500 }),
+      ) as jest.Mock
+
+    const res = await POST(makeReq({ message: {}, messages: [] }))
+    expect(res.status).toBe(500)
+    expect(await res.text()).toBe('{"detail":"boom"}')
   })
 
   it('returns 502 when the upstream request fails', async () => {
@@ -136,7 +178,9 @@ describe('POST /api/chat', () => {
       role: 'user',
       parts: [{ type: 'text', text: 'hi' }],
     }
-    await POST(makeReq({ conversationId: 'c1', message: userMessage, messages: [] }))
+    await POST(
+      makeReq({ conversationId: 'c1', message: userMessage, messages: [] }),
+    )
 
     const init = (global.fetch as jest.Mock).mock.calls[0][1]
     const forwarded = JSON.parse(init.body)
@@ -192,7 +236,9 @@ describe('POST /api/chat', () => {
   })
 
   it('marks the person UID as unavailable when the session has none', async () => {
-    mockSession.mockResolvedValue({ user: { username: 'jdoe', personUid: null } })
+    mockSession.mockResolvedValue({
+      user: { username: 'jdoe', personUid: null },
+    })
     global.fetch = jest
       .fn()
       .mockResolvedValue(new Response('ok\n', { status: 200 })) as jest.Mock
