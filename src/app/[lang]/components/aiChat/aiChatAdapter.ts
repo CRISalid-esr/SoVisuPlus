@@ -50,13 +50,6 @@ export interface AiChatSeedConversation {
   messages: { role: ChatRole; text: string }[]
 }
 
-/** Signed-in user's identity, sent with each turn so the agent can scope "me"/"my" queries. */
-export interface AiChatUser {
-  firstName?: string
-  lastName?: string
-  uid?: string
-}
-
 export interface CreateAiChatAdapterOptions {
   /**
    * Same-origin proxy path that forwards to the agents backend. @default '/api/chat'
@@ -67,18 +60,12 @@ export interface CreateAiChatAdapterOptions {
    * required for the split list / back-arrow UI to engage.
    */
   seed?: AiChatSeedConversation[]
-  /**
-   * Resolves the current user's identity at send time (read from the store, which may load after
-   * the adapter is created). Included in each request body so the proxy can add it to the prompt.
-   */
-  getUser?: () => AiChatUser | null | undefined
 }
 
 export function createAiChatAdapter(
   options: CreateAiChatAdapterOptions = {},
 ): ChatAdapter {
   const apiPath = options.apiPath ?? DEFAULT_API_PATH
-  const getUser = options.getUser ?? (() => undefined)
 
   // Source of truth for what `listConversations` / `listMessages` return.
   const conversations = new Map<string, ChatConversation>()
@@ -244,11 +231,7 @@ export function createAiChatAdapter(
       const id = conversationId ?? crypto.randomUUID()
       registerConversation(id, getMessageText(message))
       appendMessage(id, message)
-      return streamFromProxy(
-        { conversationId: id, message, messages, user: getUser() ?? undefined },
-        id,
-        signal,
-      )
+      return streamFromProxy({ conversationId: id, message, messages }, id, signal)
     },
 
     async regenerate({ conversationId, message, messages, signal }) {
@@ -256,11 +239,7 @@ export function createAiChatAdapter(
       // turn is already in `messages`, so it is not appended again.
       const id = conversationId ?? crypto.randomUUID()
       registerConversation(id, getMessageText(message))
-      return streamFromProxy(
-        { conversationId: id, message, messages, user: getUser() ?? undefined },
-        id,
-        signal,
-      )
+      return streamFromProxy({ conversationId: id, message, messages }, id, signal)
     },
   }
 }

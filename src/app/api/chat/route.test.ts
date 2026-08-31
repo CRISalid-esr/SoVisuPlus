@@ -93,7 +93,7 @@ describe('POST /api/chat', () => {
     expect(forwarded.message).toEqual(body.message)
     expect(forwarded.messages).toHaveLength(1)
     expect(forwarded.messages[0].role).toBe('system')
-    // No client `user` in the body → identity falls back to the session (name + person uid).
+    // The identity is built from the session (name + person uid).
     const identity = forwarded.messages[0].parts[0].text
     expect(identity).toContain('Jane Doe')
     expect(identity).toContain('person-123')
@@ -208,31 +208,6 @@ describe('POST /api/chat', () => {
     expect(messages).toHaveLength(1)
     expect(messages[0].role).toBe('system')
     expect(messages[0].parts[0].text).toContain('Jane Doe')
-  })
-
-  it('builds the identity from the client user (store) and does not forward it', async () => {
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue(new Response('ok\n', { status: 200 })) as jest.Mock
-
-    await POST(
-      makeReq({
-        message: {},
-        messages: [],
-        user: { firstName: 'Marie', lastName: 'Curie', uid: 'p-999' },
-      }),
-    )
-
-    const init = (global.fetch as jest.Mock).mock.calls[0][1]
-    const forwarded = JSON.parse(init.body)
-    // `user` is consumed to build the prompt, not forwarded to the agent.
-    expect(forwarded.user).toBeUndefined()
-    const identity = forwarded.messages[0].parts[0].text
-    expect(identity).toContain('Marie Curie')
-    expect(identity).toContain('p-999')
-    // Client identity wins over the session fallback.
-    expect(identity).not.toContain('Jane Doe')
-    expect(identity).not.toContain('person-123')
   })
 
   it('marks the person UID as unavailable when the session has none', async () => {

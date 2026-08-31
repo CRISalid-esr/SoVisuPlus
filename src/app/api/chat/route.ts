@@ -21,12 +21,6 @@ import { chatConfigService } from '@/lib/services/ChatConfigService'
 // Never cache or buffer the streamed response.
 export const dynamic = 'force-dynamic'
 
-type ClientUser = {
-  firstName?: string
-  lastName?: string
-  uid?: string
-}
-
 type SessionUser = {
   username?: string
   name?: string | null
@@ -62,22 +56,18 @@ const ndjsonToSse = (): TransformStream<Uint8Array, Uint8Array> => {
 
 /**
  * A one-line, machine-and-human readable description of the signed-in user, for the agent to scope
- * "me"/"my" queries to the right person in the knowledge graph. Prefers the identity the client
- * read from the store (person firstName/lastName/uid), falling back to the session.
+ * "me"/"my" queries to the right person in the knowledge graph. Built from the trusted session.
  */
-const buildUserContext = (
-  client: ClientUser | undefined,
-  session: SessionUser,
-): string => {
-  const displayName = [client?.firstName, client?.lastName]
-    .filter((part) => part && part.trim())
-    .join(' ')
-    .trim()
-  const name = displayName || session.name || session.username || 'unknown'
-  const uid = client?.uid || session.personUid || undefined
+const buildUserContext = (user: SessionUser): string => {
+  const parts = [`username: "${user.username}"`]
+  if (user.name) parts.push(`name: "${user.name}"`)
+  parts.push(
+    user.personUid
+      ? `person UID: ${user.personUid}`
+      : 'person UID: (unavailable)',
+  )
   return (
-    `Current signed-in user — name: "${name}", ` +
-    `${uid ? `person UID: ${uid}` : 'person UID: (unavailable)'}. ` +
+    `Current signed-in user — ${parts.join(', ')}. ` +
     `When the user says "me", "my", or "I", it refers to this person; use the person UID to ` +
     `scope knowledge-graph queries about them.`
   )
@@ -100,11 +90,8 @@ export const POST = async (request: NextRequest) => {
 
   try {
     // Forwarded (mostly) verbatim: `{ conversationId?, message, messages }`. The backend rebuilds
-    // context from this body each turn (it is stateless). `user` (the store's connected-user
-    // identity) is consumed here to build the prompt and is not forwarded.
+    // context from this body each turn (it is stateless).
     const body = await request.json()
-    const clientUser: ClientUser | undefined = body.user
-    delete body.user
 
     // System context injected server-side. The agents API has no dedicated fields, so both are
     // prepended as `role:"system"` messages (honoured, layered after the agent's own prompt). The
@@ -123,13 +110,11 @@ export const POST = async (request: NextRequest) => {
       })
     }
 
-    // 2) The signed-in user's identity (name + person UID) — lets the agent resolve "me"/"my"
-    //    and scope knowledge-graph queries to this person.
+    // 2) The signed-in user's identity, from the trusted session — lets the agent resolve
+    //    "me"/"my" and scope knowledge-graph queries to this person.
     systemMessages.push({
       role: 'system',
-      parts: [
-        { type: 'text', text: buildUserContext(clientUser, session.user) },
-      ],
+      parts: [{ type: 'text', text: buildUserContext(session.user) }],
     })
 
     body.messages = [

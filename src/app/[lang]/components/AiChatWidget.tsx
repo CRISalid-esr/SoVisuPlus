@@ -29,8 +29,7 @@ import { Trans } from '@lingui/react/macro'
 import { useLingui } from '@lingui/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { getRuntimeChatConfig } from '@/utils/runtimeChatConfig'
-import useStore from '@/stores/global_store'
-import { createAiChatAdapter, type AiChatUser } from './aiChat/aiChatAdapter'
+import { createAiChatAdapter } from './aiChat/aiChatAdapter'
 
 const DRAWER_WIDTH = 'min(420px, 100vw)'
 
@@ -174,15 +173,6 @@ const AiChatWidget = () => {
   // widget remounts on locale change (route change), so the memos pick up the right locale.
   const chatConfig = getRuntimeChatConfig()
 
-  // The signed-in user's identity (name + uid) comes from the store's connected user. It may load
-  // after the adapter is created, so expose it through a ref the adapter reads at send time.
-  const { connectedUser } = useStore((state) => state.user)
-  const userRef = useRef<AiChatUser | null>(null)
-  const person = connectedUser?.person
-  userRef.current = person
-    ? { firstName: person.firstName, lastName: person.lastName, uid: person.uid }
-    : null
-
   const adapter = useMemo(
     () =>
       createAiChatAdapter({
@@ -197,7 +187,6 @@ const AiChatWidget = () => {
               },
             ]
           : [],
-        getUser: () => userRef.current,
       }),
     [chatConfig.welcome],
   )
