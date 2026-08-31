@@ -95,16 +95,6 @@ msgid "snackbar_user_action_applied_with_warnings"
 msgstr "Change saved with warnings:"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/forbidden.tsx:43
-msgid "forbidden_page_back_home"
-msgstr "Back to home page"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/forbidden.tsx:108
-msgid "forbidden_page_description"
-msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/not-found.tsx:45
 msgid "notfound_page_back_home"
 msgstr "Back to home page"
@@ -113,6 +103,16 @@ msgstr "Back to home page"
 #: src/app/[lang]/not-found.tsx:110
 msgid "notfound_page_description"
 msgstr "We couldn't find the page you were looking for. If you reached this page unexpectedly, please contact us at following <0>email adress</0>."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:43
+msgid "forbidden_page_back_home"
+msgstr "Back to home page"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:108
+msgid "forbidden_page_description"
+msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:182
@@ -150,6 +150,11 @@ msgid "documents_merge_dialog_box_merge_button"
 msgstr "Confirm merge ({nbDocs})"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
+msgid "document_details_page_source_tab_card_title"
+msgstr "Sources"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.tsx:204
 msgid "documents_page_refresh_document_alert"
 msgstr "Data concerning this publication has changed"
@@ -158,11 +163,6 @@ msgstr "Data concerning this publication has changed"
 #: src/app/[lang]/documents/[uid]/page.tsx:227
 msgid "document_details_page_frozen_notice"
 msgstr "This document is being updated and cannot be edited right now."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
-msgid "document_details_page_source_tab_card_title"
-msgstr "Sources"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
@@ -205,11 +205,6 @@ msgid "concept_chip_action_delete"
 msgstr "Delete"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
-msgid "document_details_page_add_in_hal_tab_card_title"
-msgstr "Add in HAL"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "Loading..."
@@ -240,11 +235,6 @@ msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr "Disciplines"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:395
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:406
 msgid "document_details_page_source_tab_select_action_label"
@@ -261,9 +251,30 @@ msgid "document_details_page_source_tab_select_action_unmerge_label"
 msgstr "Dissociate"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
+msgid "document_details_page_add_in_hal_tab_card_title"
+msgstr "Add in HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr "Disciplines"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
 msgid "document_details_page_card_title"
 msgstr "Bibliographic information"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
+msgid "bibliographic_information_update_success"
+msgstr "Bibliographic information updated."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
+msgid "bibliographic_information_update_failure"
+msgstr "Failed to update bibliographic information."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Authors/Authors.tsx:91
@@ -279,17 +290,6 @@ msgstr "Publication date updated."
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:116
 msgid "document_details_page_publication_date_update_failure"
 msgstr "Failed to update publication date."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
-msgid "bibliographic_information_update_success"
-msgstr "Bibliographic information updated."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
-msgid "bibliographic_information_update_failure"
-msgstr "Failed to update bibliographic information."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
@@ -322,6 +322,16 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "A new expertise is awaiting validation"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:34
+msgid "profile_identifiers_card_title"
+msgstr "My identifiers"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:36
+msgid "profile_identifiers_card_title_other"
+msgstr "Identifiers"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:34
 msgid "profile_affiliations_card_title"
 msgstr "My affiliations"
@@ -332,14 +342,49 @@ msgid "profile_affiliations_card_title_other"
 msgstr "Affiliations"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:34
-msgid "profile_identifiers_card_title"
-msgstr "My identifiers"
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
+msgid "orcid_permission_read_limited"
+msgstr "Read your information with visibility set to 'Trusted Organizations'"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:36
-msgid "profile_identifiers_card_title_other"
-msgstr "Identifiers"
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:51
+msgid "orcid_permission_activities_update"
+msgstr "Create or update your research activities (publications, etc.)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:52
+msgid "orcid_permission_person_update"
+msgstr "Update your biographical information (name, affiliation, etc.)"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:165
+msgid "orcid_permissions_intro"
+msgstr "Here are the permissions you are granting to {institutionName} on your ORCID profile:"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:181
+msgid "orcid_permissions_none"
+msgstr "You are not granting any permissions to {institutionName}."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
+msgid "orcid_button_update_identifier"
+msgstr "Update ORCID authorizations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:219
+msgid "orcid_button_provide_identifier"
+msgstr "Sign-in to ORCID"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
+msgid "hal_button_update_identifier"
+msgstr "Link my Hal identifier"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
+msgid "hal_button_provide_identifier"
+msgstr "Provide my Hal identifier"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:120
@@ -443,21 +488,6 @@ msgid "orcid_control_remove_dialog_confirm"
 msgstr "Remove"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
-msgid "hal_button_update_identifier"
-msgstr "Link my Hal identifier"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
-msgid "hal_button_provide_identifier"
-msgstr "Provide my Hal identifier"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
-msgid "profile_affiliations_no_units"
-msgstr "No related research unit"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
 msgid "profile_affiliations_signature_label"
 msgstr "My signature"
@@ -471,6 +501,11 @@ msgstr "No signature"
 #: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
 msgid "profile_affiliations_signature_copied_message_confirmation"
 msgstr "Signature added to clipboard."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
+msgid "profile_affiliations_no_units"
+msgstr "No related research unit"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:138
@@ -618,41 +653,6 @@ msgid "authorizations_page_my_expertise"
 msgstr "My expertise"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
-msgid "orcid_permission_read_limited"
-msgstr "Read your information with visibility set to 'Trusted Organizations'"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:51
-msgid "orcid_permission_activities_update"
-msgstr "Create or update your research activities (publications, etc.)"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:52
-msgid "orcid_permission_person_update"
-msgstr "Update your biographical information (name, affiliation, etc.)"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:165
-msgid "orcid_permissions_intro"
-msgstr "Here are the permissions you are granting to {institutionName} on your ORCID profile:"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:181
-msgid "orcid_permissions_none"
-msgstr "You are not granting any permissions to {institutionName}."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:217
-msgid "orcid_button_update_identifier"
-msgstr "Update ORCID authorizations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:219
-msgid "orcid_button_provide_identifier"
-msgstr "Sign-in to ORCID"
-
-#. js-lingui-explicit-id
 #. placeholder {0}: import { t } from '@lingui/core/macro' import { Trans } from '@lingui/react/macro' import { useRef, useState } from 'react' import useStore from '@/stores/global_store' import { Box, Button, Card, CardContent, ClickAwayListener, Grow, Link, Popper, Typography, } from '@mui/material' import { useTheme } from '@mui/material/styles' const Journal = () => { const titleRef = useRef(null) const [isPopperOpen, setIsPopperOpen] = useState(false) const theme = useTheme() const { selectedDocument = null } = useStore((state) => state.document) const journal = selectedDocument?.journal const title = journal?.title const handleClick = () => { setIsPopperOpen(!isPopperOpen) } const handleClickAway = () => { setIsPopperOpen(false) } return ( title && ( <ClickAwayListener onClickAway={handleClickAway}> <Box> <Button variant='text' ref={titleRef} onClick={handleClick} sx={{ p: 0 }} > {title} </Button> <Popper open={isPopperOpen} anchorEl={titleRef.current} placement='bottom-start' transition disablePortal sx={{ zIndex: 1, }} > {({ TransitionProps }) => ( <Grow {...TransitionProps} timeout={200}> <Card> <CardContent> <Typography gutterBottom variant='h6' sx={{ color: theme.palette.primary.main }} > {title} </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_issn'> <Link href={`https://portal.issn.org/resource/ISSN/${journal.issnL}`} target='_blank' rel='noopener noreferrer' > {journal.issnL} </Link> </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_source_type'> {t`document_details_page_journal_journal`} </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_publisher'> {journal.publisher} </Trans> </Typography> </CardContent> </Card> </Grow> )} </Popper> </Box> </ClickAwayListener> ) ) } export default Journal 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/Journal.tsx:85
 msgid "document_details_page_journal_source_type"
@@ -698,83 +698,201 @@ msgstr "{numberOfAcronyms, plural, one {Not in collection} other {Not in collect
 msgid "document_details_page_journal_issn"
 msgstr "ISSN: <0>{0}</0>"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:43
+#: src/app/[lang]/components/AiChatWidget.tsx:44
 msgid "ai_chat_assistant_avatar_alt"
 msgstr "Assistant avatar"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:191
+#: src/app/[lang]/components/AiChatWidget.tsx:231
 msgid "ai_chat_author_assistant"
 msgstr "Assistant"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:190
+#: src/app/[lang]/components/AiChatWidget.tsx:230
 msgid "ai_chat_author_user"
 msgstr "You"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:192
+#: src/app/[lang]/components/AiChatWidget.tsx:232
 msgid "ai_chat_back_to_conversations"
 msgstr "Back to conversations"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:272
+#: src/app/[lang]/components/AiChatWidget.tsx:316
 msgid "ai_chat_close_label"
 msgstr "Close assistant"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:188
+#: src/app/[lang]/components/AiChatWidget.tsx:228
 msgid "ai_chat_composer_aria_label"
 msgstr "Message the assistant"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:187
+#: src/app/[lang]/components/AiChatWidget.tsx:227
 msgid "ai_chat_composer_placeholder"
 msgstr "Ask the assistant…"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:189
+#: src/app/[lang]/components/AiChatWidget.tsx:229
 msgid "ai_chat_composer_send_label"
 msgstr "Send"
 
-#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:36
+#: src/app/[lang]/components/AiChatWidget.tsx:246
+msgid "ai_chat_copied_label"
+msgstr "Copied"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:245
+msgid "ai_chat_copy_code_label"
+msgstr "Copy code"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:244
+msgid "ai_chat_copy_label"
+msgstr "Copy"
+
+#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:39
 msgid "ai_chat_error_bad_request"
 msgstr "The assistant could not understand the request."
 
-#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:40
-#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:182
+#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:43
+#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:205
 msgid "ai_chat_error_generic"
 msgstr "Something went wrong while contacting the assistant."
 
-#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:129
+#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:145
 msgid "ai_chat_error_network"
 msgstr "Network failure — could not reach the assistant."
 
-#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:38
+#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:41
 msgid "ai_chat_error_not_found"
 msgstr "The assistant service could not be found."
 
-#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:39
+#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:42
 msgid "ai_chat_error_server"
 msgstr "The assistant service is temporarily unavailable."
 
-#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:37
+#: src/app/[lang]/components/aiChat/aiChatAdapter.ts:40
 msgid "ai_chat_error_unauthorized"
 msgstr "You are not authorized to use the assistant."
 
-#: src/app/[lang]/components/AiChatWidget.tsx:85
-#: src/app/[lang]/components/AiChatWidget.tsx:112
-#: src/app/[lang]/components/AiChatWidget.tsx:144
+#: src/app/[lang]/components/AiChatWidget.tsx:236
+msgid "ai_chat_generic_error_label"
+msgstr "Something went wrong"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:235
+msgid "ai_chat_loading_label"
+msgstr "Loading…"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:86
+#: src/app/[lang]/components/AiChatWidget.tsx:113
+#: src/app/[lang]/components/AiChatWidget.tsx:145
 msgid "ai_chat_new_conversation"
 msgstr "New conversation"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:228
+#: src/app/[lang]/components/AiChatWidget.tsx:241
+msgid "ai_chat_no_conversations_label"
+msgstr "No conversations"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:272
 msgid "ai_chat_open_label"
 msgstr "Open assistant"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:193
+#: src/app/[lang]/components/AiChatWidget.tsx:249
+msgid "ai_chat_reasoning_label"
+msgstr "Reasoning"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:250
+msgid "ai_chat_reasoning_streaming_label"
+msgstr "Thinking…"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:234
+msgid "ai_chat_reconnect_label"
+msgstr "Reconnect"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:233
 msgid "ai_chat_retry_label"
 msgstr "Retry"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:61
+#: src/app/[lang]/components/AiChatWidget.tsx:237
+msgid "ai_chat_scroll_to_bottom_label"
+msgstr "Scroll to bottom"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:242
+msgid "ai_chat_search_conversations_placeholder"
+msgstr "Search conversations"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:215
+msgid "ai_chat_status_cancelled"
+msgstr "Cancelled"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:214
+msgid "ai_chat_status_error"
+msgstr "Error"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:209
+msgid "ai_chat_status_pending"
+msgstr "Pending"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:213
+msgid "ai_chat_status_read"
+msgstr "Read"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:210
+msgid "ai_chat_status_sending"
+msgstr "Sending"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:212
+msgid "ai_chat_status_sent"
+msgstr "Sent"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:211
+msgid "ai_chat_status_streaming"
+msgstr "Streaming"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:238
+msgid "ai_chat_suggestions_label"
+msgstr "Suggested prompts"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:240
+msgid "ai_chat_thread_empty_helper"
+msgstr "Type a message to get started"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:239
+msgid "ai_chat_thread_empty_label"
+msgstr "No messages yet"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:220
+msgid "ai_chat_tool_awaiting_approval"
+msgstr "Awaiting approval"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:247
+msgid "ai_chat_tool_called_label"
+msgstr "Tool called"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:222
+msgid "ai_chat_tool_completed"
+msgstr "Completed"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:224
+msgid "ai_chat_tool_denied"
+msgstr "Denied"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:223
+msgid "ai_chat_tool_failed"
+msgstr "Failed"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:248
+msgid "ai_chat_tool_result_label"
+msgstr "Tool result"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:218
+#: src/app/[lang]/components/AiChatWidget.tsx:219
+#: src/app/[lang]/components/AiChatWidget.tsx:221
+msgid "ai_chat_tool_running"
+msgstr "Running…"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:243
+msgid "ai_chat_unread_marker_label"
+msgstr "New messages"
+
+#: src/app/[lang]/components/AiChatWidget.tsx:62
 msgid "ai_chat_user_avatar_alt"
 msgstr "Your avatar"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/components/AiChatWidget.tsx:268
+#: src/app/[lang]/components/AiChatWidget.tsx:312
 msgid "ai_chat_title"
 msgstr "Assistant"
 
@@ -2400,24 +2518,24 @@ msgstr "Research unit (UR)"
 msgid "account_page_profile_tab"
 msgstr "Profile"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:69
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:70
 #: src/app/[lang]/research-structures/components/StructureNameCell.tsx:52
 msgid "research_structures_chip_external"
 msgstr "external"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:83
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:84
 #: src/app/[lang]/research-structures/page.tsx:53
 #: src/app/[lang]/research-structures/page.tsx:206
 msgid "research_structures_column_institutions"
 msgstr "Supervising institutions"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:100
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:101
 #: src/app/[lang]/research-structures/page.tsx:54
 #: src/app/[lang]/research-structures/page.tsx:84
 msgid "research_structures_column_members"
 msgstr "Members"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:105
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:106
 #: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:213
 #: src/app/[lang]/research-structures/page.tsx:55
 #: src/app/[lang]/research-structures/page.tsx:98
@@ -2438,12 +2556,12 @@ msgstr "Name"
 msgid "research_structures_csv_type"
 msgstr "Type"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:94
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:95
 #: src/app/[lang]/research-structures/page.tsx:162
 msgid "research_structures_dashboard_link"
 msgstr "Dashboard"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:129
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:130
 msgid "research_structures_detail_children"
 msgstr "Child structures"
 
@@ -2451,7 +2569,23 @@ msgstr "Child structures"
 msgid "research_structures_export"
 msgstr "Export"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:123
+#: src/app/[lang]/research-structures/components/structureGroups.ts:70
+msgid "research_structures_group_general_services"
+msgstr "General services"
+
+#: src/app/[lang]/research-structures/components/structureGroups.ts:69
+msgid "research_structures_group_libraries"
+msgstr "Libraries"
+
+#: src/app/[lang]/research-structures/components/structureGroups.ts:71
+msgid "research_structures_group_other"
+msgstr "Other"
+
+#: src/app/[lang]/research-structures/components/structureGroups.ts:68
+msgid "research_structures_group_teaching_research"
+msgstr "Teaching and research"
+
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:124
 #: src/app/[lang]/research-structures/page.tsx:420
 msgid "research_structures_kpi_period_note"
 msgstr "Publication indicators (publications, open access, HAL) cover the last 24 months."
@@ -2484,7 +2618,7 @@ msgstr "View this person's publications"
 msgid "research_structures_members_switch_present"
 msgstr "Currently present"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:156
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:157
 msgid "research_structures_members_title"
 msgstr "Members"
 
@@ -2524,23 +2658,27 @@ msgstr "Hierarchical table"
 msgid "research_structures_tab_tree"
 msgstr "Tree"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:202
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:312
 msgid "research_structures_tree_collapse_all"
 msgstr "Collapse all"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:250
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:404
 msgid "research_structures_tree_empty_state"
 msgstr "Select a structure in the tree"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:190
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:300
 msgid "research_structures_tree_expand_all"
 msgstr "Expand all"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:211
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:321
 msgid "research_structures_tree_no_results"
 msgstr "No structure found"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:179
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:347
+msgid "research_structures_tree_resize_handle"
+msgstr "Resize the panels"
+
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:289
 msgid "research_structures_tree_search_placeholder"
 msgstr "Search for a structure…"
 
@@ -2847,119 +2985,3 @@ msgstr "Coming soon !"
 #: src/app/[lang]/components/WordStream/WordStream.tsx:187
 msgid "wordstream_no_data_to_display"
 msgstr "No data to display"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_status_pending"
-msgstr "Pending"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_status_sending"
-msgstr "Sending"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_status_streaming"
-msgstr "Streaming"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_status_sent"
-msgstr "Sent"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_status_read"
-msgstr "Read"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_status_error"
-msgstr "Error"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_status_cancelled"
-msgstr "Cancelled"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_tool_running"
-msgstr "Running…"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_tool_awaiting_approval"
-msgstr "Awaiting approval"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_tool_completed"
-msgstr "Completed"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_tool_failed"
-msgstr "Failed"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_tool_denied"
-msgstr "Denied"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_reconnect_label"
-msgstr "Reconnect"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_loading_label"
-msgstr "Loading…"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_generic_error_label"
-msgstr "Something went wrong"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_scroll_to_bottom_label"
-msgstr "Scroll to bottom"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_suggestions_label"
-msgstr "Suggested prompts"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_thread_empty_label"
-msgstr "No messages yet"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_thread_empty_helper"
-msgstr "Type a message to get started"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_no_conversations_label"
-msgstr "No conversations"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_search_conversations_placeholder"
-msgstr "Search conversations"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_unread_marker_label"
-msgstr "New messages"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_copy_label"
-msgstr "Copy"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_copy_code_label"
-msgstr "Copy code"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_copied_label"
-msgstr "Copied"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_tool_called_label"
-msgstr "Tool called"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_tool_result_label"
-msgstr "Tool result"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_reasoning_label"
-msgstr "Reasoning"
-
-#: src/app/[lang]/components/AiChatWidget.tsx
-msgid "ai_chat_reasoning_streaming_label"
-msgstr "Thinking…"

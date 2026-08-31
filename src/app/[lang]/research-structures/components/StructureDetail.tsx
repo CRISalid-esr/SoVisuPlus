@@ -16,6 +16,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { nationalTypeLabel } from '@/app/[lang]/components/organizationTypeLabels'
 import { StructureRow } from './directoryRows'
+import { visibleChildren } from './treeExplorerUtils'
 import RateBar from './RateBar'
 import StructureMembersTable from './StructureMembersTable'
 
@@ -49,7 +50,7 @@ const StructureDetail = ({
 }) => {
   const theme = useTheme()
   const typeLabel = nationalTypeLabel(Lingui.i18n, row.nationalType)
-  const children = row.subRows ?? []
+  const children = visibleChildren(row)
 
   return (
     <Stack spacing={3}>

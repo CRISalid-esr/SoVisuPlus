@@ -4,6 +4,7 @@ import {
   OrganizationDirectoryParent,
 } from '@/types/OrganizationDirectory'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
+import type { StructureGroupKey } from './structureGroups'
 
 export interface StructureRow {
   uid: string
@@ -21,6 +22,12 @@ export interface StructureRow {
   parents: OrganizationDirectoryParent[]
   originalUid?: string
   subRows?: StructureRow[]
+  /**
+   * Set only on the synthetic group header rows the Arborescence tree inserts
+   * under institutions (see `decorateForest`). Never produced by `buildRows`
+   * nor `buildDirectoryForest`.
+   */
+  groupKey?: StructureGroupKey
 }
 
 const displayName = (
