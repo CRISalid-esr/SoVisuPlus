@@ -154,6 +154,8 @@ export const decorateForest = (
     category: OrganizationCategory.institution_subdivision,
     nationalType: null,
     external: false,
+    hidden: false,
+    hiddenEffective: false,
     institutionNames: [],
     membersCount: 0,
     publicationsCount: 0,

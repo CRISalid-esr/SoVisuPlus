@@ -17,8 +17,10 @@ import { RichTreeView } from '@mui/x-tree-view/RichTreeView'
 import { TreeItem, TreeItemProps } from '@mui/x-tree-view/TreeItem'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
+  createContext,
   forwardRef,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -41,13 +43,35 @@ import StructureDetail from './StructureDetail'
 const KEYBOARD_RESIZE_STEP = 16
 
 /**
+ * Node ids of the hidden structures, so the item slot can dim them without
+ * threading a prop through `RichTreeView`. Non-empty only when a structure
+ * manager turned the "show hidden" switch on.
+ */
+const HiddenNodesContext = createContext<Set<string>>(new Set())
+
+/**
  * Tree item that renders the synthetic group headers as quiet section titles
- * rather than as selectable structures.
+ * rather than as selectable structures, and hidden structures dimmed.
  */
 const StructureTreeItem = forwardRef<HTMLLIElement, TreeItemProps>(
   function StructureTreeItem(props, ref) {
+    const hiddenNodes = useContext(HiddenNodesContext)
     if (!isGroupNodeId(props.itemId)) {
-      return <TreeItem {...props} ref={ref} />
+      if (!hiddenNodes.has(props.itemId)) {
+        return <TreeItem {...props} ref={ref} />
+      }
+      return (
+        <TreeItem
+          {...props}
+          ref={ref}
+          sx={{
+            '& > .MuiTreeItem-content .MuiTreeItem-label': {
+              opacity: 0.55,
+              fontStyle: 'italic',
+            },
+          }}
+        />
+      )
     }
     return (
       <TreeItem
@@ -97,10 +121,17 @@ const StructureTreeExplorer = ({
   data,
   includeExternal,
   onNavigate,
+  canManageVisibility = false,
+  onToggleHidden,
+  onSelectionChange,
 }: {
   data: StructureRow[]
   includeExternal: boolean
   onNavigate: (row: StructureRow) => void
+  canManageVisibility?: boolean
+  onToggleHidden?: (uid: string, hidden: boolean) => void
+  /** Bare uid of the selected structure, null when the selection is cleared. */
+  onSelectionChange?: (uid: string | null) => void
 }) => {
   const router = useRouter()
   const pathname = usePathname()
@@ -121,6 +152,15 @@ const StructureTreeExplorer = ({
     [forest, locale],
   )
   const index = useMemo(() => indexForest(displayForest), [displayForest])
+  const hiddenNodes = useMemo(
+    () =>
+      new Set(
+        [...index.rowByNodeId.entries()]
+          .filter(([, row]) => row.hiddenEffective)
+          .map(([nodeId]) => nodeId),
+      ),
+    [index],
+  )
 
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
   const [expandedItems, setExpandedItems] = useState<string[]>([])
@@ -232,6 +272,25 @@ const StructureTreeExplorer = ({
     ])
   }, [urlUid, index])
 
+  // Report the selection to the page, which keeps a just-hidden structure on
+  // screen until the user moves away from it. Only actual changes are
+  // reported: the forest is reindexed on every directory refresh, and
+  // re-announcing the same structure would look like the user moving away.
+  const reportedUid = useRef<string | null | undefined>(undefined)
+  useEffect(() => {
+    if (!onSelectionChange) {
+      return
+    }
+    const row =
+      selectedItem !== null ? index.rowByNodeId.get(selectedItem) : undefined
+    const uid = row ? (row.originalUid ?? row.uid) : null
+    if (uid === reportedUid.current) {
+      return
+    }
+    reportedUid.current = uid
+    onSelectionChange(uid)
+  }, [selectedItem, index, onSelectionChange])
+
   const handleSearchChange = (value: string) => {
     const wasFiltering = search.trim() !== ''
     const isFiltering = value.trim() !== ''
@@ -330,23 +389,27 @@ const StructureTreeExplorer = ({
               {t`research_structures_tree_no_results`}
             </Typography>
           ) : (
-            <RichTreeView
-              items={items}
-              slots={{ item: StructureTreeItem }}
-              selectedItems={selectedItem}
-              onSelectedItemsChange={(_, itemId) => selectNode(itemId)}
-              expandedItems={expandedItems}
-              onExpandedItemsChange={(_, itemIds) => setExpandedItems(itemIds)}
-              expansionTrigger='iconContainer'
-              sx={{
-                '& .MuiTreeItem-label': {
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  fontSize: '0.875rem',
-                },
-              }}
-            />
+            <HiddenNodesContext.Provider value={hiddenNodes}>
+              <RichTreeView
+                items={items}
+                slots={{ item: StructureTreeItem }}
+                selectedItems={selectedItem}
+                onSelectedItemsChange={(_, itemId) => selectNode(itemId)}
+                expandedItems={expandedItems}
+                onExpandedItemsChange={(_, itemIds) =>
+                  setExpandedItems(itemIds)
+                }
+                expansionTrigger='iconContainer'
+                sx={{
+                  '& .MuiTreeItem-label': {
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    fontSize: '0.875rem',
+                  },
+                }}
+              />
+            </HiddenNodesContext.Provider>
           )}
         </Box>
       </Box>
@@ -399,6 +462,8 @@ const StructureTreeExplorer = ({
             row={selectedRow}
             onNavigate={onNavigate}
             onSelectChild={selectNode}
+            canManageVisibility={canManageVisibility}
+            onToggleHidden={onToggleHidden}
           />
         ) : (
           <Box

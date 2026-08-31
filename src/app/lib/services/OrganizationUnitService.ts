@@ -9,6 +9,7 @@ import { StructureMember } from '@/types/StructureMember'
 import { employeeTypeLabel } from '@/lib/employeeTypes'
 import removeAccents from 'remove-accents'
 import { OrganizationDirectoryEntry } from '@/types/OrganizationDirectory'
+import { computeEffectiveHidden } from '@/lib/services/organizationVisibility'
 import { Literal } from '@/types/Literal'
 import {
   OAStatus,
@@ -73,9 +74,51 @@ export class OrganizationUnitService {
   }
 
   /**
-   * The research-structures directory: every structure (external and hidden
-   * categories included — filtering is a client display concern) with its
-   * parent relationships and KPIs over the last 24 months.
+   * Recompute `hiddenEffective` over the whole structure graph and write it
+   * back. Called after a visibility toggle and after every ETL structure
+   * upsert or deletion, since both change the parent relationships the
+   * cascade is derived from.
+   */
+  async recomputeEffectiveHidden(): Promise<void> {
+    const { units, relations } =
+      await this.organizationUnitDAO.fetchVisibilityGraph()
+    const hidden = computeEffectiveHidden(units, relations)
+    await this.organizationUnitDAO.applyEffectiveHidden([...hidden])
+  }
+
+  /** Both visibility flags of a single structure, or null when unknown. */
+  async fetchVisibilityState(uid: string) {
+    return this.organizationUnitDAO.fetchVisibilityState(uid)
+  }
+
+  /**
+   * Hide or show a structure, then propagate: hiding cascades to the
+   * descendants reachable only through it, showing brings back those that
+   * were not hidden in their own right. Returns the resulting flags, or null
+   * when no such structure exists.
+   */
+  async setHidden(
+    uid: string,
+    hidden: boolean,
+  ): Promise<{
+    uid: string
+    hidden: boolean
+    hiddenEffective: boolean
+  } | null> {
+    const exists = await this.organizationUnitDAO.setHidden(uid, hidden)
+    if (!exists) {
+      return null
+    }
+    await this.recomputeEffectiveHidden()
+    return this.organizationUnitDAO.fetchVisibilityState(uid)
+  }
+
+  /**
+   * The research-structures directory: every structure (external ones
+   * included — filtering those is a client display concern) with its parent
+   * relationships and KPIs over the last 24 months. Hidden structures are
+   * left out, of the rows and of the KPI perimeters alike, unless
+   * `includeHidden` is set — which the route grants to structure managers.
    *
    * KPI perimeters follow the dashboard rules (one hop):
    * - institution: members of the research units member_of it;
@@ -83,14 +126,16 @@ export class OrganizationUnitService {
    *   units member_of or part_of it;
    * - anything else: direct members.
    */
-  async getDirectory(): Promise<OrganizationDirectoryEntry[]> {
+  async getDirectory({
+    includeHidden = false,
+  }: { includeHidden?: boolean } = {}): Promise<OrganizationDirectoryEntry[]> {
     const cutoff = new Date()
     cutoff.setMonth(cutoff.getMonth() - DIRECTORY_KPI_MONTHS)
 
     const documentDAO = new DocumentDAO()
     const [units, membershipPairs, documentStats] = await Promise.all([
-      this.organizationUnitDAO.fetchDirectoryUnits(),
-      this.organizationUnitDAO.fetchMembershipPairs(),
+      this.organizationUnitDAO.fetchDirectoryUnits(includeHidden),
+      this.organizationUnitDAO.fetchMembershipPairs(includeHidden),
       documentDAO.fetchDocumentStatsSince(cutoff),
     ])
 
@@ -188,6 +233,8 @@ export class OrganizationUnitService {
         genericType: unit.genericType,
         nationalType: unit.nationalType,
         external: unit.external,
+        hidden: unit.hidden,
+        hiddenEffective: unit.hiddenEffective,
         parents: (unit.parents ?? []).map((relation) => ({
           parentUid: relation.parent.uid,
           kind: relation.kind,

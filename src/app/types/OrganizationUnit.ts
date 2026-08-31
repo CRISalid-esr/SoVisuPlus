@@ -25,6 +25,8 @@ interface OrganizationUnitJson {
   localTypes: Array<Literal>
   external: boolean
   identifiers: OrganizationUnitIdentifier[]
+  hidden: boolean
+  hiddenEffective: boolean
 }
 
 const ORGANIZATION_AGENT_TYPES = new Set<AgentType>([
@@ -57,6 +59,13 @@ class OrganizationUnit implements IAgent {
     public slug: string | null = null,
     public external: boolean = false,
     public localTypes: Array<Literal> = [],
+    /** Explicit visibility toggle set by a structure manager. */
+    public hidden: boolean = false,
+    /**
+     * Derived visibility: true when the structure is hidden itself or when
+     * every one of its parents is. This is the flag display code filters on.
+     */
+    public hiddenEffective: boolean = false,
   ) {
     this.identifiers = _identifiers
   }
@@ -165,6 +174,8 @@ class OrganizationUnit implements IAgent {
             Literal.fromObject,
           )
         : [],
+      organizationUnit.hidden,
+      organizationUnit.hiddenEffective,
     )
     hydrated.parents =
       organizationUnit.parents?.map(
@@ -206,6 +217,8 @@ class OrganizationUnit implements IAgent {
             Literal.fromObject,
           )
         : [],
+      organizationUnit.hidden,
+      organizationUnit.hiddenEffective,
     )
   }
 
@@ -222,6 +235,8 @@ class OrganizationUnit implements IAgent {
       organizationUnit.slug,
       organizationUnit.external || false,
       organizationUnit.localTypes?.map(Literal.fromObject) || [],
+      organizationUnit.hidden || false,
+      organizationUnit.hiddenEffective || false,
     )
   }
 }

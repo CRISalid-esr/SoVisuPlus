@@ -371,11 +371,14 @@ export class OrganizationUnitDAO extends AbstractDAO {
 
   /**
    * All organization units with their labels and parent relationships —
-   * the raw material of the research-structures directory. External and
-   * hidden-category structures included: filtering is a display concern.
+   * the raw material of the research-structures directory. External
+   * structures are always included (filtering them is a display concern);
+   * hidden ones only when `includeHidden` is set, which the directory route
+   * grants to structure managers alone.
    */
-  public async fetchDirectoryUnits() {
+  public async fetchDirectoryUnits(includeHidden: boolean = false) {
     return this.prismaClient.organizationUnit.findMany({
+      where: includeHidden ? undefined : { hiddenEffective: false },
       include: {
         labels: true,
         parents: {
@@ -390,13 +393,90 @@ export class OrganizationUnitDAO extends AbstractDAO {
   }
 
   /**
-   * All person-to-organization membership pairs, used to compute the
-   * directory perimeters in one pass.
+   * Set the explicit visibility flag of a structure, and report whether the
+   * structure exists. `hiddenEffective` is not touched here: it is recomputed
+   * for the whole graph afterwards by OrganizationUnitService.
    */
-  public async fetchMembershipPairs(): Promise<
+  public async setHidden(uid: string, hidden: boolean): Promise<boolean> {
+    const { count } = await this.prismaClient.organizationUnit.updateMany({
+      where: { uid },
+      data: { hidden },
+    })
+    return count > 0
+  }
+
+  /** Both visibility flags of a single structure. */
+  public async fetchVisibilityState(uid: string): Promise<{
+    uid: string
+    hidden: boolean
+    hiddenEffective: boolean
+  } | null> {
+    return this.prismaClient.organizationUnit.findUnique({
+      where: { uid },
+      select: { uid: true, hidden: true, hiddenEffective: true },
+    })
+  }
+
+  /**
+   * The raw material of the effective-visibility computation: every structure
+   * with its explicit flag, plus every child → parent link, both kinds.
+   */
+  public async fetchVisibilityGraph(): Promise<{
+    units: { uid: string; hidden: boolean }[]
+    relations: { childUid: string; parentUid: string }[]
+  }> {
+    const [units, relations] = await Promise.all([
+      this.prismaClient.organizationUnit.findMany({
+        select: { uid: true, hidden: true },
+      }),
+      this.prismaClient.organizationRelationship.findMany({
+        select: {
+          child: { select: { uid: true } },
+          parent: { select: { uid: true } },
+        },
+      }),
+    ])
+    return {
+      units,
+      relations: relations.map((relation) => ({
+        childUid: relation.child.uid,
+        parentUid: relation.parent.uid,
+      })),
+    }
+  }
+
+  /**
+   * Write back the outcome of the computation: exactly the structures in
+   * `hiddenUids` carry `hiddenEffective`, every other one does not.
+   */
+  public async applyEffectiveHidden(hiddenUids: string[]): Promise<void> {
+    await this.prismaClient.$transaction([
+      this.prismaClient.organizationUnit.updateMany({
+        where: { uid: { in: hiddenUids }, hiddenEffective: false },
+        data: { hiddenEffective: true },
+      }),
+      this.prismaClient.organizationUnit.updateMany({
+        where: { uid: { notIn: hiddenUids }, hiddenEffective: true },
+        data: { hiddenEffective: false },
+      }),
+    ])
+  }
+
+  /**
+   * All person-to-organization membership pairs, used to compute the
+   * directory perimeters in one pass. Memberships toward a hidden structure
+   * are left out unless `includeHidden` is set, so its members stop counting
+   * in the KPIs of its parents.
+   */
+  public async fetchMembershipPairs(
+    includeHidden: boolean = false,
+  ): Promise<
     { personId: number; orgUid: string; orgCategory: OrganizationCategory }[]
   > {
     const memberships = await this.prismaClient.membership.findMany({
+      where: includeHidden
+        ? undefined
+        : { organizationUnit: { hiddenEffective: false } },
       select: {
         personId: true,
         organizationUnit: { select: { uid: true, category: true } },
@@ -412,7 +492,9 @@ export class OrganizationUnitDAO extends AbstractDAO {
   /**
    * Search where-clause for a perspective group: matches on label values,
    * restricted to the group's categories, always excluding external
-   * structures (registry-created relationship targets without labels).
+   * structures (registry-created relationship targets without labels) and
+   * hidden ones (a hidden structure is not a selectable perspective, not
+   * even for a structure manager).
    */
   private searchWhereClause(
     searchTerm: string,
@@ -420,6 +502,7 @@ export class OrganizationUnitDAO extends AbstractDAO {
   ): Prisma.OrganizationUnitWhereInput {
     return {
       external: false,
+      hiddenEffective: false,
       category: { in: groupToCategories(group) },
       labels: {
         some: {

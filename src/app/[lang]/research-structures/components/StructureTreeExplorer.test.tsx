@@ -38,9 +38,7 @@ const entry = (
     publicationsCount: 0,
     oaRate: 0,
     halRate: 0,
-    parents: parentUid
-      ? [{ parentUid, kind: 'part_of', position: null }]
-      : [],
+    parents: parentUid ? [{ parentUid, kind: 'part_of', position: null }] : [],
   }) as unknown as StructureRow
 
 // inst ─ bu (support_unit) ─ lab (research_unit)
@@ -50,12 +48,15 @@ const data: StructureRow[] = [
   entry('lab', OrganizationCategory.research_unit, 'inst'),
 ]
 
-const renderTree = () =>
+const renderTree = (
+  props: Partial<React.ComponentProps<typeof StructureTreeExplorer>> = {},
+) =>
   render(
     <StructureTreeExplorer
       data={data}
       includeExternal={false}
       onNavigate={jest.fn()}
+      {...props}
     />,
   )
 
@@ -168,5 +169,62 @@ describe('StructureTreeExplorer panel resizer', () => {
       'aria-valuenow',
       '720',
     )
+  })
+})
+
+describe('StructureTreeExplorer selection reporting', () => {
+  it('reports no selection on mount and the bare uid on select', async () => {
+    const user = userEvent.setup()
+    const onSelectionChange = jest.fn()
+    renderTree({ onSelectionChange })
+
+    expect(onSelectionChange).toHaveBeenLastCalledWith(null)
+
+    await user.click(chevronOf(item('inst')))
+    await user.click(labelOf(TEACHING))
+    await user.click(labelOf('lab'))
+
+    // 'lab' sits under a root, so its node id is `lab@@inst`; the page needs
+    // the bare uid to match the structure it just hid.
+    expect(onSelectionChange).toHaveBeenLastCalledWith('lab')
+  })
+
+  it('does not re-report the same structure when the forest is rebuilt', async () => {
+    // Every directory refresh reindexes the forest. Re-announcing the current
+    // selection there would read as the user moving away from it, and would
+    // drop the rows standing in for a structure that was just hidden.
+    const user = userEvent.setup()
+    const onSelectionChange = jest.fn()
+    const { rerender } = renderTree({ onSelectionChange })
+
+    await user.click(chevronOf(item('inst')))
+    await user.click(labelOf(TEACHING))
+    await user.click(labelOf('lab'))
+    onSelectionChange.mockClear()
+
+    rerender(
+      <StructureTreeExplorer
+        data={[...data]}
+        includeExternal={false}
+        onNavigate={jest.fn()}
+        onSelectionChange={onSelectionChange}
+      />,
+    )
+
+    expect(onSelectionChange).not.toHaveBeenCalled()
+  })
+
+  it('reports the selection moving to another structure', async () => {
+    const user = userEvent.setup()
+    const onSelectionChange = jest.fn()
+    renderTree({ onSelectionChange })
+
+    await user.click(chevronOf(item('inst')))
+    await user.click(labelOf(TEACHING))
+    await user.click(labelOf('lab'))
+    await user.click(labelOf(LIBRARIES))
+    await user.click(labelOf('bu'))
+
+    expect(onSelectionChange).toHaveBeenLastCalledWith('bu')
   })
 })

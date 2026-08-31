@@ -14,6 +14,21 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:56
+msgid "user_action_outcome_technical_details"
+msgstr "Technical details"
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:84
+msgid "user_action_outcome_details_copied"
+msgstr "Copied!"
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:86
+msgid "user_action_outcome_copy_details"
+msgstr "Copy details"
+
+#. js-lingui-explicit-id
 #: src/app/lib/websocket/changeWarningMessages.tsx:22
 msgid "user_action_warning_unresolvable_person"
 msgstr "Contributor {displayName} could not be identified and was skipped"
@@ -42,21 +57,6 @@ msgstr "An affiliation without a usable identifier was skipped"
 #: src/app/lib/websocket/changeWarningMessages.tsx:52
 msgid "user_action_warning_unknown"
 msgstr "An item could not be applied"
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:56
-msgid "user_action_outcome_technical_details"
-msgstr "Technical details"
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:84
-msgid "user_action_outcome_details_copied"
-msgstr "Copied!"
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:86
-msgid "user_action_outcome_copy_details"
-msgstr "Copy details"
 
 #. js-lingui-explicit-id
 #: src/app/lib/websocket/WebSocketListener.tsx:114
@@ -95,16 +95,6 @@ msgid "snackbar_user_action_applied_with_warnings"
 msgstr "Change saved with warnings:"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:45
-msgid "notfound_page_back_home"
-msgstr "Back to home page"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:110
-msgid "notfound_page_description"
-msgstr "We couldn't find the page you were looking for. If you reached this page unexpectedly, please contact us at following <0>email adress</0>."
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/forbidden.tsx:43
 msgid "forbidden_page_back_home"
 msgstr "Back to home page"
@@ -113,6 +103,16 @@ msgstr "Back to home page"
 #: src/app/[lang]/forbidden.tsx:108
 msgid "forbidden_page_description"
 msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:45
+msgid "notfound_page_back_home"
+msgstr "Back to home page"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:110
+msgid "notfound_page_description"
+msgstr "We couldn't find the page you were looking for. If you reached this page unexpectedly, please contact us at following <0>email adress</0>."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:182
@@ -150,11 +150,6 @@ msgid "documents_merge_dialog_box_merge_button"
 msgstr "Confirm merge ({nbDocs})"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
-msgid "document_details_page_source_tab_card_title"
-msgstr "Sources"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/page.tsx:204
 msgid "documents_page_refresh_document_alert"
 msgstr "Data concerning this publication has changed"
@@ -165,9 +160,9 @@ msgid "document_details_page_frozen_notice"
 msgstr "This document is being updated and cannot be edited right now."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
-msgid "document_details_page_update_in_hal_tab_card_title"
-msgstr "Update in HAL"
+#: src/app/[lang]/documents/[uid]/components/Sources/Sources.tsx:34
+msgid "document_details_page_source_tab_card_title"
+msgstr "Sources"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:105
@@ -183,6 +178,27 @@ msgstr "No keywords"
 #: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:138
 msgid "document_details_page_keywords_search_field_title"
 msgstr "Select one or more controlled vocabulary"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:395
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:406
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "action"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:430
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalidate"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:456
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissociate"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
+msgid "document_details_page_update_in_hal_tab_card_title"
+msgstr "Update in HAL"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:225
@@ -203,6 +219,16 @@ msgstr "Other variations"
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:343
 msgid "concept_chip_action_delete"
 msgstr "Delete"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
+msgid "document_details_page_add_in_hal_tab_card_title"
+msgstr "Add in HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr "Disciplines"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
@@ -233,32 +259,6 @@ msgstr "No options"
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:296
 msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:395
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:406
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "action"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:430
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalidate"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:456
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissociate"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
-msgid "document_details_page_add_in_hal_tab_card_title"
-msgstr "Add in HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr "Disciplines"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
@@ -377,16 +377,6 @@ msgid "orcid_button_provide_identifier"
 msgstr "Sign-in to ORCID"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
-msgid "hal_button_update_identifier"
-msgstr "Link my Hal identifier"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
-msgid "hal_button_provide_identifier"
-msgstr "Provide my Hal identifier"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:120
 msgid "orcid_authentication_success"
 msgstr "ORCID account authenticated successfully."
@@ -488,19 +478,14 @@ msgid "orcid_control_remove_dialog_confirm"
 msgstr "Remove"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
-msgid "profile_affiliations_signature_label"
-msgstr "My signature"
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:63
+msgid "hal_button_update_identifier"
+msgstr "Link my Hal identifier"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:64
-msgid "profile_affiliations_no_signature_message"
-msgstr "No signature"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
-msgid "profile_affiliations_signature_copied_message_confirmation"
-msgstr "Signature added to clipboard."
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalLoginButton.tsx:65
+msgid "hal_button_provide_identifier"
+msgstr "Provide my Hal identifier"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
@@ -631,6 +616,21 @@ msgstr "This will remove the idHAL and its HAL login from this account."
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:339
 msgid "hal_control_remove_dialog_confirm"
 msgstr "Remove"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
+msgid "profile_affiliations_signature_label"
+msgstr "My signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:64
+msgid "profile_affiliations_no_signature_message"
+msgstr "No signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
+msgid "profile_affiliations_signature_copied_message_confirmation"
+msgstr "Signature added to clipboard."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
@@ -2518,54 +2518,59 @@ msgstr "Research unit (UR)"
 msgid "account_page_profile_tab"
 msgstr "Profile"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:70
-#: src/app/[lang]/research-structures/components/StructureNameCell.tsx:52
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:81
+#: src/app/[lang]/research-structures/components/StructureNameCell.tsx:57
 msgid "research_structures_chip_external"
 msgstr "external"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:84
-#: src/app/[lang]/research-structures/page.tsx:53
-#: src/app/[lang]/research-structures/page.tsx:206
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:89
+#: src/app/[lang]/research-structures/components/StructureNameCell.tsx:66
+msgid "research_structures_chip_hidden"
+msgstr "Hidden"
+
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:102
+#: src/app/[lang]/research-structures/page.tsx:56
+#: src/app/[lang]/research-structures/page.tsx:209
 msgid "research_structures_column_institutions"
 msgstr "Supervising institutions"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:101
-#: src/app/[lang]/research-structures/page.tsx:54
-#: src/app/[lang]/research-structures/page.tsx:84
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:142
+#: src/app/[lang]/research-structures/page.tsx:57
+#: src/app/[lang]/research-structures/page.tsx:87
 msgid "research_structures_column_members"
 msgstr "Members"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:106
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:147
 #: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:213
-#: src/app/[lang]/research-structures/page.tsx:55
-#: src/app/[lang]/research-structures/page.tsx:98
+#: src/app/[lang]/research-structures/page.tsx:58
+#: src/app/[lang]/research-structures/page.tsx:101
 msgid "research_structures_column_publications"
 msgstr "Publications"
 
-#: src/app/[lang]/research-structures/page.tsx:50
-#: src/app/[lang]/research-structures/page.tsx:188
-#: src/app/[lang]/research-structures/page.tsx:299
+#: src/app/[lang]/research-structures/page.tsx:53
+#: src/app/[lang]/research-structures/page.tsx:191
+#: src/app/[lang]/research-structures/page.tsx:302
 msgid "research_structures_column_structure"
 msgstr "Structure"
 
-#: src/app/[lang]/research-structures/page.tsx:51
+#: src/app/[lang]/research-structures/page.tsx:54
 msgid "research_structures_csv_name"
 msgstr "Name"
 
-#: src/app/[lang]/research-structures/page.tsx:52
+#: src/app/[lang]/research-structures/page.tsx:55
 msgid "research_structures_csv_type"
 msgstr "Type"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:95
-#: src/app/[lang]/research-structures/page.tsx:162
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:113
+#: src/app/[lang]/research-structures/page.tsx:165
 msgid "research_structures_dashboard_link"
 msgstr "Dashboard"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:130
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:171
 msgid "research_structures_detail_children"
 msgstr "Child structures"
 
-#: src/app/[lang]/research-structures/page.tsx:415
+#: src/app/[lang]/research-structures/page.tsx:446
 msgid "research_structures_export"
 msgstr "Export"
 
@@ -2585,8 +2590,8 @@ msgstr "Other"
 msgid "research_structures_group_teaching_research"
 msgstr "Teaching and research"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:124
-#: src/app/[lang]/research-structures/page.tsx:420
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:165
+#: src/app/[lang]/research-structures/page.tsx:451
 msgid "research_structures_kpi_period_note"
 msgstr "Publication indicators (publications, open access, HAL) cover the last 24 months."
 
@@ -2618,67 +2623,83 @@ msgstr "View this person's publications"
 msgid "research_structures_members_switch_present"
 msgstr "Currently present"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:157
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:198
 msgid "research_structures_members_title"
 msgstr "Members"
 
-#: src/app/[lang]/research-structures/page.tsx:409
+#: src/app/[lang]/research-structures/page.tsx:440
 msgid "research_structures_page_title"
 msgstr "Research structures"
 
-#: src/app/[lang]/research-structures/page.tsx:104
+#: src/app/[lang]/research-structures/page.tsx:107
 msgid "research_structures_publications_tooltip"
 msgstr "Last 24 months"
 
-#: src/app/[lang]/research-structures/page.tsx:256
+#: src/app/[lang]/research-structures/page.tsx:259
 msgid "research_structures_reset_filters"
 msgstr "Reset filters"
 
-#: src/app/[lang]/research-structures/page.tsx:438
+#: src/app/[lang]/research-structures/page.tsx:469
 msgid "research_structures_switch_display_old"
 msgstr "Display old structures"
 
-#: src/app/[lang]/research-structures/page.tsx:434
+#: src/app/[lang]/research-structures/page.tsx:465
 msgid "research_structures_switch_display_old_tooltip"
 msgstr "Available once structure lifecycle data is available"
 
-#: src/app/[lang]/research-structures/page.tsx:432
+#: src/app/[lang]/research-structures/page.tsx:463
 msgid "research_structures_switch_include_external"
 msgstr "Include external institutions"
 
-#: src/app/[lang]/research-structures/page.tsx:456
+#: src/app/[lang]/research-structures/page.tsx:481
+msgid "research_structures_switch_show_hidden"
+msgstr "Show hidden structures"
+
+#: src/app/[lang]/research-structures/page.tsx:499
 msgid "research_structures_tab_flat"
 msgstr "List"
 
-#: src/app/[lang]/research-structures/page.tsx:461
+#: src/app/[lang]/research-structures/page.tsx:504
 msgid "research_structures_tab_hierarchical"
 msgstr "Hierarchical table"
 
-#: src/app/[lang]/research-structures/page.tsx:451
+#: src/app/[lang]/research-structures/page.tsx:494
 msgid "research_structures_tab_tree"
 msgstr "Tree"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:312
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:134
+msgid "research_structures_toggle_hidden"
+msgstr "Hide this structure"
+
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:121
+msgid "research_structures_toggle_hidden_by_ancestor"
+msgstr "This structure is hidden because every structure it belongs to is hidden. Show one of them to bring it back."
+
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:122
+msgid "research_structures_toggle_hidden_help"
+msgstr "A hidden structure disappears from the structures list, the search and the indicators. Structures reachable only through it are hidden as well."
+
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:358
 msgid "research_structures_tree_collapse_all"
 msgstr "Collapse all"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:404
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:454
 msgid "research_structures_tree_empty_state"
 msgstr "Select a structure in the tree"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:300
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:346
 msgid "research_structures_tree_expand_all"
 msgstr "Expand all"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:321
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:367
 msgid "research_structures_tree_no_results"
 msgstr "No structure found"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:347
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:395
 msgid "research_structures_tree_resize_handle"
 msgstr "Resize the panels"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:289
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:335
 msgid "research_structures_tree_search_placeholder"
 msgstr "Search for a structure…"
 

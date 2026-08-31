@@ -30,6 +30,8 @@ const makeRow = (
   category: OrganizationCategory.research_unit,
   nationalType: null,
   external: false,
+  hidden: false,
+  hiddenEffective: false,
   institutionNames: [],
   membersCount: 0,
   publicationsCount: 0,
@@ -330,9 +332,9 @@ describe('decorateForest', () => {
   it('produces group ids that isGroupNodeId recognises', () => {
     const decorated = decorateForest(institution(), label, 'fr')
     expect(isGroupNodeId(decorated[0].uid)).toBe(false)
-    expect((decorated[0].subRows ?? []).every((g) => isGroupNodeId(g.uid))).toBe(
-      true,
-    )
+    expect(
+      (decorated[0].subRows ?? []).every((g) => isGroupNodeId(g.uid)),
+    ).toBe(true)
   })
 })
 

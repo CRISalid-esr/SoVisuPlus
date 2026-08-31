@@ -4,6 +4,7 @@ import {
   STRUCTURE_MEMBER_SORT_KEYS,
   StructureMemberSortKey,
 } from '@/lib/services/OrganizationUnitService'
+import { structureVisibilityAccess } from '@/app/auth/structureVisibility'
 
 const PAGE_SIZES = [10, 20, 50]
 
@@ -27,7 +28,22 @@ export const GET = async (
     : 'name'
 
   try {
-    const result = await new OrganizationUnitService().getStructureMembers({
+    const organizationUnitService = new OrganizationUnitService()
+
+    // The members of a hidden structure are only listed for the structure
+    // managers who can still reach its detail panel.
+    const visibility = await organizationUnitService.fetchVisibilityState(uid)
+    if (visibility?.hiddenEffective) {
+      const { canManage } = await structureVisibilityAccess()
+      if (!canManage) {
+        return NextResponse.json(
+          { error: `Structure ${uid} not found` },
+          { status: 404 },
+        )
+      }
+    }
+
+    const result = await organizationUnitService.getStructureMembers({
       uid,
       present: searchParams.get('present') !== 'false',
       search: searchParams.get('search') ?? '',

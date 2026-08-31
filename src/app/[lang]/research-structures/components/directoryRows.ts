@@ -5,6 +5,7 @@ import {
 } from '@/types/OrganizationDirectory'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import type { StructureGroupKey } from './structureGroups'
+import { computeEffectiveHidden } from '@/lib/services/organizationVisibility'
 
 export interface StructureRow {
   uid: string
@@ -14,6 +15,10 @@ export interface StructureRow {
   category: OrganizationCategory
   nationalType: string | null
   external: boolean
+  /** Explicit visibility toggle — what a structure manager last set. */
+  hidden: boolean
+  /** Derived visibility: hidden itself, or hidden through all its parents. */
+  hiddenEffective: boolean
   institutionNames: string[]
   membersCount: number
   publicationsCount: number
@@ -69,6 +74,8 @@ export const buildRows = (
       category: entry.category,
       nationalType: entry.nationalType,
       external: entry.external,
+      hidden: entry.hidden,
+      hiddenEffective: entry.hiddenEffective,
       institutionNames,
       membersCount: entry.membersCount,
       publicationsCount: entry.publicationsCount,
@@ -77,6 +84,81 @@ export const buildRows = (
       parents: entry.parents,
     }
   })
+}
+
+/**
+ * The rows a visibility toggle changes, with their new flags — the toggled
+ * structure plus whatever the cascade takes with it, or gives back.
+ *
+ * Applied to the display immediately, so the switch and the tree react to the
+ * click rather than to the round trip. The cascade is derived with
+ * `computeEffectiveHidden`, the very rule the server applies, so the optimistic
+ * state matches what the refetch confirms; that refetch is then only about the
+ * KPIs, which do move when a structure leaves a perimeter.
+ *
+ * `displayed` is what is on screen, not the raw payload: after a hide the
+ * payload no longer carries the hidden structures, and showing one again has to
+ * see it to put it back.
+ */
+export const pendingVisibilityRows = (
+  displayed: StructureRow[],
+  uid: string,
+  hidden: boolean,
+): StructureRow[] => {
+  const units = displayed.map((row) => ({
+    uid: row.uid,
+    hidden: row.uid === uid ? hidden : row.hidden,
+  }))
+  const relations = displayed.flatMap((row) =>
+    row.parents.map((parent) => ({
+      childUid: row.uid,
+      parentUid: parent.parentUid,
+    })),
+  )
+  const effective = computeEffectiveHidden(units, relations)
+
+  return displayed
+    .filter(
+      (row) =>
+        row.uid === uid || row.hiddenEffective !== effective.has(row.uid),
+    )
+    .map((row) => ({
+      ...row,
+      // Only the toggled structure is hidden in its own right; the rest of the
+      // cascade is hidden through it, and its toggle stays disabled.
+      hidden: row.uid === uid ? hidden : row.hidden,
+      hiddenEffective: effective.has(row.uid),
+    }))
+}
+
+/**
+ * Directory rows with the pending visibility applied: the pending flags win
+ * over the payload's, and a pending row the payload no longer carries is
+ * appended — which is what keeps a just-hidden structure on screen until the
+ * selection moves away. Everything else, KPIs included, comes from the payload.
+ */
+export const withPendingRows = (
+  rows: StructureRow[],
+  pending: StructureRow[],
+): StructureRow[] => {
+  if (pending.length === 0) {
+    return rows
+  }
+  const byUid = new Map(pending.map((row) => [row.uid, row]))
+  const known = new Set(rows.map((row) => row.uid))
+  return [
+    ...rows.map((row) => {
+      const update = byUid.get(row.uid)
+      return update
+        ? {
+            ...row,
+            hidden: update.hidden,
+            hiddenEffective: update.hiddenEffective,
+          }
+        : row
+    }),
+    ...pending.filter((row) => !known.has(row.uid)),
+  ]
 }
 
 export const filterVisible = (

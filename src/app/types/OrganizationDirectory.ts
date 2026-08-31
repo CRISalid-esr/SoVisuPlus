@@ -25,6 +25,10 @@ export interface OrganizationDirectoryEntry {
   genericType: OrganizationGenericType
   nationalType: string | null
   external: boolean
+  /** Explicit visibility toggle — what a structure manager last set. */
+  hidden: boolean
+  /** Derived visibility: hidden itself, or hidden through all its parents. */
+  hiddenEffective: boolean
   parents: OrganizationDirectoryParent[]
   membersCount: number
   publicationsCount: number

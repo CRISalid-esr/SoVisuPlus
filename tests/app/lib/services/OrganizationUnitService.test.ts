@@ -311,3 +311,157 @@ describe('OrganizationUnitService.getStructureMembers (integration)', () => {
     expect(result).toBeNull()
   })
 })
+
+describe('OrganizationUnitService structure visibility (integration)', () => {
+  let service: OrganizationUnitService
+
+  const partOf = (uid: string) =>
+    new OrganizationRelation(
+      makeOrg(
+        uid,
+        OrganizationCategory.institution,
+        OrganizationGenericType.institution,
+      ),
+      'part_of',
+      null,
+    )
+
+  const effectiveHidden = async (): Promise<string[]> =>
+    (
+      await prisma.organizationUnit.findMany({
+        where: { hiddenEffective: true },
+        select: { uid: true },
+        orderBy: { uid: 'asc' },
+      })
+    ).map((unit) => unit.uid)
+
+  beforeAll(() => {
+    service = new OrganizationUnitService()
+  })
+
+  beforeEach(async () => {
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    // local-up1 ─ local-div ─ local-team, plus local-ru1 supervised by both
+    // local-up1 and a second institution local-up2.
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      makeOrg(
+        'local-up1',
+        OrganizationCategory.institution,
+        OrganizationGenericType.institution,
+      ),
+    )
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      makeOrg(
+        'local-up2',
+        OrganizationCategory.institution,
+        OrganizationGenericType.institution,
+      ),
+    )
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      makeOrg(
+        'local-div',
+        OrganizationCategory.institution_subdivision,
+        OrganizationGenericType.institution_subdivision,
+        [partOf('local-up1')],
+      ),
+    )
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      makeOrg(
+        'local-team',
+        OrganizationCategory.team,
+        OrganizationGenericType.team,
+        [partOf('local-div')],
+      ),
+    )
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      makeOrg(
+        'local-ru1',
+        OrganizationCategory.research_unit,
+        OrganizationGenericType.unit,
+        [institutionRelation('local-up1'), institutionRelation('local-up2')],
+      ),
+    )
+  })
+
+  it('cascades to the descendants reachable only through the hidden structure', async () => {
+    const updated = await service.setHidden('local-up1', true)
+
+    expect(updated).toEqual({
+      uid: 'local-up1',
+      hidden: true,
+      hiddenEffective: true,
+    })
+    // local-ru1 survives: it is also supervised by local-up2.
+    expect(await effectiveHidden()).toEqual([
+      'local-div',
+      'local-team',
+      'local-up1',
+    ])
+  })
+
+  it('restores the subtree when the structure is shown again', async () => {
+    await service.setHidden('local-up1', true)
+    await service.setHidden('local-up1', false)
+
+    expect(await effectiveHidden()).toEqual([])
+  })
+
+  it('keeps a structure hidden in its own right when its ancestor comes back', async () => {
+    await service.setHidden('local-div', true)
+    await service.setHidden('local-up1', true)
+    await service.setHidden('local-up1', false)
+
+    expect(await effectiveHidden()).toEqual(['local-div', 'local-team'])
+  })
+
+  it('leaves the directory and its KPIs untouched by hidden structures', async () => {
+    const person = await prisma.person.create({
+      data: { uid: 'p-hidden', firstName: 'H', lastName: 'Idden' },
+    })
+    const team = await prisma.organizationUnit.findUnique({
+      where: { uid: 'local-team' },
+    })
+    await prisma.membership.create({
+      data: { personId: person.id, organizationUnitId: team!.id },
+    })
+
+    await service.setHidden('local-div', true)
+
+    const visible = await service.getDirectory()
+    expect(visible.map((entry) => entry.uid).sort()).toEqual([
+      'local-ru1',
+      'local-up1',
+      'local-up2',
+    ])
+    // the hidden subdivision's members no longer count for its institution
+    expect(
+      visible.find((entry) => entry.uid === 'local-up1')!.membersCount,
+    ).toBe(0)
+
+    const withHidden = await service.getDirectory({ includeHidden: true })
+    const div = withHidden.find((entry) => entry.uid === 'local-div')!
+    expect(div.hidden).toBe(true)
+    expect(div.hiddenEffective).toBe(true)
+    const team1 = withHidden.find((entry) => entry.uid === 'local-team')!
+    expect(team1.hidden).toBe(false)
+    expect(team1.hiddenEffective).toBe(true)
+    expect(team1.membersCount).toBe(1)
+  })
+
+  it('excludes hidden structures from the perspective search', async () => {
+    await service.setHidden('local-up1', true)
+
+    const { organizations, total } = await service.getOrganizationUnits({
+      searchTerm: '',
+      group: 'institution',
+      pageNumber: 1,
+      itemsPerPage: 10,
+    })
+    expect(total).toBe(1)
+    expect(organizations.map((org) => org.uid)).toEqual(['local-up2'])
+  })
+
+  it('returns null for an unknown structure', async () => {
+    expect(await service.setHidden('nope', true)).toBeNull()
+  })
+})
