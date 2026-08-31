@@ -54,3 +54,10 @@ roles:
     permissions:
       - action: deposit_hal_unauthenticated
         subject: Person
+
+  - name: structure_manager
+    description: Show / hide research structures in the directory (global scope only)
+    permissions:
+      - action: update
+        subject: OrganizationUnit
+        fields: [hidden]

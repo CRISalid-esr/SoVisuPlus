@@ -13,6 +13,7 @@ Each major feature is backed by a spec document in `specs/<branch-name>/prompt.m
 | `874-new-research-structure-model`               | [`specs/874-new-research-structure-model/prompt.md`](specs/874-new-research-structure-model/prompt.md)                             |
 | `structures-tree-master-detail`                  | [`specs/structures-tree-master-detail/prompt.md`](specs/structures-tree-master-detail/prompt.md)                                   |
 | `replace-person-affiliations-and-source-records` | [`specs/replace-person-affiliations-and-source-records/prompt.md`](specs/replace-person-affiliations-and-source-records/prompt.md) |
+| `add-hide-structure-option-and-permission`       | [`specs/add-hide-structure-option-and-permission/prompt.md`](specs/add-hide-structure-option-and-permission/prompt.md)             |
 
 ## Git commits
 

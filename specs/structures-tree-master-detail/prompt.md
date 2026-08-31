@@ -161,3 +161,75 @@ name search (manual\* flags + `rowCount`, following the publications-table patte
 | Data slice                | `src/app/stores/organizationUnitSlice.ts` (`organization.directory`)  |
 | API route                 | `src/app/api/organizations/directory/route.ts`                        |
 | URL-sync example          | `src/app/[lang]/documents/page.tsx` (`?tab=` handling)                |
+
+---
+
+# Rework (branch `rework-structures-display`)
+
+Two usability follow-ups on the Arborescence view.
+
+## 1. Resizable panel split
+
+The left panel width is no longer fixed at 360px. A vertical separator between the two panels
+is draggable (pointer capture, no window listeners) and focusable, with ArrowLeft/ArrowRight
+resizing by 16px steps. Width is clamped to `PANEL_WIDTH` (240–720, default 360) and persisted
+in `localStorage` under `structures-tree-panel-width`, read on mount only so SSR hydration is
+not broken (same approach as `ThemeContext`).
+
+## 2. Ordering and grouping
+
+Nothing in the pipeline sorted anything before: sibling order was raw Postgres row order.
+
+- **Alphabetical by default.** Every sibling list, roots included, is sorted on the displayed
+  label (`treeLabel` = `ACRONYM — Full name`) with `localeCompare(locale, { sensitivity: 'base',
+  numeric: true })`.
+- **Grouping under institutions.** The direct children of a node whose `category ===
+  institution` are bucketed behind four non-selectable group headers, always in this order.
+  Conditions are evaluated in order and the first match wins, so a structure appears exactly
+  once. Empty groups are dropped.
+
+  | Order | Key                 | Matches                                                                    | fr                        | en                    |
+  | ----- | ------------------- | -------------------------------------------------------------------------- | ------------------------- | --------------------- |
+  | 1     | `teaching_research` | `nationalType === 'UFR'` **or** `category ∈ {teaching_unit, research_unit}` | Enseignement et recherche | Teaching and research |
+  | 2     | `libraries`         | `category === support_unit`                                                | Bibliothèques             | Libraries             |
+  | 3     | `general_services`  | `category === administrative_unit`                                         | Services centraux         | General services      |
+  | 4     | `other`             | everything else                                                            | Autres                    | Other                 |
+
+  Consequence of the rule as stated: `doctoral_school`, `institution_subdivision`,
+  `unit_subdivision`, `team` and nested `institution` children of an institution land in
+  **Autres**.
+
+### Design
+
+- **Arborescence only.** `buildDirectoryForest` is untouched, so the "Liste" and "Table
+  hiérarchique" tabs are unaffected. Sorting and grouping are a display transform,
+  `decorateForest(forest, groupLabel, locale)` in `treeExplorerUtils.ts`, applied between
+  `buildDirectoryForest` and `indexForest`.
+- **Group headers are synthetic `StructureRow`s** carrying a `groupKey` and a namespaced uid
+  (`__group__:<key>@@<parentNodeId>`), rather than a parallel node type. `indexForest`,
+  `ancestorsOf`, `filterForest` and `buildTreeItems` therefore keep working unchanged — in
+  particular the ancestor chain of a deep-linked structure now includes its group, which is
+  exactly what the `?structure=<uid>` expansion needs. Real uids never collide with the
+  namespace, so `firstNodeIdByUid` stays correct.
+- **Not selectable**: `selectNode` short-circuits on a group id and toggles its expansion
+  instead, leaving the selection and the URL untouched (`selectedItems` is controlled, so
+  ignoring the change reverts it). `StructureTreeItem`, a custom `slots.item`, renders them as
+  quiet uppercase section titles.
+- **Search**: a group header never matches on its own label; it survives only when one of its
+  structures matches.
+- **Detail panel**: `visibleChildren(row)` flattens the headers, so the children list shows real
+  structures.
+
+### Key files
+
+| Concern                     | File                                                                    |
+| --------------------------- | ----------------------------------------------------------------------- |
+| Group taxonomy + labels     | `src/app/[lang]/research-structures/components/structureGroups.ts`      |
+| Sort, grouping, panel width | `src/app/[lang]/research-structures/components/treeExplorerUtils.ts`    |
+| Tree, item slot, resizer    | `src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx` |
+| Interaction tests           | `src/app/[lang]/research-structures/components/StructureTreeExplorer.test.tsx` |
+
+Note on the tree item slot: MUI's icon-container click handler does not stop propagation, so
+the click also reaches the content handler and fires a selection. For a group header that would
+toggle the expansion a second time and cancel it out, leaving the chevron looking dead — hence
+the `slotProps.iconContainer.onClick` guard, covered by a regression test.

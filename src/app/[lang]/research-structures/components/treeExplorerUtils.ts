@@ -1,5 +1,13 @@
 import { TreeViewBaseItem } from '@mui/x-tree-view/models'
+import { OrganizationCategory } from '@prisma/client'
 import { StructureRow } from './directoryRows'
+import {
+  groupNodeId,
+  groupOf,
+  isGroupNodeId,
+  STRUCTURE_GROUP_ORDER,
+  StructureGroupKey,
+} from './structureGroups'
 
 export interface ForestIndex {
   rowByNodeId: Map<string, StructureRow>
@@ -71,9 +79,11 @@ export const filterForest = (
   const normalizedQuery = normalizeForSearch(query)
   const expandedIds: string[] = []
   const filterNode = (node: StructureRow): StructureRow | null => {
-    const matches = normalizeForSearch(treeLabel(node)).includes(
-      normalizedQuery,
-    )
+    // A group header is a container, not a result: it survives only when one
+    // of its structures matches.
+    const matches =
+      !isGroupNodeId(node.uid) &&
+      normalizeForSearch(treeLabel(node)).includes(normalizedQuery)
     const subRows = (node.subRows ?? [])
       .map(filterNode)
       .filter((child): child is StructureRow => child !== null)
@@ -102,3 +112,94 @@ export const buildTreeItems = (forest: StructureRow[]): TreeViewBaseItem[] =>
         ? buildTreeItems(node.subRows)
         : undefined,
   }))
+
+/**
+ * Display transform applied on top of `buildDirectoryForest`, for the
+ * Arborescence tree only:
+ *
+ * - every sibling list — roots included — is sorted alphabetically on the
+ *   label as displayed (`treeLabel`), so what the eye scans is what is sorted;
+ * - the children of an institution are additionally bucketed into the four
+ *   `STRUCTURE_GROUP_ORDER` groups behind synthetic, non-selectable header
+ *   rows. Empty groups are dropped.
+ *
+ * Group headers are plain `StructureRow`s carrying a `groupKey` and a
+ * namespaced uid, so `indexForest`, `ancestorsOf`, `filterForest` and
+ * `buildTreeItems` keep working on them unchanged — in particular the ancestor
+ * chain of a deep-linked structure now includes its group, which is exactly
+ * what the expansion needs.
+ */
+export const decorateForest = (
+  forest: StructureRow[],
+  groupLabel: (key: StructureGroupKey) => string,
+  locale: string,
+): StructureRow[] => {
+  const byLabel = (left: StructureRow, right: StructureRow): number =>
+    treeLabel(left).localeCompare(treeLabel(right), locale, {
+      sensitivity: 'base',
+      numeric: true,
+    })
+
+  const makeGroup = (
+    key: StructureGroupKey,
+    parentNodeId: string,
+    members: StructureRow[],
+  ): StructureRow => ({
+    uid: groupNodeId(key, parentNodeId),
+    slug: null,
+    acronym: groupLabel(key),
+    name: groupLabel(key),
+    // Never read: a group row is not selectable, never reaches the detail
+    // panel, and is not itself bucketed. The field is only required by the type.
+    category: OrganizationCategory.institution_subdivision,
+    nationalType: null,
+    external: false,
+    hidden: false,
+    hiddenEffective: false,
+    institutionNames: [],
+    membersCount: 0,
+    publicationsCount: 0,
+    oaRate: 0,
+    halRate: 0,
+    parents: [],
+    groupKey: key,
+    subRows: members,
+  })
+
+  const decorate = (node: StructureRow): StructureRow => {
+    const children = (node.subRows ?? []).map(decorate).sort(byLabel)
+    if (children.length === 0) {
+      return { ...node, subRows: undefined }
+    }
+    if (node.category !== OrganizationCategory.institution) {
+      return { ...node, subRows: children }
+    }
+    const buckets = new Map<StructureGroupKey, StructureRow[]>()
+    for (const child of children) {
+      const key = groupOf(child)
+      buckets.set(key, [...(buckets.get(key) ?? []), child])
+    }
+    const groups = STRUCTURE_GROUP_ORDER.filter((key) => buckets.has(key)).map(
+      (key) => makeGroup(key, node.uid, buckets.get(key)!),
+    )
+    return { ...node, subRows: groups }
+  }
+
+  return forest.map(decorate).sort(byLabel)
+}
+
+/**
+ * The real structures under a node, skipping the synthetic group headers.
+ * Used by the detail panel, which lists actual children rather than buckets.
+ */
+export const visibleChildren = (row: StructureRow): StructureRow[] =>
+  (row.subRows ?? []).flatMap((child) =>
+    child.groupKey ? (child.subRows ?? []) : [child],
+  )
+
+export const PANEL_WIDTH = { min: 240, max: 720, default: 360 } as const
+
+export const PANEL_WIDTH_KEY = 'structures-tree-panel-width'
+
+export const clampPanelWidth = (width: number): number =>
+  Math.min(PANEL_WIDTH.max, Math.max(PANEL_WIDTH.min, Math.round(width)))

@@ -39,6 +39,8 @@ interface DirectoryState {
   loading: boolean
   loaded: boolean
   error: string | null
+  /** Whether the loaded payload includes the hidden structures. */
+  includeHidden: boolean
 }
 
 export interface StructureMembersQueryParams {
@@ -64,8 +66,20 @@ export interface OrganizationUnitSlice {
     error: string | null | unknown
     fetchOrganizationsByName: (obj: OrganizationsByNameQuery) => Promise<void>
     directory: DirectoryState
-    /** Fetched once and reused; pass force to refetch explicitly. */
-    fetchDirectory: (options?: { force?: boolean }) => Promise<void>
+    /**
+     * Fetched once and reused; pass force to refetch explicitly, or a
+     * different includeHidden to switch payloads (the server only honours it
+     * for structure managers).
+     */
+    fetchDirectory: (options?: {
+      force?: boolean
+      includeHidden?: boolean
+    }) => Promise<void>
+    /**
+     * Show or hide a structure, then reload the directory so the cascade the
+     * server computed is reflected.
+     */
+    setStructureHidden: (uid: string, hidden: boolean) => Promise<void>
     /** Members of the structure currently shown in the detail panel. */
     members: StructureMembersState
     fetchStructureMembers: (query: StructureMembersQueryParams) => Promise<void>
@@ -86,10 +100,17 @@ export const addOrganizationUnitSlice: StateCreator<
       loading: false,
       loaded: false,
       error: null,
+      includeHidden: false,
     },
-    fetchDirectory: async (options?: { force?: boolean }) => {
+    fetchDirectory: async (options?: {
+      force?: boolean
+      includeHidden?: boolean
+    }) => {
       const { directory } = get().organization
-      if (directory.loading || (directory.loaded && !options?.force)) {
+      const includeHidden = options?.includeHidden ?? directory.includeHidden
+      const upToDate =
+        directory.loaded && directory.includeHidden === includeHidden
+      if (directory.loading || (upToDate && !options?.force)) {
         return
       }
       const setDirectory = (directoryState: Partial<DirectoryState>) =>
@@ -102,16 +123,21 @@ export const addOrganizationUnitSlice: StateCreator<
 
       setDirectory({ loading: true, error: null })
       try {
-        const response = await fetch('/api/organizations/directory', {
-          headers: { 'accept-language': i18n.locale },
-        })
+        const response = await fetch(
+          `/api/organizations/directory${includeHidden ? '?includeHidden=true' : ''}`,
+          { headers: { 'accept-language': i18n.locale } },
+        )
         if (!response.ok) {
           throw new Error(`Failed to fetch: ${response.statusText}`)
         }
         const jsonData = (await response.json()) as {
           structures: OrganizationDirectoryEntry[]
         }
-        setDirectory({ structures: jsonData.structures, loaded: true })
+        setDirectory({
+          structures: jsonData.structures,
+          loaded: true,
+          includeHidden,
+        })
       } catch (error) {
         setDirectory({
           structures: [],
@@ -120,6 +146,21 @@ export const addOrganizationUnitSlice: StateCreator<
       } finally {
         setDirectory({ loading: false })
       }
+    },
+    setStructureHidden: async (uid: string, hidden: boolean) => {
+      const response = await fetch(
+        `/api/organizations/${encodeURIComponent(uid)}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hidden }),
+        },
+      )
+      if (!response.ok) {
+        throw new Error(`Failed to update visibility: ${response.statusText}`)
+      }
+      // Hiding cascades server-side, so the whole payload has to come back.
+      await get().organization.fetchDirectory({ force: true })
     },
     members: {
       rows: [],

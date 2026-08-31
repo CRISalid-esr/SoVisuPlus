@@ -1,6 +1,7 @@
 import { AMQPOrganizationUnitMessage } from '@/types/AMQPOrganizationUnitMessage'
 import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
 import { OrganizationUnitGraphQLClient } from '@/lib/graphql/OrganizationUnitGraphQLClient'
+import { OrganizationUnitService } from '@/lib/services/OrganizationUnitService'
 import { MessageProcessingWorker } from '@/lib/amqp/workers/MessageProcessingWorker'
 import { DataEvent } from '@/types/DataEvent'
 
@@ -18,11 +19,13 @@ export class OrganizationUnitWorker extends MessageProcessingWorker<AMQPOrganiza
    * @param message - The organization unit message to process
    * @param organizationUnitDAO - DAO used to persist the structure
    * @param organizationUnitGraphQLClient - graph GraphQL client
+   * @param organizationUnitService - service owning the visibility cascade
    */
   constructor(
     message: AMQPOrganizationUnitMessage,
     private organizationUnitDAO: OrganizationUnitDAO,
     private organizationUnitGraphQLClient: OrganizationUnitGraphQLClient,
+    private organizationUnitService: OrganizationUnitService,
   ) {
     super(message)
   }
@@ -58,6 +61,9 @@ export class OrganizationUnitWorker extends MessageProcessingWorker<AMQPOrganiza
       await this.organizationUnitDAO.createOrUpdateOrganizationUnit(
         organizationUnit,
       )
+      // The parent relationships were just replaced, and the hidden cascade
+      // is derived from them.
+      await this.organizationUnitService.recomputeEffectiveHidden()
       console.log(`Successfully processed organization unit: ${uid}`)
     } catch (error) {
       console.error(

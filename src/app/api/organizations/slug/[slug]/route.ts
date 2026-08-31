@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { OrganizationUnitService } from '@/lib/services/OrganizationUnitService'
+import { structureVisibilityAccess } from '@/app/auth/structureVisibility'
 
 export const GET = async (
   req: NextRequest,
@@ -16,6 +17,19 @@ export const GET = async (
         { error: `OrganizationUnit with slug ${slug} not found` },
         { status: 404 },
       )
+    }
+
+    // A hidden structure is not a perspective: its dashboard stays reachable
+    // for the structure managers who can see it in the directory, and looks
+    // like a dead link to everyone else.
+    if (organizationUnit.hiddenEffective) {
+      const { canManage } = await structureVisibilityAccess()
+      if (!canManage) {
+        return NextResponse.json(
+          { error: `OrganizationUnit with slug ${slug} not found` },
+          { status: 404 },
+        )
+      }
     }
 
     return NextResponse.json(organizationUnit)

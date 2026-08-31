@@ -2,10 +2,16 @@ import {
   buildDirectoryForest,
   buildRows,
   filterVisible,
+  pendingVisibilityRows,
   StructureRow,
+  withPendingRows,
 } from './directoryRows'
 import { OrganizationDirectoryEntry } from '@/types/OrganizationDirectory'
-import { OrganizationCategory, OrganizationGenericType } from '@prisma/client'
+import {
+  OrganizationCategory,
+  OrganizationGenericType,
+  OrganizationRelationKind,
+} from '@prisma/client'
 
 const makeEntry = (
   overrides: Partial<OrganizationDirectoryEntry> & { uid: string },
@@ -17,6 +23,8 @@ const makeEntry = (
   genericType: OrganizationGenericType.unit,
   nationalType: null,
   external: false,
+  hidden: false,
+  hiddenEffective: false,
   parents: [],
   membersCount: 0,
   publicationsCount: 0,
@@ -305,5 +313,122 @@ describe('buildDirectoryForest', () => {
     // the cycle is rescued as a finite branch instead of disappearing
     expect(childUids(roots[1])).toEqual(['b'])
     expect(flatten(roots)).toHaveLength(3)
+  })
+})
+
+describe('optimistic visibility', () => {
+  const row = (uid: string, parentUid?: string): StructureRow =>
+    ({
+      uid,
+      slug: null,
+      acronym: uid,
+      name: uid,
+      category: OrganizationCategory.research_unit,
+      nationalType: null,
+      external: false,
+      hidden: false,
+      hiddenEffective: false,
+      institutionNames: [],
+      membersCount: 0,
+      publicationsCount: 0,
+      oaRate: 0,
+      halRate: 0,
+      parents: parentUid
+        ? [
+            {
+              parentUid,
+              kind: OrganizationRelationKind.part_of,
+              position: null,
+            },
+          ]
+        : [],
+    }) as StructureRow
+
+  // inst ─ div ─ team, plus an unrelated structure
+  const displayed: StructureRow[] = [
+    row('inst'),
+    row('div', 'inst'),
+    row('team', 'div'),
+    row('other'),
+  ]
+
+  const flags = (rows: StructureRow[]) =>
+    Object.fromEntries(rows.map((r) => [r.uid, [r.hidden, r.hiddenEffective]]))
+
+  it('flags the toggled structure and its cascade, and nothing else', () => {
+    const pending = pendingVisibilityRows(displayed, 'inst', true)
+
+    // 'other' is untouched, so it is not part of the update
+    expect(flags(pending)).toEqual({
+      inst: [true, true],
+      div: [false, true],
+      team: [false, true],
+    })
+  })
+
+  it('leaves a structure that keeps a visible parent alone', () => {
+    const withSecondParent = [
+      ...displayed,
+      {
+        ...row('lab', 'inst'),
+        parents: [
+          ...row('lab', 'inst').parents,
+          {
+            parentUid: 'other',
+            kind: OrganizationRelationKind.member_of,
+            position: null,
+          },
+        ],
+      } as StructureRow,
+    ]
+    const pending = pendingVisibilityRows(withSecondParent, 'inst', true)
+
+    expect(Object.keys(flags(pending)).sort()).toEqual(['div', 'inst', 'team'])
+  })
+
+  it('gives the cascade back when the structure is shown again', () => {
+    const hidden = withPendingRows(
+      displayed,
+      pendingVisibilityRows(displayed, 'inst', true),
+    )
+    const shown = pendingVisibilityRows(hidden, 'inst', false)
+
+    expect(flags(shown)).toEqual({
+      inst: [false, false],
+      div: [false, false],
+      team: [false, false],
+    })
+  })
+
+  it('does not mutate the rows it was given', () => {
+    pendingVisibilityRows(displayed, 'inst', true)
+    expect(displayed.every((r) => !r.hidden && !r.hiddenEffective)).toBe(true)
+  })
+
+  it('applies the pending flags over the payload', () => {
+    const merged = withPendingRows(
+      displayed,
+      pendingVisibilityRows(displayed, 'inst', true),
+    )
+
+    expect(merged.map((r) => r.uid)).toEqual(['inst', 'div', 'team', 'other'])
+    expect(merged.find((r) => r.uid === 'inst')!.hiddenEffective).toBe(true)
+    expect(merged.find((r) => r.uid === 'other')!.hiddenEffective).toBe(false)
+  })
+
+  it('keeps the rows the refreshed payload has dropped', () => {
+    const pending = pendingVisibilityRows(displayed, 'inst', true)
+    // what the server returns once the hide has landed
+    const refreshed = [{ ...row('other'), membersCount: 7 }]
+
+    const merged = withPendingRows(refreshed, pending)
+
+    expect(merged.map((r) => r.uid)).toEqual(['other', 'inst', 'div', 'team'])
+    // the payload still owns everything but the visibility flags
+    expect(merged.find((r) => r.uid === 'other')!.membersCount).toBe(7)
+  })
+
+  it('returns the rows untouched when nothing is pending', () => {
+    expect(withPendingRows(displayed, [])).toBe(displayed)
   })
 })

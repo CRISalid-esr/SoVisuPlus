@@ -160,6 +160,8 @@ describe('OrganizationUnit', () => {
       category: OrganizationCategory.research_unit,
       nationalType: 'UMR',
       external: false,
+      hidden: false,
+      hiddenEffective: false,
       slug: 'abc',
       localTypes: [{ value: 'Unité mixte', language: 'fr' }],
       labels: [
@@ -279,6 +281,8 @@ describe('OrganizationUnit', () => {
       category: OrganizationCategory.research_unit,
       nationalType: null,
       external: false,
+      hidden: false,
+      hiddenEffective: false,
       slug: 'another-research-unit',
       localTypes: null,
       labels: [

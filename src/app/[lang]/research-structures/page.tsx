@@ -32,14 +32,19 @@ import {
 } from 'material-react-table'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import useStore from '@/stores/global_store'
+import { hasUnscopedPermission } from '@/app/auth/ability'
+import { PermissionAction, PermissionSubject } from '@/types/Permission'
 import { Localization } from '@/types/Localization'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import {
   buildDirectoryForest,
   buildRows,
   filterVisible,
+  pendingVisibilityRows,
   StructureRow,
+  withPendingRows,
 } from './components/directoryRows'
 import RateBar from './components/RateBar'
 import StructureNameCell from './components/StructureNameCell'
@@ -363,19 +368,88 @@ const ResearchStructuresPage = () => {
   const router = useRouter()
   const [tab, setTab] = useState(0)
   const [includeExternal, setIncludeExternal] = useState(false)
+  const [showHidden, setShowHidden] = useState(false)
+  const { data: session } = useSession()
 
-  const { directory, fetchDirectory } = useStore((state) => state.organization)
+  // Structure visibility is a global permission: OrganizationUnit carries no
+  // authorization perimeter, so a scoped grant must not pass (cf. ability.ts).
+  const canManageVisibility = useMemo(
+    () =>
+      hasUnscopedPermission(
+        session?.user?.authz,
+        PermissionAction.update,
+        PermissionSubject.OrganizationUnit,
+        'hidden',
+      ),
+    [session?.user?.authz],
+  )
+
+  const { directory, fetchDirectory, setStructureHidden } = useStore(
+    (state) => state.organization,
+  )
 
   useEffect(() => {
-    fetchDirectory().catch((error) => {
-      console.error('Error fetching the structures directory:', error)
-    })
-  }, [fetchDirectory])
+    fetchDirectory({ includeHidden: canManageVisibility && showHidden }).catch(
+      (error) => {
+        console.error('Error fetching the structures directory:', error)
+      },
+    )
+  }, [fetchDirectory, canManageVisibility, showHidden])
 
   const rows = useMemo(
     () => buildRows(directory.structures, lang),
     [directory.structures, lang],
   )
+
+  /**
+   * Visibility the user just toggled, applied on top of the directory until
+   * the selection moves back to a structure the directory still carries. It
+   * makes the switch react to the click rather than to the round trip, and it
+   * keeps a just-hidden structure on screen instead of yanking the detail
+   * panel out from under the click that hid it.
+   */
+  const [pendingRows, setPendingRows] = useState<StructureRow[]>([])
+
+  /** Directory rows with the pending visibility, for the Arborescence tab. */
+  const treeRows = useMemo(
+    () => withPendingRows(rows, pendingRows),
+    [rows, pendingRows],
+  )
+
+  const toggleHidden = useCallback(
+    async (uid: string, hidden: boolean) => {
+      // Set before awaiting, from what is on screen: the display must not wait
+      // for the server, and the refetch drops the structure from the store in
+      // its own render — a render with it in neither list would blank the panel
+      // and remount the members table.
+      setPendingRows(pendingVisibilityRows(treeRows, uid, hidden))
+      try {
+        await setStructureHidden(uid, hidden)
+      } catch (error) {
+        console.error('Error updating the structure visibility:', error)
+        // Nothing changed server-side: fall back to the payload.
+        setPendingRows([])
+      }
+    },
+    [treeRows, setStructureHidden],
+  )
+
+  // Selecting a structure the directory still carries ends the pending state;
+  // the hidden ones it stands in for keep it alive.
+  const handleSelectionChange = useCallback(
+    (uid: string | null) => {
+      setPendingRows((previous) => {
+        if (previous.length === 0) {
+          return previous
+        }
+        return uid === null || directory.structures.some((e) => e.uid === uid)
+          ? []
+          : previous
+      })
+    },
+    [directory.structures],
+  )
+
   const visibleRows = useMemo(
     () => filterVisible(rows, includeExternal),
     [rows, includeExternal],
@@ -438,6 +512,18 @@ const ResearchStructuresPage = () => {
             label={t`research_structures_switch_display_old`}
           />
         </Tooltip>
+        {canManageVisibility && (
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showHidden}
+                onChange={(_, checked) => setShowHidden(checked)}
+                size='small'
+              />
+            }
+            label={t`research_structures_switch_show_hidden`}
+          />
+        )}
       </Box>
 
       <Tabs
@@ -470,9 +556,12 @@ const ResearchStructuresPage = () => {
         <>
           {tab === 0 && (
             <StructureTreeExplorer
-              data={rows}
+              data={treeRows}
               includeExternal={includeExternal}
               onNavigate={navigateToDashboard}
+              canManageVisibility={canManageVisibility}
+              onToggleHidden={toggleHidden}
+              onSelectionChange={handleSelectionChange}
             />
           )}
           {tab === 1 && <FlatTable data={visibleRows} {...tableProps} />}

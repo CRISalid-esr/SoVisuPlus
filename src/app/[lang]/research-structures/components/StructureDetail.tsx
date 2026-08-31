@@ -6,16 +6,20 @@ import {
   Box,
   Button,
   Chip,
+  FormControlLabel,
   List,
   ListItemButton,
   ListItemText,
   Paper,
   Stack,
+  Switch,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { nationalTypeLabel } from '@/app/[lang]/components/organizationTypeLabels'
 import { StructureRow } from './directoryRows'
+import { visibleChildren } from './treeExplorerUtils'
 import RateBar from './RateBar'
 import StructureMembersTable from './StructureMembersTable'
 
@@ -42,14 +46,23 @@ const StructureDetail = ({
   row,
   onNavigate,
   onSelectChild,
+  canManageVisibility = false,
+  onToggleHidden,
 }: {
   row: StructureRow
   onNavigate: (row: StructureRow) => void
   onSelectChild: (nodeId: string) => void
+  /** Whether the logged user holds the structure_manager permission. */
+  canManageVisibility?: boolean
+  /** Receives the bare structure uid, never a `uid@@rootUid` tree node id. */
+  onToggleHidden?: (uid: string, hidden: boolean) => void
 }) => {
   const theme = useTheme()
   const typeLabel = nationalTypeLabel(Lingui.i18n, row.nationalType)
-  const children = row.subRows ?? []
+  const children = visibleChildren(row)
+  // Hidden through an ancestor rather than in its own right: showing it again
+  // means showing that ancestor, so the switch would be a lie.
+  const hiddenByAncestor = row.hiddenEffective && !row.hidden
 
   return (
     <Stack spacing={3}>
@@ -70,6 +83,13 @@ const StructureDetail = ({
               size='small'
               variant='outlined'
               color='warning'
+            />
+          )}
+          {row.hiddenEffective && (
+            <Chip
+              label={t`research_structures_chip_hidden`}
+              size='small'
+              variant='outlined'
             />
           )}
         </Box>
@@ -93,6 +113,31 @@ const StructureDetail = ({
           >
             {t`research_structures_dashboard_link`}
           </Button>
+        )}
+        {canManageVisibility && onToggleHidden && (
+          <Box sx={{ mt: 1.5 }}>
+            <Tooltip
+              title={
+                hiddenByAncestor
+                  ? t`research_structures_toggle_hidden_by_ancestor`
+                  : t`research_structures_toggle_hidden_help`
+              }
+            >
+              <FormControlLabel
+                control={
+                  <Switch
+                    size='small'
+                    checked={row.hiddenEffective}
+                    disabled={hiddenByAncestor}
+                    onChange={(_, checked) =>
+                      onToggleHidden(row.originalUid ?? row.uid, checked)
+                    }
+                  />
+                }
+                label={t`research_structures_toggle_hidden`}
+              />
+            </Tooltip>
+          </Box>
         )}
       </Box>
 

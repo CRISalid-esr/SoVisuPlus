@@ -592,6 +592,16 @@ model OrganizationUnit {
   slug         String?                 @unique
   localTypes   Json? // [{ value, language }] — display only
 
+  /// Explicit visibility toggle, set from the UI by a structure_manager.
+  /// Never written by the ETL upsert, so it survives graph events.
+  hidden Boolean @default(false)
+
+  /// Derived from `hidden` and the parent relationships: a structure is
+  /// effectively hidden when it is explicitly hidden, or when it has parents
+  /// and all of them are effectively hidden. Every read path filters on this
+  /// column; it is recomputed by OrganizationUnitService.recomputeEffectiveHidden().
+  hiddenEffective Boolean @default(false)
+
   labels       OrganizationUnitLabel[]
   descriptions OrganizationUnitDescription[]
   identifiers  OrganizationUnitIdentifier[]
@@ -601,6 +611,8 @@ model OrganizationUnit {
 
   memberships Membership[]
   employments Employment[]
+
+  @@index([hiddenEffective])
 }
 
 model OrganizationUnitLabel {
@@ -719,6 +731,7 @@ enum PermissionSubject {
   Membership
   Institution
   InstitutionDivision
+  OrganizationUnit
 }
 
 enum EntityType {

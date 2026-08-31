@@ -16,7 +16,7 @@ Create a `rbac.roles.yaml` at the root of your instance. Each role has:
 - `description` (optional)
 - `permissions`: list of rules, each with
   - `action`: one of your domain actions (e.g. `manage`, `read`, `update`, `delete`, `merge`, `unmerge`...)
-  - `subject`: the domain entity (`Document`, `DocumentRecord`, `Person`, `ResearchUnit`, or `all`)
+  - `subject`: the domain entity (`Document`, `DocumentRecord`, `Person`, `ResearchUnit`, `OrganizationUnit`, or `all`)
   - `fields` (optional): field-level permissions for `update` (e.g. `titles`, `abstracts`)
 
 ```yaml
@@ -50,6 +50,13 @@ roles:
       - action: update
         subject: Person
         fields: [identifiers]
+
+  - name: structure_manager
+    description: Show / hide research structures in the directory (global scope only)
+    permissions:
+      - action: update
+        subject: OrganizationUnit
+        fields: [hidden]
 ```
 
 ### Notes
@@ -61,6 +68,25 @@ roles:
   - Scope to an **Institution** or **InstitutionDivision** → similar idea, broader perimeters
 
 - Field-level checks are supported via `fields` (e.g. for `update` actions)
+
+#### Global-only roles
+
+`structure_manager` is the exception to the scoping model: it must be assigned **without**
+`--scope`. `OrganizationUnit` carries no authorization perimeter, so CASL cannot narrow a
+rule about it — a scoped assignment would silently behave like a global one on a
+subject-type check. Server and client both go through
+`hasUnscopedPermission()` (`src/app/auth/ability.ts`) instead of `ability.can`, and that
+helper rejects any assignment that carries a scope.
+
+**`admin` is exempt.** A `manage` / `all` permission means full access however it was
+assigned: scoping it narrows the perimeter of the subjects that _have_ one, and
+`OrganizationUnit` has none. So an admin scoped to a research unit still manages structure
+visibility globally.
+
+Hiding a structure removes it from the research-structures page, the sidebar perspective
+search, the perspective resolution, the directory KPIs and people's affiliation lists, and
+cascades to the structures reachable only through it. See
+[`specs/add-hide-structure-option-and-permission/prompt.md`](../specs/add-hide-structure-option-and-permission/prompt.md).
 
 ---
 
@@ -137,6 +163,14 @@ Grant a **global** merger role to an admin user:
 ```bash
 npm run assign_role -- \
   --role document_merger \
+  --person-uid local-admin
+```
+
+Let a directory administrator hide structures (global only — a scope grants nothing here):
+
+```bash
+npm run assign_role -- \
+  --role structure_manager \
   --person-uid local-admin
 ```
 

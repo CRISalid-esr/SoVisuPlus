@@ -2,6 +2,7 @@ import { OrganizationUnitWorker } from '@/lib/amqp/workers/OrganizationUnitWorke
 import { AMQPOrganizationUnitMessage } from '@/types/AMQPOrganizationUnitMessage'
 import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
 import { OrganizationUnitGraphQLClient } from '@/lib/graphql/OrganizationUnitGraphQLClient'
+import { OrganizationUnitService } from '@/lib/services/OrganizationUnitService'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { OrganizationCategory, OrganizationGenericType } from '@prisma/client'
 import { Literal } from '@/types/Literal'
@@ -15,6 +16,12 @@ jest.mock('@/lib/daos/OrganizationUnitDAO', () => ({
 jest.mock('@/lib/graphql/OrganizationUnitGraphQLClient', () => ({
   OrganizationUnitGraphQLClient: jest.fn().mockImplementation(() => ({
     getOrganizationUnitByUid: jest.fn(),
+  })),
+}))
+
+jest.mock('@/lib/services/OrganizationUnitService', () => ({
+  OrganizationUnitService: jest.fn().mockImplementation(() => ({
+    recomputeEffectiveHidden: jest.fn(),
   })),
 }))
 
@@ -42,6 +49,7 @@ const makeOrganizationUnit = (): OrganizationUnit =>
 describe('OrganizationUnitWorker', () => {
   let organizationUnitDAO: jest.Mocked<OrganizationUnitDAO>
   let organizationUnitGraphQLClient: jest.Mocked<OrganizationUnitGraphQLClient>
+  let organizationUnitService: jest.Mocked<OrganizationUnitService>
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -49,6 +57,8 @@ describe('OrganizationUnitWorker', () => {
       new OrganizationUnitDAO() as jest.Mocked<OrganizationUnitDAO>
     organizationUnitGraphQLClient =
       new OrganizationUnitGraphQLClient() as jest.Mocked<OrganizationUnitGraphQLClient>
+    organizationUnitService =
+      new OrganizationUnitService() as jest.Mocked<OrganizationUnitService>
   })
 
   const makeWorker = (message: AMQPOrganizationUnitMessage) =>
@@ -56,6 +66,7 @@ describe('OrganizationUnitWorker', () => {
       message,
       organizationUnitDAO,
       organizationUnitGraphQLClient,
+      organizationUnitService,
     )
 
   it.each(['created', 'updated', 'unchanged'] as const)(

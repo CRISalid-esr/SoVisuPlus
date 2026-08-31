@@ -8,7 +8,9 @@ import { StructureRow } from './directoryRows'
 
 /**
  * Structure cell shared by the flat and hierarchical tables: acronym +
- * translated national-type chip + full name; muted external variant.
+ * translated national-type chip + full name; muted external and hidden
+ * variants (hidden rows only reach the tables for a structure manager who
+ * turned the "show hidden" switch on).
  */
 const StructureNameCell = ({
   row,
@@ -21,7 +23,10 @@ const StructureNameCell = ({
 
   return (
     <Box
-      sx={{ cursor: 'pointer', ...(row.external ? { opacity: 0.75 } : {}) }}
+      sx={{
+        cursor: 'pointer',
+        ...(row.external || row.hiddenEffective ? { opacity: 0.75 } : {}),
+      }}
       onClick={() => onNavigate(row)}
     >
       <Box
@@ -53,6 +58,14 @@ const StructureNameCell = ({
             size='small'
             variant='outlined'
             color='warning'
+            sx={{ height: 16, fontSize: 10 }}
+          />
+        )}
+        {row.hiddenEffective && (
+          <Chip
+            label={t`research_structures_chip_hidden`}
+            size='small'
+            variant='outlined'
             sx={{ height: 16, fontSize: 10 }}
           />
         )}
