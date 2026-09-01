@@ -28,8 +28,11 @@ const RootLayout = async ({ params, children }: Props) => {
   const { lang, selectedMessages } = await resolveLanguage(params, messages)
 
   // The agents API URL stays server-side (the /api/chat proxy holds it); the browser only gets a
-  // boolean deciding whether to show the chat, plus the localised welcome/suggestions.
-  const chatEnabled = Boolean(process.env.CRISALID_AGENTS_API_URL)
+  // boolean deciding whether to show the chat, plus the localised welcome/suggestions. The widget
+  // is shown only when the backend is configured AND a chat config file resolved.
+  const chatEnabled =
+    Boolean(process.env.CRISALID_AGENTS_API_URL) &&
+    (await chatConfigService.isAvailable())
   const chatClientConfig = await chatConfigService.getClientConfig(lang)
 
   return (

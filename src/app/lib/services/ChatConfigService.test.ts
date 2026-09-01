@@ -1,7 +1,11 @@
+import { existsSync } from 'node:fs'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { ChatConfigService, resolveChatConfigPath } from './ChatConfigService'
+
+jest.mock('node:fs', () => ({ existsSync: jest.fn() }))
+const mockExistsSync = existsSync as jest.MockedFunction<typeof existsSync>
 
 const writeFixture = async (content: unknown): Promise<string> => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'chatcfg-'))
@@ -77,40 +81,106 @@ describe('ChatConfigService', () => {
     const service = ChatConfigService.fromFile(file).build()
     expect(await service.getSystemPrompt()).toBe('')
   })
+
+  describe('{{variable}} interpolation in the system prompt', () => {
+    const OLD_ENV = process.env
+    afterEach(() => {
+      process.env = OLD_ENV
+    })
+
+    it('substitutes {{institutionName}} from NEXT_PUBLIC_INSTITUTION_NAME', async () => {
+      process.env = { ...OLD_ENV, NEXT_PUBLIC_INSTITUTION_NAME: 'Panthéon-Sorbonne' }
+      const file = await writeFixture({
+        systemPrompt: 'Assistant for {{institutionName}}.',
+      })
+      const service = ChatConfigService.fromFile(file).build()
+      expect(await service.getSystemPrompt()).toBe(
+        'Assistant for Panthéon-Sorbonne.',
+      )
+    })
+
+    it('resolves a file-declared variable and lets it override an app default', async () => {
+      process.env = { ...OLD_ENV, NEXT_PUBLIC_INSTITUTION_NAME: 'Default U' }
+      const file = await writeFixture({
+        systemPrompt: '{{institutionName}} — contact {{supportEmail}}.',
+        variables: { institutionName: 'Override U', supportEmail: 'x@y.fr' },
+      })
+      const service = ChatConfigService.fromFile(file).build()
+      expect(await service.getSystemPrompt()).toBe(
+        'Override U — contact x@y.fr.',
+      )
+    })
+
+    it('collapses an unknown placeholder to an empty string', async () => {
+      const file = await writeFixture({ systemPrompt: 'A{{nope}}B' })
+      const service = ChatConfigService.fromFile(file).build()
+      expect(await service.getSystemPrompt()).toBe('AB')
+    })
+  })
+
+  describe('isAvailable', () => {
+    it('is true when a file resolves and parses', async () => {
+      const file = await writeFixture(SAMPLE)
+      const service = ChatConfigService.fromFile(file).build()
+      expect(await service.isAvailable()).toBe(true)
+    })
+
+    it('is false when the path is null', async () => {
+      const service = ChatConfigService.fromFile(null).build()
+      expect(await service.isAvailable()).toBe(false)
+    })
+
+    it('is false when the file is missing or invalid', async () => {
+      const service = ChatConfigService.fromFile('/no/such/chat.json').build()
+      expect(await service.isAvailable()).toBe(false)
+    })
+  })
 })
 
 describe('resolveChatConfigPath', () => {
   const OLD_ENV = process.env
+  const LIVE = path.resolve(process.cwd(), 'chat.json')
+  const SAMPLE_PATH = path.resolve(process.cwd(), 'chat.sample.json')
+
+  beforeEach(() => {
+    mockExistsSync.mockReset()
+  })
 
   afterEach(() => {
     process.env = OLD_ENV
   })
 
-  it('honours the CHAT_CONFIG_FILE env var', () => {
+  it('uses CHAT_CONFIG_FILE when it is set and the file exists', () => {
     process.env = { ...OLD_ENV, CHAT_CONFIG_FILE: '/config/chat.json' }
+    mockExistsSync.mockImplementation((p) => p === '/config/chat.json')
     expect(resolveChatConfigPath()).toBe('/config/chat.json')
   })
 
-  it('defaults to configs/chat.json when the env var is an empty string', () => {
-    process.env = { ...OLD_ENV, CHAT_CONFIG_FILE: '' }
-    expect(resolveChatConfigPath()).toBe(
-      path.resolve(process.cwd(), 'configs/chat.json'),
-    )
+  it('falls through to chat.json when CHAT_CONFIG_FILE points at a missing file', () => {
+    process.env = { ...OLD_ENV, CHAT_CONFIG_FILE: '/config/chat.json' }
+    mockExistsSync.mockImplementation((p) => p === LIVE)
+    expect(resolveChatConfigPath()).toBe(LIVE)
   })
 
-  it('defaults to configs/chat.json when the env var is unset', () => {
+  it('uses chat.json when the env var is unset and chat.json exists', () => {
     const env = { ...OLD_ENV }
     delete env.CHAT_CONFIG_FILE
     process.env = env
-    expect(resolveChatConfigPath()).toBe(
-      path.resolve(process.cwd(), 'configs/chat.json'),
-    )
+    mockExistsSync.mockImplementation((p) => p === LIVE)
+    expect(resolveChatConfigPath()).toBe(LIVE)
   })
 
-  it('defaults to configs/chat.json when the env var is only whitespace', () => {
+  it('falls back to chat.sample.json when only the sample exists', () => {
+    const env = { ...OLD_ENV }
+    delete env.CHAT_CONFIG_FILE
+    process.env = env
+    mockExistsSync.mockImplementation((p) => p === SAMPLE_PATH)
+    expect(resolveChatConfigPath()).toBe(SAMPLE_PATH)
+  })
+
+  it('returns null when no file exists anywhere', () => {
     process.env = { ...OLD_ENV, CHAT_CONFIG_FILE: '   ' }
-    expect(resolveChatConfigPath()).toBe(
-      path.resolve(process.cwd(), 'configs/chat.json'),
-    )
+    mockExistsSync.mockReturnValue(false)
+    expect(resolveChatConfigPath()).toBeNull()
   })
 })

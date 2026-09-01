@@ -1,7 +1,8 @@
 /**
- * Shape of the AI chat configuration file (`configs/chat.json`, overridable via the
- * `CHAT_CONFIG_FILE` env var / a `/config/chat.json` mount). It carries the agent system prompt
- * (server-only) plus the per-locale welcome message and default suggestions shown in the widget.
+ * Shape of the AI chat configuration file. The app resolves it via a cascade
+ * (`CHAT_CONFIG_FILE` → `chat.json` → baked `chat.sample.json`; see `resolveChatConfigPath`). It
+ * carries the agent system prompt (server-only) plus the per-locale welcome message and default
+ * suggestions shown in the widget.
  */
 
 export interface ChatWelcome {
@@ -26,9 +27,16 @@ export interface ChatLocaleConfig {
 export interface ChatConfig {
   /**
    * System prompt sent to the agent (as a `role:"system"` message) to shape its behaviour.
-   * Server-only — never exposed to the browser.
+   * May contain `{{variable}}` placeholders resolved server-side. Server-only — never exposed to
+   * the browser.
    */
   systemPrompt?: string
+  /**
+   * Custom literal values for `{{key}}` placeholders in `systemPrompt`, declared by the deploying
+   * admin in the config file. Merged over (and able to override) the app-provided defaults such as
+   * `institutionName`.
+   */
+  variables?: Record<string, string>
   /** User-facing strings keyed by locale (e.g. `en`, `fr`). */
   locales?: Record<string, ChatLocaleConfig>
 }

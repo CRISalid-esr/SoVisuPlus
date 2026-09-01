@@ -170,7 +170,7 @@ const AiChatWidget = () => {
   const [open, setOpen] = useState(false)
 
   // Welcome seed, suggestions and the enable flag come from the runtime chat config injected by
-  // the layout (sourced from configs/chat.json). The reference is stable within a mount and the
+  // the layout (sourced from the resolved chat.json). The reference is stable within a mount and the
   // widget remounts on locale change (route change), so the memos pick up the right locale.
   const chatConfig = getRuntimeChatConfig()
 

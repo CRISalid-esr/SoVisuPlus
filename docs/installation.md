@@ -113,7 +113,6 @@ Following table gives detailed information on each environment variable:
 | HAL_UPLOADS_ROOT                          | Root directory for HAL deposit files (`hal-files` uploads + generated `hal-tei`); mounted as a volume in Docker                                                                                                             | n       | server          | y                  | prod                                   | n                  |
 | CRISALID_AGENTS_API_URL                   | Base URL of the Crisalid Agents API backing the AI chat assistant (e.g. `http://crisalid-agents-chat-api:9100`); the server-side `/api/chat` proxy appends the `/chat` endpoint path. Used only on the server (never exposed to the browser); the chat widget is displayed only when this variable is set and non-empty.                | n       | server          | y                  | prod                                   | n                  |
 | CRISALID_AGENTS_API_KEY                   | API key used by the server to authenticate against the Crisalid Agents API.                                                                                                                                                | y       | server          | y                  | prod                                   | n                  |
-| CHAT_CONFIG_FILE                          | Path to the AI chat config JSON (system prompt + per-locale welcome message & suggestions). Optional: defaults to the baked `configs/chat.json`, or a `/config/chat.json` mount if present. See _AI chat configuration_ below.                | n       | server          | n                  | prod                                   | n                  |
 
 6. Run the Prisma migration with `npx prisma migrate dev --name init`.
 7. Run the development server with `npm run dev`.
@@ -124,23 +123,42 @@ The listener creates two queues (`sovisuplus-interactive` and `sovisuplus-batch`
 
 ### AI chat configuration
 
-The AI chat assistant is configured from a JSON file. A baked default lives at `configs/chat.json`;
-at container startup the bootstrap script picks, in order: `CHAT_CONFIG_FILE` (if set and the file
-exists) → a `/config/chat.json` mount → the baked default. Locally (non-Docker) the app reads
-`configs/chat.json` from the working directory unless `CHAT_CONFIG_FILE` is set.
+The AI chat assistant is configured from a JSON file. A committed fallback, `chat.sample.json`,
+lives at the repository root (and is baked into the image); the live `chat.json` is env-specific and
+gitignored, mirroring the RBAC `rbac.roles.sample.yaml` / `rbac.roles.yaml` split. The app resolves
+the file via a cascade, picking the first that exists:
+
+1. `CHAT_CONFIG_FILE` — the path the deployment injects (e.g. a `/config/chat.json` mount),
+2. `chat.json` at the working directory,
+3. the baked `chat.sample.json`,
+4. otherwise **none — the chat widget is not shown**.
+
+The widget is displayed only when `CRISALID_AGENTS_API_URL` is set **and** a config file resolves.
+Locally, `cp chat.sample.json chat.json` and edit it (the sample alone already works as a fallback).
 
 The file holds:
 
 - `systemPrompt` — sent to the agent (as a `role:"system"` message) to shape its behaviour, e.g.
   "answer concisely, no jokes". **Server-only** — injected by the `/api/chat` proxy and never sent
-  to the browser. Leave empty to rely solely on the agent's own prompt.
+  to the browser. Leave empty to rely solely on the agent's own prompt. May contain `{{variable}}`
+  placeholders (see below).
+- `variables` — optional map of custom `{{key}}` values, so a deploying admin can parametrise the
+  prompt by editing only this file. Merged over (and able to override) the app-provided defaults.
 - `locales.<lang>.welcome` — the seeded welcome thread (`title` + `message`) shown when the widget
   opens.
 - `locales.<lang>.suggestions` — the default prompt chips (`label` + `value`).
 
+**Prompt variables.** `{{key}}` placeholders in `systemPrompt` are substituted server-side:
+
+- `{{institutionName}}` — an app-provided default sourced from `NEXT_PUBLIC_INSTITUTION_NAME` (which
+  the deployment maps from the unprefixed `INSTITUTION_NAME`), so it need not be re-typed.
+- any key declared in the file's `variables` map — for values the app does not provide.
+- an unknown placeholder resolves to an empty string.
+
 ```jsonc
 {
-  "systemPrompt": "",
+  "systemPrompt": "You are the research assistant for {{institutionName}}. Contact {{supportEmail}}.",
+  "variables": { "supportEmail": "svp-support@example.edu" },
   "locales": {
     "en": {
       "welcome": { "title": "Welcome", "message": "Hi! I'm your SoVisu+ assistant…" },
@@ -152,7 +170,7 @@ The file holds:
 ```
 
 Unknown locales fall back to `en`. To customise per deployment, mount your file at
-`/config/chat.json` (or set `CHAT_CONFIG_FILE`) on the sovisuplus container.
+`/config/chat.json` (pointed to by `CHAT_CONFIG_FILE`) on the sovisuplus container.
 
 ### RBAC setup (required)
 
