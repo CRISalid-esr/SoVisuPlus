@@ -1,7 +1,11 @@
 /**
- * Shape of the AI chat configuration file (`configs/chat.json`, overridable via the
- * `CHAT_CONFIG_FILE` env var / a `/config/chat.json` mount). It carries the agent system prompt
- * (server-only) plus the per-locale welcome message and default suggestions shown in the widget.
+ * Shape of the AI chat configuration file. The app resolves it via a cascade of candidates
+ * (`CHAT_CONFIG_FILE` → `chat.json` → baked `chat.sample.json`; see `resolveChatConfigCandidates`),
+ * using the first that loads to a usable config object — a JSON object with a `systemPrompt` key;
+ * a null/empty/primitive/array file, or an object without `systemPrompt`, is skipped to the next
+ * tier. It
+ * carries the agent system prompt (server-only) plus the per-locale welcome message and default
+ * suggestions shown in the widget.
  */
 
 export interface ChatWelcome {
@@ -26,9 +30,21 @@ export interface ChatLocaleConfig {
 export interface ChatConfig {
   /**
    * System prompt sent to the agent (as a `role:"system"` message) to shape its behaviour.
-   * Server-only — never exposed to the browser.
+   * May contain `{{variable}}` placeholders resolved server-side. Server-only — never exposed to
+   * the browser.
+   *
+   * NB: a config **file** must include this key (its value may be empty, e.g. `""`) to be accepted
+   * by `ChatConfigService` — it is the marker that distinguishes a real config from arbitrary JSON;
+   * see `isUsableConfig`. The field stays optional here because consumers read it defensively
+   * (`config?.systemPrompt?.trim()`).
    */
   systemPrompt?: string
+  /**
+   * Custom literal values for `{{key}}` placeholders in `systemPrompt`, declared by the deploying
+   * admin in the config file. Merged over (and able to override) the app-provided defaults such as
+   * `institutionName`.
+   */
+  variables?: Record<string, string>
   /** User-facing strings keyed by locale (e.g. `en`, `fr`). */
   locales?: Record<string, ChatLocaleConfig>
 }
