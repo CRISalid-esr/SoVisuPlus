@@ -1,54 +1,55 @@
-import { existsSync } from 'node:fs'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import type { ChatConfig, ChatSuggestion, ChatWelcome } from '@/types/ChatConfig'
 
 /**
- * Server-side reader for the AI chat configuration file. Resolves the file via a cascade
- * (`CHAT_CONFIG_FILE` → `chat.json` → baked `chat.sample.json`; see `resolveChatConfigPath`), loads
- * and caches it, and exposes the pieces the app needs: the system prompt (injected server-side by
- * the `/api/chat` proxy, with `{{variable}}` placeholders resolved) and the per-locale welcome
- * message + default suggestions (shipped to the browser by the layout). When no file resolves the
- * config stays null and `isAvailable()` is false, so the widget is hidden. Mirrors
- * `ConceptFilterService`.
+ * Server-side reader for the AI chat configuration file. Tries a cascade of candidates in priority
+ * order (`CHAT_CONFIG_FILE` → `chat.json` → baked `chat.sample.json`; see
+ * `resolveChatConfigCandidates`) and uses the first that **loads** (exists and parses) — a
+ * present-but-invalid file is skipped to the next tier rather than hiding the widget. It exposes the
+ * pieces the app needs: the system prompt (injected server-side by the `/api/chat` proxy, with
+ * `{{variable}}` placeholders resolved) and the per-locale welcome message + default suggestions
+ * (shipped to the browser by the layout). When no candidate loads the config stays null and
+ * `isAvailable()` is false, so the widget is hidden. Mirrors `ConceptFilterService`.
  */
 
 const DEFAULT_LOCALE = 'en'
 
 export class ChatConfigService {
+  static fromFiles(filePaths: string[]) {
+    return { build: () => new ChatConfigService(filePaths) }
+  }
+
   static fromFile(filePath: string | null) {
-    return { build: () => new ChatConfigService(filePath) }
+    return ChatConfigService.fromFiles(filePath ? [filePath] : [])
   }
 
   private config: ChatConfig | null = null
   private loaded = false
   private loadPromise: Promise<void> | null = null
 
-  private constructor(private readonly filePath: string | null) {}
+  private constructor(private readonly filePaths: string[]) {}
 
   private async ensureLoaded(): Promise<void> {
     if (this.loaded) return
     if (this.loadPromise) return this.loadPromise
 
     this.loadPromise = (async () => {
-      // No file resolved (none of the cascade paths exist) → leave config null (widget hidden).
-      if (!this.filePath) {
-        this.config = null
-        this.loaded = true
-        return
+      // Use the first candidate that loads; skip any that is missing or invalid. When none load,
+      // config stays null (widget hidden).
+      this.config = null
+      for (const filePath of this.filePaths) {
+        try {
+          this.config = JSON.parse(await fs.readFile(filePath, 'utf8')) as ChatConfig
+          break
+        } catch (error) {
+          console.warn(
+            `[ChatConfigService] Skipping ${filePath} (missing or invalid).`,
+            error instanceof Error ? error.message : error,
+          )
+        }
       }
-      try {
-        const raw = await fs.readFile(this.filePath, 'utf8')
-        this.config = JSON.parse(raw) as ChatConfig
-      } catch (error) {
-        console.warn(
-          `[ChatConfigService] Could not load ${this.filePath}. Proceeding with empty chat config.`,
-          error instanceof Error ? error.message : error,
-        )
-        this.config = null
-      } finally {
-        this.loaded = true
-      }
+      this.loaded = true
     })()
     return this.loadPromise
   }
@@ -101,20 +102,19 @@ export class ChatConfigService {
 }
 
 /**
- * Resolves the config file via a cascade, returning the first path that exists, or `null` when
- * none do (→ widget hidden): `CHAT_CONFIG_FILE` (set by the deployment, e.g. `/config/chat.json`) →
+ * Ordered config-file candidates (highest priority first); the service uses the first that loads
+ * (exists and parses): `CHAT_CONFIG_FILE` (set by the deployment, e.g. `/config/chat.json`) →
  * `chat.json` at the cwd (env-specific live file) → baked `chat.sample.json`.
  */
-export const resolveChatConfigPath = (): string | null => {
+export const resolveChatConfigCandidates = (): string[] => {
+  const candidates: string[] = []
   const fromEnv = process.env.CHAT_CONFIG_FILE?.trim()
-  if (fromEnv && existsSync(fromEnv)) return fromEnv
-  const live = path.resolve(process.cwd(), 'chat.json')
-  if (existsSync(live)) return live
-  const sample = path.resolve(process.cwd(), 'chat.sample.json')
-  if (existsSync(sample)) return sample
-  return null
+  if (fromEnv) candidates.push(fromEnv)
+  candidates.push(path.resolve(process.cwd(), 'chat.json'))
+  candidates.push(path.resolve(process.cwd(), 'chat.sample.json'))
+  return candidates
 }
 
-export const chatConfigService = ChatConfigService.fromFile(
-  resolveChatConfigPath(),
+export const chatConfigService = ChatConfigService.fromFiles(
+  resolveChatConfigCandidates(),
 ).build()

@@ -1,11 +1,17 @@
-import { existsSync } from 'node:fs'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { ChatConfigService, resolveChatConfigPath } from './ChatConfigService'
+import {
+  ChatConfigService,
+  resolveChatConfigCandidates,
+} from './ChatConfigService'
 
-jest.mock('node:fs', () => ({ existsSync: jest.fn() }))
-const mockExistsSync = existsSync as jest.MockedFunction<typeof existsSync>
+const writeInvalidFixture = async (): Promise<string> => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'chatcfg-'))
+  const file = path.join(dir, 'chat.json')
+  await fs.writeFile(file, '{ not valid json', 'utf8')
+  return file
+}
 
 const writeFixture = async (content: unknown): Promise<string> => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'chatcfg-'))
@@ -135,52 +141,72 @@ describe('ChatConfigService', () => {
       expect(await service.isAvailable()).toBe(false)
     })
   })
+
+  describe('cascade fallback (fromFiles)', () => {
+    it('skips an invalid file and loads the next valid candidate', async () => {
+      const invalid = await writeInvalidFixture()
+      const valid = await writeFixture(SAMPLE)
+      const service = ChatConfigService.fromFiles([invalid, valid]).build()
+      expect(await service.isAvailable()).toBe(true)
+      expect(await service.getSystemPrompt()).toBe('Be concise. No jokes.')
+      expect((await service.getClientConfig('en')).welcome).toEqual({
+        title: 'Welcome',
+        message: 'Hi!',
+      })
+    })
+
+    it('skips a missing file and loads the next valid candidate', async () => {
+      const valid = await writeFixture(SAMPLE)
+      const service = ChatConfigService.fromFiles([
+        '/no/such/chat.json',
+        valid,
+      ]).build()
+      expect(await service.isAvailable()).toBe(true)
+    })
+
+    it('is unavailable when every candidate is missing or invalid', async () => {
+      const invalid = await writeInvalidFixture()
+      const service = ChatConfigService.fromFiles([
+        invalid,
+        '/no/such/chat.json',
+      ]).build()
+      expect(await service.isAvailable()).toBe(false)
+    })
+
+    it('is unavailable when there are no candidates', async () => {
+      const service = ChatConfigService.fromFiles([]).build()
+      expect(await service.isAvailable()).toBe(false)
+    })
+  })
 })
 
-describe('resolveChatConfigPath', () => {
+describe('resolveChatConfigCandidates', () => {
   const OLD_ENV = process.env
   const LIVE = path.resolve(process.cwd(), 'chat.json')
   const SAMPLE_PATH = path.resolve(process.cwd(), 'chat.sample.json')
-
-  beforeEach(() => {
-    mockExistsSync.mockReset()
-  })
 
   afterEach(() => {
     process.env = OLD_ENV
   })
 
-  it('uses CHAT_CONFIG_FILE when it is set and the file exists', () => {
+  it('lists CHAT_CONFIG_FILE first, then chat.json, then chat.sample.json', () => {
     process.env = { ...OLD_ENV, CHAT_CONFIG_FILE: '/config/chat.json' }
-    mockExistsSync.mockImplementation((p) => p === '/config/chat.json')
-    expect(resolveChatConfigPath()).toBe('/config/chat.json')
+    expect(resolveChatConfigCandidates()).toEqual([
+      '/config/chat.json',
+      LIVE,
+      SAMPLE_PATH,
+    ])
   })
 
-  it('falls through to chat.json when CHAT_CONFIG_FILE points at a missing file', () => {
-    process.env = { ...OLD_ENV, CHAT_CONFIG_FILE: '/config/chat.json' }
-    mockExistsSync.mockImplementation((p) => p === LIVE)
-    expect(resolveChatConfigPath()).toBe(LIVE)
-  })
-
-  it('uses chat.json when the env var is unset and chat.json exists', () => {
+  it('omits CHAT_CONFIG_FILE when it is unset', () => {
     const env = { ...OLD_ENV }
     delete env.CHAT_CONFIG_FILE
     process.env = env
-    mockExistsSync.mockImplementation((p) => p === LIVE)
-    expect(resolveChatConfigPath()).toBe(LIVE)
+    expect(resolveChatConfigCandidates()).toEqual([LIVE, SAMPLE_PATH])
   })
 
-  it('falls back to chat.sample.json when only the sample exists', () => {
-    const env = { ...OLD_ENV }
-    delete env.CHAT_CONFIG_FILE
-    process.env = env
-    mockExistsSync.mockImplementation((p) => p === SAMPLE_PATH)
-    expect(resolveChatConfigPath()).toBe(SAMPLE_PATH)
-  })
-
-  it('returns null when no file exists anywhere', () => {
+  it('omits CHAT_CONFIG_FILE when it is empty or whitespace', () => {
     process.env = { ...OLD_ENV, CHAT_CONFIG_FILE: '   ' }
-    mockExistsSync.mockReturnValue(false)
-    expect(resolveChatConfigPath()).toBeNull()
+    expect(resolveChatConfigCandidates()).toEqual([LIVE, SAMPLE_PATH])
   })
 })

@@ -1,6 +1,7 @@
 /**
- * Shape of the AI chat configuration file. The app resolves it via a cascade
- * (`CHAT_CONFIG_FILE` → `chat.json` → baked `chat.sample.json`; see `resolveChatConfigPath`). It
+ * Shape of the AI chat configuration file. The app resolves it via a cascade of candidates
+ * (`CHAT_CONFIG_FILE` → `chat.json` → baked `chat.sample.json`; see `resolveChatConfigCandidates`),
+ * using the first that loads (a present-but-invalid file is skipped to the next tier). It
  * carries the agent system prompt (server-only) plus the per-locale welcome message and default
  * suggestions shown in the widget.
  */

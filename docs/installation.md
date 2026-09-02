@@ -126,7 +126,9 @@ The listener creates two queues (`sovisuplus-interactive` and `sovisuplus-batch`
 The AI chat assistant is configured from a JSON file. A committed fallback, `chat.sample.json`,
 lives at the repository root (and is baked into the image); the live `chat.json` is env-specific and
 gitignored, mirroring the RBAC `rbac.roles.sample.yaml` / `rbac.roles.yaml` split. The app resolves
-the file via a cascade, picking the first that exists:
+the file via a cascade, picking the first that **loads** (exists and parses) — a present-but-invalid
+file is skipped to the next tier (with a `[ChatConfigService] Skipping …` warning) rather than
+hiding the widget:
 
 1. `CHAT_CONFIG_FILE` — the path the deployment injects (e.g. a `/config/chat.json` mount),
 2. `chat.json` at the working directory,
