@@ -5,8 +5,9 @@ import type { ChatConfig, ChatSuggestion, ChatWelcome } from '@/types/ChatConfig
 /**
  * Server-side reader for the AI chat configuration file. Tries a cascade of candidates in priority
  * order (`CHAT_CONFIG_FILE` → `chat.json` → baked `chat.sample.json`; see
- * `resolveChatConfigCandidates`) and uses the first that **loads** (exists and parses) — a
- * present-but-invalid file is skipped to the next tier rather than hiding the widget. It exposes the
+ * `resolveChatConfigCandidates`) and uses the first that loads to a **usable config object** (a JSON
+ * object with a `systemPrompt` key) — a present-but-null/empty/primitive/array file, or an object
+ * without `systemPrompt`, is skipped to the next tier rather than hiding the widget. It exposes the
  * pieces the app needs: the system prompt (injected server-side by the `/api/chat` proxy, with
  * `{{variable}}` placeholders resolved) and the per-locale welcome message + default suggestions
  * (shipped to the browser by the layout). When no candidate loads the config stays null and
@@ -14,6 +15,17 @@ import type { ChatConfig, ChatSuggestion, ChatWelcome } from '@/types/ChatConfig
  */
 
 const DEFAULT_LOCALE = 'en'
+
+/**
+ * A parsed candidate is usable only if it is a JSON object with a `systemPrompt` key present. This
+ * rejects unusable top-level content (`null`, arrays, primitives, `{}`, or an object without
+ * `systemPrompt`) so the cascade falls through to the next tier. The key's value may be empty.
+ */
+const isUsableConfig = (value: unknown): value is ChatConfig =>
+  typeof value === 'object' &&
+  value !== null &&
+  !Array.isArray(value) &&
+  'systemPrompt' in value
 
 export class ChatConfigService {
   static fromFiles(filePaths: string[]) {
@@ -40,8 +52,14 @@ export class ChatConfigService {
       this.config = null
       for (const filePath of this.filePaths) {
         try {
-          this.config = JSON.parse(await fs.readFile(filePath, 'utf8')) as ChatConfig
-          break
+          const parsed = JSON.parse(await fs.readFile(filePath, 'utf8')) as unknown
+          if (isUsableConfig(parsed)) {
+            this.config = parsed
+            break
+          }
+          console.warn(
+            `[ChatConfigService] Skipping ${filePath} (not a usable chat config).`,
+          )
         } catch (error) {
           console.warn(
             `[ChatConfigService] Skipping ${filePath} (missing or invalid).`,

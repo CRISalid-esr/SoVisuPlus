@@ -1,7 +1,9 @@
 /**
  * Shape of the AI chat configuration file. The app resolves it via a cascade of candidates
  * (`CHAT_CONFIG_FILE` → `chat.json` → baked `chat.sample.json`; see `resolveChatConfigCandidates`),
- * using the first that loads (a present-but-invalid file is skipped to the next tier). It
+ * using the first that loads to a usable config object — a JSON object with a `systemPrompt` key;
+ * a null/empty/primitive/array file, or an object without `systemPrompt`, is skipped to the next
+ * tier. It
  * carries the agent system prompt (server-only) plus the per-locale welcome message and default
  * suggestions shown in the widget.
  */
@@ -30,6 +32,11 @@ export interface ChatConfig {
    * System prompt sent to the agent (as a `role:"system"` message) to shape its behaviour.
    * May contain `{{variable}}` placeholders resolved server-side. Server-only — never exposed to
    * the browser.
+   *
+   * NB: a config **file** must include this key (its value may be empty, e.g. `""`) to be accepted
+   * by `ChatConfigService` — it is the marker that distinguishes a real config from arbitrary JSON;
+   * see `isUsableConfig`. The field stays optional here because consumers read it defensively
+   * (`config?.systemPrompt?.trim()`).
    */
   systemPrompt?: string
   /**

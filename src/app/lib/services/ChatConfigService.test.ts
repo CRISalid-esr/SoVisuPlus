@@ -164,6 +164,14 @@ describe('ChatConfigService', () => {
       expect(await service.isAvailable()).toBe(true)
     })
 
+    it('skips a file whose content parses to null and loads the next candidate', async () => {
+      const nullFile = await writeFixture(null)
+      const valid = await writeFixture(SAMPLE)
+      const service = ChatConfigService.fromFiles([nullFile, valid]).build()
+      expect(await service.isAvailable()).toBe(true)
+      expect(await service.getSystemPrompt()).toBe('Be concise. No jokes.')
+    })
+
     it('is unavailable when every candidate is missing or invalid', async () => {
       const invalid = await writeInvalidFixture()
       const service = ChatConfigService.fromFiles([
@@ -176,6 +184,28 @@ describe('ChatConfigService', () => {
     it('is unavailable when there are no candidates', async () => {
       const service = ChatConfigService.fromFiles([]).build()
       expect(await service.isAvailable()).toBe(false)
+    })
+  })
+
+  describe('unusable top-level content is rejected (must be an object with systemPrompt)', () => {
+    it.each([
+      ['null', null],
+      ['an array', []],
+      ['a number', 0],
+      ['a string', 'text'],
+      ['an empty object', {}],
+      ['an object without systemPrompt', { foo: 1 }],
+      ['an object with only locales', { locales: {} }],
+    ])('is unavailable when the content is %s', async (_label, content) => {
+      const file = await writeFixture(content)
+      const service = ChatConfigService.fromFile(file).build()
+      expect(await service.isAvailable()).toBe(false)
+    })
+
+    it('is available when systemPrompt is present but empty', async () => {
+      const file = await writeFixture({ systemPrompt: '' })
+      const service = ChatConfigService.fromFile(file).build()
+      expect(await service.isAvailable()).toBe(true)
     })
   })
 })
