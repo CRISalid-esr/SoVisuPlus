@@ -123,34 +123,22 @@ The listener creates two queues (`sovisuplus-interactive` and `sovisuplus-batch`
 
 ### AI chat configuration
 
-The AI chat assistant is configured from a JSON file. A committed fallback, `chat.sample.json`,
-lives at the repository root (and is baked into the image); the live `chat.json` is env-specific and
-gitignored, mirroring the RBAC `rbac.roles.sample.yaml` / `rbac.roles.yaml` split. The app resolves
-the file via a cascade, picking the first that **loads to a usable config** — a JSON object
-containing a `systemPrompt` key (its value may be empty, e.g. `"systemPrompt": ""`). A file that is
-missing, unparseable, `null`, an empty object, a non-object, or an object without `systemPrompt` is
-skipped to the next tier (with a `[ChatConfigService] Skipping …` warning) rather than hiding the
-widget:
+The AI chat assistant is configured from a JSON file called `chat.json`. A sample, `chat.sample.json`,
+is located at the repository root - it is also used as a fallback if chat.json is missing. 
+The chat widget is displayed only when `CRISALID_AGENTS_API_URL` is set **and** a config file resolves.
 
-1. `CHAT_CONFIG_FILE` — the path the deployment injects (e.g. a `/config/chat.json` mount),
-2. `chat.json` at the working directory,
-3. the baked `chat.sample.json`,
-4. otherwise **none — the chat widget is not shown**.
-
-The widget is displayed only when `CRISALID_AGENTS_API_URL` is set **and** a config file resolves.
 Locally, `cp chat.sample.json chat.json` and edit it (the sample alone already works as a fallback).
 
 The file holds:
 
 - `systemPrompt` — sent to the agent (as a `role:"system"` message) to shape its behaviour, e.g.
   "answer concisely, no jokes". **Server-only** — injected by the `/api/chat` proxy and never sent
-  to the browser. Leave empty to rely solely on the agent's own prompt. May contain `{{variable}}`
-  placeholders (see below).
+  to the browser. May contain `{{variable}}` placeholders (see below). Leaving it empty relies on the agent's own prompt which has no specific instruction (not recommended).
 - `variables` — optional map of custom `{{key}}` values, so a deploying admin can parametrise the
   prompt by editing only this file. Merged over (and able to override) the app-provided defaults.
 - `locales.<lang>.welcome` — the seeded welcome thread (`title` + `message`) shown when the widget
   opens.
-- `locales.<lang>.suggestions` — the default prompt chips (`label` + `value`).
+- `locales.<lang>.suggestions` — the default prompt suggestions chips (`label` + `value`).
 
 **Prompt variables.** `{{key}}` placeholders in `systemPrompt` are substituted server-side:
 
@@ -158,6 +146,8 @@ The file holds:
   the deployment maps from the unprefixed `INSTITUTION_NAME`), so it need not be re-typed.
 - any key declared in the file's `variables` map — for values the app does not provide.
 - an unknown placeholder resolves to an empty string.
+
+Unknown locales fall back to `en`.
 
 ```jsonc
 {
@@ -172,9 +162,6 @@ The file holds:
   }
 }
 ```
-
-Unknown locales fall back to `en`. To customise per deployment, mount your file at
-`/config/chat.json` (pointed to by `CHAT_CONFIG_FILE`) on the sovisuplus container.
 
 ### RBAC setup (required)
 
