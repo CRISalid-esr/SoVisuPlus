@@ -39,7 +39,7 @@ describe('POST /api/chat', () => {
     jest.clearAllMocks()
     process.env = {
       ...OLD_ENV,
-      // Base URL only — the client appends the `/chat` endpoint path.
+      // Base URL only — the client appends the `/agents/{name}/chat` endpoint path.
       CRISALID_AGENTS_API_URL: 'http://agents.test',
       CRISALID_AGENTS_API_KEY: 'secret-key',
     }
@@ -59,6 +59,26 @@ describe('POST /api/chat', () => {
     mockSession.mockResolvedValue(null)
     const res = await POST(makeReq({}))
     expect(res.status).toBe(401)
+  })
+
+  it('targets the agent named by CRISALID_AGENTS_AGENT', async () => {
+    process.env.CRISALID_AGENTS_AGENT = 'sorbobot'
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(new Response('', { status: 200 })) as jest.Mock
+
+    await POST(
+      makeReq({
+        message: {
+          id: 'u1',
+          role: 'user',
+          parts: [{ type: 'text', text: 'hi' }],
+        },
+      }),
+    )
+
+    const [url] = (global.fetch as jest.Mock).mock.calls[0]
+    expect(url).toBe('http://agents.test/agents/sorbobot/chat')
   })
 
   it('forwards the body with the api key and streams the response back', async () => {
@@ -82,7 +102,7 @@ describe('POST /api/chat', () => {
     // Upstream call carries the secret key and the forwarded body.
     expect(global.fetch).toHaveBeenCalledTimes(1)
     const [url, init] = (global.fetch as jest.Mock).mock.calls[0]
-    expect(url).toBe('http://agents.test/chat')
+    expect(url).toBe('http://agents.test/agents/generic_agent/chat')
     expect(init.method).toBe('POST')
     expect(init.headers['x-api-key']).toBe('secret-key')
 
