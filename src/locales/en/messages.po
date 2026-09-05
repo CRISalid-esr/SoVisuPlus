@@ -14,21 +14,6 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:56
-msgid "user_action_outcome_technical_details"
-msgstr "Technical details"
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:84
-msgid "user_action_outcome_details_copied"
-msgstr "Copied!"
-
-#. js-lingui-explicit-id
-#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:86
-msgid "user_action_outcome_copy_details"
-msgstr "Copy details"
-
-#. js-lingui-explicit-id
 #: src/app/lib/websocket/changeWarningMessages.tsx:22
 msgid "user_action_warning_unresolvable_person"
 msgstr "Contributor {displayName} could not be identified and was skipped"
@@ -95,14 +80,19 @@ msgid "snackbar_user_action_applied_with_warnings"
 msgstr "Change saved with warnings:"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/forbidden.tsx:43
-msgid "forbidden_page_back_home"
-msgstr "Back to home page"
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:56
+msgid "user_action_outcome_technical_details"
+msgstr "Technical details"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/forbidden.tsx:108
-msgid "forbidden_page_description"
-msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:84
+msgid "user_action_outcome_details_copied"
+msgstr "Copied!"
+
+#. js-lingui-explicit-id
+#: src/app/lib/websocket/UserActionOutcomeDetails.tsx:86
+msgid "user_action_outcome_copy_details"
+msgstr "Copy details"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/not-found.tsx:45
@@ -113,6 +103,16 @@ msgstr "Back to home page"
 #: src/app/[lang]/not-found.tsx:110
 msgid "notfound_page_description"
 msgstr "We couldn't find the page you were looking for. If you reached this page unexpectedly, please contact us at following <0>email adress</0>."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:43
+msgid "forbidden_page_back_home"
+msgstr "Back to home page"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/forbidden.tsx:108
+msgid "forbidden_page_description"
+msgstr "You are not authorized to access this resource. If you believe this is an error, please contact the administrator."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:182
@@ -221,16 +221,6 @@ msgid "concept_chip_action_delete"
 msgstr "Delete"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
-msgid "document_details_page_add_in_hal_tab_card_title"
-msgstr "Add in HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr "Disciplines"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
 msgid "document_details_page_keywords_input_options_loading"
 msgstr "Loading..."
@@ -261,9 +251,24 @@ msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Error loading suggestions"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
-msgid "document_details_page_card_title"
-msgstr "Bibliographic information"
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
+msgid "document_details_page_add_in_hal_tab_card_title"
+msgstr "Add in HAL"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr "Disciplines"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:114
+msgid "document_details_page_publication_date_update_success"
+msgstr "Publication date updated."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:116
+msgid "document_details_page_publication_date_update_failure"
+msgstr "Failed to update publication date."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
@@ -282,14 +287,9 @@ msgid "documents_details_page_authors_tab_title"
 msgstr "Authors"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:114
-msgid "document_details_page_publication_date_update_success"
-msgstr "Publication date updated."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:116
-msgid "document_details_page_publication_date_update_failure"
-msgstr "Failed to update publication date."
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
+msgid "document_details_page_card_title"
+msgstr "Bibliographic information"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
@@ -322,16 +322,6 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "A new expertise is awaiting validation"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:34
-msgid "profile_identifiers_card_title"
-msgstr "My identifiers"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:36
-msgid "profile_identifiers_card_title_other"
-msgstr "Identifiers"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:34
 msgid "profile_affiliations_card_title"
 msgstr "My affiliations"
@@ -340,6 +330,16 @@ msgstr "My affiliations"
 #: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:36
 msgid "profile_affiliations_card_title_other"
 msgstr "Affiliations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:34
+msgid "profile_identifiers_card_title"
+msgstr "My identifiers"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:36
+msgid "profile_identifiers_card_title_other"
+msgstr "Identifiers"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
@@ -493,6 +493,41 @@ msgid "profile_affiliations_no_units"
 msgstr "No related research unit"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
+msgid "profile_affiliations_signature_label"
+msgstr "My signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:64
+msgid "profile_affiliations_no_signature_message"
+msgstr "No signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
+msgid "profile_affiliations_signature_copied_message_confirmation"
+msgstr "Signature added to clipboard."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:28
+msgid "authorizations_page_authorizations_title"
+msgstr "Authorizations"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:50
+msgid "authorizations_page_description"
+msgstr "I allow SoVisu+ to share my data with Idya application: "
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:54
+msgid "authorizations_page_list_publications"
+msgstr "Publications"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/authorizations/index.tsx:58
+msgid "authorizations_page_my_expertise"
+msgstr "My expertise"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:138
 msgid "hal_authentication_success"
 msgstr "HAL authentication successful"
@@ -616,41 +651,6 @@ msgstr "This will remove the idHAL and its HAL login from this account."
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:339
 msgid "hal_control_remove_dialog_confirm"
 msgstr "Remove"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
-msgid "profile_affiliations_signature_label"
-msgstr "My signature"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:64
-msgid "profile_affiliations_no_signature_message"
-msgstr "No signature"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
-msgid "profile_affiliations_signature_copied_message_confirmation"
-msgstr "Signature added to clipboard."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:28
-msgid "authorizations_page_authorizations_title"
-msgstr "Authorizations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:50
-msgid "authorizations_page_description"
-msgstr "I allow SoVisu+ to share my data with Idya application: "
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:54
-msgid "authorizations_page_list_publications"
-msgstr "Publications"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/authorizations/index.tsx:58
-msgid "authorizations_page_my_expertise"
-msgstr "My expertise"
 
 #. js-lingui-explicit-id
 #. placeholder {0}: import { t } from '@lingui/core/macro' import { Trans } from '@lingui/react/macro' import { useRef, useState } from 'react' import useStore from '@/stores/global_store' import { Box, Button, Card, CardContent, ClickAwayListener, Grow, Link, Popper, Typography, } from '@mui/material' import { useTheme } from '@mui/material/styles' const Journal = () => { const titleRef = useRef(null) const [isPopperOpen, setIsPopperOpen] = useState(false) const theme = useTheme() const { selectedDocument = null } = useStore((state) => state.document) const journal = selectedDocument?.journal const title = journal?.title const handleClick = () => { setIsPopperOpen(!isPopperOpen) } const handleClickAway = () => { setIsPopperOpen(false) } return ( title && ( <ClickAwayListener onClickAway={handleClickAway}> <Box> <Button variant='text' ref={titleRef} onClick={handleClick} sx={{ p: 0 }} > {title} </Button> <Popper open={isPopperOpen} anchorEl={titleRef.current} placement='bottom-start' transition disablePortal sx={{ zIndex: 1, }} > {({ TransitionProps }) => ( <Grow {...TransitionProps} timeout={200}> <Card> <CardContent> <Typography gutterBottom variant='h6' sx={{ color: theme.palette.primary.main }} > {title} </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_issn'> <Link href={`https://portal.issn.org/resource/ISSN/${journal.issnL}`} target='_blank' rel='noopener noreferrer' > {journal.issnL} </Link> </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_source_type'> {t`document_details_page_journal_journal`} </Trans> </Typography> <Typography sx={{ fontWeight: theme.typography.fontWeightBold }} > <Trans id='document_details_page_journal_publisher'> {journal.publisher} </Trans> </Typography> </CardContent> </Card> </Grow> )} </Popper> </Box> </ClickAwayListener> ) ) } export default Journal 
@@ -2518,59 +2518,59 @@ msgstr "Research unit (UR)"
 msgid "account_page_profile_tab"
 msgstr "Profile"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:81
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:82
 #: src/app/[lang]/research-structures/components/StructureNameCell.tsx:57
 msgid "research_structures_chip_external"
 msgstr "external"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:89
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:90
 #: src/app/[lang]/research-structures/components/StructureNameCell.tsx:66
 msgid "research_structures_chip_hidden"
 msgstr "Hidden"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:102
-#: src/app/[lang]/research-structures/page.tsx:56
-#: src/app/[lang]/research-structures/page.tsx:209
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:103
+#: src/app/[lang]/research-structures/page.tsx:58
+#: src/app/[lang]/research-structures/page.tsx:211
 msgid "research_structures_column_institutions"
 msgstr "Supervising institutions"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:142
-#: src/app/[lang]/research-structures/page.tsx:57
-#: src/app/[lang]/research-structures/page.tsx:87
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:145
+#: src/app/[lang]/research-structures/page.tsx:59
+#: src/app/[lang]/research-structures/page.tsx:89
 msgid "research_structures_column_members"
 msgstr "Members"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:147
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:150
 #: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:213
-#: src/app/[lang]/research-structures/page.tsx:58
-#: src/app/[lang]/research-structures/page.tsx:101
+#: src/app/[lang]/research-structures/page.tsx:60
+#: src/app/[lang]/research-structures/page.tsx:103
 msgid "research_structures_column_publications"
 msgstr "Publications"
 
-#: src/app/[lang]/research-structures/page.tsx:53
-#: src/app/[lang]/research-structures/page.tsx:191
-#: src/app/[lang]/research-structures/page.tsx:302
+#: src/app/[lang]/research-structures/page.tsx:55
+#: src/app/[lang]/research-structures/page.tsx:193
+#: src/app/[lang]/research-structures/page.tsx:304
 msgid "research_structures_column_structure"
 msgstr "Structure"
 
-#: src/app/[lang]/research-structures/page.tsx:54
+#: src/app/[lang]/research-structures/page.tsx:56
 msgid "research_structures_csv_name"
 msgstr "Name"
 
-#: src/app/[lang]/research-structures/page.tsx:55
+#: src/app/[lang]/research-structures/page.tsx:57
 msgid "research_structures_csv_type"
 msgstr "Type"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:113
-#: src/app/[lang]/research-structures/page.tsx:165
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:114
+#: src/app/[lang]/research-structures/page.tsx:167
 msgid "research_structures_dashboard_link"
 msgstr "Dashboard"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:171
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:174
 msgid "research_structures_detail_children"
 msgstr "Child structures"
 
-#: src/app/[lang]/research-structures/page.tsx:446
+#: src/app/[lang]/research-structures/page.tsx:489
 msgid "research_structures_export"
 msgstr "Export"
 
@@ -2590,8 +2590,8 @@ msgstr "Other"
 msgid "research_structures_group_teaching_research"
 msgstr "Teaching and research"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:165
-#: src/app/[lang]/research-structures/page.tsx:451
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:168
+#: src/app/[lang]/research-structures/page.tsx:494
 msgid "research_structures_kpi_period_note"
 msgstr "Publication indicators (publications, open access, HAL) cover the last 24 months."
 
@@ -2623,83 +2623,83 @@ msgstr "View this person's publications"
 msgid "research_structures_members_switch_present"
 msgstr "Currently present"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:198
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:201
 msgid "research_structures_members_title"
 msgstr "Members"
 
-#: src/app/[lang]/research-structures/page.tsx:440
+#: src/app/[lang]/research-structures/page.tsx:483
 msgid "research_structures_page_title"
 msgstr "Research structures"
 
-#: src/app/[lang]/research-structures/page.tsx:107
+#: src/app/[lang]/research-structures/page.tsx:109
 msgid "research_structures_publications_tooltip"
 msgstr "Last 24 months"
 
-#: src/app/[lang]/research-structures/page.tsx:259
+#: src/app/[lang]/research-structures/page.tsx:261
 msgid "research_structures_reset_filters"
 msgstr "Reset filters"
 
-#: src/app/[lang]/research-structures/page.tsx:469
+#: src/app/[lang]/research-structures/page.tsx:512
 msgid "research_structures_switch_display_old"
 msgstr "Display old structures"
 
-#: src/app/[lang]/research-structures/page.tsx:465
+#: src/app/[lang]/research-structures/page.tsx:508
 msgid "research_structures_switch_display_old_tooltip"
 msgstr "Available once structure lifecycle data is available"
 
-#: src/app/[lang]/research-structures/page.tsx:463
+#: src/app/[lang]/research-structures/page.tsx:506
 msgid "research_structures_switch_include_external"
 msgstr "Include external institutions"
 
-#: src/app/[lang]/research-structures/page.tsx:481
+#: src/app/[lang]/research-structures/page.tsx:524
 msgid "research_structures_switch_show_hidden"
 msgstr "Show hidden structures"
 
-#: src/app/[lang]/research-structures/page.tsx:499
+#: src/app/[lang]/research-structures/page.tsx:542
 msgid "research_structures_tab_flat"
 msgstr "List"
 
-#: src/app/[lang]/research-structures/page.tsx:504
+#: src/app/[lang]/research-structures/page.tsx:547
 msgid "research_structures_tab_hierarchical"
 msgstr "Hierarchical table"
 
-#: src/app/[lang]/research-structures/page.tsx:494
+#: src/app/[lang]/research-structures/page.tsx:537
 msgid "research_structures_tab_tree"
 msgstr "Tree"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:134
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:137
 msgid "research_structures_toggle_hidden"
 msgstr "Hide this structure"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:121
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:122
 msgid "research_structures_toggle_hidden_by_ancestor"
 msgstr "This structure is hidden because every structure it belongs to is hidden. Show one of them to bring it back."
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:122
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:123
 msgid "research_structures_toggle_hidden_help"
 msgstr "A hidden structure disappears from the structures list, the search and the indicators. Structures reachable only through it are hidden as well."
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:358
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:380
 msgid "research_structures_tree_collapse_all"
 msgstr "Collapse all"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:454
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:478
 msgid "research_structures_tree_empty_state"
 msgstr "Select a structure in the tree"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:346
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:368
 msgid "research_structures_tree_expand_all"
 msgstr "Expand all"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:367
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:389
 msgid "research_structures_tree_no_results"
 msgstr "No structure found"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:395
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:419
 msgid "research_structures_tree_resize_handle"
 msgstr "Resize the panels"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:335
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:357
 msgid "research_structures_tree_search_placeholder"
 msgstr "Search for a structure…"
 
