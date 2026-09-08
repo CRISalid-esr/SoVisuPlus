@@ -7,6 +7,7 @@ import { plural, t } from '@lingui/core/macro'
 import { alpha, Box, CircularProgress } from '@mui/material'
 
 import { ECElementEvent, ECharts } from 'echarts'
+import { TooltipComponentOption } from 'echarts/components'
 import {
   AffiliationData,
   ChartOption,
@@ -302,7 +303,8 @@ const CollaborationMap = ({
       tooltip: {
         show: true,
         trigger: 'item',
-        triggerOn: 'mousemove|click',
+        triggerOn:
+          'mousemove|click' as unknown as TooltipComponentOption['triggerOn'],
         enterable: true,
         //transitionDuration: 0.1,
         //hideDelay: 100,
