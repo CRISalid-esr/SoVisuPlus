@@ -7,7 +7,6 @@ import { plural, t } from '@lingui/core/macro'
 import { alpha, Box, CircularProgress } from '@mui/material'
 
 import { ECElementEvent, ECharts } from 'echarts'
-import { TooltipComponentOption } from 'echarts/components'
 import {
   AffiliationData,
   ChartOption,
@@ -70,6 +69,11 @@ const CollaborationMap = ({
   const onEvents: Record<string, EChartsEventHandler> = useMemo(
     () => ({
       georoam: () => {
+        // The pin stores raw pixels, which stop matching their point as soon as the map
+        // pans or zooms. Drop it so the tooltip goes back to following the pointer;
+        // otherwise every later tooltip is anchored at the stale click position until
+        // the user clicks outside the chart.
+        lockedPointRef.current = null
         handleRoam()
       },
     }),
@@ -303,8 +307,13 @@ const CollaborationMap = ({
       tooltip: {
         show: true,
         trigger: 'item',
-        triggerOn:
-          'mousemove|click' as unknown as TooltipComponentOption['triggerOn'],
+        // Hover shows; leaving hides (echarts' 'leave' branch is unconditional). Clicking a
+        // point pins the tooltip through the explicit showTip dispatch in handleClick, which
+        // bypasses triggerOn. 'mousewheel' is deliberately excluded: the tooltip is refreshed
+        // by echarts' _keepShow() when handleRoam's debounced setOption swaps in the re-merged
+        // points, i.e. once the new data is valid. Re-triggering on every wheel tick would
+        // re-show it against points that are about to be replaced.
+        triggerOn: 'mousemove',
         enterable: true,
         //transitionDuration: 0.1,
         //hideDelay: 100,
