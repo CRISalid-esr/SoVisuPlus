@@ -122,7 +122,6 @@ describe('DocumentAggregateDAO', () => {
               select: {
                 uid: true,
                 displayName: true,
-                normalizedName: true,
                 firstName: true,
                 lastName: true,
               },

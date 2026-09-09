@@ -7,8 +7,7 @@ import { getStringInLocale } from '@/utils/getStringInLocale'
 import { Journal, JournalJson } from '@/types/Journal'
 import { DocumentState, DocumentType, OAStatus } from '@prisma/client'
 import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
-import { BibliographicPlatform } from '@/types/BibliographicPlatform'
-import { toUTCISOString } from '@/utils/toUTCISOString'
+import { organizationPerimeterFromMemberships } from '@/types/organizationScopes'
 
 interface DocumentJson {
   uid: string
@@ -53,6 +52,15 @@ class Document implements Authorizable {
 
   getTitleInLocale(localeNumber: number): string {
     return getStringInLocale(this.titles, localeNumber)
+  }
+
+  /**
+   * The document is frozen (not editable) while it waits for the graph to apply
+   * a pending change. This is durable: it survives navigating away and back, as a
+   * re-fetch of a still-pending document returns `waiting_for_update`.
+   */
+  get isFrozen(): boolean {
+    return this.state === DocumentState.waiting_for_update
   }
 
   /**
@@ -134,17 +142,15 @@ class Document implements Authorizable {
   }
 
   private computeScope() {
-    const rs =
-      this.contributions
-        ?.flatMap((c) => c.person?.memberships?.map((m) => m.researchUnit?.uid))
-        ?.filter((x): x is string => !!x) ?? []
+    const contributorMemberships =
+      this.contributions?.flatMap((c) => c.person?.memberships ?? []) ?? []
     const persons =
       this.contributions
         ?.map((c) => c.person?.uid)
         .filter((x): x is string => !!x) ?? []
     return {
-      ResearchUnit: Array.from(new Set(rs)),
       Person: Array.from(new Set(persons)),
+      ...organizationPerimeterFromMemberships(contributorMemberships),
     }
   }
 

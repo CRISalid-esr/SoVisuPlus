@@ -45,6 +45,7 @@ class Contribution {
       contribution.affiliations.map((affiliation) =>
         AuthorityOrganization.fromDb(affiliation),
       ),
+      contribution.rank,
     )
   }
 }

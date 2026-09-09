@@ -12,9 +12,18 @@ import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 import { DocumentType, Document } from '@/types/Document'
 import { Concept, ConceptJson } from '@/types/Concept'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
+import {
+  HalDepositDAO,
+  CreateHalDepositParams,
+  HalDepositFileInput,
+} from '@/lib/daos/HalDepositDAO'
+import { HalDeposit } from '@/types/HalDeposit'
+import { Person } from '@/types/Person'
 import dayjs from 'dayjs'
-import { OAStatus } from '@prisma/client'
 import { Literal, LiteralJson } from '@/types/Literal'
+import { ContributionActionParameters } from '@/types/ContributionAction'
+import { InputJsonValue } from '@prisma/client/runtime/library'
+import { DashboardDocumentData } from '@/types/DashboardDocumentData'
 
 type ColumnFilter =
   | { id: 'date'; value: [string | null, string | null] }
@@ -33,6 +42,7 @@ interface FetchDocumentsParams {
   areHalCollectionCodesOmitted: boolean
 }
 
+// Mirrors FetchDocumentsParams minus paging and sorting.
 interface CountDocumentsParams {
   searchTerm: string
   searchLang: string
@@ -40,6 +50,7 @@ interface CountDocumentsParams {
   contributorUid: string | null
   contributorType: AgentType
   halCollectionCodes: string[]
+  areHalCollectionCodesOmitted: boolean
 }
 
 export class DocumentService {
@@ -48,6 +59,7 @@ export class DocumentService {
   private actionDAO: ActionDAO
   private userDAO: UserDAO
   private conceptDAO: ConceptDAO
+  private halDepositDAO: HalDepositDAO
 
   constructor() {
     this.documentDAO = new DocumentDAO()
@@ -55,6 +67,93 @@ export class DocumentService {
     this.actionDAO = new ActionDAO()
     this.userDAO = new UserDAO()
     this.conceptDAO = new ConceptDAO()
+    this.halDepositDAO = new HalDepositDAO()
+  }
+
+  // ─── HAL deposits ─────────────────────────────────────────────────────────
+  // The go-between for the deposit API routes and HalDepositDAO. Deposits are made on behalf
+  // of the perspective person carried by the request, not the authenticated user.
+
+  /** Fetch the perspective person (for the server-side authz + eligibility checks). */
+  async getPersonByUid(uid: string): Promise<Person | null> {
+    return this.personDAO.fetchPersonByUid(uid)
+  }
+
+  /** Create a deposit row in `pending` status (files are attached afterwards). */
+  async createHalDeposit(params: CreateHalDepositParams): Promise<HalDeposit> {
+    return this.halDepositDAO.createDeposit(params)
+  }
+
+  /** Attach uploaded files (already written to disk) to a deposit. */
+  async attachDepositFiles(
+    depositId: number,
+    files: HalDepositFileInput[],
+  ): Promise<HalDeposit> {
+    return this.halDepositDAO.addFiles(depositId, files)
+  }
+
+  /** Remove a deposit (used to roll back when post-creation steps fail). */
+  async deleteHalDeposit(depositId: number): Promise<void> {
+    await this.halDepositDAO.deleteDeposit(depositId)
+  }
+
+  async getHalDepositById(depositId: number): Promise<HalDeposit | null> {
+    return this.halDepositDAO.findById(depositId)
+  }
+
+  /** Latest deposit for a document (by updatedAt), used to render the status panel. */
+  async getLatestDepositForDocument(
+    documentUid: string,
+  ): Promise<HalDeposit | null> {
+    return this.halDepositDAO.findLatestByDocumentUid(documentUid)
+  }
+
+  /** Signal an on-demand status refresh for a deposit (listener picks it up). */
+  async requestDepositRefresh(depositId: number): Promise<void> {
+    await this.halDepositDAO.requestRefresh(depositId, new Date())
+  }
+
+  /**
+   * Persist the contributions made on the Authors tab.
+   *
+   * Contribution data is intentionally NOT written to the app DB here. The save
+   * becomes a single authoritative `Action` row (actionType UPDATE, targetType
+   * DOCUMENT, path 'contributions') that the change poller forwards to the graph;
+   * the updated data round-trips back via AMQP. The action carries the complete new
+   * state of the document's contributions — contributors present are upserted,
+   * contributors absent are removed.
+   */
+  async saveContributions(
+    documentUid: string,
+    contributions: ContributionActionParameters[],
+    userName: string,
+  ): Promise<void> {
+    try {
+      const user = await this.userDAO.getUserByIdentifier(
+        new PersonIdentifier(PersonIdentifierType.local, userName),
+      )
+      if (!user?.person) {
+        throw new Error(`User with username ${userName} not found`)
+      }
+
+      await this.actionDAO.createAction({
+        actionType: ActionType.UPDATE,
+        targetType: ActionTargetType.DOCUMENT,
+        targetUid: documentUid,
+        path: 'contributions',
+        parameters: { contributions } as unknown as InputJsonValue,
+        personUid: user.person.uid,
+      })
+
+      // Flag the document as awaiting the graph round-trip. This freezes the
+      // Authors tab (and disables further mutations) until the graph re-writes
+      // the document, which resets the state back to `default`.
+      await this.documentDAO.markDocumentsWaitingForUpdate([documentUid])
+    } catch (error) {
+      const message = 'Error saving contributions'
+      console.error(message, error)
+      throw new Error(message)
+    }
   }
 
   async buildContributorUidArray(
@@ -66,15 +165,20 @@ export class DocumentService {
       case 'person':
         contributorUids = contributorUid ? [contributorUid] : []
         break
+      case 'institution':
       case 'research_unit':
+      case 'other_structure':
+      case 'team':
+        // One-hop expansion through organization relationships; the
+        // per-group perimeter rules live in the DAO.
         contributorUids = (
           contributorUid
-            ? await this.personDAO.fetchPeopleByResearchUnitUid(contributorUid)
+            ? await this.personDAO.fetchPeopleByOrganizationPerimeter(
+                contributorUid,
+                contributorType,
+              )
             : []
         ).map((person) => person.uid)
-        break
-      case 'institution':
-        console.error('Institution filter not implemented yet')
         break
     }
 
@@ -132,15 +236,7 @@ export class DocumentService {
       const { documents } =
         await this.documentDAO.fetchOAYearDocuments(contributorUids)
       const publicationsPerYear = documents.reduce<
-        Record<
-          number,
-          {
-            uid: string
-            oaStatus: OAStatus | null
-            publicationDate: string | null
-            upwOAStatus: OAStatus | null
-          }[]
-        >
+        Record<number, DashboardDocumentData[]>
       >((acc, doc) => {
         const publicationDate = doc.publicationDate
         if (publicationDate) {
@@ -153,7 +249,10 @@ export class DocumentService {
         }
         return acc
       }, {})
-      return { publicationsPerYear }
+      // The perimeter is what separates the perspective's own contributors from
+      // its collaborators; the client cannot derive it (the rules are one-hop
+      // expansions living in PersonDAO), so it travels with the documents.
+      return { publicationsPerYear, perimeterUids: contributorUids }
     } catch (error) {
       console.error('Error in service layer:', error)
       throw new Error('Error fetching documents from service')
@@ -179,28 +278,26 @@ export class DocumentService {
     contributorUid,
     contributorType,
     halCollectionCodes,
-  }: CountDocumentsParams) {
+    areHalCollectionCodesOmitted,
+  }: CountDocumentsParams): Promise<number> {
     const contributorUids = await this.buildContributorUidArray(
       contributorUid,
       contributorType,
     )
 
     if (contributorUids.length == 0) {
-      return { allItems: 0, incompleteHalRepositoryItems: 0 }
+      return 0
     }
 
-    const expandedColumnFilters = this.expandedColumnFilters(columnFilters)
-
     try {
-      const { allItems, incompleteHalRepositoryItems } =
-        await this.documentDAO.countDocuments({
-          searchTerm,
-          searchLang: searchLang,
-          columnFilters: expandedColumnFilters,
-          contributorUids,
-          halCollectionCodes,
-        })
-      return { allItems, incompleteHalRepositoryItems }
+      return await this.documentDAO.countDocuments({
+        searchTerm,
+        searchLang,
+        columnFilters: this.expandedColumnFilters(columnFilters),
+        contributorUids,
+        halCollectionCodes,
+        areHalCollectionCodesOmitted,
+      })
     } catch (error) {
       console.error('Error in service layer:', error)
       throw new Error('Error counting documents from service')
@@ -448,6 +545,39 @@ export class DocumentService {
       })
     } catch (error) {
       const message = 'Error updating document type'
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
+
+  async updatePublicationDate(
+    documentUid: string,
+    publicationDate: string | null,
+    userName: string,
+  ): Promise<void> {
+    try {
+      const user = await this.userDAO.getUserByIdentifier(
+        new PersonIdentifier(PersonIdentifierType.local, userName),
+      )
+      if (!user?.person) {
+        throw new Error(`User with username ${userName} not found`)
+      }
+
+      await this.documentDAO.updatePublicationDateByUid(
+        documentUid,
+        publicationDate,
+      )
+
+      await this.actionDAO.createAction({
+        actionType: ActionType.UPDATE,
+        targetType: ActionTargetType.DOCUMENT,
+        targetUid: documentUid,
+        path: 'publicationDate',
+        parameters: { value: publicationDate },
+        personUid: user.person.uid,
+      })
+    } catch (error) {
+      const message = 'Error updating publication date'
       console.error(message, error)
       throw new Error(message)
     }

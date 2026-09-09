@@ -1,7 +1,7 @@
 # syntax=docker.io/docker/dockerfile:1
 
 
-FROM node:24-alpine AS base
+FROM node:24.19.0-alpine AS base
 
 
 FROM base AS deps
@@ -55,7 +55,15 @@ COPY --from=builder --chown=nextjs:nodejs /app/dist-listener ./dist-listener
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/rbac.roles.sample.yaml /app/rbac.roles.yaml
 
+# Baked fallback AI chat config (welcome + suggestions + system prompt); the final tier of the
+# resolution cascade (CHAT_CONFIG_FILE → chat.json → chat.sample.json; see ChatConfigService).
+COPY --from=builder --chown=nextjs:nodejs /app/chat.sample.json /app/chat.sample.json
+
 RUN touch .env && chown nextjs:nodejs .env
+
+# Pre-create HAL upload directories owned by the runtime user (container runs as nextjs)
+RUN mkdir -p /app/uploads/hal-files /app/uploads/hal-tei \
+    && chown -R nextjs:nodejs /app/uploads
 
 # queries are not bundled in the build, so we need to copy them manually
 COPY --from=builder --chown=nextjs:nodejs /app/src/app/lib/graphql/queries /app/src/app/lib/graphql/queries

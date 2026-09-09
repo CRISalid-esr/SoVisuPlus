@@ -73,6 +73,7 @@ describe('GET /api/route', () => {
           },
         ],
         memberships: [],
+        records: [],
       },
       personId: null,
       roles: [],

@@ -44,7 +44,9 @@ export const OrcidLoginButton = ({
     '/authenticate': 'authenticate', // never shown; required for typing
   }
 
-  const PERMISSION_TEXT_BY_SCOPE: Partial<Record<OrcidScope, JSX.Element>> = {
+  const PERMISSION_TEXT_BY_SCOPE: Partial<
+    Record<OrcidScope, React.JSX.Element>
+  > = {
     '/read-limited': <Trans id='orcid_permission_read_limited' />,
     '/activities/update': <Trans id='orcid_permission_activities_update' />,
     '/person/update': <Trans id='orcid_permission_person_update' />,

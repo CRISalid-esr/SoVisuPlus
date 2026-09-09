@@ -5,13 +5,8 @@ import { TabFilter } from '@/components/TabFilter'
 import useStore from '@/stores/global_store'
 import { Alert, Box, CircularProgress, Link, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
-import {
-  notFound,
-  useParams,
-  useRouter,
-  useSearchParams,
-} from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { notFound, useParams, useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Authors,
   BibliographicInformation,
@@ -26,11 +21,17 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Trans } from '@lingui/react'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import UpdateInHAL from '@/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL'
-import AddInHAL from '@/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL'
+import HalDeposit from '@/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDeposit'
+import {
+  useBlockNavigation,
+  useGuardedRouter,
+} from '@/app/[lang]/components/NavigationGuard/NavigationGuardProvider'
+import { useSession } from 'next-auth/react'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
 
 const DocumentDetailsPage = () => {
   const theme = useTheme()
-  const router = useRouter()
   const searchParams = useSearchParams()
   const { uid } = useParams<{ uid: string }>()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
@@ -83,13 +84,6 @@ const DocumentDetailsPage = () => {
   const halRecord = selectedDocument?.records.find(
     (record) => record.platform === BibliographicPlatform.HAL,
   )
-  if (!halRecord) {
-    tabs.push({
-      label: t`document_details_add_in_hal_tab`,
-      value: 'add_in_hal',
-      color: theme.palette.primary.main,
-    })
-  }
 
   useEffect(() => {
     if (selectedDocument?.uid == uid && hasFetched) {
@@ -107,8 +101,47 @@ const DocumentDetailsPage = () => {
     }
   }, [searchParams])
 
-  const { selectedDocumentHasChanged, setSelectedDocumentHasChanged } =
-    useStore((state) => state.document)
+  const {
+    selectedDocumentHasChanged,
+    setSelectedDocumentHasChanged,
+    contributionsTabDirty,
+  } = useStore((state) => state.document)
+
+  // Block navigation while the Authors tab has unsaved edits. The provider drives
+  // the confirmation modal for tabs, sidebar links, back/forward and reload alike.
+  const guardedRouter = useGuardedRouter()
+  useBlockNavigation(contributionsTabDirty)
+
+  // Only editors see the frozen notice — read-only viewers never have controls to
+  // freeze, so the message would be irrelevant noise to them.
+  const { data: session } = useSession()
+  const ability = useMemo(
+    () => abilityFromAuthzContext(session?.user?.authz),
+    [session?.user?.authz],
+  )
+  const canEdit = !!(
+    selectedDocument && ability.can(PermissionAction.update, selectedDocument)
+  )
+
+  // The HAL deposit tab is shown only when the document is not yet in HAL and the user can
+  // deposit on behalf of the current (person) perspective.
+  const currentPerspective = useStore((state) => state.user?.currentPerspective)
+  const canDeposit = !!(
+    currentPerspective &&
+    currentPerspective.type === 'person' &&
+    (ability.can(PermissionAction.deposit_hal, currentPerspective) ||
+      ability.can(
+        PermissionAction.deposit_hal_unauthenticated,
+        currentPerspective,
+      ))
+  )
+  if (!halRecord && canDeposit) {
+    tabs.push({
+      label: t`document_details_add_in_hal_tab`,
+      value: 'add_in_hal',
+      color: theme.palette.primary.main,
+    })
+  }
 
   if (!hasFetched || loading) {
     return (
@@ -128,10 +161,11 @@ const DocumentDetailsPage = () => {
     return notFound()
   }
 
+  // Routed through the guard so switching away from a dirty Authors tab prompts.
   const handleTabChange = (newValue: string) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('tab', newValue)
-    router.push(`/${lang}/documents/${uid}?${params.toString()}`)
+    guardedRouter.push(`/${lang}/documents/${uid}?${params.toString()}`)
   }
 
   const renderTabContent = () => {
@@ -149,7 +183,7 @@ const DocumentDetailsPage = () => {
       case 'update_in_hal':
         return <UpdateInHAL />
       case 'add_in_hal':
-        return <AddInHAL />
+        return <HalDeposit />
       default:
         return <BibliographicInformation />
     }
@@ -188,6 +222,11 @@ const DocumentDetailsPage = () => {
         selectedValue={selectedTab}
         onTabChange={handleTabChange}
       />
+      {canEdit && selectedDocument?.isFrozen && (
+        <Alert severity='info' sx={{ mb: 2 }}>
+          <Trans id='document_details_page_frozen_notice' />
+        </Alert>
+      )}
       {renderTabContent()}
     </Box>
   )

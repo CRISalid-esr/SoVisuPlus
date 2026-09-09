@@ -31,7 +31,7 @@ const TabFilter = ({
         overflowX: 'auto',
         whiteSpace: 'nowrap',
         borderBottom: '1px solid #DDE4E1',
-        marginBottom: theme.spacing(8),
+        marginBottom: theme.spacing(5),
       })}
     >
       <Tabs
@@ -60,7 +60,7 @@ const TabFilter = ({
                 }}
               >
                 <Typography sx={{ mr: 1 }}>{tab.label}</Typography>
-                {tab.numberOfItems && (
+                {tab.numberOfItems !== undefined && (
                   <Badge
                     sx={{
                       ' .MuiBadge-badge': {
@@ -72,6 +72,7 @@ const TabFilter = ({
                     }}
                     badgeContent={tab.numberOfItems}
                     max={999_999}
+                    showZero
                   />
                 )}
               </Box>

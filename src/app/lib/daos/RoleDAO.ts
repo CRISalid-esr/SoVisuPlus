@@ -5,8 +5,6 @@ import {
   PermissionSubject,
   Role,
 } from '@prisma/client'
-import { RoleWithPermissionIds } from '@/prisma-schema/extended-client'
-
 export class RoleDAO extends AbstractDAO {
   async upsertRole(
     name: string,
@@ -27,17 +25,6 @@ export class RoleDAO extends AbstractDAO {
     return this.prismaClient.role.findUnique({
       where: { name },
     })
-  }
-
-  async getRoleWithPermissionIdsByName(
-    name: string,
-  ): Promise<RoleWithPermissionIds | null> {
-    return this.prismaClient.role.findUnique({
-      where: { name },
-      include: {
-        permissions: { select: { permissionId: true } },
-      },
-    }) as unknown as RoleWithPermissionIds | null
   }
 
   async setRolePermissions(

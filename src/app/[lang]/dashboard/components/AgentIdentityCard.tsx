@@ -6,8 +6,8 @@ import type { IAgent } from '@/types/IAgent'
 import { isPerson, Person } from '@/types/Person'
 
 import PersonIdentityCard from '@/app/[lang]/dashboard/components/PersonIdentityCard'
-import ResearchUnitIdentityCard from '@/app/[lang]/dashboard/components/ResearchUnitIdentityCard'
-import { isResearchUnit, ResearchUnit } from '@/types/ResearchUnit'
+import OrganizationUnitIdentityCard from '@/app/[lang]/dashboard/components/OrganizationUnitIdentityCard'
+import { isOrganizationUnit } from '@/types/OrganizationUnit'
 import { Trans } from '@lingui/react/macro'
 
 const AgentIdentityCard = ({ agent }: { agent: IAgent | null | undefined }) => {
@@ -15,8 +15,8 @@ const AgentIdentityCard = ({ agent }: { agent: IAgent | null | undefined }) => {
     return <PersonIdentityCard person={agent as Person} />
   }
 
-  if (isResearchUnit(agent)) {
-    return <ResearchUnitIdentityCard researchUnit={agent as ResearchUnit} />
+  if (isOrganizationUnit(agent)) {
+    return <OrganizationUnitIdentityCard organizationUnit={agent as IAgent} />
   }
 
   return (

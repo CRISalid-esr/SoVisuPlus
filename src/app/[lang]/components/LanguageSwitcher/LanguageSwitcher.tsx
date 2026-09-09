@@ -65,7 +65,7 @@ const LanguageSwitcher = ({ value }: Props) => {
           <Box
             component='span'
             sx={{
-              ml: 1,
+              ml: '14px',
               color: theme.palette.primaryContainer,
               fontSize: theme.utils.pxToRem(16),
               lineHeight: theme.typography.lineHeight.lineHeight24px,

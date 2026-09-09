@@ -18,13 +18,15 @@ export const resetAuthzDb = async () => {
   await prisma.document.deleteMany()
 
   await prisma.membership.deleteMany()
+  await prisma.employment.deleteMany()
   await prisma.personIdentifier.deleteMany()
   await prisma.user.deleteMany()
   await prisma.person.deleteMany()
-  await prisma.researchUnitIdentifier.deleteMany()
-  await prisma.researchUnitName.deleteMany()
-  await prisma.researchUnitDescription.deleteMany()
-  await prisma.researchUnit.deleteMany()
+  await prisma.organizationUnitIdentifier.deleteMany()
+  await prisma.organizationUnitLabel.deleteMany()
+  await prisma.organizationUnitDescription.deleteMany()
+  await prisma.organizationRelationship.deleteMany()
+  await prisma.organizationUnit.deleteMany()
 }
 
 export const seedRoles = async (payload: RolesFileSeed) => {
@@ -32,13 +34,17 @@ export const seedRoles = async (payload: RolesFileSeed) => {
   await svc.reset(payload)
 }
 
-export const createResearchUnit = async (uid: string, acronym?: string) =>
-  prisma.researchUnit.create({
+export const createOrganizationUnit = async (uid: string, acronym?: string) =>
+  prisma.organizationUnit.create({
     data: {
       uid,
       acronym: acronym ?? null,
+      genericType: 'unit',
+      category: 'research_unit',
       external: false,
-      names: { create: [{ language: 'en', value: acronym ?? uid }] },
+      labels: {
+        create: [{ kind: 'long', language: 'en', value: acronym ?? uid }],
+      },
       descriptions: { create: [{ language: 'en', value: `RS ${uid}` }] },
     },
   })
@@ -74,11 +80,11 @@ export const createPersonWithUser = async (
   return { person, user }
 }
 
-export const addMembership = async (personId: number, rsId: number) =>
+export const addMembership = async (personId: number, orgUnitId: number) =>
   prisma.membership.create({
     data: {
       personId,
-      researchUnitId: rsId,
+      organizationUnitId: orgUnitId,
       startDate: new Date('2020-01-01'),
       positionCode: 'RES',
     },

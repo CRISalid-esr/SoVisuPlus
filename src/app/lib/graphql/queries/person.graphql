@@ -26,17 +26,23 @@ query PeopleQuery($where: PersonWhere) {
           position_code
         }
         node {
-          acronym
+          uid
+          external
+          generic_type
+          national_type
+          types
           identifiers {
             type
             value
           }
-          names {
+          short_labels {
             language
             value
           }
-          types
-          uid
+          long_labels {
+            language
+            value
+          }
         }
       }
     }
@@ -48,18 +54,34 @@ query PeopleQuery($where: PersonWhere) {
           position_code
         }
         node {
-          acronym
+          uid
+          external
+          generic_type
+          national_type
+          types
           identifiers {
             type
             value
           }
-          names {
+          short_labels {
             language
             value
           }
-          types
-          uid
+          long_labels {
+            language
+            value
+          }
         }
+      }
+    }
+    recorded_by {
+      uid
+      name
+      source
+      source_identifier
+      identifiers {
+        type
+        value
       }
     }
   }

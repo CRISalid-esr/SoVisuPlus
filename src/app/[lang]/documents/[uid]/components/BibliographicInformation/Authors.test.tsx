@@ -76,6 +76,12 @@ jest.mock('@mui/material/styles', () => ({
 const mockState = {
   document: {
     selectedDocument: {
+      // Lets CASL detect the subject as Document and match the Person-scoped
+      // editor role, so the (permission-gated) edit button renders.
+      authzProperties: {
+        __type: 'Document',
+        perimeter: { Person: ['john-doe'] },
+      },
       contributions: [
         {
           person: {

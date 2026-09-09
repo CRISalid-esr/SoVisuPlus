@@ -2,9 +2,13 @@ import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 import prisma from '@/lib/daos/prisma'
 import { PersonMembership } from '@/types/PersonMembership'
-import { ResearchUnit } from '@/types/ResearchUnit'
+import { PersonEmployment } from '@/types/PersonEmployment'
+import { OrganizationRelation } from '@/types/OrganizationRelation'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { Literal } from '@/types/Literal'
-import { ResearchUnitDAO } from '@/lib/daos/ResearchUnitDAO'
+import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
+import { SourcePerson } from '@/types/SourcePerson'
+import { OrganizationCategory, OrganizationGenericType } from '@prisma/client'
 import {
   PersonIdentifier,
   PersonIdentifierType,
@@ -27,13 +31,13 @@ describe('PersonDAO Integration Tests', () => {
     [new PersonIdentifier(PersonIdentifierType.orcid, '0000-0001-2345-6789')],
     [
       new PersonMembership(
-        new ResearchUnit(
+        new OrganizationUnit(
           'local-unit',
           'ACR',
           [new Literal('JD Laboratory', 'en')],
           [new Literal('Laboratory of John Doe', 'en')],
-          'ACR_signature',
-          [],
+          OrganizationCategory.research_unit,
+          OrganizationGenericType.unit,
         ),
         null,
         null,
@@ -62,17 +66,18 @@ describe('PersonDAO Integration Tests', () => {
   })
 
   test('should create a new person with memberships', async () => {
-    const researchUnitDAO = new ResearchUnitDAO()
-    const researchUnit = await researchUnitDAO.createOrUpdateResearchUnit(
-      new ResearchUnit(
-        'local-unit',
-        'ACR',
-        [new Literal('JD Laboratory', 'en')],
-        [new Literal('Laboratory of John Doe', 'en')],
-        'ACR_signature',
-        [],
-      ),
-    )
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    const organizationUnit =
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(
+        new OrganizationUnit(
+          'local-unit',
+          'ACR',
+          [new Literal('JD Laboratory', 'en')],
+          [new Literal('Laboratory of John Doe', 'en')],
+          OrganizationCategory.research_unit,
+          OrganizationGenericType.unit,
+        ),
+      )
     const dbPerson = await personDAO.createOrUpdatePerson(person)
 
     expect(dbPerson).toHaveProperty('id')
@@ -81,14 +86,499 @@ describe('PersonDAO Integration Tests', () => {
 
     const savedMemberships = await prisma.membership.findMany({
       where: { personId: dbPerson.id },
-      include: { researchUnit: true },
+      include: { organizationUnit: true },
     })
 
     expect(savedMemberships).toHaveLength(1)
     expect(savedMemberships[0]).toMatchObject({
       personId: dbPerson.id,
-      researchUnitId: researchUnit.id,
+      organizationUnitId: organizationUnit.id,
       positionCode: 'MCF',
+    })
+  })
+
+  test('should create a new person with employments', async () => {
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    const institution =
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(
+        new OrganizationUnit(
+          'local-UP1',
+          'UP1',
+          [new Literal('Université Paris 1', 'fr')],
+          [],
+          OrganizationCategory.institution,
+          OrganizationGenericType.institution,
+        ),
+      )
+    // membership organization also present so both relations resolve
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      new OrganizationUnit(
+        'local-unit',
+        'ACR',
+        [new Literal('JD Laboratory', 'en')],
+        [],
+        OrganizationCategory.research_unit,
+        OrganizationGenericType.unit,
+      ),
+    )
+
+    const employedPerson = new Person(
+      'local-johndoe',
+      false,
+      'johndoe@example.com',
+      'John',
+      'Doe',
+      'John Doe',
+      [],
+      person.memberships,
+    )
+    employedPerson.employments = [
+      new PersonEmployment(
+        new OrganizationUnit(
+          'local-UP1',
+          'UP1',
+          [new Literal('Université Paris 1', 'fr')],
+          [],
+          OrganizationCategory.institution,
+          OrganizationGenericType.institution,
+        ),
+        '2018-09-01T00:00:00.000Z',
+        null,
+        'MCF',
+      ),
+    ]
+
+    const dbPerson = await personDAO.createOrUpdatePerson(employedPerson)
+
+    const savedEmployments = await prisma.employment.findMany({
+      where: { personId: dbPerson.id },
+    })
+    expect(savedEmployments).toHaveLength(1)
+    expect(savedEmployments[0]).toMatchObject({
+      personId: dbPerson.id,
+      organizationUnitId: institution.id,
+      positionCode: 'MCF',
+    })
+
+    // round-trip through fetchPersonByUid
+    const fetched = await personDAO.fetchPersonByUid('local-johndoe')
+    expect(fetched!.employments).toHaveLength(1)
+    expect(fetched!.employments[0].organizationUnit.uid).toBe('local-UP1')
+    expect(fetched!.employments[0].organizationUnit.category).toBe(
+      OrganizationCategory.institution,
+    )
+  })
+
+  test('should skip employments whose organization is unknown', async () => {
+    const employedPerson = new Person(
+      'local-johndoe',
+      false,
+      'johndoe@example.com',
+      'John',
+      'Doe',
+      'John Doe',
+      [],
+      [],
+    )
+    employedPerson.employments = [
+      new PersonEmployment(
+        new OrganizationUnit(
+          'local-MISSING',
+          null,
+          [],
+          [],
+          OrganizationCategory.institution,
+          OrganizationGenericType.institution,
+        ),
+      ),
+    ]
+
+    const dbPerson = await personDAO.createOrUpdatePerson(employedPerson)
+
+    const savedEmployments = await prisma.employment.findMany({
+      where: { personId: dbPerson.id },
+    })
+    expect(savedEmployments).toHaveLength(0)
+  })
+
+  const makeReplaceUnit = (uid: string, acronym: string) =>
+    new OrganizationUnit(
+      uid,
+      acronym,
+      [new Literal(`Lab ${acronym}`, 'en')],
+      [],
+      OrganizationCategory.research_unit,
+      OrganizationGenericType.unit,
+    )
+
+  const makeReplacePerson = (
+    uid: string,
+    memberships: PersonMembership[],
+  ): Person =>
+    new Person(
+      uid,
+      false,
+      `${uid}@example.com`,
+      'John Doe',
+      'John',
+      'Doe',
+      [],
+      memberships,
+    )
+
+  test('authoritative update removes memberships and employments no longer sent by the graph', async () => {
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    const unitA = await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      makeReplaceUnit('replace-unit-a', 'RUA'),
+    )
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      makeReplaceUnit('replace-unit-b', 'RUB'),
+    )
+
+    // The graph first reports the person in both units, employed at unit B
+    const inBothUnits = makeReplacePerson('local-replace-affiliations', [
+      new PersonMembership(makeReplaceUnit('replace-unit-a', 'RUA')),
+      new PersonMembership(makeReplaceUnit('replace-unit-b', 'RUB')),
+    ])
+    inBothUnits.employments = [
+      new PersonEmployment(
+        makeReplaceUnit('replace-unit-b', 'RUB'),
+        null,
+        null,
+        'MCF',
+      ),
+    ]
+    let dbPerson = await personDAO.createOrUpdatePerson(inBothUnits, {
+      authoritative: true,
+    })
+
+    expect(
+      await prisma.membership.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(2)
+    expect(
+      await prisma.employment.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(1)
+
+    // The person leaves unit B: the graph now sends unit A only, no employment
+    const inUnitAOnly = makeReplacePerson('local-replace-affiliations', [
+      new PersonMembership(makeReplaceUnit('replace-unit-a', 'RUA')),
+    ])
+    dbPerson = await personDAO.createOrUpdatePerson(inUnitAOnly, {
+      authoritative: true,
+    })
+
+    const savedMemberships = await prisma.membership.findMany({
+      where: { personId: dbPerson.id },
+    })
+    expect(savedMemberships).toHaveLength(1)
+    expect(savedMemberships[0].organizationUnitId).toBe(unitA.id)
+    expect(
+      await prisma.employment.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(0)
+  })
+
+  test('non-authoritative update preserves affiliations absent from the incoming data', async () => {
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      makeReplaceUnit('replace-unit-c', 'RUC'),
+    )
+
+    const withMembership = makeReplacePerson('local-replace-preserved', [
+      new PersonMembership(makeReplaceUnit('replace-unit-c', 'RUC')),
+    ])
+    withMembership.employments = [
+      new PersonEmployment(makeReplaceUnit('replace-unit-c', 'RUC')),
+    ]
+    let dbPerson = await personDAO.createOrUpdatePerson(withMembership, {
+      authoritative: true,
+    })
+
+    // A partial payload (e.g. a document contributor) has no affiliations:
+    // the default upsert-only mode must not prune them
+    const bare = makeReplacePerson('local-replace-preserved', [])
+    dbPerson = await personDAO.createOrUpdatePerson(bare)
+
+    expect(
+      await prisma.membership.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(1)
+    expect(
+      await prisma.employment.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(1)
+  })
+
+  test('authoritative update keeps affiliations whose graph edges could not be hydrated', async () => {
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      makeReplaceUnit('replace-unit-d', 'RUD'),
+    )
+
+    const withMembership = makeReplacePerson('local-replace-unhydrated', [
+      new PersonMembership(makeReplaceUnit('replace-unit-d', 'RUD')),
+    ])
+    let dbPerson = await personDAO.createOrUpdatePerson(withMembership, {
+      authoritative: true,
+    })
+
+    // The graph still asserts the membership, but its edge could not be
+    // hydrated (undeterminable category): it must survive the replacement
+    const withUnhydratedEdge = makeReplacePerson('local-replace-unhydrated', [])
+    withUnhydratedEdge.unhydratedMembershipOrgUids = ['replace-unit-d']
+    dbPerson = await personDAO.createOrUpdatePerson(withUnhydratedEdge, {
+      authoritative: true,
+    })
+
+    expect(
+      await prisma.membership.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(1)
+  })
+
+  test('authoritative update unlinks source persons no longer sent by the graph', async () => {
+    const withTwoRecords = makeReplacePerson('local-replace-records', [])
+    withTwoRecords.records = [
+      new SourcePerson('replace-src-1', 'J. Doe', 'hal', 'jdoe'),
+      new SourcePerson('replace-src-2', 'John D.', 'openalex', 'A123'),
+    ]
+    let dbPerson = await personDAO.createOrUpdatePerson(withTwoRecords, {
+      authoritative: true,
+    })
+
+    expect(
+      await prisma.sourcePerson.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(2)
+
+    // A non-authoritative update without records must not touch the links
+    dbPerson = await personDAO.createOrUpdatePerson(
+      makeReplacePerson('local-replace-records', []),
+    )
+    expect(
+      await prisma.sourcePerson.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(2)
+
+    // The graph now sends a single record: the other one is unlinked, not deleted
+    const withOneRecord = makeReplacePerson('local-replace-records', [])
+    withOneRecord.records = [
+      new SourcePerson('replace-src-1', 'J. Doe', 'hal', 'jdoe'),
+    ]
+    dbPerson = await personDAO.createOrUpdatePerson(withOneRecord, {
+      authoritative: true,
+    })
+
+    const linked = await prisma.sourcePerson.findMany({
+      where: { personId: dbPerson.id },
+    })
+    expect(linked).toHaveLength(1)
+    expect(linked[0].uid).toBe('replace-src-1')
+
+    const unlinked = await prisma.sourcePerson.findUnique({
+      where: { uid: 'replace-src-2' },
+    })
+    expect(unlinked).not.toBeNull()
+    expect(unlinked!.personId).toBeNull()
+  })
+
+  describe('fetchPeopleByOrganizationPerimeter', () => {
+    const makeOrg = (
+      uid: string,
+      acronym: string,
+      category: OrganizationCategory,
+      genericType: OrganizationGenericType,
+    ) =>
+      new OrganizationUnit(
+        uid,
+        acronym,
+        [new Literal(`Org ${acronym}`, 'en')],
+        [],
+        category,
+        genericType,
+      )
+
+    const makeMember = (uid: string, lastName: string, orgUid: string) => {
+      const member = new Person(
+        uid,
+        false,
+        null,
+        `P ${lastName}`,
+        'P',
+        lastName,
+        [],
+        [
+          new PersonMembership(
+            makeOrg(
+              orgUid,
+              'X',
+              OrganizationCategory.research_unit,
+              OrganizationGenericType.unit,
+            ),
+          ),
+        ],
+      )
+      return member
+    }
+
+    beforeEach(async () => {
+      const organizationUnitDAO = new OrganizationUnitDAO()
+      // institution supervising a research unit and a support unit
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(
+        makeOrg(
+          'local-UP1',
+          'UP1',
+          OrganizationCategory.institution,
+          OrganizationGenericType.institution,
+        ),
+      )
+      const ru1 = makeOrg(
+        'local-RU1',
+        'RU1',
+        OrganizationCategory.research_unit,
+        OrganizationGenericType.unit,
+      )
+      ru1.parents = [
+        new OrganizationRelation(
+          makeOrg(
+            'local-UP1',
+            'UP1',
+            OrganizationCategory.institution,
+            OrganizationGenericType.institution,
+          ),
+          'member_of',
+          'associated_supervision',
+        ),
+      ]
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(ru1)
+      const su1 = makeOrg(
+        'local-SU1',
+        'SU1',
+        OrganizationCategory.support_unit,
+        OrganizationGenericType.unit,
+      )
+      su1.parents = [
+        new OrganizationRelation(
+          makeOrg(
+            'local-UP1',
+            'UP1',
+            OrganizationCategory.institution,
+            OrganizationGenericType.institution,
+          ),
+          'member_of',
+        ),
+      ]
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(su1)
+
+      // subdivision with an attached research unit (part_of) and team (member_of)
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(
+        makeOrg(
+          'local-FAC1',
+          'FAC1',
+          OrganizationCategory.institution_subdivision,
+          OrganizationGenericType.institution_subdivision,
+        ),
+      )
+      const ru2 = makeOrg(
+        'local-RU2',
+        'RU2',
+        OrganizationCategory.research_unit,
+        OrganizationGenericType.unit,
+      )
+      ru2.parents = [
+        new OrganizationRelation(
+          makeOrg(
+            'local-FAC1',
+            'FAC1',
+            OrganizationCategory.institution_subdivision,
+            OrganizationGenericType.institution_subdivision,
+          ),
+          'part_of',
+        ),
+      ]
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(ru2)
+      const team1 = makeOrg(
+        'local-T1',
+        'T1',
+        OrganizationCategory.team,
+        OrganizationGenericType.team,
+      )
+      team1.parents = [
+        new OrganizationRelation(
+          makeOrg(
+            'local-FAC1',
+            'FAC1',
+            OrganizationCategory.institution_subdivision,
+            OrganizationGenericType.institution_subdivision,
+          ),
+          'member_of',
+        ),
+      ]
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(team1)
+
+      // people: one member per structure + a direct institution member
+      await personDAO.createOrUpdatePerson(
+        makeMember('p-ru1', 'Aru', 'local-RU1'),
+      )
+      await personDAO.createOrUpdatePerson(
+        makeMember('p-su1', 'Bsu', 'local-SU1'),
+      )
+      await personDAO.createOrUpdatePerson(
+        makeMember('p-up1', 'Cdirect', 'local-UP1'),
+      )
+      await personDAO.createOrUpdatePerson(
+        makeMember('p-fac1', 'Dfac', 'local-FAC1'),
+      )
+      await personDAO.createOrUpdatePerson(
+        makeMember('p-ru2', 'Eru', 'local-RU2'),
+      )
+      await personDAO.createOrUpdatePerson(
+        makeMember('p-t1', 'Fteam', 'local-T1'),
+      )
+    })
+
+    test('institution: members of research units member_of it, no direct members, no support units', async () => {
+      const people = await personDAO.fetchPeopleByOrganizationPerimeter(
+        'local-UP1',
+        'institution',
+      )
+      expect(people.map((p) => p.uid).sort()).toEqual(['p-ru1'])
+    })
+
+    test('other_structure: direct members plus members of attached units', async () => {
+      const people = await personDAO.fetchPeopleByOrganizationPerimeter(
+        'local-FAC1',
+        'other_structure',
+      )
+      expect(people.map((p) => p.uid).sort()).toEqual([
+        'p-fac1',
+        'p-ru2',
+        'p-t1',
+      ])
+    })
+
+    test('fetched person publishes one-hop authorization perimeters', async () => {
+      const fetched = await personDAO.fetchPersonByUid('p-ru1')
+      expect(fetched!.authzProperties.perimeter).toMatchObject({
+        Person: ['p-ru1'],
+        ResearchUnit: ['local-RU1'],
+        Institution: ['local-UP1'],
+      })
+
+      const teamMember = await personDAO.fetchPersonByUid('p-t1')
+      expect(teamMember!.authzProperties.perimeter).toMatchObject({
+        Team: ['local-T1'],
+        InstitutionDivision: ['local-FAC1'],
+      })
+    })
+
+    test('research_unit and team: direct members only', async () => {
+      const researchUnitPeople =
+        await personDAO.fetchPeopleByOrganizationPerimeter(
+          'local-RU1',
+          'research_unit',
+        )
+      expect(researchUnitPeople.map((p) => p.uid)).toEqual(['p-ru1'])
+
+      const teamPeople = await personDAO.fetchPeopleByOrganizationPerimeter(
+        'local-T1',
+        'team',
+      )
+      expect(teamPeople.map((p) => p.uid)).toEqual(['p-t1'])
     })
   })
 
@@ -197,6 +687,112 @@ describe('PersonDAO Integration Tests', () => {
         }),
       ]),
     )
+  })
+
+  test('should delete an idref identifier without touching other identifiers on the same person', async () => {
+    const dbPerson = await prisma.person.create({
+      data: {
+        uid: 'local-deletetest',
+        email: 'deletetest@example.com',
+        firstName: 'Test',
+        lastName: 'Delete',
+        identifiers: {
+          createMany: {
+            data: [
+              { type: PersonIdentifierType.idref, value: '127220747' },
+              {
+                type: PersonIdentifierType.orcid,
+                value: '0000-0001-9999-9999',
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    await personDAO.deleteIdentifier(dbPerson.uid, PersonIdentifierType.idref)
+
+    const remaining = await prisma.personIdentifier.findMany({
+      where: { personId: dbPerson.id },
+    })
+
+    expect(remaining).toHaveLength(1)
+    expect(remaining[0].type).toBe(PersonIdentifierType.orcid)
+  })
+
+  test('deleteIdentifier is a no-op when the identifier does not exist', async () => {
+    const dbPerson = await prisma.person.create({
+      data: {
+        uid: 'local-nodelete',
+        email: 'nodelete@example.com',
+        firstName: 'No',
+        lastName: 'Delete',
+      },
+    })
+
+    // idref was never created — deleteMany returns count 0, no throw
+    await expect(
+      personDAO.deleteIdentifier(dbPerson.uid, PersonIdentifierType.idref),
+    ).resolves.toBeUndefined()
+
+    const remaining = await prisma.personIdentifier.findMany({
+      where: { personId: dbPerson.id },
+    })
+    expect(remaining).toHaveLength(0)
+  })
+
+  test('should throw when deleteIdentifier is called with an unknown person uid', async () => {
+    await expect(
+      personDAO.deleteIdentifier('nonexistent-uid', PersonIdentifierType.idref),
+    ).rejects.toThrow('Person with UID nonexistent-uid not found')
+  })
+
+  test('deleting an idHAL cascades to its companion hal_login', async () => {
+    const dbPerson = await prisma.person.create({
+      data: {
+        uid: 'local-halcascade',
+        email: 'halcascade@example.com',
+        firstName: 'Hal',
+        lastName: 'Cascade',
+        identifiers: {
+          createMany: {
+            data: [
+              { type: PersonIdentifierType.idhals, value: 'jacques-dupont' },
+              { type: PersonIdentifierType.hal_login, value: 'jdupont' },
+            ],
+          },
+        },
+      },
+    })
+
+    await personDAO.deleteIdentifier(dbPerson.uid, PersonIdentifierType.idhals)
+
+    const remaining = await prisma.personIdentifier.findMany({
+      where: { personId: dbPerson.id },
+    })
+    expect(remaining).toHaveLength(0)
+  })
+
+  test('createIdentifier throws IdentifierConflictError when the type already exists', async () => {
+    const { IdentifierConflictError } = await import('@/lib/daos/PersonDAO')
+    const dbPerson = await prisma.person.create({
+      data: {
+        uid: 'local-createconflict',
+        email: 'createconflict@example.com',
+        firstName: 'Create',
+        lastName: 'Conflict',
+        identifiers: {
+          create: { type: PersonIdentifierType.idref, value: '127220747' },
+        },
+      },
+    })
+
+    await expect(
+      personDAO.createIdentifier(
+        new PersonIdentifier(PersonIdentifierType.idref, '111111111'),
+        dbPerson.uid,
+      ),
+    ).rejects.toBeInstanceOf(IdentifierConflictError)
   })
 
   test('should append -1 to the slug when a second person with the same name is added', async () => {

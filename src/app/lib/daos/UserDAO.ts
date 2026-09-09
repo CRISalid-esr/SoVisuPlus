@@ -67,26 +67,20 @@ export class UserDAO extends AbstractDAO {
                 },
               },
               memberships: {
-                select: {
-                  id: true,
-                  researchUnitId: true,
-                  personId: true,
-                  startDate: true,
-                  endDate: true,
-                  positionCode: true,
-                  researchUnit: {
-                    select: {
-                      id: true,
-                      uid: true,
-                      acronym: true,
-                      signature: true,
-                      slug: true,
-                      names: true,
+                include: {
+                  organizationUnit: {
+                    include: {
+                      labels: true,
+                      parents: { include: { parent: true } },
                       descriptions: true,
                       identifiers: true,
-                      external: true,
                     },
                   },
+                },
+              },
+              records: {
+                include: {
+                  identifiers: true,
                 },
               },
             },

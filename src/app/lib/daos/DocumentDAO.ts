@@ -1,5 +1,6 @@
 import { DocumentWithRelations as DbDocument } from '@/prisma-schema/extended-client'
 import {
+  AuthorityOrganization as DbAuthorityOrganization,
   Concept as DbConcept,
   DocumentState,
   OAStatus,
@@ -9,6 +10,7 @@ import {
 import { Document, DocumentType } from '@/types/Document'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PersonDAO } from './PersonDAO'
+import { SourcePersonDAO } from '@/lib/daos/SourcePersonDAO'
 import {
   BibliographicPlatform,
   getBibliographicPlatformDbValue,
@@ -21,6 +23,9 @@ import QueryMode = Prisma.QueryMode
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { Literal, LiteralJson } from '@/types/Literal'
+import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
+import { HalStatusFilterValue } from '@/types/HalStatusFilter'
+import { DashboardDocumentData } from '@/types/DashboardDocumentData'
 
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
@@ -40,12 +45,14 @@ interface FetchDocumentsFromDBParams {
   areHalCollectionCodesOmitted: boolean
 }
 
+// Mirrors FetchDocumentsFromDBParams minus paging and sorting.
 interface CountDocumentsFromDBParams {
   searchTerm: string
   searchLang: string
   columnFilters: DbColumnFilters[]
   contributorUids: string[]
   halCollectionCodes: string[]
+  areHalCollectionCodesOmitted: boolean
 }
 
 export class DocumentDAO extends AbstractDAO {
@@ -54,7 +61,9 @@ export class DocumentDAO extends AbstractDAO {
    * @param document - The Document object to create or update
    * @returns The created or updated Document record
    */
-  public async createOrUpdateDocument(document: Document): Promise<DbDocument> {
+  public async createOrUpdateDocument(
+    document: Document,
+  ): Promise<Pick<DbDocument, 'id' | 'uid'>> {
     const {
       uid,
       titles,
@@ -69,52 +78,20 @@ export class DocumentDAO extends AbstractDAO {
     } = document
 
     try {
-      let dbDocument: DbDocument | null =
-        await this.prismaClient.document.findUnique({
-          where: { uid: uid },
-          include: {
-            titles: true,
-            abstracts: true,
-            subjects: { include: { labels: true } },
-            contributions: {
-              include: {
-                affiliations: {
-                  include: {
-                    identifiers: true,
-                  },
-                },
-                person: {
-                  include: {
-                    identifiers: true,
-                    memberships: {
-                      include: {
-                        researchUnit: {
-                          include: {
-                            names: true,
-                            identifiers: true,
-                            descriptions: true,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            records: {
-              include: {
-                identifiers: true,
-                contributions: { include: { person: true } },
-                journal: true,
-              },
-            },
-            journal: {
-              include: {
-                identifiers: true,
-              },
-            },
-          },
-        })
+      // Only the fields used by the obsolete-contribution/subject diffing below are read
+      // off the existing row; everything else is (re)written by the upserts that follow.
+      const existing = await this.prismaClient.document.findUnique({
+        where: { uid: uid },
+        select: {
+          id: true,
+          contributions: { select: { person: { select: { uid: true } } } },
+          subjects: { select: { uid: true } },
+        },
+      })
+
+      // The created/updated row is only used for its id (write loops below) and its uid
+      // (returned to callers, which merely truthiness-check it) — no relations are read.
+      let dbDocument: Pick<DbDocument, 'id' | 'uid'>
 
       let journalId: number | null = null
 
@@ -153,7 +130,7 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
 
-      if (!dbDocument) {
+      if (!existing) {
         dbDocument = await this.prismaClient.document.create({
           data: {
             uid: uid,
@@ -175,53 +152,12 @@ export class DocumentDAO extends AbstractDAO {
             issue,
             pages,
           },
-          include: {
-            titles: true,
-            abstracts: true,
-            subjects: { include: { labels: true } },
-            contributions: {
-              include: {
-                affiliations: {
-                  include: {
-                    identifiers: true,
-                  },
-                },
-                person: {
-                  include: {
-                    identifiers: true,
-                    memberships: {
-                      include: {
-                        researchUnit: {
-                          include: {
-                            names: true,
-                            identifiers: true,
-                            descriptions: true,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            records: {
-              include: {
-                identifiers: true,
-                contributions: { include: { person: true } },
-                journal: true,
-              },
-            },
-            journal: {
-              include: {
-                identifiers: true,
-              },
-            },
-          },
+          select: { id: true, uid: true },
         })
       } else {
         // Remove obsolete contributions
         const existingContributors = new Set(
-          dbDocument.contributions.map((c) => c.person.uid),
+          existing.contributions.map((c) => c.person.uid),
         )
         const newContributors = new Set(contributions.map((c) => c.person.uid))
         const contributorsToRemove = [...existingContributors].filter(
@@ -231,7 +167,7 @@ export class DocumentDAO extends AbstractDAO {
         if (contributorsToRemove.length > 0) {
           await this.prismaClient.contribution.deleteMany({
             where: {
-              documentId: dbDocument.id,
+              documentId: existing.id,
               person: {
                 uid: { in: contributorsToRemove },
               },
@@ -240,7 +176,7 @@ export class DocumentDAO extends AbstractDAO {
         }
 
         // Remove obsolete subjects
-        const existingSubjects = new Set(dbDocument.subjects.map((s) => s.uid))
+        const existingSubjects = new Set(existing.subjects.map((s) => s.uid))
         const newSubjects = new Set(subjects.map((s) => s.uid))
         const subjectsToRemove = [...existingSubjects].filter(
           (uid) => !newSubjects.has(uid),
@@ -248,7 +184,7 @@ export class DocumentDAO extends AbstractDAO {
 
         if (subjectsToRemove.length > 0) {
           await this.prismaClient.document.update({
-            where: { id: dbDocument.id },
+            where: { id: existing.id },
             data: {
               subjects: {
                 disconnect: subjectsToRemove.map((uid) => ({ uid })),
@@ -257,7 +193,7 @@ export class DocumentDAO extends AbstractDAO {
           })
         }
 
-        dbDocument = (await this.prismaClient.document.update({
+        dbDocument = await this.prismaClient.document.update({
           where: { uid },
           data: {
             documentType: document.documentType,
@@ -279,26 +215,27 @@ export class DocumentDAO extends AbstractDAO {
             issue,
             pages,
           },
-          include: {
-            titles: true,
-            abstracts: true,
-            subjects: { include: { labels: true } },
-            contributions: { include: { person: true } },
-            records: {
-              include: {
-                identifiers: true,
-                contributions: { include: { person: true } },
-                journal: true,
-              },
-            },
-            journal: { include: { identifiers: true } },
-          },
-        })) as DbDocument
+          select: { id: true, uid: true },
+        })
       }
 
-      if (!dbDocument) {
-        throw new Error('dbDocument is null')
-      }
+      // Incoming data is authoritative: literals absent from it are removed.
+      // The graph rebuilds its title/abstract set from a single winning source
+      // record on every recomputation, so a language can disappear entirely.
+      await this.prismaClient.documentTitle.deleteMany({
+        where: {
+          documentId: dbDocument.id,
+          NOT: { language: { in: titles.map((title) => title.language) } },
+        },
+      })
+      await this.prismaClient.documentAbstract.deleteMany({
+        where: {
+          documentId: dbDocument.id,
+          NOT: {
+            language: { in: abstracts.map((abstract) => abstract.language) },
+          },
+        },
+      })
 
       for (const title of titles) {
         await this.prismaClient.documentTitle.upsert({
@@ -390,6 +327,7 @@ export class DocumentDAO extends AbstractDAO {
             },
             update: {
               roles: { set: contribution.getRoleLabels() },
+              affiliations: { set: [] },
             },
             create: {
               personId,
@@ -403,6 +341,42 @@ export class DocumentDAO extends AbstractDAO {
             error,
           )
         }
+
+        for (const affiliation of contribution.affiliations) {
+          let authorityOrganization: DbAuthorityOrganization
+          try {
+            authorityOrganization =
+              await new AuthorityOrganizationDAO().createOrUpdateAuthorityOrganization(
+                affiliation,
+              )
+            const { id: authorityId } = authorityOrganization
+            try {
+              await this.prismaClient.contribution.update({
+                where: {
+                  personId_documentId: {
+                    personId,
+                    documentId,
+                  },
+                },
+                data: {
+                  affiliations: {
+                    connect: { id: authorityId },
+                  },
+                },
+              })
+            } catch (error) {
+              console.error(
+                `Failed to upsert contribution affiliation for authority organization ID: ${authorityId} and contribution document ID: ${documentId} and person ID: ${personId}`,
+                error,
+              )
+            }
+          } catch (error) {
+            console.error(
+              `Failed to create or update authority organization for contribution: ${contribution}`,
+              error,
+            )
+          }
+        }
       }
 
       const incomingUids = new Set(records.map((r) => r.uid))
@@ -415,8 +389,18 @@ export class DocumentDAO extends AbstractDAO {
         },
       })
 
+      const sourcePersonDAO = new SourcePersonDAO()
+
       for (const record of records) {
         try {
+          // Ensure each source contributor exists with its identifiers before
+          // connecting it to the document record's contributions.
+          for (const contribution of record.contributions) {
+            await sourcePersonDAO.createOrUpdateSourcePerson(
+              contribution.person,
+            )
+          }
+
           const documentRecord = await this.prismaClient.documentRecord.upsert({
             where: {
               uid: record.uid,
@@ -446,15 +430,7 @@ export class DocumentDAO extends AbstractDAO {
                 create: record.contributions.map((contribution) => ({
                   role: LocRelatorHelper.toLabel(contribution.role),
                   person: {
-                    connectOrCreate: {
-                      where: { uid: contribution.person.uid },
-                      create: {
-                        uid: contribution.person.uid,
-                        name: contribution.person.name,
-                        source: contribution.person.source,
-                        sourceId: contribution.person.sourceId,
-                      },
-                    },
+                    connect: { uid: contribution.person.uid },
                   },
                 })),
               },
@@ -492,15 +468,7 @@ export class DocumentDAO extends AbstractDAO {
                 create: record.contributions.map((contribution) => ({
                   role: LocRelatorHelper.toLabel(contribution.role),
                   person: {
-                    connectOrCreate: {
-                      where: { uid: contribution.person.uid },
-                      create: {
-                        uid: contribution.person.uid,
-                        name: contribution.person.name,
-                        source: contribution.person.source,
-                        sourceId: contribution.person.sourceId,
-                      },
-                    },
+                    connect: { uid: contribution.person.uid },
                   },
                 })),
               },
@@ -672,6 +640,32 @@ export class DocumentDAO extends AbstractDAO {
         contributionFilters.push(nameFilter)
       }
 
+      if (
+        filter.id === 'structures' &&
+        Array.isArray(filter.value) &&
+        filter.value.length > 0
+      ) {
+        const structuresFilter: Prisma.DocumentWhereInput = {
+          contributions: {
+            some: {
+              person: {
+                uid: {
+                  notIn: contributorUids,
+                },
+              },
+              affiliations: {
+                some: {
+                  uid: {
+                    in: filter.value,
+                  },
+                },
+              },
+            },
+          },
+        }
+        contributionFilters.push(structuresFilter)
+      }
+
       if (filter.id === 'date' && Array.isArray(filter.value)) {
         const startDate = filter.value[0] || null // Full ISO string date
         const endDate = filter.value[1] || null // Full ISO string date
@@ -767,13 +761,16 @@ export class DocumentDAO extends AbstractDAO {
 
       if (filter.id === 'halStatus' && Array.isArray(filter.value)) {
         const halStatusOr: Prisma.DocumentWhereInput[] = []
+        const halPlatform = getBibliographicPlatformDbValue(
+          BibliographicPlatform.HAL,
+        )
 
         filter.value.forEach((type) => {
-          if (type === 'in_collection') {
+          if (type === HalStatusFilterValue.InCollection) {
             halStatusOr.push({
               records: {
                 some: {
-                  platform: 'hal',
+                  platform: halPlatform,
                   halCollectionCodes: {
                     hasSome: halCollectionCodes,
                   },
@@ -782,11 +779,11 @@ export class DocumentDAO extends AbstractDAO {
             })
           }
 
-          if (type === 'out_of_collection') {
+          if (type === HalStatusFilterValue.OutOfCollection) {
             halStatusOr.push({
               records: {
                 some: {
-                  platform: 'hal',
+                  platform: halPlatform,
                 },
                 none: {
                   halCollectionCodes: {
@@ -797,11 +794,11 @@ export class DocumentDAO extends AbstractDAO {
             })
           }
 
-          if (type === 'outside_hal') {
+          if (type === HalStatusFilterValue.OutsideHal) {
             halStatusOr.push({
               records: {
                 none: {
-                  platform: 'hal',
+                  platform: halPlatform,
                 },
               },
             })
@@ -942,13 +939,19 @@ export class DocumentDAO extends AbstractDAO {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchUnit: {
+                    organizationUnit: {
                       include: {
-                        names: true,
+                        labels: true,
+                        parents: { include: { parent: true } },
                         identifiers: true,
                         descriptions: true,
                       },
                     },
+                  },
+                },
+                records: {
+                  include: {
+                    identifiers: true,
                   },
                 },
               },
@@ -960,7 +963,7 @@ export class DocumentDAO extends AbstractDAO {
             identifiers: true,
             contributions: {
               include: {
-                person: true,
+                person: { include: { identifiers: true } },
               },
             },
             journal: true,
@@ -984,14 +987,46 @@ export class DocumentDAO extends AbstractDAO {
     }
   }
 
-  public async fetchOAYearDocuments(contributorUids: string[]): Promise<{
-    documents: {
-      uid: string
+  /**
+   * Per-document facts needed by the research-structures directory KPIs:
+   * contributor person ids, OA statuses and HAL-record presence of every
+   * document published since the cutoff.
+   */
+  public async fetchDocumentStatsSince(cutoff: Date): Promise<
+    {
+      id: number
       oaStatus: OAStatus | null
-      publicationDate: string | null
       upwOAStatus: OAStatus | null
+      hasHalRecord: boolean
+      personIds: number[]
     }[]
-  }> {
+  > {
+    const documents = await this.prismaClient.document.findMany({
+      where: { publicationDateStart: { gte: cutoff } },
+      select: {
+        id: true,
+        oaStatus: true,
+        upwOAStatus: true,
+        records: { select: { platform: true } },
+        contributions: { select: { personId: true } },
+      },
+    })
+    return documents.map((document) => ({
+      id: document.id,
+      oaStatus: document.oaStatus,
+      upwOAStatus: document.upwOAStatus,
+      hasHalRecord: document.records.some(
+        (record) => record.platform === 'hal',
+      ),
+      personIds: document.contributions.map(
+        (contribution) => contribution.personId,
+      ),
+    }))
+  }
+
+  public async fetchOAYearDocuments(
+    contributorUids: string[],
+  ): Promise<{ documents: DashboardDocumentData[] }> {
     const perspectiveRolesFilter: string[] = parseStrArrayEnvVar(
       process.env.PERSPECTIVE_ROLES_FILTER,
     )
@@ -1002,6 +1037,23 @@ export class DocumentDAO extends AbstractDAO {
         oaStatus: true,
         publicationDate: true,
         upwOAStatus: true,
+        contributions: {
+          select: {
+            person: {
+              select: {
+                uid: true,
+                displayName: true,
+              },
+            },
+            affiliations: {
+              select: {
+                uid: true,
+                displayNames: true,
+                places: true,
+              },
+            },
+          },
+        },
       },
       where: {
         publicationDate: { not: null },
@@ -1024,36 +1076,40 @@ export class DocumentDAO extends AbstractDAO {
     })
 
     return {
-      documents: dbDocuments,
+      documents: dbDocuments.map((doc) => {
+        return {
+          ...doc,
+          contributions: doc.contributions.map((contribution) => {
+            return {
+              ...contribution,
+              affiliations: contribution.affiliations.map((affiliation) => {
+                return {
+                  ...affiliation,
+                  places: affiliation.places as {
+                    latitude: number
+                    longitude: number
+                  }[],
+                }
+              }),
+            }
+          }),
+        }
+      }),
     }
   }
 
-  public async countDocuments(params: CountDocumentsFromDBParams): Promise<{
-    allItems: number
-    incompleteHalRepositoryItems: number
-  }> {
-    const allWhere = this.createFetchDocumentsWhere({
-      ...params,
-      areHalCollectionCodesOmitted: false,
+  /**
+   * The count half of {@link fetchDocuments}: same where clause, no paging and
+   * no sorting. Used for the badge of a tab the user is not currently on — the
+   * active tab's badge comes from the `totalItems` the list query already
+   * returns.
+   */
+  public async countDocuments(
+    params: CountDocumentsFromDBParams,
+  ): Promise<number> {
+    return this.prismaClient.document.count({
+      where: this.createFetchDocumentsWhere(params),
     })
-    const incompleteHalRepositoryWhere = this.createFetchDocumentsWhere({
-      ...params,
-      areHalCollectionCodesOmitted: true,
-    })
-
-    const allItems = await this.prismaClient.document.count({
-      where: allWhere,
-    })
-    const incompleteHalRepositoryItems = await this.prismaClient.document.count(
-      {
-        where: incompleteHalRepositoryWhere,
-      },
-    )
-
-    return {
-      allItems,
-      incompleteHalRepositoryItems,
-    }
   }
 
   async fetchDocumentById(uid: string): Promise<Document | null> {
@@ -1074,13 +1130,19 @@ export class DocumentDAO extends AbstractDAO {
                 identifiers: true,
                 memberships: {
                   include: {
-                    researchUnit: {
+                    organizationUnit: {
                       include: {
-                        names: true,
+                        labels: true,
+                        parents: { include: { parent: true } },
                         descriptions: true,
                         identifiers: true,
                       },
                     },
+                  },
+                },
+                records: {
+                  include: {
+                    identifiers: true,
                   },
                 },
               },
@@ -1090,7 +1152,9 @@ export class DocumentDAO extends AbstractDAO {
         records: {
           include: {
             identifiers: true,
-            contributions: { include: { person: true } },
+            contributions: {
+              include: { person: { include: { identifiers: true } } },
+            },
             journal: true,
           },
         },
@@ -1274,6 +1338,44 @@ export class DocumentDAO extends AbstractDAO {
     })
   }
 
+  /**
+   * Unfreeze documents whose graph round-trip failed: no `document_updated`
+   * message will re-write them, so their state must be reset here. Only
+   * documents currently `waiting_for_update` are touched.
+   */
+  public async resetDocumentsWaitingForUpdate(uids: string[]) {
+    await this.prismaClient.document.updateMany({
+      where: { uid: { in: uids }, state: DocumentState.waiting_for_update },
+      data: { state: DocumentState.default },
+    })
+
+    return this.prismaClient.document.findMany({
+      where: { uid: { in: uids } },
+      select: { uid: true, state: true },
+    })
+  }
+
+  public async getDocumentLabelsByUid(
+    uid: string,
+  ): Promise<Record<string, string>> {
+    const document = await this.prismaClient.document.findUnique({
+      where: { uid },
+      include: { titles: true },
+    })
+
+    if (!document) {
+      return {}
+    }
+
+    const labels: Record<string, string> = {}
+    for (const title of document.titles) {
+      if (title.value && title.language) {
+        labels[title.language] = title.value
+      }
+    }
+    return labels
+  }
+
   public async updateDocumentTypeByUid(
     uid: string,
     documentType: DocumentType,
@@ -1291,6 +1393,27 @@ export class DocumentDAO extends AbstractDAO {
       where: { id: doc.id },
       data: {
         documentType,
+      },
+    })
+  }
+
+  public async updatePublicationDateByUid(
+    uid: string,
+    publicationDate: string | null,
+  ): Promise<void> {
+    const doc = await this.prismaClient.document.findUnique({
+      where: { uid },
+      select: { id: true },
+    })
+
+    if (!doc) {
+      throw new Error(`Document with UID ${uid} not found`)
+    }
+
+    await this.prismaClient.document.update({
+      where: { id: doc.id },
+      data: {
+        publicationDate,
       },
     })
   }

@@ -3,6 +3,7 @@ import {
   AuthOptions,
   DefaultSession,
   Profile,
+  Session,
   User as NextAuthUser,
 } from 'next-auth'
 import KeycloakProvider, { KeycloakProfile } from 'next-auth/providers/keycloak'
@@ -10,7 +11,6 @@ import { UserService } from '@/lib/services/UserService'
 import { AuthenticationProfile } from '@/types/AuthenticationProfile'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { JWT } from 'next-auth/jwt'
-import { Session } from '@auth/core/types'
 import { userToAuthzContext } from '@/app/auth/ability'
 import {
   PersonIdentifier,
@@ -18,7 +18,7 @@ import {
 } from '@/types/PersonIdentifier'
 import { AuthzContext } from '@/types/authz'
 
-declare module '@auth/core/types' {
+declare module 'next-auth' {
   interface User {
     username?: string
     orcid?: string

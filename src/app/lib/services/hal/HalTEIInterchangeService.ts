@@ -1,8 +1,47 @@
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 import { Document as DocumentClass, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
+import { Concept } from '@/types/Concept'
 import { Journal } from '@/types/Journal'
+import { Contribution } from '@/types/Contribution'
+import { halTypologyForDocumentType } from '@/lib/services/hal/halDepositFormConfig'
 import xpath from 'xpath'
+
+/** A file to reference in the TEI `editionStmt/edition` (codes already resolved by the caller). */
+export type HalFileDescriptor = {
+  fileName: string
+  /** HAL fileType code → `ref/@type` (file | src | annex). */
+  fileType: string
+  /** HAL fileSource code → `ref/@subtype` (author | greenPublisher | …). */
+  fileSource: string
+  /** Embargo date `YYYY-MM-DD` → `date/@notBefore`; null/undefined = immediately visible. */
+  notBefore?: string | null
+  /** 1-based sequence index → `ref/@n`. */
+  n: number
+}
+
+export type HalTEIOptions = {
+  domains?: string[]
+  language?: string
+  halDocumentType?: string
+  /** Internal document UID, emitted as `<idno type="localRef">` for round-trip matching. */
+  localRef?: string
+  /** Resolved Creative Commons `@target` URL for `availability/licence` (null = omit). */
+  licenceTarget?: string | null
+  /** Attached files (Case 2 / ZIP deposit). Empty/absent ⇒ XML-only notice. */
+  files?: HalFileDescriptor[]
+  // Type-specific overrides emitted into <monogr> for the non-ART types.
+  conferenceTitle?: string | null
+  conferenceCity?: string | null
+  /** Partial ISO 8601 (YYYY / YYYY-MM / YYYY-MM-DD) → meeting/date[@type="start"] text. */
+  conferenceStartDate?: string | null
+  /** ISO 3166-1 alpha-2 code → meeting/country/@key. */
+  conferenceCountry?: string | null
+  institution?: string | null
+  bookTitle?: string | null
+  /** THESE thesis advisor / HDR chair of jury → monogr/authority[@type="supervisor"]. */
+  supervisor?: string | null
+}
 
 /**
  * HAL TEI (AOfr profile) interchange service.
@@ -61,25 +100,6 @@ export class HalTEIInterchangeService {
     SON: DocumentType.Document,
   })
 
-  private static readonly DOCUMENT_TYPE_TO_HAL_TYPOLOGY: Readonly<
-    Record<DocumentType, string>
-  > = Object.freeze({
-    [DocumentType.Document]: 'UNDEFINED',
-    [DocumentType.ScholarlyPublication]: 'UNDEFINED',
-    [DocumentType.Presentation]: 'PRESCONF',
-    [DocumentType.Article]: 'ART',
-    [DocumentType.ConferenceAbstract]: 'COMM',
-    [DocumentType.Preface]: 'OTHER',
-    [DocumentType.Comment]: 'NOTE',
-    [DocumentType.JournalArticle]: 'ART',
-    [DocumentType.Book]: 'OUV',
-    [DocumentType.Monograph]: 'OUV',
-    [DocumentType.BookChapter]: 'COUV',
-    [DocumentType.BookOfChapters]: 'OUV',
-    [DocumentType.ConferenceArticle]: 'COMM',
-    [DocumentType.Proceedings]: 'PROCEEDINGS',
-  })
-
   /**
    * Parse HAL TEI XML into DocumentClass model
    */
@@ -120,16 +140,28 @@ export class HalTEIInterchangeService {
   /**
    * Convert a DocumentClass into HAL TEI XML (AOfr-TEI).
    */
-  public toHalTEI(document: DocumentClass): string {
-    const lang = this.pickMainLanguage(document)
+  public toHalTEI(
+    document: DocumentClass,
+    options: HalTEIOptions = {},
+  ): string {
+    const lang =
+      options.language ??
+      process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')[0] ??
+      'fr'
+    const date = document.publicationDate ?? null
 
     const dom = this.domParser.parseFromString(
       this.minimalTeiSkeletonXml(),
       'text/xml',
     )
 
-    this.patchDocumentType(dom, document.documentType)
+    const halCode =
+      options.halDocumentType ??
+      this.mapDocumentTypeToHalTypology(document.documentType)
+    this.patchDocumentType(dom, halCode, options.domains ?? [])
+    this.patchKeywords(dom, document.subjects ?? [], halCode)
     this.patchTitles(dom, document.titles)
+    this.patchAuthors(dom, document.contributions ?? [])
     this.patchAbstracts(dom, document.abstracts)
     this.patchLangUsage(dom, lang)
 
@@ -138,9 +170,40 @@ export class HalTEIInterchangeService {
         volume: document.volume ?? null,
         issue: document.issue ?? null,
         pages: document.pages ?? null,
-        publicationDate: document.publicationDate ?? null,
+        publicationDate: date,
+      })
+    } else if (date) {
+      this.patchProductionDate(dom, date)
+    }
+
+    // Per-type conditional metadata into <monogr> (guarded so ART output is unchanged).
+    if (options.bookTitle) this.patchBookTitle(dom, options.bookTitle)
+    if (
+      options.conferenceTitle ||
+      options.conferenceStartDate ||
+      options.conferenceCity ||
+      options.conferenceCountry
+    ) {
+      this.patchMeeting(dom, {
+        title: options.conferenceTitle ?? null,
+        startDate: options.conferenceStartDate ?? null,
+        city: options.conferenceCity ?? null,
+        countryCode: options.conferenceCountry ?? null,
       })
     }
+    if (options.institution)
+      this.patchMonogrAuthority(dom, 'institution', options.institution)
+    if (options.supervisor)
+      this.patchMonogrAuthority(dom, 'supervisor', options.supervisor)
+    // For a thesis/HDR the publication date is the defense date — emit it as dateDefended
+    // alongside the datePub already produced above.
+    if ((halCode === 'THESE' || halCode === 'HDR') && date)
+      this.patchDefenseDate(dom, date)
+
+    if (options.localRef) this.patchLocalRef(dom, options.localRef)
+    if (options.files?.length) this.patchFiles(dom, options.files)
+    if (options.licenceTarget) this.patchLicence(dom, options.licenceTarget)
+    this.pruneEmptyDepositElements(dom)
 
     return this.serialize(dom)
   }
@@ -274,12 +337,15 @@ export class HalTEIInterchangeService {
 
   private minimalTeiSkeletonXml(): string {
     return `<?xml version="1.0" encoding="UTF-8"?>
-<TEI>
+<TEI xmlns="http://www.tei-c.org/ns/1.0"
+     xmlns:hal="http://hal.archives-ouvertes.fr/">
   <text>
     <body>
       <listBibl>
         <biblFull>
           <titleStmt></titleStmt>
+          <editionStmt><edition></edition></editionStmt>
+          <publicationStmt></publicationStmt>
           <sourceDesc>
             <biblStruct>
               <analytic></analytic>
@@ -300,9 +366,11 @@ export class HalTEIInterchangeService {
 </TEI>`
   }
 
-  private patchDocumentType(dom: Document, documentType: DocumentType): void {
-    const code = this.mapDocumentTypeToHalTypology(documentType)
-
+  private patchDocumentType(
+    dom: Document,
+    halCode: string,
+    domains: string[],
+  ): void {
     const textClass = this.ensureElement(
       dom,
       "//*[local-name()='profileDesc']/*[local-name()='textClass']",
@@ -313,11 +381,75 @@ export class HalTEIInterchangeService {
       dom,
       "//*[local-name()='classCode' and @scheme='halTypology']",
     )
+    this.removeAll(dom, "//*[local-name()='classCode' and @scheme='halDomain']")
 
-    const classCode = this.createElement(dom, 'classCode')
-    classCode.setAttribute('scheme', 'halTypology')
-    classCode.setAttribute('n', code)
-    textClass.appendChild(classCode)
+    const typologyCode = this.createElement(dom, 'classCode')
+    typologyCode.setAttribute('scheme', 'halTypology')
+    typologyCode.setAttribute('n', halCode)
+    textClass.appendChild(typologyCode)
+
+    for (const domain of domains) {
+      const domainCode = this.createElement(dom, 'classCode')
+      domainCode.setAttribute('scheme', 'halDomain')
+      domainCode.setAttribute('n', domain)
+      textClass.appendChild(domainCode)
+    }
+  }
+
+  /**
+   * Emits the document subjects as `textClass/keywords[@scheme="author"]/term` (one `<term>` per
+   * preferred label, tagged with its `xml:lang`). Only preferred labels are used — never alt labels.
+   *
+   * - For THESE/HDR both the French **and** English preferred label of each subject are emitted
+   *   (other languages are dropped); HAL requires the fr+en pair for a thesis/HDR.
+   * - For every other type a single term per subject is emitted: the French label, or the English
+   *   label when the subject has no French translation.
+   *
+   * The `<keywords>` block is inserted before the `classCode` children (matching the HAL THESE/HDR
+   * examples); `textClass` is an unbounded choice so the order is not schema-significant.
+   */
+  private patchKeywords(
+    dom: Document,
+    subjects: Concept[],
+    halCode: string,
+  ): void {
+    const isThesis = halCode === 'THESE' || halCode === 'HDR'
+
+    const terms: { lang: string; value: string }[] = []
+    for (const subject of subjects) {
+      const pref = (lang: string) =>
+        subject.prefLabels.find(
+          (l) => l.language === lang && l.value?.trim(),
+        )
+      const fr = pref('fr')
+      const en = pref('en')
+      if (isThesis) {
+        if (fr) terms.push({ lang: 'fr', value: fr.value })
+        if (en) terms.push({ lang: 'en', value: en.value })
+      } else {
+        const chosen = fr ?? en
+        if (chosen) terms.push({ lang: chosen.language, value: chosen.value })
+      }
+    }
+
+    if (terms.length === 0) return
+
+    const textClass = this.ensureElement(
+      dom,
+      "//*[local-name()='profileDesc']/*[local-name()='textClass']",
+      () => this.createElement(dom, 'textClass'),
+    )
+    this.removeAllWithin(textClass, "./*[local-name()='keywords']")
+
+    const keywords = this.createElement(dom, 'keywords')
+    keywords.setAttribute('scheme', 'author')
+    for (const term of terms) {
+      const termEl = this.createElement(dom, 'term')
+      termEl.setAttribute('xml:lang', term.lang)
+      termEl.appendChild(dom.createTextNode(term.value))
+      keywords.appendChild(termEl)
+    }
+    textClass.insertBefore(keywords, textClass.firstChild)
   }
 
   private patchTitles(dom: Document, titles: Literal[]): void {
@@ -329,12 +461,172 @@ export class HalTEIInterchangeService {
 
     this.removeAllWithin(titleStmt, "./*[local-name()='title']")
 
+    const analytic = this.ensureElement(
+      dom,
+      "//*[local-name()='biblStruct']/*[local-name()='analytic']",
+      () => this.createElement(dom, 'analytic'),
+    )
+
+    this.removeAllWithin(analytic, "./*[local-name()='title']")
+
     for (const t of titles) {
-      const title = this.createElement(dom, 'title')
-      if (t.language) title.setAttribute('xml:lang', t.language)
-      title.appendChild(dom.createTextNode(t.value))
-      titleStmt.appendChild(title)
+      const mkTitle = () => {
+        const title = this.createElement(dom, 'title')
+        if (t.language) title.setAttribute('xml:lang', t.language)
+        title.appendChild(dom.createTextNode(t.value))
+        return title
+      }
+      titleStmt.appendChild(mkTitle())
+      analytic.appendChild(mkTitle())
     }
+  }
+
+  private static readonly IDNO_TYPE_MAP: Partial<Record<string, string>> = {
+    nns: 'RNSR',
+    ror: 'ROR',
+    isni: 'ISNI',
+    idref: 'IdRef',
+    hal: 'idhal',
+  }
+
+  private patchAuthors(dom: Document, contributions: Contribution[]): void {
+    const analytic = this.ensureElement(
+      dom,
+      "//*[local-name()='biblStruct']/*[local-name()='analytic']",
+      () => this.createElement(dom, 'analytic'),
+    )
+
+    this.removeAllWithin(analytic, "./*[local-name()='author']")
+
+    const orgMap = new Map<
+      string,
+      {
+        xmlId: string
+        orgName: string
+        orgType: string
+        identifiers: { type: string; value: string }[]
+      }
+    >()
+    let orgCounter = 0
+
+    const sorted = contributions
+      .slice()
+      .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
+
+    for (const contribution of sorted) {
+      const { person } = contribution
+      const names = this.resolveAuthorNames(
+        person.firstName,
+        person.lastName,
+        person.displayName,
+      )
+      if (!names) continue
+
+      const author = this.createElement(dom, 'author')
+      author.setAttribute('role', 'aut')
+
+      const persName = this.createElement(dom, 'persName')
+
+      const forename = this.createElement(dom, 'forename')
+      forename.setAttribute('type', 'first')
+      forename.appendChild(dom.createTextNode(names.forename))
+      persName.appendChild(forename)
+
+      const surname = this.createElement(dom, 'surname')
+      surname.appendChild(dom.createTextNode(names.surname))
+      persName.appendChild(surname)
+
+      author.appendChild(persName)
+
+      for (const org of contribution.affiliations) {
+        const idnos = org.identifiers
+          .map((id) => {
+            const halType = HalTEIInterchangeService.IDNO_TYPE_MAP[id.type]
+            return halType && id.value
+              ? { type: halType, value: id.value }
+              : null
+          })
+          .filter((x): x is { type: string; value: string } => x !== null)
+
+        if (idnos.length === 0) continue
+
+        const { orgType, idnos: resolvedIdnos } =
+          HalTEIInterchangeService.resolveOrgEntry(idnos)
+
+        if (!orgMap.has(org.uid)) {
+          orgCounter++
+          const xmlId = `localStruct-${orgCounter}`
+          orgMap.set(org.uid, {
+            xmlId,
+            orgName: org.displayNames[0] ?? '',
+            orgType,
+            identifiers: resolvedIdnos,
+          })
+        }
+        const { xmlId } = orgMap.get(org.uid)!
+        const affiliation = this.createElement(dom, 'affiliation')
+        affiliation.setAttribute('ref', `#${xmlId}`)
+        author.appendChild(affiliation)
+      }
+
+      analytic.appendChild(author)
+    }
+
+    if (orgMap.size > 0) this.patchOrganisations(dom, orgMap)
+  }
+
+  private static resolveOrgEntry(idnos: { type: string; value: string }[]): {
+    orgType: string
+    idnos: { type: string; value: string }[]
+  } {
+    const rnsr = idnos.find((id) => id.type === 'RNSR')
+    if (rnsr) return { orgType: 'laboratory', idnos: [rnsr] }
+    return { orgType: 'institution', idnos }
+  }
+
+  private patchOrganisations(
+    dom: Document,
+    orgMap: Map<
+      string,
+      {
+        xmlId: string
+        orgName: string
+        orgType: string
+        identifiers: { type: string; value: string }[]
+      }
+    >,
+  ): void {
+    const textEl = xpath.select1("//*[local-name()='text']", dom) as
+      | Element
+      | undefined
+    if (!textEl) return
+
+    const back = this.createElement(dom, 'back')
+    const listOrg = this.createElement(dom, 'listOrg')
+    listOrg.setAttribute('type', 'structures')
+
+    for (const { xmlId, orgName, orgType, identifiers } of orgMap.values()) {
+      const org = this.createElement(dom, 'org')
+      org.setAttribute('type', orgType)
+      org.setAttributeNS(
+        'http://www.w3.org/XML/1998/namespace',
+        'xml:id',
+        xmlId,
+      )
+      const orgNameEl = this.createElement(dom, 'orgName')
+      orgNameEl.appendChild(dom.createTextNode(orgName))
+      org.appendChild(orgNameEl)
+      for (const { type, value } of identifiers) {
+        const idno = this.createElement(dom, 'idno')
+        idno.setAttribute('type', type)
+        idno.appendChild(dom.createTextNode(value))
+        org.appendChild(idno)
+      }
+      listOrg.appendChild(org)
+    }
+
+    back.appendChild(listOrg)
+    textEl.appendChild(back)
   }
 
   private patchAbstracts(dom: Document, abstracts: Literal[]): void {
@@ -365,6 +657,116 @@ export class HalTEIInterchangeService {
     const language = this.createElement(dom, 'language')
     language.setAttribute('ident', lang)
     langUsage.appendChild(language)
+  }
+
+  /**
+   * Emit the document's internal UID as `<idno type="localRef">` so a later HAL harvest can be
+   * matched back to this document.
+   * NOTE: exact placement to confirm against a real preprod deposit (spec open item); HAL is
+   * expected to preserve and surface this localRef.
+   */
+  private patchLocalRef(dom: Document, localRef: string): void {
+    const pubStmt = this.ensureElement(
+      dom,
+      "//*[local-name()='biblFull']/*[local-name()='publicationStmt']",
+      () => this.createElement(dom, 'publicationStmt'),
+    )
+    this.removeAllWithin(
+      pubStmt,
+      "./*[local-name()='idno' and @type='localRef']",
+    )
+    const idno = this.createElement(dom, 'idno')
+    idno.setAttribute('type', 'localRef')
+    idno.appendChild(dom.createTextNode(localRef))
+    pubStmt.appendChild(idno)
+  }
+
+  /**
+   * Reference each attached file in `editionStmt/edition` as a `<ref>` (with its embargo date as
+   * a preceding sibling `<date notBefore>` when delayed). `@type` is the file kind, `@subtype`
+   * the file source, `@target` the filename used in the ZIP.
+   */
+  private patchFiles(dom: Document, files: HalFileDescriptor[]): void {
+    const editionStmt = this.ensureElement(
+      dom,
+      "//*[local-name()='biblFull']/*[local-name()='editionStmt']",
+      () => this.createElement(dom, 'editionStmt'),
+    )
+    const edition = this.ensureElementWithin(
+      editionStmt,
+      "./*[local-name()='edition']",
+      () => this.createElement(dom, 'edition'),
+    )
+
+    for (const f of files) {
+      if (f.notBefore) {
+        const date = this.createElement(dom, 'date')
+        date.setAttribute('notBefore', f.notBefore)
+        edition.appendChild(date)
+      }
+      const ref = this.createElement(dom, 'ref')
+      ref.setAttribute('type', f.fileType)
+      ref.setAttribute('subtype', f.fileSource)
+      ref.setAttribute('target', f.fileName)
+      ref.setAttribute('n', String(f.n))
+      edition.appendChild(ref)
+    }
+  }
+
+  /** Emit the deposit licence as `publicationStmt/availability/licence/@target`. */
+  private patchLicence(dom: Document, target: string): void {
+    const pubStmt = this.ensureElement(
+      dom,
+      "//*[local-name()='biblFull']/*[local-name()='publicationStmt']",
+      () => this.createElement(dom, 'publicationStmt'),
+    )
+    const availability = this.ensureElementWithin(
+      pubStmt,
+      "./*[local-name()='availability']",
+      () => this.createElement(dom, 'availability'),
+    )
+    this.removeAllWithin(availability, "./*[local-name()='licence']")
+    const licence = this.createElement(dom, 'licence')
+    licence.setAttribute('target', target)
+    availability.appendChild(licence)
+  }
+
+  /** Drop the editionStmt/publicationStmt skeleton placeholders when nothing populated them. */
+  private pruneEmptyDepositElements(dom: Document): void {
+    const edition = xpath.select1(
+      "//*[local-name()='editionStmt']/*[local-name()='edition']",
+      dom,
+    ) as Element | undefined
+    if (edition && !this.hasElementChild(edition)) {
+      const editionStmt = edition.parentNode
+      if (editionStmt?.parentNode)
+        editionStmt.parentNode.removeChild(editionStmt)
+    }
+
+    const pubStmt = xpath.select1(
+      "//*[local-name()='biblFull']/*[local-name()='publicationStmt']",
+      dom,
+    ) as Element | undefined
+    if (pubStmt && !this.hasElementChild(pubStmt) && pubStmt.parentNode) {
+      pubStmt.parentNode.removeChild(pubStmt)
+    }
+
+    // Drop the skeleton's placeholder <title level="j"/> (and any empty monogr title) when
+    // nothing populated it — e.g. book types emit only title[@level="m"].
+    const monogrTitles = this.selectNodes(
+      dom,
+      "//*[local-name()='monogr']/*[local-name()='title']",
+    )
+    for (const t of monogrTitles) {
+      if (!this.nodeText(t) && t.parentNode) t.parentNode.removeChild(t)
+    }
+  }
+
+  private hasElementChild(el: Element): boolean {
+    for (let i = 0; i < el.childNodes.length; i++) {
+      if (el.childNodes[i].nodeType === 1) return true
+    }
+    return false
   }
 
   private patchJournalAndImprint(
@@ -418,6 +820,194 @@ export class HalTEIInterchangeService {
     }
   }
 
+  private resolveAuthorNames(
+    firstName: string | null | undefined,
+    lastName: string | null | undefined,
+    displayName: string | null | undefined,
+  ): { forename: string; surname: string } | null {
+    const first = firstName?.trim() ?? ''
+    const last = lastName?.trim() ?? ''
+
+    if (first && last) return { forename: first, surname: last }
+
+    // Strip authority-record disambiguation like " (19..-.... ; Auteur En Sciences Économiques)"
+    const display = (displayName?.trim() ?? '')
+      .replace(/\s*\([^)]*\)/g, '')
+      .trim()
+
+    if (display) {
+      const spaceIdx = display.indexOf(' ')
+      if (spaceIdx > 0) {
+        return {
+          forename: first || display.substring(0, spaceIdx),
+          surname: last || display.substring(spaceIdx + 1).trim(),
+        }
+      }
+      // Single clean word: use as surname only if we already have a forename
+      if (first) return { forename: first, surname: display }
+      if (last) return { forename: display, surname: last }
+    }
+
+    // Can't produce both a valid forename and surname — skip this author
+    return null
+  }
+
+  private patchProductionDate(dom: Document, date: string): void {
+    const monogr = this.ensureElement(
+      dom,
+      "//*[local-name()='biblStruct']/*[local-name()='monogr']",
+      () => this.createElement(dom, 'monogr'),
+    )
+    const imprintEl = this.ensureElementWithin(
+      monogr,
+      "./*[local-name()='imprint']",
+      () => this.createElement(dom, 'imprint'),
+    )
+    const datePub = this.ensureElementWithin(
+      imprintEl,
+      "./*[local-name()='date' and @type='datePub']",
+      () => {
+        const d = this.createElement(dom, 'date')
+        d.setAttribute('type', 'datePub')
+        return d
+      },
+    )
+    this.setText(datePub, date)
+  }
+
+  /** XSD child order of `<monogr>` — new children must be inserted at their position. */
+  private static readonly MONOGR_CHILD_ORDER: Readonly<Record<string, number>> =
+    Object.freeze({
+      idno: 0,
+      title: 1,
+      meeting: 2,
+      respStmt: 3,
+      settlement: 4,
+      country: 5,
+      editor: 6,
+      imprint: 7,
+      authority: 8,
+    })
+
+  private monogrRank(el: Node): number {
+    const name = (el as Element).localName ?? el.nodeName
+    return HalTEIInterchangeService.MONOGR_CHILD_ORDER[name] ?? 99
+  }
+
+  /** Insert `el` into `monogr` at its schema-mandated position (HAL rejects out-of-order children). */
+  private insertMonogrChild(monogr: Element, el: Element): void {
+    const rank = this.monogrRank(el)
+    for (let i = 0; i < monogr.childNodes.length; i++) {
+      const child = monogr.childNodes[i]
+      if (child.nodeType !== 1) continue
+      if (this.monogrRank(child) > rank) {
+        monogr.insertBefore(el, child)
+        return
+      }
+    }
+    monogr.appendChild(el)
+  }
+
+  private ensureMonogr(dom: Document): Element {
+    return this.ensureElement(
+      dom,
+      "//*[local-name()='biblStruct']/*[local-name()='monogr']",
+      () => this.createElement(dom, 'monogr'),
+    )
+  }
+
+  /** Related-book title for COUV/OUV → `monogr/title[@level="m"]` (same slot family as journal). */
+  private patchBookTitle(dom: Document, bookTitle: string): void {
+    const monogr = this.ensureMonogr(dom)
+    const existing = xpath.select1(
+      "./*[local-name()='title' and @level='m']",
+      monogr,
+    ) as Element | undefined
+    if (existing) {
+      this.setText(existing, bookTitle)
+      return
+    }
+    const title = this.createElement(dom, 'title')
+    title.setAttribute('level', 'm')
+    this.setText(title, bookTitle)
+    this.insertMonogrChild(monogr, title)
+  }
+
+  /** Conference metadata for COMM/POSTER → `monogr/meeting` (title, date, settlement, country). */
+  private patchMeeting(
+    dom: Document,
+    opts: {
+      title: string | null
+      startDate: string | null
+      city: string | null
+      countryCode: string | null
+    },
+  ): void {
+    const monogr = this.ensureMonogr(dom)
+    let meeting = xpath.select1("./*[local-name()='meeting']", monogr) as
+      | Element
+      | undefined
+    if (!meeting) {
+      meeting = this.createElement(dom, 'meeting')
+      this.insertMonogrChild(monogr, meeting)
+    }
+    // meeting is built once; append children in their XSD order: title, date, settlement, country.
+    if (opts.title) {
+      const t = this.createElement(dom, 'title')
+      this.setText(t, opts.title)
+      meeting.appendChild(t)
+    }
+    if (opts.startDate) {
+      const d = this.createElement(dom, 'date')
+      d.setAttribute('type', 'start')
+      this.setText(d, opts.startDate)
+      meeting.appendChild(d)
+    }
+    if (opts.city) {
+      const s = this.createElement(dom, 'settlement')
+      this.setText(s, opts.city)
+      meeting.appendChild(s)
+    }
+    if (opts.countryCode) {
+      const c = this.createElement(dom, 'country')
+      c.setAttribute('key', opts.countryCode)
+      meeting.appendChild(c)
+    }
+  }
+
+  /** Issuing body / supervisor → `monogr/authority[@type="institution"|"supervisor"]`. */
+  private patchMonogrAuthority(
+    dom: Document,
+    type: 'institution' | 'supervisor',
+    content: string,
+  ): void {
+    const monogr = this.ensureMonogr(dom)
+    const authority = this.createElement(dom, 'authority')
+    authority.setAttribute('type', type)
+    this.setText(authority, content)
+    this.insertMonogrChild(monogr, authority)
+  }
+
+  /** THESE/HDR defense date → a second `monogr/imprint/date[@type="dateDefended"]`. */
+  private patchDefenseDate(dom: Document, date: string): void {
+    const monogr = this.ensureMonogr(dom)
+    const imprintEl = this.ensureElementWithin(
+      monogr,
+      "./*[local-name()='imprint']",
+      () => this.createElement(dom, 'imprint'),
+    )
+    const dateDefended = this.ensureElementWithin(
+      imprintEl,
+      "./*[local-name()='date' and @type='dateDefended']",
+      () => {
+        const d = this.createElement(dom, 'date')
+        d.setAttribute('type', 'dateDefended')
+        return d
+      },
+    )
+    this.setText(dateDefended, date)
+  }
+
   private upsertBiblScope(
     dom: Document,
     imprintEl: Element,
@@ -466,8 +1056,10 @@ export class HalTEIInterchangeService {
     return (t ?? '').trim()
   }
 
+  private static readonly TEI_NS = 'http://www.tei-c.org/ns/1.0'
+
   private createElement(dom: Document, tagName: string): Element {
-    return dom.createElement(tagName)
+    return dom.createElementNS(HalTEIInterchangeService.TEI_NS, tagName)
   }
 
   private setText(el: Element, value: string): void {
@@ -518,15 +1110,7 @@ export class HalTEIInterchangeService {
     }
   }
 
-  private pickMainLanguage(document: DocumentClass): string {
-    const l = document.titles.find((t) => !!t.language)?.language
-    return l && l !== 'ul' ? l : 'fr'
-  }
-
   private mapDocumentTypeToHalTypology(documentType: DocumentType): string {
-    return (
-      HalTEIInterchangeService.DOCUMENT_TYPE_TO_HAL_TYPOLOGY[documentType] ??
-      'UNDEFINED'
-    )
+    return halTypologyForDocumentType(documentType)
   }
 }

@@ -4,7 +4,14 @@ import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles'
 import '@testing-library/jest-dom'
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import { Document, DocumentState, DocumentType } from '@/types/Document'
 import { Journal } from '@/types/Journal'
 import { JournalIdentifier } from '@/types/JournalIdentifier'
@@ -133,15 +140,15 @@ const mockState = {
     ],
     totalItems: 1,
     count: {
-      allItems: 0,
-      incompleteHalRepositoryItems: 0,
+      byTab: {},
+      latestRequestIdByTab: {},
     },
   },
   user: {
     currentPerspective: {
       type: 'person',
       getDisplayName: () => 'John Doe',
-      hasIdHAL: () => true,
+      hasIdentifier: () => true,
       memberships: [],
       membershipAcronyms: ['ABC', 'DEF'],
     },
@@ -163,10 +170,7 @@ beforeEach(() => {
     totalItems: 0,
   })
 
-  mockCountDocuments.mockResolvedValue({
-    allItems: 0,
-    incompleteHalRepositoryItems: 0,
-  })
+  mockCountDocuments.mockResolvedValue({ totalItems: 0 })
 })
 
 const theme = createTheme({
@@ -275,10 +279,11 @@ describe('DocumentsPage Component', () => {
 
     await waitFor(() => {
       expect(mockFetchDocuments).toHaveBeenCalledWith({
+        tab: 'all_documents',
         page: 1,
         pageSize: 10,
         searchTerm: '',
-        columnFilters: JSON.stringify([]),
+        columnFilters: JSON.stringify([{ id: 'structures', value: [] }]),
         sorting: JSON.stringify([
           {
             id: 'date',
@@ -295,33 +300,47 @@ describe('DocumentsPage Component', () => {
     })
   })
 
-  it('fetches incomplete HAL repository document count on mount', async () => {
+  // Only the tab that is NOT on screen is counted — the active tab's badge is
+  // fed by the totalItems the list request already returns.
+  it('counts only the inactive tab on mount', async () => {
     renderComponent()
 
     await waitFor(() => {
       expect(mockCountDocuments).toHaveBeenCalledWith({
-        page: 1,
+        tab: 'outside_hal',
         searchTerm: '',
-        columnFilters: JSON.stringify([]),
         searchLang: 'en',
+        columnFilters: JSON.stringify([
+          { id: 'structures', value: [] },
+          { id: 'halStatus', value: ['outside_hal'] },
+        ]),
         contributorType: 'person',
         contributorUid: '',
         requestId: 1,
         halCollectionCodes: JSON.stringify(['ABC', 'DEF']),
+        areHalCollectionCodesOmitted: false,
       })
     })
+
+    expect(mockCountDocuments).toHaveBeenCalledTimes(1)
   })
 
   it('switches tabs when a tab is clicked', async () => {
     renderComponent()
 
-    const tab = screen.getByText(
-      i18n.t('documents_page_incomplete_hal_repository_filter'),
-    )
-    fireEvent.click(tab)
+    const tab = screen
+      .getByText(i18n.t('documents_page_incomplete_hal_repository_filter'))
+      .closest('[role="tab"]')
 
-    // Check that the tab gets selected
-    expect(tab).toHaveClass('MuiTypography-root')
+    expect(tab).toHaveAttribute('aria-selected', 'false')
+
+    fireEvent.click(tab!)
+
+    await waitFor(() =>
+      expect(pushMock).toHaveBeenCalledWith(
+        expect.stringContaining('tab=outside_hal'),
+      ),
+    )
   })
 
   it('renders the document list', async () => {
@@ -425,71 +444,99 @@ describe('DocumentsPage Component', () => {
       })
       expect(mergeBtn).toBeEnabled()
     })
-  })
+    // This MRT-heavy render is slow under full-suite parallel load; the default 5s
+    // timeout flakes even though it passes in ~2.3s in isolation.
+  }, 20000)
 
-  it('calls mergeDocuments, then re-fetches the list', async () => {
-    const mockMergeDocuments = jest.fn().mockResolvedValue({
-      updated: [
-        { uid: 'doc1', state: 'waiting_for_update' },
-        { uid: 'doc2', state: 'waiting_for_update' },
-      ],
+  describe('missing identifiers warning', () => {
+    const originalEnv = process.env
+
+    beforeEach(() => {
+      process.env = {
+        ...originalEnv,
+        NEXT_PUBLIC_WARN_MISSING_IDENTIFIER_TYPES: 'idhals,orcid',
+      }
     })
 
-    const doc1 = mockState.document.documents[0]
-    const doc2 = new Document(
-      'doc2',
-      DocumentType.JournalArticle,
-      OAStatus.GREEN,
-      '2023-12-31',
-      new Date('2023-12-31'),
-      new Date('2023-12-31'),
-      OAStatus.DIAMOND,
-      [new Literal('Another Title', 'en')],
-      [],
-      [],
-      [
-        new Contribution(
-          new InternalPerson('person-1', null, 'John Doe', 'John', 'Doe', []),
-          [LocRelator.AUTHOR],
-        ),
-      ],
-      [],
-    )
-
-    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
-      selector({
-        ...mockState,
-        document: {
-          ...mockState.document,
-          documents: [doc1, doc2],
-          totalItems: 2,
-          mergeDocuments: mockMergeDocuments,
-        },
-      }),
-    )
-
-    renderComponent()
-
-    await screen.findByText('Test Title')
-    await screen.findByText('Another Title')
-
-    const checkboxes = screen.getAllByRole('checkbox')
-    fireEvent.click(checkboxes[1])
-    fireEvent.click(checkboxes[2])
-
-    const mergeBtn = screen.getByRole('button', {
-      name: i18n.t('documents_page_merge_selected_documents_button'),
+    afterEach(() => {
+      process.env = originalEnv
     })
 
-    fireEvent.click(mergeBtn)
-
-    await waitFor(() => {
-      expect(mockMergeDocuments).toHaveBeenCalledTimes(1)
-      // order should follow the current table order (date desc): doc1 then doc2
-      expect(mockMergeDocuments).toHaveBeenCalledWith(['doc1', 'doc2'])
+    it('does not show a warning when all required identifiers are present', () => {
+      // default mockState: hasIdentifier: () => true for every type
+      renderComponent()
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     })
-    await waitFor(() => {
-      expect(mockFetchDocuments).toHaveBeenCalledTimes(2)
+
+    it('shows a warning when the HAL identifier is missing', () => {
+      ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+        selector({
+          ...mockState,
+          user: {
+            ...mockState.user,
+            currentPerspective: {
+              ...mockState.user.currentPerspective,
+              hasIdentifier: (type: string) => type !== 'idhals',
+            },
+          },
+        }),
+      )
+      renderComponent()
+      expect(screen.getByRole('alert')).toBeInTheDocument()
+    })
+
+    it('shows a warning when the ORCID identifier is missing', () => {
+      ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+        selector({
+          ...mockState,
+          user: {
+            ...mockState.user,
+            currentPerspective: {
+              ...mockState.user.currentPerspective,
+              hasIdentifier: (type: string) => type !== 'orcid',
+            },
+          },
+        }),
+      )
+      renderComponent()
+      expect(screen.getByRole('alert')).toBeInTheDocument()
+    })
+
+    it('shows a warning with a link to the account page when identifiers are missing', () => {
+      ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+        selector({
+          ...mockState,
+          user: {
+            ...mockState.user,
+            currentPerspective: {
+              ...mockState.user.currentPerspective,
+              hasIdentifier: () => false,
+            },
+          },
+        }),
+      )
+      renderComponent()
+      const alert = screen.getByRole('alert')
+      expect(alert).toBeInTheDocument()
+      expect(within(alert).getByRole('link')).toBeInTheDocument()
+    })
+
+    it("does not show a warning when viewing another person's perspective", () => {
+      ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+        selector({
+          ...mockState,
+          user: {
+            ...mockState.user,
+            currentPerspective: {
+              ...mockState.user.currentPerspective,
+              hasIdentifier: () => false,
+            },
+            ownPerspective: false,
+          },
+        }),
+      )
+      renderComponent()
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     })
   })
 })

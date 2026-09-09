@@ -1,8 +1,14 @@
-import { Person as DbPerson, PrismaClient } from '@prisma/client'
+import {
+  Person as DbPerson,
+  PrismaClient,
+  OrganizationCategory,
+  OrganizationGenericType,
+} from '@prisma/client'
 import { Person } from '@/types/Person'
-import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { PersonAlreadyExistsError, PersonDAO } from '@/lib/daos/PersonDAO'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
-import { ResearchUnit } from '@/types/ResearchUnit'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { Literal } from '@/types/Literal'
 import {
   PersonIdentifier,
@@ -19,19 +25,22 @@ jest.mock('@prisma/client', () => {
   // avoid PersonIdentifierType to be mocked
   const actualPrismaClient: PrismaClient = jest.requireActual('@prisma/client')
 
-  const mockResearchUnitFindUnique = jest.fn()
+  const mockOrganizationUnitFindUnique = jest.fn()
 
-  mockResearchUnitFindUnique.mockResolvedValue({
+  mockOrganizationUnitFindUnique.mockResolvedValue({
     id: 1,
-    slug: 'local-unit',
-    type: 'ACR',
-    names: [{ value: 'JD Laboratory', language: 'en' }],
+    uid: 'local-unit',
+    slug: 'org:acr',
+    acronym: 'ACR',
+    labels: [{ kind: 'long', value: 'JD Laboratory', language: 'en' }],
     descriptions: [{ value: 'Laboratory of John Doe', language: 'en' }],
+    identifiers: [],
   })
 
-  const mockPrismaClient = {
+  const mockPrismaClient: Record<string, unknown> = {
     person: {
       upsert: jest.fn(),
+      create: jest.fn(),
       findFirst: jest.fn(),
       findUnique: jest.fn(),
       findUniqueOrThrow: jest.fn(),
@@ -48,11 +57,23 @@ jest.mock('@prisma/client', () => {
     },
     membership: {
       upsert: jest.fn(),
+      deleteMany: jest.fn(),
     },
-    researchUnit: {
-      findUnique: mockResearchUnitFindUnique,
+    employment: {
+      upsert: jest.fn(),
+      deleteMany: jest.fn(),
+    },
+    sourcePerson: {
+      updateMany: jest.fn(),
+    },
+    organizationUnit: {
+      findUnique: mockOrganizationUnitFindUnique,
     },
   }
+  // Interactive-transaction mock: run the callback against the same client
+  mockPrismaClient.$transaction = jest.fn(
+    async (fn: (tx: unknown) => Promise<unknown>) => fn(mockPrismaClient),
+  )
 
   return {
     ...actualPrismaClient,
@@ -77,13 +98,13 @@ describe('PersonDAO', () => {
     [new PersonIdentifier(PersonIdentifierType.orcid, '0000-0001-2345-6789')],
     [
       new PersonMembership(
-        new ResearchUnit(
+        new OrganizationUnit(
           'local-unit',
           'ACR',
           [new Literal('JD Laboratory', 'en')],
           [new Literal('Laboratory of John Doe', 'en')],
-          'ACR_signature',
-          [],
+          OrganizationCategory.research_unit,
+          OrganizationGenericType.unit,
         ),
       ),
     ],
@@ -96,10 +117,6 @@ describe('PersonDAO', () => {
     })
     ;(mockPrisma.person.findFirst as jest.Mock).mockResolvedValue(null)
     ;(mockPrisma.personIdentifier.findMany as jest.Mock).mockResolvedValue([])
-    ;(mockPrisma.person.findUniqueOrThrow as jest.Mock).mockResolvedValue({
-      ...person,
-      id: 1,
-    })
     const dbPerson: DbPerson = await personDAO.createOrUpdatePerson(person)
     expect(dbPerson.uid).toEqual('local-johndoe')
     expect(dbPerson.email).toEqual('johndoe@myuniversity.com')
@@ -164,9 +181,9 @@ describe('PersonDAO', () => {
 
     expect(mockPrisma.membership.upsert).toHaveBeenCalledWith({
       where: {
-        personId_researchUnitId: {
+        personId_organizationUnitId: {
           personId: 1,
-          researchUnitId: 1,
+          organizationUnitId: 1,
         },
       },
       update: {
@@ -176,13 +193,104 @@ describe('PersonDAO', () => {
       },
       create: {
         personId: 1,
-        researchUnitId: 1,
+        organizationUnitId: 1,
         endDate: undefined,
         positionCode: undefined,
         startDate: undefined,
       },
     })
   })
+
+  it('should not prune relations by default', async () => {
+    await personDAO.createOrUpdatePerson(person)
+
+    expect(mockPrisma.membership.deleteMany).not.toHaveBeenCalled()
+    expect(mockPrisma.employment.deleteMany).not.toHaveBeenCalled()
+    expect(mockPrisma.sourcePerson.updateMany).not.toHaveBeenCalled()
+  })
+
+  it('should prune relations absent from authoritative data', async () => {
+    await personDAO.createOrUpdatePerson(person, { authoritative: true })
+
+    expect(mockPrisma.membership.deleteMany).toHaveBeenCalledWith({
+      where: {
+        personId: 1,
+        organizationUnit: { uid: { notIn: ['local-unit'] } },
+      },
+    })
+    // No employment in the incoming data: every existing row is obsolete.
+    expect(mockPrisma.employment.deleteMany).toHaveBeenCalledWith({
+      where: {
+        personId: 1,
+        organizationUnit: { uid: { notIn: [] } },
+      },
+    })
+    // Source persons are unlinked, not deleted (document records reference them)
+    expect(mockPrisma.sourcePerson.updateMany).toHaveBeenCalledWith({
+      where: { personId: 1, uid: { notIn: [] } },
+      data: { personId: null },
+    })
+  })
+
+  it('should keep unhydrated affiliation org uids out of the prune set', async () => {
+    const partiallyHydrated = new Person(
+      person.uid,
+      person.external,
+      person.email,
+      person.displayName,
+      person.firstName,
+      person.lastName,
+      person.getIdentifiers(),
+      person.memberships,
+    )
+    partiallyHydrated.unhydratedMembershipOrgUids = ['mystery-unit']
+
+    await personDAO.createOrUpdatePerson(partiallyHydrated, {
+      authoritative: true,
+    })
+
+    expect(mockPrisma.membership.deleteMany).toHaveBeenCalledWith({
+      where: {
+        personId: 1,
+        organizationUnit: { uid: { notIn: ['local-unit', 'mystery-unit'] } },
+      },
+    })
+  })
+
+  describe('createPerson', () => {
+    it('should create the person strictly, without upserting', async () => {
+      ;(mockPrisma.person.findFirst as jest.Mock).mockResolvedValue(null)
+      ;(mockPrisma.personIdentifier.findMany as jest.Mock).mockResolvedValue([])
+      ;(mockPrisma.person.create as jest.Mock).mockResolvedValue({
+        id: 5,
+        uid: person.uid,
+      })
+
+      const dbPerson = await personDAO.createPerson(person)
+
+      expect(dbPerson.id).toBe(5)
+      expect(mockPrisma.person.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ uid: 'local-johndoe' }),
+      })
+      expect(mockPrisma.person.upsert).not.toHaveBeenCalled()
+    })
+
+    it('should throw PersonAlreadyExistsError when the uid is taken', async () => {
+      ;(mockPrisma.person.findFirst as jest.Mock).mockResolvedValue(null)
+      ;(mockPrisma.person.create as jest.Mock).mockRejectedValue(
+        new PrismaClientKnownRequestError('Unique constraint failed', {
+          code: 'P2002',
+          clientVersion: 'test',
+          meta: { target: ['uid'] },
+        }),
+      )
+
+      await expect(personDAO.createPerson(person)).rejects.toThrow(
+        PersonAlreadyExistsError,
+      )
+    })
+  })
+
   describe('upsertOrcidIdentifierExtension', () => {
     it('should upsert ORCID oauth extension when base identifier exists and oauth is present', async () => {
       ;(mockPrisma.personIdentifier.findUnique as jest.Mock).mockResolvedValue({

@@ -18,6 +18,7 @@ import { SourceJournal } from '@/types/SourceJournal'
 import {
   PublicationIdentifierType,
   AuthorityOrganizationIdentifierType,
+  AuthorityOrganizationType,
   OAStatus,
 } from '@prisma/client'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
@@ -82,6 +83,13 @@ describe('DocumentGraphQLClient', () => {
                 {
                   uid: 'some-org-001',
                   display_names: ['Some Organization'],
+                  type: 'laboratory',
+                  places: [
+                    {
+                      latitude: 1.23456,
+                      longitude: 98.7654,
+                    },
+                  ],
                   identifiers: [
                     { type: 'openalex', value: '000054' },
                     { type: 'wikidata', value: '10.0004.BA34' },
@@ -111,6 +119,7 @@ describe('DocumentGraphQLClient', () => {
                     name: 'John Smith',
                     source: 'somesource',
                     source_identifier: 'source001',
+                    identifiers: [],
                   },
                 },
               ],
@@ -198,6 +207,13 @@ describe('DocumentGraphQLClient', () => {
             new AuthorityOrganization(
               'some-org-001',
               ['Some Organization'],
+              AuthorityOrganizationType.laboratory,
+              [
+                {
+                  latitude: 1.23456,
+                  longitude: 98.7654,
+                },
+              ],
               [
                 new AuthorityOrganizationIdentifier(
                   AuthorityOrganizationIdentifierType.openalex,
@@ -349,6 +365,7 @@ describe('DocumentGraphQLClient', () => {
                     name: 'John Smith',
                     source: 'somesource',
                     source_identifier: 'source001',
+                    identifiers: [],
                   },
                 },
               ],
@@ -395,6 +412,7 @@ describe('DocumentGraphQLClient', () => {
                     name: 'John Smith',
                     source: 'somesource',
                     source_identifier: 'source001',
+                    identifiers: [],
                   },
                 },
               ],

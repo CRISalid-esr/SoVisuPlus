@@ -66,6 +66,7 @@ const parseScope = (
     'ResearchUnit',
     'Institution',
     'InstitutionDivision',
+    'Team',
   ]
   if (!allowed.includes(entityType)) {
     throw new Error(

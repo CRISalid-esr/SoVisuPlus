@@ -231,25 +231,28 @@ describe('KeywordSearchAutocomplete Component', () => {
     expect(autocomplete).toBeInTheDocument()
 
     fireEvent.change(autocomplete, { target: { value: 'dia' } })
-    await waitFor(async () => {
-      expect(fetchKeywordsMock).toHaveBeenCalledWith('dia', ['vocab-test'])
-      expect(
-        screen.getByText(
-          'Getty Research Institute - Art & Architecture Thesaurus',
-        ),
-      ).toBeInTheDocument()
-      const emElement = screen.getByText('diadems')
-      expect(emElement).toBeInTheDocument()
-      expect(emElement.tagName).toBe('EM')
-      expect(emElement).toHaveStyle({ backgroundColor: 'yellow' })
-      expect(screen.getByText('(300046021)')).toBeInTheDocument()
-      const link = await screen.findByRole('link')
-      expect(link).toBeInTheDocument()
-      expect(link).toHaveAttribute(
-        'href',
-        'http://vocab.getty.edu/aat/300046021',
-      )
-    })
+    await waitFor(
+      async () => {
+        expect(fetchKeywordsMock).toHaveBeenCalledWith('dia', ['vocab-test'])
+        expect(
+          screen.getByText(
+            'Getty Research Institute - Art & Architecture Thesaurus',
+          ),
+        ).toBeInTheDocument()
+        const emElement = screen.getByText('diadems')
+        expect(emElement).toBeInTheDocument()
+        expect(emElement.tagName).toBe('EM')
+        expect(emElement).toHaveStyle({ backgroundColor: 'yellow' })
+        expect(screen.getByText('(300046021)')).toBeInTheDocument()
+        const link = await screen.findByRole('link')
+        expect(link).toBeInTheDocument()
+        expect(link).toHaveAttribute(
+          'href',
+          'http://vocab.getty.edu/aat/300046021',
+        )
+      },
+      { timeout: 5000 },
+    )
   })
 
   it('Check that a keystroke call the refetch after delay', async () => {

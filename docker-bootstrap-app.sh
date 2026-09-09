@@ -33,6 +33,7 @@ NEXT_PUBLIC_ORCID_URL="${ORCID_URL:-}"
 NEXT_PUBLIC_ORCID_SCOPES="${ORCID_SCOPES:-/authenticate}"
 NEXT_PUBLIC_ORCID_CLIENT_ID="${ORCID_CLIENT_ID:-}"
 ORCID_CLIENT_SECRET="${ORCID_CLIENT_SECRET:-}"
+ORCID_PUBLIC_API_URL="${ORCID_PUBLIC_API_URL:-https://pub.orcid.org}"
 KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-}
 KEYCLOAK_CLIENT_SECRET="${KEYCLOAK_CLIENT_SECRET:-}"
 KEYCLOAK_ISSUER=${KEYCLOAK_INTERNAL_ADDR:-}/realms/${KEYCLOAK_REALM:-}
@@ -54,7 +55,11 @@ PERSPECTIVES_ROLES_FILTER=${PERSPECTIVES_ROLES_FILTER:-["author ","author of int
 PUBLICATION_LIST_ROLES_FILTER=${PUBLICATION_LIST_ROLES_FILTER:-["analyst ","annotator ","author ","author in quotations or text abstracts ","author of afterword, colophon, etc. ","author of introduction, etc. ","cartographer ","commentator for written text ","compiler ","composer ","conceptor ","contributor ","curator ","degree committee member ","dissertant ","donor ","editor ","editor of compilation ","film director ","film editor ","former owner ","illustrator ","interviewee ","interviewer ","opponent ","organizer ","other ","photographer ","praeses ","production personnel ","project director ","publisher director ","rapporteur ","scientific advisor ","software developer ","sound designer ","speaker ","stage manager ","thesis advisor ","translator ","writer of accompanying material"]}
 VOCABS_URL="${VOCABS_URL:-http://localhost:8000/api/v0/autocomplete/}"
 NEXT_PUBLIC_AVAILABLE_VOCABS=${NEXT_PUBLIC_AVAILABLE_VOCABS:-jel,aat,acm,elsst,euroscivoc,pactols}
-DEFAULT_SELF_SCOPED_ROLES=${DEFAULT_SELF_SCOPED_ROLES:-document_editor,document_fetcher,document_merger}
+DEFAULT_SELF_SCOPED_ROLES=${DEFAULT_SELF_SCOPED_ROLES:-document_editor,document_fetcher,document_merger,account_editor,document_depositor}
+HAL_ENDPOINT=${HAL_ENDPOINT:-https://api-preprod.archives-ouvertes.fr}
+HAL_SERVICE_ACCOUNT_LOGIN="${HAL_SERVICE_ACCOUNT_LOGIN:-}"
+HAL_SERVICE_ACCOUNT_PASSWORD="${HAL_SERVICE_ACCOUNT_PASSWORD:-}"
+HAL_UPLOADS_ROOT=${HAL_UPLOADS_ROOT:-/app/uploads}
 NEXT_PUBLIC_CAS_URL=${CAS_URL:-https://cas.ccsd.cnrs.fr/cas}
 NEXT_PUBLIC_INSTITUTION_NAME="${INSTITUTION_NAME:-university}"
 FIELD_ENC_PRIMARY_KID="${FIELD_ENC_PRIMARY_KID:-}"
@@ -63,6 +68,10 @@ NEXT_PUBLIC_SUPPORT_SERVICE_EMAIL_ADDR="${NEXT_PUBLIC_SUPPORT_SERVICE_EMAIL_ADDR
 NEXT_PUBLIC_ABOUT_PAGE_URL="${NEXT_PUBLIC_ABOUT_PAGE_URL}"
 NEXT_PUBLIC_TERMS_PAGE_URL="${NEXT_PUBLIC_TERMS_PAGE_URL}"
 NEXT_PUBLIC_COMMUNITY_PAGE_URL="${NEXT_PUBLIC_COMMUNITY_PAGE_URL:-https://crisalid.org}"
+NEXT_PUBLIC_HELP_URL="${NEXT_PUBLIC_HELP_URL}"
+NEXT_PUBLIC_WARN_MISSING_IDENTIFIER_TYPES="${NEXT_PUBLIC_WARN_MISSING_IDENTIFIER_TYPES:-idhals,orcid}"
+CRISALID_AGENTS_API_URL="${CRISALID_AGENTS_API_URL}"
+CRISALID_AGENTS_API_KEY="${CRISALID_AGENTS_API_KEY}"
 EOF
 
 CUSTOM_THEME_MOUNT="/custom-theme"
@@ -82,6 +91,10 @@ if $use_custom_theme; then
 else
   log "No custom theme found at: ${CUSTOM_THEME_MOUNT}"
 fi
+
+log "Ensuring HAL upload directories exist…"
+HAL_ROOT="${HAL_UPLOADS_ROOT:-/app/uploads}"
+mkdir -p "${HAL_ROOT}/hal-files" "${HAL_ROOT}/hal-tei"
 
 log "Running Prisma migrations…"
 if ! ./node_modules/.bin/prisma migrate deploy; then

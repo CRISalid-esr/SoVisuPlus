@@ -21,7 +21,6 @@ export class ConceptDAO {
       let dbConcept: DbConcept | null =
         await this.prismaClient.concept.findUnique({
           where: { uid: concept.uid },
-          include: { labels: true },
         })
 
       const uniquePrefLabels = Array.from(
@@ -55,7 +54,6 @@ export class ConceptDAO {
               ],
             },
           },
-          include: { labels: true },
         })
       } else {
         // Update the concept's URI if needed
@@ -64,7 +62,6 @@ export class ConceptDAO {
           data: {
             uri: concept.uri,
           },
-          include: { labels: true },
         })
 
         // 1. Fetch all existing labels for the concept

@@ -57,8 +57,12 @@ describe('LanguageChips Component', () => {
       onLanguageSelect: mockOnLanguageSelect,
     })
 
-    const selectedChip = screen.getByText('fr')
-    expect(selectedChip).toHaveClass('MuiChip-label') // Should be highlighted
+    expect(screen.getByText('fr').closest('.MuiChip-root')).toHaveClass(
+      'MuiChip-colorPrimary',
+    )
+    expect(screen.getByText('en').closest('.MuiChip-root')).toHaveClass(
+      'MuiChip-colorDefault',
+    )
   })
 
   it('calls onLanguageSelect when clicking on a different language chip', () => {

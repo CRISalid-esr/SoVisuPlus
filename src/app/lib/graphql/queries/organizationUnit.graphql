@@ -1,0 +1,84 @@
+query OrganizationUnitsQuery($where: OrganizationUnitWhere) {
+  organizationUnits(where: $where) {
+    uid
+    external
+    generic_type
+    national_type
+    types
+    long_labels {
+      value
+      language
+    }
+    short_labels {
+      value
+      language
+    }
+    local_types {
+      value
+      language
+    }
+    descriptions {
+      value
+      language
+    }
+    identifiers {
+      type
+      value
+    }
+    member_ofConnection {
+      edges {
+        node {
+          uid
+          external
+          generic_type
+          national_type
+          types
+          short_labels {
+            value
+            language
+          }
+          long_labels {
+            value
+            language
+          }
+          identifiers {
+            type
+            value
+          }
+        }
+        properties {
+          position
+          start_date
+          end_date
+        }
+      }
+    }
+    part_ofConnection {
+      edges {
+        node {
+          uid
+          external
+          generic_type
+          national_type
+          types
+          short_labels {
+            value
+            language
+          }
+          long_labels {
+            value
+            language
+          }
+          identifiers {
+            type
+            value
+          }
+        }
+        properties {
+          start_date
+          end_date
+        }
+      }
+    }
+  }
+}

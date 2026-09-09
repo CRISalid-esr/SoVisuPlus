@@ -1,15 +1,20 @@
 import { MessageProcessingWorkerFactory } from '@/lib/amqp/workers/MessageProcessingWorkerFactory'
 import { PersonWorker } from '@/lib/amqp/workers/PersonWorker'
-import { ResearchUnitWorker } from '@/lib/amqp/workers/ResearchUnitWorker'
+import { OrganizationUnitWorker } from '@/lib/amqp/workers/OrganizationUnitWorker'
 import { AMQPPersonMessage } from '@/types/AMQPPersonMessage'
-import { AMQPResearchUnitMessage } from '@/types/AMQPResearchUnitMessage'
+import {
+  AMQPOrganizationUnitMessage,
+  ORGANIZATION_MESSAGE_TYPES,
+} from '@/types/AMQPOrganizationUnitMessage'
 import { DocumentWorker } from '@/lib/amqp/workers/DocumentWorker'
 import { HarvestingStateEventWorker } from '@/lib/amqp/workers/HarvestingStateEventWorker'
 import { HarvestingResultEventWorker } from '@/lib/amqp/workers/HarvestingResultEventWorker'
+import { ChangeEventWorker } from '@/lib/amqp/workers/ChangeEventWorker'
 
 import { AMQPDocumentMessage } from '@/types/AMQPDocumentMessage'
 import { AMQPHarvestingStateEventMessage } from '@/types/AMQPHarvestingStateEventMessage'
 import { AMQPHarvestingResultEventMessage } from '@/types/AMQPHarvestingResultEventMessage'
+import { AMQPChangeEventMessage } from '@/types/AMQPChangeEventMessage'
 import { AMQPMessage } from '@/types/AMQPMessage'
 
 describe('MessageProcessingWorkerFactory', () => {
@@ -39,23 +44,46 @@ describe('MessageProcessingWorkerFactory', () => {
     expect(worker).toBeInstanceOf(PersonWorker)
   })
 
-  it('should create a ResearchUnitWorker for research_unit messages', () => {
-    const message: AMQPResearchUnitMessage = {
-      type: 'research_unit',
+  it.each(ORGANIZATION_MESSAGE_TYPES)(
+    'should create an OrganizationUnitWorker for %s messages',
+    (type) => {
+      const message: AMQPOrganizationUnitMessage = {
+        type,
+        event: 'updated',
+        fields: {
+          uid: 'org-123',
+          national_type: 'UMR',
+          long_labels: [{ value: 'Some Structure', language: 'en' }],
+          short_labels: [{ value: 'ST', language: 'en' }],
+          descriptions: [{ value: 'A description', language: 'en' }],
+          identifiers: [{ type: 'nns', value: '12345' }],
+        },
+      }
+
+      const worker = factory.createWorker(message)
+
+      expect(worker).toBeInstanceOf(OrganizationUnitWorker)
+    },
+  )
+
+  it('should create an OrganizationUnitWorker for unit messages regardless of main_mission', () => {
+    const message: AMQPOrganizationUnitMessage = {
+      type: 'unit',
       event: 'updated',
       fields: {
         uid: 'rs-123',
-        acronym: 'RS',
-        signature: 'RS_Signature',
-        names: [{ value: 'Research Unit', language: 'en' }],
+        national_type: 'UFR',
+        long_labels: [{ value: 'Teaching Unit', language: 'en' }],
+        short_labels: [{ value: 'TU', language: 'en' }],
         descriptions: [{ value: 'A description', language: 'en' }],
-        identifiers: [{ type: 'NNS', value: '12345' }],
+        identifiers: [{ type: 'nns', value: '12345' }],
+        main_mission: 'teaching',
       },
     }
 
     const worker = factory.createWorker(message)
 
-    expect(worker).toBeInstanceOf(ResearchUnitWorker)
+    expect(worker).toBeInstanceOf(OrganizationUnitWorker)
   })
 
   it('should create a DocumentWorker for document messages', () => {
@@ -131,6 +159,30 @@ describe('MessageProcessingWorkerFactory', () => {
 
     const worker = factory.createWorker(message)
     expect(worker).toBeInstanceOf(HarvestingResultEventWorker)
+  })
+
+  it('should create a ChangeEventWorker for change messages', () => {
+    const message: AMQPChangeEventMessage = {
+      type: 'change',
+      event: 'failed',
+      fields: {
+        uid: 'sovisuplus:action-1',
+        id: 'action-1',
+        application: 'sovisuplus',
+        person_uid: 'person-1',
+        target_type: 'DOCUMENT',
+        target_uid: 'doc-1',
+        path: 'contributions',
+        action_type: 'UPDATE',
+        status: 'failed',
+        error_message: 'boom',
+        warnings: [],
+        timestamp: '2026-01-01T09:00:00Z',
+      },
+    }
+
+    const worker = factory.createWorker(message)
+    expect(worker).toBeInstanceOf(ChangeEventWorker)
   })
 
   it('should throw an error for unknown message type', () => {

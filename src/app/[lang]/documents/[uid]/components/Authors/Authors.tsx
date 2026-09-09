@@ -1,129 +1,112 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import { Box, CardContent, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { t } from '@lingui/core/macro'
+import { Trans } from '@lingui/react'
+import { useSnackbar } from 'notistack'
+import { useSession } from 'next-auth/react'
+import { CustomCard } from '@/components/Card'
 import useStore from '@/stores/global_store'
-import { Contribution } from '@/types/Contribution'
-import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import { Localization } from '@/types/Localization'
-import { Person } from '@/types/Person'
-import * as Lingui from '@lingui/core'
-import { Box, Paper, Typography } from '@mui/material'
-import {
-  MaterialReactTable,
-  MRT_ColumnDef,
-  useMaterialReactTable,
-} from 'material-react-table'
-import { ReactNode, useMemo } from 'react'
-import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
+import { useContributionsEditor } from './hooks/useContributionsEditor'
+import { countDistinctAffiliations } from './lib/halMapping'
+import AuthorsToolbar from './components/AuthorsToolbar'
+import UnsavedBanner from './components/UnsavedBanner'
+import ContributorList from './components/ContributorList'
 
 const Authors = () => {
+  const theme = useTheme()
   const { selectedDocument = null } = useStore((state) => state.document)
-  const lang = Lingui.i18n.locale as ExtendedLanguageCode
-  const columns = useMemo<MRT_ColumnDef<Contribution>[]>(
-    () => [
-      {
-        id: 'person',
-        header: t`documents_details_page_authors_tab_name_column`,
-        accessorFn: (row: { person: Person }) => row.person.displayName,
-        enableFilterMatchHighlighting: true,
-        Cell({ renderedCellValue }: { renderedCellValue: ReactNode }) {
-          return (
-            <Typography variant='body2' color='textSecondary'>
-              {renderedCellValue}
-            </Typography>
-          )
-        },
-      },
-      {
-        id: 'idref',
-        header: t`documents_details_page_authors_tab_idref_column`,
-        accessorFn: (row: { person: Person }) => {
-          return row.person
-            .getIdentifiers()
-            .find(
-              (identifier) => identifier.type === DbPersonIdentifierType.idref,
-            )?.value
-        },
-        Cell({ renderedCellValue }: { renderedCellValue: ReactNode }) {
-          return (
-            <Typography variant='body2' color='textSecondary'>
-              {renderedCellValue}
-            </Typography>
-          )
-        },
-      },
-      {
-        id: 'orcid',
-        header: t`documents_details_page_authors_tab_orcid_column`,
-        accessorFn: (row: { person: Person }) => {
-          return row.person
-            .getIdentifiers()
-            .find(
-              (identifier) => identifier.type === DbPersonIdentifierType.orcid,
-            )?.value
-        },
-        Cell({ renderedCellValue }: { renderedCellValue: ReactNode }) {
-          return (
-            <Typography variant='body2' color='textSecondary'>
-              {renderedCellValue}
-            </Typography>
-          )
-        },
-      },
-      {
-        id: 'idhal',
-        header: t`documents_details_page_authors_tab_idhal_column`,
-        accessorFn: (row: { person: Person }) => {
-          return row.person
-            .getIdentifiers()
-            .find(
-              (identifier) => identifier.type === DbPersonIdentifierType.idhali,
-            )?.value
-        },
-        Cell({ renderedCellValue }: { renderedCellValue: ReactNode }) {
-          return (
-            <Typography variant='body2' color='textSecondary'>
-              {renderedCellValue}
-            </Typography>
-          )
-        },
-      },
-      {
-        id: 'scopus',
-        header: t`documents_details_page_authors_tab_scopus_column`,
-        accessorFn: (row: { person: Person }) => {
-          return row.person
-            .getIdentifiers()
-            .find(
-              (identifier) => identifier.type === DbPersonIdentifierType.scopus,
-            )?.value
-        },
-        Cell({ renderedCellValue }: { renderedCellValue: ReactNode }) {
-          return (
-            <Typography variant='body2' color='textSecondary'>
-              {renderedCellValue}
-            </Typography>
-          )
-        },
-      },
-    ],
-    [],
+  // Read-only unless the user is authorized to update this document's
+  // contributors (CASL ability, perimeter-scoped) — same check the Save API
+  // route enforces server-side. Do NOT rely on the viewing perspective: a direct
+  // URL to a document has no perspective param yet must stay protected.
+  const { data: session } = useSession()
+  const ability = useMemo(
+    () => abilityFromAuthzContext(session?.user?.authz),
+    [session?.user?.authz],
+  )
+  const readOnly = !(
+    selectedDocument &&
+    ability.can(PermissionAction.update, selectedDocument, 'contributors')
+  )
+  const editor = useContributionsEditor(selectedDocument)
+  const { enqueueSnackbar } = useSnackbar()
+  const [saving, setSaving] = useState(false)
+
+  const affiliationCount = useMemo(
+    () => countDistinctAffiliations(editor.working),
+    [editor.working],
   )
 
-  const table = useMaterialReactTable({
-    columns,
-    data: selectedDocument?.contributions || [],
-    enableRowSelection: true,
-    localization: Localization[lang],
-  })
+  // The unsaved-changes guard (modal, beforeunload, back/forward) is owned by the
+  // app-level NavigationGuardProvider, driven by `contributionsTabDirty`.
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const result = await editor.save()
+      if (!result.success) {
+        enqueueSnackbar(t`documents_details_page_authors_tab_save_error`, {
+          variant: 'error',
+        })
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
-    <Paper elevation={0}>
-      <Box>
-        <Typography variant='h6'>Authors</Typography>
-      </Box>
-      <Box>
-        <MaterialReactTable table={table} />
-      </Box>
-    </Paper>
+    <>
+      {/* Rendered outside CustomCard: MUI Card sets `overflow: hidden`, which would
+          clip the banner and disable its `position: sticky`. */}
+      {!readOnly && editor.isDirty && (
+        <UnsavedBanner
+          saving={saving}
+          onSave={handleSave}
+          onCancel={editor.cancel}
+        />
+      )}
+      <CustomCard
+        header={
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Typography
+              sx={{
+                color: theme.palette.primary.main,
+                fontSize: theme.utils.pxToRem(20),
+                fontStyle: 'normal',
+                fontWeight: theme.typography.fontWeightRegular,
+                lineHeight: 'normal',
+              }}
+            >
+              <Trans id='documents_details_page_authors_tab_title' />
+            </Typography>
+          </Box>
+        }
+      >
+        <CardContent>
+          <AuthorsToolbar
+            rankingMode={editor.rankingMode}
+            disabled={editor.isFrozen}
+            readOnly={readOnly}
+            contributorCount={editor.contributorCount}
+            affiliationCount={affiliationCount}
+            onToggleRankingMode={editor.setRankingMode}
+          />
+
+          <ContributorList editor={editor} readOnly={readOnly} />
+        </CardContent>
+      </CustomCard>
+    </>
   )
 }
 

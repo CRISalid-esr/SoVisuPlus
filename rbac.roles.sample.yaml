@@ -12,7 +12,15 @@ roles:
       - action: update
         subject: Document
         fields:
-          [titles, abstracts, contributors, identifiers, documentType, subjects]
+          [
+            titles,
+            abstracts,
+            contributors,
+            identifiers,
+            documentType,
+            subjects,
+            publicationDate,
+          ]
 
   - name: document_merger
     description: Merge / unmerge documents and source records
@@ -27,3 +35,29 @@ roles:
     permissions:
       - action: fetch_documents
         subject: Person
+
+  - name: account_editor
+    description: Edit own person identifiers (self-scoped by default)
+    permissions:
+      - action: update
+        subject: Person
+        fields: [identifiers]
+
+  - name: document_depositor
+    description: Deposit publications to HAL on behalf of a person (self-scoped by default)
+    permissions:
+      - action: deposit_hal
+        subject: Person
+
+  - name: document_depositor_unauthenticated
+    description: Deposit to HAL on behalf of a person without requiring their HAL login (idhal still required); explicit grant only
+    permissions:
+      - action: deposit_hal_unauthenticated
+        subject: Person
+
+  - name: structure_manager
+    description: Show / hide research structures in the directory (global scope only)
+    permissions:
+      - action: update
+        subject: OrganizationUnit
+        fields: [hidden]

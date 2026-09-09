@@ -6,7 +6,8 @@ import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import HalStatusCellBadge, { HalStatusCellType } from './HalStatusCellBadge'
 import AttachFileOffIcon from '@/app/theme/icons/AttachFileOffIcon'
 import { isPerson, Person } from '@/types/Person'
-import { isResearchUnit, ResearchUnit } from '@/types/ResearchUnit'
+import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { isResearchUnit, OrganizationUnit } from '@/types/OrganizationUnit'
 
 const halSubmitTypeToHalSubmitTypeIcon = (halSubmitType: string | null) => {
   switch (halSubmitType) {
@@ -30,7 +31,7 @@ const HalStatusCell = ({ row }: { row: { original: Document } }) => {
   if (!halRecord) {
     if (isPerson(currentPerspective)) {
       const person = currentPerspective as Person
-      return person.hasIdHAL() ? (
+      return person.hasIdentifier(PersonIdentifierType.idhals) ? (
         <HalStatusCellBadge
           type={HalStatusCellType.OutsideHal}
           documentUid={row.original.uid}
@@ -40,7 +41,7 @@ const HalStatusCell = ({ row }: { row: { original: Document } }) => {
       )
     }
     if (isResearchUnit(currentPerspective)) {
-      const unit = currentPerspective as ResearchUnit
+      const unit = currentPerspective as OrganizationUnit
       return unit.hasIdHAL() ? (
         <HalStatusCellBadge
           type={HalStatusCellType.OutsideHal}

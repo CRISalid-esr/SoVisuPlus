@@ -10,6 +10,9 @@
 !.yarn/releases
 !.yarn/versions
 
+# HAL deposit files (uploaded attachments + generated TEI/ZIP)
+/uploads
+
 # testing
 /coverage
 
@@ -35,6 +38,9 @@ yarn-error.log*
 .env
 .env.production
 
+#Claude local file
+CLAUDE.local.md
+
 # vercel
 .vercel
 
@@ -46,6 +52,13 @@ next-env.d.ts
 .run
 
 .vscode/launch.json
+.mcp.json
+
+# generated Lingui catalogs (compiled in CI)
+src/locales/*/messages.js
 
 # RBAC (env-specific)
 rbac.roles.yaml
+
+# AI chat config (env-specific; chat.sample.json is the committed fallback)
+chat.json

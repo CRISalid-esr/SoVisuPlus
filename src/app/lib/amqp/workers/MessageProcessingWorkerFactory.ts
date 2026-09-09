@@ -1,27 +1,31 @@
 import { AMQPMessage } from '@/types/AMQPMessage'
 
 import {
+  isChangeEventMessage,
   isDocumentMessage,
   isHarvestingResultEventMessage,
   isHarvestingStateEventMessage,
+  isOrganizationUnitMessage,
   isPersonMessage,
-  isResearchUnitMessage,
 } from '@/lib/amqp/utils/typeGuards'
 
 import { MessageProcessingWorker } from '@/lib/amqp/workers/MessageProcessingWorker'
 import { PersonWorker } from '@/lib/amqp/workers/PersonWorker'
-import { ResearchUnitWorker } from '@/lib/amqp/workers/ResearchUnitWorker'
+import { OrganizationUnitWorker } from '@/lib/amqp/workers/OrganizationUnitWorker'
 import { DocumentWorker } from '@/lib/amqp/workers/DocumentWorker'
 import { HarvestingStateEventWorker } from '@/lib/amqp/workers/HarvestingStateEventWorker'
 import { HarvestingResultEventWorker } from '@/lib/amqp/workers/HarvestingResultEventWorker'
+import { ChangeEventWorker } from '@/lib/amqp/workers/ChangeEventWorker'
 
 import { PersonDAO } from '@/lib/daos/PersonDAO'
-import { ResearchUnitDAO } from '@/lib/daos/ResearchUnitDAO'
+import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { UserDAO } from '@/lib/daos/UserDAO'
 
 import { DocumentGraphQLClient } from '@/lib/graphql/DocumentGraphQLClient'
 import { PersonGraphQLClient } from '@/lib/graphql/PersonGraphQLClient'
+import { OrganizationUnitGraphQLClient } from '@/lib/graphql/OrganizationUnitGraphQLClient'
+import { OrganizationUnitService } from '@/lib/services/OrganizationUnitService'
 
 export class MessageProcessingWorkerFactory {
   createWorker(message: AMQPMessage): MessageProcessingWorker<AMQPMessage> {
@@ -34,8 +38,13 @@ export class MessageProcessingWorkerFactory {
       )
     }
 
-    if (isResearchUnitMessage(message)) {
-      return new ResearchUnitWorker(message, new ResearchUnitDAO())
+    if (isOrganizationUnitMessage(message)) {
+      return new OrganizationUnitWorker(
+        message,
+        new OrganizationUnitDAO(),
+        new OrganizationUnitGraphQLClient(),
+        new OrganizationUnitService(),
+      )
     }
 
     if (isDocumentMessage(message)) {
@@ -52,6 +61,10 @@ export class MessageProcessingWorkerFactory {
 
     if (isHarvestingResultEventMessage(message)) {
       return new HarvestingResultEventWorker(message, new PersonDAO())
+    }
+
+    if (isChangeEventMessage(message)) {
+      return new ChangeEventWorker(message, new DocumentDAO())
     }
 
     throw new Error(

@@ -9,6 +9,9 @@ import {
   DocumentRecord,
   DocumentState,
   DocumentTitle,
+  Employment,
+  HalDeposit,
+  HalDepositFile,
   HalSubmitType,
   Journal,
   JournalIdentifier,
@@ -18,32 +21,45 @@ import {
   Permission,
   Person,
   PersonIdentifier,
+  Prisma,
   PrismaClient,
   PublicationIdentifier,
-  ResearchUnit,
-  ResearchUnitDescription,
-  ResearchUnitIdentifier,
-  ResearchUnitIdentifierType,
-  ResearchUnitName,
   Role,
   RolePermission,
   SourceContribution,
   SourceJournal,
   SourcePerson,
+  SourcePersonIdentifier,
   User,
   UserRole,
   UserRoleScope,
 } from '@prisma/client'
 const prisma = new PrismaClient()
 
-export type ResearchUnitIdentifierWithRelations = ResearchUnitIdentifier & {
-  type: ResearchUnitIdentifierType
-}
+export const organizationUnitInclude = {
+  labels: true,
+  descriptions: true,
+  identifiers: true,
+} satisfies Prisma.OrganizationUnitInclude
 
-export type ResearchUnitWithRelations = ResearchUnit & {
-  names: ResearchUnitName[]
-  descriptions: ResearchUnitDescription[]
-  identifiers: ResearchUnitIdentifierWithRelations[]
+/**
+ * Include used where the organization's parent relationships matter
+ * (authorization perimeters computed from person memberships).
+ */
+export const organizationUnitParentsInclude = {
+  parents: { include: { parent: true } },
+} satisfies Prisma.OrganizationUnitInclude
+
+export type OrganizationRelationshipWithParent =
+  Prisma.OrganizationRelationshipGetPayload<{
+    include: { parent: true }
+  }>
+
+export type OrganizationUnitWithRelations = Prisma.OrganizationUnitGetPayload<{
+  include: typeof organizationUnitInclude
+}> & {
+  // present only when the query includes organizationUnitParentsInclude
+  parents?: OrganizationRelationshipWithParent[]
 }
 
 export type ContributionWithRelations = Contribution & {
@@ -56,7 +72,7 @@ export type AuthorityOrganizationWithRelations = AuthorityOrganization & {
 }
 
 export type SourceContributionWithRelations = SourceContribution & {
-  person: SourcePerson
+  person: SourcePersonWithRelations
 }
 
 export type DocumentRecordWithRelations = DocumentRecord & {
@@ -88,6 +104,12 @@ export type DocumentWithRelations = Document & {
   state: DocumentState
 }
 
+export type HalDepositWithRelations = HalDeposit & {
+  files: HalDepositFile[]
+  document: { uid: string }
+  person: { uid: string }
+}
+
 export type RoleWithPermission = RolePermission & {
   permission: Permission
 }
@@ -96,22 +118,28 @@ export type RoleWithRelations = Role & {
   permissions: RoleWithPermission[] // include: { permissions: { include: { permission: true } } }
 }
 
-export type RoleWithPermissionIds = Role & {
-  permissions: Array<Pick<RolePermission, 'permissionId'>> // include: { permissions: { select: { permissionId: true } } }
-}
-
 export type UserRoleWithRelations = UserRole & {
   role: RoleWithRelations
   scopes: UserRoleScope[]
 }
 
 export type MembershipWithRelations = Membership & {
-  researchUnit: ResearchUnitWithRelations
+  organizationUnit: OrganizationUnitWithRelations
+}
+
+export type EmploymentWithRelations = Employment & {
+  organizationUnit: OrganizationUnitWithRelations
+}
+
+export type SourcePersonWithRelations = SourcePerson & {
+  identifiers: SourcePersonIdentifier[]
 }
 
 export type PersonWithRelations = Person & {
   identifiers: PersonIdentifierWithRelations[]
   memberships: MembershipWithRelations[]
+  employments?: EmploymentWithRelations[]
+  records: SourcePersonWithRelations[]
 }
 
 export type UserWithRelations = User & {

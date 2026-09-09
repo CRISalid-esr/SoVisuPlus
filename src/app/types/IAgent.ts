@@ -6,11 +6,18 @@ export interface IAgentJson {
   slug: string | null
 }
 
-export type AgentType = 'person' | 'research_unit' | 'institution'
+export type AgentType =
+  | 'person'
+  | 'institution'
+  | 'research_unit'
+  | 'other_structure'
+  | 'team'
 const AGENT_TYPE_VALUES = new Set<AgentType>([
   'person',
-  'research_unit',
   'institution',
+  'research_unit',
+  'other_structure',
+  'team',
 ])
 
 export const agentTypeFromString = (value: string | null): AgentType | null => {
@@ -19,6 +26,16 @@ export const agentTypeFromString = (value: string | null): AgentType | null => {
   }
   return value as AgentType
 }
+
+/** Organization perspective groups (every agent type except person) */
+export type OrganizationGroup = Exclude<AgentType, 'person'>
+
+export const ORGANIZATION_GROUPS: OrganizationGroup[] = [
+  'institution',
+  'research_unit',
+  'other_structure',
+  'team',
+]
 
 export interface IAgent extends IEntity {
   type: AgentType

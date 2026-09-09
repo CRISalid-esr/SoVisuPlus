@@ -66,6 +66,82 @@ const scopesToCondition = (scopes: Scope[]): Array<MongoQuery | undefined> => {
   return conds.length ? conds : [undefined]
 }
 
+/**
+ * Returns true if the user holds at least one matching permission that is NOT scoped
+ * to their own Person entity (i.e. global, ResearchUnit, Institution, …).
+ *
+ * @param p       - the authz context to inspect
+ * @param action  - the permission action to look for (e.g. 'update')
+ * @param subject - the permission subject to look for (e.g. 'Person')
+ * @param field   - optional field restriction to look for (e.g. 'identifiers')
+ */
+export const hasWiderThanSelfPersonScope = (
+  p: AuthzContext = EMPTY_PRINCIPAL,
+  action: string,
+  subject: string,
+  field?: string,
+): boolean => {
+  for (const ra of p.roleAssignments) {
+    const hasPerm = ra.permissions.some(
+      (perm) =>
+        perm.action === action &&
+        perm.subject === subject &&
+        (field === undefined || (perm.fields ?? []).includes(field)),
+    )
+    if (!hasPerm) continue
+
+    if (!ra.scopes.length) return true // global role
+
+    for (const scope of ra.scopes) {
+      if (scope.entityType !== 'Person') return true // ResearchUnit, Institution, …
+      if (scope.entityUid !== p.personUid) return true // scoped to a different person
+    }
+  }
+  return false
+}
+
+/** `manage` on `all`: the admin wildcard, which no scope narrows. */
+const isFullAccess = (perm: { action: string; subject: string }): boolean =>
+  perm.action === 'manage' && perm.subject === 'all'
+
+/**
+ * Returns true if the user holds a matching permission through a grant that no
+ * scope narrows — either an **unscoped** role assignment, or the `manage` /
+ * `all` admin wildcard, which grants full access however it was assigned.
+ *
+ * CASL cannot answer this: a subject-type check (`can(action, 'Subject')`)
+ * ignores conditions, so a scoped assignment would pass it. Use this helper
+ * for permissions on subjects that carry no `authzProperties` and are
+ * meaningful globally only, such as `OrganizationUnit`.
+ *
+ * Outside the wildcard, `manage` still matches any action and `all` any
+ * subject, and a permission carrying no field restriction matches any
+ * requested field.
+ *
+ * @param p       - the authz context to inspect
+ * @param action  - the permission action to look for (e.g. 'update')
+ * @param subject - the permission subject to look for (e.g. 'OrganizationUnit')
+ * @param field   - optional field restriction to look for (e.g. 'hidden')
+ */
+export const hasUnscopedPermission = (
+  p: AuthzContext = EMPTY_PRINCIPAL,
+  action: string,
+  subject: string,
+  field?: string,
+): boolean =>
+  (p?.roleAssignments ?? []).some((ra) =>
+    ra.permissions.some(
+      (perm) =>
+        isFullAccess(perm) ||
+        (ra.scopes.length === 0 &&
+          (perm.action === action || perm.action === 'manage') &&
+          (perm.subject === subject || perm.subject === 'all') &&
+          (field === undefined ||
+            !perm.fields?.length ||
+            perm.fields.includes(field))),
+    ),
+  )
+
 export const abilityFromAuthzContext = (
   p: AuthzContext = EMPTY_PRINCIPAL,
 ): AppAbility => {

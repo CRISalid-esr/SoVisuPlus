@@ -31,6 +31,11 @@ query Documents($where: DocumentWhere) {
       affiliations {
         uid
         display_names
+        type
+        places {
+          latitude
+          longitude
+        }
         identifiers {
           type
           value
@@ -55,14 +60,43 @@ query Documents($where: DocumentWhere) {
             value
           }
         }
-        memberships {
+        membershipsConnection {
+          edges {
+            properties {
+              start_date
+              end_date
+              position_code
+            }
+            node {
+              uid
+              external
+              generic_type
+              national_type
+              types
+              identifiers {
+                type
+                value
+              }
+              short_labels {
+                language
+                value
+              }
+              long_labels {
+                language
+                value
+              }
+            }
+          }
+        }
+        recorded_by {
           uid
-          acronym
-          names {
-            language
+          name
+          source
+          source_identifier
+          identifiers {
+            type
             value
           }
-          types
         }
       }
     }
@@ -112,6 +146,10 @@ query Documents($where: DocumentWhere) {
           name
           source
           source_identifier
+          identifiers {
+            type
+            value
+          }
         }
       }
       has_identifiers {

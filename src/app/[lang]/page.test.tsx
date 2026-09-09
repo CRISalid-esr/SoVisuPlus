@@ -60,7 +60,7 @@ describe('getSplashImages tests', () => {
             logoUrl: '/theme/defaults/splash_org_logo_default.svg',
           },
         }),
-        {},
+        undefined,
       ),
     )
   })
@@ -92,7 +92,7 @@ describe('getSplashImages tests', () => {
             logoUrl: '/theme/splash_org_logo.svg',
           },
         }),
-        {},
+        undefined,
       ),
     )
   })

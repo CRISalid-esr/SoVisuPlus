@@ -5,13 +5,17 @@ import { render, screen } from '@testing-library/react'
 import AgentIdentityCard from './AgentIdentityCard'
 import { Person } from '@/types/Person'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
-import { ResearchUnit } from '@/types/ResearchUnit'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
 import type { PersonMembership } from '@/types/PersonMembership'
 import type { Literal } from '@/types/Literal'
-import type { IAgent } from '@/types/IAgent'
+import type { AgentType, IAgent } from '@/types/IAgent'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
-import { PersonIdentifierType } from '@prisma/client'
+import {
+  OrganizationCategory,
+  OrganizationGenericType,
+  PersonIdentifierType,
+} from '@prisma/client'
 
 // Mock Lingui `t` function
 jest.mock('@lingui/macro', () => ({
@@ -26,10 +30,10 @@ jest.mock('@/[lang]/dashboard/components/PersonIdentityCard', () => ({
   ),
 }))
 
-jest.mock('@/[lang]/dashboard/components/ResearchUnitIdentityCard', () => ({
+jest.mock('@/[lang]/dashboard/components/OrganizationUnitIdentityCard', () => ({
   __esModule: true,
-  default: ({ researchUnit }: { researchUnit: ResearchUnit }) => (
-    <div data-testid='rs-identity-card'>{researchUnit.uid}</div>
+  default: ({ organizationUnit }: { organizationUnit: OrganizationUnit }) => (
+    <div data-testid='org-identity-card'>{organizationUnit.uid}</div>
   ),
 }))
 
@@ -52,31 +56,34 @@ const makePerson = (): Person => {
   )
 }
 
-const makeResearchUnit = (): ResearchUnit => {
+const makeOrganizationUnit = (
+  category: OrganizationCategory,
+): OrganizationUnit => {
   const names: Literal[] = []
   const descriptions: Literal[] = []
-  return new ResearchUnit(
+  return new OrganizationUnit(
     'rs1',
     'IRJS',
     names,
     descriptions,
-    'Institut de Recherche Juridique de la Sorbonne',
+    category,
+    OrganizationGenericType.unit,
+    null,
     [],
-    'research_unit',
-    'irjs',
+    'org:irjs',
     false,
   )
 }
 
 const makeUnsupportedAgent = (): IAgent => {
-  // minimal IAgent instance (not a Person nor ResearchUnit)
+  // minimal IAgent instance with a type outside the known agent types
   return {
-    uid: 'inst1',
-    slug: 'univ-x',
-    type: 'institution',
+    uid: 'x1',
+    slug: 'x1',
+    type: 'unknown' as AgentType,
     membershipAcronyms: [],
     membershipSignatures: [],
-    getDisplayName: () => 'Université X',
+    getDisplayName: () => 'Unknown Agent',
   }
 }
 
@@ -87,7 +94,7 @@ describe('AgentIdentityCard', () => {
     render(<AgentIdentityCard agent={person} />)
 
     expect(screen.getByTestId('person-identity-card')).toBeInTheDocument()
-    expect(screen.queryByTestId('rs-identity-card')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('org-identity-card')).not.toBeInTheDocument()
     expect(
       screen.queryByText(
         'dashboard_page_agent_identity_card_no_agent_selected',
@@ -95,18 +102,32 @@ describe('AgentIdentityCard', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('renders ResearchUnitIdentityCard when agent is a ResearchUnit', () => {
-    const rs = makeResearchUnit()
+  it('renders OrganizationUnitIdentityCard when agent is a research unit', () => {
+    const rs = makeOrganizationUnit(OrganizationCategory.research_unit)
 
     render(<AgentIdentityCard agent={rs} />)
 
-    expect(screen.getByTestId('rs-identity-card')).toBeInTheDocument()
+    expect(screen.getByTestId('org-identity-card')).toBeInTheDocument()
     expect(screen.queryByTestId('person-identity-card')).not.toBeInTheDocument()
     expect(
       screen.queryByText(
         'dashboard_page_agent_identity_card_no_agent_selected',
       ),
     ).not.toBeInTheDocument()
+  })
+
+  it('renders OrganizationUnitIdentityCard for the other organization groups', () => {
+    for (const category of [
+      OrganizationCategory.institution,
+      OrganizationCategory.team,
+      OrganizationCategory.support_unit,
+    ]) {
+      const { unmount } = render(
+        <AgentIdentityCard agent={makeOrganizationUnit(category)} />,
+      )
+      expect(screen.getByTestId('org-identity-card')).toBeInTheDocument()
+      unmount()
+    }
   })
 
   it('renders fallback card when agent is null', () => {
@@ -120,7 +141,7 @@ describe('AgentIdentityCard', () => {
       screen.getByText('dashboard_page_agent_identity_card_no_agent_selected'),
     ).toBeInTheDocument()
     expect(screen.queryByTestId('person-identity-card')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('rs-identity-card')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('org-identity-card')).not.toBeInTheDocument()
   })
 
   it('renders fallback card when agent is an unsupported IAgent type', () => {
@@ -136,6 +157,6 @@ describe('AgentIdentityCard', () => {
       screen.getByText('dashboard_page_agent_identity_card_no_agent_selected'),
     ).toBeInTheDocument()
     expect(screen.queryByTestId('person-identity-card')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('rs-identity-card')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('org-identity-card')).not.toBeInTheDocument()
   })
 })

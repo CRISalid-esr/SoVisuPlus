@@ -1,0 +1,270 @@
+import { Box, Checkbox, Link, Paper, Typography } from '@mui/material'
+import {
+  BibliographicPlatform,
+  BibliographicPlatformMetadata,
+} from '@/types/BibliographicPlatform'
+import Image from 'next/image'
+import { SourceRecordTypeLabels } from '@/app/[lang]/documents/components/SourceRecordTypeLabels'
+import { DocumentType, SourceRecordType } from '@prisma/client'
+import { DocumentTypeLabels } from '@/app/[lang]/documents/components/DocumentTypeLabels'
+import { t } from '@lingui/core/macro'
+import React, { useCallback, useMemo } from 'react'
+import { getLocalizedValue } from '@/utils/getLocalizedValue'
+import * as Lingui from '@lingui/core'
+import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
+import { Document } from '@/types/Document'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import { LocaleDateFormats } from '@/types/LocaleDateFormats'
+import { Contribution } from '@/types/Contribution'
+import { SourceRecordTypeService } from '@/lib/services/SourceRecordTypeService'
+import { useLingui } from '@lingui/react'
+import { useTheme } from '@mui/system'
+import { ParsedUrlQueryInput } from 'node:querystring'
+import { useSearchParams } from 'next/navigation'
+import NextLink from 'next/link'
+
+dayjs.extend(utc)
+
+type MergeDialogDocumentProps = {
+  document: Document
+  checked: boolean
+  toggleSelection: (uid: string) => void
+  formattedData: {
+    publicationDate:boolean,
+    contributors:Record<string,boolean>,
+    journal:boolean
+  }
+}
+
+const MergeDialogDocument = React.memo(
+  ({ document, checked, toggleSelection, formattedData }: MergeDialogDocumentProps) => {
+    MergeDialogDocument.displayName = 'MergeDialogDocument'
+    const handleChange = useCallback(
+      () => toggleSelection(document.uid),
+      [toggleSelection, document.uid],
+    )
+    const theme = useTheme()
+    const searchParams = useSearchParams()
+    const lang = Lingui.i18n.locale as ExtendedLanguageCode
+    const { _ } = useLingui()
+    const supportedLocales =
+      process.env.NEXT_PUBLIC_SUPPORTED_LOCALES?.split(',')
+    const localizedTitle = getLocalizedValue(
+      document.titles,
+      lang,
+      supportedLocales,
+      t`no_title_available`,
+    )
+    let dateStr = document.publicationDate
+    if (!dateStr) {
+      dateStr = t`documents_page_publication_date_column_no_date_available`
+    } else if (dayjs(dateStr, 'YYYY-MM-DD').isValid()) {
+      const dateFormat = LocaleDateFormats[lang] || 'MM-DD-YYYY'
+      dateStr = dayjs(dateStr, 'YYYY-MM-DD').format(dateFormat)
+    }
+    const sourcesUrl = useMemo(() => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set('tab', 'sources')
+      const query: ParsedUrlQueryInput = {}
+
+      params.forEach((value, key) => {
+        query[key] = value
+      })
+
+      return {
+        pathname: `/${lang}/documents/${document.uid}`,
+        query,
+      }
+    }, [document.uid, lang, searchParams])
+    const contributors = useMemo(
+      () =>
+        document.contributions.length > 0
+          ? document.contributions
+              .map((contribution: Contribution) => {
+                const person = contribution.person
+                const { firstName, lastName } = person
+                let name = [firstName, lastName].filter(Boolean).join(' ')
+                if (name.match(/^\s*$/)) {
+                  name = person.getDisplayName()
+                }
+                return name
+              })
+              .filter(Boolean)
+          : null,
+      [document.contributions],
+    )
+    const journal = document.journal?.title
+
+    const records = useMemo(() => {
+      const records: Array<{
+        url: string | null
+        platform: BibliographicPlatform | null
+        value: DocumentType | SourceRecordType
+      }> = [{ url: null, platform: null, value: document.documentType }]
+      document.records.forEach((record) => {
+        const type = SourceRecordTypeService.getPreciseType(
+          record.documentTypes,
+        )
+        records.push({
+          url: record.url,
+          platform: record.platform,
+          value: type,
+        })
+      })
+      return records
+    }, [document.documentType, document.records])
+
+    const [boldDate, boldContributors, boldJournal] = useMemo(()=> [!formattedData.publicationDate, formattedData.contributors, !formattedData.journal],[formattedData])
+    return (
+      <Paper
+        elevation={1}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '10px',
+          backgroundColor: checked ? theme.palette.surface : 'inherit',
+        }}
+      >
+        <Checkbox checked={checked} onChange={handleChange} />
+        <Box
+          sx={{ display: 'flex', flexDirection: 'column', padding: '0px 5px' }}
+        >
+          <Typography
+            variant={'subtitle1'}
+            sx={{
+              fontSize: '13px',
+              fontWeight: 'bold',
+              color: theme.palette.primary.main,
+            }}
+          >
+            {localizedTitle.value}
+          </Typography>
+          <Box>
+            <Typography
+              variant={'caption'}
+              sx={{
+                fontWeight: boldDate ? 'bold' : 'inherit',
+              }}
+            >
+              {dateStr}
+            </Typography>
+            <Typography variant={'caption'}>{' • '}</Typography>
+            {contributors ? (
+              <>
+                {contributors.map((contributor, index) => (
+                  <Box key={contributor} sx={{ display: 'inline' }}>
+                    <Typography
+                      variant={'caption'}
+                      sx={{
+                        display: 'inline',
+                        fontWeight: boldContributors[contributor]
+                          ? 'bold'
+                          : 'inherit',
+                      }}
+                    >
+                      {contributor}
+                    </Typography>
+                    {index != contributors.length - 1 && (
+                      <Typography variant={'caption'}>{', '}</Typography>
+                    )}
+                  </Box>
+                ))}
+              </>
+            ) : (
+              <Typography
+                variant={'caption'}
+                sx={{
+                  fontWeight:
+                    Object.entries(boldContributors).length > 0
+                      ? 'bold'
+                      : 'inherit',
+                }}
+              >{t`documents_merge_dialog_box_publication_no_contributors`}</Typography>
+            )}
+            {journal && (
+              <>
+                <Typography variant={'caption'}>{' • '}</Typography>
+                <Typography
+                  variant={'caption'}
+                  sx={{
+                    fontWeight: boldJournal ? 'bold' : 'inherit',
+                    fontStyle: 'italic',
+                  }}
+                >
+                  {journal}
+                </Typography>
+              </>
+            )}
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'baseline',
+            }}
+          >
+            <Box sx={{ display: 'flex', gap: '10px' }}>
+              {records.map((record) => {
+                let imageElement = null
+                if (record.platform) {
+                  const metadata =
+                    BibliographicPlatformMetadata[record.platform]
+                  imageElement = (
+                    <Image
+                      src={metadata?.icon || '/icons/default.png'}
+                      alt={metadata?.name || 'Unknown Source'}
+                      width={18}
+                      height={18}
+                      priority
+                      title={metadata?.name || 'Unknown Source'} // Tooltip on hover
+                    />
+                  )
+                }
+                return (
+                  <Paper
+                    variant='outlined'
+                    component={record.platform ? Link : 'div'}
+                    href={record.url ?? undefined}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    key={record.platform ?? 'default'}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '5px 5px',
+                      gap: '6px',
+                      backgroundColor: record.platform
+                        ? 'inherit'
+                        : theme.palette.lightSecondaryContainer,
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <Typography>
+                      {record.platform
+                        ? _(
+                            SourceRecordTypeLabels[
+                              record.value as SourceRecordType
+                            ],
+                          )
+                        : _(DocumentTypeLabels[record.value as DocumentType])}
+                    </Typography>
+                    {imageElement}
+                  </Paper>
+                )
+              })}
+            </Box>
+            <Link
+              component={NextLink}
+              href={sourcesUrl}
+              target='_blank'
+              rel='noopener noreferrer'
+            >{t`documents_merge_dialog_box_detail_link`}</Link>
+          </Box>
+        </Box>
+      </Paper>
+    )
+  },
+)
+
+export default MergeDialogDocument

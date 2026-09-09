@@ -1,10 +1,11 @@
 import { StateCreator } from 'zustand'
 import { Document, DocumentState, DocumentType } from '@/types/Document'
 import { toQueryString } from '@/utils/query'
-import { BaseQuery } from '@/types/BaseQuery'
+import { BaseQuery, SearchQuery } from '@/types/BaseQuery'
 import { AgentType } from '@/types/IAgent'
 import { Concept } from '@/types/Concept'
 import { Literal } from '@/types/Literal'
+import { ContributionActionParameters } from '@/types/ContributionAction'
 
 export interface DocumentQuery extends BaseQuery {
   searchTerm: string
@@ -18,17 +19,23 @@ export interface DocumentQuery extends BaseQuery {
   requestId: number
   halCollectionCodes: string
   areHalCollectionCodesOmitted: boolean
+  // Which tab this result belongs to. Client-side routing metadata: stripped
+  // before the query string is built, like `requestId`.
+  tab: string
 }
 
-export interface CountDocumentQuery extends BaseQuery {
-  searchTerm: string
-  page: number
-  columnFilters: string
+// Mirrors DocumentQuery minus paging and sorting: counting a tab that is not on
+// screen, so no rows are fetched. Extends SearchQuery rather than BaseQuery
+// because it is not paginated.
+export interface CountDocumentQuery extends SearchQuery {
   searchLang: string
+  columnFilters: string
   contributorUid: string | null
   contributorType: AgentType
   requestId: number
   halCollectionCodes: string
+  areHalCollectionCodesOmitted: boolean
+  tab: string
 }
 
 export interface DocumentSlice {
@@ -38,9 +45,10 @@ export interface DocumentSlice {
     selectedDocument: Document | null
     totalItems?: number
     count: {
-      latestCountDocumentsRequestId?: number
-      allItems?: number
-      incompleteHalRepositoryItems?: number
+      // Tab badge counts, keyed by tab. The active tab's entry is written by
+      // fetchDocuments from the list's totalItems; the others by countDocuments.
+      byTab: Record<string, number | undefined>
+      latestRequestIdByTab: Record<string, number>
       loading: boolean
       error: string | null | unknown
     }
@@ -51,6 +59,8 @@ export interface DocumentSlice {
     setSelectedDocumentHasChanged: (flag: boolean) => void
     hasFetched?: boolean
     setHasFetched: (flag: boolean) => void // To force a re-fetch
+    contributionsTabDirty: boolean
+    setContributionsTabDirty: (flag: boolean) => void
     error: string | null | unknown
     fetchDocuments: (obj: DocumentQuery) => Promise<void>
     countDocuments: (obj: CountDocumentQuery) => Promise<void>
@@ -60,7 +70,14 @@ export interface DocumentSlice {
     removeConcepts: (conceptUids: string[]) => Promise<void>
     modifyTitles: (titles: Literal[]) => Promise<{ success: boolean }>
     modifyAbstracts: (abstracts: Literal[]) => Promise<{ success: boolean }>
+    modifyPublicationDate: (
+      publicationDate: string | null,
+    ) => Promise<{ success: boolean }>
     updateDocumentType: (type: DocumentType) => Promise<void>
+    saveContributions: (
+      contributions: ContributionActionParameters[],
+    ) => Promise<{ success: boolean }>
+    unfreezeSelectedDocument: (documentUid: string) => void
   }
 }
 
@@ -79,8 +96,8 @@ export const addDocumentSlice: StateCreator<
     count: {
       loading: true,
       error: null,
-      allItems: 0,
-      incompleteHalRepositoryItems: 0,
+      byTab: {},
+      latestRequestIdByTab: {},
     },
     hasFetched: false,
     setHasFetched: (flag: boolean) =>
@@ -90,8 +107,16 @@ export const addDocumentSlice: StateCreator<
           hasFetched: flag,
         },
       })),
+    contributionsTabDirty: false,
+    setContributionsTabDirty: (flag: boolean) =>
+      set((state) => ({
+        document: {
+          ...state.document,
+          contributionsTabDirty: flag,
+        },
+      })),
     fetchDocuments: async (queryObject: DocumentQuery) => {
-      const { requestId, ...rest } = queryObject
+      const { requestId, tab, ...rest } = queryObject
       const queryString = toQueryString(rest)
 
       // Mark the request as the latest before the async call
@@ -118,6 +143,12 @@ export const addDocumentSlice: StateCreator<
               ...state.document,
               documents,
               totalItems,
+              // The active tab's badge: the list query already counted its own
+              // where clause, so no separate count request is needed for it.
+              count: {
+                ...state.document.count,
+                byTab: { ...state.document.count.byTab, [tab]: totalItems },
+              },
               error: null,
               loading: false,
             },
@@ -192,17 +223,22 @@ export const addDocumentSlice: StateCreator<
     },
 
     countDocuments: async (queryObject: CountDocumentQuery) => {
-      const { requestId, ...rest } = queryObject
+      const { requestId, tab, ...rest } = queryObject
       const queryString = toQueryString(rest)
 
-      // Mark the request as the latest before the async call
+      // Mark the request as the latest for this tab before the async call.
+      // The guard is per tab so counts for different tabs, which may be in
+      // flight at the same time, cannot reject each other.
       set((state) => ({
         document: {
           ...state.document,
           count: {
             ...state.document.count,
             loading: true,
-            latestCountDocumentsRequestId: requestId,
+            latestRequestIdByTab: {
+              ...state.document.count.latestRequestIdByTab,
+              [tab]: requestId,
+            },
           },
         },
       }))
@@ -210,11 +246,11 @@ export const addDocumentSlice: StateCreator<
       try {
         const response = await fetch(`/api/documents/count?${queryString}`)
         const jsonData = await response.json()
-        const { allItems, incompleteHalRepositoryItems } = jsonData
+        const totalItems = jsonData.totalItems
 
         set((state) => {
-          // Ignore if a newer request was made since this one started
-          if (state.document.count.latestCountDocumentsRequestId !== requestId)
+          // Ignore if a newer request for this tab was made since this started
+          if (state.document.count.latestRequestIdByTab[tab] !== requestId)
             return state
 
           return {
@@ -222,8 +258,7 @@ export const addDocumentSlice: StateCreator<
               ...state.document,
               count: {
                 ...state.document.count,
-                allItems,
-                incompleteHalRepositoryItems,
+                byTab: { ...state.document.count.byTab, [tab]: totalItems },
                 error: null,
                 loading: false,
               },
@@ -233,7 +268,7 @@ export const addDocumentSlice: StateCreator<
       } catch (error) {
         console.error('Failed to count documents', error)
         set((state) => {
-          if (state.document.count.latestCountDocumentsRequestId !== requestId)
+          if (state.document.count.latestRequestIdByTab[tab] !== requestId)
             return state
 
           return {
@@ -268,37 +303,24 @@ export const addDocumentSlice: StateCreator<
           const updatedDocuments = state.document.documents.map((doc) => {
             const updatedDoc = data.updated.find((d) => d.uid === doc.uid)
             if (updatedDoc) {
-              return {
-                ...doc,
-                state: updatedDoc.state as DocumentState,
-              } as Document
+              doc.state = updatedDoc.state as DocumentState
             }
             return doc
           })
           // Also update selectedDocument if it's among the merged ones
-          let updatedSelectedDocument = state.document.selectedDocument
-          if (
-            state.document.selectedDocument &&
-            documentUids.includes(state.document.selectedDocument.uid)
-          ) {
-            const updatedDoc = data.updated.find(
-              (d) => d.uid === state.document.selectedDocument?.uid,
-            )
-            if (updatedDoc) {
-              updatedSelectedDocument = Object.assign(
-                Object.create(
-                  Object.getPrototypeOf(state.document.selectedDocument),
-                ),
-                state.document.selectedDocument,
-                { state: updatedDoc.state as DocumentState },
-              )
-            }
+          const selectedDocument = state.document.selectedDocument
+          const selectUpdated = data.updated.find(
+            (d) => d.uid === selectedDocument?.uid,
+          )
+          if (selectedDocument && selectUpdated) {
+            selectedDocument.state = selectUpdated.state as DocumentState
           }
+
           return {
             document: {
               ...state.document,
               documents: updatedDocuments,
-              selectedDocument: updatedSelectedDocument,
+              selectedDocument: selectedDocument,
             },
           }
         })
@@ -478,6 +500,159 @@ export const addDocumentSlice: StateCreator<
             Object.create(Object.getPrototypeOf(doc)),
             doc,
             { abstracts: abstracts },
+          )
+
+          return {
+            document: {
+              ...state.document,
+              selectedDocument: updatedDocument,
+            },
+          }
+        })
+        return { success: true }
+      } catch (error) {
+        set((state) => ({
+          document: {
+            ...state.document,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        }))
+        return { success: false }
+      }
+    },
+    saveContributions: async (
+      contributions: ContributionActionParameters[],
+    ) => {
+      try {
+        const documentUid = get().document.selectedDocument?.uid
+
+        if (!documentUid) {
+          throw new Error('Cannot save contributions: no selected document')
+        }
+
+        const response = await fetch(
+          `/api/documents/${documentUid}/contributions`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contributions }),
+          },
+        )
+
+        if (!response.ok) throw new Error('Failed to save contributions')
+
+        // Pessimistic model: do NOT write contribution data. Only flag the
+        // document as waiting for the graph round-trip (mirrors the server-side
+        // markDocumentsWaitingForUpdate). The Authors tab freezes on this state
+        // and unfreezes when the refreshed document comes back as `default`.
+        set((state) => {
+          const doc = state.document.selectedDocument
+          if (!doc || doc.uid !== documentUid) return state
+          const updatedDocument = new Document(
+            doc.uid,
+            doc.documentType,
+            doc.oaStatus,
+            doc.publicationDate,
+            doc.publicationDateStart,
+            doc.publicationDateEnd,
+            doc.upwOAStatus,
+            doc.titles,
+            doc.abstracts,
+            doc.subjects,
+            doc.contributions,
+            doc.records,
+            DocumentState.waiting_for_update,
+            doc.journal,
+            doc.volume,
+            doc.issue,
+            doc.pages,
+          )
+          return {
+            document: {
+              ...state.document,
+              selectedDocument: updatedDocument,
+            },
+          }
+        })
+        return { success: true }
+      } catch (error) {
+        set((state) => ({
+          document: {
+            ...state.document,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        }))
+        return { success: false }
+      }
+    },
+    // Failure path of the pessimistic model: the graph reported the action
+    // failed, so no refreshed document will come back to reset the state —
+    // unfreeze in place so the user can retry immediately.
+    unfreezeSelectedDocument: (documentUid: string) => {
+      set((state) => {
+        const doc = state.document.selectedDocument
+        if (
+          !doc ||
+          doc.uid !== documentUid ||
+          doc.state !== DocumentState.waiting_for_update
+        )
+          return state
+        const updatedDocument = new Document(
+          doc.uid,
+          doc.documentType,
+          doc.oaStatus,
+          doc.publicationDate,
+          doc.publicationDateStart,
+          doc.publicationDateEnd,
+          doc.upwOAStatus,
+          doc.titles,
+          doc.abstracts,
+          doc.subjects,
+          doc.contributions,
+          doc.records,
+          DocumentState.default,
+          doc.journal,
+          doc.volume,
+          doc.issue,
+          doc.pages,
+        )
+        return {
+          document: {
+            ...state.document,
+            selectedDocument: updatedDocument,
+          },
+        }
+      })
+    },
+    modifyPublicationDate: async (publicationDate: string | null) => {
+      try {
+        const documentUid = get().document.selectedDocument?.uid
+
+        if (!documentUid) {
+          throw new Error(
+            'Cannot modify publication date: no selected document',
+          )
+        }
+
+        const response = await fetch(
+          `/api/documents/${documentUid}/publicationDate`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ publicationDate }),
+          },
+        )
+
+        if (!response.ok) throw new Error('Failed to modify publication date')
+
+        set((state) => {
+          const doc = state.document.selectedDocument
+          if (!doc) return state
+
+          const updatedDocument = Object.assign(
+            Object.create(Object.getPrototypeOf(doc)),
+            doc,
+            { publicationDate },
           )
 
           return {

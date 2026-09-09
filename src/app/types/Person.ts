@@ -13,8 +13,12 @@ import { IAgent, IAgentJson } from '@/types/IAgent'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { PersonIdentifier as DbPersonIdentifier } from '@prisma/client'
 import { PersonMembership } from '@/types/PersonMembership'
+import { PersonEmployment } from '@/types/PersonEmployment'
+import { SourcePerson, SourcePersonJson } from '@/types/SourcePerson'
+import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
 import removeAccents from 'remove-accents'
 import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
+import { organizationPerimeterFromMemberships } from '@/types/organizationScopes'
 
 interface PersonJson extends IAgentJson {
   uid: string
@@ -26,12 +30,24 @@ interface PersonJson extends IAgentJson {
   lastName?: string
   identifiers?: Array<PersonIdentifierJson | ORCIDIdentifierJson>
   memberships?: PersonMembership[]
+  employments?: PersonEmployment[]
+  records: SourcePersonJson[]
 }
 
 type IdentifierHydrationJson = PersonIdentifierJson | ORCIDIdentifierJson
 
 class Person implements IAgent, Authorizable {
   public normalizedName: string
+  /** EMPLOYED_AT relationships — populated alongside memberships */
+  public employments: PersonEmployment[] = []
+  /**
+   * Uids of organization units whose affiliation edges could not be hydrated
+   * (undeterminable category). They are missing from memberships/employments
+   * but the graph still asserts them, so they must count toward the keep-set
+   * when affiliations are replaced rather than upserted.
+   */
+  public unhydratedMembershipOrgUids: string[] = []
+  public unhydratedEmploymentOrgUids: string[] = []
 
   constructor(
     public uid: string,
@@ -44,6 +60,7 @@ class Person implements IAgent, Authorizable {
     public memberships: PersonMembership[] = [],
     public type: 'person' = 'person',
     public slug: string | null = null,
+    public records: SourcePerson[] = [],
   ) {
     this.validateIdentifiers(identifiers)
     this.normalizedName = removeAccents(this.displayNameGuard().toLowerCase())
@@ -51,14 +68,12 @@ class Person implements IAgent, Authorizable {
 
   get membershipAcronyms(): string[] {
     return this.memberships
-      .map(({ researchUnit: { acronym } }) => acronym)
+      .map(({ organizationUnit: { acronym } }) => acronym)
       .filter((acronym) => acronym !== null)
   }
 
   get membershipSignatures(): string[] {
-    return this.memberships
-      .map(({ researchUnit: { signature } }) => signature)
-      .filter((signature) => signature !== null)
+    return []
   }
 
   getDisplayName(language?: ExtendedLanguageCode): string {
@@ -74,6 +89,30 @@ class Person implements IAgent, Authorizable {
 
   getIdentifiers(): PersonIdentifier[] {
     return this.identifiers
+  }
+
+  /**
+   * Identifiers to display in the UI. Returns the person's own identifiers
+   * when present; otherwise falls back to the deduplicated identifiers of the
+   * source-person records (deduplicated on type + value).
+   */
+  displayIdentifiers(): Array<PersonIdentifier | SourcePersonIdentifier> {
+    if (this.identifiers.length > 0) {
+      return this.identifiers
+    }
+
+    const seen = new Set<string>()
+    const deduped: SourcePersonIdentifier[] = []
+    for (const record of this.records) {
+      for (const identifier of record.getIdentifiers()) {
+        const key = `${identifier.type}:${identifier.value}`
+        if (!seen.has(key)) {
+          seen.add(key)
+          deduped.push(identifier)
+        }
+      }
+    }
+    return deduped
   }
 
   setIdentifiers(value: PersonIdentifier[]) {
@@ -97,8 +136,30 @@ class Person implements IAgent, Authorizable {
     })
   }
 
-  hasIdHAL(): boolean {
-    return this.identifiers.some((id) => id.type == PersonIdentifierType.idhals)
+  hasIdentifier(type: PersonIdentifierType): boolean {
+    return this.identifiers.some((id) => id.type === type)
+  }
+
+  /**
+   * Whether the identifier of the given type is authenticated. Derived, never
+   * stored (see specs/872-refactor-account-edition-workflow/prompt.md): ORCID →
+   * an OAuth grant exists; idHAL → a companion hal_login exists; every other
+   * type (IdRef, …) is never authenticated.
+   */
+  isIdentifierAuthenticated(type: PersonIdentifierType): boolean {
+    if (type === PersonIdentifierType.orcid) {
+      const orcid = this.identifiers.find(
+        (id) => id.type === PersonIdentifierType.orcid,
+      )
+      return orcid instanceof ORCIDIdentifier && !!orcid.oauth
+    }
+    if (
+      type === PersonIdentifierType.idhals ||
+      type === PersonIdentifierType.idhali
+    ) {
+      return this.hasIdentifier(PersonIdentifierType.hal_login)
+    }
+    return false
   }
 
   private static computeDisplayName(
@@ -116,7 +177,7 @@ class Person implements IAgent, Authorizable {
       person.lastName,
       person.displayName,
     )
-    return new Person(
+    const hydrated = new Person(
       person.uid,
       person.external,
       person.email,
@@ -135,7 +196,13 @@ class Person implements IAgent, Authorizable {
         : [],
       'person',
       person.slug,
+      person.records.map((record) => SourcePerson.fromDbSourcePerson(record)),
     )
+    hydrated.employments =
+      person.employments?.map((employment) =>
+        PersonEmployment.fromDbPersonEmployment(employment),
+      ) ?? []
+    return hydrated
   }
 
   private static identifiersFromJson(
@@ -171,7 +238,7 @@ class Person implements IAgent, Authorizable {
       json.lastName,
       json.displayName ?? null,
     )
-    return new Person(
+    const hydrated = new Person(
       json.uid,
       json.external,
       json.email ?? null,
@@ -182,19 +249,18 @@ class Person implements IAgent, Authorizable {
       json.memberships ?? [],
       'person',
       json.slug ?? null,
+      json.records.map((record) => SourcePerson.fromJson(record)),
     )
+    hydrated.employments = json.employments ?? []
+    return hydrated
   }
 
   get authzProperties(): AuthorizationProperties {
-    const rs =
-      this.memberships
-        ?.map((m) => m.researchUnit?.uid)
-        .filter((x): x is string => !!x) ?? []
     return {
       __type: 'Person',
       perimeter: {
         Person: [this.uid],
-        ResearchUnit: Array.from(new Set(rs)),
+        ...organizationPerimeterFromMemberships(this.memberships),
       },
     }
   }

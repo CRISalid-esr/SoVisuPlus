@@ -159,7 +159,7 @@ describe('Type component (document type editor)', () => {
     expect(calledWith).not.toBe(DocumentType.Book)
   })
 
-  it('disables editing when user lacks update permission for documentType', () => {
+  it('hides the edit control when user lacks update permission for documentType', () => {
     const updateDocumentType = jest.fn()
     const selectedDocument = makeDoc(DocumentType.JournalArticle)
 
@@ -177,11 +177,12 @@ describe('Type component (document type editor)', () => {
 
     renderWithI18n(<Type />)
 
-    const editBtn = screen.getByRole('button', { name: /edit/i })
-    expect(editBtn).toBeDisabled()
-
-    // Clicking does nothing
-    fireEvent.click(editBtn)
+    // Read-only users see no edit control at all (not a disabled one).
+    expect(
+      screen.queryByRole('button', {
+        name: /document_details_page_type_edit_button/i,
+      }),
+    ).not.toBeInTheDocument()
     expect(screen.queryByRole('tree')).not.toBeInTheDocument()
     expect(updateDocumentType).not.toHaveBeenCalled()
   })

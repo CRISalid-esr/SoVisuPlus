@@ -52,5 +52,6 @@ export class SourceRecordTypeService {
         return type
       }
     }
+    return SourceRecordType.Unknown
   }
 }

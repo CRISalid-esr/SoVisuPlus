@@ -12,14 +12,11 @@ const OAStatusCell = ({ row }: { row: { original: Document } }) => {
   const defaultOAStatus = row.original.oaStatus
   const upwOAStatus = row.original.upwOAStatus
 
-  if (upwOAStatus) {
-    return <OAStatusCellBadge type={upwOAStatus} />
-  } else {
-    return defaultOAStatus ? (
-      <OAStatusCellBadge type={defaultOAStatus} />
-    ) : (
-      <OAStatusCellBadge type={'UNKNOWN'} />
-    )
-  }
+  const type =
+    upwOAStatus && upwOAStatus !== 'CLOSED'
+      ? upwOAStatus
+      : (defaultOAStatus ?? upwOAStatus ?? 'UNKNOWN')
+
+  return <OAStatusCellBadge type={type} />
 }
 export default OAStatusCell

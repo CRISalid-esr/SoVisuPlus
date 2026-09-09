@@ -4,10 +4,12 @@ import { Trans } from '@lingui/react/macro'
 import Check from '@/public/icons/check.svg'
 import DarkMode from '@/public/icons/dark_mode.svg'
 import LightMode from '@/public/icons/light_mode.svg'
-
 import SystemMode from '@/public/icons/system_mode.svg'
 import { User } from '@/types/User'
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Backdrop,
   Drawer,
   IconButton,
@@ -15,7 +17,9 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Menu,
   MenuItem,
+  MenuList,
   Select,
   SelectChangeEvent,
   Typography,
@@ -25,24 +29,30 @@ import { useTheme } from '@mui/material/styles'
 import { Box, useMediaQuery } from '@mui/system'
 import {
   BarChartSquare02 as BarChartSquare,
+  Building07 as Building,
   CheckDone01 as CheckDone,
   LayersThree01 as LayerThere,
-  LifeBuoy01 as LifeBuoy,
   LogOut01 as Logout,
   SearchSm,
-  Settings01 as Settings,
-  User01 as Users,
   XClose as Close,
 } from '@untitled-ui/icons-react'
 import Image from 'next/image'
-import Link from 'next/link'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
+import {
+  GuardedLink,
+  useGuardedRouter,
+} from '@/app/[lang]/components/NavigationGuard/NavigationGuardProvider'
 import { ThemeMode, useThemeContext } from '../../context/ThemeContext'
 import { SearchInput } from '../SearchInput'
 import { signOut } from 'next-auth/react'
 import { institutionalConfig } from '@/configs/index'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import LanguageSwitcher from '@/components/LanguageSwitcher/LanguageSwitcher'
+import { HelpOutline, PermIdentityOutlined } from '@mui/icons-material'
+import { getRuntimeEnv } from '@/utils/runtimeEnv'
+import { t } from '@lingui/core/macro'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { useMemo, useState } from 'react'
 
 interface SidebarProps {
   handleToggleDrawerAction: () => void
@@ -56,8 +66,20 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
   const theme = useTheme()
   const { setTheme, currentTheme } = useThemeContext()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const router = useRouter()
+  const guardedRouter = useGuardedRouter()
   const searchParams = useSearchParams()
+  // The `tab` param belongs to the document details page; its values (authors,
+  // sources…) are invalid elsewhere and break the destination's TabFilter. Drop
+  // it from nav links when leaving the details page so it doesn't leak.
+  const navSearchParams = useMemo(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (pathname.startsWith(`/${lang}/documents/`)) {
+      params.delete('tab')
+    }
+    return params.toString()
+  }, [searchParams, pathname, lang])
+  const helpUrl = getRuntimeEnv().NEXT_PUBLIC_HELP_URL
+  const [accountMenu, setAccountMenu] = useState<null | HTMLElement>(null)
 
   const handleThemeChange = (event: SelectChangeEvent) => {
     setTheme(event.target.value as 'light' | 'dark' | 'system')
@@ -82,7 +104,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
               sx={{
                 color: theme.palette.primaryContainer,
               }}
-              ml={1}
+              ml={'14px'}
             >
               <Trans>sidebar_theme_light</Trans>
             </Typography>
@@ -105,7 +127,7 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
               sx={{
                 color: theme.palette.primaryContainer,
               }}
-              ml={1}
+              ml={'14px'}
             >
               <Trans>sidebar_theme_dark</Trans>
             </Typography>
@@ -172,9 +194,13 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
 
   const renderInstitutionalLogo = () => {
     if (currentTheme === ThemeMode.light) {
-      return institutionalConfig.logos.lightSideBarLogo
+      return open
+        ? institutionalConfig.logos.lightSideBarLogo
+        : institutionalConfig.logos.lightSideBarLogoMinimize
     }
-    return institutionalConfig.logos.darkSideBarLogo
+    return open
+      ? institutionalConfig.logos.darkSideBarLogo
+      : institutionalConfig.logos.darkSideBarLogoMinimize
   }
 
   return (
@@ -289,29 +315,30 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                   margin: '0 auto',
                 }}
               >
-                {
-                  <IconButton
-                    onClick={handleToggleDrawerAction}
-                    sx={{
-                      zIndex: 1201,
-                    }}
-                  >
-                    <Avatar
-                      src='/icons/showSidePanel.svg'
-                      alt='sidepanel'
-                      sx={{ width: 24, height: 24 }}
-                    />
-                  </IconButton>
-                }
                 <Image
                   src={renderInstitutionalLogo()}
                   alt='logo'
                   width={0}
                   height={0}
                   sizes='100vw'
-                  style={{ width: '100%', height: 'auto' }} // optional
+                  style={{
+                    width: theme.utils.pxToRem(46),
+                    height: theme.utils.pxToRem(46),
+                  }} // optional
                   priority
                 />
+                <IconButton
+                  onClick={handleToggleDrawerAction}
+                  sx={{
+                    zIndex: 1201,
+                  }}
+                >
+                  <Avatar
+                    src='/icons/showSidePanel.svg'
+                    alt='sidepanel'
+                    sx={{ width: 24, height: 24 }}
+                  />
+                </IconButton>
               </Box>
             )}
           </Box>
@@ -364,8 +391,8 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
             </Box>
             <Box>
               <ListItem
-                component={Link}
-                href={`/${lang}/dashboard?${searchParams.toString()}`}
+                component={GuardedLink}
+                href={`/${lang}/dashboard?${navSearchParams}`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   marginBottom: theme.utils.pxToRem(4),
@@ -413,8 +440,8 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                 )}
               </ListItem>
               <ListItem
-                component={Link}
-                href={`/${lang}/documents?${searchParams.toString()}`}
+                component={GuardedLink}
+                href={`/${lang}/documents?${navSearchParams}`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   marginBottom: theme.utils.pxToRem(4),
@@ -462,8 +489,8 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                 )}
               </ListItem>
               <ListItem
-                component={Link}
-                href={`/${lang}/expertise?${searchParams.toString()}`}
+                component={GuardedLink}
+                href={`/${lang}/expertise?${navSearchParams}`}
                 onClick={() => isMobile && handleToggleDrawerAction()}
                 sx={{
                   marginBottom: theme.utils.pxToRem(4),
@@ -510,6 +537,55 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                   />
                 )}
               </ListItem>
+              <ListItem
+                sx={{
+                  marginBottom: theme.utils.pxToRem(4),
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  color: theme.palette.primaryContainer,
+                  ...(pathname === `/${lang}/research-structures`
+                    ? {
+                        backgroundColor: theme.palette.primaryContainer,
+                        borderRadius: theme.utils.pxToRem(8),
+                        color: theme.palette.onPrimaryContainer,
+                      }
+                    : {}),
+                  '&:hover': {
+                    backgroundColor: theme.palette.sidebarItemHover,
+                    borderRadius: theme.utils.pxToRem(8),
+                    color: theme.palette.primaryContainer,
+                  },
+                }}
+                component={GuardedLink}
+                href={`/${lang}/research-structures?${navSearchParams}`}
+                onClick={() => isMobile && handleToggleDrawerAction()}
+              >
+                <ListItemIcon
+                  sx={{
+                    height: theme.utils.pxToRem(24),
+                    width: theme.utils.pxToRem(24),
+                    minWidth: 'unset',
+                    marginRight: open ? theme.utils.pxToRem(12) : 0,
+                    color: 'inherit',
+                  }}
+                >
+                  <Building />
+                </ListItemIcon>
+                {open && (
+                  <ListItemText
+                    sx={{
+                      '& .MuiTypography-root': {
+                        fontFamily: 'Inter, Roboto, sans-serif',
+                        fontSize: theme.utils.pxToRem(16),
+                        fontWeight: theme.typography.fontWeightMedium,
+                        lineHeight: theme.typography.lineHeight.lineHeight24px,
+                      },
+                    }}
+                    primary={<Trans>side_bar_research_structures</Trans>}
+                  />
+                )}
+              </ListItem>
             </Box>
             <Box
               pb={3}
@@ -519,159 +595,6 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                 flexDirection: 'column',
               }}
             >
-              {/* Second Box */}
-              <Box pb={3}>
-                <ListItem
-                  sx={{
-                    marginBottom: theme.utils.pxToRem(4),
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    color: theme.palette.primaryContainer,
-                    ...(pathname === `/${lang}/groups`
-                      ? {
-                          backgroundColor: theme.palette.primaryContainer,
-                          borderRadius: theme.utils.pxToRem(8),
-                          color: theme.palette.onPrimaryContainer,
-                        }
-                      : {}),
-                    '&:hover': {
-                      backgroundColor: theme.palette.sidebarItemHover,
-                      borderRadius: theme.utils.pxToRem(8),
-                      color: theme.palette.primaryContainer,
-                    },
-                  }}
-                  component={Link}
-                  href={`/${lang}/groups?${searchParams.toString()}`}
-                  onClick={() => isMobile && handleToggleDrawerAction()}
-                >
-                  <ListItemIcon
-                    sx={{
-                      height: theme.utils.pxToRem(24),
-                      width: theme.utils.pxToRem(24),
-                      minWidth: 'unset',
-                      marginRight: open ? theme.utils.pxToRem(12) : 0,
-                      color: 'inherit',
-                    }}
-                  >
-                    <Users />
-                  </ListItemIcon>
-                  {open && (
-                    <ListItemText
-                      sx={{
-                        '& .MuiTypography-root': {
-                          fontFamily: 'Inter, Roboto, sans-serif',
-                          fontSize: theme.utils.pxToRem(16),
-                          fontWeight: theme.typography.fontWeightMedium,
-                          lineHeight:
-                            theme.typography.lineHeight.lineHeight24px,
-                        },
-                      }}
-                      primary={<Trans>side_bar_my_groups</Trans>}
-                    />
-                  )}
-                </ListItem>
-                <ListItem
-                  sx={{
-                    marginBottom: theme.utils.pxToRem(4),
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    color: theme.palette.primaryContainer,
-                    ...(pathname === `/${lang}/institutions`
-                      ? {
-                          backgroundColor: theme.palette.primaryContainer,
-                          borderRadius: theme.utils.pxToRem(8),
-                          color: theme.palette.onPrimaryContainer,
-                        }
-                      : {}),
-                    '&:hover': {
-                      backgroundColor: theme.palette.sidebarItemHover,
-                      borderRadius: theme.utils.pxToRem(8),
-                      color: theme.palette.primaryContainer,
-                    },
-                  }}
-                  component={Link}
-                  href={`/${lang}/institutions?${searchParams.toString()}`}
-                  onClick={() => isMobile && handleToggleDrawerAction()}
-                >
-                  <ListItemIcon
-                    sx={{
-                      height: theme.utils.pxToRem(24),
-                      width: theme.utils.pxToRem(24),
-                      minWidth: 'unset',
-                      marginRight: open ? theme.utils.pxToRem(12) : 0,
-                      color: 'inherit',
-                    }}
-                  >
-                    <LifeBuoy />
-                  </ListItemIcon>
-                  {open && (
-                    <ListItemText
-                      sx={{
-                        '& .MuiTypography-root': {
-                          fontFamily: 'Inter, Roboto, sans-serif',
-                          fontSize: theme.utils.pxToRem(16),
-                          fontWeight: theme.typography.fontWeightMedium,
-                          lineHeight:
-                            theme.typography.lineHeight.lineHeight24px,
-                        },
-                      }}
-                      primary={<Trans>side_bar_institutions</Trans>}
-                    />
-                  )}
-                </ListItem>
-                <ListItem
-                  sx={{
-                    marginBottom: theme.utils.pxToRem(4),
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    color: theme.palette.primaryContainer,
-                    ...(pathname === `/${lang}/laboratories`
-                      ? {
-                          backgroundColor: theme.palette.primaryContainer,
-                          borderRadius: theme.utils.pxToRem(8),
-                          color: theme.palette.onPrimaryContainer,
-                        }
-                      : {}),
-                    '&:hover': {
-                      backgroundColor: theme.palette.sidebarItemHover,
-                      borderRadius: theme.utils.pxToRem(8),
-                      color: theme.palette.primaryContainer,
-                    },
-                  }}
-                  component={Link}
-                  href={`/${lang}/laboratories?${searchParams.toString()}`}
-                  onClick={() => isMobile && handleToggleDrawerAction()}
-                >
-                  <ListItemIcon
-                    sx={{
-                      height: theme.utils.pxToRem(24),
-                      width: theme.utils.pxToRem(24),
-                      minWidth: 'unset',
-                      marginRight: open ? theme.utils.pxToRem(12) : 0,
-                      color: 'inherit',
-                    }}
-                  >
-                    <Settings />
-                  </ListItemIcon>
-                  {open && (
-                    <ListItemText
-                      sx={{
-                        '& .MuiTypography-root': {
-                          fontFamily: 'Inter, Roboto, sans-serif',
-                          fontSize: theme.utils.pxToRem(16),
-                          fontWeight: theme.typography.fontWeightMedium,
-                          lineHeight:
-                            theme.typography.lineHeight.lineHeight24px,
-                        },
-                      }}
-                      primary={<Trans>side_bar_laboratories</Trans>}
-                    />
-                  )}
-                </ListItem>
-              </Box>
               {/* Third Box */}
               <Box>
                 {open ? (
@@ -844,6 +767,52 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                   </ListItem>
                 )}
               </Box>
+              <Box>
+                <ListItem
+                  sx={{
+                    paddingLeft: '14px',
+                    marginBottom: theme.utils.pxToRem(4),
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    color: theme.palette.primaryContainer,
+                    '&:hover': {
+                      backgroundColor: theme.palette.sidebarItemHover,
+                      borderRadius: theme.utils.pxToRem(8),
+                      color: theme.palette.primaryContainer,
+                    },
+                  }}
+                  component={GuardedLink}
+                  href={helpUrl}
+                  onClick={() => isMobile && handleToggleDrawerAction()}
+                >
+                  <ListItemIcon
+                    sx={{
+                      height: theme.utils.pxToRem(24),
+                      width: theme.utils.pxToRem(24),
+                      minWidth: 'unset',
+                      marginRight: open ? theme.utils.pxToRem(12) : 0,
+                      color: 'inherit',
+                    }}
+                  >
+                    <HelpOutline />
+                  </ListItemIcon>
+                  {open && (
+                    <ListItemText
+                      sx={{
+                        '& .MuiTypography-root': {
+                          fontFamily: 'Inter, Roboto, sans-serif',
+                          fontSize: theme.utils.pxToRem(16),
+                          fontWeight: theme.typography.fontWeightRegular,
+                          lineHeight:
+                            theme.typography.lineHeight.lineHeight24px,
+                        },
+                      }}
+                      primary={<Trans>sidebar_help_button</Trans>}
+                    />
+                  )}
+                </ListItem>
+              </Box>
             </Box>
           </Box>
           <Box
@@ -860,126 +829,196 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
             }}
           >
             {open ? (
-              <Box
-                pt={1}
+              <Accordion
+                slotProps={{
+                  heading: {
+                    component: 'div',
+                  },
+                }}
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-around',
-                  alignItems: 'center',
-                  borderTop: '1px solid',
-                  borderColor: theme.palette.white,
+                  backgroundColor: theme.palette.onPrimaryFixedVariant,
                   width: '100%',
                 }}
               >
-                <IconButton
-                  title='account'
-                  onClick={() => router.push(`/${lang}/account`)}
-                  sx={{
-                    cursor: 'pointer',
-                    '&:hover': {
-                      transform: 'scale(1.05)',
-                      backgroundColor: theme.palette.action.hover,
-                    },
-                    transition: 'transform 0.2s ease-in-out',
-                  }}
-                >
-                  <Image
-                    src='/icons/avatar.png'
-                    alt='avatar'
-                    width={40}
-                    height={40}
-                    priority
-                  />
-                </IconButton>
-
-                <Box
-                  onClick={() => router.push(`/${lang}/account`)}
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      textDecoration: 'underline',
-                      color: theme.palette.grey[200], // or whatever hover color you want
+                <AccordionSummary
+                  expandIcon={
+                    <ExpandMoreIcon sx={{ color: theme.palette.white }} />
+                  }
+                  slotProps={{
+                    content: {
+                      sx: {
+                        gap: '10px',
+                      },
                     },
                   }}
+                  sx={{
+                    '&.Mui-expanded': {
+                      borderBottom: '1px solid',
+                      borderColor: 'divider',
+                    },
+                    width: '100%',
+                  }}
                 >
-                  <Box
+                  <Avatar
+                    alt={'avatar'}
+                    src={'/icons/avatar.png'}
+                    sx={{ width: 32, height: 32 }}
+                  >
+                    {(user?.person?.firstName.charAt(0) ?? '') +
+                      (user?.person?.lastName.charAt(0) ?? '')}
+                  </Avatar>
+                  <Typography
+                    color={theme.palette.white}
                     sx={{
                       display: 'flex',
-                      flexDirection: 'row',
-                      alignContent: 'center',
+                      fontWeight: theme.typography.fontWeightMedium,
+                      fontSize: theme.utils.pxToRem(14),
+                      lineHeight: theme.typography.lineHeight.lineHeight20px,
                       alignItems: 'center',
                     }}
                   >
-                    <Typography
-                      color={theme.palette.white}
+                    {user?.person?.firstName + ' ' + user?.person?.lastName}
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails sx={{ padding: '0' }}>
+                  <MenuList sx={{ paddingBottom: '16px' }}>
+                    <MenuItem
+                      onClick={() => guardedRouter.push(`/${lang}/account`)}
                       sx={{
-                        fontWeight: theme.typography.fontWeightMedium,
-                        fontSize: theme.utils.pxToRem(16),
-                        lineHeight: theme.typography.lineHeight.lineHeight20px,
+                        color: theme.palette.primaryContainer,
                       }}
                     >
-                      {user?.person?.firstName} {user?.person?.lastName}
-                    </Typography>
-                    {/* Logout icon stays separate */}
-                    <IconButton
-                      title='Logout'
-                      sx={{
-                        marginLeft: 'auto',
-                        paddingRight: '0px',
-                      }}
+                      <ListItemIcon>
+                        <PermIdentityOutlined
+                          width={theme.utils.pxToRem(22)}
+                          height={theme.utils.pxToRem(22)}
+                          sx={{
+                            color: theme.palette.primaryContainer,
+                          }}
+                        />
+                      </ListItemIcon>
+                      <ListItemText
+                        sx={{
+                          '& .MuiTypography-root': {
+                            fontFamily: 'Inter, Roboto, sans-serif',
+                          },
+                        }}
+                      >{t`sidebar_account`}</ListItemText>
+                    </MenuItem>
+                    <MenuItem
                       onClick={async () =>
                         await signOut({
                           callbackUrl: '/api/logout',
                         })
                       }
+                      sx={{
+                        color: theme.palette.primaryContainer,
+                      }}
                     >
-                      <Logout
-                        width={20}
-                        height={20}
-                        color={theme.palette.white}
-                      />
-                    </IconButton>
-                  </Box>
-                  <Typography
-                    sx={{
-                      fontSize: theme.utils.pxToRem(12),
-                      fontWeight: theme.typography.fontWeightRegular,
-                      lineHeight: theme.typography.lineHeight.lineHeight16px,
-                    }}
-                    color={theme.palette.white}
-                  >
-                    {user?.person?.email}
-                  </Typography>
-                </Box>
-              </Box>
+                      <ListItemIcon>
+                        <Logout
+                          width={theme.utils.pxToRem(22)}
+                          height={theme.utils.pxToRem(22)}
+                          color={theme.palette.primaryContainer}
+                        />
+                      </ListItemIcon>
+                      <ListItemText
+                        sx={{
+                          '& .MuiTypography-root': {
+                            fontFamily: 'Inter, Roboto, sans-serif',
+                          },
+                        }}
+                      >{t`sidebar_logout`}</ListItemText>
+                    </MenuItem>
+                  </MenuList>
+                </AccordionDetails>
+              </Accordion>
             ) : (
-              <ListItem>
+              <ListItem sx={{ padding: 0, justifyContent: 'center' }}>
                 <ListItemIcon
-                  onClick={() => {
-                    router.push(`/${lang}/account`)
-                    handleToggleDrawerAction()
+                  onClick={(event) => {
+                    setAccountMenu(event.currentTarget)
                   }}
                   sx={{
-                    height: theme.utils.pxToRem(24),
-                    width: theme.utils.pxToRem(24),
+                    height: theme.utils.pxToRem(32),
+                    width: theme.utils.pxToRem(32),
                     minWidth: 'unset',
-                    marginRight: theme.utils.pxToRem(12),
                     borderTop: '1px solid',
                     borderColor: theme.palette.white,
-                    paddingTop: theme.spacing(3),
+                    paddingTop: theme.spacing(2),
                     cursor: 'pointer',
                   }}
                 >
-                  <Image
-                    src='/icons/avatar.png'
-                    alt='avatar'
-                    width={24}
-                    height={24}
-                    priority
-                  />
+                  <Avatar
+                    alt={'avatar'}
+                    src={'/icons/avatar.png'}
+                    sx={{ width: 32, height: 32 }}
+                  >
+                    {(user?.person?.firstName.charAt(0) ?? '') +
+                      (user?.person?.lastName.charAt(0) ?? '')}
+                  </Avatar>
                 </ListItemIcon>
+                <Menu
+                  open={!!accountMenu}
+                  anchorEl={accountMenu}
+                  onClose={() => setAccountMenu(null)}
+                  slotProps={{
+                    paper: {
+                      sx: {
+                        backgroundColor: theme.palette.onPrimaryFixedVariant,
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem
+                    onClick={() => guardedRouter.push(`/${lang}/account`)}
+                    sx={{
+                      color: theme.palette.primaryContainer,
+                    }}
+                  >
+                    <ListItemIcon>
+                      <PermIdentityOutlined
+                        width={theme.utils.pxToRem(22)}
+                        height={theme.utils.pxToRem(22)}
+                        sx={{
+                          color: theme.palette.primaryContainer,
+                        }}
+                      />
+                    </ListItemIcon>
+                    <ListItemText
+                      sx={{
+                        '& .MuiTypography-root': {
+                          fontFamily: 'Inter, Roboto, sans-serif',
+                        },
+                      }}
+                    >{t`sidebar_account`}</ListItemText>
+                  </MenuItem>
+                  <MenuItem
+                    onClick={async () =>
+                      await signOut({
+                        callbackUrl: '/api/logout',
+                      })
+                    }
+                    sx={{
+                      color: theme.palette.primaryContainer,
+                    }}
+                  >
+                    <ListItemIcon>
+                      <Logout
+                        width={theme.utils.pxToRem(22)}
+                        height={theme.utils.pxToRem(22)}
+                        color={theme.palette.primaryContainer}
+                      />
+                    </ListItemIcon>
+                    <ListItemText
+                      sx={{
+                        '& .MuiTypography-root': {
+                          fontFamily: 'Inter, Roboto, sans-serif',
+                        },
+                      }}
+                    >{t`sidebar_logout`}</ListItemText>
+                  </MenuItem>
+                </Menu>
               </ListItem>
             )}
           </Box>

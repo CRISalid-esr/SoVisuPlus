@@ -74,7 +74,7 @@ const mkPerson = (): Person => {
 
   const memberships: PersonMembership[] = [
     {
-      researchUnit: {
+      organizationUnit: {
         uid: 'rs1',
         acronym: 'IRJS',
         slug: 'irjs',

@@ -12,32 +12,85 @@ import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import { SourceContribution } from '@/types/SourceContribution'
 import { SourcePerson } from '@/types/SourcePerson'
 import { SourceJournal } from '@/types/SourceJournal'
-import { OAStatus, PublicationIdentifierType } from '@prisma/client'
+import {
+  AuthorityOrganizationIdentifierType,
+  AuthorityOrganizationType,
+  OAStatus,
+  OrganizationCategory,
+  OrganizationGenericType,
+  PublicationIdentifierType,
+} from '@prisma/client'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
+import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
+import { AuthorityOrganization } from '@/types/AuthorityOrganization'
+import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
+import { PersonMembership } from '@/types/PersonMembership'
+import { PersonEmployment } from '@/types/PersonEmployment'
 
 describe('DocumentDAO Integration Tests', () => {
   let documentDAO: DocumentDAO
   let personDAO: PersonDAO
+  let authorityOrganizationDAO: AuthorityOrganizationDAO
 
   beforeAll(() => {
     documentDAO = new DocumentDAO()
     personDAO = new PersonDAO()
+    authorityOrganizationDAO = new AuthorityOrganizationDAO()
   })
 
   afterEach(async () => {
     await prisma.contribution.deleteMany()
     await prisma.document.deleteMany()
     await prisma.person.deleteMany()
+    await prisma.authorityOrganization.deleteMany()
   })
 
   test('should remove contributions', async () => {
     // Step 1: Create persons
-    const person1 = await personDAO.createOrUpdatePerson(
-      new Person('local-p1', false, null, 'Alice', 'Smith', 'Alice Smith', []),
+    const person1Data = new Person(
+      'local-p1',
+      false,
+      null,
+      'Alice',
+      'Smith',
+      'Alice Smith',
+      [],
     )
-    const person2 = await personDAO.createOrUpdatePerson(
-      new Person('local-p2', false, null, 'Bob', 'Johnson', 'Bob Johnson', []),
+    const person2Data = new Person(
+      'local-p2',
+      false,
+      null,
+      'Bob',
+      'Johnson',
+      'Bob Johnson',
+      [],
     )
+    const person1 = await personDAO.createOrUpdatePerson(person1Data)
+    await personDAO.createOrUpdatePerson(person2Data)
+
+    const org1Data = new AuthorityOrganization(
+      'org-123',
+      ['Some Organization'],
+      AuthorityOrganizationType.laboratory,
+      [{ latitude: 10, longitude: 42 }],
+      [{ type: AuthorityOrganizationIdentifierType.hal, value: 'org1' }],
+    )
+    const org2Data = new AuthorityOrganization(
+      'org-234',
+      ['Other Organization'],
+      AuthorityOrganizationType.research_team,
+      [
+        { latitude: 43, longitude: 52 },
+        { latitude: 17, longitude: 13 },
+      ],
+      [{ type: AuthorityOrganizationIdentifierType.idref, value: 'org2' }],
+    )
+    await authorityOrganizationDAO.createOrUpdateAuthorityOrganization(org1Data)
+    const org2 =
+      await authorityOrganizationDAO.createOrUpdateAuthorityOrganization(
+        org2Data,
+      )
 
     // Step 2: Create a document with both contributors
     const documentData = new Document(
@@ -52,10 +105,12 @@ describe('DocumentDAO Integration Tests', () => {
       [], // No abstracts
       [], // No subjects
       [
-        new Contribution(Person.fromDbPerson(person1), [
-          LocRelatorHelper.fromLabel('author') as LocRelator,
-        ]),
-        new Contribution(Person.fromDbPerson(person2), [
+        new Contribution(
+          person1Data,
+          [LocRelatorHelper.fromLabel('author') as LocRelator],
+          [org1Data],
+        ),
+        new Contribution(person2Data, [
           LocRelatorHelper.fromLabel('editor') as LocRelator,
         ]),
       ],
@@ -68,6 +123,9 @@ describe('DocumentDAO Integration Tests', () => {
     // Verify both contributions exist
     let contributions = await prisma.contribution.findMany({
       where: { documentId: createdDocument.id },
+      include: {
+        affiliations: true,
+      },
     })
 
     expect(contributions).toHaveLength(2)
@@ -84,7 +142,7 @@ describe('DocumentDAO Integration Tests', () => {
       [new Literal('Test Document', 'en')],
       [], // No abstracts
       [], // No subjects
-      [new Contribution(Person.fromDbPerson(person1), [])],
+      [new Contribution(person1Data, [], [org2Data])],
       [],
     )
 
@@ -93,10 +151,14 @@ describe('DocumentDAO Integration Tests', () => {
     // Verify that only person1 remains and person2's contribution was removed
     contributions = await prisma.contribution.findMany({
       where: { documentId: createdDocument.id },
+      include: {
+        affiliations: true,
+      },
     })
 
     expect(contributions).toHaveLength(1)
     expect(contributions[0].personId).toBe(person1.id)
+    expect(contributions[0].affiliations).toEqual([org2])
   })
 
   test('should handle document subjects', async () => {
@@ -208,6 +270,139 @@ describe('DocumentDAO Integration Tests', () => {
     expect(updatedDbDocument2?.subjects).toHaveLength(1)
     expect(updatedDbDocument2?.subjects[0].uid).toBe(subject2.uid)
   })
+  test('should remove titles and abstracts whose language is no longer sent by the graph', async () => {
+    const buildDocument = (titles: Literal[], abstracts: Literal[]) =>
+      new Document(
+        'doc-languages',
+        Document.documentTypeFromString('JournalArticle'),
+        OAStatus.GREEN,
+        '2023-03-01',
+        new Date('2023-03-01T00:00:00.000Z'),
+        new Date('2023-03-01T23:59:59.000Z'),
+        OAStatus.DIAMOND,
+        titles,
+        abstracts,
+        [], // No subjects
+        [], // No contributions
+        [], // No records
+      )
+
+    // The graph first reports titles and abstracts in two languages
+    await documentDAO.createOrUpdateDocument(
+      buildDocument(
+        [
+          new Literal('Titre en français', 'fr'),
+          new Literal('English title', 'en'),
+        ],
+        [
+          new Literal('Résumé en français', 'fr'),
+          new Literal('English abstract', 'en'),
+        ],
+      ),
+    )
+
+    let dbDocument = await prisma.document.findUnique({
+      where: { uid: 'doc-languages' },
+      include: { titles: true, abstracts: true },
+    })
+    expect(dbDocument?.titles).toHaveLength(2)
+    expect(dbDocument?.abstracts).toHaveLength(2)
+
+    // A richer source record wins the merge: the graph now sends English only
+    await documentDAO.createOrUpdateDocument(
+      buildDocument(
+        [new Literal('Better English title', 'en')],
+        [new Literal('Better English abstract', 'en')],
+      ),
+    )
+
+    dbDocument = await prisma.document.findUnique({
+      where: { uid: 'doc-languages' },
+      include: { titles: true, abstracts: true },
+    })
+
+    expect(dbDocument?.titles).toHaveLength(1)
+    expect(dbDocument?.titles[0].language).toBe('en')
+    expect(dbDocument?.titles[0].value).toBe('Better English title')
+    expect(dbDocument?.abstracts).toHaveLength(1)
+    expect(dbDocument?.abstracts[0].language).toBe('en')
+    expect(dbDocument?.abstracts[0].value).toBe('Better English abstract')
+  })
+
+  test('should not erase a contributor affiliations or source links', async () => {
+    // A person arrives through the authoritative person flow with a
+    // membership, an employment and a linked source person
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    const unit = new OrganizationUnit(
+      'contrib-unit',
+      'CU',
+      [new Literal('Contributor Unit', 'en')],
+      [],
+      OrganizationCategory.research_unit,
+      OrganizationGenericType.unit,
+    )
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(unit)
+
+    const syncedPerson = new Person(
+      'contrib-person',
+      false,
+      'contrib@example.com',
+      'Jane Roe',
+      'Jane',
+      'Roe',
+      [],
+      [new PersonMembership(unit)],
+    )
+    syncedPerson.employments = [new PersonEmployment(unit, null, null, 'PR')]
+    syncedPerson.records = [
+      new SourcePerson('contrib-src', 'J. Roe', 'hal', 'jroe'),
+    ]
+    const dbPerson = await personDAO.createOrUpdatePerson(syncedPerson, {
+      authoritative: true,
+    })
+
+    // A document message then names them as a contributor, with none of that data
+    const bareContributor = new Person(
+      'contrib-person',
+      false,
+      'contrib@example.com',
+      'Jane Roe',
+      'Jane',
+      'Roe',
+      [],
+    )
+    await documentDAO.createOrUpdateDocument(
+      new Document(
+        'doc-contrib',
+        Document.documentTypeFromString('JournalArticle'),
+        OAStatus.GREEN,
+        '2023-01-01',
+        new Date('2023-01-01T00:00:00.000Z'),
+        new Date('2023-01-01T23:59:59.000Z'),
+        OAStatus.DIAMOND,
+        [new Literal('Contributor Test', 'en')],
+        [],
+        [],
+        [
+          new Contribution(bareContributor, [
+            LocRelatorHelper.fromLabel('author') as LocRelator,
+          ]),
+        ],
+        [],
+      ),
+    )
+
+    expect(
+      await prisma.membership.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(1)
+    expect(
+      await prisma.employment.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(1)
+    expect(
+      await prisma.sourcePerson.findMany({ where: { personId: dbPerson.id } }),
+    ).toHaveLength(1)
+  })
+
   test('should persist document with HAL source record and custom fields', async () => {
     const halRecord = new DocumentRecord(
       'hal-doc-001',

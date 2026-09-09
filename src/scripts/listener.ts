@@ -5,11 +5,10 @@ import { AmqpConnection } from '@/lib/amqp/AmqpConnection'
 import { startWebSocketServer } from './startWebSocketServer'
 import { startAMQPConsumer } from './startAMQPConsumer'
 import { startChangePoller } from './startChangePoller'
+import { startHalDepositPoller } from './startHalDepositPoller'
 
 dotenv.config()
 ;(async () => {
-  const semaphore = new Sema(1)
-
   try {
     const websocketPort = 3001
     console.log(`Starting WebSocket server on port ${websocketPort}...`)
@@ -18,10 +17,12 @@ dotenv.config()
     console.log('Connecting to RabbitMQ...')
     const connection = new AmqpConnection()
     await connection.connect()
-    console.log('Connected to RabbitMQ')
 
-    await startAMQPConsumer(connection, semaphore)
+    const interactiveSemaphore = new Sema(1)
+    const batchSemaphore = new Sema(1)
+    await startAMQPConsumer(connection, interactiveSemaphore, batchSemaphore)
     startChangePoller(connection)
+    startHalDepositPoller()
   } catch (error) {
     console.error('❌ Error during startup:', error)
   }

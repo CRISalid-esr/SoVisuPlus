@@ -6,6 +6,8 @@ import { TabFilter } from '@/components/TabFilter'
 import { Box, Typography } from '@mui/material'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import useStore from '@/stores/global_store'
+import { isPerson } from '@/types/Person'
 
 // Import tab content components
 import Authorizations from './components/authorizations/'
@@ -15,10 +17,13 @@ import Notifications from './components/notification'
 const MyAccountPage = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { currentPerspective, ownPerspective } = useStore((state) => state.user)
 
   const tabs = [
     {
-      label: t`my_account_page_my_profile_tab`,
+      label: ownPerspective
+        ? t`my_account_page_my_profile_tab`
+        : t({ id: 'account_page_profile_tab', message: 'Profile' }),
       value: 'my_profile',
     } /*,
     {
@@ -77,7 +82,13 @@ const MyAccountPage = () => {
       >
         <Box>
           <Typography variant='h4' gutterBottom>
-            <Trans>side_bar_my_account</Trans>
+            {ownPerspective ||
+            !currentPerspective ||
+            !isPerson(currentPerspective) ? (
+              <Trans>side_bar_my_account</Trans>
+            ) : (
+              currentPerspective.getDisplayName()
+            )}
           </Typography>
         </Box>
       </Box>

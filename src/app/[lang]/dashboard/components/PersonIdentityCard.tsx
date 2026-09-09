@@ -101,11 +101,17 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
                 }}
               >
                 {person.memberships
+                  // A structure hidden from the directory is not named here
+                  // either — but the membership itself is untouched, so the
+                  // person's authorization perimeter is unaffected.
                   .filter(
-                    (m) => m.researchUnit?.acronym && m.researchUnit?.slug,
+                    (m) =>
+                      m.organizationUnit?.acronym &&
+                      m.organizationUnit?.slug &&
+                      !m.organizationUnit.hiddenEffective,
                   )
                   .map((m, index, arr) => {
-                    const rs = m.researchUnit!
+                    const rs = m.organizationUnit!
                     return (
                       <Box
                         key={rs.uid}

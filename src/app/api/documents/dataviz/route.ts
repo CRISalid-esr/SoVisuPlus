@@ -17,13 +17,12 @@ export const GET = async (req: NextRequest) => {
       )
     }
     const documentService = new DocumentService()
-    const { publicationsPerYear } = await documentService.documentsPerYear(
-      contributorUid,
-      contributorType,
-    )
+    const { publicationsPerYear, perimeterUids } =
+      await documentService.documentsPerYear(contributorUid, contributorType)
 
     return NextResponse.json({
       documents: publicationsPerYear,
+      perimeterUids,
     })
   } catch (error) {
     console.error('Error fetching documents:', error)

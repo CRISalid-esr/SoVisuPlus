@@ -94,8 +94,7 @@ describe('DocumentService', () => {
   })
 
   it('should return document count when countDocuments succeeds', async () => {
-    const mockCount = { allItems: 1, incompleteHalRepositoryItems: 1 }
-    mockCountDocuments.mockResolvedValue(mockCount)
+    mockCountDocuments.mockResolvedValue(7)
 
     const params = {
       searchTerm: 'test',
@@ -104,11 +103,10 @@ describe('DocumentService', () => {
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
     }
 
-    await expect(documentService.countDocuments(params)).resolves.toEqual(
-      mockCount,
-    )
+    await expect(documentService.countDocuments(params)).resolves.toBe(7)
 
     // Replace contributorUid with contributorUids
     const dbParams = {
@@ -131,6 +129,7 @@ describe('DocumentService', () => {
       contributorUid: 'local-124',
       contributorType: 'person' as AgentType,
       halCollectionCodes: ['ABC', 'DEF'],
+      areHalCollectionCodesOmitted: false,
     }
 
     await expect(documentService.countDocuments(params)).rejects.toThrow(
@@ -221,6 +220,26 @@ describe('DocumentService', () => {
           oaStatus: 'GREEN',
           publicationDate: '2022',
           upwOAStatus: 'DIAMOND',
+          contributions: [
+            {
+              person: {
+                uid: 'local-124',
+                displayName: 'John Doe',
+              },
+              affiliations: [
+                {
+                  uid: 'organization-1',
+                  displayNames: ['Some Organization'],
+                  places: [
+                    {
+                      latitude: 14,
+                      longitude: 53,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     }
@@ -233,9 +252,30 @@ describe('DocumentService', () => {
             oaStatus: 'GREEN',
             publicationDate: '2022',
             upwOAStatus: 'DIAMOND',
+            contributions: [
+              {
+                person: {
+                  uid: 'local-124',
+                  displayName: 'John Doe',
+                },
+                affiliations: [
+                  {
+                    uid: 'organization-1',
+                    displayNames: ['Some Organization'],
+                    places: [
+                      {
+                        latitude: 14,
+                        longitude: 53,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       },
+      perimeterUids: ['local-124'],
     }
 
     mockFetchOAYearDocuments.mockResolvedValue(mockResponse)
@@ -251,7 +291,7 @@ describe('DocumentService', () => {
     expect(mockFetchOAYearDocuments).toHaveBeenCalledWith(contributorUids)
   })
 
-  it('should throw an error when fetchDocumentsFromDB fails', async () => {
+  it('should throw an error when documentsPerYear fails', async () => {
     mockFetchOAYearDocuments.mockRejectedValue(new Error('DB error'))
 
     const contributorUid = 'local-124'
@@ -1016,49 +1056,10 @@ describe('DocumentService', () => {
     expect(typeFilter.value).toEqual([DocumentType.JournalArticle])
   })
 
-  it('expands hierarchical types for countDocuments as well', async () => {
-    mockCountDocuments.mockResolvedValue({
-      allItems: 0,
-      incompleteHalRepositoryItems: 0,
-    })
+  // No countDocuments equivalent: the tab badge counts are perspective totals
+  // and deliberately ignore the table's column filters, so there is no type
+  // filter left to expand.
 
-    const params = {
-      searchTerm: '',
-      searchLang: 'en',
-      columnFilters: [
-        { id: 'type', value: [DocumentType.ScholarlyPublication] },
-      ],
-      contributorUid: 'local-xyz',
-      contributorType: 'person' as AgentType,
-      halCollectionCodes: [],
-    }
-
-    await documentService.countDocuments(params)
-
-    const calledWith = mockCountDocuments.mock.calls[0][0]
-    const typeFilter = calledWith.columnFilters.find(
-      (f: { id: string; value: string }) => f.id === 'type',
-    )
-
-    const expected = [
-      DocumentType.ScholarlyPublication,
-      DocumentType.JournalArticle,
-      DocumentType.ConferenceArticle,
-      DocumentType.Book,
-      DocumentType.BookChapter,
-      DocumentType.Monograph,
-      DocumentType.Proceedings,
-      DocumentType.BookOfChapters,
-      DocumentType.Presentation,
-      DocumentType.Article,
-      DocumentType.ConferenceAbstract,
-      DocumentType.Preface,
-      DocumentType.Comment,
-    ]
-
-    expect(typeFilter.value).toEqual(expect.arrayContaining(expected))
-    expect(typeFilter.value.length).toBe(expected.length)
-  })
   it('updates document type and creates UPDATE action', async () => {
     mockUpdateDocumentTypeByUid.mockResolvedValue(undefined)
 
@@ -1130,5 +1131,87 @@ describe('DocumentService', () => {
       DocumentType.Book,
     )
     expect(mockCreateAction).toHaveBeenCalled()
+  })
+
+  describe('saveContributions', () => {
+    const contributions = [
+      {
+        person: {
+          uid: null,
+          displayName: 'New One',
+          firstName: null,
+          lastName: null,
+          identifiers: [],
+        },
+        roles: ['http://id.loc.gov/vocabulary/relators/aut'],
+        rank: 1,
+        affiliations: [],
+      },
+      {
+        person: {
+          uid: 'p1',
+          displayName: 'Existing',
+          firstName: null,
+          lastName: null,
+          identifiers: [],
+        },
+        roles: ['http://id.loc.gov/vocabulary/relators/aut'],
+        rank: 2,
+        affiliations: [],
+      },
+    ]
+
+    it('creates a single DOCUMENT/contributions UPDATE action carrying the full state', async () => {
+      await documentService.saveContributions(
+        'doc-1',
+        contributions,
+        'user-1234',
+      )
+
+      expect(mockCreateAction).toHaveBeenCalledTimes(1)
+      expect(mockCreateAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionType: 'UPDATE',
+          targetType: 'DOCUMENT',
+          targetUid: 'doc-1',
+          path: 'contributions',
+          personUid: 'local-123',
+          parameters: { contributions },
+        }),
+      )
+    })
+
+    it('does not chain the action with id/nextId fields', async () => {
+      await documentService.saveContributions(
+        'doc-1',
+        contributions,
+        'user-1234',
+      )
+
+      const { parameters } = mockCreateAction.mock.calls[0][0]
+      expect(parameters).not.toHaveProperty('id')
+      expect(parameters).not.toHaveProperty('nextId')
+    })
+
+    it('flags the document as waiting for the graph round-trip', async () => {
+      await documentService.saveContributions(
+        'doc-1',
+        contributions,
+        'user-1234',
+      )
+
+      expect(mockMarkDocumentsWaitingForUpdate).toHaveBeenCalledWith(['doc-1'])
+    })
+
+    it('throws when the acting user cannot be resolved', async () => {
+      ;(UserDAO as jest.Mock).mockImplementation(() => ({
+        getUserByIdentifier: jest.fn().mockResolvedValue(null),
+      }))
+      documentService = new DocumentService()
+
+      await expect(
+        documentService.saveContributions('doc-1', contributions, 'ghost'),
+      ).rejects.toThrow('Error saving contributions')
+    })
   })
 })

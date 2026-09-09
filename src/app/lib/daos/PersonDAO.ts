@@ -1,5 +1,11 @@
 import slugify from 'slugify'
-import { PersonIdentifier as DbPersonIdentifier, Prisma } from '@prisma/client'
+import {
+  OrganizationCategory,
+  OrganizationRelationKind,
+  Person as DbPerson,
+  PersonIdentifier as DbPersonIdentifier,
+  Prisma,
+} from '@prisma/client'
 import { Person } from '@/types/Person'
 import {
   PersonIdentifier,
@@ -8,12 +14,40 @@ import {
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
-import { ResearchUnitDAO } from '@/lib/daos/ResearchUnitDAO'
+import { PersonEmployment } from '@/types/PersonEmployment'
+import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
+import { OrganizationGroup } from '@/types/IAgent'
+import { SourcePersonDAO } from '@/lib/daos/SourcePersonDAO'
+import { SourcePerson } from '@/types/SourcePerson'
+import { StructureMember } from '@/types/StructureMember'
 import removeAccents from 'remove-accents'
 import { ORCIDIdentifier, OrcidOAuthData } from '@/types/OrcidIdentifier'
 import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
 import { decryptString, encryptString } from '@/utils/crypto/fieldEncryption'
-import { PersonWithRelations as DbPerson } from '@/prisma-schema/extended-client'
+/**
+ * Thrown when an identifier cannot be created because one already exists —
+ * either the person already has an identifier of that type, or the value is
+ * already used by another person (`@@unique([type, value])`). Callers translate
+ * this into a 409 (remove-before-add).
+ */
+export class IdentifierConflictError extends Error {
+  constructor(message = 'Identifier already exists') {
+    super(message)
+    this.name = 'IdentifierConflictError'
+  }
+}
+
+/**
+ * Thrown by {@link PersonDAO.createPerson} when a person with the same uid
+ * already exists. Guarantees create-only semantics even against a concurrent
+ * AMQP upsert (the unique constraint fires, not a silent overwrite).
+ */
+export class PersonAlreadyExistsError extends Error {
+  constructor(uid: string) {
+    super(`Person with uid ${uid} already exists`)
+    this.name = 'PersonAlreadyExistsError'
+  }
+}
 
 /** PersonDAO: Handles operations related to Person and PersonIdentifiers */
 export class PersonDAO extends AbstractDAO {
@@ -22,31 +56,23 @@ export class PersonDAO extends AbstractDAO {
   /**
    * Create or update a Person record in the database
    * @param person - The Person object to upsert
+   * @param options - `authoritative: true` when the person carries their
+   *   complete relation sets (the person AMQP message): memberships and
+   *   employments absent from the incoming data are then deleted, and
+   *   source-person records absent from it are unlinked. Callers with partial
+   *   data (document contributors) must keep the default upsert-only mode.
    * @returns The created or updated Person record
    */
-  public async createOrUpdatePerson(person: Person): Promise<DbPerson> {
+  public async createOrUpdatePerson(
+    person: Person,
+    options?: { authoritative?: boolean },
+  ): Promise<DbPerson> {
+    const authoritative = options?.authoritative ?? false
     try {
-      const slugPrefix = 'person:'
-      // baseSlug could be null for people with only a display name
-      let baseSlug: string | null = slugify(
-        `${person.firstName}-${person.lastName}`,
-        {
-          lower: true,
-          strict: true,
-        },
-      )
-      // if baseSlug is not null, add the prefix
-      baseSlug = baseSlug ? `${slugPrefix}${baseSlug}` : null
-
-      let uniqueSlug = null
+      const { baseSlug, uniqueSlug: initialSlug } =
+        await this.computeUniqueSlug(person)
+      let uniqueSlug = initialSlug
       let counter = 1
-      if (baseSlug?.trim()) {
-        uniqueSlug = baseSlug
-        while (await this.slugExists(uniqueSlug, person.uid)) {
-          uniqueSlug = `${baseSlug}-${counter}`
-          counter++
-        }
-      }
       const maxRetries = 3
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -80,28 +106,38 @@ export class PersonDAO extends AbstractDAO {
 
           await this.upsertIdentifiers(person.getIdentifiers(), dbPerson.id)
 
-          await this.upsertMemberships(person.memberships, dbPerson.id)
+          await this.upsertMemberships(
+            person.memberships,
+            dbPerson.id,
+            authoritative
+              ? {
+                  keepOrgUids: [
+                    ...person.memberships.map((m) => m.organizationUnit.uid),
+                    ...person.unhydratedMembershipOrgUids,
+                  ],
+                }
+              : undefined,
+          )
 
-          const dbPersonWithRelations =
-            await this.prismaClient.person.findUniqueOrThrow({
-              where: { uid: person.uid },
-              include: {
-                identifiers: true,
-                memberships: {
-                  include: {
-                    researchUnit: {
-                      include: {
-                        names: true,
-                        identifiers: true,
-                        descriptions: true,
-                      },
-                    },
-                  },
-                },
-              },
-            })
+          await this.upsertEmployments(
+            person.employments,
+            dbPerson.id,
+            authoritative
+              ? {
+                  keepOrgUids: [
+                    ...person.employments.map((e) => e.organizationUnit.uid),
+                    ...person.unhydratedEmploymentOrgUids,
+                  ],
+                }
+              : undefined,
+          )
 
-          return dbPersonWithRelations
+          await this.upsertRecords(person.records, dbPerson.id, authoritative)
+
+          // The upsert result carries every scalar column callers read (id, external,
+          // uid, …); the person's relations are written above but never consumed off the
+          // return value, so there is no need to re-fetch them here.
+          return dbPerson
         } catch (error) {
           if (
             error instanceof PrismaClientKnownRequestError &&
@@ -134,44 +170,274 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Upsert memberships for a given person
+   * Create a Person record, strictly. Unlike {@link createOrUpdatePerson} this
+   * never overwrites an existing person: it throws
+   * {@link PersonAlreadyExistsError} when the uid is already taken — including
+   * when the conflict only surfaces at the database level, closing the
+   * check-then-create race with a concurrent AMQP message. Used by manual
+   * provisioning, which must never touch a graph-synced person.
+   * @param person - The Person object to create
+   * @returns The created Person record
+   */
+  public async createPerson(person: Person): Promise<DbPerson> {
+    const { baseSlug, uniqueSlug: initialSlug } =
+      await this.computeUniqueSlug(person)
+    let uniqueSlug = initialSlug
+    let counter = 1
+    const maxRetries = 3
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const dbPerson = await this.prismaClient.person.create({
+          data: {
+            uid: person.uid,
+            email: person.email,
+            displayName: person.displayName,
+            firstName: person.firstName,
+            lastName: person.lastName,
+            external: person.external,
+            slug: uniqueSlug,
+            normalizedName: person.normalizedName,
+          },
+        })
+
+        await this.handleIdentifierConflicts(
+          person.getIdentifiers(),
+          dbPerson.id,
+        )
+        await this.upsertIdentifiers(person.getIdentifiers(), dbPerson.id)
+
+        return dbPerson
+      } catch (error) {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2002'
+        ) {
+          const target = error.meta?.target
+          const fields = Array.isArray(target) ? target : [String(target)]
+          if (fields.some((field) => String(field).includes('uid'))) {
+            throw new PersonAlreadyExistsError(person.uid)
+          }
+          if (baseSlug) {
+            console.error(
+              `Slug collision detected for '${uniqueSlug}', retrying...`,
+            )
+            uniqueSlug = `${baseSlug}-${counter}`
+            counter++
+            continue
+          }
+        }
+        throw error
+      }
+    }
+    throw new Error(`Num of max retries reached`)
+  }
+
+  /**
+   * Compute the person's unique slug (`person:<first>-<last>`, suffixed with a
+   * counter on collision). `baseSlug` can be null for people with only a
+   * display name; `uniqueSlug` is then null too.
+   */
+  private async computeUniqueSlug(
+    person: Person,
+  ): Promise<{ baseSlug: string | null; uniqueSlug: string | null }> {
+    const slugPrefix = 'person:'
+    let baseSlug: string | null = slugify(
+      `${person.firstName}-${person.lastName}`,
+      {
+        lower: true,
+        strict: true,
+      },
+    )
+    baseSlug = baseSlug ? `${slugPrefix}${baseSlug}` : null
+
+    let uniqueSlug = null
+    let counter = 1
+    if (baseSlug?.trim()) {
+      uniqueSlug = baseSlug
+      while (await this.slugExists(uniqueSlug, person.uid)) {
+        uniqueSlug = `${baseSlug}-${counter}`
+        counter++
+      }
+    }
+    return { baseSlug, uniqueSlug }
+  }
+
+  /**
+   * Upsert memberships for a given person.
+   *
+   * With `replace`, memberships whose organization unit uid is not in
+   * `keepOrgUids` are deleted first: the person's message carries the person's
+   * complete membership set, whereas an organization unit's message never
+   * enumerates its members — so this is the only place that can prune them.
+   * The prune and the upserts run in one transaction so a crash cannot leave
+   * the person without affiliations. Units that fail to resolve are harmless
+   * in the keep-set: a membership row cannot reference an organization unit
+   * absent from the database.
    * @param memberships - List of memberships to upsert
    * @param personId - The ID of the person in the database
+   * @param replace - When set, delete memberships outside `keepOrgUids`
    */
   private async upsertMemberships(
     memberships: PersonMembership[],
     personId: number,
+    replace?: { keepOrgUids: string[] },
   ): Promise<void> {
-    const researchUnitDAO = new ResearchUnitDAO()
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    const resolved: { unitId: number; membership: PersonMembership }[] = []
     for (const membership of memberships) {
-      const dbResearchUnit = await researchUnitDAO.getResearchUnitByUid(
-        membership.researchUnit.uid,
-      )
-      if (!dbResearchUnit) {
+      const dbOrganizationUnit =
+        await organizationUnitDAO.getOrganizationUnitByUid(
+          membership.organizationUnit.uid,
+        )
+      if (!dbOrganizationUnit) {
         console.error(
-          `Research unit not found for UID: ${membership.researchUnit.uid}`,
+          `Organization unit not found for UID: ${membership.organizationUnit.uid}`,
         )
         continue
       }
-      await this.prismaClient.membership.upsert({
-        where: {
-          personId_researchUnitId: {
+      resolved.push({ unitId: dbOrganizationUnit.id, membership })
+    }
+
+    const write = async (tx: Prisma.TransactionClient) => {
+      if (replace) {
+        await tx.membership.deleteMany({
+          where: {
             personId,
-            researchUnitId: dbResearchUnit.id,
+            organizationUnit: { uid: { notIn: replace.keepOrgUids } },
           },
-        },
-        update: {
-          startDate: membership.startDate,
-          endDate: membership.endDate,
-          positionCode: membership.positionCode,
-        },
-        create: {
+        })
+      }
+      for (const { unitId, membership } of resolved) {
+        await tx.membership.upsert({
+          where: {
+            personId_organizationUnitId: {
+              personId,
+              organizationUnitId: unitId,
+            },
+          },
+          update: {
+            startDate: membership.startDate,
+            endDate: membership.endDate,
+            positionCode: membership.positionCode,
+          },
+          create: {
+            personId,
+            organizationUnitId: unitId,
+            startDate: membership.startDate,
+            endDate: membership.endDate,
+            positionCode: membership.positionCode,
+          },
+        })
+      }
+    }
+
+    if (replace) {
+      await this.prismaClient.$transaction(write)
+    } else {
+      await write(this.prismaClient)
+    }
+  }
+
+  /**
+   * Upsert employments for a given person.
+   *
+   * With `replace`, employments whose organization unit uid is not in
+   * `keepOrgUids` are deleted first, in the same transaction as the upserts
+   * (see {@link upsertMemberships} for the reasoning).
+   * @param employments - List of employments to upsert
+   * @param personId - The ID of the person in the database
+   * @param replace - When set, delete employments outside `keepOrgUids`
+   */
+  private async upsertEmployments(
+    employments: PersonEmployment[],
+    personId: number,
+    replace?: { keepOrgUids: string[] },
+  ): Promise<void> {
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    const resolved: { unitId: number; employment: PersonEmployment }[] = []
+    for (const employment of employments) {
+      const dbOrganizationUnit =
+        await organizationUnitDAO.getOrganizationUnitByUid(
+          employment.organizationUnit.uid,
+        )
+      if (!dbOrganizationUnit) {
+        console.error(
+          `Organization unit not found for UID: ${employment.organizationUnit.uid}`,
+        )
+        continue
+      }
+      resolved.push({ unitId: dbOrganizationUnit.id, employment })
+    }
+
+    const write = async (tx: Prisma.TransactionClient) => {
+      if (replace) {
+        await tx.employment.deleteMany({
+          where: {
+            personId,
+            organizationUnit: { uid: { notIn: replace.keepOrgUids } },
+          },
+        })
+      }
+      for (const { unitId, employment } of resolved) {
+        await tx.employment.upsert({
+          where: {
+            personId_organizationUnitId: {
+              personId,
+              organizationUnitId: unitId,
+            },
+          },
+          update: {
+            startDate: employment.startDate,
+            endDate: employment.endDate,
+            positionCode: employment.positionCode,
+          },
+          create: {
+            personId,
+            organizationUnitId: unitId,
+            startDate: employment.startDate,
+            endDate: employment.endDate,
+            positionCode: employment.positionCode,
+          },
+        })
+      }
+    }
+
+    if (replace) {
+      await this.prismaClient.$transaction(write)
+    } else {
+      await write(this.prismaClient)
+    }
+  }
+
+  /**
+   * Upsert the source-person records of a given person.
+   *
+   * With `replace`, records absent from the incoming data are unlinked
+   * (`personId: null`) after the upserts. They are disconnected rather than
+   * deleted, because a source person is also referenced by the contributions
+   * of document records. The unlink runs last so a crash can only leave stale
+   * links behind (repaired by the next message), never sever fresh ones.
+   * @param records - List of source persons to upsert
+   * @param personId - The ID of the person in the database
+   * @param replace - When true, unlink records absent from the incoming data
+   */
+  private async upsertRecords(
+    records: SourcePerson[],
+    personId: number,
+    replace = false,
+  ): Promise<void> {
+    const sourcePersonDAO = new SourcePersonDAO()
+    for (const record of records) {
+      await sourcePersonDAO.createOrUpdateSourcePerson(record, personId)
+    }
+
+    if (replace) {
+      await this.prismaClient.sourcePerson.updateMany({
+        where: {
           personId,
-          researchUnitId: dbResearchUnit.id,
-          startDate: membership.startDate,
-          endDate: membership.endDate,
-          positionCode: membership.positionCode,
+          uid: { notIn: records.map((record) => record.uid) },
         },
+        data: { personId: null },
       })
     }
   }
@@ -328,6 +594,61 @@ export class PersonDAO extends AbstractDAO {
     }
   }
 
+  /**
+   * Create an identifier row for a person. Unlike {@link upsertIdentifier} this
+   * never overwrites an existing value: identifier changes are handled as
+   * remove-then-add. Throws {@link IdentifierConflictError} when a row of that
+   * type already exists for the person, or the value is already used elsewhere.
+   */
+  public async createIdentifier(
+    identifier: PersonIdentifier,
+    personUid: string,
+  ): Promise<DbPersonIdentifier> {
+    const person = await this.prismaClient.person.findUnique({
+      where: { uid: personUid },
+      select: { id: true },
+    })
+    if (!person) {
+      throw new Error(`Person with UID ${personUid} not found`)
+    }
+
+    try {
+      return await this.prismaClient.personIdentifier.create({
+        data: {
+          personId: person.id,
+          type: identifier.type as PersonIdentifierType,
+          value: identifier.value,
+        },
+      })
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new IdentifierConflictError()
+      }
+      throw new Error(
+        `Failed to create identifier: ${(error as Error).message}`,
+      )
+    }
+  }
+
+  /**
+   * Returns the stored value of a person's identifier of the given type, or
+   * null if the person has none. Used by the authentication consistency check
+   * and to carry the value on REMOVE messages.
+   */
+  public async findIdentifierValue(
+    personUid: string,
+    type: PersonIdentifierType,
+  ): Promise<string | null> {
+    const row = await this.prismaClient.personIdentifier.findFirst({
+      where: { person: { uid: personUid }, type },
+      select: { value: true },
+    })
+    return row?.value ?? null
+  }
+
   public async upsertOrcidIdentifierExtension(
     personIdentifierId: number,
     identifier: ORCIDIdentifier,
@@ -461,16 +782,24 @@ export class PersonDAO extends AbstractDAO {
       skip: (page - 1) * itemsPerPage,
       take: itemsPerPage,
       include: {
-        contributions: {
-          select: {
-            roles: true,
-          },
-        },
         memberships: {
           include: {
-            researchUnit: {
+            organizationUnit: {
               include: {
-                names: true,
+                labels: true,
+                parents: { include: { parent: true } },
+                identifiers: true,
+                descriptions: true,
+              },
+            },
+          },
+        },
+        employments: {
+          include: {
+            organizationUnit: {
+              include: {
+                labels: true,
+                parents: { include: { parent: true } },
                 identifiers: true,
                 descriptions: true,
               },
@@ -478,6 +807,11 @@ export class PersonDAO extends AbstractDAO {
           },
         },
         identifiers: true,
+        records: {
+          include: {
+            identifiers: true,
+          },
+        },
       },
       orderBy: {
         lastName: 'asc',
@@ -503,9 +837,22 @@ export class PersonDAO extends AbstractDAO {
         include: {
           memberships: {
             include: {
-              researchUnit: {
+              organizationUnit: {
                 include: {
-                  names: true,
+                  labels: true,
+                  parents: { include: { parent: true } },
+                  identifiers: true,
+                  descriptions: true,
+                },
+              },
+            },
+          },
+          employments: {
+            include: {
+              organizationUnit: {
+                include: {
+                  labels: true,
+                  parents: { include: { parent: true } },
                   identifiers: true,
                   descriptions: true,
                 },
@@ -513,6 +860,11 @@ export class PersonDAO extends AbstractDAO {
             },
           },
           identifiers: true,
+          records: {
+            include: {
+              identifiers: true,
+            },
+          },
         },
       })
 
@@ -527,25 +879,94 @@ export class PersonDAO extends AbstractDAO {
     }
   }
 
-  fetchPeopleByResearchUnitUid = async (
-    researchUnitUid: string,
-  ): Promise<Person[]> => {
-    const people = await this.prismaClient.person.findMany({
-      where: {
-        memberships: {
-          some: {
-            researchUnit: {
-              uid: researchUnitUid,
+  /**
+   * Membership condition defining an organization perspective's perimeter:
+   * - research_unit / team: direct members of the organization;
+   * - institution: members of the research units that are member_of the
+   *   institution (any supervision position, one hop) — no direct
+   *   institution memberships, no employments until they exist;
+   * - other_structure (institution & unit subdivisions): direct members,
+   *   plus members of the units that are member_of or part_of it (one hop).
+   */
+  private organizationPerimeterWhereClause(
+    organizationUid: string,
+    group: OrganizationGroup,
+  ): Prisma.PersonWhereInput {
+    const directMembership: Prisma.PersonWhereInput = {
+      memberships: {
+        some: { organizationUnit: { uid: organizationUid } },
+      },
+    }
+    const childMembership = (
+      kinds: OrganizationRelationKind[],
+      childCategories?: OrganizationCategory[],
+    ): Prisma.PersonWhereInput => ({
+      memberships: {
+        some: {
+          organizationUnit: {
+            ...(childCategories ? { category: { in: childCategories } } : {}),
+            parents: {
+              some: {
+                kind: { in: kinds },
+                parent: { uid: organizationUid },
+              },
             },
           },
         },
       },
+    })
+
+    switch (group) {
+      case 'institution':
+        return childMembership(
+          [OrganizationRelationKind.member_of],
+          [OrganizationCategory.research_unit],
+        )
+      case 'other_structure':
+        return {
+          OR: [
+            directMembership,
+            childMembership([
+              OrganizationRelationKind.member_of,
+              OrganizationRelationKind.part_of,
+            ]),
+          ],
+        }
+      case 'research_unit':
+      case 'team':
+        return directMembership
+    }
+  }
+
+  /**
+   * Fetch the people whose documents make up an organization perspective
+   * (see organizationPerimeterWhereClause for the per-group rules).
+   */
+  fetchPeopleByOrganizationPerimeter = async (
+    organizationUid: string,
+    group: OrganizationGroup,
+  ): Promise<Person[]> => {
+    const people = await this.prismaClient.person.findMany({
+      where: this.organizationPerimeterWhereClause(organizationUid, group),
       include: {
         memberships: {
           include: {
-            researchUnit: {
+            organizationUnit: {
               include: {
-                names: true,
+                labels: true,
+                parents: { include: { parent: true } },
+                identifiers: true,
+                descriptions: true,
+              },
+            },
+          },
+        },
+        employments: {
+          include: {
+            organizationUnit: {
+              include: {
+                labels: true,
+                parents: { include: { parent: true } },
                 identifiers: true,
                 descriptions: true,
               },
@@ -553,10 +974,72 @@ export class PersonDAO extends AbstractDAO {
           },
         },
         identifiers: true,
+        records: {
+          include: {
+            identifiers: true,
+          },
+        },
       },
     })
 
     return people.map((person) => Person.fromDbPerson(person))
+  }
+
+  /**
+   * People directly attached to a structure: Membership rows for research
+   * structures, Employment rows for institutions. Returns the link dates and
+   * the person's identifiers; KPI fields are left for the service to fill.
+   */
+  public async fetchStructureMembers(
+    organizationUid: string,
+    kind: 'membership' | 'employment',
+  ): Promise<StructureMember[]> {
+    const where = { organizationUnit: { uid: organizationUid } }
+    const select = {
+      startDate: true,
+      endDate: true,
+      positionCode: true,
+      person: {
+        select: {
+          id: true,
+          uid: true,
+          slug: true,
+          displayName: true,
+          firstName: true,
+          lastName: true,
+          identifiers: { select: { type: true, value: true } },
+        },
+      },
+    } as const
+    const rows =
+      kind === 'employment'
+        ? await this.prismaClient.employment.findMany({ where, select })
+        : await this.prismaClient.membership.findMany({ where, select })
+    return rows.map(StructureMember.fromDb)
+  }
+
+  /**
+   * First non-null employment position code per person. Most people have a
+   * single employment; when there are several, the first row wins.
+   */
+  public async fetchFirstEmploymentPositions(
+    personIds: number[],
+  ): Promise<Map<number, string>> {
+    if (personIds.length === 0) {
+      return new Map()
+    }
+    const rows = await this.prismaClient.employment.findMany({
+      where: { personId: { in: personIds }, positionCode: { not: null } },
+      select: { personId: true, positionCode: true },
+      orderBy: { id: 'asc' },
+    })
+    const byPerson = new Map<number, string>()
+    for (const row of rows) {
+      if (!byPerson.has(row.personId)) {
+        byPerson.set(row.personId, row.positionCode!)
+      }
+    }
+    return byPerson
   }
 
   public async fetchPersonByUid(uid: string): Promise<Person | null> {
@@ -566,9 +1049,22 @@ export class PersonDAO extends AbstractDAO {
         include: {
           memberships: {
             include: {
-              researchUnit: {
+              organizationUnit: {
                 include: {
-                  names: true,
+                  labels: true,
+                  parents: { include: { parent: true } },
+                  identifiers: true,
+                  descriptions: true,
+                },
+              },
+            },
+          },
+          employments: {
+            include: {
+              organizationUnit: {
+                include: {
+                  labels: true,
+                  parents: { include: { parent: true } },
                   identifiers: true,
                   descriptions: true,
                 },
@@ -576,6 +1072,11 @@ export class PersonDAO extends AbstractDAO {
             },
           },
           identifiers: true,
+          records: {
+            include: {
+              identifiers: true,
+            },
+          },
         },
       })
 
@@ -588,6 +1089,29 @@ export class PersonDAO extends AbstractDAO {
       console.error(`Error fetching person with uid ${uid}:`, error)
       throw new Error(`Failed to fetch person with uid ${uid}`)
     }
+  }
+
+  public async deleteIdentifier(
+    personUid: string,
+    type: PersonIdentifierType,
+  ): Promise<void> {
+    const person = await this.prismaClient.person.findUnique({
+      where: { uid: personUid },
+      select: { id: true },
+    })
+    if (!person) {
+      throw new Error(`Person with UID ${personUid} not found`)
+    }
+    // Removing an idHAL also removes its companion hal_login: hal_login is not a
+    // user-managed identifier, it only marks the idHAL as authenticated.
+    const types: PersonIdentifierType[] =
+      type === PersonIdentifierType.idhals ||
+      type === PersonIdentifierType.idhali
+        ? [type, PersonIdentifierType.hal_login]
+        : [type]
+    await this.prismaClient.personIdentifier.deleteMany({
+      where: { personId: person.id, type: { in: types } },
+    })
   }
 
   public async fetchPersonByIdentifier(
@@ -606,9 +1130,22 @@ export class PersonDAO extends AbstractDAO {
         include: {
           memberships: {
             include: {
-              researchUnit: {
+              organizationUnit: {
                 include: {
-                  names: true,
+                  labels: true,
+                  parents: { include: { parent: true } },
+                  identifiers: true,
+                  descriptions: true,
+                },
+              },
+            },
+          },
+          employments: {
+            include: {
+              organizationUnit: {
+                include: {
+                  labels: true,
+                  parents: { include: { parent: true } },
                   identifiers: true,
                   descriptions: true,
                 },
@@ -616,6 +1153,11 @@ export class PersonDAO extends AbstractDAO {
             },
           },
           identifiers: true,
+          records: {
+            include: {
+              identifiers: true,
+            },
+          },
         },
       })
 

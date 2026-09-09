@@ -101,6 +101,9 @@ describe('WebSocketListener', () => {
         fetchConnectedUser: jest.fn(),
         setPerspective: jest.fn(),
         setPerspectiveBySlug: jest.fn(),
+        refreshPerspective: jest.fn(),
+        addPersonIdentifier: jest.fn(),
+        removePersonIdentifier: jest.fn(),
       },
       document: {
         selectedDocument: document,
@@ -110,9 +113,8 @@ describe('WebSocketListener', () => {
         documents: [],
         totalItems: undefined,
         count: {
-          latestCountDocumentsRequestId: undefined,
-          allItems: undefined,
-          incompleteHalRepositoryItems: undefined,
+          byTab: {},
+          latestRequestIdByTab: {},
           loading: false,
           error: null,
         },
@@ -127,6 +129,11 @@ describe('WebSocketListener', () => {
         addConcepts: jest.fn(),
         modifyTitles: jest.fn(),
         modifyAbstracts: jest.fn(),
+        modifyPublicationDate: jest.fn(),
+        saveContributions: jest.fn(),
+        unfreezeSelectedDocument: jest.fn(),
+        contributionsTabDirty: false,
+        setContributionsTabDirty: jest.fn(),
         mergeDocuments: jest.fn(),
         updateDocumentType: jest.fn(),
         error: null,
@@ -301,5 +308,124 @@ describe('WebSocketListener', () => {
     expect(enqueueSnackbarMock).not.toHaveBeenCalled()
 
     window.WebSocket = OriginalWebSocket
+  })
+
+  describe('user_action_outcome events', () => {
+    const outcomeEvent = (overrides: Record<string, unknown> = {}) => ({
+      type: 'user_action_outcome',
+      actionId: 'action-1',
+      outcome: 'failed',
+      personUid: 'person-1',
+      targetType: 'DOCUMENT',
+      targetUid: 'doc-123',
+      path: 'contributions',
+      actionType: 'UPDATE',
+      errorMessage: 'boom',
+      warnings: [],
+      objectLabels: { en: 'Test document' },
+      timestamp: '2026-01-01T09:00:00Z',
+      ...overrides,
+    })
+
+    const setupWebSocket = () => {
+      const enqueueSnackbarMock = jest.fn()
+      ;(useSnackbar as jest.Mock).mockReturnValue({
+        enqueueSnackbar: enqueueSnackbarMock,
+        closeSnackbar: jest.fn(),
+      })
+      const mockWSInstance = new MockWebSocket('ws://localhost:3001')
+      // @ts-expect-error override global
+      window.WebSocket = jest.fn(() => mockWSInstance)
+      render(
+        <SnackbarProvider>
+          <WebSocketListener />
+        </SnackbarProvider>,
+      )
+      return { enqueueSnackbarMock, mockWSInstance }
+    }
+
+    let OriginalWebSocket: typeof window.WebSocket
+
+    beforeEach(() => {
+      OriginalWebSocket = window.WebSocket
+    })
+
+    afterEach(() => {
+      window.WebSocket = OriginalWebSocket
+    })
+
+    it('shows a persistent error snackbar and unfreezes the document on failure', async () => {
+      const { enqueueSnackbarMock, mockWSInstance } = setupWebSocket()
+
+      mockWSInstance.emitMessage(outcomeEvent())
+
+      await waitFor(() => {
+        expect(enqueueSnackbarMock).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ variant: 'error', persist: true }),
+        )
+        expect(
+          useStore.getState().document.unfreezeSelectedDocument,
+        ).toHaveBeenCalledWith('doc-123')
+      })
+    })
+
+    it('ignores outcomes of other users', async () => {
+      const { enqueueSnackbarMock, mockWSInstance } = setupWebSocket()
+
+      mockWSInstance.emitMessage(outcomeEvent({ personUid: 'person-2' }))
+
+      await new Promise((r) => setTimeout(r, 500))
+      expect(enqueueSnackbarMock).not.toHaveBeenCalled()
+      expect(
+        useStore.getState().document.unfreezeSelectedDocument,
+      ).not.toHaveBeenCalled()
+    })
+
+    it('shows no snackbar on clean success', async () => {
+      const { enqueueSnackbarMock, mockWSInstance } = setupWebSocket()
+
+      mockWSInstance.emitMessage(
+        outcomeEvent({ outcome: 'applied', errorMessage: null }),
+      )
+
+      await new Promise((r) => setTimeout(r, 500))
+      expect(enqueueSnackbarMock).not.toHaveBeenCalled()
+      expect(
+        useStore.getState().document.unfreezeSelectedDocument,
+      ).not.toHaveBeenCalled()
+    })
+
+    it('shows a warning snackbar on partial success', async () => {
+      const { enqueueSnackbarMock, mockWSInstance } = setupWebSocket()
+
+      mockWSInstance.emitMessage(
+        outcomeEvent({
+          outcome: 'applied',
+          errorMessage: null,
+          warnings: [
+            {
+              code: 'UNRESOLVABLE_PERSON',
+              message: 'Skipping contribution with unresolvable person',
+              context: { display_name: 'Claire Durand' },
+            },
+            {
+              code: 'SOME_FUTURE_CODE',
+              message: 'Something else was skipped',
+            },
+          ],
+        }),
+      )
+
+      await waitFor(() => {
+        expect(enqueueSnackbarMock).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ variant: 'warning' }),
+        )
+      })
+      expect(
+        useStore.getState().document.unfreezeSelectedDocument,
+      ).not.toHaveBeenCalled()
+    })
   })
 })
