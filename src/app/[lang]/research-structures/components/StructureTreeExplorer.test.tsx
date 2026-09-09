@@ -107,7 +107,7 @@ describe('StructureTreeExplorer group headers', () => {
     // were (here on "inst", selected by the chevron click above)
     expect(replace).not.toHaveBeenCalled()
     expect(screen.getByTestId('detail')).toHaveTextContent('inst')
-    expect(item(LIBRARIES)).toHaveAttribute('aria-selected', 'false')
+    expect(item(LIBRARIES)).toHaveAttribute('aria-checked', 'false')
   })
 
   it('toggles exactly once on a chevron click', async () => {
