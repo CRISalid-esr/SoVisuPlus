@@ -196,16 +196,7 @@ export default function HalDeposit() {
         </Box>
       }
     >
-      <CardContent>
-        {/* Rendered here rather than per-step: a submit failure sets the error *and* returns to
-            the form, so an Alert living in the review step would unmount before it could show. */}
-        {error && (
-          <Alert severity='error' sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-        {body}
-      </CardContent>
+      <CardContent>{body}</CardContent>
     </CustomCard>
   )
 
@@ -431,7 +422,6 @@ export default function HalDeposit() {
     setSubmitting(false)
     if (!result.success) {
       setError(describeHalDepositFailure(result.reason, documentType))
-      setStep('form')
     }
     // On success the slice sets the deposit, flipping this component to the status panel.
   }
@@ -466,6 +456,14 @@ export default function HalDeposit() {
       .filter(Boolean)
     return wrap(
       <>
+        {/* `error` is only ever set by a submit, which can only be triggered from this step and no
+            longer leaves it — so this is the one place it needs to render. */}
+        {error && (
+          <Alert severity='error' sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
         {/* Bibliographic information (sent in the TEI) */}
         <Section title={t`hal_deposit_section_bibliographic`}>
           <BiblioCardBody
@@ -630,7 +628,13 @@ export default function HalDeposit() {
         </Section>
 
         <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-          <Button onClick={() => setStep('form')} disabled={submitting}>
+          <Button
+            onClick={() => {
+              setError(null)
+              setStep('form')
+            }}
+            disabled={submitting}
+          >
             <Trans>hal_deposit_button_back</Trans>
           </Button>
           <Button

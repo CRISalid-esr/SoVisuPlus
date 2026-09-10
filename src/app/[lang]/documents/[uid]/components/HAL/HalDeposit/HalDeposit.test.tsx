@@ -125,9 +125,9 @@ beforeEach(() => {
 
 describe('HalDeposit submit failure', () => {
   /**
-   * Regression: the failure handler sets the error *and* returns to the form step, so an Alert
-   * rendered only under `step === 'review'` unmounted in the very render that would have shown
-   * it — every deposit failure was silent.
+   * Regression: the failure handler used to set the error *and* return to the form step, so the
+   * Alert — rendered only under `step === 'review'` — unmounted in the very render that would
+   * have shown it, and every deposit failure was silent. The submit now stays on review.
    */
   it('shows the failure message after a rejected submit', async () => {
     const user = userEvent.setup({ delay: null })
@@ -144,6 +144,33 @@ describe('HalDeposit submit failure', () => {
     await waitFor(() =>
       expect(screen.getByText(/requires a main file/i)).toBeInTheDocument(),
     )
+    // Still on review — the Back button is the user's way out, not an automatic redirect.
+    expect(screen.getByRole('button', { name: /Back/i })).toBeInTheDocument()
+  })
+
+  it('keeps the user on the review step and clears the error on Back', async () => {
+    const user = userEvent.setup({ delay: null })
+    createDeposit.mockResolvedValue({
+      success: false,
+      reason: 'internal_error',
+    })
+    renderDeposit()
+
+    await goToReview(user)
+    await user.click(screen.getByRole('button', { name: /Confirm deposit/i }))
+    await waitFor(() =>
+      expect(screen.getByText(/unexpected server error/i)).toBeInTheDocument(),
+    )
+
+    await user.click(screen.getByRole('button', { name: /Back/i }))
+
+    // Back returns to the form, and the stale failure does not follow the user there or
+    // reappear when they open the review again.
+    expect(screen.getByLabelText(/HAL domains/i)).toBeInTheDocument()
+    expect(screen.queryByText(/unexpected server error/i)).toBeNull()
+
+    await user.click(screen.getByRole('button', { name: 'Review' }))
+    expect(screen.queryByText(/unexpected server error/i)).toBeNull()
   })
 
   it('translates the reason rather than echoing the route English', async () => {
