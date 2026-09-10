@@ -7,6 +7,7 @@ import { DocumentService } from '@/lib/services/DocumentService'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { validateDepositEligibility } from '@/lib/services/hal/validateDepositEligibility'
+import type { HalDepositFailureReason } from '@/lib/services/hal/halDepositFailure'
 import {
   isHalDocumentType,
   requiresMainFile,
@@ -45,7 +46,7 @@ interface DepositPayload {
   supervisor?: string | null
 }
 
-const bad = (error: string, reason?: string, status = 400) =>
+const bad = (error: string, reason?: HalDepositFailureReason, status = 400) =>
   NextResponse.json({ error, ...(reason ? { reason } : {}) }, { status })
 
 /** Latest deposit for a document (for the status panel). Returns `null` when there is none. */
@@ -54,7 +55,7 @@ export const GET = async (request: Request) => {
     user: { username?: string }
   }
   if (!session?.user?.username) {
-    return bad('User is not authenticated', undefined, 401)
+    return bad('User is not authenticated', 'not_authenticated', 401)
   }
 
   const documentUid = new URL(request.url).searchParams.get('documentUid')
@@ -71,7 +72,7 @@ export const POST = async (request: Request) => {
     user: { username?: string }
   }
   if (!session?.user?.username) {
-    return bad('User is not authenticated', undefined, 401)
+    return bad('User is not authenticated', 'not_authenticated', 401)
   }
 
   const service = new DocumentService()
@@ -80,7 +81,8 @@ export const POST = async (request: Request) => {
   try {
     const form = await request.formData()
     const raw = form.get('payload')
-    if (typeof raw !== 'string') return bad('Missing payload')
+    if (typeof raw !== 'string')
+      return bad('Missing payload', 'missing_payload')
 
     const payload = JSON.parse(raw) as DepositPayload
     if (
@@ -91,13 +93,13 @@ export const POST = async (request: Request) => {
       !Array.isArray(payload.halDomains) ||
       payload.halDomains.length === 0
     ) {
-      return bad('Invalid deposit payload')
+      return bad('Invalid deposit payload', 'invalid_payload')
     }
 
     // Authorization: deposit_hal — or deposit_hal_unauthenticated, which additionally waives the
     // perspective person's hal_login requirement — on the perspective person.
     const person = await service.getPersonByUid(payload.personUid)
-    if (!person) return bad('Person not found', undefined, 404)
+    if (!person) return bad('Person not found', 'person_not_found', 404)
 
     const ability = abilityFromAuthzContext(session.user.authz)
     const canUnauthenticated = ability.can(
@@ -110,13 +112,13 @@ export const POST = async (request: Request) => {
     ) {
       return bad(
         'Not allowed to deposit on behalf of this person',
-        undefined,
+        'forbidden',
         403,
       )
     }
 
     const document = await service.fetchDocumentById(payload.documentUid)
-    if (!document) return bad('Document not found', undefined, 404)
+    if (!document) return bad('Document not found', 'document_not_found', 404)
 
     // Eligibility gates (shared with the client form).
     const eligibility = validateDepositEligibility(
@@ -151,9 +153,13 @@ export const POST = async (request: Request) => {
     // File-metadata invariants: at most one main file; a main file requires a license.
     const files = payload.files ?? []
     const mains = files.filter((f) => f.isMain)
-    if (mains.length > 1) return bad('At most one main file is allowed')
+    if (mains.length > 1)
+      return bad('At most one main file is allowed', 'multiple_main_files')
     if (mains.length === 1 && !mains[0].license) {
-      return bad('The main file requires a license')
+      return bad(
+        'The main file requires a license',
+        'main_file_license_required',
+      )
     }
 
     // THESE/HDR always require a main file (moderated ZIP deposit).
@@ -188,7 +194,10 @@ export const POST = async (request: Request) => {
       for (const meta of files) {
         const file = form.get(meta.field)
         if (!(file instanceof File))
-          return bad(`Missing file for ${meta.field}`)
+          return bad(
+            `Missing file for ${meta.field}`,
+            'file_missing_from_upload',
+          )
         const fileName = path.basename(file.name)
         const filePath = path.join(dir, fileName)
         await fs.promises.writeFile(
@@ -216,6 +225,6 @@ export const POST = async (request: Request) => {
     if (deposit) {
       await service.deleteHalDeposit(deposit.id).catch(() => undefined)
     }
-    return bad('Internal Server Error', undefined, 500)
+    return bad('Internal Server Error', 'internal_error', 500)
   }
 }
