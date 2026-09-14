@@ -24,6 +24,7 @@ import removeAccents from 'remove-accents'
 import { ORCIDIdentifier, OrcidOAuthData } from '@/types/OrcidIdentifier'
 import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
 import { decryptString, encryptString } from '@/utils/crypto/fieldEncryption'
+import { backfillNormalizedColumn } from '@/lib/daos/search/backfillNormalizedColumn'
 /**
  * Thrown when an identifier cannot be created because one already exists —
  * either the person already has an identifier of that type, or the value is
@@ -1175,5 +1176,39 @@ export class PersonDAO extends AbstractDAO {
         `Failed to fetch person with identifier ${identifier.type}:${identifier.value}`,
       )
     }
+  }
+
+  /**
+   * Fill `normalizedName` for people written without it. Idempotent.
+   * Returns the updated row count.
+   */
+  async backfillNormalizedSearchColumns(batchSize?: number): Promise<number> {
+    return backfillNormalizedColumn(
+      this.prismaClient,
+      async (take) =>
+        (
+          await this.prismaClient.person.findMany({
+            where: { normalizedName: null },
+            select: {
+              id: true,
+              displayName: true,
+              firstName: true,
+              lastName: true,
+            },
+            take,
+          })
+        ).map((row) => ({
+          id: row.id,
+          source:
+            row.displayName?.trim() ||
+            `${row.firstName ?? ''} ${row.lastName ?? ''}`.trim(),
+        })),
+      (id, normalized) =>
+        this.prismaClient.person.update({
+          where: { id },
+          data: { normalizedName: normalized },
+        }),
+      batchSize,
+    )
   }
 }

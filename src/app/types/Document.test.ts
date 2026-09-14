@@ -171,6 +171,7 @@ describe('Document type', () => {
           documentId: 1,
           language: 'en',
           value: 'Study on deep and shallow water platform',
+          normalizedValue: null,
         },
       ],
       abstracts: [
@@ -179,6 +180,7 @@ describe('Document type', () => {
           documentId: 1,
           language: 'en',
           value: 'Deep and shallow water platform',
+          normalizedValue: null,
         },
       ],
       subjects: [

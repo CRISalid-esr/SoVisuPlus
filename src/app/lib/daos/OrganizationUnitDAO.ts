@@ -13,6 +13,8 @@ import { OrganizationGroup } from '@/types/IAgent'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import slugify from 'slugify'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import { normalizeSearchText } from '@/utils/fuzzySearch/fuzzySearch'
+import { backfillNormalizedColumn } from '@/lib/daos/search/backfillNormalizedColumn'
 import QueryMode = Prisma.QueryMode
 
 export type { OrganizationGroup }
@@ -69,6 +71,9 @@ export class OrganizationUnitDAO extends AbstractDAO {
             nationalType: organizationUnit.nationalType,
             external: organizationUnit.external,
             acronym: organizationUnit.acronym,
+            normalizedAcronym: organizationUnit.acronym
+              ? normalizeSearchText(organizationUnit.acronym)
+              : null,
             localTypes:
               organizationUnit.localTypes as unknown as Prisma.InputJsonValue,
             slug: uniqueSlug,
@@ -150,12 +155,16 @@ export class OrganizationUnitDAO extends AbstractDAO {
             language: name.language,
           },
         },
-        update: { value: name.value },
+        update: {
+          value: name.value,
+          normalizedValue: normalizeSearchText(name.value),
+        },
         create: {
           organizationUnitId,
           kind: 'long',
           language: name.language,
           value: name.value,
+          normalizedValue: normalizeSearchText(name.value),
         },
       })
     }
@@ -548,5 +557,47 @@ export class OrganizationUnitDAO extends AbstractDAO {
     return this.prismaClient.organizationUnit.count({
       where: this.searchWhereClause(searchTerm, group),
     })
+  }
+
+  /**
+   * Fill the search-only normalized columns of labels and acronyms written
+   * before they existed. Idempotent. Returns the updated row count.
+   */
+  async backfillNormalizedSearchColumns(batchSize?: number): Promise<number> {
+    const labels = await backfillNormalizedColumn(
+      this.prismaClient,
+      async (take) =>
+        (
+          await this.prismaClient.organizationUnitLabel.findMany({
+            where: { normalizedValue: null },
+            select: { id: true, value: true },
+            take,
+          })
+        ).map((row) => ({ id: row.id, source: row.value })),
+      (id, normalized) =>
+        this.prismaClient.organizationUnitLabel.update({
+          where: { id },
+          data: { normalizedValue: normalized },
+        }),
+      batchSize,
+    )
+    const acronyms = await backfillNormalizedColumn(
+      this.prismaClient,
+      async (take) =>
+        (
+          await this.prismaClient.organizationUnit.findMany({
+            where: { normalizedAcronym: null, acronym: { not: null } },
+            select: { id: true, acronym: true },
+            take,
+          })
+        ).map((row) => ({ id: row.id, source: row.acronym ?? '' })),
+      (id, normalized) =>
+        this.prismaClient.organizationUnit.update({
+          where: { id },
+          data: { normalizedAcronym: normalized },
+        }),
+      batchSize,
+    )
+    return labels + acronyms
   }
 }

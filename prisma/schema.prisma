@@ -2,13 +2,16 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["debian-openssl-1.1.x", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x", "darwin-arm64"]
+  provider        = "prisma-client-js"
+  binaryTargets   = ["debian-openssl-1.1.x", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x", "darwin-arm64"]
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  // pg_trgm: trigram similarity for fuzzy search on the normalized* columns
+  extensions = [pg_trgm]
 }
 
 model User {
@@ -38,6 +41,8 @@ model Person {
   employments    Employment[]
   records        SourcePerson[]
   deposits       HalDeposit[]
+
+  @@index([normalizedName(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 model Membership {
@@ -181,12 +186,16 @@ model HalDepositFile {
 }
 
 model Journal {
-  id          Int                 @id @default(autoincrement())
-  issnL       String              @unique
-  publisher   String
-  title       String
-  identifiers JournalIdentifier[]
-  documents   Document[]
+  id              Int                 @id @default(autoincrement())
+  issnL           String              @unique
+  publisher       String
+  title           String
+  /// Search-only copy of title (lowercase, no diacritics), see normalizeSearchText
+  normalizedTitle String?
+  identifiers     JournalIdentifier[]
+  documents       Document[]
+
+  @@index([normalizedTitle(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 model JournalIdentifier {
@@ -387,23 +396,29 @@ enum BibliographicPlatform {
 }
 
 model DocumentTitle {
-  id         Int      @id @default(autoincrement())
-  documentId Int
-  language   String // ISO 639-1 code (e.g., 'en', 'fr')
-  value      String   @db.VarChar(2000)
-  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  id              Int      @id @default(autoincrement())
+  documentId      Int
+  language        String // ISO 639-1 code (e.g., 'en', 'fr')
+  value           String   @db.VarChar(2000)
+  /// Search-only copy of value (lowercase, no diacritics), see normalizeSearchText
+  normalizedValue String?  @db.VarChar(2000)
+  document        Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@unique([documentId, language]) // Ensure no duplicate languages for the same document
+  @@index([normalizedValue(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 model DocumentAbstract {
-  id         Int      @id @default(autoincrement())
-  documentId Int
-  language   String // ISO 639-1 code (e.g., 'en', 'fr')
-  value      String   @db.Text
-  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  id              Int      @id @default(autoincrement())
+  documentId      Int
+  language        String // ISO 639-1 code (e.g., 'en', 'fr')
+  value           String   @db.Text
+  /// Search-only copy of value (lowercase, no diacritics), see normalizeSearchText
+  normalizedValue String?  @db.Text
+  document        Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@unique([documentId, language]) // Ensure no duplicate languages for the same document
+  @@index([normalizedValue(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 enum AuthorityOrganizationIdentifierType {
@@ -582,15 +597,17 @@ enum OrganizationRelationKind {
 }
 
 model OrganizationUnit {
-  id           Int                     @id @default(autoincrement())
-  uid          String                  @unique
-  genericType  OrganizationGenericType
-  category     OrganizationCategory
-  nationalType String? // open national list (UNIV, EPE, UMR, UAR, UFR, …) — evolves upstream
-  external     Boolean                 @default(false)
-  acronym      String?
-  slug         String?                 @unique
-  localTypes   Json? // [{ value, language }] — display only
+  id                Int                     @id @default(autoincrement())
+  uid               String                  @unique
+  genericType       OrganizationGenericType
+  category          OrganizationCategory
+  nationalType      String? // open national list (UNIV, EPE, UMR, UAR, UFR, …) — evolves upstream
+  external          Boolean                 @default(false)
+  acronym           String?
+  /// Search-only copy of acronym (lowercase, no diacritics), see normalizeSearchText
+  normalizedAcronym String?
+  slug              String?                 @unique
+  localTypes        Json? // [{ value, language }] — display only
 
   /// Explicit visibility toggle, set from the UI by a structure_manager.
   /// Never written by the ETL upsert, so it survives graph events.
@@ -621,9 +638,12 @@ model OrganizationUnitLabel {
   kind               OrganizationLabelKind
   language           String // ISO 639-1 code
   value              String                @db.VarChar(255)
+  /// Search-only copy of value (lowercase, no diacritics), see normalizeSearchText
+  normalizedValue    String?               @db.VarChar(255)
   organizationUnit   OrganizationUnit      @relation(fields: [organizationUnitId], references: [id], onDelete: Cascade)
 
   @@unique([organizationUnitId, kind, language])
+  @@index([normalizedValue(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 model OrganizationUnitDescription {

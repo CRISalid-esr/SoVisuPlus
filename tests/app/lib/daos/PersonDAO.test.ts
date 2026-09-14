@@ -835,4 +835,27 @@ describe('PersonDAO Integration Tests', () => {
       'person:john-doe-1',
     ])
   })
+
+  describe('backfillNormalizedSearchColumns', () => {
+    it('fills normalizedName from the display name or the name parts', async () => {
+      await prisma.person.createMany({
+        data: [
+          { uid: 'p-display', displayName: 'Élodie Durand' },
+          { uid: 'p-parts', firstName: 'José', lastName: 'Núñez' },
+        ],
+      })
+
+      expect(await personDAO.backfillNormalizedSearchColumns(1)).toBe(2)
+      expect(await personDAO.backfillNormalizedSearchColumns(1)).toBe(0)
+
+      const people = await prisma.person.findMany({
+        where: { uid: { in: ['p-display', 'p-parts'] } },
+        orderBy: { uid: 'asc' },
+      })
+      expect(people.map((p) => p.normalizedName)).toEqual([
+        'elodie durand',
+        'jose nunez',
+      ])
+    })
+  })
 })
