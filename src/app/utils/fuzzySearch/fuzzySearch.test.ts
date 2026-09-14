@@ -33,6 +33,11 @@ describe('tokenizeSearchQuery', () => {
     expect(tokenizeSearchQuery('a b c d e f g h')).toHaveLength(6)
   })
 
+  it('truncates overly long tokens', () => {
+    const [token] = tokenizeSearchQuery('a'.repeat(10_000))
+    expect(token).toHaveLength(100)
+  })
+
   it('returns no token for a blank query', () => {
     expect(tokenizeSearchQuery(' - ')).toEqual([])
   })
@@ -115,9 +120,9 @@ describe('findFuzzyMatchChunks', () => {
 
   it('highlights substring matches on the original characters', () => {
     expect(highlighted('Université Paris', 'universite par')).toEqual([
-      'Université',
-      'Par',
+      'Université Par',
     ])
+    expect(highlighted('Économie', 'conom')).toEqual(['conom'])
   })
 
   it('maps back through length-changing normalization', () => {
@@ -129,10 +134,18 @@ describe('findFuzzyMatchChunks', () => {
     expect(highlighted('Jean Dupont', 'dupond')).toEqual(['Dupont'])
   })
 
+  it('merges chunks separated only by whitespace', () => {
+    expect(highlighted('John Doe', 'doe john')).toEqual(['John Doe'])
+    expect(highlighted('Jean-Paul Dupont', 'jean dupont')).toEqual([
+      'Jean',
+      'Dupont',
+    ])
+  })
+
   it('returns every occurrence, sorted', () => {
-    expect(findFuzzyMatchChunks('Paris Paris', 'paris')).toEqual([
+    expect(findFuzzyMatchChunks('Paris, Paris', 'paris')).toEqual([
       { start: 0, end: 5 },
-      { start: 6, end: 11 },
+      { start: 7, end: 12 },
     ])
   })
 })

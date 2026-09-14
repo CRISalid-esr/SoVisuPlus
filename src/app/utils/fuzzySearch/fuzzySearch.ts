@@ -1,5 +1,6 @@
 import removeAccents from 'remove-accents'
 import {
+  MAX_SEARCH_TOKEN_LENGTH,
   MAX_SEARCH_TOKENS,
   MIN_TYPO_TOKEN_LENGTH,
   TWO_EDITS_TOKEN_LENGTH,
@@ -34,10 +35,17 @@ const wordsOf = (normalizedText: string): Word[] =>
     end: (match.index ?? 0) + match[0].length,
   }))
 
-/** Distinct normalized words of a query, capped to MAX_SEARCH_TOKENS. */
+/**
+ * Distinct normalized words of a query, capped to MAX_SEARCH_TOKENS words of
+ * at most MAX_SEARCH_TOKEN_LENGTH characters.
+ */
 export const tokenizeSearchQuery = (query: string): string[] =>
   [
-    ...new Set(wordsOf(normalizeSearchText(query)).map((word) => word.value)),
+    ...new Set(
+      wordsOf(normalizeSearchText(query)).map((word) =>
+        word.value.slice(0, MAX_SEARCH_TOKEN_LENGTH),
+      ),
+    ),
   ].slice(0, MAX_SEARCH_TOKENS)
 
 const trigramsOf = (normalizedText: string): Set<string> => {
@@ -179,7 +187,9 @@ export const fuzzyMatch = (
 /**
  * Ranges of `text` (original indexes) matched by `query`, for
  * react-highlight-words `findChunks`. Substring matches highlight the exact
- * characters; typo matches highlight the whole word.
+ * characters; typo matches highlight the whole word. Overlapping chunks and
+ * chunks separated only by whitespace are merged, so "John Doe" is
+ * highlighted as one range.
  */
 export const findFuzzyMatchChunks = (
   text: string,
@@ -226,5 +236,15 @@ export const findFuzzyMatchChunks = (
       }
     }
   }
-  return chunks.sort((a, b) => a.start - b.start)
+  chunks.sort((a, b) => a.start - b.start)
+  const merged: MatchChunk[] = []
+  for (const chunk of chunks) {
+    const last = merged[merged.length - 1]
+    if (last && text.slice(last.end, chunk.start).trim() === '') {
+      last.end = Math.max(last.end, chunk.end)
+    } else {
+      merged.push({ ...chunk })
+    }
+  }
+  return merged
 }
