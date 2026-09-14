@@ -26,6 +26,7 @@ import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn'
 import { useSession } from 'next-auth/react'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
+import { findFuzzyMatchChunks } from '@/utils/fuzzySearch/fuzzySearch'
 
 interface IAutoCompleteGroupTag {
   label: string
@@ -481,7 +482,11 @@ const SearchInput: React.FC = () => {
               <Highlighter
                 highlightClassName='highlight'
                 searchWords={[inputValue]}
-                autoEscape
+                // Results are fuzzy matches: highlight accent-insensitive and
+                // typo-tolerant matches, not only the literal input
+                findChunks={({ textToHighlight }) =>
+                  findFuzzyMatchChunks(textToHighlight, inputValue)
+                }
                 textToHighlight={option.label}
               />
             </li>

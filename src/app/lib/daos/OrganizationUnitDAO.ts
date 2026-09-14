@@ -13,9 +13,15 @@ import { OrganizationGroup } from '@/types/IAgent'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import slugify from 'slugify'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-import { normalizeSearchText } from '@/utils/fuzzySearch/fuzzySearch'
+import {
+  normalizeSearchText,
+  tokenizeSearchQuery,
+} from '@/utils/fuzzySearch/fuzzySearch'
 import { backfillNormalizedColumn } from '@/lib/daos/search/backfillNormalizedColumn'
-import QueryMode = Prisma.QueryMode
+import {
+  buildTokenMatch,
+  withWordSimilarityThreshold,
+} from '@/lib/daos/search/trigramSearchSql'
 
 export type { OrganizationGroup }
 
@@ -499,64 +505,89 @@ export class OrganizationUnitDAO extends AbstractDAO {
   }
 
   /**
-   * Search where-clause for a perspective group: matches on label values,
-   * restricted to the group's categories, always excluding external
-   * structures (registry-created relationship targets without labels) and
-   * hidden ones (a hidden structure is not a selectable perspective, not
-   * even for a structure manager).
+   * Perspective search within a group, always excluding external structures
+   * (registry-created relationship targets without labels) and hidden ones
+   * (a hidden structure is not a selectable perspective, not even for a
+   * structure manager). Only structures with at least one label are
+   * searchable.
+   *
+   * A blank query lists the group; otherwise every query word must match the
+   * structure's normalized acronym or labels (substring or pg_trgm typo
+   * tolerance) and results are ranked by relevance.
    */
-  private searchWhereClause(
-    searchTerm: string,
-    group: OrganizationGroup,
-  ): Prisma.OrganizationUnitWhereInput {
-    return {
-      external: false,
-      hiddenEffective: false,
-      category: { in: groupToCategories(group) },
-      labels: {
-        some: {
-          value: {
-            contains: searchTerm,
-            mode: QueryMode.insensitive,
-          },
-        },
-      },
-    }
-  }
-
-  /**
-   * Get a list of OrganizationUnit records based on a search term
-   * @param searchTerm
-   * @param group - perspective group to search within
-   * @param pageNumber
-   * @param itemsPerPage
-   */
-  async getOrganizationUnits(
+  async searchOrganizationUnits(
     searchTerm: string,
     group: OrganizationGroup,
     pageNumber: number,
     itemsPerPage: number,
-  ): Promise<OrganizationUnit[]> {
-    const organizationUnits = await this.prismaClient.organizationUnit.findMany(
-      {
-        where: this.searchWhereClause(searchTerm, group),
-        skip: (pageNumber - 1) * itemsPerPage,
-        take: itemsPerPage,
-        include: organizationUnitInclude,
-        orderBy: {
-          labels: {
-            _count: 'asc',
-          },
-        },
-      },
-    )
-    return organizationUnits.map(OrganizationUnit.fromDbOrganizationUnit)
-  }
+  ): Promise<{ organizationUnits: OrganizationUnit[]; total: number }> {
+    const skip = (pageNumber - 1) * itemsPerPage
+    const categories = groupToCategories(group)
+    const tokens = tokenizeSearchQuery(searchTerm)
 
-  async countOrganizationUnits(searchTerm: string, group: OrganizationGroup) {
-    return this.prismaClient.organizationUnit.count({
-      where: this.searchWhereClause(searchTerm, group),
+    if (tokens.length === 0) {
+      const where: Prisma.OrganizationUnitWhereInput = {
+        external: false,
+        hiddenEffective: false,
+        category: { in: categories },
+        labels: { some: {} },
+      }
+      const [dbUnits, total] = await Promise.all([
+        this.prismaClient.organizationUnit.findMany({
+          where,
+          skip,
+          take: itemsPerPage,
+          include: organizationUnitInclude,
+          orderBy: { labels: { _count: 'asc' } },
+        }),
+        this.prismaClient.organizationUnit.count({ where }),
+      ])
+      return {
+        organizationUnits: dbUnits.map(OrganizationUnit.fromDbOrganizationUnit),
+        total,
+      }
+    }
+
+    const match = buildTokenMatch(Prisma.sql`u.search_text`, tokens)
+    const searchable = Prisma.sql`
+      WITH u AS (
+        SELECT ou.id,
+          concat_ws(' ', ou."normalizedAcronym", string_agg(l."normalizedValue", ' ')) AS search_text,
+          count(l.id) AS label_count
+        FROM "OrganizationUnit" ou
+        JOIN "OrganizationUnitLabel" l ON l."organizationUnitId" = ou.id
+        WHERE ou.external = false
+          AND ou."hiddenEffective" = false
+          AND ou.category::text = ANY(${categories}::text[])
+        GROUP BY ou.id
+      )`
+    const [rows, [{ total }]] = await withWordSimilarityThreshold(
+      this.prismaClient,
+      [
+        this.prismaClient.$queryRaw<{ id: number }[]>`
+          ${searchable}
+          SELECT u.id FROM u
+          WHERE ${match.where}
+          ORDER BY ${match.score} DESC, u.label_count ASC, u.id ASC
+          LIMIT ${itemsPerPage} OFFSET ${skip}`,
+        this.prismaClient.$queryRaw<{ total: number }[]>`
+          ${searchable}
+          SELECT count(*)::int AS total FROM u WHERE ${match.where}`,
+      ],
+    )
+
+    const ids = rows.map((row) => row.id)
+    const dbUnits = await this.prismaClient.organizationUnit.findMany({
+      where: { id: { in: ids } },
+      include: organizationUnitInclude,
     })
+    const rankById = new Map(ids.map((id, rank) => [id, rank]))
+    dbUnits.sort((a, b) => rankById.get(a.id)! - rankById.get(b.id)!)
+
+    return {
+      organizationUnits: dbUnits.map(OrganizationUnit.fromDbOrganizationUnit),
+      total,
+    }
   }
 
   /**

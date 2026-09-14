@@ -365,38 +365,19 @@ describe('OrganizationUnitDAO Integration Tests', () => {
       )
     })
 
+    const search = async (
+      term: string,
+      group: 'institution' | 'research_unit' | 'other_structure' | 'team',
+    ) =>
+      (
+        await organizationUnitDAO.searchOrganizationUnits(term, group, 1, 10)
+      ).organizationUnits.map((o) => o.uid)
+
     it('filters by group and always excludes external structures', async () => {
-      const researchUnits = await organizationUnitDAO.getOrganizationUnits(
-        'alpha',
-        'research_unit',
-        1,
-        10,
-      )
-      expect(researchUnits.map((o) => o.uid)).toEqual(['local-RU1'])
-
-      const institutions = await organizationUnitDAO.getOrganizationUnits(
-        'alpha',
-        'institution',
-        1,
-        10,
-      )
-      expect(institutions.map((o) => o.uid)).toEqual(['local-INST1'])
-
-      const teams = await organizationUnitDAO.getOrganizationUnits(
-        'alpha',
-        'team',
-        1,
-        10,
-      )
-      expect(teams.map((o) => o.uid)).toEqual(['local-TEAM1'])
-
-      const otherStructures = await organizationUnitDAO.getOrganizationUnits(
-        'alpha',
-        'other_structure',
-        1,
-        10,
-      )
-      expect(otherStructures.map((o) => o.uid)).toEqual(['local-FAC1'])
+      expect(await search('alpha', 'research_unit')).toEqual(['local-RU1'])
+      expect(await search('alpha', 'institution')).toEqual(['local-INST1'])
+      expect(await search('alpha', 'team')).toEqual(['local-TEAM1'])
+      expect(await search('alpha', 'other_structure')).toEqual(['local-FAC1'])
     })
 
     it('support units are unreachable through any group', async () => {
@@ -406,29 +387,91 @@ describe('OrganizationUnitDAO Integration Tests', () => {
         'other_structure',
         'team',
       ] as const) {
-        const results = await organizationUnitDAO.getOrganizationUnits(
-          'support',
-          group,
-          1,
-          10,
-        )
-        expect(results).toHaveLength(0)
+        expect(await search('support', group)).toHaveLength(0)
       }
     })
 
     it('counts organization units per group', async () => {
-      expect(
-        await organizationUnitDAO.countOrganizationUnits(
-          'alpha',
-          'research_unit',
-        ),
-      ).toBe(1)
-      expect(
-        await organizationUnitDAO.countOrganizationUnits(
-          'alpha',
-          'institution',
-        ),
-      ).toBe(1)
+      const { total } = await organizationUnitDAO.searchOrganizationUnits(
+        'alpha',
+        'research_unit',
+        1,
+        10,
+      )
+      expect(total).toBe(1)
+      const blank = await organizationUnitDAO.searchOrganizationUnits(
+        '',
+        'institution',
+        1,
+        10,
+      )
+      expect(blank.total).toBe(1)
+      expect(blank.organizationUnits.map((o) => o.uid)).toEqual(['local-INST1'])
+    })
+
+    describe('fuzzy matching', () => {
+      beforeEach(async () => {
+        await organizationUnitDAO.createOrUpdateOrganizationUnit(
+          makeUnit({
+            uid: 'local-UP1',
+            acronym: 'UP1',
+            category: OrganizationCategory.institution,
+            genericType: OrganizationGenericType.institution,
+            names: [
+              Literal.fromObject({
+                value: 'Université Paris 1 Panthéon-Sorbonne',
+                language: 'fr',
+              }),
+            ],
+          }),
+        )
+        await organizationUnitDAO.createOrUpdateOrganizationUnit(
+          makeUnit({
+            uid: 'local-ISJPS',
+            acronym: 'ISJPS',
+            names: [
+              Literal.fromObject({
+                value: 'Institut des sciences juridique et philosophique',
+                language: 'fr',
+              }),
+            ],
+          }),
+        )
+      })
+
+      it('ignores accents, case and word order', async () => {
+        expect(await search('PARIS universite', 'institution')).toEqual([
+          'local-UP1',
+        ])
+      })
+
+      it('tolerates typos', async () => {
+        expect(await search('pantheon sorbone', 'institution')).toEqual([
+          'local-UP1',
+        ])
+        expect(await search('filosophique', 'research_unit')).toEqual([
+          'local-ISJPS',
+        ])
+      })
+
+      it('matches the acronym together with the labels', async () => {
+        expect(await search('isjps juridique', 'research_unit')).toEqual([
+          'local-ISJPS',
+        ])
+      })
+
+      it('ranks whole words above typos', async () => {
+        await organizationUnitDAO.createOrUpdateOrganizationUnit(
+          makeUnit({
+            uid: 'local-ALPHO',
+            names: [Literal.fromObject({ value: 'Alpho lab', language: 'en' })],
+          }),
+        )
+        expect(await search('alpha', 'research_unit')).toEqual([
+          'local-RU1',
+          'local-ALPHO',
+        ])
+      })
     })
   })
 

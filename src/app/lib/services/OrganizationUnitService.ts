@@ -442,17 +442,13 @@ export class OrganizationUnitService {
     itemsPerPage: number
   }): Promise<{ organizations: OrganizationUnit[]; total: number }> {
     try {
-      const organizations = await this.organizationUnitDAO.getOrganizationUnits(
-        searchTerm,
-        group,
-        pageNumber,
-        itemsPerPage,
-      )
-
-      const total = await this.organizationUnitDAO.countOrganizationUnits(
-        searchTerm,
-        group,
-      )
+      const { organizationUnits: organizations, total } =
+        await this.organizationUnitDAO.searchOrganizationUnits(
+          searchTerm,
+          group,
+          pageNumber,
+          itemsPerPage,
+        )
 
       return { organizations, total }
     } catch (error) {
