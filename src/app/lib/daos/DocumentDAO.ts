@@ -26,6 +26,8 @@ import { Literal, LiteralJson } from '@/types/Literal'
 import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
 import { HalStatusFilterValue } from '@/types/HalStatusFilter'
 import { DashboardDocumentData } from '@/types/DashboardDocumentData'
+import { normalizeSearchText } from '@/utils/fuzzySearch/fuzzySearch'
+import { backfillNormalizedColumn } from '@/lib/daos/search/backfillNormalizedColumn'
 
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
@@ -104,11 +106,13 @@ export class DocumentDAO extends AbstractDAO {
           update: {
             publisher: journal.publisher,
             title: journal.title,
+            normalizedTitle: normalizeSearchText(journal.title),
           },
           create: {
             issnL: journal.issnL,
             publisher: journal.publisher,
             title: journal.title,
+            normalizedTitle: normalizeSearchText(journal.title),
           },
         })
 
@@ -247,11 +251,13 @@ export class DocumentDAO extends AbstractDAO {
           },
           update: {
             value: title.value,
+            normalizedValue: normalizeSearchText(title.value),
           },
           create: {
             documentId: dbDocument.id,
             language: title.language ?? null,
             value: title.value,
+            normalizedValue: normalizeSearchText(title.value),
           },
         })
       }
@@ -265,11 +271,13 @@ export class DocumentDAO extends AbstractDAO {
           },
           update: {
             value: abstract.value,
+            normalizedValue: normalizeSearchText(abstract.value),
           },
           create: {
             documentId: dbDocument.id,
             language: abstract.language ?? null,
             value: abstract.value,
+            normalizedValue: normalizeSearchText(abstract.value),
           },
         })
       }
@@ -1242,6 +1250,7 @@ export class DocumentDAO extends AbstractDAO {
             data: titles.map((title) => ({
               language: title.language,
               value: title.value,
+              normalizedValue: normalizeSearchText(title.value),
             })),
           },
         },
@@ -1274,6 +1283,7 @@ export class DocumentDAO extends AbstractDAO {
             data: abstracts.map((abstract) => ({
               language: abstract.language,
               value: abstract.value,
+              normalizedValue: normalizeSearchText(abstract.value),
             })),
           },
         },
@@ -1532,5 +1542,64 @@ export class DocumentDAO extends AbstractDAO {
         )
       }
     }
+  }
+
+  /**
+   * Fill the search-only normalized columns of titles, abstracts and journals
+   * written before they existed. Idempotent. Returns the updated row count.
+   */
+  async backfillNormalizedSearchColumns(batchSize?: number): Promise<number> {
+    const titles = await backfillNormalizedColumn(
+      this.prismaClient,
+      async (take) =>
+        (
+          await this.prismaClient.documentTitle.findMany({
+            where: { normalizedValue: null },
+            select: { id: true, value: true },
+            take,
+          })
+        ).map((row) => ({ id: row.id, source: row.value })),
+      (id, normalized) =>
+        this.prismaClient.documentTitle.update({
+          where: { id },
+          data: { normalizedValue: normalized },
+        }),
+      batchSize,
+    )
+    const abstracts = await backfillNormalizedColumn(
+      this.prismaClient,
+      async (take) =>
+        (
+          await this.prismaClient.documentAbstract.findMany({
+            where: { normalizedValue: null },
+            select: { id: true, value: true },
+            take,
+          })
+        ).map((row) => ({ id: row.id, source: row.value })),
+      (id, normalized) =>
+        this.prismaClient.documentAbstract.update({
+          where: { id },
+          data: { normalizedValue: normalized },
+        }),
+      batchSize,
+    )
+    const journals = await backfillNormalizedColumn(
+      this.prismaClient,
+      async (take) =>
+        (
+          await this.prismaClient.journal.findMany({
+            where: { normalizedTitle: null },
+            select: { id: true, title: true },
+            take,
+          })
+        ).map((row) => ({ id: row.id, source: row.title })),
+      (id, normalized) =>
+        this.prismaClient.journal.update({
+          where: { id },
+          data: { normalizedTitle: normalized },
+        }),
+      batchSize,
+    )
+    return titles + abstracts + journals
   }
 }

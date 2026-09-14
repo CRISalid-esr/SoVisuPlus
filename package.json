@@ -33,6 +33,8 @@
     "create_user:js": "node dist-listener/src/scripts/create_user.js",
     "seed:self-scoped-defaults": "ts-node --project tsconfig.listener.json src/scripts/seed_self_scoped_defaults.ts",
     "seed:self-scoped-defaults:js": "node dist-listener/src/scripts/seed_self_scoped_defaults.js",
+    "backfill:search-columns": "ts-node --project tsconfig.listener.json src/scripts/backfill_search_columns.ts",
+    "backfill:search-columns:js": "node dist-listener/src/scripts/backfill_search_columns.js",
     "dispatch_actions": "ts-node --project tsconfig.listener.json src/scripts/dispatch_actions.ts",
     "dispatch_actions:js": "node dist-listener/src/scripts/dispatch_actions.js",
     "dispatch_action": "npm run dispatch_actions --",

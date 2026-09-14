@@ -451,4 +451,59 @@ describe('OrganizationUnitDAO Integration Tests', () => {
       expect(second!.slug).toBe('org:same-1')
     })
   })
+
+  describe('normalized search columns', () => {
+    it('are set when a unit is created', async () => {
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(
+        makeUnit({
+          uid: 'local-norm',
+          acronym: 'ÉCO',
+          names: [
+            Literal.fromObject({ value: 'Économie Générale', language: 'fr' }),
+          ],
+        }),
+      )
+      const dbUnit = await prisma.organizationUnit.findUnique({
+        where: { uid: 'local-norm' },
+        include: { labels: true },
+      })
+      expect(dbUnit!.normalizedAcronym).toBe('eco')
+      expect(dbUnit!.labels[0].normalizedValue).toBe('economie generale')
+    })
+
+    it('are backfilled for rows written without them', async () => {
+      await prisma.organizationUnit.create({
+        data: {
+          uid: 'local-legacy',
+          acronym: 'ÉCO',
+          category: OrganizationCategory.research_unit,
+          genericType: OrganizationGenericType.unit,
+          labels: {
+            create: [{ kind: 'long', language: 'fr', value: 'Économie' }],
+          },
+        },
+      })
+      // a unit without acronym must not be picked up forever
+      await prisma.organizationUnit.create({
+        data: {
+          uid: 'local-no-acronym',
+          category: OrganizationCategory.research_unit,
+          genericType: OrganizationGenericType.unit,
+        },
+      })
+
+      expect(await organizationUnitDAO.backfillNormalizedSearchColumns(1)).toBe(
+        2,
+      )
+      expect(await organizationUnitDAO.backfillNormalizedSearchColumns(1)).toBe(
+        0,
+      )
+      const dbUnit = await prisma.organizationUnit.findUnique({
+        where: { uid: 'local-legacy' },
+        include: { labels: true },
+      })
+      expect(dbUnit!.normalizedAcronym).toBe('eco')
+      expect(dbUnit!.labels[0].normalizedValue).toBe('economie')
+    })
+  })
 })

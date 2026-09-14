@@ -92,6 +92,7 @@ describe('OrganizationUnitDAO', () => {
       nationalType: 'UMR',
       external: false,
       acronym: 'RS001',
+      normalizedAcronym: 'rs001',
       localTypes: [],
       slug: 'org:rs001',
     }
@@ -131,12 +132,16 @@ describe('OrganizationUnitDAO', () => {
           language: 'en',
         },
       },
-      update: { value: 'Research Unit 001' },
+      update: {
+        value: 'Research Unit 001',
+        normalizedValue: 'research unit 001',
+      },
       create: {
         organizationUnitId: 1,
         kind: 'long',
         language: 'en',
         value: 'Research Unit 001',
+        normalizedValue: 'research unit 001',
       },
     })
 
