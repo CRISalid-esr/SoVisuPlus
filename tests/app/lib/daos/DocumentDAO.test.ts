@@ -27,6 +27,7 @@ import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { PersonMembership } from '@/types/PersonMembership'
 import { PersonEmployment } from '@/types/PersonEmployment'
+import { Journal } from '@/types/Journal'
 
 describe('DocumentDAO Integration Tests', () => {
   let documentDAO: DocumentDAO
@@ -657,5 +658,77 @@ describe('DocumentDAO Integration Tests', () => {
     expect(abstracts?.abstracts.map((title) => title.value)).toContain(
       'Le nouveau abstract',
     )
+  })
+
+  describe('normalized search columns', () => {
+    afterEach(async () => {
+      await prisma.journal.deleteMany({ where: { issnL: '1234-5678' } })
+    })
+
+    test('are set when a document is created or its literals modified', async () => {
+      const document = new Document(
+        'doc-normalized',
+        Document.documentTypeFromString('JournalArticle'),
+        null,
+        null,
+        null,
+        null,
+        null,
+        [new Literal('Économie Générale', 'fr')],
+        [new Literal('Étude des Œuvres', 'fr')],
+        [],
+        [],
+        [],
+        undefined,
+        new Journal('Revue d’Économie', '1234-5678', 'Éditeur', []),
+      )
+      await documentDAO.createOrUpdateDocument(document)
+
+      const dbDocument = await prisma.document.findUnique({
+        where: { uid: 'doc-normalized' },
+        include: { titles: true, abstracts: true, journal: true },
+      })
+      expect(dbDocument!.titles[0].normalizedValue).toBe('economie generale')
+      expect(dbDocument!.abstracts[0].normalizedValue).toBe('etude des oeuvres')
+      expect(dbDocument!.journal!.normalizedTitle).toBe('revue d’economie')
+
+      await documentDAO.modifyTitles('doc-normalized', [
+        new Literal('Nouveau Titre Modifié', 'fr'),
+      ])
+      await documentDAO.modifyAbstracts('doc-normalized', [
+        new Literal('Résumé', 'fr'),
+      ])
+      const modified = await prisma.document.findUnique({
+        where: { uid: 'doc-normalized' },
+        include: { titles: true, abstracts: true },
+      })
+      expect(modified!.titles[0].normalizedValue).toBe('nouveau titre modifie')
+      expect(modified!.abstracts[0].normalizedValue).toBe('resume')
+    })
+
+    test('are backfilled for rows written without them', async () => {
+      await prisma.document.create({
+        data: {
+          uid: 'doc-legacy',
+          titles: { create: [{ language: 'fr', value: 'Économie' }] },
+          abstracts: { create: [{ language: 'fr', value: 'Résumé' }] },
+          journal: {
+            create: { issnL: '1234-5678', publisher: 'P', title: 'Revue É' },
+          },
+        },
+      })
+
+      expect(await documentDAO.backfillNormalizedSearchColumns(1)).toBe(3)
+      // idempotent
+      expect(await documentDAO.backfillNormalizedSearchColumns(1)).toBe(0)
+
+      const dbDocument = await prisma.document.findUnique({
+        where: { uid: 'doc-legacy' },
+        include: { titles: true, abstracts: true, journal: true },
+      })
+      expect(dbDocument!.titles[0].normalizedValue).toBe('economie')
+      expect(dbDocument!.abstracts[0].normalizedValue).toBe('resume')
+      expect(dbDocument!.journal!.normalizedTitle).toBe('revue e')
+    })
   })
 })

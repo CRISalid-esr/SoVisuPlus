@@ -338,11 +338,13 @@ describe('DocumentDAO', () => {
       },
       update: {
         value: 'Sample Document Title',
+        normalizedValue: 'sample document title',
       },
       create: {
         documentId: 1,
         language: 'en',
         value: 'Sample Document Title',
+        normalizedValue: 'sample document title',
       },
     })
     expect(mockPrisma.documentTitle.upsert).toHaveBeenCalledWith({
@@ -354,11 +356,13 @@ describe('DocumentDAO', () => {
       },
       update: {
         value: 'Sample Second Title',
+        normalizedValue: 'sample second title',
       },
       create: {
         documentId: 1,
         language: 'fr',
         value: 'Sample Second Title',
+        normalizedValue: 'sample second title',
       },
     })
     expect(mockPrisma.documentAbstract.upsert).toHaveBeenCalledTimes(1)
@@ -371,11 +375,13 @@ describe('DocumentDAO', () => {
       },
       update: {
         value: 'Sample Abstract',
+        normalizedValue: 'sample abstract',
       },
       create: {
         documentId: 1,
         language: 'fr',
         value: 'Sample Abstract',
+        normalizedValue: 'sample abstract',
       },
     })
 
@@ -1806,8 +1812,16 @@ describe('DocumentDAO', () => {
         titles: {
           createMany: {
             data: [
-              { language: 'es', value: 'El nuevo titulo' },
-              { language: 'fr', value: 'Le nouveau titre' },
+              {
+                language: 'es',
+                value: 'El nuevo titulo',
+                normalizedValue: 'el nuevo titulo',
+              },
+              {
+                language: 'fr',
+                value: 'Le nouveau titre',
+                normalizedValue: 'le nouveau titre',
+              },
             ],
           },
         },
@@ -1863,8 +1877,16 @@ describe('DocumentDAO', () => {
         abstracts: {
           createMany: {
             data: [
-              { language: 'es', value: 'El nuevo abstract' },
-              { language: 'fr', value: 'Le nouveau abstract' },
+              {
+                language: 'es',
+                value: 'El nuevo abstract',
+                normalizedValue: 'el nuevo abstract',
+              },
+              {
+                language: 'fr',
+                value: 'Le nouveau abstract',
+                normalizedValue: 'le nouveau abstract',
+              },
             ],
           },
         },
