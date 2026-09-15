@@ -409,16 +409,13 @@ model DocumentTitle {
 }
 
 model DocumentAbstract {
-  id              Int      @id @default(autoincrement())
-  documentId      Int
-  language        String // ISO 639-1 code (e.g., 'en', 'fr')
-  value           String   @db.Text
-  /// Search-only copy of value (lowercase, no diacritics), see normalizeSearchText
-  normalizedValue String?  @db.Text
-  document        Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  id         Int      @id @default(autoincrement())
+  documentId Int
+  language   String // ISO 639-1 code (e.g., 'en', 'fr')
+  value      String   @db.Text
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@unique([documentId, language]) // Ensure no duplicate languages for the same document
-  @@index([normalizedValue(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 enum AuthorityOrganizationIdentifierType {

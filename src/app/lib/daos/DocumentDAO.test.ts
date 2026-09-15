@@ -37,6 +37,20 @@ import { AuthorityOrganization } from '@/types/AuthorityOrganization'
 import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
+import { expandSearchTokens } from '@/lib/daos/search/SearchTermExpander'
+
+jest.mock('@/lib/daos/search/SearchTermExpander', () => ({
+  // "sample" has a (mocked) typo variant, other words expand to themselves
+  expandSearchTokens: jest.fn(
+    async (_prisma: unknown, tokens: string[]) =>
+      new Map(
+        tokens.map((token) => [
+          token,
+          token === 'sample' ? ['sample', 'simple'] : [token],
+        ]),
+      ),
+  ),
+}))
 
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
@@ -375,13 +389,11 @@ describe('DocumentDAO', () => {
       },
       update: {
         value: 'Sample Abstract',
-        normalizedValue: 'sample abstract',
       },
       create: {
         documentId: 1,
         language: 'fr',
         value: 'Sample Abstract',
-        normalizedValue: 'sample abstract',
       },
     })
 
@@ -868,20 +880,10 @@ describe('DocumentDAO', () => {
               {
                 titles: {
                   some: {
-                    value: {
-                      contains: 'Sample',
-                      mode: Prisma.QueryMode.insensitive,
-                    },
-                  },
-                },
-              },
-              {
-                abstracts: {
-                  some: {
-                    value: {
-                      contains: 'Sample',
-                      mode: Prisma.QueryMode.insensitive,
-                    },
+                    OR: [
+                      { normalizedValue: { contains: 'sample' } },
+                      { normalizedValue: { contains: 'simple' } },
+                    ],
                   },
                 },
               },
@@ -889,26 +891,26 @@ describe('DocumentDAO', () => {
                 contributions: {
                   some: {
                     person: {
-                      displayName: {
-                        contains: 'Sample',
-                        mode: Prisma.QueryMode.insensitive,
-                      },
+                      OR: [
+                        { normalizedName: { contains: 'sample' } },
+                        { normalizedName: { contains: 'simple' } },
+                      ],
                     },
                   },
                 },
               },
               {
                 publicationDate: {
-                  contains: 'Sample',
+                  contains: 'sample',
                   mode: Prisma.QueryMode.insensitive,
                 },
               },
               {
                 journal: {
-                  title: {
-                    contains: 'Sample',
-                    mode: Prisma.QueryMode.insensitive,
-                  },
+                  OR: [
+                    { normalizedTitle: { contains: 'sample' } },
+                    { normalizedTitle: { contains: 'simple' } },
+                  ],
                 },
               },
             ],
@@ -942,12 +944,19 @@ describe('DocumentDAO', () => {
             },
           },
         ],
+        // every word of the column filter must match the same title
         titles: {
           some: {
-            value: {
-              contains: 'Sample Document Title',
-              mode: Prisma.QueryMode.insensitive,
-            },
+            AND: [
+              {
+                OR: [
+                  { normalizedValue: { contains: 'sample' } },
+                  { normalizedValue: { contains: 'simple' } },
+                ],
+              },
+              { OR: [{ normalizedValue: { contains: 'document' } }] },
+              { OR: [{ normalizedValue: { contains: 'title' } }] },
+            ],
           },
         },
       },
@@ -1486,6 +1495,91 @@ describe('DocumentDAO', () => {
     })
   })
 
+  describe('fuzzy text search', () => {
+    const baseParams = {
+      searchTerm: '',
+      searchLang: 'en',
+      columnFilters: [],
+      contributorUids: [],
+      halCollectionCodes: [],
+      areHalCollectionCodesOmitted: false,
+    }
+
+    it('requires every meaningful word, ignoring short ones', () => {
+      const where = documentDAO.createFetchDocumentsWhere({
+        ...baseParams,
+        searchTerm: 'Économie de la Santé 2020',
+      })
+      const words = (where.AND as Prisma.DocumentWhereInput[]).map(
+        (condition) =>
+          (condition.OR as Prisma.DocumentWhereInput[])[2].publicationDate,
+      )
+      expect(words).toEqual([
+        { contains: 'economie', mode: Prisma.QueryMode.insensitive },
+        { contains: 'sante', mode: Prisma.QueryMode.insensitive },
+        { contains: '2020', mode: Prisma.QueryMode.insensitive },
+      ])
+    })
+
+    it('keeps short words when there is nothing else', () => {
+      const where = documentDAO.createFetchDocumentsWhere({
+        ...baseParams,
+        searchTerm: 'Li',
+      })
+      expect(where.AND).toHaveLength(1)
+    })
+
+    it('matches substrings only without variants', () => {
+      const where = documentDAO.createFetchDocumentsWhere({
+        ...baseParams,
+        columnFilters: [{ id: 'publishedIn', value: 'Revue économique' }],
+      })
+      expect(where.journal).toEqual({
+        AND: [
+          { OR: [{ normalizedTitle: { contains: 'revue' } }] },
+          { OR: [{ normalizedTitle: { contains: 'economique' } }] },
+        ],
+      })
+    })
+
+    it('ignores text filters without any word', () => {
+      const where = documentDAO.createFetchDocumentsWhere({
+        ...baseParams,
+        searchTerm: ' - ',
+        columnFilters: [
+          { id: 'titles', value: '--' },
+          { id: 'contributions', value: ' ' },
+        ],
+      })
+      expect(where).toEqual({
+        contributions: {
+          every: { roles: { hasSome: ['editor', 'reviewer'] } },
+        },
+      })
+    })
+
+    it('expands the words of the search term and text filters only', async () => {
+      ;(mockPrisma.document.count as jest.Mock).mockResolvedValue(0)
+      ;(expandSearchTokens as jest.Mock).mockClear()
+
+      await documentDAO.countDocuments({
+        ...baseParams,
+        searchTerm: 'climat',
+        columnFilters: [
+          { id: 'contributions', value: 'Dupont' },
+          { id: 'publishedIn', value: 'Nature' },
+          { id: 'type', value: ['Book'] },
+        ],
+      })
+
+      expect(expandSearchTokens).toHaveBeenCalledWith(mockPrisma, [
+        'climat',
+        'dupont',
+        'nature',
+      ])
+    })
+  })
+
   it('should count documents', async () => {
     ;(mockPrisma.document.count as jest.Mock).mockResolvedValue(1)
 
@@ -1880,12 +1974,10 @@ describe('DocumentDAO', () => {
               {
                 language: 'es',
                 value: 'El nuevo abstract',
-                normalizedValue: 'el nuevo abstract',
               },
               {
                 language: 'fr',
                 value: 'Le nouveau abstract',
-                normalizedValue: 'le nouveau abstract',
               },
             ],
           },

@@ -40,6 +40,7 @@ import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import NextLink, { LinkProps } from 'next/link'
 import Highlighter from 'react-highlight-words'
+import { findDocumentSearchChunks } from '@/utils/fuzzySearch/fuzzySearch'
 import { LanguageChips } from '@/components/LanguageChips'
 import { Contribution } from '@/types/Contribution'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
@@ -489,11 +490,11 @@ export const usePublicationsTable = (
     const yearsFilterSet = yearsFilter.length > 0
     if (yearsFilterSet) {
       const dateFilter:
-        | { id: 'date'; value: [string | null, string | null] }
-        | undefined = columnFilters.find((filter) => filter.id === 'date') as {
-        id: 'date'
-        value: [string | null, string | null]
-      }
+        { id: 'date'; value: [string | null, string | null] } | undefined =
+        columnFilters.find((filter) => filter.id === 'date') as {
+          id: 'date'
+          value: [string | null, string | null]
+        }
       if (dateFilter) {
         const newColumnFilters = columnFilters.map((filter) => {
           if (filter.id == 'date') {
@@ -660,7 +661,7 @@ export const usePublicationsTable = (
                     globalFilter,
                     column.getFilterValue() as string,
                   ]}
-                  autoEscape
+                  findChunks={findDocumentSearchChunks}
                   textToHighlight={localizedTitle.value}
                 />
               </Box>
@@ -709,6 +710,7 @@ export const usePublicationsTable = (
           return (
             <HighlighterWithEllipsis
               searchWords={[globalFilter, filterValue as string]}
+              findChunks={findDocumentSearchChunks}
               text={contributors}
             />
           )
@@ -728,7 +730,7 @@ export const usePublicationsTable = (
               <Highlighter
                 highlightClassName='highlight'
                 searchWords={[globalFilter]}
-                autoEscape
+                findChunks={findDocumentSearchChunks}
                 textToHighlight={dateStr}
               />
             )
@@ -740,7 +742,7 @@ export const usePublicationsTable = (
             <Highlighter
               highlightClassName='highlight'
               searchWords={[globalFilter]}
-              autoEscape
+              findChunks={findDocumentSearchChunks}
               textToHighlight={localizedDate}
             />
           )
@@ -762,7 +764,7 @@ export const usePublicationsTable = (
               <Highlighter
                 highlightClassName='highlight'
                 searchWords={[globalFilter, column.getFilterValue() as string]}
-                autoEscape
+                findChunks={findDocumentSearchChunks}
                 textToHighlight={title}
               />
             )

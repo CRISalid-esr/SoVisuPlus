@@ -1,14 +1,16 @@
 import { Trans } from '@lingui/react/macro'
 import { useEffect, useRef, useState } from 'react'
-import Highlighter from 'react-highlight-words'
+import Highlighter, { HighlighterProps } from 'react-highlight-words'
 import styles from './HighlighterWithEllipsis.module.css'
 
 const HighlighterWithEllipsis = ({
   text,
   searchWords,
+  findChunks,
 }: {
   text: string
   searchWords: string[]
+  findChunks?: HighlighterProps['findChunks']
 }) => {
   const [expanded, setExpanded] = useState(false)
   const [isTruncated, setIsTruncated] = useState(false)
@@ -32,6 +34,7 @@ const HighlighterWithEllipsis = ({
           highlightClassName='highlight'
           searchWords={searchWords}
           autoEscape
+          findChunks={findChunks}
           textToHighlight={text}
         />
       </div>

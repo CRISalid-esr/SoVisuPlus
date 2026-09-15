@@ -1,9 +1,11 @@
 import {
+  findDocumentSearchChunks,
   findFuzzyMatchChunks,
   fuzzyMatch,
   fuzzyScore,
   normalizeSearchText,
   osaDistance,
+  tokenizeDocumentSearchQuery,
   tokenizeSearchQuery,
   trigramSimilarity,
 } from './fuzzySearch'
@@ -31,6 +33,7 @@ describe('tokenizeSearchQuery', () => {
 
   it('caps the number of tokens', () => {
     expect(tokenizeSearchQuery('a b c d e f g h')).toHaveLength(6)
+    expect(tokenizeSearchQuery('a b c d e f g h', 7)).toHaveLength(7)
   })
 
   it('truncates overly long tokens', () => {
@@ -147,5 +150,41 @@ describe('findFuzzyMatchChunks', () => {
       { start: 0, end: 5 },
       { start: 7, end: 12 },
     ])
+  })
+})
+
+describe('tokenizeDocumentSearchQuery', () => {
+  it('keeps up to 30 words', () => {
+    const words = Array.from({ length: 40 }, (_, i) => `word${i}`).join(' ')
+    expect(tokenizeDocumentSearchQuery(words)).toHaveLength(30)
+  })
+
+  it('ignores short words when longer ones exist', () => {
+    expect(tokenizeDocumentSearchQuery('Économie de la santé')).toEqual([
+      'economie',
+      'sante',
+    ])
+    expect(tokenizeDocumentSearchQuery('Li')).toEqual(['li'])
+  })
+})
+
+describe('findDocumentSearchChunks', () => {
+  const chunksOf = (text: string, searchWords: (string | undefined)[]) =>
+    findDocumentSearchChunks({
+      searchWords: searchWords as string[],
+      textToHighlight: text,
+    }).map(({ start, end }) => text.slice(start, end))
+
+  it('highlights typo matches of the global search and column filter', () => {
+    expect(
+      chunksOf('Deep Learning pour la politique', ['learnng', 'politque']),
+    ).toEqual(['Learning', 'politique'])
+  })
+
+  it('ignores missing searches and short words', () => {
+    expect(chunksOf('La santé de la ville', ['sante de', undefined])).toEqual([
+      'santé',
+    ])
+    expect(chunksOf('La santé', ['', undefined])).toEqual([])
   })
 })
