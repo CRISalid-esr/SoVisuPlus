@@ -40,6 +40,8 @@ import { PermissionAction, PermissionSubject } from '@/types/Permission'
 import { Localization } from '@/types/Localization'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { fuzzyMatch, fuzzyScore } from '@/utils/fuzzySearch/fuzzySearch'
+import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
+import { searchFieldProps } from '@/utils/fuzzySearch/searchQueryLength'
 import {
   buildDirectoryForest,
   buildRows,
@@ -104,6 +106,8 @@ const structureFilterFns: NonNullable<
     return score > 0
   },
 }
+
+const structureSearchFieldProps = searchFieldProps(MAX_NAME_SEARCH_QUERY_LENGTH)
 
 const kpiColumns = (theme: Theme): MRT_ColumnDef<StructureRow>[] => [
   {
@@ -217,6 +221,7 @@ function FlatTable({
         grow: 2,
         filterFn: (row, _id, filterValue: string) =>
           fuzzyMatch(filterValue, [row.original.acronym, row.original.name]),
+        muiFilterTextFieldProps: structureSearchFieldProps,
         Cell({ row }) {
           return (
             <StructureNameCell row={row.original} onNavigate={onNavigate} />
@@ -259,6 +264,7 @@ function FlatTable({
     enableRowSelection: true,
     enableGlobalFilter: true,
     filterFns: structureFilterFns,
+    muiSearchTextFieldProps: structureSearchFieldProps,
     enableColumnFilters: true,
     layoutMode: 'grid',
     localization: Localization[lang],
@@ -359,6 +365,7 @@ function TreeTable({
     enablePagination: false,
     enableGlobalFilter: true,
     filterFns: structureFilterFns,
+    muiSearchTextFieldProps: structureSearchFieldProps,
     enableColumnFilters: false,
     layoutMode: 'grid',
     localization: Localization[lang],
