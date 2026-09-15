@@ -192,4 +192,97 @@ describe('addOrganizationUnitSlice', () => {
     const groupState = store.getState().organization.byGroup.institution
     expect(groupState.organizations).toEqual(refreshedOrganizations)
   })
+
+  /**
+   * fetch mock whose calls resolve only when the test says so, and reject with
+   * an AbortError when their signal is aborted — like the real fetch.
+   */
+  const controllableFetch = () => {
+    const pending: ((data: unknown) => void)[] = []
+    global.fetch = jest.fn(
+      (_url: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>((resolve, reject) => {
+          init?.signal?.addEventListener('abort', () =>
+            reject(new DOMException('aborted', 'AbortError')),
+          )
+          pending.push((data) =>
+            resolve({
+              ok: true,
+              json: () => Promise.resolve(data),
+            } as Response),
+          )
+        }),
+    )
+    return pending
+  }
+
+  it('ignores the response of a group search replaced by a newer one', async () => {
+    const pending = controllableFetch()
+    const { fetchOrganizationsByName } = store.getState().organization
+    const older = fetchOrganizationsByName({
+      searchTerm: 'sorbo',
+      page: 1,
+      group: 'institution',
+    })
+    const otherGroup = fetchOrganizationsByName({
+      searchTerm: 'sorbo',
+      page: 1,
+      group: 'team',
+    })
+    const newer = fetchOrganizationsByName({
+      searchTerm: 'sorbonne',
+      page: 1,
+      group: 'institution',
+    })
+
+    pending[2]({
+      hasMore: false,
+      organizations: [makeOrganizationUnit('UP1', 'UP1')],
+      total: 1,
+    })
+    await newer
+    pending[0]({ hasMore: false, organizations: [], total: 0 })
+    await older
+    // groups are independent: the team search was not aborted
+    pending[1]({
+      hasMore: false,
+      organizations: [makeOrganizationUnit('T1', 'T1')],
+      total: 1,
+    })
+    await otherGroup
+
+    const { byGroup, error } = store.getState().organization
+    expect(byGroup.institution.organizations.map((org) => org.uid)).toEqual([
+      'UP1',
+    ])
+    expect(byGroup.institution.loading).toBe(false)
+    expect(byGroup.team.organizations.map((org) => org.uid)).toEqual(['T1'])
+    expect(error).toBeNull()
+  })
+
+  it('ignores the members response of a replaced query', async () => {
+    const pending = controllableFetch()
+    const { fetchStructureMembers } = store.getState().organization
+    const query = {
+      uid: 'ru1',
+      page: 1,
+      pageSize: 10,
+      present: true,
+      sortBy: 'name',
+      sortDesc: false,
+    }
+    const older = fetchStructureMembers({ ...query, search: 'dur' })
+    const newer = fetchStructureMembers({ ...query, search: 'durand' })
+
+    pending[1]({ members: [{ uid: 'p-durand' }], total: 1 })
+    await newer
+    pending[0]({ members: [], total: 0 })
+    await older
+
+    const { members } = store.getState().organization
+    expect(members.rows).toEqual([{ uid: 'p-durand' }])
+    expect(members.total).toBe(1)
+    expect(members.loading).toBe(false)
+    expect(members.error).toBeNull()
+  })
 })

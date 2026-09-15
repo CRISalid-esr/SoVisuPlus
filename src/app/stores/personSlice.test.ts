@@ -126,4 +126,69 @@ describe('addPersonSlice', () => {
     expect(state.hasMore).toBe(false)
     expect(state.total).toBe(2)
   })
+
+  /**
+   * fetch mock whose calls resolve only when the test says so, and reject with
+   * an AbortError when their signal is aborted — like the real fetch.
+   */
+  const controllableFetch = () => {
+    const pending: ((data: unknown) => void)[] = []
+    global.fetch = jest.fn(
+      (_url: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>((resolve, reject) => {
+          init?.signal?.addEventListener('abort', () =>
+            reject(new DOMException('aborted', 'AbortError')),
+          )
+          pending.push((data) =>
+            resolve({
+              ok: true,
+              json: () => Promise.resolve(data),
+            } as Response),
+          )
+        }),
+    )
+    return pending
+  }
+
+  it('ignores the response of a search replaced by a newer one', async () => {
+    const pending = controllableFetch()
+    const { fetchPeopleByName } = store.getState().person
+    const older = fetchPeopleByName({ page: 1, searchTerm: 'dupo' })
+    const newer = fetchPeopleByName({ page: 1, searchTerm: 'dupont' })
+
+    const dupont = new Person(
+      'p-dupont',
+      false,
+      null,
+      'Jean Dupont',
+      'Jean',
+      'Dupont',
+      [],
+    )
+    pending[1]({ hasMore: false, people: [dupont], total: 1 })
+    await newer
+    // the older request was aborted: resolving it late changes nothing
+    pending[0]({ hasMore: false, people: [], total: 0 })
+    await older
+
+    const { people, total, loading, error } = store.getState().person
+    expect(people.map((person) => person.uid)).toEqual(['p-dupont'])
+    expect(total).toBe(1)
+    expect(loading).toBe(false)
+    expect(error).toBeNull()
+  })
+
+  it('stays loading until the latest search completes', async () => {
+    const pending = controllableFetch()
+    const { fetchPeopleByName } = store.getState().person
+    const older = fetchPeopleByName({ page: 1, searchTerm: 'dupo' })
+    const newer = fetchPeopleByName({ page: 1, searchTerm: 'dupont' })
+
+    await older
+    expect(store.getState().person.loading).toBe(true)
+
+    pending[1]({ hasMore: false, people: [], total: 0 })
+    await newer
+    expect(store.getState().person.loading).toBe(false)
+  })
 })

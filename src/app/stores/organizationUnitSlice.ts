@@ -9,6 +9,7 @@ import { StructureMemberJson } from '@/types/StructureMember'
 import { i18n } from '@lingui/core'
 import { BaseQuery } from '@/types/BaseQuery'
 import { toQueryString } from '@/utils/query'
+import { createLatestRequest, isAbortError } from '@/utils/latestRequest'
 
 export interface OrganizationsByNameQuery extends BaseQuery {
   searchTerm: string
@@ -91,201 +92,236 @@ export const addOrganizationUnitSlice: StateCreator<
   [], // Middlewares (if any)
   [], // Additional options (if any)
   OrganizationUnitSlice // The slice being created
-> = (set, get) => ({
-  organization: {
-    byGroup: initialByGroup(),
-    error: null,
-    directory: {
-      structures: [],
-      loading: false,
-      loaded: false,
+> = (set, get) => {
+  // A new search aborts the one still in flight: per group for the sidebar
+  // (groups are searched independently), one for the members table
+  const startGroupRequest = Object.fromEntries(
+    ORGANIZATION_GROUPS.map((group) => [group, createLatestRequest()]),
+  ) as Record<OrganizationGroup, () => AbortController>
+  const startMembersRequest = createLatestRequest()
+  return {
+    organization: {
+      byGroup: initialByGroup(),
       error: null,
-      includeHidden: false,
-    },
-    fetchDirectory: async (options?: {
-      force?: boolean
-      includeHidden?: boolean
-    }) => {
-      const { directory } = get().organization
-      const includeHidden = options?.includeHidden ?? directory.includeHidden
-      const upToDate =
-        directory.loaded && directory.includeHidden === includeHidden
-      if (directory.loading || (upToDate && !options?.force)) {
-        return
-      }
-      const setDirectory = (directoryState: Partial<DirectoryState>) =>
-        set((state) => ({
-          organization: {
-            ...state.organization,
-            directory: { ...state.organization.directory, ...directoryState },
-          },
-        }))
-
-      setDirectory({ loading: true, error: null })
-      try {
-        const response = await fetch(
-          `/api/organizations/directory${includeHidden ? '?includeHidden=true' : ''}`,
-          { headers: { 'accept-language': i18n.locale } },
-        )
-        if (!response.ok) {
-          throw new Error(`Failed to fetch: ${response.statusText}`)
+      directory: {
+        structures: [],
+        loading: false,
+        loaded: false,
+        error: null,
+        includeHidden: false,
+      },
+      fetchDirectory: async (options?: {
+        force?: boolean
+        includeHidden?: boolean
+      }) => {
+        const { directory } = get().organization
+        const includeHidden = options?.includeHidden ?? directory.includeHidden
+        const upToDate =
+          directory.loaded && directory.includeHidden === includeHidden
+        if (directory.loading || (upToDate && !options?.force)) {
+          return
         }
-        const jsonData = (await response.json()) as {
-          structures: OrganizationDirectoryEntry[]
-        }
-        setDirectory({
-          structures: jsonData.structures,
-          loaded: true,
-          includeHidden,
-        })
-      } catch (error) {
-        setDirectory({
-          structures: [],
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      } finally {
-        setDirectory({ loading: false })
-      }
-    },
-    setStructureHidden: async (uid: string, hidden: boolean) => {
-      const response = await fetch(
-        `/api/organizations/${encodeURIComponent(uid)}`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ hidden }),
-        },
-      )
-      if (!response.ok) {
-        throw new Error(`Failed to update visibility: ${response.statusText}`)
-      }
-      // Hiding cascades server-side, so the whole payload has to come back.
-      await get().organization.fetchDirectory({ force: true })
-    },
-    members: {
-      rows: [],
-      total: 0,
-      loading: false,
-      error: null,
-    },
-    fetchStructureMembers: async (query: StructureMembersQueryParams) => {
-      const setMembers = (membersState: Partial<StructureMembersState>) =>
-        set((state) => ({
-          organization: {
-            ...state.organization,
-            members: { ...state.organization.members, ...membersState },
-          },
-        }))
-
-      setMembers({ loading: true, error: null })
-      try {
-        const { uid, ...params } = query
-        const queryString = new URLSearchParams(
-          Object.entries(params).map(([key, value]) => [key, String(value)]),
-        ).toString()
-        const response = await fetch(
-          `/api/organizations/${encodeURIComponent(uid)}/members?${queryString}`,
-          { headers: { 'accept-language': i18n.locale } },
-        )
-        if (!response.ok) {
-          throw new Error(`Failed to fetch: ${response.statusText}`)
-        }
-        const jsonData = (await response.json()) as {
-          members: StructureMemberJson[]
-          total: number
-        }
-        setMembers({ rows: jsonData.members, total: jsonData.total })
-      } catch (error) {
-        setMembers({
-          rows: [],
-          total: 0,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      } finally {
-        setMembers({ loading: false })
-      }
-    },
-    fetchOrganizationsByName: async (queryObject: OrganizationsByNameQuery) => {
-      const { group } = queryObject
-      const queryString = toQueryString(queryObject)
-
-      const setGroupState = (
-        state: OrganizationUnitSlice,
-        groupState: Partial<OrganizationGroupState>,
-      ) => ({
-        organization: {
-          ...state.organization,
-          byGroup: {
-            ...state.organization.byGroup,
-            [group]: {
-              ...state.organization.byGroup[group],
-              ...groupState,
-            },
-          },
-        },
-      })
-
-      set((state) => setGroupState(state, { loading: true }))
-
-      try {
-        const response = await fetch(`/api/organizations?${queryString}`, {
-          headers: {
-            'accept-language': i18n.locale,
-          },
-        })
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch: ${response.statusText}`)
-        }
-
-        const jsonData = (await response.json()) as {
-          hasMore: boolean
-          organizations: OrganizationUnitJson[]
-          total: number
-        }
-        const { hasMore, organizations, total } = jsonData
-
-        set((state) => {
-          const reinit = Number(queryObject.page) === 1
-          let updatedOrganizations = organizations.map(
-            OrganizationUnit.fromJson,
-          )
-
-          if (!reinit) {
-            // Push data to a transient map to avoid duplicates
-            const combinedOrganizationMap = new Map<string, OrganizationUnit>([
-              ...state.organization.byGroup[group].organizations.map(
-                (org): [string, OrganizationUnit] => [org.uid, org],
-              ),
-              ...organizations.map((org): [string, OrganizationUnit] => [
-                org.uid,
-                OrganizationUnit.fromJson(org),
-              ]),
-            ])
-            updatedOrganizations = Array.from(combinedOrganizationMap.values())
-          }
-
-          return {
+        const setDirectory = (directoryState: Partial<DirectoryState>) =>
+          set((state) => ({
             organization: {
-              ...setGroupState(state, {
-                organizations: updatedOrganizations,
-                hasMore,
-                total,
-              }).organization,
-              error: null,
+              ...state.organization,
+              directory: { ...state.organization.directory, ...directoryState },
             },
+          }))
+
+        setDirectory({ loading: true, error: null })
+        try {
+          const response = await fetch(
+            `/api/organizations/directory${includeHidden ? '?includeHidden=true' : ''}`,
+            { headers: { 'accept-language': i18n.locale } },
+          )
+          if (!response.ok) {
+            throw new Error(`Failed to fetch: ${response.statusText}`)
           }
-        })
-      } catch (error) {
-        set((state) => ({
-          organization: {
-            ...setGroupState(state, { organizations: [] }).organization,
+          const jsonData = (await response.json()) as {
+            structures: OrganizationDirectoryEntry[]
+          }
+          setDirectory({
+            structures: jsonData.structures,
+            loaded: true,
+            includeHidden,
+          })
+        } catch (error) {
+          setDirectory({
+            structures: [],
             error: error instanceof Error ? error.message : 'Unknown error',
+          })
+        } finally {
+          setDirectory({ loading: false })
+        }
+      },
+      setStructureHidden: async (uid: string, hidden: boolean) => {
+        const response = await fetch(
+          `/api/organizations/${encodeURIComponent(uid)}`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hidden }),
           },
-        }))
-      } finally {
-        set((state) => setGroupState(state, { loading: false }))
-      }
+        )
+        if (!response.ok) {
+          throw new Error(`Failed to update visibility: ${response.statusText}`)
+        }
+        // Hiding cascades server-side, so the whole payload has to come back.
+        await get().organization.fetchDirectory({ force: true })
+      },
+      members: {
+        rows: [],
+        total: 0,
+        loading: false,
+        error: null,
+      },
+      fetchStructureMembers: async (query: StructureMembersQueryParams) => {
+        const setMembers = (membersState: Partial<StructureMembersState>) =>
+          set((state) => ({
+            organization: {
+              ...state.organization,
+              members: { ...state.organization.members, ...membersState },
+            },
+          }))
+
+        const { signal } = startMembersRequest()
+        setMembers({ loading: true, error: null })
+        try {
+          const { uid, ...params } = query
+          const queryString = new URLSearchParams(
+            Object.entries(params).map(([key, value]) => [key, String(value)]),
+          ).toString()
+          const response = await fetch(
+            `/api/organizations/${encodeURIComponent(uid)}/members?${queryString}`,
+            { headers: { 'accept-language': i18n.locale }, signal },
+          )
+          if (!response.ok) {
+            throw new Error(`Failed to fetch: ${response.statusText}`)
+          }
+          const jsonData = (await response.json()) as {
+            members: StructureMemberJson[]
+            total: number
+          }
+          if (signal.aborted) {
+            return
+          }
+          setMembers({ rows: jsonData.members, total: jsonData.total })
+        } catch (error) {
+          if (isAbortError(error) || signal.aborted) {
+            return
+          }
+          setMembers({
+            rows: [],
+            total: 0,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          })
+        } finally {
+          // An aborted request leaves loading to the one that replaced it
+          if (!signal.aborted) {
+            setMembers({ loading: false })
+          }
+        }
+      },
+      fetchOrganizationsByName: async (
+        queryObject: OrganizationsByNameQuery,
+      ) => {
+        const { group } = queryObject
+        const queryString = toQueryString(queryObject)
+
+        const setGroupState = (
+          state: OrganizationUnitSlice,
+          groupState: Partial<OrganizationGroupState>,
+        ) => ({
+          organization: {
+            ...state.organization,
+            byGroup: {
+              ...state.organization.byGroup,
+              [group]: {
+                ...state.organization.byGroup[group],
+                ...groupState,
+              },
+            },
+          },
+        })
+
+        const { signal } = startGroupRequest[group]()
+        set((state) => setGroupState(state, { loading: true }))
+
+        try {
+          const response = await fetch(`/api/organizations?${queryString}`, {
+            headers: {
+              'accept-language': i18n.locale,
+            },
+            signal,
+          })
+
+          if (!response.ok) {
+            throw new Error(`Failed to fetch: ${response.statusText}`)
+          }
+
+          const jsonData = (await response.json()) as {
+            hasMore: boolean
+            organizations: OrganizationUnitJson[]
+            total: number
+          }
+          const { hasMore, organizations, total } = jsonData
+          if (signal.aborted) {
+            return
+          }
+
+          set((state) => {
+            const reinit = Number(queryObject.page) === 1
+            let updatedOrganizations = organizations.map(
+              OrganizationUnit.fromJson,
+            )
+
+            if (!reinit) {
+              // Push data to a transient map to avoid duplicates
+              const combinedOrganizationMap = new Map<string, OrganizationUnit>(
+                [
+                  ...state.organization.byGroup[group].organizations.map(
+                    (org): [string, OrganizationUnit] => [org.uid, org],
+                  ),
+                  ...organizations.map((org): [string, OrganizationUnit] => [
+                    org.uid,
+                    OrganizationUnit.fromJson(org),
+                  ]),
+                ],
+              )
+              updatedOrganizations = Array.from(
+                combinedOrganizationMap.values(),
+              )
+            }
+
+            return {
+              organization: {
+                ...setGroupState(state, {
+                  organizations: updatedOrganizations,
+                  hasMore,
+                  total,
+                }).organization,
+                error: null,
+              },
+            }
+          })
+        } catch (error) {
+          if (isAbortError(error) || signal.aborted) {
+            return
+          }
+          set((state) => ({
+            organization: {
+              ...setGroupState(state, { organizations: [] }).organization,
+              error: error instanceof Error ? error.message : 'Unknown error',
+            },
+          }))
+        } finally {
+          // An aborted request leaves loading to the one that replaced it
+          if (!signal.aborted) {
+            set((state) => setGroupState(state, { loading: false }))
+          }
+        }
+      },
     },
-  },
-})
+  }
+}
