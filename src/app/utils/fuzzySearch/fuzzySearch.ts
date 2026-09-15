@@ -1,5 +1,7 @@
 import removeAccents from 'remove-accents'
 import {
+  MAX_DOCUMENT_SEARCH_TOKENS,
+  MIN_TRIGRAM_TOKEN_LENGTH,
   MAX_SEARCH_TOKEN_LENGTH,
   MAX_SEARCH_TOKENS,
   MIN_TYPO_TOKEN_LENGTH,
@@ -36,17 +38,35 @@ const wordsOf = (normalizedText: string): Word[] =>
   }))
 
 /**
- * Distinct normalized words of a query, capped to MAX_SEARCH_TOKENS words of
- * at most MAX_SEARCH_TOKEN_LENGTH characters.
+ * Distinct normalized words of a query, capped to `maxTokens` words of at
+ * most MAX_SEARCH_TOKEN_LENGTH characters.
  */
-export const tokenizeSearchQuery = (query: string): string[] =>
+export const tokenizeSearchQuery = (
+  query: string,
+  maxTokens: number = MAX_SEARCH_TOKENS,
+): string[] =>
   [
     ...new Set(
       wordsOf(normalizeSearchText(query)).map((word) =>
         word.value.slice(0, MAX_SEARCH_TOKEN_LENGTH),
       ),
     ),
-  ].slice(0, MAX_SEARCH_TOKENS)
+  ].slice(0, maxTokens)
+
+/**
+ * Words of a documents list search: up to MAX_DOCUMENT_SEARCH_TOKENS words so
+ * that a pasted title is used whole. Words shorter than
+ * MIN_TRIGRAM_TOKEN_LENGTH ("de", "a", "1"…) are ignored when longer ones
+ * exist: they match almost every document and cannot use the trigram
+ * indexes.
+ */
+export const tokenizeDocumentSearchQuery = (query: string): string[] => {
+  const tokens = tokenizeSearchQuery(query, MAX_DOCUMENT_SEARCH_TOKENS)
+  const meaningful = tokens.filter(
+    (token) => token.length >= MIN_TRIGRAM_TOKEN_LENGTH,
+  )
+  return meaningful.length > 0 ? meaningful : tokens
+}
 
 const trigramsOf = (normalizedText: string): Set<string> => {
   const trigrams = new Set<string>()
@@ -194,8 +214,9 @@ export const fuzzyMatch = (
 export const findFuzzyMatchChunks = (
   text: string,
   query: string,
+  tokenize: (query: string) => string[] = tokenizeSearchQuery,
 ): MatchChunk[] => {
-  const tokens = tokenizeSearchQuery(query)
+  const tokens = tokenize(query)
   if (tokens.length === 0 || !text) {
     return []
   }
@@ -248,3 +269,23 @@ export const findFuzzyMatchChunks = (
   }
   return merged
 }
+
+/**
+ * react-highlight-words `findChunks` for the documents list: highlights the
+ * words of all the given searches (global search and column filter) the way
+ * the documents search matches them, typos included.
+ */
+export const findDocumentSearchChunks = ({
+  searchWords,
+  textToHighlight,
+}: {
+  searchWords: (string | RegExp)[]
+  textToHighlight: string
+}): MatchChunk[] =>
+  findFuzzyMatchChunks(
+    textToHighlight,
+    searchWords
+      .filter((word): word is string => typeof word === 'string')
+      .join(' '),
+    tokenizeDocumentSearchQuery,
+  )
