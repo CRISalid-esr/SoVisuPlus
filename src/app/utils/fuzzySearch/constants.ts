@@ -42,3 +42,17 @@ export const MAX_VARIANTS_PER_TOKEN = 5
  * looking up the typo variants of a word.
  */
 export const MAX_EXPANSION_CANDIDATE_ROWS = 200
+
+/**
+ * Maximum length of a name search: people, structures, members, and the
+ * documents list contributors and journal filters. Enforced by the API routes
+ * (400) and the search fields.
+ */
+export const MAX_NAME_SEARCH_QUERY_LENGTH = 200
+
+/**
+ * Maximum length of the documents list global search and title filter,
+ * enforced by the documents API routes (400) and search fields. Larger than
+ * for names: a whole title may be pasted.
+ */
+export const MAX_DOCUMENT_SEARCH_QUERY_LENGTH = 500

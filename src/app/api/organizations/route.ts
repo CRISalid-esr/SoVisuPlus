@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { OrganizationUnitService } from '@/lib/services/OrganizationUnitService'
 import { ORGANIZATION_GROUPS, OrganizationGroup } from '@/types/IAgent'
+import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
+import { searchQueryLengthError } from '@/utils/fuzzySearch/searchQueryLength'
 
 const organizationUnitService = new OrganizationUnitService()
 
@@ -19,6 +21,14 @@ export const GET = async (req: NextRequest) => {
       },
       { status: 400 },
     )
+  }
+
+  const searchLengthError = searchQueryLengthError(
+    [searchTerm],
+    MAX_NAME_SEARCH_QUERY_LENGTH,
+  )
+  if (searchLengthError) {
+    return NextResponse.json({ error: searchLengthError }, { status: 400 })
   }
 
   try {

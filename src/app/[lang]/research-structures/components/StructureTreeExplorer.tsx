@@ -39,6 +39,7 @@ import {
 } from './treeExplorerUtils'
 import { isGroupNodeId, structureGroupLabel } from './structureGroups'
 import StructureDetail from './StructureDetail'
+import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
 
 const KEYBOARD_RESIZE_STEP = 16
 
@@ -356,6 +357,7 @@ const StructureTreeExplorer = ({
             onChange={(event) => handleSearchChange(event.target.value)}
             placeholder={t`research_structures_tree_search_placeholder`}
             slotProps={{
+              htmlInput: { maxLength: MAX_NAME_SEARCH_QUERY_LENGTH },
               input: {
                 startAdornment: (
                   <InputAdornment position='start'>

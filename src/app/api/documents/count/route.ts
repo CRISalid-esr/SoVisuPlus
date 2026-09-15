@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { DocumentService } from '@/lib/services/DocumentService'
 import { AgentType, agentTypeFromString } from '@/types/IAgent'
+import { documentSearchQueryLengthError } from '@/utils/fuzzySearch/searchQueryLength'
 
 export const GET = async (req: NextRequest) => {
   try {
@@ -26,6 +27,14 @@ export const GET = async (req: NextRequest) => {
         { error: 'Invalid contributorType' },
         { status: 400 },
       )
+    }
+
+    const searchLengthError = documentSearchQueryLengthError(
+      searchTerm,
+      columnFilters,
+    )
+    if (searchLengthError) {
+      return NextResponse.json({ error: searchLengthError }, { status: 400 })
     }
 
     const documentService = new DocumentService()
