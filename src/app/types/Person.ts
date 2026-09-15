@@ -16,7 +16,7 @@ import { PersonMembership } from '@/types/PersonMembership'
 import { PersonEmployment } from '@/types/PersonEmployment'
 import { SourcePerson, SourcePersonJson } from '@/types/SourcePerson'
 import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
-import removeAccents from 'remove-accents'
+import { normalizeSearchText } from '@/utils/fuzzySearch/fuzzySearch'
 import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
 import { organizationPerimeterFromMemberships } from '@/types/organizationScopes'
 
@@ -63,7 +63,7 @@ class Person implements IAgent, Authorizable {
     public records: SourcePerson[] = [],
   ) {
     this.validateIdentifiers(identifiers)
-    this.normalizedName = removeAccents(this.displayNameGuard().toLowerCase())
+    this.normalizedName = normalizeSearchText(this.displayNameGuard())
   }
 
   get membershipAcronyms(): string[] {

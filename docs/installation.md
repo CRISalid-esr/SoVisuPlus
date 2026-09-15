@@ -34,6 +34,15 @@ resolve this problem you need to change the database owner using the following c
 ALTER DATABASE sovisuplus OWNER TO sovisuplus ;
 ```
 
+Fuzzy search relies on the `pg_trgm` extension (shipped with PostgreSQL contrib packages and the official `postgres`
+Docker image). Migrations create it with `CREATE EXTENSION IF NOT EXISTS pg_trgm`. Since PostgreSQL 13 `pg_trgm` is a
+trusted extension, so the database owner (see above) can create it. If the application role is neither owner nor
+allowed to `CREATE` on the database (e.g. a managed PostgreSQL service), ask your DBA to run once:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+```
+
 4. Run Keycloak with Docker
 
 ```bash
@@ -122,6 +131,8 @@ Following table gives detailed information on each environment variable:
 | CRISALID_AGENTS_API_KEY                   | API key used by the server to authenticate against the Crisalid Agents API.                                                                                                                                                                                                                                                            | y       | server          | y                  | prod                                   | n                  |
 
 6. Run the Prisma migration with `npx prisma migrate dev --name init`.
+   On an existing database, fill the fuzzy-search columns of previously imported data with
+   `npm run backfill:search-columns` (idempotent; the Docker image runs it at startup).
 7. Run the development server with `npm run dev`.
 
 To enable the AMQP listener, start a RabbitMQ instance on your local machine, fill in the `.env` file with the RabbitMQ parameters (`AMQP_USER`, `AMQP_PASSWORD`, `AMQP_HOST`, `AMQP_PORT`, `AMQP_EXCHANGE_NAME`, `AMQP_INTERACTIVE_QUEUE_NAME`, `AMQP_BATCH_QUEUE_NAME`) and run the listener: `npm run dev:listener`

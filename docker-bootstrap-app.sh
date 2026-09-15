@@ -125,6 +125,12 @@ else
   log "Skipping RBAC seeding (INIT_ROLES_ON_START=${INIT_ROLES_ON_START:-false}, file='${RBAC_FILE:-none}')"
 fi
 
+# Fill the fuzzy-search normalized columns of rows written before they existed.
+# Idempotent and a no-op once done; runs in the background so a first, long
+# backfill does not delay the application start.
+log "Backfilling search columns in the background…"
+( npm run backfill:search-columns:js || log "Search columns backfill FAILED" ) &
+
 
 export NODE_PATH=/app/node_modules # for the listener to find shared modules
 HOSTNAME="0.0.0.0" npm run start:web & npm run start:listener

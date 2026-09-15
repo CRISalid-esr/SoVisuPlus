@@ -162,6 +162,7 @@ describe('OrganizationUnit', () => {
       external: false,
       hidden: false,
       hiddenEffective: false,
+      normalizedAcronym: null,
       slug: 'abc',
       localTypes: [{ value: 'Unité mixte', language: 'fr' }],
       labels: [
@@ -171,6 +172,7 @@ describe('OrganizationUnit', () => {
           kind: 'long',
           id: 1,
           organizationUnitId: 1,
+          normalizedValue: null,
         },
         {
           value: 'Unité de Recherche',
@@ -178,6 +180,7 @@ describe('OrganizationUnit', () => {
           kind: 'long',
           id: 2,
           organizationUnitId: 1,
+          normalizedValue: null,
         },
         {
           value: 'RU',
@@ -185,6 +188,7 @@ describe('OrganizationUnit', () => {
           kind: 'short',
           id: 3,
           organizationUnitId: 1,
+          normalizedValue: null,
         },
       ],
       descriptions: [
@@ -283,6 +287,7 @@ describe('OrganizationUnit', () => {
       external: false,
       hidden: false,
       hiddenEffective: false,
+      normalizedAcronym: null,
       slug: 'another-research-unit',
       localTypes: null,
       labels: [
@@ -292,6 +297,7 @@ describe('OrganizationUnit', () => {
           kind: 'long',
           id: 5,
           organizationUnitId: 2,
+          normalizedValue: null,
         },
       ],
       descriptions: [
