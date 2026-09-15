@@ -5,6 +5,8 @@ import {
   StructureMemberSortKey,
 } from '@/lib/services/OrganizationUnitService'
 import { structureVisibilityAccess } from '@/app/auth/structureVisibility'
+import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
+import { searchQueryLengthError } from '@/utils/fuzzySearch/searchQueryLength'
 
 const PAGE_SIZES = [10, 20, 50]
 
@@ -26,6 +28,15 @@ export const GET = async (
   )
     ? (requestedSortBy as StructureMemberSortKey)
     : 'name'
+  const search = searchParams.get('search') ?? ''
+
+  const searchLengthError = searchQueryLengthError(
+    [search],
+    MAX_NAME_SEARCH_QUERY_LENGTH,
+  )
+  if (searchLengthError) {
+    return NextResponse.json({ error: searchLengthError }, { status: 400 })
+  }
 
   try {
     const organizationUnitService = new OrganizationUnitService()
@@ -46,7 +57,7 @@ export const GET = async (
     const result = await organizationUnitService.getStructureMembers({
       uid,
       present: searchParams.get('present') !== 'false',
-      search: searchParams.get('search') ?? '',
+      search,
       sortBy,
       sortDesc: searchParams.get('sortDesc') === 'true',
       page,

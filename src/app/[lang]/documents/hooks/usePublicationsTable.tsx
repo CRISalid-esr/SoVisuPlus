@@ -41,6 +41,11 @@ import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import NextLink, { LinkProps } from 'next/link'
 import Highlighter from 'react-highlight-words'
 import { findDocumentSearchChunks } from '@/utils/fuzzySearch/fuzzySearch'
+import {
+  MAX_DOCUMENT_SEARCH_QUERY_LENGTH,
+  MAX_NAME_SEARCH_QUERY_LENGTH,
+} from '@/utils/fuzzySearch/constants'
+import { searchFieldProps } from '@/utils/fuzzySearch/searchQueryLength'
 import { LanguageChips } from '@/components/LanguageChips'
 import { Contribution } from '@/types/Contribution'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
@@ -110,6 +115,10 @@ const DEFAULT_SORTING = [
 // Stable reference for tabs with no filters yet: `columnFilters` feeds the
 // fetch effect and the tableOptions memo, so a fresh [] each render would loop.
 const EMPTY_COLUMN_FILTERS: MRT_ColumnFiltersState = []
+
+// Same limits as the documents API routes, so the user never gets their 400
+const longSearchFieldProps = searchFieldProps(MAX_DOCUMENT_SEARCH_QUERY_LENGTH)
+const nameSearchFieldProps = searchFieldProps(MAX_NAME_SEARCH_QUERY_LENGTH)
 
 const createDocTypeTree = (
   _: (descriptor: Lingui.MessageDescriptor) => string,
@@ -615,6 +624,7 @@ export const usePublicationsTable = (
       {
         size: 200,
         accessorKey: `titles`,
+        muiFilterTextFieldProps: longSearchFieldProps,
         accessorFn: (row) => {
           return row.titles
         },
@@ -685,6 +695,7 @@ export const usePublicationsTable = (
           return row.contributions
         },
         accessorKey: 'contributions',
+        muiFilterTextFieldProps: nameSearchFieldProps,
         header: t`documents_page_contributors_column`,
         Cell({
           row,
@@ -754,6 +765,7 @@ export const usePublicationsTable = (
       },
       {
         accessorKey: 'publishedIn',
+        muiFilterTextFieldProps: nameSearchFieldProps,
         header: t`documents_page_publishedIn_column`,
         Cell({ row, column }) {
           const { journal } = row.original
@@ -929,6 +941,7 @@ export const usePublicationsTable = (
       },
       muiSelectAllCheckboxProps: { disabled: !hasSelectableRow },
       manualFiltering: true,
+      muiSearchTextFieldProps: longSearchFieldProps,
       manualPagination: true,
       manualSorting: true,
       muiTableBodyRowProps: ({

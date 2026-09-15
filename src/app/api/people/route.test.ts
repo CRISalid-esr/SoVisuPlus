@@ -50,4 +50,16 @@ describe('GET /api/people', () => {
     expect(jsonResponse.total).toBe(2)
     expect(jsonResponse.hasMore).toBe(false)
   })
+
+  it('rejects a search longer than the name search limit', async () => {
+    const longReq = {
+      nextUrl: new URL(
+        `http://localhost/api/people?searchTerm=${'a'.repeat(201)}&page=1`,
+      ),
+    } as unknown as NextRequest
+
+    const response = await GET(longReq)
+
+    expect(response.status).toBe(400)
+  })
 })

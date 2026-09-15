@@ -30,6 +30,8 @@ import {
 } from '@/types/PersonIdentifier'
 import { StructureMemberJson } from '@/types/StructureMember'
 import RateBar from './RateBar'
+import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
+import { searchFieldProps } from '@/utils/fuzzySearch/searchQueryLength'
 
 const IDENTIFIER_DISPLAY_ORDER: PersonIdentifierType[] = [
   PersonIdentifierType.orcid,
@@ -316,6 +318,7 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
       setGlobalFilter(value ?? '')
       setPagination((prev) => ({ ...prev, pageIndex: 0 }))
     },
+    muiSearchTextFieldProps: searchFieldProps(MAX_NAME_SEARCH_QUERY_LENGTH),
     muiPaginationProps: { rowsPerPageOptions: [10, 20, 50] },
     muiTablePaperProps: { variant: 'outlined', elevation: 0 },
     renderTopToolbarCustomActions: () => (
