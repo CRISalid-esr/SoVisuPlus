@@ -123,6 +123,18 @@ The matching inputs carry the same `maxLength` (`searchFieldProps`): sidebar, me
 table, documents global search and text filters, and the research structures tree search,
 table searches and structure column filter (client-side only, limited for consistency).
 
+### Debounce and stale responses
+
+- Every search input is debounced before filtering or fetching: sidebar 500 ms,
+  documents list global search 500 ms and text filters 400 ms, members table 500 ms
+  (Material React Table), structures page tables 250 / 200 ms, structures tree search
+  250 ms (clearing is immediate).
+- Sidebar people and structure searches (one sequence per group) and the members table
+  abort the request still in flight when a new one starts (`createLatestRequest`,
+  `src/app/utils/latestRequest.ts`): a slow response to an older search can no longer
+  overwrite newer results, and `loading` stays on until the latest request completes.
+  The documents list already ignores stale responses through its request ids.
+
 ## Known limits
 
 - Server-side, a letter swap in a very short word (`jaen` → Jean) is not caught; the
