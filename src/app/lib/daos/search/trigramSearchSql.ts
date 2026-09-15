@@ -52,17 +52,19 @@ export const buildTokenMatch = (
 }
 
 /**
- * Run raw queries in one transaction where the pg_trgm `<%` operator uses
- * WORD_SIMILARITY_THRESHOLD. The setting is local to the transaction.
+ * Run raw queries in one transaction where the pg_trgm `<%` / `%>` operators
+ * use `threshold` (WORD_SIMILARITY_THRESHOLD by default). The setting is local
+ * to the transaction.
  */
 export const withWordSimilarityThreshold = async <
   T extends Prisma.PrismaPromise<unknown>[],
 >(
   prismaClient: PrismaClient,
   queries: [...T],
+  threshold: number = WORD_SIMILARITY_THRESHOLD,
 ): Promise<{ [K in keyof T]: Awaited<T[K]> }> => {
   const [, ...results] = await prismaClient.$transaction([
-    prismaClient.$queryRaw`SELECT set_config('pg_trgm.word_similarity_threshold', ${String(WORD_SIMILARITY_THRESHOLD)}, true)`,
+    prismaClient.$queryRaw`SELECT set_config('pg_trgm.word_similarity_threshold', ${String(threshold)}, true)`,
     ...queries,
   ])
   return results as { [K in keyof T]: Awaited<T[K]> }

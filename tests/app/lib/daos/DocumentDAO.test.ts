@@ -28,6 +28,7 @@ import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { PersonMembership } from '@/types/PersonMembership'
 import { PersonEmployment } from '@/types/PersonEmployment'
 import { Journal } from '@/types/Journal'
+import { clearSearchTokenExpansionCache } from '@/lib/daos/search/SearchTermExpander'
 
 describe('DocumentDAO Integration Tests', () => {
   let documentDAO: DocumentDAO
@@ -675,7 +676,7 @@ describe('DocumentDAO Integration Tests', () => {
         null,
         null,
         [new Literal('Économie Générale', 'fr')],
-        [new Literal('Étude des Œuvres', 'fr')],
+        [],
         [],
         [],
         [],
@@ -686,24 +687,19 @@ describe('DocumentDAO Integration Tests', () => {
 
       const dbDocument = await prisma.document.findUnique({
         where: { uid: 'doc-normalized' },
-        include: { titles: true, abstracts: true, journal: true },
+        include: { titles: true, journal: true },
       })
       expect(dbDocument!.titles[0].normalizedValue).toBe('economie generale')
-      expect(dbDocument!.abstracts[0].normalizedValue).toBe('etude des oeuvres')
       expect(dbDocument!.journal!.normalizedTitle).toBe('revue d’economie')
 
       await documentDAO.modifyTitles('doc-normalized', [
         new Literal('Nouveau Titre Modifié', 'fr'),
       ])
-      await documentDAO.modifyAbstracts('doc-normalized', [
-        new Literal('Résumé', 'fr'),
-      ])
       const modified = await prisma.document.findUnique({
         where: { uid: 'doc-normalized' },
-        include: { titles: true, abstracts: true },
+        include: { titles: true },
       })
       expect(modified!.titles[0].normalizedValue).toBe('nouveau titre modifie')
-      expect(modified!.abstracts[0].normalizedValue).toBe('resume')
     })
 
     test('are backfilled for rows written without them', async () => {
@@ -711,24 +707,198 @@ describe('DocumentDAO Integration Tests', () => {
         data: {
           uid: 'doc-legacy',
           titles: { create: [{ language: 'fr', value: 'Économie' }] },
-          abstracts: { create: [{ language: 'fr', value: 'Résumé' }] },
           journal: {
             create: { issnL: '1234-5678', publisher: 'P', title: 'Revue É' },
           },
         },
       })
 
-      expect(await documentDAO.backfillNormalizedSearchColumns(1)).toBe(3)
+      expect(await documentDAO.backfillNormalizedSearchColumns(1)).toBe(2)
       // idempotent
       expect(await documentDAO.backfillNormalizedSearchColumns(1)).toBe(0)
 
       const dbDocument = await prisma.document.findUnique({
         where: { uid: 'doc-legacy' },
-        include: { titles: true, abstracts: true, journal: true },
+        include: { titles: true, journal: true },
       })
       expect(dbDocument!.titles[0].normalizedValue).toBe('economie')
-      expect(dbDocument!.abstracts[0].normalizedValue).toBe('resume')
       expect(dbDocument!.journal!.normalizedTitle).toBe('revue e')
+    })
+  })
+
+  describe('fetchDocuments fuzzy text search', () => {
+    const savedEnv = {
+      publicationList: process.env.PUBLICATION_LIST_ROLES_FILTER,
+      perspective: process.env.PERSPECTIVE_ROLES_FILTER,
+    }
+    const jean = new Person(
+      'p-dupont',
+      false,
+      null,
+      'Jean Dupont',
+      'Jean',
+      'Dupont',
+      [],
+    )
+    const marie = new Person(
+      'p-curie',
+      false,
+      null,
+      'Marie Curie',
+      'Marie',
+      'Curie',
+      [],
+    )
+    const author = [LocRelatorHelper.fromLabel('author') as LocRelator]
+
+    const makeDocument = (
+      uid: string,
+      title: string,
+      contributor: Person,
+      options: { abstract?: string; journal?: Journal; date?: string } = {},
+    ) =>
+      new Document(
+        uid,
+        Document.documentTypeFromString('JournalArticle'),
+        null,
+        options.date ?? null,
+        null,
+        null,
+        null,
+        [new Literal(title, 'fr')],
+        options.abstract ? [new Literal(options.abstract, 'en')] : [],
+        [],
+        [new Contribution(contributor, author)],
+        [],
+        undefined,
+        options.journal,
+      )
+
+    const search = async (
+      searchTerm: string,
+      columnFilters: { id: string; value: string }[] = [],
+      contributorUids = ['p-dupont', 'p-curie'],
+    ) => {
+      const params = {
+        searchTerm,
+        searchLang: 'en',
+        columnFilters,
+        contributorUids,
+        halCollectionCodes: [],
+        areHalCollectionCodesOmitted: false,
+      }
+      const { documents, totalItems } = await documentDAO.fetchDocuments({
+        ...params,
+        page: 1,
+        pageSize: 10,
+        sorting: [],
+      })
+      expect(await documentDAO.countDocuments(params)).toBe(totalItems)
+      return documents.map((document) => document.uid).sort()
+    }
+
+    beforeAll(() => {
+      process.env.PUBLICATION_LIST_ROLES_FILTER = ''
+      process.env.PERSPECTIVE_ROLES_FILTER = ''
+    })
+
+    afterAll(() => {
+      process.env.PUBLICATION_LIST_ROLES_FILTER = savedEnv.publicationList
+      process.env.PERSPECTIVE_ROLES_FILTER = savedEnv.perspective
+    })
+
+    beforeEach(async () => {
+      clearSearchTokenExpansionCache()
+      await personDAO.createOrUpdatePerson(jean)
+      await personDAO.createOrUpdatePerson(marie)
+      await documentDAO.createOrUpdateDocument(
+        makeDocument('doc-learning', 'Deep Learning pour l’Économie', jean, {
+          journal: new Journal(
+            'Revue d’Économie Politique',
+            '1111-1111',
+            'P',
+            [],
+          ),
+        }),
+      )
+      await documentDAO.createOrUpdateDocument(
+        makeDocument('doc-climate', 'Changement climatique et villes', marie, {
+          abstract: 'Zebra migrations',
+        }),
+      )
+      await documentDAO.createOrUpdateDocument(
+        makeDocument('doc-history', 'Histoire urbaine', jean, { date: '2020' }),
+      )
+    })
+
+    afterEach(async () => {
+      await prisma.journal.deleteMany({ where: { issnL: '1111-1111' } })
+    })
+
+    test('tolerates typos in titles', async () => {
+      expect(await search('learnng')).toEqual(['doc-learning'])
+    })
+
+    test('ignores accents, case and word order', async () => {
+      expect(await search('ECONOMIE deep')).toEqual(['doc-learning'])
+    })
+
+    test('tolerates typos in contributor names', async () => {
+      expect(await search('dupond')).toEqual(['doc-history', 'doc-learning'])
+    })
+
+    test('matches words across fields', async () => {
+      expect(await search('dupont histoire')).toEqual(['doc-history'])
+      expect(await search('politique learning')).toEqual(['doc-learning'])
+      expect(await search('histoire 2020')).toEqual(['doc-history'])
+    })
+
+    test('no longer searches abstracts', async () => {
+      expect(await search('zebra')).toEqual([])
+    })
+
+    test('requires every word of a title filter in the same title', async () => {
+      expect(
+        await search('', [{ id: 'titles', value: 'climatique villes' }]),
+      ).toEqual(['doc-climate'])
+      expect(
+        await search('', [{ id: 'titles', value: 'histoire climatique' }]),
+      ).toEqual([])
+    })
+
+    test('filters contributors and journals with typos', async () => {
+      expect(
+        await search('', [{ id: 'contributions', value: 'marie curi' }]),
+      ).toEqual(['doc-climate'])
+      expect(
+        await search('', [{ id: 'publishedIn', value: 'revue politque' }]),
+      ).toEqual(['doc-learning'])
+    })
+
+    test('stays within the contributor perimeter', async () => {
+      expect(await search('dupond', [], ['p-curie'])).toEqual([])
+    })
+
+    test('uses the words of a pasted title beyond the sixth', async () => {
+      await documentDAO.createOrUpdateDocument(
+        makeDocument(
+          'doc-long-a',
+          'Une étude comparative des politiques publiques locales en Bretagne',
+          marie,
+        ),
+      )
+      await documentDAO.createOrUpdateDocument(
+        makeDocument(
+          'doc-long-b',
+          'Une étude comparative des politiques publiques locales en Normandie',
+          marie,
+        ),
+      )
+      expect(
+        await search(
+          'Une étude comparative des politiques publiques locales en Normandie',
+        ),
+      ).toEqual(['doc-long-b'])
     })
   })
 })
