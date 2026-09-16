@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getServerSession, Session } from 'next-auth'
-import authOptions from '@/app/auth/auth_options'
+import { requireSession } from '@/app/auth/requireSession'
 import { DocumentService } from '@/lib/services/DocumentService'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
@@ -26,12 +25,9 @@ const refuse = (
 }
 
 export const POST = async (_request: Request, context: RouteContext) => {
-  const session = (await getServerSession(authOptions)) as Session & {
-    user: { username?: string }
-  }
-  if (!session?.user?.username) {
-    return refuse(401, 'User is not authenticated', {})
-  }
+  const { session, error: authError } = await requireSession()
+  if (authError) return refuse(401, 'User is not authenticated', {})
+
   const username = session.user.username
 
   try {

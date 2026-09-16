@@ -1,20 +1,12 @@
 import { NextResponse } from 'next/server'
-import { getServerSession, Session } from 'next-auth'
-import authOptions from '@/app/auth/auth_options'
+import { requireSession } from '@/app/auth/requireSession'
 import { DocumentService } from '@/lib/services/DocumentService'
 
 export async function POST(request: Request) {
   // TODO implement access control / authorization by perspective
-  const session = (await getServerSession(authOptions)) as Session & {
-    user: { username?: string }
-  }
-  const userName = session?.user?.username
-  if (!userName) {
-    return NextResponse.json(
-      { error: 'User is not authenticated' },
-      { status: 401 },
-    )
-  }
+  const { session, error: authError } = await requireSession()
+  if (authError) return authError
+  const userName = session.user.username
 
   try {
     const body = await request.json()

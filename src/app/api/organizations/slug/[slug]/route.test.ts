@@ -6,6 +6,7 @@ jest.mock('@/app/auth/auth_options', () => ({ __esModule: true, default: {} }))
 jest.mock('@/app/auth/ability', () => ({ hasUnscopedPermission: jest.fn() }))
 
 import { NextRequest } from 'next/server'
+import { getServerSession } from 'next-auth'
 import { hasUnscopedPermission } from '@/app/auth/ability'
 import { GET } from './route'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
@@ -57,6 +58,12 @@ jest.mock('next/server', () => ({
 }))
 
 const mockHasUnscopedPermission = hasUnscopedPermission as jest.Mock
+
+const mockGetServerSession = getServerSession as jest.Mock
+
+beforeEach(() => {
+  mockGetServerSession.mockResolvedValue({ user: { username: 'jdupont' } })
+})
 
 describe('GET /api/organizations/slug/[slug]', () => {
   let req: NextRequest
@@ -110,5 +117,13 @@ describe('GET /api/organizations/slug/[slug]', () => {
     expect(jsonResponse).toEqual({
       error: 'OrganizationUnit with slug org:efgh not found',
     })
+  })
+
+  it('rejects an anonymous caller', async () => {
+    mockGetServerSession.mockResolvedValue(null)
+
+    const response = await GET(req, { params: Promise.resolve(params) })
+
+    expect(response.status).toBe(401)
   })
 })

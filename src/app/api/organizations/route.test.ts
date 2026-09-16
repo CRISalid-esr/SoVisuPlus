@@ -1,4 +1,10 @@
+// requireSession reads the session through next-auth; authOptions pulls in
+// openid-client, which Jest cannot parse, hence the mocks.
+jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
+jest.mock('@/app/auth/auth_options', () => ({ __esModule: true, default: {} }))
+
 import { NextRequest } from 'next/server'
+import { getServerSession } from 'next-auth'
 import { GET } from './route'
 
 jest.mock('@/lib/services/OrganizationUnitService', () => ({
@@ -26,6 +32,12 @@ const requestWith = (params: Record<string, string>) =>
     ),
   }) as unknown as NextRequest
 
+const mockGetServerSession = getServerSession as jest.Mock
+
+beforeEach(() => {
+  mockGetServerSession.mockResolvedValue({ user: { username: 'jdupont' } })
+})
+
 describe('GET /api/organizations', () => {
   it('searches a perspective group', async () => {
     const response = await GET(
@@ -46,5 +58,15 @@ describe('GET /api/organizations', () => {
     )
 
     expect(response.status).toBe(400)
+  })
+
+  it('rejects an anonymous caller', async () => {
+    mockGetServerSession.mockResolvedValue(null)
+
+    const response = await GET(
+      requestWith({ searchTerm: 'paris', group: 'institution' }),
+    )
+
+    expect(response.status).toBe(401)
   })
 })

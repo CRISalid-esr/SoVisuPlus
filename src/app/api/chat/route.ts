@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession, Session } from 'next-auth'
-import authOptions from '@/app/auth/auth_options'
+import { requireSession } from '@/app/auth/requireSession'
 import { CrisalidAgentsChatClient } from '@/lib/services/CrisalidAgentsChatClient'
 import { chatConfigService } from '@/lib/services/ChatConfigService'
 
@@ -90,19 +89,8 @@ export const POST = async (request: NextRequest) => {
     return NextResponse.json({ error: 'AI chat is disabled' }, { status: 404 })
   }
 
-  const session = (await getServerSession(authOptions)) as Session & {
-    user: {
-      username?: string
-      name?: string | null
-      personUid?: string | null
-    }
-  }
-  if (!session?.user?.username) {
-    return NextResponse.json(
-      { error: 'User is not authenticated' },
-      { status: 401 },
-    )
-  }
+  const { session, error: authError } = await requireSession()
+  if (authError) return authError
 
   try {
     // Forwarded (mostly) verbatim: `{ conversationId?, message, messages }`. The backend rebuilds

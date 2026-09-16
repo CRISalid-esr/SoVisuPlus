@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { OrganizationUnitService } from '@/lib/services/OrganizationUnitService'
-import { structureVisibilityAccess } from '@/app/auth/structureVisibility'
+import { canManageStructureVisibility } from '@/app/auth/structureVisibility'
+import { requireSession } from '@/app/auth/requireSession'
 
 export const GET = async (
   req: NextRequest,
   context: { params: Promise<{ slug: string }> },
 ) => {
+  const { session, error: authError } = await requireSession()
+  if (authError) return authError
+
   const { slug } = await context.params
   const organizationUnitService = new OrganizationUnitService()
 
@@ -23,8 +27,7 @@ export const GET = async (
     // for the structure managers who can see it in the directory, and looks
     // like a dead link to everyone else.
     if (organizationUnit.hiddenEffective) {
-      const { canManage } = await structureVisibilityAccess()
-      if (!canManage) {
+      if (!canManageStructureVisibility(session)) {
         return NextResponse.json(
           { error: `OrganizationUnit with slug ${slug} not found` },
           { status: 404 },

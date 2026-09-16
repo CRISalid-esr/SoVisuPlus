@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { DocumentService } from '@/lib/services/DocumentService'
 import { AgentType, agentTypeFromString } from '@/types/IAgent'
 import { documentSearchQueryLengthError } from '@/utils/fuzzySearch/searchQueryLength'
+import { requireSession } from '@/app/auth/requireSession'
 
 export const GET = async (req: NextRequest) => {
+  const { error: authError } = await requireSession()
+  if (authError) return authError
+
   try {
     const urlParams = req.nextUrl.searchParams
     const searchTerm = urlParams.get('searchTerm') || ''

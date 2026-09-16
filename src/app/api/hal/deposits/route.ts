@@ -1,8 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { NextResponse } from 'next/server'
-import { getServerSession, Session } from 'next-auth'
-import authOptions from '@/app/auth/auth_options'
+import { getAuthenticatedSession } from '@/app/auth/requireSession'
 import { DocumentService } from '@/lib/services/DocumentService'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
@@ -51,10 +50,8 @@ const bad = (error: string, reason?: HalDepositFailureReason, status = 400) =>
 
 /** Latest deposit for a document (for the status panel). Returns `null` when there is none. */
 export const GET = async (request: Request) => {
-  const session = (await getServerSession(authOptions)) as Session & {
-    user: { username?: string }
-  }
-  if (!session?.user?.username) {
+  const session = await getAuthenticatedSession()
+  if (!session) {
     return bad('User is not authenticated', 'not_authenticated', 401)
   }
 
@@ -68,10 +65,8 @@ export const GET = async (request: Request) => {
 }
 
 export const POST = async (request: Request) => {
-  const session = (await getServerSession(authOptions)) as Session & {
-    user: { username?: string }
-  }
-  if (!session?.user?.username) {
+  const session = await getAuthenticatedSession()
+  if (!session) {
     return bad('User is not authenticated', 'not_authenticated', 401)
   }
 
