@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { OrganizationUnitService } from '@/lib/services/OrganizationUnitService'
-import { structureVisibilityAccess } from '@/app/auth/structureVisibility'
+import { canManageStructureVisibility } from '@/app/auth/structureVisibility'
+import { requireSession } from '@/app/auth/requireSession'
 
 /**
  * Show or hide a structure in the research-structures directory.
@@ -13,16 +14,12 @@ export const PATCH = async (
   request: Request,
   context: { params: Promise<{ uid: string }> },
 ) => {
+  const { session, error: authError } = await requireSession()
+  if (authError) return authError
+
   const { uid } = await context.params
 
-  const { session, canManage } = await structureVisibilityAccess()
-  if (!session?.user?.username) {
-    return NextResponse.json(
-      { error: 'User is not authenticated' },
-      { status: 401 },
-    )
-  }
-  if (!canManage) {
+  if (!canManageStructureVisibility(session)) {
     return NextResponse.json(
       { error: 'Logged user cannot change structure visibility' },
       { status: 403 },

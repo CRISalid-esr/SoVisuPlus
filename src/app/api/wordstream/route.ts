@@ -9,8 +9,12 @@ import {
 } from '@/types/ExtendLanguageCode'
 import { agentTypeFromString } from '@/types/IAgent'
 import { WordstreamTopic } from '@/types/WordStream'
+import { requireSession } from '@/app/auth/requireSession'
 
 export const GET = async (req: NextRequest) => {
+  const { error: authError } = await requireSession()
+  if (authError) return authError
+
   try {
     const sp = req.nextUrl.searchParams
 

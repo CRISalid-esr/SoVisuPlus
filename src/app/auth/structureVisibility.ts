@@ -1,5 +1,4 @@
-import { getServerSession, Session } from 'next-auth'
-import authOptions from '@/app/auth/auth_options'
+import { Session } from 'next-auth'
 import { hasUnscopedPermission } from '@/app/auth/ability'
 import { PermissionAction, PermissionSubject } from '@/types/Permission'
 
@@ -11,29 +10,18 @@ import { PermissionAction, PermissionSubject } from '@/types/Permission'
  * carries no `authzProperties`, so a CASL instance check cannot narrow it —
  * `structure_manager` is a global role or nothing.
  */
-export const structureVisibilityAccess = async (): Promise<{
-  session: Session | null
-  canManage: boolean
-}> => {
-  const session = await getServerSession(authOptions)
-  return {
-    session,
-    canManage: hasUnscopedPermission(
-      session?.user?.authz,
-      PermissionAction.update,
-      PermissionSubject.OrganizationUnit,
-      'hidden',
-    ),
-  }
-}
+export const canManageStructureVisibility = (session: Session): boolean =>
+  hasUnscopedPermission(
+    session.user?.authz,
+    PermissionAction.update,
+    PermissionSubject.OrganizationUnit,
+    'hidden',
+  )
 
 /** True when the caller asked for hidden structures and is allowed to see them. */
-export const resolveIncludeHidden = async (
+export const resolveIncludeHidden = (
   searchParams: URLSearchParams,
-): Promise<boolean> => {
-  if (searchParams.get('includeHidden') !== 'true') {
-    return false
-  }
-  const { canManage } = await structureVisibilityAccess()
-  return canManage
-}
+  session: Session,
+): boolean =>
+  searchParams.get('includeHidden') === 'true' &&
+  canManageStructureVisibility(session)

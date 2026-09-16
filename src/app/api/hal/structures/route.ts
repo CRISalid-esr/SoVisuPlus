@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession, Session } from 'next-auth'
-import authOptions from '@/app/auth/auth_options'
+import { requireSession } from '@/app/auth/requireSession'
 import { AureHalAPIClient } from '@/lib/services/AureHalAPIClient'
 
 /**
@@ -9,15 +8,8 @@ import { AureHalAPIClient } from '@/lib/services/AureHalAPIClient'
  * rationale and auth rules as the author proxy.
  */
 export const GET = async (request: NextRequest) => {
-  const session = (await getServerSession(authOptions)) as Session & {
-    user: { username?: string }
-  }
-  if (!session?.user?.username) {
-    return NextResponse.json(
-      { error: 'User is not authenticated' },
-      { status: 401 },
-    )
-  }
+  const { error: authError } = await requireSession()
+  if (authError) return authError
 
   const query = request.nextUrl.searchParams.get('q')?.trim() ?? ''
   // Structure search allows a 1-char minimum (affiliation suggestions); the

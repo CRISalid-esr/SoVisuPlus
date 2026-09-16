@@ -3,10 +3,14 @@ import { OrganizationUnitService } from '@/lib/services/OrganizationUnitService'
 import { ORGANIZATION_GROUPS, OrganizationGroup } from '@/types/IAgent'
 import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
 import { searchQueryLengthError } from '@/utils/fuzzySearch/searchQueryLength'
+import { requireSession } from '@/app/auth/requireSession'
 
 const organizationUnitService = new OrganizationUnitService()
 
 export const GET = async (req: NextRequest) => {
+  const { error: authError } = await requireSession()
+  if (authError) return authError
+
   const urlParams = req.nextUrl.searchParams
   const searchTerm = urlParams.get('searchTerm') || ''
   const group = urlParams.get('group')
