@@ -11,6 +11,9 @@ export interface UserSlice {
     currentPerspective: IAgent | null
     // Whether the current perspective is the connected user
     ownPerspective: boolean
+    // Slug of the perspective requested last that could not be loaded
+    // (unknown, hidden structure, server error), null otherwise
+    unavailablePerspectiveSlug: string | null
     loading: boolean
     error: string | null | unknown
     fetchConnectedUser: () => Promise<void>
@@ -39,6 +42,7 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
     error: null,
     currentPerspective: null,
     ownPerspective: false,
+    unavailablePerspectiveSlug: null,
     fetchConnectedUser: async () => {
       set((state) => ({ user: { ...state.user, loading: true } }))
       try {
@@ -95,6 +99,7 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
         user: {
           ...state.user,
           currentPerspective: perspective,
+          unavailablePerspectiveSlug: null,
           ownPerspective:
             state.user.connectedUser?.person?.uid === perspective?.uid,
         },
@@ -141,7 +146,13 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
       }
     },
     setPerspectiveBySlug: async (slug: string) => {
-      set((state) => ({ user: { ...state.user, loading: true } }))
+      set((state) => ({
+        user: {
+          ...state.user,
+          loading: true,
+          unavailablePerspectiveSlug: null,
+        },
+      }))
 
       try {
         let endpoint = ''
@@ -176,10 +187,15 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
         }))
       } catch (error) {
         console.error('Failed to fetch entity by slug', error)
+        // Drop the previous perspective: its data must not be shown under the
+        // requested one.
         set((state) => ({
           user: {
             ...state.user,
             error,
+            currentPerspective: null,
+            ownPerspective: false,
+            unavailablePerspectiveSlug: slug,
           },
         }))
       } finally {

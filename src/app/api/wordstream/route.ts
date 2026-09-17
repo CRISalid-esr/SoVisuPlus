@@ -10,6 +10,7 @@ import {
 import { agentTypeFromString } from '@/types/IAgent'
 import { WordstreamTopic } from '@/types/WordStream'
 import { requireSession } from '@/app/auth/requireSession'
+import { isHiddenPerspective } from '@/app/auth/structureVisibility'
 
 export const GET = async (req: NextRequest) => {
   const { error: authError } = await requireSession()
@@ -51,6 +52,13 @@ export const GET = async (req: NextRequest) => {
       )
     }
     const lang = langRaw as ExtendedLanguageCode
+
+    if (await isHiddenPerspective(uid, entityType)) {
+      return NextResponse.json(
+        { error: `Structure ${uid} not found` },
+        { status: 404 },
+      )
+    }
 
     // --- required: topic (allow comma-separated list) ---
     const topicRaw = sp.get('topic')?.toLowerCase() ?? ''

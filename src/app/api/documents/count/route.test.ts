@@ -2,9 +2,13 @@
 // openid-client, which Jest cannot parse, hence the mocks.
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@/app/auth/auth_options', () => ({ __esModule: true, default: {} }))
+jest.mock('@/app/auth/structureVisibility', () => ({
+  isHiddenPerspective: jest.fn(),
+}))
 
 import { NextRequest } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { isHiddenPerspective } from '@/app/auth/structureVisibility'
 import { GET } from './route'
 
 jest.mock('../../../lib/services/DocumentService', () => ({
@@ -29,8 +33,11 @@ jest.mock('next/server', () => {
 
 const mockGetServerSession = getServerSession as jest.Mock
 
+const mockIsHiddenPerspective = isHiddenPerspective as jest.Mock
+
 beforeEach(() => {
   mockGetServerSession.mockResolvedValue({ user: { username: 'jdupont' } })
+  mockIsHiddenPerspective.mockResolvedValue(false)
 })
 
 describe('GET handler', () => {
@@ -112,5 +119,15 @@ describe('GET handler', () => {
     const response = await GET(req)
 
     expect(response.status).toBe(401)
+  })
+
+  it('answers a hidden structure perspective as not found', async () => {
+    mockIsHiddenPerspective.mockResolvedValue(true)
+
+    const response = await GET(
+      requestWith({ contributorType: 'research_unit' }),
+    )
+
+    expect(response.status).toBe(404)
   })
 })
