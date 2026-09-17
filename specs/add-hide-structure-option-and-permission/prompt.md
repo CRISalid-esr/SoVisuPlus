@@ -70,19 +70,25 @@ which grants full access however it was assigned (scoping `manage all` narrows t
 perimeter of the subjects that _have_ one, and `OrganizationUnit` has none, so a
 research-unit-scoped admin still manages structure visibility). Outside the wildcard,
 `manage` still matches any action and `all` any subject. It is used on both sides — server
-(`PATCH`, the `includeHidden` gate, the slug and members guards) and client (rendering the
+(`PATCH`, the `includeHidden` gate, the members guard) and client (rendering the
 switches). No `<Can>`, since the subject is a type rather than an instance.
 
 ## Surfaces
 
-| Surface                                | Behaviour                                                                    |
-| -------------------------------------- | ---------------------------------------------------------------------------- |
-| Structures page (3 tabs + CSV export)  | Hidden structures absent, unless "show hidden" is on for a structure manager |
-| Sidebar perspective search             | Hidden structures never returned, structure managers included                |
-| `GET /api/organizations/slug/[slug]`   | 404 for a hidden structure unless the caller can manage visibility           |
-| `GET /api/organizations/[uid]/members` | Same guard                                                                   |
-| Directory KPIs                         | Memberships toward a hidden structure drop out of the parent perimeters      |
-| `PersonIdentityCard` affiliations      | A hidden structure is not named                                              |
+A hidden structure is never a perspective, not even for a structure manager: its
+dashboard is unreachable (`isHiddenPerspective` in `src/app/auth/structureVisibility.ts`).
+Managers still see it, its KPIs and its members on the structures page.
+
+| Surface                                | Behaviour                                                                                                               |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Structures page (3 tabs + CSV export)  | Hidden structures absent, unless "show hidden" is on for a structure manager                                            |
+| Sidebar perspective search             | Hidden structures never returned, structure managers included                                                           |
+| `GET /api/organizations/slug/[slug]`   | 404 for a hidden structure, structure managers included                                                                 |
+| `GET /api/organizations/[uid]/members` | 404 for a hidden structure unless the caller can manage visibility                                                      |
+| Dashboard data routes                  | `documents`, `documents/count`, `documents/dataviz`, `wordstream`: 404 for a hidden structure perspective, for everyone |
+| "Dashboard" buttons (structures page)  | Disabled for a hidden structure, same look as the others, no hover effect                                               |
+| Directory KPIs                         | Memberships toward a hidden structure drop out of the parent perimeters                                                 |
+| `PersonIdentityCard` affiliations      | A hidden structure is not named                                                                                         |
 
 ### Known limit
 

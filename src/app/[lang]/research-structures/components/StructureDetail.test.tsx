@@ -103,3 +103,24 @@ describe('StructureDetail visibility toggle', () => {
     expect(toggle()).toBeDisabled()
   })
 })
+
+describe('StructureDetail dashboard link', () => {
+  const dashboardLink = () => screen.getByRole('button', { name: /dashboard/ })
+
+  it('navigates to the dashboard of a visible structure', async () => {
+    const onNavigate = jest.fn()
+    renderDetail({ onNavigate })
+
+    await userEvent.click(dashboardLink())
+    expect(onNavigate).toHaveBeenCalledWith(row())
+  })
+
+  it('is disabled for a hidden structure, even for a structure manager', () => {
+    renderDetail({
+      row: row({ hiddenEffective: true }),
+      canManageVisibility: true,
+    })
+
+    expect(dashboardLink()).toBeDisabled()
+  })
+})

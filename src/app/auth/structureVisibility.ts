@@ -1,6 +1,8 @@
 import { Session } from 'next-auth'
 import { hasUnscopedPermission } from '@/app/auth/ability'
 import { PermissionAction, PermissionSubject } from '@/types/Permission'
+import { AgentType } from '@/types/IAgent'
+import { OrganizationUnitService } from '@/lib/services/OrganizationUnitService'
 
 /**
  * Server-side gate of the structure visibility feature, shared by every
@@ -25,3 +27,16 @@ export const resolveIncludeHidden = (
 ): boolean =>
   searchParams.get('includeHidden') === 'true' &&
   canManageStructureVisibility(session)
+
+export const isHiddenPerspective = async (
+  uid: string,
+  type: AgentType,
+): Promise<boolean> => {
+  if (type === 'person' || !uid) {
+    return false
+  }
+  const visibility = await new OrganizationUnitService().fetchVisibilityState(
+    uid,
+  )
+  return visibility?.hiddenEffective ?? false
+}
