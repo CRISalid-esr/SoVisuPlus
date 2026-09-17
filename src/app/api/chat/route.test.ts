@@ -43,6 +43,8 @@ describe('POST /api/chat', () => {
       CRISALID_AGENTS_API_URL: 'http://agents.test',
       CRISALID_AGENTS_API_KEY: 'secret-key',
     }
+    // Chat enabled by default, whatever the developer's environment says.
+    delete process.env.CHAT_ENABLED
     mockSession.mockResolvedValue({
       user: { username: 'jdoe', name: 'Jane Doe', personUid: 'person-123' },
     })
@@ -59,6 +61,33 @@ describe('POST /api/chat', () => {
     mockSession.mockResolvedValue(null)
     const res = await POST(makeReq({}))
     expect(res.status).toBe(401)
+  })
+
+  it.each(['false', ' FALSE '])(
+    'returns 404 without calling upstream when CHAT_ENABLED is %p',
+    async (value) => {
+      process.env.CHAT_ENABLED = value
+      global.fetch = jest.fn() as jest.Mock
+
+      const res = await POST(makeReq({ message: {}, messages: [] }))
+
+      expect(res.status).toBe(404)
+      expect(res.body).toEqual({ error: 'AI chat is disabled' })
+      expect(global.fetch).not.toHaveBeenCalled()
+      expect(mockSession).not.toHaveBeenCalled()
+    },
+  )
+
+  it('proxies the request when CHAT_ENABLED is true', async () => {
+    process.env.CHAT_ENABLED = 'true'
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(new Response('ok\n', { status: 200 })) as jest.Mock
+
+    const res = await POST(makeReq({ message: {}, messages: [] }))
+
+    expect(res.status).toBe(200)
+    expect(global.fetch).toHaveBeenCalledTimes(1)
   })
 
   it('targets the agent named by CRISALID_AGENTS_AGENT', async () => {
