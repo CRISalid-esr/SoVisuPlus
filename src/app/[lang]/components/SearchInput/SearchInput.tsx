@@ -26,6 +26,8 @@ import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn'
 import { useSession } from 'next-auth/react'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
+import { findFuzzyMatchChunks } from '@/utils/fuzzySearch/fuzzySearch'
+import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
 
 interface IAutoCompleteGroupTag {
   label: string
@@ -451,6 +453,13 @@ const SearchInput: React.FC = () => {
               },
             }}
             placeholder={t`sidebar_search_placeholder`}
+            slotProps={{
+              htmlInput: {
+                // slotProps.htmlInput replaces the Autocomplete's inputProps
+                ...params.inputProps,
+                maxLength: MAX_NAME_SEARCH_QUERY_LENGTH,
+              },
+            }}
             fullWidth
           />
         )}
@@ -481,7 +490,11 @@ const SearchInput: React.FC = () => {
               <Highlighter
                 highlightClassName='highlight'
                 searchWords={[inputValue]}
-                autoEscape
+                // Results are fuzzy matches: highlight accent-insensitive and
+                // typo-tolerant matches, not only the literal input
+                findChunks={({ textToHighlight }) =>
+                  findFuzzyMatchChunks(textToHighlight, inputValue)
+                }
                 textToHighlight={option.label}
               />
             </li>

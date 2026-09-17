@@ -95,7 +95,7 @@ describe('GET /api/route', () => {
     const data = await response.json()
 
     expect(response.status).toBe(401)
-    expect(data).toEqual({ error: 'User not authenticated' })
+    expect(data).toEqual({ error: 'User is not authenticated' })
   })
 
   it('should return 404 if user is not found in the database', async () => {

@@ -1,5 +1,3 @@
-import { getServerSession, Session } from 'next-auth'
-import authOptions from '@/app/auth/auth_options'
 import { NextResponse } from 'next/server'
 import { PersonService } from '@/lib/services/PersonService'
 import { IdentifierConflictError, PersonDAO } from '@/lib/daos/PersonDAO'
@@ -17,6 +15,7 @@ import {
   computeIdentifierCapabilities,
   identifierSupportsAuth,
 } from '@/lib/identifiers/identifierCapabilities'
+import { requireSession } from '@/app/auth/requireSession'
 
 // Identifier types that can be added/removed through this route and their
 // validation rules. ORCID is validated after ORCIDIdentifier.normalize().
@@ -38,17 +37,10 @@ type RouteContext = { params: Promise<{ uid: string; type: string }> }
 
 const resolveContext = async (
   context: RouteContext,
-  session: Session | null,
 ): Promise<
   | { error: NextResponse }
   | { uid: string; identifierType: PersonIdentifierType }
 > => {
-  if (!session?.user?.authz) {
-    return {
-      error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
-    }
-  }
-
   const { uid, type } = await context.params
 
   const identifierType = PersonIdentifier.typeFromString(
@@ -83,8 +75,10 @@ const normaliseValue = (type: PersonIdentifierType, raw: string): string => {
 }
 
 export const PUT = async (request: Request, context: RouteContext) => {
-  const session = (await getServerSession(authOptions)) as Session
-  const resolved = await resolveContext(context, session)
+  const { session, error: authError } = await requireSession()
+  if (authError) return authError
+
+  const resolved = await resolveContext(context)
   if ('error' in resolved) return resolved.error
   const { uid, identifierType } = resolved
 
@@ -163,8 +157,10 @@ export const PUT = async (request: Request, context: RouteContext) => {
 }
 
 export const DELETE = async (_request: Request, context: RouteContext) => {
-  const session = (await getServerSession(authOptions)) as Session
-  const resolved = await resolveContext(context, session)
+  const { session, error: authError } = await requireSession()
+  if (authError) return authError
+
+  const resolved = await resolveContext(context)
   if ('error' in resolved) return resolved.error
   const { uid, identifierType } = resolved
 

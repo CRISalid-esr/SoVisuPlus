@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import authOptions from '@/app/auth/auth_options'
+import { requireSession } from '@/app/auth/requireSession'
 import { OrcidPublicClient } from '@/lib/services/OrcidPublicClient'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 
@@ -14,10 +13,8 @@ type RouteContext = { params: Promise<{ orcid: string }> }
  * /api/aurehal/author).
  */
 export const GET = async (_req: NextRequest, context: RouteContext) => {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.authz) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const { error: authError } = await requireSession()
+  if (authError) return authError
 
   const { orcid } = await context.params
   const normalized = ORCIDIdentifier.normalize(orcid)
