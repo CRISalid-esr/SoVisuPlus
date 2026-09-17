@@ -3,7 +3,6 @@ import { getServerSession, Session } from 'next-auth'
 import authOptions from '@/app/auth/auth_options'
 import { CrisalidAgentsChatClient } from '@/lib/services/CrisalidAgentsChatClient'
 import { chatConfigService } from '@/lib/services/ChatConfigService'
-import { isChatEnabledByEnv } from '@/utils/chatEnabled'
 
 /**
  * Backend proxy for the Crisalid Agents chat API. Keeps the browser from calling the agents
@@ -85,8 +84,9 @@ const buildUserContext = (
 }
 
 export const POST = async (request: NextRequest) => {
-  // Deployment kill switch: refuse before touching the session or the upstream.
-  if (!isChatEnabledByEnv()) {
+  // Same gate as the widget (CHAT_ENABLED, agents URL, chat config): refuse before touching the
+  // session or the upstream.
+  if (!(await chatConfigService.isChatEnabled())) {
     return NextResponse.json({ error: 'AI chat is disabled' }, { status: 404 })
   }
 

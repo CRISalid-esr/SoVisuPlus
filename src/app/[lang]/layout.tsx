@@ -13,7 +13,6 @@ import { LanguageProvider } from './LanguageProvider'
 import { EnvInjector } from '@/components/EnvInjector'
 import { ChatConfigInjector } from '@/components/ChatConfigInjector'
 import { chatConfigService } from '@/lib/services/ChatConfigService'
-import { isChatEnabledByEnv } from '@/utils/chatEnabled'
 import Script from 'next/script'
 
 type Props = {
@@ -29,13 +28,9 @@ const RootLayout = async ({ params, children }: Props) => {
   const { lang, selectedMessages } = await resolveLanguage(params, messages)
 
   // The agents API URL stays server-side (the /api/chat proxy holds it); the browser only gets a
-  // boolean deciding whether to show the chat, plus the localised welcome/suggestions. The widget
-  // is shown only when CHAT_ENABLED is not `false` AND the backend is configured AND a chat config
-  // file resolved.
-  const chatEnabled =
-    isChatEnabledByEnv() &&
-    Boolean(process.env.CRISALID_AGENTS_API_URL) &&
-    (await chatConfigService.isAvailable())
+  // boolean deciding whether to show the chat, plus the localised welcome/suggestions. See
+  // `ChatConfigService.isChatEnabled` for the conditions.
+  const chatEnabled = await chatConfigService.isChatEnabled()
   const chatClientConfig = await chatConfigService.getClientConfig(lang)
 
   return (
