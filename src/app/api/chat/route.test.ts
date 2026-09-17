@@ -8,7 +8,10 @@ import { POST } from './route'
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@/app/auth/auth_options', () => ({ __esModule: true, default: {} }))
 jest.mock('@/lib/services/ChatConfigService', () => ({
-  chatConfigService: { getSystemPrompt: jest.fn().mockResolvedValue('') },
+  chatConfigService: {
+    getSystemPrompt: jest.fn().mockResolvedValue(''),
+    isChatEnabled: jest.fn().mockResolvedValue(true),
+  },
 }))
 jest.mock('next/server', () => ({
   NextResponse: {
@@ -21,6 +24,7 @@ jest.mock('next/server', () => ({
 
 const mockSession = getServerSession as jest.Mock
 const mockGetSystemPrompt = chatConfigService.getSystemPrompt as jest.Mock
+const mockIsChatEnabled = chatConfigService.isChatEnabled as jest.Mock
 
 // Minimal NextRequest stand-in exposing the two members the route reads.
 const makeReq = (body: unknown) =>
@@ -48,6 +52,7 @@ describe('POST /api/chat', () => {
     })
     // Default: no system prompt configured (cleared by clearAllMocks above).
     mockGetSystemPrompt.mockResolvedValue('')
+    mockIsChatEnabled.mockResolvedValue(true)
   })
 
   afterEach(() => {
@@ -59,6 +64,18 @@ describe('POST /api/chat', () => {
     mockSession.mockResolvedValue(null)
     const res = await POST(makeReq({}))
     expect(res.status).toBe(401)
+  })
+
+  it('returns 404 without checking the session or calling upstream when the chat is disabled', async () => {
+    mockIsChatEnabled.mockResolvedValue(false)
+    global.fetch = jest.fn() as jest.Mock
+
+    const res = await POST(makeReq({ message: {}, messages: [] }))
+
+    expect(res.status).toBe(404)
+    expect(res.body).toEqual({ error: 'AI chat is disabled' })
+    expect(global.fetch).not.toHaveBeenCalled()
+    expect(mockSession).not.toHaveBeenCalled()
   })
 
   it('targets the agent named by CRISALID_AGENTS_AGENT', async () => {
