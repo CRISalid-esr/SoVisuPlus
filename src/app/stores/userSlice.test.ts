@@ -213,6 +213,40 @@ describe('addUserSlice Tests', () => {
     expect(updatedState.user.currentPerspective).toBeNull()
   })
 
+  it('setPerspectiveBySlug should flag the slug as unavailable when the fetch fails', async () => {
+    useStore.setState((state) => ({
+      user: {
+        ...state.user,
+        connectedUser: mockUser,
+        currentPerspective: otherPerson,
+      },
+    }))
+    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 404 })
+
+    await useStore.getState().user.setPerspectiveBySlug('org:hidden-unit')
+
+    const updatedState = useStore.getState()
+    expect(updatedState.user.unavailablePerspectiveSlug).toBe('org:hidden-unit')
+    expect(updatedState.user.currentPerspective).toBeNull()
+    expect(updatedState.user.loading).toBe(false)
+  })
+
+  it('setPerspectiveBySlug should clear the unavailable flag once a perspective loads', async () => {
+    useStore.setState((state) => ({
+      user: { ...state.user, unavailablePerspectiveSlug: 'org:hidden-unit' },
+    }))
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => organizationUnit,
+    })
+
+    await useStore
+      .getState()
+      .user.setPerspectiveBySlug('org:some-research-unit')
+
+    expect(useStore.getState().user.unavailablePerspectiveSlug).toBeNull()
+  })
+
   it('refreshPerspective should refetch a person perspective from the person endpoint', async () => {
     useStore.setState((state) => ({
       user: {

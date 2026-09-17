@@ -13,13 +13,17 @@ import { SnackbarProvider } from 'notistack'
 import WebSocketListener from '@/lib/websocket/WebSocketListener'
 import { NavigationGuardProvider } from '@/app/[lang]/components/NavigationGuard/NavigationGuardProvider'
 import AiChatWidget from 'src/app/[lang]/components/AiChatWidget'
+import PerspectiveUnavailable from '@/app/[lang]/components/PerspectiveUnavailable'
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const [open, setOpen] = useState(true) // Determines if the drawer is expanded or collapsed
 
-  const { currentPerspective, setPerspective, setPerspectiveBySlug } = useStore(
-    (state) => state.user,
-  )
+  const {
+    currentPerspective,
+    setPerspective,
+    setPerspectiveBySlug,
+    unavailablePerspectiveSlug,
+  } = useStore((state) => state.user)
   const searchParams = useSearchParams()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
@@ -40,9 +44,17 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     }
   }, [connectedUser, fetchConnectedUser])
 
+  const perspectiveSlugFromUrl = searchParams?.get('perspective')
+  const perspectiveUnavailable =
+    !!perspectiveSlugFromUrl &&
+    perspectiveSlugFromUrl === unavailablePerspectiveSlug
+
   // if the current perspective is not set, set it to the connected user
   useEffect(() => {
-    const perspectiveSlugFromUrl = searchParams?.get('perspective')
+    // The perspective in the url already failed to load: don't retry it
+    if (perspectiveUnavailable) {
+      return
+    }
     // If the perspective is set from the url and matches
     // the current perspective, do nothing
     if (
@@ -66,7 +78,14 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       // the connected user will watch her/his own works
       setPerspective(connectedUser.person as IAgent)
     }
-  }, [connectedUser, currentPerspective, setPerspective, searchParams])
+  }, [
+    connectedUser,
+    currentPerspective,
+    setPerspective,
+    setPerspectiveBySlug,
+    perspectiveSlugFromUrl,
+    perspectiveUnavailable,
+  ])
 
   if (loading && !connectedUser) {
     return <p>Loading...</p>
@@ -104,7 +123,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 position: 'relative', // Ensure main is properly positioned
               }}
             >
-              {children}
+              {perspectiveUnavailable ? <PerspectiveUnavailable /> : children}
             </Box>
           </Box>
           <AiChatWidget />

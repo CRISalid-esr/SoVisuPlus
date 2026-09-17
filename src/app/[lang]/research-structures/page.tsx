@@ -51,6 +51,7 @@ import {
   withPendingRows,
 } from './components/directoryRows'
 import RateBar from './components/RateBar'
+import DashboardLinkButton from './components/DashboardLinkButton'
 import StructureNameCell from './components/StructureNameCell'
 import StructureTreeExplorer from './components/StructureTreeExplorer'
 
@@ -181,17 +182,13 @@ const dashboardColumn = (
   enableColumnFilter: false,
   size: 120,
   Cell({ row }) {
-    if (!row.original.slug) {
-      return null
-    }
     return (
-      <Button
+      <DashboardLinkButton
+        row={row.original}
+        onNavigate={onNavigate}
         size='small'
         variant='text'
-        onClick={() => onNavigate(row.original)}
-      >
-        {t`research_structures_dashboard_link`}
-      </Button>
+      />
     )
   },
 })
@@ -483,7 +480,7 @@ const ResearchStructuresPage = () => {
 
   const navigateToDashboard = useCallback(
     (row: StructureRow) => {
-      if (row.slug) {
+      if (row.slug && !row.hiddenEffective) {
         router.push(`/${lang}/dashboard?perspective=${row.slug}`)
       }
     },

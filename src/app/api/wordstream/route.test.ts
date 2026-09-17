@@ -2,9 +2,13 @@
 // openid-client, which Jest cannot parse, hence the mocks.
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@/app/auth/auth_options', () => ({ __esModule: true, default: {} }))
+jest.mock('@/app/auth/structureVisibility', () => ({
+  isHiddenPerspective: jest.fn(),
+}))
 
 import { NextRequest } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { isHiddenPerspective } from '@/app/auth/structureVisibility'
 import { GET } from './route'
 
 const mockComputeWordStreamForAgent = jest.fn()
@@ -29,6 +33,7 @@ jest.mock('next/server', () => ({
 }))
 
 const mockGetServerSession = getServerSession as jest.Mock
+const mockIsHiddenPerspective = isHiddenPerspective as jest.Mock
 
 const requestWith = (params: Record<string, string>) =>
   ({
@@ -48,6 +53,7 @@ describe('GET /api/wordstream', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockGetServerSession.mockResolvedValue({ user: { username: 'jdupont' } })
+    mockIsHiddenPerspective.mockResolvedValue(false)
     mockComputeWordStreamForAgent.mockResolvedValue({ series: [] })
   })
 
@@ -71,5 +77,15 @@ describe('GET /api/wordstream', () => {
 
     expect(response.status).toBe(401)
     expect(mockComputeWordStreamForAgent).not.toHaveBeenCalled()
+  })
+
+  it('answers a hidden structure perspective as not found', async () => {
+    mockIsHiddenPerspective.mockResolvedValue(true)
+
+    const response = await GET(
+      requestWith({ ...validParams, entityType: 'research_unit' }),
+    )
+
+    expect(response.status).toBe(404)
   })
 })
