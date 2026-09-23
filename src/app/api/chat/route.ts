@@ -84,6 +84,12 @@ const buildUserContext = (
 }
 
 export const POST = async (request: NextRequest) => {
+  // Same gate as the widget (CHAT_ENABLED, agents URL, chat config): refuse before touching the
+  // session or the upstream.
+  if (!(await chatConfigService.isChatEnabled())) {
+    return NextResponse.json({ error: 'AI chat is disabled' }, { status: 404 })
+  }
+
   const session = (await getServerSession(authOptions)) as Session & {
     user: {
       username?: string
