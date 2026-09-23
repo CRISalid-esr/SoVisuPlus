@@ -27,7 +27,7 @@ export interface HalDepositSlice {
       documentUid: string,
       form: FormData,
     ) => Promise<{ success: boolean; error?: string; reason?: string }>
-    refreshDeposit: (depositId: number) => Promise<void>
+    refreshDeposit: (depositId: number) => Promise<{ success: boolean }>
     applyDepositEvent: (event: HalDepositEventPayload) => void
   }
 }
@@ -53,11 +53,16 @@ export const addHalDepositSlice: StateCreator<
         const res = await fetch(
           `/api/hal/deposits?documentUid=${encodeURIComponent(documentUid)}`,
         )
-        const deposit = res.ok ? ((await res.json()) as HalDepositView | null) : null
+        const deposit = res.ok
+          ? ((await res.json()) as HalDepositView | null)
+          : null
         set((state) => ({
           halDeposit: {
             ...state.halDeposit,
-            byDocument: { ...state.halDeposit.byDocument, [documentUid]: deposit },
+            byDocument: {
+              ...state.halDeposit.byDocument,
+              [documentUid]: deposit,
+            },
             loading: { ...state.halDeposit.loading, [documentUid]: false },
           },
         }))
@@ -101,7 +106,22 @@ export const addHalDepositSlice: StateCreator<
     },
 
     refreshDeposit: async (depositId: number) => {
-      await fetch(`/api/hal/deposits/${depositId}/refresh`, { method: 'POST' })
+      try {
+        const res = await fetch(`/api/hal/deposits/${depositId}/refresh`, {
+          method: 'POST',
+        })
+        if (!res.ok) {
+          const body = await res.json().catch(() => null)
+          console.error(
+            `HAL deposit ${depositId} refresh failed (${res.status}):`,
+            body?.error ?? res.statusText,
+          )
+        }
+        return { success: res.ok }
+      } catch (error) {
+        console.error(`HAL deposit ${depositId} refresh failed:`, error)
+        return { success: false }
+      }
     },
 
     applyDepositEvent: (event: HalDepositEventPayload) => {

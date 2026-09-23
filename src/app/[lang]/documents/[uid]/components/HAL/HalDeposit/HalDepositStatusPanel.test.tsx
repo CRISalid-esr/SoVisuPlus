@@ -1,11 +1,15 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import useStore from '@/stores/global_store'
 import type { HalDepositView } from '@/stores/halDepositSlice'
 import { HalDepositStatusPanel } from './HalDepositStatusPanel'
 
-jest.mock('@/stores/global_store', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('@/stores/global_store', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
 
 const refreshDeposit = jest.fn()
 
@@ -63,9 +67,31 @@ describe('HalDepositStatusPanel', () => {
     expect(
       screen.getByText('hal_deposit_status_moderation_title'),
     ).toBeInTheDocument()
+    expect(screen.getByText('hal_deposit_status_refresh')).toBeInTheDocument()
+  })
+
+  it('reports a refused refresh request', async () => {
+    refreshDeposit.mockResolvedValue({ success: false })
+    const user = userEvent.setup()
+    renderPanel(deposit({ status: 'verify', halId: 'hal-2' }))
+    await user.click(screen.getByText('hal_deposit_status_refresh'))
+    expect(refreshDeposit).toHaveBeenCalledWith(1)
     expect(
-      screen.getByText('hal_deposit_status_refresh'),
+      await screen.findByText('hal_deposit_status_refresh_failed'),
     ).toBeInTheDocument()
+  })
+
+  it('shows no error after a successful refresh request', async () => {
+    refreshDeposit.mockResolvedValue({ success: true })
+    const user = userEvent.setup()
+    renderPanel(deposit({ status: 'verify', halId: 'hal-2' }))
+    await user.click(screen.getByText('hal_deposit_status_refresh'))
+    expect(
+      await screen.findByText('hal_deposit_status_refresh'),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText('hal_deposit_status_refresh_failed'),
+    ).not.toBeInTheDocument()
   })
 
   it('shows the error message for a failed submission', () => {

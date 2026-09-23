@@ -48,6 +48,7 @@ interface Props {
 export function HalDepositStatusPanel({ deposit }: Props) {
   const { refreshDeposit } = useStore((s) => s.halDeposit)
   const [refreshing, setRefreshing] = useState(false)
+  const [refreshFailed, setRefreshFailed] = useState(false)
 
   const submittedAt = deposit.createdAt
     ? new Date(deposit.createdAt).toLocaleDateString()
@@ -55,7 +56,9 @@ export function HalDepositStatusPanel({ deposit }: Props) {
 
   const handleRefresh = async () => {
     setRefreshing(true)
-    await refreshDeposit(deposit.id)
+    setRefreshFailed(false)
+    const { success } = await refreshDeposit(deposit.id)
+    setRefreshFailed(!success)
     setRefreshing(false)
   }
 
@@ -99,6 +102,12 @@ export function HalDepositStatusPanel({ deposit }: Props) {
       {deposit.comment && (
         <Alert severity='warning' sx={{ mb: 2 }}>
           {deposit.comment}
+        </Alert>
+      )}
+
+      {refreshFailed && (
+        <Alert severity='error' sx={{ mb: 2 }}>
+          <Trans>hal_deposit_status_refresh_failed</Trans>
         </Alert>
       )}
 
@@ -193,9 +202,7 @@ type StatusView = {
 
 const STATUS_VIEWS: Record<string, StatusView> = {
   pending: {
-    icon: (
-      <LinearProgress color='info' sx={{ width: 96, borderRadius: 1 }} />
-    ),
+    icon: <LinearProgress color='info' sx={{ width: 96, borderRadius: 1 }} />,
     color: 'info.main',
     severity: 'info',
     title: <Trans>hal_deposit_status_in_progress_title</Trans>,
