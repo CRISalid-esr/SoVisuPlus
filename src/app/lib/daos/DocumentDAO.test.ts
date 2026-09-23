@@ -108,7 +108,7 @@ describe('DocumentDAO', () => {
 
   afterAll(() => {
     process.env.PUBLICATION_LIST_ROLES_FILTER = ''
-    process.env.PERSPECTIVES_ROLES_FILTER = ''
+    process.env.PERSPECTIVE_ROLES_FILTER = ''
     process.env.NEXT_PUBLIC_SUPPORTED_LOCALES = ''
   })
 
