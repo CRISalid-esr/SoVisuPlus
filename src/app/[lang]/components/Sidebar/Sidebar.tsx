@@ -50,9 +50,11 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import LanguageSwitcher from '@/components/LanguageSwitcher/LanguageSwitcher'
 import { HelpOutline, PermIdentityOutlined } from '@mui/icons-material'
 import { getRuntimeEnv } from '@/utils/runtimeEnv'
+import { resolveHelpLink } from '@/utils/helpLink'
 import { t } from '@lingui/core/macro'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useMemo, useState } from 'react'
+import { useSnackbar } from 'notistack'
 
 interface SidebarProps {
   handleToggleDrawerAction: () => void
@@ -78,7 +80,8 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
     }
     return params.toString()
   }, [searchParams, pathname, lang])
-  const helpUrl = getRuntimeEnv().NEXT_PUBLIC_HELP_URL
+  const helpLink = resolveHelpLink(getRuntimeEnv())
+  const { enqueueSnackbar } = useSnackbar()
   const [accountMenu, setAccountMenu] = useState<null | HTMLElement>(null)
 
   const handleThemeChange = (event: SelectChangeEvent) => {
@@ -767,52 +770,70 @@ const Sidebar = ({ open, handleToggleDrawerAction, user }: SidebarProps) => {
                   </ListItem>
                 )}
               </Box>
-              <Box>
-                <ListItem
-                  sx={{
-                    paddingLeft: '14px',
-                    marginBottom: theme.utils.pxToRem(4),
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    color: theme.palette.primaryContainer,
-                    '&:hover': {
-                      backgroundColor: theme.palette.sidebarItemHover,
-                      borderRadius: theme.utils.pxToRem(8),
-                      color: theme.palette.primaryContainer,
-                    },
-                  }}
-                  component={GuardedLink}
-                  href={helpUrl}
-                  onClick={() => isMobile && handleToggleDrawerAction()}
-                >
-                  <ListItemIcon
+              {helpLink && (
+                <Box>
+                  <ListItem
                     sx={{
-                      height: theme.utils.pxToRem(24),
-                      width: theme.utils.pxToRem(24),
-                      minWidth: 'unset',
-                      marginRight: open ? theme.utils.pxToRem(12) : 0,
-                      color: 'inherit',
+                      paddingLeft: '14px',
+                      marginBottom: theme.utils.pxToRem(4),
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      color: theme.palette.primaryContainer,
+                      '&:hover': {
+                        backgroundColor: theme.palette.sidebarItemHover,
+                        borderRadius: theme.utils.pxToRem(8),
+                        color: theme.palette.primaryContainer,
+                      },
+                    }}
+                    component={GuardedLink}
+                    href={helpLink.href}
+                    {...(helpLink.external && {
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                    })}
+                    onClick={() => {
+                      if (helpLink.email) {
+                        navigator.clipboard
+                          ?.writeText(helpLink.email)
+                          .then(() =>
+                            enqueueSnackbar(t`sidebar_help_email_copied`, {
+                              variant: 'success',
+                            }),
+                          )
+                          .catch(() => {})
+                      }
+                      if (isMobile) handleToggleDrawerAction()
                     }}
                   >
-                    <HelpOutline />
-                  </ListItemIcon>
-                  {open && (
-                    <ListItemText
+                    <ListItemIcon
                       sx={{
-                        '& .MuiTypography-root': {
-                          fontFamily: 'Inter, Roboto, sans-serif',
-                          fontSize: theme.utils.pxToRem(16),
-                          fontWeight: theme.typography.fontWeightRegular,
-                          lineHeight:
-                            theme.typography.lineHeight.lineHeight24px,
-                        },
+                        height: theme.utils.pxToRem(24),
+                        width: theme.utils.pxToRem(24),
+                        minWidth: 'unset',
+                        marginRight: open ? theme.utils.pxToRem(12) : 0,
+                        color: 'inherit',
                       }}
-                      primary={<Trans>sidebar_help_button</Trans>}
-                    />
-                  )}
-                </ListItem>
-              </Box>
+                    >
+                      <HelpOutline />
+                    </ListItemIcon>
+                    {open && (
+                      <ListItemText
+                        sx={{
+                          '& .MuiTypography-root': {
+                            fontFamily: 'Inter, Roboto, sans-serif',
+                            fontSize: theme.utils.pxToRem(16),
+                            fontWeight: theme.typography.fontWeightRegular,
+                            lineHeight:
+                              theme.typography.lineHeight.lineHeight24px,
+                          },
+                        }}
+                        primary={<Trans>sidebar_help_button</Trans>}
+                      />
+                    )}
+                  </ListItem>
+                </Box>
+              )}
             </Box>
           </Box>
           <Box
