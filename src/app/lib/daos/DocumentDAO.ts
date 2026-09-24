@@ -26,6 +26,12 @@ import { Literal, LiteralJson } from '@/types/Literal'
 import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
 import { HalStatusFilterValue } from '@/types/HalStatusFilter'
 import { DashboardDocumentData } from '@/types/DashboardDocumentData'
+import {
+  normalizeSearchText,
+  tokenizeDocumentSearchQuery,
+} from '@/utils/fuzzySearch/fuzzySearch'
+import { expandSearchTokens } from '@/lib/daos/search/SearchTermExpander'
+import { backfillNormalizedColumn } from '@/lib/daos/search/backfillNormalizedColumn'
 
 type DbColumnFilters =
   | { id: 'date'; value: [string | null, string | null] }
@@ -54,6 +60,9 @@ interface CountDocumentsFromDBParams {
   halCollectionCodes: string[]
   areHalCollectionCodesOmitted: boolean
 }
+
+/** Column filters matched as free text, like the global search term. */
+const TEXT_SEARCH_FILTER_IDS = ['titles', 'contributions', 'publishedIn']
 
 export class DocumentDAO extends AbstractDAO {
   /**
@@ -104,11 +113,13 @@ export class DocumentDAO extends AbstractDAO {
           update: {
             publisher: journal.publisher,
             title: journal.title,
+            normalizedTitle: normalizeSearchText(journal.title),
           },
           create: {
             issnL: journal.issnL,
             publisher: journal.publisher,
             title: journal.title,
+            normalizedTitle: normalizeSearchText(journal.title),
           },
         })
 
@@ -247,11 +258,13 @@ export class DocumentDAO extends AbstractDAO {
           },
           update: {
             value: title.value,
+            normalizedValue: normalizeSearchText(title.value),
           },
           create: {
             documentId: dbDocument.id,
             language: title.language ?? null,
             value: title.value,
+            normalizedValue: normalizeSearchText(title.value),
           },
         })
       }
@@ -498,20 +511,55 @@ export class DocumentDAO extends AbstractDAO {
     return where.AND ? (Array.isArray(where.AND) ? where.AND : [where.AND]) : []
   }
 
-  createFetchDocumentsWhere({
-    searchTerm,
-    columnFilters,
-    halCollectionCodes,
-    areHalCollectionCodesOmitted,
-    contributorUids,
-  }: {
-    searchTerm: string
-    searchLang: string
-    columnFilters: DbColumnFilters[]
-    contributorUids: string[]
-    halCollectionCodes: string[]
-    areHalCollectionCodesOmitted: boolean
-  }): Prisma.DocumentWhereInput {
+  /**
+   * Text search (global search term and the titles / contributions /
+   * publishedIn column filters) is fuzzy: every word must match, in any
+   * order, case- and diacritics-insensitively, against the normalized search
+   * columns. A word also matches its typo variants when `searchVariants`
+   * provides them (see expandSearchTokens); without it, words match as
+   * substrings only.
+   */
+  createFetchDocumentsWhere(
+    {
+      searchTerm,
+      columnFilters,
+      halCollectionCodes,
+      areHalCollectionCodesOmitted,
+      contributorUids,
+    }: {
+      searchTerm: string
+      searchLang: string
+      columnFilters: DbColumnFilters[]
+      contributorUids: string[]
+      halCollectionCodes: string[]
+      areHalCollectionCodesOmitted: boolean
+    },
+    searchVariants: Map<string, string[]> = new Map(),
+  ): Prisma.DocumentWhereInput {
+    const variantsOf = (token: string) => searchVariants.get(token) ?? [token]
+    const containsAnyVariant = <Field extends string>(
+      field: Field,
+      token: string,
+    ) => ({
+      OR: variantsOf(token).map(
+        (variant) =>
+          ({ [field]: { contains: variant } }) as Record<
+            Field,
+            { contains: string }
+          >,
+      ),
+    })
+    // All the words of a column filter must match the same title / person /
+    // journal
+    const everyTokenMatches = <Field extends string>(
+      field: Field,
+      value: string,
+    ) => ({
+      AND: tokenizeDocumentSearchQuery(value).map((token) =>
+        containsAnyVariant(field, token),
+      ),
+    })
+
     const publicationListRolesFilter = parseStrArrayEnvVar(
       process.env.PUBLICATION_LIST_ROLES_FILTER,
     )
@@ -536,104 +584,60 @@ export class DocumentDAO extends AbstractDAO {
       }
     }
 
-    if (searchTerm) {
+    const searchTokens = tokenizeDocumentSearchQuery(searchTerm)
+    if (searchTokens.length > 0) {
       where = {
         ...where,
         AND: [
           ...this.computeExistingAnd(where),
-          {
+          ...searchTokens.map((token): Prisma.DocumentWhereInput => ({
             OR: [
               {
-                titles: {
-                  some: {
-                    value: {
-                      contains: searchTerm,
-                      mode: QueryMode.insensitive,
-                    },
-                  },
-                },
-              },
-              {
-                abstracts: {
-                  some: {
-                    value: {
-                      contains: searchTerm,
-                      mode: QueryMode.insensitive,
-                    },
-                  },
-                },
+                titles: { some: containsAnyVariant('normalizedValue', token) },
               },
               {
                 contributions: {
                   some: {
-                    person: {
-                      displayName: {
-                        contains: searchTerm,
-                        mode: QueryMode.insensitive,
-                      },
-                    },
+                    person: containsAnyVariant('normalizedName', token),
                   },
                 },
               },
               {
                 publicationDate: {
-                  contains: searchTerm,
+                  contains: token,
                   mode: QueryMode.insensitive,
                 },
               },
-              {
-                journal: {
-                  title: {
-                    contains: searchTerm,
-                    mode: QueryMode.insensitive,
-                  },
-                },
-              },
+              { journal: containsAnyVariant('normalizedTitle', token) },
             ],
-          },
+          })),
         ],
       }
     }
 
     columnFilters.forEach((filter) => {
-      if (filter.id === 'titles' && typeof filter.value === 'string') {
+      if (
+        filter.id === 'titles' &&
+        typeof filter.value === 'string' &&
+        tokenizeDocumentSearchQuery(filter.value).length > 0
+      ) {
         where = {
           ...where,
           titles: {
-            some: {
-              value: {
-                contains: filter.value,
-                mode: QueryMode.insensitive,
-              },
-            },
+            some: everyTokenMatches('normalizedValue', filter.value),
           },
         }
       }
 
-      if (filter.id === 'abstracts' && typeof filter.value === 'string') {
-        where = {
-          ...where,
-          abstracts: {
-            some: {
-              value: {
-                contains: filter.value,
-                mode: QueryMode.insensitive,
-              },
-            },
-          },
-        }
-      }
-
-      if (filter.id === 'contributions' && typeof filter.value === 'string') {
+      if (
+        filter.id === 'contributions' &&
+        typeof filter.value === 'string' &&
+        tokenizeDocumentSearchQuery(filter.value).length > 0
+      ) {
         const nameFilter: Prisma.DocumentWhereInput = {
           contributions: {
             some: {
-              person: {
-                displayName: {
-                  contains: filter.value,
-                  mode: QueryMode.insensitive,
-                },
-              },
+              person: everyTokenMatches('normalizedName', filter.value),
             },
           },
         }
@@ -747,15 +751,14 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
 
-      if (filter.id === 'publishedIn' && typeof filter.value === 'string') {
+      if (
+        filter.id === 'publishedIn' &&
+        typeof filter.value === 'string' &&
+        tokenizeDocumentSearchQuery(filter.value).length > 0
+      ) {
         where = {
           ...where,
-          journal: {
-            title: {
-              contains: filter.value,
-              mode: QueryMode.insensitive,
-            },
-          },
+          journal: everyTokenMatches('normalizedTitle', filter.value),
         }
       }
 
@@ -911,7 +914,10 @@ export class DocumentDAO extends AbstractDAO {
 
     const skip = (page - 1) * pageSize
 
-    const where = this.createFetchDocumentsWhere(params)
+    const where = this.createFetchDocumentsWhere(
+      params,
+      await this.expandTextSearch(params),
+    )
     const orderBy = this.createFetchDocumentsOrderBy(params)
 
     const dbDocuments = await this.prismaClient.document.findMany({
@@ -1108,8 +1114,29 @@ export class DocumentDAO extends AbstractDAO {
     params: CountDocumentsFromDBParams,
   ): Promise<number> {
     return this.prismaClient.document.count({
-      where: this.createFetchDocumentsWhere(params),
+      where: this.createFetchDocumentsWhere(
+        params,
+        await this.expandTextSearch(params),
+      ),
     })
+  }
+
+  /** Typo variants of the words of the global search and text filters. */
+  private async expandTextSearch({
+    searchTerm,
+    columnFilters,
+  }: CountDocumentsFromDBParams): Promise<Map<string, string[]>> {
+    const texts = [
+      searchTerm,
+      ...columnFilters
+        .filter((filter) => TEXT_SEARCH_FILTER_IDS.includes(filter.id))
+        .map((filter) => filter.value)
+        .filter((value): value is string => typeof value === 'string'),
+    ]
+    const tokens = texts.flatMap(tokenizeDocumentSearchQuery)
+    return tokens.length > 0
+      ? expandSearchTokens(this.prismaClient, tokens)
+      : new Map()
   }
 
   async fetchDocumentById(uid: string): Promise<Document | null> {
@@ -1242,6 +1269,7 @@ export class DocumentDAO extends AbstractDAO {
             data: titles.map((title) => ({
               language: title.language,
               value: title.value,
+              normalizedValue: normalizeSearchText(title.value),
             })),
           },
         },
@@ -1532,5 +1560,47 @@ export class DocumentDAO extends AbstractDAO {
         )
       }
     }
+  }
+
+  /**
+   * Fill the search-only normalized columns of titles and journals
+   * written before they existed. Idempotent. Returns the updated row count.
+   */
+  async backfillNormalizedSearchColumns(batchSize?: number): Promise<number> {
+    const titles = await backfillNormalizedColumn(
+      this.prismaClient,
+      async (take) =>
+        (
+          await this.prismaClient.documentTitle.findMany({
+            where: { normalizedValue: null },
+            select: { id: true, value: true },
+            take,
+          })
+        ).map((row) => ({ id: row.id, source: row.value })),
+      (id, normalized) =>
+        this.prismaClient.documentTitle.update({
+          where: { id },
+          data: { normalizedValue: normalized },
+        }),
+      batchSize,
+    )
+    const journals = await backfillNormalizedColumn(
+      this.prismaClient,
+      async (take) =>
+        (
+          await this.prismaClient.journal.findMany({
+            where: { normalizedTitle: null },
+            select: { id: true, title: true },
+            take,
+          })
+        ).map((row) => ({ id: row.id, source: row.title })),
+      (id, normalized) =>
+        this.prismaClient.journal.update({
+          where: { id },
+          data: { normalizedTitle: normalized },
+        }),
+      batchSize,
+    )
+    return titles + journals
   }
 }

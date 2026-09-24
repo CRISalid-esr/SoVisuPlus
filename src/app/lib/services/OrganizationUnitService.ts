@@ -7,7 +7,7 @@ import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { StructureMember } from '@/types/StructureMember'
 import { employeeTypeLabel } from '@/lib/employeeTypes'
-import removeAccents from 'remove-accents'
+import { fuzzyScore } from '@/utils/fuzzySearch/fuzzySearch'
 import { OrganizationDirectoryEntry } from '@/types/OrganizationDirectory'
 import { computeEffectiveHidden } from '@/lib/services/organizationVisibility'
 import { Literal } from '@/types/Literal'
@@ -258,7 +258,7 @@ export class OrganizationUnitService {
    * rows (children's members are seen by selecting the child — no perimeter
    * aggregation, so the total may differ from the directory membersCount).
    *
-   * Filtering (presence, name search), per-person KPIs over the directory
+   * Filtering (presence, fuzzy name search), per-person KPIs over the directory
    * window, sorting and pagination all happen here, in memory: member sets
    * are at most a few thousand rows. Returns null for an unknown structure.
    */
@@ -284,15 +284,19 @@ export class OrganizationUnitService {
         (member) => member.endDate === null || member.endDate >= today,
       )
     }
-    const search = removeAccents(query.search.trim()).toLowerCase()
-    if (search !== '') {
-      members = members.filter((member) =>
-        removeAccents(
-          `${member.displayName} ${member.firstName} ${member.lastName}`,
+    const searchScores = new Map<StructureMember, number>()
+    if (query.search.trim() !== '') {
+      for (const member of members) {
+        searchScores.set(
+          member,
+          fuzzyScore(query.search, [
+            member.displayName,
+            member.firstName,
+            member.lastName,
+          ]),
         )
-          .toLowerCase()
-          .includes(search),
-      )
+      }
+      members = members.filter((member) => searchScores.get(member)! > 0)
     }
 
     // Position: the corps code of the member's employment — the row itself
@@ -356,7 +360,15 @@ export class OrganizationUnitService {
       if (b === null) return -1
       return direction * a.localeCompare(b)
     }
+    // With a search and the default name order, best matches come first
+    // (name order breaks ties)
+    const rankBySearch =
+      searchScores.size > 0 && query.sortBy === 'name' && !query.sortDesc
     members.sort((a, b) => {
+      if (rankBySearch) {
+        const byScore = searchScores.get(b)! - searchScores.get(a)!
+        if (byScore !== 0) return byScore
+      }
       switch (query.sortBy) {
         case 'position':
           if (a.position === b.position) return 0
@@ -430,17 +442,13 @@ export class OrganizationUnitService {
     itemsPerPage: number
   }): Promise<{ organizations: OrganizationUnit[]; total: number }> {
     try {
-      const organizations = await this.organizationUnitDAO.getOrganizationUnits(
-        searchTerm,
-        group,
-        pageNumber,
-        itemsPerPage,
-      )
-
-      const total = await this.organizationUnitDAO.countOrganizationUnits(
-        searchTerm,
-        group,
-      )
+      const { organizationUnits: organizations, total } =
+        await this.organizationUnitDAO.searchOrganizationUnits(
+          searchTerm,
+          group,
+          pageNumber,
+          itemsPerPage,
+        )
 
       return { organizations, total }
     } catch (error) {

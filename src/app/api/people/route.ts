@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PersonService } from '@/lib/services/PersonService'
+import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
+import { searchQueryLengthError } from '@/utils/fuzzySearch/searchQueryLength'
 
 export const GET = async (req: NextRequest) => {
   const urlParams = req.nextUrl.searchParams
@@ -7,6 +9,14 @@ export const GET = async (req: NextRequest) => {
   const page = parseInt(urlParams.get('page') || '1', 10)
   const includeExternal = urlParams.get('includeExternal') === 'true'
   const itemsPerPage = 10
+
+  const searchLengthError = searchQueryLengthError(
+    [searchTerm],
+    MAX_NAME_SEARCH_QUERY_LENGTH,
+  )
+  if (searchLengthError) {
+    return NextResponse.json({ error: searchLengthError }, { status: 400 })
+  }
 
   const personService = new PersonService()
 
