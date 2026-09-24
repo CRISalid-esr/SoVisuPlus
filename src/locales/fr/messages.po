@@ -896,6 +896,11 @@ msgstr "Votre avatar"
 msgid "ai_chat_title"
 msgstr "Assistant"
 
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/AiChatWidget.tsx:327
+msgid "ai_chat_info_alert"
+msgstr "Il s'agit d'une version bêta. L'assistant peut commettre des erreurs."
+
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:59
 msgid "authenticate_tooltip"
 msgstr "S'authentifier uniquement avec ORCID"

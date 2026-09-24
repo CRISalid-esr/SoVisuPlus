@@ -14,7 +14,9 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined'
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import CloseIcon from '@mui/icons-material/Close'
+import InfoIcon from '@mui/icons-material/Info'
 import {
+  Alert,
   Avatar,
   Box,
   Button,
@@ -319,6 +321,16 @@ const AiChatWidget = () => {
             <CloseIcon />
           </IconButton>
         </Box>
+
+        <Alert
+          icon={<InfoIcon />}
+          severity='info'
+          sx={{ flexShrink: 0, borderRadius: 0 }}
+        >
+          <Trans id='ai_chat_info_alert'>
+            This is a beta version. AI assistant may make mistakes.
+          </Trans>
+        </Alert>
 
         <Box sx={{ flexGrow: 1, minHeight: 0 }}>
           <ChatBox
