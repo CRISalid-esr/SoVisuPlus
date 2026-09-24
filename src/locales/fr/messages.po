@@ -14,6 +14,16 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
+msgid "document_details_page_domains_tab_card_title"
+msgstr "Domaines"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
+msgid "profile_affiliations_no_units"
+msgstr "Pas de unité(s) de recherche associée(s)"
+
+#. js-lingui-explicit-id
 #: src/app/lib/websocket/changeWarningMessages.tsx:22
 msgid "user_action_warning_unresolvable_person"
 msgstr "Le contributeur {displayName} n'a pas pu être identifié et a été ignoré"
@@ -95,16 +105,6 @@ msgid "snackbar_user_action_applied_with_warnings"
 msgstr "Modification enregistrée avec des avertissements :"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:45
-msgid "notfound_page_back_home"
-msgstr "Retour à la page d'accueil"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/not-found.tsx:110
-msgid "notfound_page_description"
-msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Contactez-nous à cette <0>adresse mail</0> si cela vous semble anormal."
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/forbidden.tsx:43
 msgid "forbidden_page_back_home"
 msgstr "Retour"
@@ -113,6 +113,16 @@ msgstr "Retour"
 #: src/app/[lang]/forbidden.tsx:108
 msgid "forbidden_page_description"
 msgstr "Vous n'êtes pas autorisé à accéder à cette ressource. Si vous pensez qu'il s'agit d'une erreur, veuillez contacter l'administrateur"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:45
+msgid "notfound_page_back_home"
+msgstr "Retour à la page d'accueil"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/not-found.tsx:110
+msgid "notfound_page_description"
+msgstr "Nous n’avons pas trouvé la page que vous cherchiez. Contactez-nous à cette <0>adresse mail</0> si cela vous semble anormal."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:182
@@ -165,45 +175,9 @@ msgid "document_details_page_frozen_notice"
 msgstr "Ce document est en cours de mise à jour et ne peut pas être modifié pour le moment."
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:105
-msgid "document_details_page_keywords_tab_card_title"
-msgstr "Mots-clés"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:124
-msgid "document_details_page_keywords_tab_card_empty_content"
-msgstr "Aucun mot-clé"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:138
-msgid "document_details_page_keywords_search_field_title"
-msgstr "Sélectionner un ou plusieurs vocabulaires contrôlés"
-
-#. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/HAL/UpdateInHAL/UpdateInHAL.tsx:30
 msgid "document_details_page_update_in_hal_tab_card_title"
 msgstr "Mettre à jour dans HAL"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:395
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:406
-msgid "document_details_page_source_tab_select_action_label"
-msgstr "Actions"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:430
-msgid "document_details_page_source_tab_select_action_invalidate_label"
-msgstr "Invalider"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:456
-msgid "document_details_page_source_tab_select_action_unmerge_label"
-msgstr "Dissocier"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/Domains/Domains.tsx:30
-msgid "document_details_page_domains_tab_card_title"
-msgstr "Domaines"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/ConceptChip.tsx:225
@@ -226,9 +200,19 @@ msgid "concept_chip_action_delete"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
-msgid "document_details_page_add_in_hal_tab_card_title"
-msgstr "Déposer dans HAL"
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:105
+msgid "document_details_page_keywords_tab_card_title"
+msgstr "Mots-clés"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:124
+msgid "document_details_page_keywords_tab_card_empty_content"
+msgstr "Aucun mot-clé"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/Keywords/Keywords.tsx:138
+msgid "document_details_page_keywords_search_field_title"
+msgstr "Sélectionner un ou plusieurs vocabulaires contrôlés"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/Keywords/components/KeywordSearchAutocomplete.tsx:257
@@ -261,20 +245,30 @@ msgid "document_details_page_keywords_input_fetch_error_label"
 msgstr "Erreur lors du chargement des données"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
-msgid "bibliographic_information_update_success"
-msgstr "Informations bibliographiques mises à jour."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
-msgid "bibliographic_information_update_failure"
-msgstr "Erreur lors de la mise à jour des informations bibliographiques."
+#: src/app/[lang]/documents/[uid]/components/HAL/AddInHAL/AddInHAL.tsx:30
+msgid "document_details_page_add_in_hal_tab_card_title"
+msgstr "Déposer dans HAL"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/BibliographicInformation.tsx:190
 msgid "document_details_page_card_title"
 msgstr "Informations bibliographiques"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:395
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:406
+msgid "document_details_page_source_tab_select_action_label"
+msgstr "Actions"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:430
+msgid "document_details_page_source_tab_select_action_invalidate_label"
+msgstr "Invalider"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:456
+msgid "document_details_page_source_tab_select_action_unmerge_label"
+msgstr "Dissocier"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:114
@@ -292,6 +286,32 @@ msgid "documents_details_page_authors_tab_title"
 msgstr "Auteurs"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:121
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:153
+msgid "bibliographic_information_update_success"
+msgstr "Informations bibliographiques mises à jour."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:137
+msgid "bibliographic_information_update_failure"
+msgstr "Erreur lors de la mise à jour des informations bibliographiques."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/PerspectiveUnavailable.tsx:19
+msgid "perspective_unavailable_title"
+msgstr "Cette perspective est indisponible"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/PerspectiveUnavailable.tsx:22
+msgid "perspective_unavailable_description"
+msgstr "Les données de cette perspective ne peuvent pas être affichées : elle n'existe pas ou n'est pas accessible."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/PerspectiveUnavailable.tsx:28
+msgid "perspective_unavailable_back_to_own_dashboard"
+msgstr "Retour à mon tableau de bord"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/components/ErrorFallback.tsx:38
 msgid "internal_server_page_back_home"
 msgstr "Retour à la page d'accueil"
@@ -300,26 +320,6 @@ msgstr "Retour à la page d'accueil"
 #: src/app/[lang]/components/ErrorFallback.tsx:103
 msgid "internal_server_page_description"
 msgstr "Le serveur a détecté une erreur interne et n'a  pas pu traiter votre demande. Réessayez un peu plus tard !"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:34
-msgid "profile_affiliations_card_title"
-msgstr "Mes affiliations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:36
-msgid "profile_affiliations_card_title_other"
-msgstr "Affiliations"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:34
-msgid "profile_identifiers_card_title"
-msgstr "Mes identifiants"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:36
-msgid "profile_identifiers_card_title_other"
-msgstr "Identifiants"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/notification/index.tsx:27
@@ -342,105 +342,24 @@ msgid "notification_page_new_expertise_awaiting_validation"
 msgstr "Une nouvelle expertise est en attente de validation"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:120
-msgid "orcid_authentication_success"
-msgstr "Compte ORCID authentifié avec succès."
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:34
+msgid "profile_identifiers_card_title"
+msgstr "Mes identifiants"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:122
-msgid "orcid_authentication_failure"
-msgstr "Échec de l'authentification ORCID."
+#: src/app/[lang]/account/components/myProfile/components/Identifiers.tsx:36
+msgid "profile_identifiers_card_title_other"
+msgstr "Identifiants"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:124
-msgid "orcid_authentication_failure_no_code"
-msgstr "Échec de l'authentification ORCID : aucun code d'autorisation reçu."
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:34
+msgid "profile_affiliations_card_title"
+msgstr "Mes affiliations"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:126
-msgid "orcid_authentication_failure_no_session"
-msgstr "Échec de l'authentification ORCID : aucune session active."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:128
-msgid "orcid_authentication_failure_user_not_found"
-msgstr "Échec de l'authentification ORCID : utilisateur introuvable."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:130
-msgid "orcid_authentication_value_mismatch"
-msgstr "L'ORCID authentifié diffère de celui déjà enregistré. Supprimez l'ORCID existant avant d'en authentifier un autre."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:132
-msgid "orcid_insert_failure"
-msgstr "Échec de l'enregistrement de l'identifiant ORCID."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:134
-msgid "orcid_manual_add_success"
-msgstr "Identifiant ORCID ajouté."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:136
-msgid "orcid_manual_add_failure"
-msgstr "Échec de l'ajout de l'identifiant ORCID."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:138
-msgid "orcid_manual_add_conflict"
-msgstr "Un identifiant ORCID existe déjà. Supprimez-le avant d'en ajouter un nouveau."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:140
-msgid "orcid_remove_success"
-msgstr "Identifiant ORCID supprimé."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:142
-msgid "orcid_remove_failure"
-msgstr "Échec de la suppression de l'identifiant ORCID."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:197
-msgid "orcid_identifier_no_orcid_provided"
-msgstr "Aucun ORCID renseigné."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:246
-msgid "orcid_account_linked_tooltip"
-msgstr "Compte ORCID authentifié"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:263
-msgid "orcid_control_remove_button"
-msgstr "Supprimer"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:306
-msgid "orcid_control_helper"
-msgstr "Gérez votre identifiant <0>ORCID</0>."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:323
-msgid "orcid_control_remove_dialog_title"
-msgstr "Supprimer l'identifiant ORCID ?"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:327
-msgid "orcid_control_remove_dialog_text"
-msgstr "Cette action supprimera l'identifiant ORCID de ce compte."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:336
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:332
-msgid "identifier_dialog_cancel_button"
-msgstr "Annuler"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:335
-msgid "orcid_control_remove_dialog_confirm"
-msgstr "Supprimer"
+#: src/app/[lang]/account/components/myProfile/components/Affiliations.tsx:36
+msgid "profile_affiliations_card_title_other"
+msgstr "Affiliations"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:50
@@ -488,6 +407,21 @@ msgid "hal_button_provide_identifier"
 msgstr "Fournir mon identifiant Hal"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
+msgid "profile_affiliations_signature_label"
+msgstr "Ma signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:64
+msgid "profile_affiliations_no_signature_message"
+msgstr "Aucune signature"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
+msgid "profile_affiliations_signature_copied_message_confirmation"
+msgstr "Signature ajoutée au presse-papier."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/authorizations/index.tsx:28
 msgid "authorizations_page_authorizations_title"
 msgstr "Mes autorisations"
@@ -506,26 +440,6 @@ msgstr "Liste de mes publications"
 #: src/app/[lang]/account/components/authorizations/index.tsx:58
 msgid "authorizations_page_my_expertise"
 msgstr "Mes expertises"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:44
-msgid "profile_affiliations_signature_label"
-msgstr "Ma signature"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:64
-msgid "profile_affiliations_no_signature_message"
-msgstr "Aucune signature"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/SignatureControl.tsx:71
-msgid "profile_affiliations_signature_copied_message_confirmation"
-msgstr "Signature ajoutée au presse-papier."
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/account/components/myProfile/components/affiliations/UnitsControl.tsx:44
-msgid "profile_affiliations_no_units"
-msgstr "Pas de unité(s) de recherche associée(s)"
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:138
@@ -648,8 +562,109 @@ msgid "hal_control_remove_dialog_text"
 msgstr "Cette action supprimera l'idHAL et son identifiant de connexion HAL de ce compte."
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:336
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:332
+msgid "identifier_dialog_cancel_button"
+msgstr "Annuler"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:339
 msgid "hal_control_remove_dialog_confirm"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:120
+msgid "orcid_authentication_success"
+msgstr "Compte ORCID authentifié avec succès."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:122
+msgid "orcid_authentication_failure"
+msgstr "Échec de l'authentification ORCID."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:124
+msgid "orcid_authentication_failure_no_code"
+msgstr "Échec de l'authentification ORCID : aucun code d'autorisation reçu."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:126
+msgid "orcid_authentication_failure_no_session"
+msgstr "Échec de l'authentification ORCID : aucune session active."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:128
+msgid "orcid_authentication_failure_user_not_found"
+msgstr "Échec de l'authentification ORCID : utilisateur introuvable."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:130
+msgid "orcid_authentication_value_mismatch"
+msgstr "L'ORCID authentifié diffère de celui déjà enregistré. Supprimez l'ORCID existant avant d'en authentifier un autre."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:132
+msgid "orcid_insert_failure"
+msgstr "Échec de l'enregistrement de l'identifiant ORCID."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:134
+msgid "orcid_manual_add_success"
+msgstr "Identifiant ORCID ajouté."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:136
+msgid "orcid_manual_add_failure"
+msgstr "Échec de l'ajout de l'identifiant ORCID."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:138
+msgid "orcid_manual_add_conflict"
+msgstr "Un identifiant ORCID existe déjà. Supprimez-le avant d'en ajouter un nouveau."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:140
+msgid "orcid_remove_success"
+msgstr "Identifiant ORCID supprimé."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:142
+msgid "orcid_remove_failure"
+msgstr "Échec de la suppression de l'identifiant ORCID."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:197
+msgid "orcid_identifier_no_orcid_provided"
+msgstr "Aucun ORCID renseigné."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:246
+msgid "orcid_account_linked_tooltip"
+msgstr "Compte ORCID authentifié"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:263
+msgid "orcid_control_remove_button"
+msgstr "Supprimer"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:306
+msgid "orcid_control_helper"
+msgstr "Gérez votre identifiant <0>ORCID</0>."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:323
+msgid "orcid_control_remove_dialog_title"
+msgstr "Supprimer l'identifiant ORCID ?"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:327
+msgid "orcid_control_remove_dialog_text"
+msgstr "Cette action supprimera l'identifiant ORCID de ce compte."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:335
+msgid "orcid_control_remove_dialog_confirm"
 msgstr "Supprimer"
 
 #. js-lingui-explicit-id
@@ -698,47 +713,47 @@ msgstr "{numberOfAcronyms, plural, one {Absent de la collection} other {Absent d
 msgid "document_details_page_journal_issn"
 msgstr "ISSN : <0>{0}</0>"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:44
+#: src/app/[lang]/components/AiChatWidget.tsx:46
 msgid "ai_chat_assistant_avatar_alt"
 msgstr "Avatar de l'assistant"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:231
+#: src/app/[lang]/components/AiChatWidget.tsx:233
 msgid "ai_chat_author_assistant"
 msgstr "Assistant"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:230
+#: src/app/[lang]/components/AiChatWidget.tsx:232
 msgid "ai_chat_author_user"
 msgstr "Vous"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:232
+#: src/app/[lang]/components/AiChatWidget.tsx:234
 msgid "ai_chat_back_to_conversations"
 msgstr "Retour aux conversations"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:316
+#: src/app/[lang]/components/AiChatWidget.tsx:318
 msgid "ai_chat_close_label"
 msgstr "Fermer l'assistant"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:228
+#: src/app/[lang]/components/AiChatWidget.tsx:230
 msgid "ai_chat_composer_aria_label"
 msgstr "Écrire à l'assistant"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:227
+#: src/app/[lang]/components/AiChatWidget.tsx:229
 msgid "ai_chat_composer_placeholder"
 msgstr "Posez votre question à l'assistant…"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:229
+#: src/app/[lang]/components/AiChatWidget.tsx:231
 msgid "ai_chat_composer_send_label"
 msgstr "Envoyer"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:246
+#: src/app/[lang]/components/AiChatWidget.tsx:248
 msgid "ai_chat_copied_label"
 msgstr "Copié"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:245
+#: src/app/[lang]/components/AiChatWidget.tsx:247
 msgid "ai_chat_copy_code_label"
 msgstr "Copier le code"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:244
+#: src/app/[lang]/components/AiChatWidget.tsx:246
 msgid "ai_chat_copy_label"
 msgstr "Copier"
 
@@ -767,139 +782,134 @@ msgstr "Le service de l'assistant est temporairement indisponible."
 msgid "ai_chat_error_unauthorized"
 msgstr "Vous n'êtes pas autorisé à utiliser l'assistant."
 
-#: src/app/[lang]/components/AiChatWidget.tsx:236
+#: src/app/[lang]/components/AiChatWidget.tsx:238
 msgid "ai_chat_generic_error_label"
 msgstr "Une erreur est survenue"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:235
+#: src/app/[lang]/components/AiChatWidget.tsx:237
 msgid "ai_chat_loading_label"
 msgstr "Chargement…"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:86
-#: src/app/[lang]/components/AiChatWidget.tsx:113
-#: src/app/[lang]/components/AiChatWidget.tsx:145
+#: src/app/[lang]/components/AiChatWidget.tsx:88
+#: src/app/[lang]/components/AiChatWidget.tsx:115
+#: src/app/[lang]/components/AiChatWidget.tsx:147
 msgid "ai_chat_new_conversation"
 msgstr "Nouvelle conversation"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:241
+#: src/app/[lang]/components/AiChatWidget.tsx:243
 msgid "ai_chat_no_conversations_label"
 msgstr "Aucune conversation"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:272
+#: src/app/[lang]/components/AiChatWidget.tsx:274
 msgid "ai_chat_open_label"
 msgstr "Ouvrir l'assistant"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:249
+#: src/app/[lang]/components/AiChatWidget.tsx:251
 msgid "ai_chat_reasoning_label"
 msgstr "Raisonnement"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:250
+#: src/app/[lang]/components/AiChatWidget.tsx:252
 msgid "ai_chat_reasoning_streaming_label"
 msgstr "Réflexion…"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:234
+#: src/app/[lang]/components/AiChatWidget.tsx:236
 msgid "ai_chat_reconnect_label"
 msgstr "Reconnecter"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:233
+#: src/app/[lang]/components/AiChatWidget.tsx:235
 msgid "ai_chat_retry_label"
 msgstr "Réessayer"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:237
+#: src/app/[lang]/components/AiChatWidget.tsx:239
 msgid "ai_chat_scroll_to_bottom_label"
 msgstr "Aller en bas"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:242
+#: src/app/[lang]/components/AiChatWidget.tsx:244
 msgid "ai_chat_search_conversations_placeholder"
 msgstr "Rechercher une conversation"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:215
+#: src/app/[lang]/components/AiChatWidget.tsx:217
 msgid "ai_chat_status_cancelled"
 msgstr "Annulé"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:214
+#: src/app/[lang]/components/AiChatWidget.tsx:216
 msgid "ai_chat_status_error"
 msgstr "Erreur"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:209
+#: src/app/[lang]/components/AiChatWidget.tsx:211
 msgid "ai_chat_status_pending"
 msgstr "En attente"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:213
+#: src/app/[lang]/components/AiChatWidget.tsx:215
 msgid "ai_chat_status_read"
 msgstr "Lu"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:210
+#: src/app/[lang]/components/AiChatWidget.tsx:212
 msgid "ai_chat_status_sending"
 msgstr "Envoi…"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:212
+#: src/app/[lang]/components/AiChatWidget.tsx:214
 msgid "ai_chat_status_sent"
 msgstr "Envoyé"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:211
+#: src/app/[lang]/components/AiChatWidget.tsx:213
 msgid "ai_chat_status_streaming"
 msgstr "Réception…"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:238
+#: src/app/[lang]/components/AiChatWidget.tsx:240
 msgid "ai_chat_suggestions_label"
 msgstr "Suggestions"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:240
+#: src/app/[lang]/components/AiChatWidget.tsx:242
 msgid "ai_chat_thread_empty_helper"
 msgstr "Écrivez un message pour commencer"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:239
+#: src/app/[lang]/components/AiChatWidget.tsx:241
 msgid "ai_chat_thread_empty_label"
 msgstr "Aucun message"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:220
+#: src/app/[lang]/components/AiChatWidget.tsx:222
 msgid "ai_chat_tool_awaiting_approval"
 msgstr "En attente d'approbation"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:247
+#: src/app/[lang]/components/AiChatWidget.tsx:249
 msgid "ai_chat_tool_called_label"
 msgstr "Outil appelé"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:222
+#: src/app/[lang]/components/AiChatWidget.tsx:224
 msgid "ai_chat_tool_completed"
 msgstr "Terminé"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:224
+#: src/app/[lang]/components/AiChatWidget.tsx:226
 msgid "ai_chat_tool_denied"
 msgstr "Refusé"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:223
+#: src/app/[lang]/components/AiChatWidget.tsx:225
 msgid "ai_chat_tool_failed"
 msgstr "Échec"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:248
+#: src/app/[lang]/components/AiChatWidget.tsx:250
 msgid "ai_chat_tool_result_label"
 msgstr "Résultat de l'outil"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:218
-#: src/app/[lang]/components/AiChatWidget.tsx:219
+#: src/app/[lang]/components/AiChatWidget.tsx:220
 #: src/app/[lang]/components/AiChatWidget.tsx:221
+#: src/app/[lang]/components/AiChatWidget.tsx:223
 msgid "ai_chat_tool_running"
 msgstr "En cours…"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:243
+#: src/app/[lang]/components/AiChatWidget.tsx:245
 msgid "ai_chat_unread_marker_label"
 msgstr "Nouveaux messages"
 
-#: src/app/[lang]/components/AiChatWidget.tsx:62
+#: src/app/[lang]/components/AiChatWidget.tsx:64
 msgid "ai_chat_user_avatar_alt"
 msgstr "Votre avatar"
 
 #. js-lingui-explicit-id
-#: src/app/[lang]/components/AiChatWidget.tsx:312
+#: src/app/[lang]/components/AiChatWidget.tsx:314
 msgid "ai_chat_title"
 msgstr "Assistant"
-
-#. js-lingui-explicit-id
-#: src/app/[lang]/components/AiChatWidget.tsx:327
-msgid "ai_chat_info_alert"
-msgstr "Il s'agit d'une version bêta. L'assistant peut commettre des erreurs."
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidLoginButton.tsx:59
 msgid "authenticate_tooltip"
@@ -1444,7 +1454,7 @@ msgstr "Auteur(s) inconnu(s)"
 msgid "documents_merge_dialog_box_title"
 msgstr "Fusionner les publications"
 
-#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:995
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:1010
 msgid "documents_page_action_column_details"
 msgstr "Détails"
 
@@ -1481,7 +1491,7 @@ msgid "documents_page_conference_article_icon_label"
 msgstr "Article de conférence"
 
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:196
-#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:687
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:699
 msgid "documents_page_contributors_column"
 msgstr "Auteurs"
 
@@ -1564,7 +1574,7 @@ msgstr "Dans HAL"
 msgid "documents_page_hal_status_outside_hal"
 msgstr "Hors HAL"
 
-#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:775
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:789
 msgid "documents_page_halStatus_column"
 msgstr "Statut HAL"
 
@@ -1584,7 +1594,7 @@ msgstr "Publications"
 msgid "documents_page_main_title_first_person"
 msgstr "Mes publications"
 
-#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:967
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:982
 msgid "documents_page_merge_selected_documents_button"
 msgstr "Fusionner les documents sélectionnés"
 
@@ -1592,7 +1602,7 @@ msgstr "Fusionner les documents sélectionnés"
 msgid "documents_page_monograph_icon_label"
 msgstr "Monographie"
 
-#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:792
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:806
 msgid "documents_page_oaStatus_column"
 msgstr "Statut Open Access"
 
@@ -1609,19 +1619,19 @@ msgid "documents_page_proceedings_icon_label"
 msgstr "Actes"
 
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:215
-#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:720
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:733
 msgid "documents_page_publication_date_column"
 msgstr "Date de publication"
 
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/PublicationDate.tsx:166
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:231
 #: src/app/[lang]/documents/components/MergeDialogDocument.tsx:61
-#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:724
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:737
 msgid "documents_page_publication_date_column_no_date_available"
 msgstr "Aucune date"
 
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:272
-#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:755
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:769
 msgid "documents_page_publishedIn_column"
 msgstr "Paru dans"
 
@@ -1638,7 +1648,7 @@ msgid "documents_page_scholarly_publication_icon_label"
 msgstr "Publication scientifique"
 
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:290
-#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:815
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:829
 msgid "documents_page_source_column"
 msgstr "Sources"
 
@@ -1682,12 +1692,12 @@ msgid "documents_page_synchronize_modal_title"
 msgstr "Sources à synchroniser"
 
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:154
-#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:620
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:631
 msgid "documents_page_title_column"
 msgstr "Titre"
 
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:111
-#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:601
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:611
 msgid "documents_page_type_column"
 msgstr "Type"
 
@@ -2174,11 +2184,11 @@ msgstr "Accord exprès de l'éditeur pour le dépôt"
 msgid "hal_deposit_source_publisher_paid"
 msgstr "Frais de publication financés pour le libre accès"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:239
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:237
 msgid "hal_deposit_status_changes_message"
 msgstr "Les modérateurs ont demandé des modifications ; appliquez-les directement sur HAL, puis actualisez."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:238
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:236
 msgid "hal_deposit_status_changes_title"
 msgstr "Modifications demandées"
 
@@ -2187,11 +2197,11 @@ msgstr "Modifications demandées"
 msgid "hal_deposit_status_error_message_label"
 msgstr "Message d'erreur :"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:260
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:258
 msgid "hal_deposit_status_failed_message"
 msgstr "L'envoi vers HAL a échoué."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:259
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:257
 msgid "hal_deposit_status_failed_title"
 msgstr "Échec de l'envoi"
 
@@ -2199,29 +2209,29 @@ msgstr "Échec de l'envoi"
 msgid "hal_deposit_status_hal_identifier"
 msgstr "Identifiant HAL"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:211
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:218
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:209
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:216
 msgid "hal_deposit_status_in_progress_message"
 msgstr "Votre dépôt est en file d'attente ou en cours."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:210
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:217
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:208
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:215
 msgid "hal_deposit_status_in_progress_title"
 msgstr "Dépôt en cours"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:225
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:223
 msgid "hal_deposit_status_moderation_message"
 msgstr "Votre dépôt est en cours de modération (1 à 5 jours ouvrés)."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:224
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:222
 msgid "hal_deposit_status_moderation_title"
 msgstr "En cours de modération"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:232
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:230
 msgid "hal_deposit_status_published_message"
 msgstr "Votre publication a été acceptée et publiée sur HAL. Mettez à jour vos publications pour voir la nouvelle source HAL nouvellement déposée sur ce document."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:231
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:229
 msgid "hal_deposit_status_published_title"
 msgstr "Publié sur HAL"
 
@@ -2237,19 +2247,19 @@ msgstr "L'actualisation du statut n'a pas pu être demandée. Veuillez réessaye
 msgid "hal_deposit_status_refreshing"
 msgstr "Actualisation…"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:246
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:244
 msgid "hal_deposit_status_rejected_message"
 msgstr "Votre dépôt a été rejeté par les modérateurs HAL."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:245
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:243
 msgid "hal_deposit_status_rejected_title"
 msgstr "Rejeté"
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:253
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:251
 msgid "hal_deposit_status_replaced_message"
 msgstr "Ce dépôt a été remplacé par une autre version."
 
-#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:252
+#: src/app/[lang]/documents/[uid]/components/HAL/HalDeposit/HalDepositStatusPanel.tsx:250
 msgid "hal_deposit_status_replaced_title"
 msgstr "Remplacé"
 
@@ -2489,7 +2499,7 @@ msgstr "Mon profil"
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:149
 #: src/app/[lang]/documents/[uid]/hooks/useSourcesTable.tsx:169
 #: src/app/[lang]/documents/components/MergeDialogDocument.tsx:57
-#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:641
+#: src/app/[lang]/documents/hooks/usePublicationsTable.tsx:652
 msgid "no_title_available"
 msgstr "aucun titre disponible"
 
@@ -2609,48 +2619,47 @@ msgid "research_structures_chip_hidden"
 msgstr "Masquée"
 
 #: src/app/[lang]/research-structures/components/StructureDetail.tsx:103
-#: src/app/[lang]/research-structures/page.tsx:58
-#: src/app/[lang]/research-structures/page.tsx:211
+#: src/app/[lang]/research-structures/page.tsx:63
+#: src/app/[lang]/research-structures/page.tsx:230
 msgid "research_structures_column_institutions"
 msgstr "Tutelles"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:145
-#: src/app/[lang]/research-structures/page.tsx:59
-#: src/app/[lang]/research-structures/page.tsx:89
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:142
+#: src/app/[lang]/research-structures/page.tsx:64
+#: src/app/[lang]/research-structures/page.tsx:116
 msgid "research_structures_column_members"
 msgstr "Membres"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:150
-#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:213
-#: src/app/[lang]/research-structures/page.tsx:60
-#: src/app/[lang]/research-structures/page.tsx:103
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:147
+#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:215
+#: src/app/[lang]/research-structures/page.tsx:65
+#: src/app/[lang]/research-structures/page.tsx:130
 msgid "research_structures_column_publications"
 msgstr "Publications"
 
-#: src/app/[lang]/research-structures/page.tsx:55
-#: src/app/[lang]/research-structures/page.tsx:193
-#: src/app/[lang]/research-structures/page.tsx:304
+#: src/app/[lang]/research-structures/page.tsx:60
+#: src/app/[lang]/research-structures/page.tsx:216
+#: src/app/[lang]/research-structures/page.tsx:325
 msgid "research_structures_column_structure"
 msgstr "Structure"
 
-#: src/app/[lang]/research-structures/page.tsx:56
+#: src/app/[lang]/research-structures/page.tsx:61
 msgid "research_structures_csv_name"
 msgstr "Nom"
 
-#: src/app/[lang]/research-structures/page.tsx:57
+#: src/app/[lang]/research-structures/page.tsx:62
 msgid "research_structures_csv_type"
 msgstr "Type"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:114
-#: src/app/[lang]/research-structures/page.tsx:167
+#: src/app/[lang]/research-structures/components/DashboardLinkButton.tsx:34
 msgid "research_structures_dashboard_link"
 msgstr "Tableau de bord"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:174
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:171
 msgid "research_structures_detail_children"
 msgstr "Structures rattachées"
 
-#: src/app/[lang]/research-structures/page.tsx:489
+#: src/app/[lang]/research-structures/page.tsx:512
 msgid "research_structures_export"
 msgstr "Exporter"
 
@@ -2670,126 +2679,126 @@ msgstr "Autres"
 msgid "research_structures_group_teaching_research"
 msgstr "Enseignement et recherche"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:168
-#: src/app/[lang]/research-structures/page.tsx:494
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:165
+#: src/app/[lang]/research-structures/page.tsx:517
 msgid "research_structures_kpi_period_note"
 msgstr "Les indicateurs de publication (publications, accès ouvert, HAL) portent sur les 24 derniers mois."
 
-#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:187
+#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:189
 msgid "research_structures_members_column_arrival"
 msgstr "Arrivée"
 
-#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:200
+#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:202
 msgid "research_structures_members_column_departure"
 msgstr "Départ"
 
-#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:281
+#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:283
 msgid "research_structures_members_column_identifiers"
 msgstr "Identifiants"
 
-#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:145
+#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:147
 msgid "research_structures_members_column_name"
 msgstr "Nom"
 
-#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:173
+#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:175
 msgid "research_structures_members_column_position"
 msgstr "Emploi"
 
-#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:231
+#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:233
 msgid "research_structures_members_publications_tooltip"
 msgstr "Voir les publications de cette personne"
 
-#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:336
+#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:339
 msgid "research_structures_members_switch_present"
 msgstr "Actuellement présents"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:201
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:198
 msgid "research_structures_members_title"
 msgstr "Membres"
 
-#: src/app/[lang]/research-structures/page.tsx:483
+#: src/app/[lang]/research-structures/page.tsx:506
 msgid "research_structures_page_title"
 msgstr "Structures de recherche"
 
-#: src/app/[lang]/research-structures/page.tsx:109
+#: src/app/[lang]/research-structures/page.tsx:136
 msgid "research_structures_publications_tooltip"
 msgstr "24 derniers mois"
 
-#: src/app/[lang]/research-structures/page.tsx:261
+#: src/app/[lang]/research-structures/page.tsx:282
 msgid "research_structures_reset_filters"
 msgstr "Réinitialiser les filtres"
 
-#: src/app/[lang]/research-structures/page.tsx:512
+#: src/app/[lang]/research-structures/page.tsx:535
 msgid "research_structures_switch_display_old"
 msgstr "Afficher les structures fermées"
 
-#: src/app/[lang]/research-structures/page.tsx:508
+#: src/app/[lang]/research-structures/page.tsx:531
 msgid "research_structures_switch_display_old_tooltip"
 msgstr "Disponible lorsque les données de cycle de vie des structures seront disponibles"
 
-#: src/app/[lang]/research-structures/page.tsx:506
+#: src/app/[lang]/research-structures/page.tsx:529
 msgid "research_structures_switch_include_external"
 msgstr "Inclure les établissements externes"
 
-#: src/app/[lang]/research-structures/page.tsx:524
+#: src/app/[lang]/research-structures/page.tsx:547
 msgid "research_structures_switch_show_hidden"
 msgstr "Afficher les structures masquées"
 
-#: src/app/[lang]/research-structures/page.tsx:542
+#: src/app/[lang]/research-structures/page.tsx:565
 msgid "research_structures_tab_flat"
 msgstr "Liste"
 
-#: src/app/[lang]/research-structures/page.tsx:547
+#: src/app/[lang]/research-structures/page.tsx:570
 msgid "research_structures_tab_hierarchical"
 msgstr "Table hiérarchique"
 
-#: src/app/[lang]/research-structures/page.tsx:537
+#: src/app/[lang]/research-structures/page.tsx:560
 msgid "research_structures_tab_tree"
 msgstr "Arborescence"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:137
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:134
 msgid "research_structures_toggle_hidden"
 msgstr "Masquer cette structure"
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:122
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:119
 msgid "research_structures_toggle_hidden_by_ancestor"
 msgstr "Cette structure est masquée parce que toutes les structures dont elle dépend le sont. Réaffichez l’une d’elles pour la faire réapparaître."
 
-#: src/app/[lang]/research-structures/components/StructureDetail.tsx:123
+#: src/app/[lang]/research-structures/components/StructureDetail.tsx:120
 msgid "research_structures_toggle_hidden_help"
 msgstr "Une structure masquée disparaît de la liste des structures, de la recherche et des indicateurs. Les structures qui ne dépendent que d’elle sont masquées également."
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:380
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:397
 msgid "research_structures_tree_collapse_all"
 msgstr "Tout replier"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:478
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:495
 msgid "research_structures_tree_empty_state"
 msgstr "Sélectionnez une structure dans l’arborescence"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:368
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:385
 msgid "research_structures_tree_expand_all"
 msgstr "Tout déplier"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:389
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:406
 msgid "research_structures_tree_no_results"
 msgstr "Aucune structure trouvée"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:419
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:436
 msgid "research_structures_tree_resize_handle"
 msgstr "Redimensionner les panneaux"
 
-#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:357
+#: src/app/[lang]/research-structures/components/StructureTreeExplorer.tsx:373
 msgid "research_structures_tree_search_placeholder"
 msgstr "Rechercher une structure…"
 
 #: src/app/[lang]/documents/components/HighlighterWithChipsEllipsis.tsx:169
-#: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:51
+#: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:54
 msgid "see_less_contributors"
 msgstr "Voir moins"
 
 #: src/app/[lang]/documents/components/HighlighterWithChipsEllipsis.tsx:161
-#: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:43
+#: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:46
 msgid "see_more_contributors"
 msgstr "Voir plus"
 
@@ -2826,7 +2835,7 @@ msgstr "Structures"
 msgid "sidebar_account"
 msgstr "Accéder à mon compte"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:511
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:524
 msgid "sidebar_back_to_my_perspective"
 msgstr "Retour à mon profil"
 
@@ -2843,39 +2852,39 @@ msgstr "Adresse e-mail copiée dans le presse-papiers"
 msgid "sidebar_logout"
 msgstr "Se déconnecter"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:90
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:92
 msgid "sidebar_search_institutions"
 msgstr "Établissements"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:493
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:506
 msgid "sidebar_search_no_options"
 msgstr "Aucun résultat"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:92
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:94
 msgid "sidebar_search_other_structures"
 msgstr "Autres structures"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:100
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:116
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:199
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:310
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:426
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:102
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:118
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:201
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:312
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:428
 msgid "sidebar_search_people"
 msgstr "Chercheurs"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:453
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:455
 msgid "sidebar_search_placeholder"
 msgstr "Chercher"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:91
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:93
 msgid "sidebar_search_research_units"
 msgstr "Unités de recherche"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:93
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:95
 msgid "sidebar_search_teams"
 msgstr "Équipes"
 
-#: src/app/[lang]/components/SearchInput/SearchInput.tsx:267
+#: src/app/[lang]/components/SearchInput/SearchInput.tsx:269
 msgid "sidebar_search_unknown_label"
 msgstr "label inconnu"
 
@@ -3081,6 +3090,11 @@ msgstr "Connectez-vous"
 #: src/app/[lang]/splash.tsx:170
 msgid "splash.terms"
 msgstr "Mentions légales"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/components/AiChatWidget.tsx:330
+msgid "ai_chat_info_alert"
+msgstr "Il s'agit d'une version bêta. L'assistant peut commettre des erreurs."
 
 #: src/app/[lang]/components/WorkInProgress/WorkInProgress.tsx:100
 msgid "wip_component_coming_soon"

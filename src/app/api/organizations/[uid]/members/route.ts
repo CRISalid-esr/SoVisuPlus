@@ -4,7 +4,10 @@ import {
   STRUCTURE_MEMBER_SORT_KEYS,
   StructureMemberSortKey,
 } from '@/lib/services/OrganizationUnitService'
-import { structureVisibilityAccess } from '@/app/auth/structureVisibility'
+import { canManageStructureVisibility } from '@/app/auth/structureVisibility'
+import { requireSession } from '@/app/auth/requireSession'
+import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
+import { searchQueryLengthError } from '@/utils/fuzzySearch/searchQueryLength'
 
 const PAGE_SIZES = [10, 20, 50]
 
@@ -12,6 +15,9 @@ export const GET = async (
   req: NextRequest,
   context: { params: Promise<{ uid: string }> },
 ) => {
+  const { session, error: authError } = await requireSession()
+  if (authError) return authError
+
   const { uid } = await context.params
   const searchParams = req.nextUrl.searchParams
 
@@ -26,6 +32,15 @@ export const GET = async (
   )
     ? (requestedSortBy as StructureMemberSortKey)
     : 'name'
+  const search = searchParams.get('search') ?? ''
+
+  const searchLengthError = searchQueryLengthError(
+    [search],
+    MAX_NAME_SEARCH_QUERY_LENGTH,
+  )
+  if (searchLengthError) {
+    return NextResponse.json({ error: searchLengthError }, { status: 400 })
+  }
 
   try {
     const organizationUnitService = new OrganizationUnitService()
@@ -34,8 +49,7 @@ export const GET = async (
     // managers who can still reach its detail panel.
     const visibility = await organizationUnitService.fetchVisibilityState(uid)
     if (visibility?.hiddenEffective) {
-      const { canManage } = await structureVisibilityAccess()
-      if (!canManage) {
+      if (!canManageStructureVisibility(session)) {
         return NextResponse.json(
           { error: `Structure ${uid} not found` },
           { status: 404 },
@@ -46,7 +60,7 @@ export const GET = async (
     const result = await organizationUnitService.getStructureMembers({
       uid,
       present: searchParams.get('present') !== 'false',
-      search: searchParams.get('search') ?? '',
+      search,
       sortBy,
       sortDesc: searchParams.get('sortDesc') === 'true',
       page,
