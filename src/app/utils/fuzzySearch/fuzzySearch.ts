@@ -269,9 +269,17 @@ export const findFuzzyMatchChunks = (
       }
     }
   }
-  chunks.sort((a, b) => a.start - b.start)
+  return mergeChunks(chunks, text)
+}
+
+/**
+ * Sort and coalesce chunks, joining those separated only by whitespace so
+ * "John Doe" highlights as one range. react-highlight-words needs the result
+ * ordered and non-overlapping.
+ */
+const mergeChunks = (chunks: MatchChunk[], text: string): MatchChunk[] => {
   const merged: MatchChunk[] = []
-  for (const chunk of chunks) {
+  for (const chunk of [...chunks].sort((a, b) => a.start - b.start)) {
     const last = merged[merged.length - 1]
     if (last && text.slice(last.end, chunk.start).trim() === '') {
       last.end = Math.max(last.end, chunk.end)
@@ -286,6 +294,13 @@ export const findFuzzyMatchChunks = (
  * react-highlight-words `findChunks` for the documents list: highlights the
  * words of all the given searches (global search and column filter) the way
  * the documents search matches them, typos included.
+ *
+ * Each search is tokenized on its own, then the chunks are merged. Joining
+ * them into one string first would let one search change how another is
+ * tokenized, because tokenizeDocumentSearchQuery only drops words shorter
+ * than MIN_TRIGRAM_TOKEN_LENGTH when longer ones exist: a global search for
+ * "IA" next to a title filter "learning" would silently stop highlighting
+ * "IA", although the server matched the two filters independently.
  */
 export const findDocumentSearchChunks = ({
   searchWords,
@@ -294,10 +309,15 @@ export const findDocumentSearchChunks = ({
   searchWords: (string | RegExp)[]
   textToHighlight: string
 }): MatchChunk[] =>
-  findFuzzyMatchChunks(
-    textToHighlight,
+  mergeChunks(
     searchWords
       .filter((word): word is string => typeof word === 'string')
-      .join(' '),
-    tokenizeDocumentSearchQuery,
+      .flatMap((search) =>
+        findFuzzyMatchChunks(
+          textToHighlight,
+          search,
+          tokenizeDocumentSearchQuery,
+        ),
+      ),
+    textToHighlight,
   )

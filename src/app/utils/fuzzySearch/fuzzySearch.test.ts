@@ -197,6 +197,19 @@ describe('tokenizeDocumentSearchQuery', () => {
 })
 
 describe('findDocumentSearchChunks', () => {
+  // each search is tokenized on its own: a short word in one search must not
+  // be dropped because another search happens to contain a longer one
+  it('highlights a short search word next to a longer filter', () => {
+    const text = 'IA and machine learning'
+    const chunks = findDocumentSearchChunks({
+      searchWords: ['IA', 'learning'],
+      textToHighlight: text,
+    })
+    const highlighted = chunks.map((c) => text.slice(c.start, c.end))
+    expect(highlighted).toContain('IA')
+    expect(highlighted).toContain('learning')
+  })
+
   const chunksOf = (text: string, searchWords: (string | undefined)[]) =>
     findDocumentSearchChunks({
       searchWords: searchWords as string[],
