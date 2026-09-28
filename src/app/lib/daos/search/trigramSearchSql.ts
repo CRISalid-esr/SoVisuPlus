@@ -12,12 +12,38 @@ const escapeRegex = (value: string): string =>
   value.replace(/[.*+?^${}()|[\]\\]/g, (character) => `\\${character}`)
 
 /**
+ * One match condition per token, in token order: the token is a substring of
+ * the column or, from MIN_TRIGRAM_TOKEN_LENGTH characters, has a pg_trgm
+ * word_similarity with it above the `<%` threshold.
+ *
+ * Returned per token rather than pre-joined so a caller can apply each token
+ * to several columns independently — the structures search matches a token
+ * against one label row or the acronym, which lets the GIN indexes serve the
+ * predicate (a condition on an aggregate cannot use an index).
+ *
+ * @throws if `tokens` is empty — callers must treat a blank query separately
+ * (see tokenizeSearchQuery); `Prisma.join` would otherwise throw less clearly.
+ */
+export const buildTokenConditions = (
+  column: Prisma.Sql,
+  tokens: string[],
+): Prisma.Sql[] => {
+  if (tokens.length === 0) {
+    throw new Error('buildTokenConditions requires at least one token')
+  }
+  return tokens.map((token) => {
+    const pattern = `%${escapeLike(token)}%`
+    return token.length >= MIN_TRIGRAM_TOKEN_LENGTH
+      ? Prisma.sql`(${column} LIKE ${pattern} OR ${token} <% ${column})`
+      : Prisma.sql`${column} LIKE ${pattern}`
+  })
+}
+
+/**
  * SQL fragments matching normalized search tokens against a normalized
  * column (lowercase, no diacritics), with pg_trgm typo tolerance.
  *
- * - `where`: every token must be a substring of the column or, for tokens of
- *   at least MIN_TRIGRAM_TOKEN_LENGTH characters, have a pg_trgm
- *   word_similarity with it above the `<%` threshold.
+ * - `where`: every token must match the column (see buildTokenConditions).
  * - `score`: sum over tokens of 1 (whole word), 0.9 (word prefix),
  *   0.8 (substring) or 0.7 × word_similarity (typo) — the same scale as the
  *   client-side fuzzyScore.
@@ -28,12 +54,7 @@ export const buildTokenMatch = (
   column: Prisma.Sql,
   tokens: string[],
 ): { where: Prisma.Sql; score: Prisma.Sql } => {
-  const conditions = tokens.map((token) => {
-    const pattern = `%${escapeLike(token)}%`
-    return token.length >= MIN_TRIGRAM_TOKEN_LENGTH
-      ? Prisma.sql`(${column} LIKE ${pattern} OR ${token} <% ${column})`
-      : Prisma.sql`${column} LIKE ${pattern}`
-  })
+  const conditions = buildTokenConditions(column, tokens)
   const scores = tokens.map((token) => {
     const pattern = `%${escapeLike(token)}%`
     const wordStart = `(^|[^[:alnum:]])${escapeRegex(token)}`

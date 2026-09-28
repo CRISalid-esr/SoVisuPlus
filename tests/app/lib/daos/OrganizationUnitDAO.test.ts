@@ -460,6 +460,55 @@ describe('OrganizationUnitDAO Integration Tests', () => {
         ])
       })
 
+      // The search filters one token at a time against a single label row, so
+      // a unit whose tokens are spread over several labels must still match.
+      it('matches words coming from two different labels of the same unit', async () => {
+        await organizationUnitDAO.createOrUpdateOrganizationUnit(
+          makeUnit({
+            uid: 'local-MULTI',
+            names: [
+              Literal.fromObject({
+                value: 'Laboratoire de recherche marine',
+                language: 'fr',
+              }),
+              Literal.fromObject({
+                value: 'Marine research laboratory',
+                language: 'en',
+              }),
+            ],
+          }),
+        )
+        expect(await search('laboratoire laboratory', 'research_unit')).toEqual(
+          ['local-MULTI'],
+        )
+        expect(await search('recherche research', 'research_unit')).toEqual([
+          'local-MULTI',
+        ])
+      })
+
+      // The acronym is matched through its own branch, but a unit with no
+      // label is not a selectable perspective — same rule as the blank query.
+      it('excludes a unit whose acronym matches but which has no label', async () => {
+        await organizationUnitDAO.createOrUpdateOrganizationUnit(
+          makeUnit({ uid: 'local-BARE', acronym: 'BARELAB', names: [] }),
+        )
+        const bare = await prisma.organizationUnit.findUnique({
+          where: { uid: 'local-BARE' },
+          include: { labels: true },
+        })
+        expect(bare!.labels).toHaveLength(0)
+        expect(bare!.normalizedAcronym).toBe('barelab')
+
+        expect(await search('barelab', 'research_unit')).toHaveLength(0)
+        const { total } = await organizationUnitDAO.searchOrganizationUnits(
+          'barelab',
+          'research_unit',
+          1,
+          10,
+        )
+        expect(total).toBe(0)
+      })
+
       it('ranks whole words above typos', async () => {
         await organizationUnitDAO.createOrUpdateOrganizationUnit(
           makeUnit({

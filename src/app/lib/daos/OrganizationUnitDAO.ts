@@ -19,6 +19,7 @@ import {
 } from '@/utils/fuzzySearch/fuzzySearch'
 import { backfillNormalizedColumn } from '@/lib/daos/search/backfillNormalizedColumn'
 import {
+  buildTokenConditions,
   buildTokenMatch,
   withWordSimilarityThreshold,
 } from '@/lib/daos/search/trigramSearchSql'
@@ -548,17 +549,51 @@ export class OrganizationUnitDAO extends AbstractDAO {
       }
     }
 
+    // Filter first, one indexable condition per token against a single label
+    // row or the acronym, then aggregate only the survivors for scoring. The
+    // aggregate cannot be filtered through an index, so matching on it would
+    // scan and group the whole group on every search.
+    const labelConditions = buildTokenConditions(
+      Prisma.sql`l."normalizedValue"`,
+      tokens,
+    )
+    const acronymConditions = buildTokenConditions(
+      Prisma.sql`o."normalizedAcronym"`,
+      tokens,
+    )
+    // A token may come from any label or from the acronym, and different
+    // tokens may come from different labels — so one subquery per token,
+    // ANDed. Uncorrelated on purpose: evaluated once per token rather than
+    // probed once per unit per token.
+    const tokenFilters = tokens.map(
+      (_, index) => Prisma.sql`
+        ou.id IN (
+          SELECT l."organizationUnitId" FROM "OrganizationUnitLabel" l
+          WHERE ${labelConditions[index]}
+          UNION ALL
+          SELECT o.id FROM "OrganizationUnit" o
+          WHERE ${acronymConditions[index]}
+        )`,
+    )
     const match = buildTokenMatch(Prisma.sql`u.search_text`, tokens)
     const searchable = Prisma.sql`
-      WITH u AS (
+      WITH matched AS (
+        SELECT ou.id
+        FROM "OrganizationUnit" ou
+        WHERE ou.external = false
+          AND ou."hiddenEffective" = false
+          AND ou.category::text = ANY(${categories}::text[])
+          AND ${Prisma.join(tokenFilters, ' AND ')}
+      ),
+      u AS (
         SELECT ou.id,
           concat_ws(' ', ou."normalizedAcronym", string_agg(l."normalizedValue", ' ')) AS search_text,
           count(l.id) AS label_count
         FROM "OrganizationUnit" ou
+        -- inner join: a unit whose acronym matched but which has no label is
+        -- not searchable, as in the blank-query path
         JOIN "OrganizationUnitLabel" l ON l."organizationUnitId" = ou.id
-        WHERE ou.external = false
-          AND ou."hiddenEffective" = false
-          AND ou.category::text = ANY(${categories}::text[])
+        WHERE ou.id IN (SELECT id FROM matched)
         GROUP BY ou.id
       )`
     const [rows, [{ total }]] = await withWordSimilarityThreshold(
@@ -567,12 +602,11 @@ export class OrganizationUnitDAO extends AbstractDAO {
         this.prismaClient.$queryRaw<{ id: number }[]>`
           ${searchable}
           SELECT u.id FROM u
-          WHERE ${match.where}
           ORDER BY ${match.score} DESC, u.label_count ASC, u.id ASC
           LIMIT ${itemsPerPage} OFFSET ${skip}`,
         this.prismaClient.$queryRaw<{ total: number }[]>`
           ${searchable}
-          SELECT count(*)::int AS total FROM u WHERE ${match.where}`,
+          SELECT count(*)::int AS total FROM u`,
       ],
     )
 
