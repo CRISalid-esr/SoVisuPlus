@@ -6,7 +6,11 @@ import {
   MIN_TRIGRAM_TOKEN_LENGTH,
   WORD_VARIANT_SIMILARITY_THRESHOLD,
 } from '@/utils/fuzzySearch/constants'
-import { withWordSimilarityThreshold } from '@/lib/daos/search/trigramSearchSql'
+import {
+  escapeLike,
+  wholeWordRegex,
+  withWordSimilarityThreshold,
+} from '@/lib/daos/search/trigramSearchSql'
 
 const CACHE_TTL_MS = 5 * 60 * 1000
 const CACHE_MAX_ENTRIES = 1000
@@ -54,34 +58,65 @@ export const expandSearchTokens = async (
 
   // Candidate rows use the looser variant threshold: a typo inside a word
   // ("politque") has a lower word similarity than a typo at its end
+  const likePatterns = toLookUp.map((token) => `%${escapeLike(token)}%`)
+  const wordRegexes = toLookUp.map(wholeWordRegex)
   const [rows] = await withWordSimilarityThreshold(
     prismaClient,
     [
       prismaClient.$queryRaw<{ token: string; word: string }[]>`
+      WITH tokens AS (
+        SELECT * FROM unnest(
+          ${toLookUp}::text[], ${likePatterns}::text[], ${wordRegexes}::text[]
+        ) AS t(token, like_pattern, word_regex)
+      ),
+      -- A word that really occurs is not a typo, so it gets no variants
+      -- ("economie" must not also match "economics"). Checked against the
+      -- whole corpus: the candidate sample below is capped and would answer
+      -- this by luck. The LIKE prefilter is served by the GIN trigram
+      -- indexes; the regex then applies the word boundary.
+      pending AS (
+        SELECT * FROM tokens t
+        WHERE NOT EXISTS (
+          SELECT 1 FROM "DocumentTitle" d
+            WHERE d."normalizedValue" LIKE t.like_pattern
+              AND d."normalizedValue" ~ t.word_regex
+          UNION ALL
+          SELECT 1 FROM "Journal" j
+            WHERE j."normalizedTitle" LIKE t.like_pattern
+              AND j."normalizedTitle" ~ t.word_regex
+          UNION ALL
+          SELECT 1 FROM "Person" p
+            WHERE p."normalizedName" LIKE t.like_pattern
+              AND p."normalizedName" ~ t.word_regex
+        )
+      )
       SELECT t.token, v.word
-      FROM unnest(${toLookUp}::text[]) AS t(token)
+      FROM pending t
       CROSS JOIN LATERAL (
         WITH words AS (
           SELECT regexp_split_to_table(c.txt, '[^[:alnum:]]+') AS word
           FROM (
+            -- ordered so the capped sample is the closest rows rather than
+            -- an arbitrary ones, which made the variants non-reproducible
             (SELECT "normalizedValue" AS txt FROM "DocumentTitle"
               WHERE "normalizedValue" %> t.token
+              ORDER BY word_similarity(t.token, "normalizedValue") DESC
               LIMIT ${MAX_EXPANSION_CANDIDATE_ROWS})
             UNION ALL
             (SELECT "normalizedTitle" FROM "Journal"
               WHERE "normalizedTitle" %> t.token
+              ORDER BY word_similarity(t.token, "normalizedTitle") DESC
               LIMIT ${MAX_EXPANSION_CANDIDATE_ROWS})
             UNION ALL
             (SELECT "normalizedName" FROM "Person"
               WHERE "normalizedName" %> t.token
+              ORDER BY word_similarity(t.token, "normalizedName") DESC
               LIMIT ${MAX_EXPANSION_CANDIDATE_ROWS})
           ) c
         )
         SELECT w.word
         FROM words w
-        -- a word found as such is not a typo: no variants
-        WHERE NOT EXISTS (SELECT 1 FROM words e WHERE e.word = t.token)
-          AND length(w.word) >= ${MIN_TRIGRAM_TOKEN_LENGTH}
+        WHERE length(w.word) >= ${MIN_TRIGRAM_TOKEN_LENGTH}
         GROUP BY w.word
         HAVING similarity(w.word, t.token) >= ${WORD_VARIANT_SIMILARITY_THRESHOLD}
         ORDER BY similarity(w.word, t.token) DESC, count(*) DESC, w.word

@@ -8,8 +8,16 @@ import {
 export const escapeLike = (value: string): string =>
   value.replace(/[\\%_]/g, (character) => `\\${character}`)
 
-const escapeRegex = (value: string): string =>
+/** Escape POSIX regex metacharacters so a token matches literally. */
+export const escapeRegex = (value: string): string =>
   value.replace(/[.*+?^${}()|[\]\\]/g, (character) => `\\${character}`)
+
+/**
+ * POSIX regex matching `token` as a whole word in a normalized column —
+ * the same word boundary the scoring CASE uses.
+ */
+export const wholeWordRegex = (token: string): string =>
+  `(^|[^[:alnum:]])${escapeRegex(token)}($|[^[:alnum:]])`
 
 /**
  * One match condition per token, in token order: the token is a substring of
@@ -58,7 +66,7 @@ export const buildTokenMatch = (
   const scores = tokens.map((token) => {
     const pattern = `%${escapeLike(token)}%`
     const wordStart = `(^|[^[:alnum:]])${escapeRegex(token)}`
-    const wholeWord = `${wordStart}($|[^[:alnum:]])`
+    const wholeWord = wholeWordRegex(token)
     return Prisma.sql`(CASE
       WHEN ${column} ~ ${wholeWord} THEN 1.0
       WHEN ${column} ~ ${wordStart} THEN 0.9
