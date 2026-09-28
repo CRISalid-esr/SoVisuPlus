@@ -400,8 +400,10 @@ model DocumentTitle {
   documentId      Int
   language        String // ISO 639-1 code (e.g., 'en', 'fr')
   value           String   @db.VarChar(2000)
-  /// Search-only copy of value (lowercase, no diacritics), see normalizeSearchText
-  normalizedValue String?  @db.VarChar(2000)
+  /// Search-only copy of value (lowercase, no diacritics), see normalizeSearchText.
+  /// Deliberately unbounded: normalization can lengthen a value (ligatures such as
+  /// `œ` expand to `oe`), so it must not inherit the source column's width.
+  normalizedValue String?
   document        Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@unique([documentId, language]) // Ensure no duplicate languages for the same document
@@ -635,8 +637,9 @@ model OrganizationUnitLabel {
   kind               OrganizationLabelKind
   language           String // ISO 639-1 code
   value              String                @db.VarChar(255)
-  /// Search-only copy of value (lowercase, no diacritics), see normalizeSearchText
-  normalizedValue    String?               @db.VarChar(255)
+  /// Search-only copy of value (lowercase, no diacritics), see normalizeSearchText.
+  /// Deliberately unbounded, see DocumentTitle.normalizedValue.
+  normalizedValue    String?
   organizationUnit   OrganizationUnit      @relation(fields: [organizationUnitId], references: [id], onDelete: Cascade)
 
   @@unique([organizationUnitId, kind, language])

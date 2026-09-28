@@ -2,10 +2,7 @@
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- AlterTable
-ALTER TABLE "DocumentAbstract" ADD COLUMN     "normalizedValue" TEXT;
-
--- AlterTable
-ALTER TABLE "DocumentTitle" ADD COLUMN     "normalizedValue" VARCHAR(2000);
+ALTER TABLE "DocumentTitle" ADD COLUMN     "normalizedValue" TEXT;
 
 -- AlterTable
 ALTER TABLE "Journal" ADD COLUMN     "normalizedTitle" TEXT;
@@ -14,10 +11,7 @@ ALTER TABLE "Journal" ADD COLUMN     "normalizedTitle" TEXT;
 ALTER TABLE "OrganizationUnit" ADD COLUMN     "normalizedAcronym" TEXT;
 
 -- AlterTable
-ALTER TABLE "OrganizationUnitLabel" ADD COLUMN     "normalizedValue" VARCHAR(255);
-
--- CreateIndex
-CREATE INDEX "DocumentAbstract_normalizedValue_idx" ON "DocumentAbstract" USING GIN ("normalizedValue" gin_trgm_ops);
+ALTER TABLE "OrganizationUnitLabel" ADD COLUMN     "normalizedValue" TEXT;
 
 -- CreateIndex
 CREATE INDEX "DocumentTitle_normalizedValue_idx" ON "DocumentTitle" USING GIN ("normalizedValue" gin_trgm_ops);
