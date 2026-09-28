@@ -24,11 +24,23 @@ export interface MatchChunk {
 }
 
 /**
- * Case- and diacritics-insensitive form used for every search comparison.
- * Must stay identical to the stored `Person.normalizedName`.
+ * Case- and diacritics-insensitive form used for every search comparison,
+ * on both the query and the stored `normalized*` columns.
+ *
+ * Decomposes first and drops the combining marks (U+0300-U+036F), then lets
+ * `remove-accents` handle what decomposition cannot: precomposed letters with
+ * no combining form (`ł`, `ø`) and ligatures (`œ` becomes `oe`). Both halves
+ * are needed — source data is not always precomposed, and `remove-accents` is
+ * a Latin lookup table that leaves a decomposed `e` + U+0301 untouched.
+ *
+ * Dropping the marks also matters for tokenizing: neither `\p{L}` nor POSIX
+ * `[:alnum:]` matches a combining mark, so a value still carrying one splits
+ * mid-word (`ame` + `riques`) on either side of the search.
  */
 export const normalizeSearchText = (value: string): string =>
-  removeAccents(value).toLowerCase()
+  removeAccents(
+    value.normalize('NFD').replace(/[\u0300-\u036f]/g, ''),
+  ).toLowerCase()
 
 const wordsOf = (normalizedText: string): Word[] =>
   Array.from(normalizedText.matchAll(wordPattern()), (match) => ({

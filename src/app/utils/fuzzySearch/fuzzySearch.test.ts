@@ -20,6 +20,28 @@ describe('normalizeSearchText', () => {
     expect(normalizeSearchText('Économie Générale')).toBe('economie generale')
     expect(normalizeSearchText('Œuvre')).toBe('oeuvre')
   })
+
+  // remove-accents is a lookup table over precomposed characters, so a value
+  // that arrives decomposed (NFD) keeps its diacritics unless we strip them.
+  it('folds decomposed (NFD) input, not only precomposed', () => {
+    expect(normalizeSearchText('Université')).toBe('universite')
+    expect(normalizeSearchText('Benoı̂t')).toBe('benoit')
+    // same result whichever form the source happens to arrive in
+    expect(normalizeSearchText('Créteil')).toBe(normalizeSearchText('Créteil'))
+  })
+
+  it('keeps folding what decomposition alone cannot', () => {
+    expect(normalizeSearchText('Łukasz')).toBe('lukasz')
+    expect(normalizeSearchText('Ørsted')).toBe('orsted')
+    expect(normalizeSearchText('İstanbul')).toBe('istanbul')
+    expect(normalizeSearchText('Nguyễn')).toBe('nguyen')
+  })
+
+  // remove-accents only covers Latin; decomposition reaches every script
+  // whose diacritics are combining marks.
+  it('folds diacritics outside Latin', () => {
+    expect(normalizeSearchText('Οικονομία')).toBe('οικονομια')
+  })
 })
 
 describe('tokenizeSearchQuery', () => {
@@ -43,6 +65,12 @@ describe('tokenizeSearchQuery', () => {
 
   it('returns no token for a blank query', () => {
     expect(tokenizeSearchQuery(' - ')).toEqual([])
+  })
+
+  // \p{L} does not match a combining mark, so a decomposed query would split
+  // mid-word if normalization did not remove the mark first
+  it('does not split a decomposed query at its combining mark', () => {
+    expect(tokenizeSearchQuery('amériques')).toEqual(['ameriques'])
   })
 })
 
