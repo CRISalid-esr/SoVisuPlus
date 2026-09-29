@@ -127,9 +127,12 @@ const HalControl = () => {
   const handleClose = () => {
     setOpen(false)
     const url = new URL(window.location.href)
+    if (!url.searchParams.has('success') && !url.searchParams.has('error')) {
+      return
+    }
     url.searchParams.delete('success')
     url.searchParams.delete('error')
-    router.replace(url.pathname, { scroll: false })
+    router.replace(`${url.pathname}${url.search}`, { scroll: false })
   }
 
   const renderMessage = () => {
