@@ -7,7 +7,6 @@ import {
   WORD_VARIANT_SIMILARITY_THRESHOLD,
 } from '@/utils/fuzzySearch/constants'
 import {
-  escapeLike,
   wholeWordRegex,
   withWordSimilarityThreshold,
 } from '@/lib/daos/search/trigramSearchSql'
@@ -58,7 +57,6 @@ export const expandSearchTokens = async (
 
   // Candidate rows use the looser variant threshold: a typo inside a word
   // ("politque") has a lower word similarity than a typo at its end
-  const likePatterns = toLookUp.map((token) => `%${escapeLike(token)}%`)
   const wordRegexes = toLookUp.map(wholeWordRegex)
   const [rows] = await withWordSimilarityThreshold(
     prismaClient,
@@ -66,27 +64,34 @@ export const expandSearchTokens = async (
       prismaClient.$queryRaw<{ token: string; word: string }[]>`
       WITH tokens AS (
         SELECT * FROM unnest(
-          ${toLookUp}::text[], ${likePatterns}::text[], ${wordRegexes}::text[]
-        ) AS t(token, like_pattern, word_regex)
+          ${toLookUp}::text[], ${wordRegexes}::text[]
+        ) AS t(token, word_regex)
       ),
       -- A word that really occurs is not a typo, so it gets no variants
-      -- ("economie" must not also match "economics"). Checked against the
-      -- whole corpus: the candidate sample below is capped and would answer
-      -- this by luck. The LIKE prefilter is served by the GIN trigram
-      -- indexes; the regex then applies the word boundary.
+      -- ("economie" must not also match "economics"). The capped candidate
+      -- sample below would answer this by luck, so ask the whole corpus.
+      --
+      -- %> prefilters through the GIN trigram indexes and loses nothing: a
+      -- row holding the token as a whole word scores word_similarity 1.0,
+      -- far above the threshold, so it is always in the %> set. The regex
+      -- then applies the word boundary to those few rows.
+      --
+      -- A LIKE prefilter would be just as correct but far more expensive: a
+      -- common substring that is never a word on its own ("tion") matches a
+      -- large part of the corpus, and every match would be regex-tested.
       pending AS (
         SELECT * FROM tokens t
         WHERE NOT EXISTS (
           SELECT 1 FROM "DocumentTitle" d
-            WHERE d."normalizedValue" LIKE t.like_pattern
+            WHERE d."normalizedValue" %> t.token
               AND d."normalizedValue" ~ t.word_regex
           UNION ALL
           SELECT 1 FROM "Journal" j
-            WHERE j."normalizedTitle" LIKE t.like_pattern
+            WHERE j."normalizedTitle" %> t.token
               AND j."normalizedTitle" ~ t.word_regex
           UNION ALL
           SELECT 1 FROM "Person" p
-            WHERE p."normalizedName" LIKE t.like_pattern
+            WHERE p."normalizedName" %> t.token
               AND p."normalizedName" ~ t.word_regex
         )
       )
