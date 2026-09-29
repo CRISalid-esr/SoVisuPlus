@@ -92,21 +92,25 @@ const trigramsOf = (normalizedText: string): Set<string> => {
   return trigrams
 }
 
-/** Jaccard similarity of trigram sets, as pg_trgm `similarity()`. */
-export const trigramSimilarity = (a: string, b: string): number => {
-  const trigramsA = trigramsOf(normalizeSearchText(a))
-  const trigramsB = trigramsOf(normalizeSearchText(b))
-  if (trigramsA.size === 0 || trigramsB.size === 0) {
+const jaccard = (a: Set<string>, b: Set<string>): number => {
+  if (a.size === 0 || b.size === 0) {
     return 0
   }
   let shared = 0
-  for (const trigram of trigramsA) {
-    if (trigramsB.has(trigram)) {
+  for (const trigram of a) {
+    if (b.has(trigram)) {
       shared++
     }
   }
-  return shared / (trigramsA.size + trigramsB.size - shared)
+  return shared / (a.size + b.size - shared)
 }
+
+/** Jaccard similarity of trigram sets, as pg_trgm `similarity()`. */
+export const trigramSimilarity = (a: string, b: string): number =>
+  jaccard(
+    trigramsOf(normalizeSearchText(a)),
+    trigramsOf(normalizeSearchText(b)),
+  )
 
 /**
  * Optimal string alignment distance (Levenshtein plus adjacent
@@ -143,78 +147,135 @@ export const osaDistance = (a: string, b: string, max: number): number => {
   return Math.min(previous[b.length], max + 1)
 }
 
-const maxEditsFor = (token: string) =>
-  token.length >= TWO_EDITS_TOKEN_LENGTH ? 2 : 1
+/**
+ * A query token with the per-token work done once: its edit budget and its
+ * trigram set do not depend on the text being scored, so they are hoisted out
+ * of the loop over candidate rows.
+ */
+interface PreparedToken {
+  value: string
+  maxEdits: number
+  trigrams: Set<string>
+}
 
-/** Typo score of a token against a single word, 0 when too different. */
-const typoScore = (token: string, word: string): number => {
-  const maxEdits = maxEditsFor(token)
-  const distance = osaDistance(token, word, maxEdits)
+const prepareToken = (value: string): PreparedToken => ({
+  value,
+  maxEdits: value.length >= TWO_EDITS_TOKEN_LENGTH ? 2 : 1,
+  trigrams: trigramsOf(value),
+})
+
+/** Typo score of a prepared token against a single word, 0 when too different. */
+const typoScoreOf = (
+  token: PreparedToken,
+  word: string,
+  wordTrigrams: (word: string) => Set<string>,
+): number => {
+  const { value, maxEdits } = token
+  const distance = osaDistance(value, word, maxEdits)
   if (distance <= maxEdits) {
     return 0.7 - 0.1 * distance
   }
   // The user may still be typing: compare with the word's beginning (not for
   // the shortest tokens, whose one-edit prefixes match far too many words)
-  if (word.length > token.length && token.length > MIN_TYPO_TOKEN_LENGTH) {
+  if (word.length > value.length && value.length > MIN_TYPO_TOKEN_LENGTH) {
     const prefixDistance = osaDistance(
-      token,
-      word.slice(0, token.length),
+      value,
+      word.slice(0, value.length),
       maxEdits,
     )
     if (prefixDistance <= maxEdits) {
       return 0.6 - 0.1 * prefixDistance
     }
   }
-  const similarity = trigramSimilarity(token, word)
+  const similarity = jaccard(token.trigrams, wordTrigrams(word))
   return similarity >= WORD_VARIANT_SIMILARITY_THRESHOLD ? 0.6 * similarity : 0
 }
+
+/** Typo score of a single token against a single word, both normalized. */
+const typoScore = (token: string, word: string): number =>
+  typoScoreOf(prepareToken(token), word, trigramsOf)
 
 /**
  * Score (0..1) of a normalized token against a normalized text: exact word
  * 1, word prefix 0.9, substring 0.8, then typo-tolerant word matches for
  * tokens of at least MIN_TYPO_TOKEN_LENGTH characters.
  */
-const scoreToken = (token: string, normalizedText: string, words: Word[]) => {
-  if (words.some((word) => word.value === token)) return 1
-  if (words.some((word) => word.value.startsWith(token))) return 0.9
-  if (normalizedText.includes(token)) return 0.8
-  if (token.length < MIN_TYPO_TOKEN_LENGTH) return 0
-  return Math.max(0, ...words.map((word) => typoScore(token, word.value)))
+const scoreToken = (
+  token: PreparedToken,
+  normalizedText: string,
+  words: Word[],
+  wordTrigrams: (word: string) => Set<string>,
+) => {
+  const { value } = token
+  if (words.some((word) => word.value === value)) return 1
+  if (words.some((word) => word.value.startsWith(value))) return 0.9
+  if (normalizedText.includes(value)) return 0.8
+  if (value.length < MIN_TYPO_TOKEN_LENGTH) return 0
+  return Math.max(
+    0,
+    ...words.map((word) => typoScoreOf(token, word.value, wordTrigrams)),
+  )
+}
+
+/** Texts a scorer can be applied to; falsy entries are ignored. */
+type ScorableTexts = string | (string | null | undefined)[]
+
+/**
+ * Prepare a query once, then score many candidates against it.
+ *
+ * Use this over `fuzzyScore` whenever a single query is applied to a list —
+ * filtering a members table or a tree — since it tokenizes the query and
+ * builds each token's trigram set once instead of per candidate. It runs
+ * synchronously on the Node event loop server-side, so the work it saves is
+ * not just allocations: it is time no other request can use.
+ */
+export const createFuzzyScorer = (
+  query: string,
+): ((texts: ScorableTexts) => number) => {
+  const tokens = tokenizeSearchQuery(query).map(prepareToken)
+  if (tokens.length === 0) {
+    // an empty query matches everything
+    return () => 1
+  }
+  return (texts: ScorableTexts) => {
+    const normalizedText = (Array.isArray(texts) ? texts : [texts])
+      .filter((text): text is string => !!text)
+      .map(normalizeSearchText)
+      .join(' ')
+    const words = wordsOf(normalizedText)
+    // a word repeated across the given texts is only expanded once
+    const trigramCache = new Map<string, Set<string>>()
+    const wordTrigrams = (word: string): Set<string> => {
+      const cached = trigramCache.get(word)
+      if (cached) return cached
+      const trigrams = trigramsOf(word)
+      trigramCache.set(word, trigrams)
+      return trigrams
+    }
+    let total = 0
+    for (const token of tokens) {
+      const score = scoreToken(token, normalizedText, words, wordTrigrams)
+      if (score === 0) {
+        return 0
+      }
+      total += score
+    }
+    return total / tokens.length
+  }
 }
 
 /**
  * Relevance (0..1) of a free-text query against one or several texts. Every
  * query word must match one of the texts (in any order), otherwise 0. An
  * empty query matches everything with score 1.
+ *
+ * Scoring a list against one query? Use createFuzzyScorer instead.
  */
-export const fuzzyScore = (
-  query: string,
-  texts: string | (string | null | undefined)[],
-): number => {
-  const tokens = tokenizeSearchQuery(query)
-  if (tokens.length === 0) {
-    return 1
-  }
-  const normalizedText = (Array.isArray(texts) ? texts : [texts])
-    .filter((text): text is string => !!text)
-    .map(normalizeSearchText)
-    .join(' ')
-  const words = wordsOf(normalizedText)
-  let total = 0
-  for (const token of tokens) {
-    const score = scoreToken(token, normalizedText, words)
-    if (score === 0) {
-      return 0
-    }
-    total += score
-  }
-  return total / tokens.length
-}
+export const fuzzyScore = (query: string, texts: ScorableTexts): number =>
+  createFuzzyScorer(query)(texts)
 
-export const fuzzyMatch = (
-  query: string,
-  texts: string | (string | null | undefined)[],
-): boolean => fuzzyScore(query, texts) > 0
+export const fuzzyMatch = (query: string, texts: ScorableTexts): boolean =>
+  fuzzyScore(query, texts) > 0
 
 /**
  * Ranges of `text` (original indexes) matched by `query`, for

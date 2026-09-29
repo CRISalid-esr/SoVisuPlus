@@ -7,7 +7,7 @@ import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { StructureMember } from '@/types/StructureMember'
 import { employeeTypeLabel } from '@/lib/employeeTypes'
-import { fuzzyScore } from '@/utils/fuzzySearch/fuzzySearch'
+import { createFuzzyScorer } from '@/utils/fuzzySearch/fuzzySearch'
 import { OrganizationDirectoryEntry } from '@/types/OrganizationDirectory'
 import { computeEffectiveHidden } from '@/lib/services/organizationVisibility'
 import { Literal } from '@/types/Literal'
@@ -284,16 +284,17 @@ export class OrganizationUnitService {
         (member) => member.endDate === null || member.endDate >= today,
       )
     }
+    // One scorer for the whole member set: tokenizing the query per member
+    // would repeat that work a few thousand times, synchronously, on the
+    // event loop.
+    const isSearching = query.search.trim() !== ''
     const searchScores = new Map<StructureMember, number>()
-    if (query.search.trim() !== '') {
+    if (isSearching) {
+      const score = createFuzzyScorer(query.search)
       for (const member of members) {
         searchScores.set(
           member,
-          fuzzyScore(query.search, [
-            member.displayName,
-            member.firstName,
-            member.lastName,
-          ]),
+          score([member.displayName, member.firstName, member.lastName]),
         )
       }
       members = members.filter((member) => searchScores.get(member)! > 0)
@@ -363,7 +364,7 @@ export class OrganizationUnitService {
     // With a search and the default name order, best matches come first
     // (name order breaks ties)
     const rankBySearch =
-      searchScores.size > 0 && query.sortBy === 'name' && !query.sortDesc
+      isSearching && query.sortBy === 'name' && !query.sortDesc
     members.sort((a, b) => {
       if (rankBySearch) {
         const byScore = searchScores.get(b)! - searchScores.get(a)!
