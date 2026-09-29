@@ -39,8 +39,11 @@ import {
 } from './treeExplorerUtils'
 import { isGroupNodeId, structureGroupLabel } from './structureGroups'
 import StructureDetail from './StructureDetail'
+import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
 
 const KEYBOARD_RESIZE_STEP = 16
+// Same delay as the client-side table searches (Material React Table)
+const SEARCH_DEBOUNCE_MS = 250
 
 /**
  * Node ids of the hidden structures, so the item slot can dim them without
@@ -165,6 +168,9 @@ const StructureTreeExplorer = ({
   const [selectedItem, setSelectedItem] = useState<string | null>(null)
   const [expandedItems, setExpandedItems] = useState<string[]>([])
   const [search, setSearch] = useState('')
+  // What the tree is filtered on: the input value, debounced (fuzzy matching
+  // walks the whole forest)
+  const [filterQuery, setFilterQuery] = useState('')
   const preFilterExpanded = useRef<string[] | null>(null)
   const selectedRef = useRef<string | null>(null)
   selectedRef.current = selectedItem
@@ -194,10 +200,18 @@ const StructureTreeExplorer = ({
     }
   }, [leftWidth])
 
+  useEffect(() => {
+    const timeout = setTimeout(
+      () => setFilterQuery(search.trim()),
+      SEARCH_DEBOUNCE_MS,
+    )
+    return () => clearTimeout(timeout)
+  }, [search])
+
   const filtered = useMemo(
     () =>
-      search.trim() !== '' ? filterForest(displayForest, search.trim()) : null,
-    [displayForest, search],
+      filterQuery !== '' ? filterForest(displayForest, filterQuery) : null,
+    [displayForest, filterQuery],
   )
   const displayedForest = filtered ? filtered.forest : displayForest
   const items = useMemo(
@@ -300,6 +314,8 @@ const StructureTreeExplorer = ({
     if (!isFiltering && wasFiltering) {
       setExpandedItems(preFilterExpanded.current ?? [])
       preFilterExpanded.current = null
+      // Clearing is not debounced: restore the full tree with its expansion
+      setFilterQuery('')
     }
     setSearch(value)
   }
@@ -356,6 +372,7 @@ const StructureTreeExplorer = ({
             onChange={(event) => handleSearchChange(event.target.value)}
             placeholder={t`research_structures_tree_search_placeholder`}
             slotProps={{
+              htmlInput: { maxLength: MAX_NAME_SEARCH_QUERY_LENGTH },
               input: {
                 startAdornment: (
                   <InputAdornment position='start'>

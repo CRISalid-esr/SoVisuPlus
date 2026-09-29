@@ -835,4 +835,93 @@ describe('PersonDAO Integration Tests', () => {
       'person:john-doe-1',
     ])
   })
+
+  describe('backfillNormalizedSearchColumns', () => {
+    it('fills normalizedName from the display name or the name parts', async () => {
+      await prisma.person.createMany({
+        data: [
+          { uid: 'p-display', displayName: 'Élodie Durand' },
+          { uid: 'p-parts', firstName: 'José', lastName: 'Núñez' },
+        ],
+      })
+
+      expect(await personDAO.backfillNormalizedSearchColumns(1)).toBe(2)
+      expect(await personDAO.backfillNormalizedSearchColumns(1)).toBe(0)
+
+      const people = await prisma.person.findMany({
+        where: { uid: { in: ['p-display', 'p-parts'] } },
+        orderBy: { uid: 'asc' },
+      })
+      expect(people.map((p) => p.normalizedName)).toEqual([
+        'elodie durand',
+        'jose nunez',
+      ])
+    })
+  })
+
+  describe('fetchPeople search', () => {
+    beforeEach(async () => {
+      for (const [uid, firstName, lastName, external] of [
+        ['p-dupont', 'Jean', 'Dupont', false],
+        ['p-dupond', 'Marie', 'Dupond', false],
+        ['p-jose', 'José', 'Núñez', false],
+        ['p-external', 'Jean', 'Dupontel', true],
+      ] as const) {
+        await personDAO.createOrUpdatePerson(
+          new Person(
+            uid,
+            external,
+            null,
+            `${firstName} ${lastName}`,
+            firstName,
+            lastName,
+            [],
+          ),
+        )
+      }
+    })
+
+    const uids = async (term: string, includeExternal = false) =>
+      (await personDAO.fetchPeople(term, 1, includeExternal, 10)).people.map(
+        (p) => p.uid,
+      )
+
+    test('lists everyone by last name for a blank query', async () => {
+      const result = await personDAO.fetchPeople('  ', 1, false, 10)
+      expect(result.people.map((p) => p.uid)).toEqual([
+        'p-dupond',
+        'p-dupont',
+        'p-jose',
+      ])
+      expect(result.total).toBe(3)
+    })
+
+    test('ignores accents, case and word order', async () => {
+      expect(await uids('NUNEZ jose')).toEqual(['p-jose'])
+    })
+
+    test('tolerates typos and ranks exact matches first', async () => {
+      expect(await uids('dupont')).toEqual(['p-dupont', 'p-dupond'])
+      expect(await uids('dupond')).toEqual(['p-dupond', 'p-dupont'])
+    })
+
+    test('requires every word to match', async () => {
+      expect(await uids('jean dupont')).toEqual(['p-dupont'])
+    })
+
+    test('excludes external people unless requested', async () => {
+      expect(await uids('dupontel')).not.toContain('p-external')
+      expect(await uids('dupontel', true)).toContain('p-external')
+    })
+
+    test('paginates ranked results with the full total', async () => {
+      const page1 = await personDAO.fetchPeople('dupont', 1, false, 1)
+      const page2 = await personDAO.fetchPeople('dupont', 2, false, 1)
+      expect(page1.people.map((p) => p.uid)).toEqual(['p-dupont'])
+      expect(page2.people.map((p) => p.uid)).toEqual(['p-dupond'])
+      expect(page1.total).toBe(2)
+      expect(page1.hasMore).toBe(true)
+      expect(page2.hasMore).toBe(false)
+    })
+  })
 })

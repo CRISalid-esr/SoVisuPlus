@@ -1,14 +1,16 @@
 import { Trans } from '@lingui/react/macro'
 import { useEffect, useRef, useState } from 'react'
-import Highlighter from 'react-highlight-words'
+import Highlighter, { HighlighterProps } from 'react-highlight-words'
 import styles from './HighlighterWithEllipsis.module.css'
 
 const HighlighterWithEllipsis = ({
   text,
   searchWords,
+  findChunks,
 }: {
   text: string
   searchWords: string[]
+  findChunks?: HighlighterProps['findChunks']
 }) => {
   const [expanded, setExpanded] = useState(false)
   const [isTruncated, setIsTruncated] = useState(false)
@@ -31,7 +33,11 @@ const HighlighterWithEllipsis = ({
         <Highlighter
           highlightClassName='highlight'
           searchWords={searchWords}
+          // Ignored when findChunks is supplied, but the Sources tab renders
+          // this component without one and relies on the default literal
+          // matching, where it keeps regex metacharacters harmless.
           autoEscape
+          findChunks={findChunks}
           textToHighlight={text}
         />
       </div>

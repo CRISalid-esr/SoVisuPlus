@@ -1,0 +1,100 @@
+import { Prisma, PrismaClient } from '@prisma/client'
+import {
+  MIN_TRIGRAM_TOKEN_LENGTH,
+  WORD_SIMILARITY_THRESHOLD,
+} from '@/utils/fuzzySearch/constants'
+
+/** Escape LIKE wildcards; the default LIKE escape character is backslash. */
+export const escapeLike = (value: string): string =>
+  value.replace(/[\\%_]/g, (character) => `\\${character}`)
+
+/** Escape POSIX regex metacharacters so a token matches literally. */
+export const escapeRegex = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, (character) => `\\${character}`)
+
+/**
+ * POSIX regex matching `token` as a whole word in a normalized column —
+ * the same word boundary the scoring CASE uses.
+ */
+export const wholeWordRegex = (token: string): string =>
+  `(^|[^[:alnum:]])${escapeRegex(token)}($|[^[:alnum:]])`
+
+/**
+ * One match condition per token, in token order: the token is a substring of
+ * the column or, from MIN_TRIGRAM_TOKEN_LENGTH characters, has a pg_trgm
+ * word_similarity with it above the `<%` threshold.
+ *
+ * Returned per token rather than pre-joined so a caller can apply each token
+ * to several columns independently — the structures search matches a token
+ * against one label row or the acronym, which lets the GIN indexes serve the
+ * predicate (a condition on an aggregate cannot use an index).
+ *
+ * @throws if `tokens` is empty — callers must treat a blank query separately
+ * (see tokenizeSearchQuery); `Prisma.join` would otherwise throw less clearly.
+ */
+export const buildTokenConditions = (
+  column: Prisma.Sql,
+  tokens: string[],
+): Prisma.Sql[] => {
+  if (tokens.length === 0) {
+    throw new Error('buildTokenConditions requires at least one token')
+  }
+  return tokens.map((token) => {
+    const pattern = `%${escapeLike(token)}%`
+    return token.length >= MIN_TRIGRAM_TOKEN_LENGTH
+      ? Prisma.sql`(${column} LIKE ${pattern} OR ${token} <% ${column})`
+      : Prisma.sql`${column} LIKE ${pattern}`
+  })
+}
+
+/**
+ * SQL fragments matching normalized search tokens against a normalized
+ * column (lowercase, no diacritics), with pg_trgm typo tolerance.
+ *
+ * - `where`: every token must match the column (see buildTokenConditions).
+ * - `score`: sum over tokens of 1 (whole word), 0.9 (word prefix),
+ *   0.8 (substring) or 0.7 × word_similarity (typo) — the same scale as the
+ *   client-side fuzzyScore.
+ *
+ * `tokens` must not be empty (see tokenizeSearchQuery).
+ */
+export const buildTokenMatch = (
+  column: Prisma.Sql,
+  tokens: string[],
+): { where: Prisma.Sql; score: Prisma.Sql } => {
+  const conditions = buildTokenConditions(column, tokens)
+  const scores = tokens.map((token) => {
+    const pattern = `%${escapeLike(token)}%`
+    const wordStart = `(^|[^[:alnum:]])${escapeRegex(token)}`
+    const wholeWord = wholeWordRegex(token)
+    return Prisma.sql`(CASE
+      WHEN ${column} ~ ${wholeWord} THEN 1.0
+      WHEN ${column} ~ ${wordStart} THEN 0.9
+      WHEN ${column} LIKE ${pattern} THEN 0.8
+      ELSE 0.7 * word_similarity(${token}, ${column})
+    END)`
+  })
+  return {
+    where: Prisma.join(conditions, ' AND '),
+    score: Prisma.sql`(${Prisma.join(scores, ' + ')})`,
+  }
+}
+
+/**
+ * Run raw queries in one transaction where the pg_trgm `<%` / `%>` operators
+ * use `threshold` (WORD_SIMILARITY_THRESHOLD by default). The setting is local
+ * to the transaction.
+ */
+export const withWordSimilarityThreshold = async <
+  T extends Prisma.PrismaPromise<unknown>[],
+>(
+  prismaClient: PrismaClient,
+  queries: [...T],
+  threshold: number = WORD_SIMILARITY_THRESHOLD,
+): Promise<{ [K in keyof T]: Awaited<T[K]> }> => {
+  const [, ...results] = await prismaClient.$transaction([
+    prismaClient.$queryRaw`SELECT set_config('pg_trgm.word_similarity_threshold', ${String(threshold)}, true)`,
+    ...queries,
+  ])
+  return results as { [K in keyof T]: Awaited<T[K]> }
+}

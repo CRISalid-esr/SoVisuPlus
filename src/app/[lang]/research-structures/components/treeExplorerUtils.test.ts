@@ -7,7 +7,6 @@ import {
   decorateForest,
   filterForest,
   indexForest,
-  normalizeForSearch,
   PANEL_WIDTH,
   treeLabel,
   visibleChildren,
@@ -105,13 +104,6 @@ describe('ancestorsOf', () => {
   })
 })
 
-describe('normalizeForSearch', () => {
-  it('is case- and diacritics-insensitive', () => {
-    expect(normalizeForSearch('Économie Générale')).toBe('economie generale')
-    expect(normalizeForSearch('UMR 8103 – ISJPS')).toBe('umr 8103 – isjps')
-  })
-})
-
 describe('treeLabel', () => {
   it('combines acronym and name, collapsing the fallback case', () => {
     expect(treeLabel(makeRow('a'))).toBe('A — Name of a')
@@ -137,6 +129,16 @@ describe('filterForest', () => {
       makeRow('r1', { subRows: [makeRow('a', { name: 'Écologie' })] }),
     ]
     const { forest: kept } = filterForest(rows, 'ecolo')
+    expect(kept[0].subRows?.[0].uid).toBe('a')
+  })
+
+  it('tolerates typos and word order', () => {
+    const rows = [
+      makeRow('r1', {
+        subRows: [makeRow('a', { name: 'Institut de philosophie' })],
+      }),
+    ]
+    const { forest: kept } = filterForest(rows, 'filosophie institut')
     expect(kept[0].subRows?.[0].uid).toBe('a')
   })
 
