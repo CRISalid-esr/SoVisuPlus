@@ -28,7 +28,7 @@ document Sources tab, static option autocompletes.
 
 | Question                     | Decision                                                                                                                                                                                                                                                   |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Normalization                | Once, in TS: `normalizeSearchText` = `removeAccents` + lowercase, shared by browser and server                                                                                                                                                             |
+| Normalization                | Once, in TS: `normalizeSearchText` = NFD decomposition, combining marks (U+0300-U+036F) dropped, then `removeAccents` + lowercase, shared by browser and server                                                                                            |
 | Server storage               | Search-only `normalized*` columns next to the originals (data and UI keep accents), GIN `gin_trgm_ops`                                                                                                                                                     |
 | PostgreSQL extension         | `pg_trgm` only (trusted extension; no `unaccent`, which is not IMMUTABLE and cannot be indexed via Prisma)                                                                                                                                                 |
 | Word semantics               | Every query word must match (AND), in any order                                                                                                                                                                                                            |
@@ -58,7 +58,29 @@ document Sources tab, static option autocompletes.
     `findChunks`, merging chunks separated by whitespace.
 - `searchQueryLength.ts` — length checks used by the API routes.
 
-`Person.normalizedName` uses the same function, so existing rows stay valid.
+`Person.normalizedName` uses the same function.
+
+**Normalization is not `remove-accents` alone, and stored rows did not stay valid.**
+An earlier draft of this spec claimed they would; two things were wrong.
+
+- `remove-accents` is a lookup table over _precomposed_ characters, so a source value
+  that arrives decomposed (NFD) keeps its diacritics: `Benoı̂t` normalized to `benoît`,
+  and a decomposed `Université` to `université`. Those rows then fragment at the mark —
+  neither `\p{L}` nor POSIX `[:alnum:]` matches a combining mark — so the documents
+  list, which matches with `contains` only, could not find them at all. Decomposing and
+  dropping U+0300-U+036F first fixes it, and also extends accent-insensitivity to every
+  script whose diacritics are combining marks (Greek, Vietnamese tone marks).
+  This subsumes the deleted `treeExplorerUtils.normalizeForSearch`, which decomposed but
+  did not handle ligatures or stroked letters (`œ`, `Ł`, `Ø`); the two compose.
+- Independently, this branch changed the order from `removeAccents(x.toLowerCase())` to
+  `removeAccents(x).toLowerCase()`, which changes `İ` (`i̇stanbul` before, `istanbul`
+  after). Two rows on the deployed corpus were affected.
+
+Both leave stored `normalized*` values disagreeing with the code, and the startup
+backfill cannot repair them because it only fills nulls. `npm run renormalize:search-columns`
+recomputes every row from its source column and writes back only where the result
+differs (284 rows locally; it updates 0 on a second run). It is deliberately **not** wired
+into `docker-bootstrap-app.sh`, and must be run once against each database holding data.
 
 ### People and structures (sidebar)
 
@@ -105,14 +127,40 @@ composition with perimeter, HAL, type, date filters, paging, sorting and count i
 
 ### Schema, write paths and backfill
 
-- Migrations `fuzzy_search` (extension, columns, GIN indexes) and
-  `drop_abstract_search_column`.
+- One migration, `fuzzy_search` (extension, columns, GIN indexes). It was squashed with
+  the follow-up that dropped the abstract column, so a deploy no longer builds a GIN index
+  over every abstract and immediately drops it again. Safe only because neither migration
+  had ever been applied outside local dev databases — both are immutable from now on.
+- The `normalized*` columns are `TEXT`, deliberately unbounded: normalization can lengthen
+  a value (`œ` expands to `oe`), so giving them their source column's width made a title
+  or label at the limit fail its own insert.
 - Columns: `Person.normalizedName` (existing, now indexed), `DocumentTitle.normalizedValue`,
   `Journal.normalizedTitle`, `OrganizationUnitLabel.normalizedValue`,
   `OrganizationUnit.normalizedAcronym`.
 - Every DAO write sets them. `npm run backfill:search-columns` (`:js` in the image) fills
   rows written before; `docker-bootstrap-app.sh` runs it in the background after the
   migrations (idempotent, no-op once done).
+
+**The backfill is temporary.** It exists only to fill the single existing deployment's
+database; the orchestrated deployment will start from an empty one and never needs it.
+Delete it once the deployed instance is filled: `src/scripts/backfill_search_columns.ts`,
+`src/scripts/renormalize_search_columns.ts`, the `backfill:search-columns` /
+`renormalize:search-columns` npm scripts (and their `:js` variants), the
+`docker-bootstrap-app.sh` invocation, `SearchColumnsService`, the three DAO
+`backfillNormalizedSearchColumns` methods and
+`src/app/lib/daos/search/backfillNormalizedColumn.ts`. The write paths and
+`normalizeSearchText` stay. Readiness check — every count must be 0:
+
+```sql
+SELECT
+  (SELECT count(*) FROM "Person"                WHERE "normalizedName"  IS NULL) AS people,
+  (SELECT count(*) FROM "DocumentTitle"         WHERE "normalizedValue" IS NULL) AS titles,
+  (SELECT count(*) FROM "Journal"               WHERE "normalizedTitle" IS NULL) AS journals,
+  (SELECT count(*) FROM "OrganizationUnitLabel" WHERE "normalizedValue" IS NULL) AS labels;
+```
+
+(`OrganizationUnit.normalizedAcronym` is legitimately null for units without an acronym —
+compare it against `count(*) WHERE acronym IS NOT NULL` instead of expecting 0.)
 
 ### API routes
 
@@ -142,7 +190,19 @@ table searches and structure column filter (client-side only, limited for consis
 - Documents highlighting decides typos on its own (same rules as the client scorer); a
   rare server-side trigram variant may stay unhighlighted.
 - A multi-word documents search no longer requires a contiguous phrase.
-- Rows whose normalized columns are still null (backfill not run yet) are not found.
+- Rows whose normalized columns are still null (backfill not run yet) are not found, and
+  rows whose stored value predates a change to `normalizeSearchText` rank wrongly until
+  `npm run renormalize:search-columns` has been run against that database.
+- **The database must use a UTF-8 locale, not `C`.** `SearchTermExpander` splits candidate
+  strings with POSIX `[^[:alnum:]]+`, which is locale-dependent. Under `LC_CTYPE=C` — easy
+  to inherit from a minimal container image or some managed instances — `[:alnum:]`
+  collapses to ASCII and the documents typo-variant lookup silently stops producing
+  variants for non-Latin scripts. Nothing errors; results just degrade. See
+  `docs/installation.md`.
+- The documents typo-variant lookup costs roughly 100 ms per word that is a common
+  substring but never a word on its own (`tion`, `atio`), because `%>` has to scan every
+  trigram-similar row. A real word costs a few ms. A pasted 30-word title made only of
+  such fragments is the worst case, at a few seconds.
 - `postgresqlExtensions` is a Prisma preview feature; a managed PostgreSQL where the app
   role cannot create extensions needs `CREATE EXTENSION pg_trgm` once
   (`docs/installation.md`).

@@ -34,6 +34,14 @@ resolve this problem you need to change the database owner using the following c
 ALTER DATABASE sovisuplus OWNER TO sovisuplus ;
 ```
 
+Fuzzy search requires the database to be created with a **UTF-8 locale, not `C`**. The
+documents typo-variant lookup splits candidate strings with the POSIX class
+`[^[:alnum:]]+`, which is locale-dependent: under `LC_CTYPE=C`, `[:alnum:]` collapses to
+ASCII and the lookup silently stops producing variants for non-Latin scripts. Nothing
+errors, results just get worse. Check with `SHOW lc_ctype;` (or
+`SELECT datcollate, datctype FROM pg_database WHERE datname = current_database();` on
+newer servers) and expect something like `fr_FR.UTF-8` or `en_US.utf8`.
+
 Fuzzy search relies on the `pg_trgm` extension (shipped with PostgreSQL contrib packages and the official `postgres`
 Docker image). Migrations create it with `CREATE EXTENSION IF NOT EXISTS pg_trgm`. Since PostgreSQL 13 `pg_trgm` is a
 trusted extension, so the database owner (see above) can create it. If the application role is neither owner nor

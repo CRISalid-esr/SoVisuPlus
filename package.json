@@ -35,6 +35,7 @@
     "seed:self-scoped-defaults:js": "node dist-listener/src/scripts/seed_self_scoped_defaults.js",
     "backfill:search-columns": "ts-node --project tsconfig.listener.json src/scripts/backfill_search_columns.ts",
     "renormalize:search-columns": "ts-node --project tsconfig.listener.json src/scripts/renormalize_search_columns.ts",
+    "renormalize:search-columns:js": "node dist-listener/src/scripts/renormalize_search_columns.js",
     "backfill:search-columns:js": "node dist-listener/src/scripts/backfill_search_columns.js",
     "dispatch_actions": "ts-node --project tsconfig.listener.json src/scripts/dispatch_actions.ts",
     "dispatch_actions:js": "node dist-listener/src/scripts/dispatch_actions.js",
