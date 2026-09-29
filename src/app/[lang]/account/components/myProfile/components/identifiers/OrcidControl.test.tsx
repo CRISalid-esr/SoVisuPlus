@@ -248,4 +248,54 @@ describe('OrcidControl', () => {
 
     expect(screen.getByText('orcid_authentication_success')).toBeInTheDocument()
   })
+
+  describe('closing the snackbar', () => {
+    afterEach(() => {
+      window.history.replaceState({}, '', '/')
+    })
+
+    it('keeps the perspective param and only strips OAuth feedback params', () => {
+      window.history.replaceState(
+        {},
+        '',
+        '/en/account?perspective=person:other-uid&success=orcid_authentication_success',
+      )
+      mockUseSearchParams.mockReturnValue(
+        new URLSearchParams(window.location.search),
+      )
+      setupStore({ person: buildPerson([]) })
+      renderWithProviders()
+
+      fireEvent.click(screen.getByLabelText('Close'))
+
+      expect(mockRouter.replace).toHaveBeenCalledWith(
+        '/en/account?perspective=person%3Aother-uid',
+        { scroll: false },
+      )
+    })
+
+    it("does not navigate after removing another person's identifier", async () => {
+      window.history.replaceState(
+        {},
+        '',
+        '/en/account?perspective=person:other-uid',
+      )
+      setupStore({
+        person: buildPerson([]),
+        currentPerspective: buildPerson([plainOrcid]),
+        ownPerspective: false,
+      })
+      renderWithProviders()
+
+      fireEvent.click(screen.getByText('orcid_control_remove_button'))
+      fireEvent.click(screen.getByText('orcid_control_remove_dialog_confirm'))
+      expect(
+        await screen.findByText('orcid_remove_success'),
+      ).toBeInTheDocument()
+
+      fireEvent.click(screen.getByLabelText('Close'))
+
+      expect(mockRouter.replace).not.toHaveBeenCalled()
+    })
+  })
 })
