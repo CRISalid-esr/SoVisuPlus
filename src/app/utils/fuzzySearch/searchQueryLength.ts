@@ -45,14 +45,3 @@ export const documentSearchQueryLengthError = (
     )
   )
 }
-
-/**
- * MUI TextField props limiting a search field to `maxLength` characters, so
- * the user never gets the API's 400. `autoComplete: 'off'` is kept because
- * `slotProps.htmlInput` replaces Material React Table's default input props.
- */
-export const searchFieldProps = (maxLength: number) => ({
-  slotProps: {
-    htmlInput: { autoComplete: 'off', maxLength },
-  },
-})

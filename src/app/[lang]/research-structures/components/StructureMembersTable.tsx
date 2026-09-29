@@ -31,7 +31,7 @@ import {
 import { StructureMemberJson } from '@/types/StructureMember'
 import RateBar from './RateBar'
 import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
-import { searchFieldProps } from '@/utils/fuzzySearch/searchQueryLength'
+import { searchFieldProps } from '@/components/searchFieldProps'
 
 const IDENTIFIER_DISPLAY_ORDER: PersonIdentifierType[] = [
   PersonIdentifierType.orcid,

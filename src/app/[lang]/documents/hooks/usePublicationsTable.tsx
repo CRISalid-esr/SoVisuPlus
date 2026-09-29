@@ -45,7 +45,7 @@ import {
   MAX_DOCUMENT_SEARCH_QUERY_LENGTH,
   MAX_NAME_SEARCH_QUERY_LENGTH,
 } from '@/utils/fuzzySearch/constants'
-import { searchFieldProps } from '@/utils/fuzzySearch/searchQueryLength'
+import { searchFieldProps } from '@/components/searchFieldProps'
 import { LanguageChips } from '@/components/LanguageChips'
 import { Contribution } from '@/types/Contribution'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'

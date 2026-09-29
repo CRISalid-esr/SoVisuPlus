@@ -1,6 +1,5 @@
 import {
   documentSearchQueryLengthError,
-  searchFieldProps,
   searchQueryLengthError,
 } from './searchQueryLength'
 
@@ -56,13 +55,5 @@ describe('documentSearchQueryLengthError', () => {
   it('tolerates malformed column filters', () => {
     expect(documentSearchQueryLengthError('', 'not an array')).toBeNull()
     expect(documentSearchQueryLengthError('', [null, 3])).toBeNull()
-  })
-})
-
-describe('searchFieldProps', () => {
-  it('limits the input length and keeps autocomplete off', () => {
-    expect(searchFieldProps(200)).toEqual({
-      slotProps: { htmlInput: { autoComplete: 'off', maxLength: 200 } },
-    })
   })
 })

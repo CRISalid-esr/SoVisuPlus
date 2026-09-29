@@ -33,6 +33,9 @@ const HighlighterWithEllipsis = ({
         <Highlighter
           highlightClassName='highlight'
           searchWords={searchWords}
+          // Ignored when findChunks is supplied, but the Sources tab renders
+          // this component without one and relies on the default literal
+          // matching, where it keeps regex metacharacters harmless.
           autoEscape
           findChunks={findChunks}
           textToHighlight={text}

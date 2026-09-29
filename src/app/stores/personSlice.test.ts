@@ -89,6 +89,27 @@ describe('addPersonSlice', () => {
     expect(state.error).toEqual(new Error(errorMessage))
   })
 
+  it('should report a non-ok response instead of throwing on its body', async () => {
+    // the route answers 400 with { error } when the search is too long; the
+    // destructuring would otherwise throw a TypeError on that body
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: false,
+        statusText: 'Bad Request',
+        json: () => Promise.resolve({ error: 'Search too long' }),
+      } as unknown as Response),
+    )
+
+    await store
+      .getState()
+      .person.fetchPeopleByName({ page: 1, searchTerm: 'x'.repeat(201) })
+
+    const state = store.getState().person
+    expect(state.loading).toBe(false)
+    expect(state.people).toEqual([])
+    expect(String(state.error)).toContain('Bad Request')
+  })
+
   it('should append people data on subsequent pages', async () => {
     const initialPeople = [
       new Person(

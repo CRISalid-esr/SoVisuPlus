@@ -39,9 +39,9 @@ import { hasUnscopedPermission } from '@/app/auth/ability'
 import { PermissionAction, PermissionSubject } from '@/types/Permission'
 import { Localization } from '@/types/Localization'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import { fuzzyMatch, fuzzyScore } from '@/utils/fuzzySearch/fuzzySearch'
+import { fuzzyScore } from '@/utils/fuzzySearch/fuzzySearch'
 import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
-import { searchFieldProps } from '@/utils/fuzzySearch/searchQueryLength'
+import { searchFieldProps } from '@/components/searchFieldProps'
 import {
   buildDirectoryForest,
   buildRows,
@@ -219,8 +219,9 @@ function FlatTable({
         header: t`research_structures_column_structure`,
         size: 260,
         grow: 2,
-        filterFn: (row, _id, filterValue: string) =>
-          fuzzyMatch(filterValue, [row.original.acronym, row.original.name]),
+        // structureFilterFns.fuzzy already searches acronym + name for this
+        // column, for the global filter; reuse it rather than restate it
+        filterFn: 'fuzzy',
         muiFilterTextFieldProps: structureSearchFieldProps,
         Cell({ row }) {
           return (

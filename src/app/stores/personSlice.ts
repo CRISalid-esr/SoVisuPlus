@@ -62,6 +62,13 @@ export const addPersonSlice: StateCreator<PersonSlice, [], [], PersonSlice> = (
             signal,
           })
 
+          if (!response.ok) {
+            // e.g. 400 when the search exceeds MAX_NAME_SEARCH_QUERY_LENGTH;
+            // without this the destructuring below throws a TypeError on an
+            // error body, which reads as a bug rather than a failed request
+            throw new Error(`Failed to fetch: ${response.statusText}`)
+          }
+
           const { hasMore, people, total } =
             (await response.json()) as FindPeopleResponse
           if (signal.aborted) {
