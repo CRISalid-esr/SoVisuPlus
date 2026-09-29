@@ -10,10 +10,15 @@ import {
   ToolboxComponentOption,
   TooltipComponentOption,
 } from 'echarts/components'
-import { useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import BlockIcon from '@mui/icons-material/Block'
 import { OAStatus } from '@prisma/client'
+import { ECharts } from 'echarts'
+import { ElementEvent } from 'echarts/core'
+import * as Lingui from '@lingui/core'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { OAStatusProperties } from '@/app/[lang]/documents/components/OAStatusProperties'
+import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 
 type ChartOption = ComposeOption<
   | BarSeriesOption
@@ -57,6 +62,11 @@ const PublicationCard = ({
   data = [],
   loading = false,
 }: PublicationCardProps) => {
+  const lang = Lingui.i18n.locale as ExtendedLanguageCode
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [chartInstance, setChartInstance] = useState<ECharts | null>(null)
+
   const oldestYear = useMemo(() => {
     const years = Object.keys(data)
       .map(Number)
@@ -261,6 +271,54 @@ const PublicationCard = ({
     }
   }, [filteredData, yearRange])
 
+  /**
+   * Open the publications list filtered on the given year, with every other
+   * filter reset.
+   */
+  const navigateToYearPublications = useCallback(
+    (year: number) => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete('structures')
+      params.delete('tab')
+      params.set('years', `${year},${year}`)
+      params.set('resetFilters', 'true')
+      router.push(`/${lang}/documents?${params.toString()}`)
+    },
+    [lang, router, searchParams],
+  )
+
+  /**
+   * Make each year column clickable.
+   */
+  useEffect(() => {
+    const chart = chartInstance
+    if (!chart || chart.isDisposed()) return
+    const zr = chart.getZr()
+    const yearAt = (event: ElementEvent): number | undefined => {
+      const point = [event.offsetX, event.offsetY]
+      if (!chart.containPixel('grid', point)) return undefined
+      const [index] = chart.convertFromPixel(
+        { gridIndex: 0 },
+        point,
+      ) as number[]
+      return filteredData[Math.round(index)]?.year
+    }
+    const handleClick = (event: ElementEvent) => {
+      const year = yearAt(event)
+      if (year !== undefined) navigateToYearPublications(year)
+    }
+    const handleMouseMove = (event: ElementEvent) => {
+      if (yearAt(event) !== undefined) zr.setCursorStyle('pointer')
+    }
+    zr.on('click', handleClick)
+    zr.on('mousemove', handleMouseMove)
+    return () => {
+      if (chart.isDisposed()) return
+      zr.off('click', handleClick)
+      zr.off('mousemove', handleMouseMove)
+    }
+  }, [chartInstance, filteredData, navigateToYearPublications])
+
   return (
     <Box>
       {loading ? (
@@ -303,6 +361,7 @@ const PublicationCard = ({
                   option={option}
                   notMerge={true}
                   lazyUpdate={true}
+                  onChartReady={setChartInstance}
                 />
               )}
             </Box>
