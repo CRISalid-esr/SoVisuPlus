@@ -475,13 +475,23 @@ export const usePublicationsTable = (
         .map((date, index) =>
           index === 0 ? date.startOf('year') : date.endOf('year'),
         )
-      setYearsFilter(formattedYears)
+      // Keep only the date filter when the link asks for a reset.
+      if (searchParams.get('resetFilters') === 'true') {
+        setColumnFiltersByTab({
+          [selectedTab]: [{ id: 'date', value: formattedYears }],
+        })
+        setGlobalFilter('')
+        setPagination((previous) => ({ ...previous, pageIndex: 0 }))
+      } else {
+        setYearsFilter(formattedYears)
+      }
       const params = new URLSearchParams(searchParams.toString())
       params.delete('years')
       params.delete('structures')
+      params.delete('resetFilters')
       router.replace(`/${lang}/documents?${params}`)
     }
-  }, [lang, router, searchParams])
+  }, [lang, router, searchParams, selectedTab])
 
   usePublicationsTableStorage(
     globalFilter,
