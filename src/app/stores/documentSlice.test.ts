@@ -474,3 +474,24 @@ describe('addDocumentSlice - unfreezeSelectedDocument', () => {
     expect(useStore.getState().document.selectedDocument).toBeNull()
   })
 })
+
+describe('addDocumentSlice - fetchDocumentById', () => {
+  let useStore: ReturnType<typeof createTestStore>
+
+  beforeEach(() => {
+    useStore = createTestStore()
+    jest.clearAllMocks()
+  })
+
+  it('marks the fetch as done with no document when the API fails', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({ ok: false })
+
+    await useStore.getState().document.fetchDocumentById('unknown')
+
+    const state = useStore.getState().document
+    expect(global.fetch).toHaveBeenCalledWith('/api/documents/unknown')
+    expect(state.hasFetched).toBe(true)
+    expect(state.loading).toBe(false)
+    expect(state.selectedDocument).toBeNull()
+  })
+})
