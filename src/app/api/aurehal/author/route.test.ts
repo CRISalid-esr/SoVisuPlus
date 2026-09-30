@@ -33,7 +33,7 @@ describe('GET /api/aurehal/author', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(getServerSession as jest.Mock).mockResolvedValue({
-      user: { authz: { userId: 'u', roleAssignments: [] } },
+      user: { username: 'u', authz: { userId: 'u', roleAssignments: [] } },
     })
   })
 

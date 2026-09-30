@@ -72,7 +72,9 @@ const person = (
 })
 
 const setSession = (authz: unknown) =>
-  (getServerSession as jest.Mock).mockResolvedValue({ user: { authz } })
+  (getServerSession as jest.Mock).mockResolvedValue({
+    user: { username: 'u', authz },
+  })
 
 const ctx = (uid: string, type: string) => ({
   params: Promise.resolve({ uid, type }),

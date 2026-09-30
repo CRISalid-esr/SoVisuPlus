@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server'
 import { DocumentService } from '@/lib/services/DocumentService'
+import { requireSession } from '@/app/auth/requireSession'
 
 export const GET = async (
   request: Request,
   context: { params: Promise<{ uid: string }> },
 ) => {
+  const { error: authError } = await requireSession()
+  if (authError) return authError
+
   const { uid } = await context.params
 
   if (!uid) {

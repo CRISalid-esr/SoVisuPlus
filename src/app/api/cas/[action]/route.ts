@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as process from 'node:process'
-import { getServerSession, Session } from 'next-auth'
-import authOptions from '@/app/auth/auth_options'
-
+import { getAuthenticatedSession } from '@/app/auth/requireSession'
 import { AureHalAPIClient } from '@/lib/services/AureHalAPIClient'
 import { PersonService } from '@/lib/services/PersonService'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
@@ -51,10 +49,8 @@ export async function GET(
   }
 
   // Require a valid NextAuth session
-  const session = (await getServerSession(authOptions)) as Session & {
-    user: { username?: string; id?: string }
-  }
-  if (!session?.user?.id || !session?.user?.username) {
+  const session = await getAuthenticatedSession()
+  if (!session?.user?.id) {
     return NextResponse.redirect(
       `${userRedirectionUrl}?error=hal_authentication_failure_no_session`,
     )

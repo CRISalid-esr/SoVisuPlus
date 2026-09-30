@@ -1,7 +1,6 @@
 // file: src/app/api/documents/[uid]/type/route.ts
 import { NextResponse } from 'next/server'
-import { getServerSession, Session } from 'next-auth'
-import authOptions from '@/app/auth/auth_options'
+import { requireSession } from '@/app/auth/requireSession'
 import { DocumentService } from '@/lib/services/DocumentService'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
@@ -14,16 +13,9 @@ export const PUT = async (
   try {
     const { uid } = await context.params
 
-    const session = (await getServerSession(authOptions)) as Session & {
-      user: { username?: string }
-    }
-    const userName = session?.user?.username
-    if (!userName) {
-      return NextResponse.json(
-        { error: 'User is not authenticated' },
-        { status: 401 },
-      )
-    }
+    const { session, error: authError } = await requireSession()
+    if (authError) return authError
+    const userName = session.user.username
 
     if (!uid) {
       return NextResponse.json(

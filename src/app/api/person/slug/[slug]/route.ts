@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PersonService } from '@/lib/services/PersonService'
+import { requireSession } from '@/app/auth/requireSession'
 
 export const GET = async (
   req: NextRequest,
   context: { params: Promise<{ slug: string }> },
 ) => {
+  const { error: authError } = await requireSession()
+  if (authError) return authError
+
   const { slug } = await context.params
   const personService = new PersonService()
 

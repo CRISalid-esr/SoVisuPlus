@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { PersonService } from '@/lib/services/PersonService'
 import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
 import { searchQueryLengthError } from '@/utils/fuzzySearch/searchQueryLength'
+import { requireSession } from '@/app/auth/requireSession'
 
 export const GET = async (req: NextRequest) => {
+  const { error: authError } = await requireSession()
+  if (authError) return authError
+
   const urlParams = req.nextUrl.searchParams
   const searchTerm = urlParams.get('searchTerm') || ''
   const page = parseInt(urlParams.get('page') || '1', 10)

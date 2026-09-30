@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { VocabSearchService } from '@/lib/services/VocabSearchService'
+import { requireSession } from '@/app/auth/requireSession'
 
 export const GET = async (req: NextRequest) => {
+  const { error: authError } = await requireSession()
+  if (authError) return authError
+
   const urlParams = req.nextUrl.searchParams
   const q = urlParams.get('q') || ''
   const vocabs = urlParams.get('vocabs')?.split(',') || []
