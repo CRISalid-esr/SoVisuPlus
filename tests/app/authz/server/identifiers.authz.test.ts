@@ -13,6 +13,7 @@ import { PersonDAO } from '@/lib/daos/PersonDAO'
 import { hasWiderThanSelfPersonScope } from '@/app/auth/ability'
 import {
   computeIdentifierCapabilities,
+  identifierRemovalRequiresWideScope,
   identifierSupportsAuth,
 } from '@/lib/identifiers/identifierCapabilities'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
@@ -202,6 +203,7 @@ describe('AuthZ (identifier capability matrix) – integration', () => {
       ),
       isAuthenticated,
       supportsAuth: identifierSupportsAuth(type),
+      removalRequiresWide: identifierRemovalRequiresWideScope(type),
     })
   }
 
@@ -234,7 +236,7 @@ describe('AuthZ (identifier capability matrix) – integration', () => {
     expect(auth.canAddUnauthenticated).toBe(false)
   })
 
-  test('self-scoped editor, own IdRef: can remove but cannot add (no auth workflow)', async () => {
+  test('self-scoped editor, own IdRef: can neither remove nor add', async () => {
     await createPersonWithUser('local-alice')
     await assignRoleToPersonUid('account_editor', 'local-alice', {
       entityType: EntityType.Person,
@@ -250,7 +252,7 @@ describe('AuthZ (identifier capability matrix) – integration', () => {
     expect(caps).toEqual({
       canAuthenticate: false,
       canAddUnauthenticated: false,
-      canRemove: true,
+      canRemove: false,
     })
   })
 

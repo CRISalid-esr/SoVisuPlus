@@ -13,6 +13,7 @@ import {
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import {
   computeIdentifierCapabilities,
+  identifierRemovalRequiresWideScope,
   identifierSupportsAuth,
 } from '@/lib/identifiers/identifierCapabilities'
 import { requireSession } from '@/app/auth/requireSession'
@@ -188,6 +189,7 @@ export const DELETE = async (_request: Request, context: RouteContext) => {
     ),
     isAuthenticated: person.isIdentifierAuthenticated(identifierType),
     supportsAuth: identifierSupportsAuth(identifierType),
+    removalRequiresWide: identifierRemovalRequiresWideScope(identifierType),
   })
   if (!canRemove) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

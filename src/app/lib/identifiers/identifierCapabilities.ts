@@ -16,6 +16,8 @@ export type IdentifierCapabilityInput = {
   isAuthenticated: boolean
   /** The identifier type has an authentication workflow (ORCID, idHAL). */
   supportsAuth: boolean
+  /** Removal is restricted to wide-scoped editors for this identifier type. */
+  removalRequiresWide: boolean
 }
 
 export type IdentifierCapabilities = {
@@ -23,7 +25,7 @@ export type IdentifierCapabilities = {
   canAuthenticate: boolean
   /** Add a non-authenticated identifier — wide-scoped editors only. */
   canAddUnauthenticated: boolean
-  /** Remove the identifier (authenticated → own account only). */
+  /** Remove the identifier (authenticated → own account only; see `identifierRemovalRequiresWideScope`). */
   canRemove: boolean
 }
 
@@ -33,14 +35,26 @@ export const identifierSupportsAuth = (type: PersonIdentifierType): boolean =>
   type === PersonIdentifierType.idhals ||
   type === PersonIdentifierType.idhali
 
+/**
+ * Temporary: IdRef removal is denied to self-scoped editors until the backends
+ * (ikg, harvester) correctly handle an IdRef being re-assigned afterwards.
+ * See specs/882-no-self-deletion-of-idref-for-a-researcher/prompt.md.
+ */
+export const identifierRemovalRequiresWideScope = (
+  type: PersonIdentifierType,
+): boolean => type === PersonIdentifierType.idref
+
 export const computeIdentifierCapabilities = ({
   canManage,
   isOwn,
   isWide,
   isAuthenticated,
   supportsAuth,
+  removalRequiresWide,
 }: IdentifierCapabilityInput): IdentifierCapabilities => ({
   canAuthenticate: supportsAuth && isOwn && canManage,
   canAddUnauthenticated: canManage && isWide,
-  canRemove: canManage && (isAuthenticated ? isOwn : isOwn || isWide),
+  canRemove:
+    canManage &&
+    (removalRequiresWide ? isWide : isAuthenticated ? isOwn : isOwn || isWide),
 })

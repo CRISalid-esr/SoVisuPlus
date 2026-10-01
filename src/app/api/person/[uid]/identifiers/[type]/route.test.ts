@@ -176,4 +176,22 @@ describe('DELETE /api/person/[uid]/identifiers/[type]', () => {
     expect(res.status).toBe(200)
     expect(mockRemoveIdentifier).toHaveBeenCalled()
   })
+
+  it('forbids a self-scoped editor from removing their own IdRef', async () => {
+    setSession(selfAuthz('alice'))
+    mockFetchPersonByUid.mockResolvedValue(person('alice'))
+
+    const res = await DELETE({} as Request, ctx('alice', 'idref'))
+    expect(res.status).toBe(403)
+    expect(mockRemoveIdentifier).not.toHaveBeenCalled()
+  })
+
+  it('lets a self-scoped editor remove another non-authenticated identifier', async () => {
+    setSession(selfAuthz('alice'))
+    mockFetchPersonByUid.mockResolvedValue(person('alice'))
+
+    const res = await DELETE({} as Request, ctx('alice', 'idhals'))
+    expect(res.status).toBe(200)
+    expect(mockRemoveIdentifier).toHaveBeenCalled()
+  })
 })
