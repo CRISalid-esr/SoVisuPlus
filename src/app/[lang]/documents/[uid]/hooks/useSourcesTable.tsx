@@ -21,6 +21,7 @@ import {
   MRT_Row,
   MRT_TableOptions,
 } from 'material-react-table'
+import { alphabeticalSortColumn } from '@/components/alphabeticalSortColumn'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import { t } from '@lingui/core/macro'
 import { SourceRecordTypeService } from '@/lib/services/SourceRecordTypeService'
@@ -136,7 +137,7 @@ export const useSourcesTable = () => {
           return value.includes(type)
         },
       },
-      {
+      alphabeticalSortColumn<DocumentRecord>({
         size: 200,
         accessorKey: `titles`,
         accessorFn: (row) => {
@@ -187,7 +188,7 @@ export const useSourcesTable = () => {
             </Box>
           )
         },
-      },
+      }),
       {
         enableSorting: false,
         accessorKey: 'contributions',
@@ -258,7 +259,7 @@ export const useSourcesTable = () => {
           sx: { '& .MuiBox-root': { gridTemplateColumns: '1fr' } },
         },
       },
-      {
+      alphabeticalSortColumn<DocumentRecord>({
         accessorKey: 'publishedIn',
         accessorFn: (row) => {
           if (row.journal) {
@@ -283,7 +284,7 @@ export const useSourcesTable = () => {
             )
           )
         },
-      },
+      }),
       {
         enableSorting: false,
         accessorKey: 'source',

@@ -35,6 +35,7 @@ import {
   MRT_TableInstance,
   MRT_TableOptions,
 } from 'material-react-table'
+import { alphabeticalSortColumn } from '@/components/alphabeticalSortColumn'
 import { t } from '@lingui/core/macro'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
@@ -631,7 +632,7 @@ export const usePublicationsTable = (
         //@ts-expect-error:  override filterSelectOptions to accept Element.jsx instead of Element
         filterSelectOptions: typeOptions,
       },
-      {
+      alphabeticalSortColumn<Document>({
         size: 200,
         accessorKey: `titles`,
         muiFilterTextFieldProps: longSearchFieldProps,
@@ -698,7 +699,7 @@ export const usePublicationsTable = (
             </Box>
           )
         },
-      },
+      }),
       {
         enableSorting: false,
         accessorFn: (row) => {
@@ -773,7 +774,7 @@ export const usePublicationsTable = (
           sx: { '& .MuiBox-root': { gridTemplateColumns: '1fr' } },
         },
       },
-      {
+      alphabeticalSortColumn<Document>({
         accessorKey: 'publishedIn',
         muiFilterTextFieldProps: nameSearchFieldProps,
         header: t`documents_page_publishedIn_column`,
@@ -792,7 +793,7 @@ export const usePublicationsTable = (
             )
           )
         },
-      },
+      }),
       {
         enableSorting: false,
         accessorKey: 'halStatus',

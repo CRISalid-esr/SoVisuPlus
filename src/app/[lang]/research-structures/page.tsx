@@ -31,6 +31,7 @@ import {
   MRT_ToggleGlobalFilterButton,
   useMaterialReactTable,
 } from 'material-react-table'
+import { alphabeticalSortColumn } from '@/components/alphabeticalSortColumn'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
@@ -211,7 +212,7 @@ function FlatTable({
 
   const columns = useMemo<MRT_ColumnDef<StructureRow>[]>(
     () => [
-      {
+      alphabeticalSortColumn<StructureRow>({
         accessorKey: 'acronym',
         header: t`research_structures_column_structure`,
         size: 260,
@@ -225,8 +226,8 @@ function FlatTable({
             <StructureNameCell row={row.original} onNavigate={onNavigate} />
           )
         },
-      },
-      {
+      }),
+      alphabeticalSortColumn<StructureRow>({
         accessorKey: 'institutionNames',
         header: t`research_structures_column_institutions`,
         size: 200,
@@ -247,7 +248,7 @@ function FlatTable({
             </Typography>
           )
         },
-      },
+      }),
       ...kpiColumns(theme),
       dashboardColumn(onNavigate),
     ],
@@ -321,7 +322,7 @@ function TreeTable({
 
   const columns = useMemo<MRT_ColumnDef<StructureRow>[]>(
     () => [
-      {
+      alphabeticalSortColumn<StructureRow>({
         accessorKey: 'acronym',
         header: t`research_structures_column_structure`,
         size: 300,
@@ -331,7 +332,7 @@ function TreeTable({
             <StructureNameCell row={row.original} onNavigate={onNavigate} />
           )
         },
-      },
+      }),
       ...kpiColumns(theme),
       dashboardColumn(onNavigate),
     ],
