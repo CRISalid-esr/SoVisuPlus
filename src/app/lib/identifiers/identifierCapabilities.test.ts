@@ -1,5 +1,6 @@
 import {
   computeIdentifierCapabilities,
+  identifierRemovalRequiresWideScope,
   identifierSupportsAuth,
 } from './identifierCapabilities'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
@@ -13,6 +14,20 @@ describe('identifierSupportsAuth', () => {
   })
 })
 
+describe('identifierRemovalRequiresWideScope', () => {
+  it('is true for IdRef only', () => {
+    expect(identifierRemovalRequiresWideScope(PersonIdentifierType.idref)).toBe(
+      true,
+    )
+    expect(identifierRemovalRequiresWideScope(PersonIdentifierType.orcid)).toBe(
+      false,
+    )
+    expect(
+      identifierRemovalRequiresWideScope(PersonIdentifierType.idhals),
+    ).toBe(false)
+  })
+})
+
 describe('computeIdentifierCapabilities', () => {
   const base = {
     canManage: true,
@@ -20,6 +35,7 @@ describe('computeIdentifierCapabilities', () => {
     isWide: false,
     isAuthenticated: false,
     supportsAuth: true,
+    removalRequiresWide: false,
   }
 
   it('no manage permission → nothing is allowed', () => {
@@ -76,6 +92,21 @@ describe('computeIdentifierCapabilities', () => {
     expect(
       computeIdentifierCapabilities({ ...base, isAuthenticated: true })
         .canRemove,
+    ).toBe(true)
+  })
+
+  it('wide-only removal: self-scoped owner cannot remove', () => {
+    expect(
+      computeIdentifierCapabilities({ ...base, removalRequiresWide: true })
+        .canRemove,
+    ).toBe(false)
+  })
+
+  it('wide-only removal: wide editor can remove, on own or other account', () => {
+    const wide = { ...base, removalRequiresWide: true, isWide: true }
+    expect(computeIdentifierCapabilities(wide).canRemove).toBe(true)
+    expect(
+      computeIdentifierCapabilities({ ...wide, isOwn: false }).canRemove,
     ).toBe(true)
   })
 })

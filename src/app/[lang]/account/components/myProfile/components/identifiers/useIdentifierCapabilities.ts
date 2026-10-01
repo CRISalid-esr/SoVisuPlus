@@ -12,6 +12,7 @@ import { Person } from '@/types/Person'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import {
   computeIdentifierCapabilities,
+  identifierRemovalRequiresWideScope,
   identifierSupportsAuth,
 } from '@/lib/identifiers/identifierCapabilities'
 
@@ -63,6 +64,7 @@ export const useIdentifierCapabilities = (
         isWide,
         isAuthenticated,
         supportsAuth: identifierSupportsAuth(type),
+        removalRequiresWide: identifierRemovalRequiresWideScope(type),
       }),
     }
   }, [person, type, ownPerspective, ability, authz])
