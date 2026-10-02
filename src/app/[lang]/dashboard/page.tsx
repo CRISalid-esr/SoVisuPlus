@@ -20,8 +20,9 @@ import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import DocumentHeader from '@/app/[lang]/documents/components/DocumentHeader'
 import { CustomCard } from '@/components/Card'
 import WordStream from '@/app/[lang]/components/WordStream/WordStream'
+import WordStreamDownloadButton from '@/app/[lang]/components/WordStream/WordStreamDownloadButton'
 import { useLingui } from '@lingui/react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { WordstreamTopic } from '@/types/WordStream'
 import PublicationCard from '@/app/[lang]/dashboard/components/PublicationCard'
 import AgentIdentityCard from '@/app/[lang]/dashboard/components/AgentIdentityCard'
@@ -62,6 +63,8 @@ const DashboardPage = () => {
   const [appliedWSFontRange, setAppliedWSFontRange] = useState<
     [number, number]
   >([DEFAULT_MIN_FONT, DEFAULT_MAX_FONT])
+  const wordstreamSvgRef = useRef<SVGSVGElement | null>(null)
+  const [wordstreamRendered, setWordstreamRendered] = useState(false)
 
   // Reset controls when perspective changes (year range is handled by the
   // dashboard store via initYearRangeForPerspective in the fetch effect)
@@ -291,6 +294,8 @@ const DashboardPage = () => {
                   minFont={appliedWSFontRange[0]}
                   maxFont={appliedWSFontRange[1]}
                   autoSize
+                  svgRef={wordstreamSvgRef}
+                  onRenderedChange={setWordstreamRendered}
                 />
               </Box>
             ) : (
@@ -364,6 +369,15 @@ const DashboardPage = () => {
                   {t`dashboard_page_wordstream_validate_button_label`}
                 </Button>
               </Box>
+              {canShowWordstream && (
+                <Box sx={{ alignSelf: { xs: 'flex-end', md: 'center' } }}>
+                  <WordStreamDownloadButton
+                    svgRef={wordstreamSvgRef}
+                    filename={`wordstream_${uid}_${yearRange[0]}-${yearRange[1]}`}
+                    disabled={!wordstreamRendered}
+                  />
+                </Box>
+              )}
             </Stack>
           </Box>
         </CustomCard>

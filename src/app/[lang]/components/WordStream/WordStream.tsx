@@ -1,6 +1,13 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  RefObject,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Box, Card, CardContent, CircularProgress } from '@mui/material'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { AgentType } from '@/types/IAgent'
@@ -23,6 +30,8 @@ type WordStreamProps = {
   maxFont?: number
   tickFont?: number
   legendFont?: number
+  svgRef?: RefObject<SVGSVGElement | null>
+  onRenderedChange?: (rendered: boolean) => void
 }
 
 const DEFAULT_XS_HEIGHT = 360
@@ -44,9 +53,12 @@ const WordStream = ({
   maxFont = 30,
   tickFont = 12,
   legendFont = 12,
+  svgRef: externalSvgRef,
+  onRenderedChange,
 }: WordStreamProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const svgRef = useRef<SVGSVGElement | null>(null)
+  const internalSvgRef = useRef<SVGSVGElement | null>(null)
+  const svgRef = externalSvgRef ?? internalSvgRef
   const [ready, setReady] = useState<boolean>(
     () => typeof window !== 'undefined' && !!window.d3 && !!window.wordstream,
   )
@@ -128,6 +140,7 @@ const WordStream = ({
 
   // Re-render on size change
   useEffect(() => {
+    onRenderedChange?.(false)
     if (!ready || !data || !svgRef.current) return
     if (data.slices.length === 0) {
       setError(t`wordstream_no_data_to_display`)
@@ -158,6 +171,7 @@ const WordStream = ({
     }
 
     window.wordstream(svg, data.slices, config)
+    onRenderedChange?.(true)
   }, [
     ready,
     data?.slices,
@@ -171,6 +185,8 @@ const WordStream = ({
     maxFont,
     tickFont,
     legendFont,
+    svgRef,
+    onRenderedChange,
   ])
 
   const showSpinner =
