@@ -397,6 +397,8 @@ describe('DocumentDAO', () => {
       },
     })
 
+    // Subjects must reuse the shared Prisma singleton, not open a new client
+    expect(PrismaClient).not.toHaveBeenCalled()
     expect(ConceptDAO.prototype.createOrUpdateConcept).toHaveBeenCalledTimes(1)
     expect(ConceptDAO.prototype.createOrUpdateConcept).toHaveBeenCalledWith(
       new Concept(
