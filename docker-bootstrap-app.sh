@@ -51,9 +51,9 @@ GRAPHQL_ENDPOINT_ENABLED="${GRAPHQL_ENDPOINT_ENABLED:-false}"
 GRAPHQL_ENDPOINT_URL="${GRAPHQL_ENDPOINT_URL:-}"
 GRAPHQL_API_KEY_ENABLED=${GRAPHQL_API_KEY_ENABLED:-false}
 GRAPHQL_API_KEY="${GRAPHQL_API_KEY:-}"
-PERSPECTIVES_ROLES_FILTER=${PERSPECTIVES_ROLES_FILTER:-["author ","author of introduction, etc. ","author of afterword, colophon, etc. ","author in quotations or text abstracts ","editor ","editor of compilation ","translator" ]}
+PERSPECTIVE_ROLES_FILTER=${PERSPECTIVE_ROLES_FILTER:-["author ","author of introduction, etc. ","author of afterword, colophon, etc. ","author in quotations or text abstracts ","editor ","editor of compilation ","translator" ]}
 PUBLICATION_LIST_ROLES_FILTER=${PUBLICATION_LIST_ROLES_FILTER:-["analyst ","annotator ","author ","author in quotations or text abstracts ","author of afterword, colophon, etc. ","author of introduction, etc. ","cartographer ","commentator for written text ","compiler ","composer ","conceptor ","contributor ","curator ","degree committee member ","dissertant ","donor ","editor ","editor of compilation ","film director ","film editor ","former owner ","illustrator ","interviewee ","interviewer ","opponent ","organizer ","other ","photographer ","praeses ","production personnel ","project director ","publisher director ","rapporteur ","scientific advisor ","software developer ","sound designer ","speaker ","stage manager ","thesis advisor ","translator ","writer of accompanying material"]}
-VOCABS_URL="${VOCABS_URL:-http://localhost:8000/api/v0/autocomplete/}"
+VOCABS_URL="${VOCABS_URL:-http://localhost:8005/api/v1/autocomplete/}"
 NEXT_PUBLIC_AVAILABLE_VOCABS=${NEXT_PUBLIC_AVAILABLE_VOCABS:-jel,aat,acm,elsst,euroscivoc,pactols}
 DEFAULT_SELF_SCOPED_ROLES=${DEFAULT_SELF_SCOPED_ROLES:-document_editor,document_fetcher,document_merger,account_editor,document_depositor}
 HAL_ENDPOINT=${HAL_ENDPOINT:-https://api-preprod.archives-ouvertes.fr}
@@ -69,7 +69,9 @@ NEXT_PUBLIC_ABOUT_PAGE_URL="${NEXT_PUBLIC_ABOUT_PAGE_URL}"
 NEXT_PUBLIC_TERMS_PAGE_URL="${NEXT_PUBLIC_TERMS_PAGE_URL}"
 NEXT_PUBLIC_COMMUNITY_PAGE_URL="${NEXT_PUBLIC_COMMUNITY_PAGE_URL:-https://crisalid.org}"
 NEXT_PUBLIC_HELP_URL="${NEXT_PUBLIC_HELP_URL}"
+NEXT_PUBLIC_HELP_LINK_TYPE="${NEXT_PUBLIC_HELP_LINK_TYPE}"
 NEXT_PUBLIC_WARN_MISSING_IDENTIFIER_TYPES="${NEXT_PUBLIC_WARN_MISSING_IDENTIFIER_TYPES:-idhals,orcid}"
+CHAT_ENABLED="${CHAT_ENABLED:-}"
 CRISALID_AGENTS_API_URL="${CRISALID_AGENTS_API_URL}"
 CRISALID_AGENTS_API_KEY="${CRISALID_AGENTS_API_KEY}"
 EOF
@@ -124,6 +126,12 @@ if [ "${INIT_ROLES_ON_START:-true}" = "true" ] && [ -n "$RBAC_FILE" ]; then
 else
   log "Skipping RBAC seeding (INIT_ROLES_ON_START=${INIT_ROLES_ON_START:-false}, file='${RBAC_FILE:-none}')"
 fi
+
+# Fill the fuzzy-search normalized columns of rows written before they existed.
+# Idempotent and a no-op once done; runs in the background so a first, long
+# backfill does not delay the application start.
+log "Backfilling search columns in the background…"
+( npm run backfill:search-columns:js || log "Search columns backfill FAILED" ) &
 
 
 export NODE_PATH=/app/node_modules # for the listener to find shared modules

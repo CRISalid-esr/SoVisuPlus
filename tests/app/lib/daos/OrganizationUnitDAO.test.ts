@@ -365,38 +365,19 @@ describe('OrganizationUnitDAO Integration Tests', () => {
       )
     })
 
+    const search = async (
+      term: string,
+      group: 'institution' | 'research_unit' | 'other_structure' | 'team',
+    ) =>
+      (
+        await organizationUnitDAO.searchOrganizationUnits(term, group, 1, 10)
+      ).organizationUnits.map((o) => o.uid)
+
     it('filters by group and always excludes external structures', async () => {
-      const researchUnits = await organizationUnitDAO.getOrganizationUnits(
-        'alpha',
-        'research_unit',
-        1,
-        10,
-      )
-      expect(researchUnits.map((o) => o.uid)).toEqual(['local-RU1'])
-
-      const institutions = await organizationUnitDAO.getOrganizationUnits(
-        'alpha',
-        'institution',
-        1,
-        10,
-      )
-      expect(institutions.map((o) => o.uid)).toEqual(['local-INST1'])
-
-      const teams = await organizationUnitDAO.getOrganizationUnits(
-        'alpha',
-        'team',
-        1,
-        10,
-      )
-      expect(teams.map((o) => o.uid)).toEqual(['local-TEAM1'])
-
-      const otherStructures = await organizationUnitDAO.getOrganizationUnits(
-        'alpha',
-        'other_structure',
-        1,
-        10,
-      )
-      expect(otherStructures.map((o) => o.uid)).toEqual(['local-FAC1'])
+      expect(await search('alpha', 'research_unit')).toEqual(['local-RU1'])
+      expect(await search('alpha', 'institution')).toEqual(['local-INST1'])
+      expect(await search('alpha', 'team')).toEqual(['local-TEAM1'])
+      expect(await search('alpha', 'other_structure')).toEqual(['local-FAC1'])
     })
 
     it('support units are unreachable through any group', async () => {
@@ -406,29 +387,140 @@ describe('OrganizationUnitDAO Integration Tests', () => {
         'other_structure',
         'team',
       ] as const) {
-        const results = await organizationUnitDAO.getOrganizationUnits(
-          'support',
-          group,
-          1,
-          10,
-        )
-        expect(results).toHaveLength(0)
+        expect(await search('support', group)).toHaveLength(0)
       }
     })
 
     it('counts organization units per group', async () => {
-      expect(
-        await organizationUnitDAO.countOrganizationUnits(
-          'alpha',
+      const { total } = await organizationUnitDAO.searchOrganizationUnits(
+        'alpha',
+        'research_unit',
+        1,
+        10,
+      )
+      expect(total).toBe(1)
+      const blank = await organizationUnitDAO.searchOrganizationUnits(
+        '',
+        'institution',
+        1,
+        10,
+      )
+      expect(blank.total).toBe(1)
+      expect(blank.organizationUnits.map((o) => o.uid)).toEqual(['local-INST1'])
+    })
+
+    describe('fuzzy matching', () => {
+      beforeEach(async () => {
+        await organizationUnitDAO.createOrUpdateOrganizationUnit(
+          makeUnit({
+            uid: 'local-UP1',
+            acronym: 'UP1',
+            category: OrganizationCategory.institution,
+            genericType: OrganizationGenericType.institution,
+            names: [
+              Literal.fromObject({
+                value: 'Université Paris 1 Panthéon-Sorbonne',
+                language: 'fr',
+              }),
+            ],
+          }),
+        )
+        await organizationUnitDAO.createOrUpdateOrganizationUnit(
+          makeUnit({
+            uid: 'local-ISJPS',
+            acronym: 'ISJPS',
+            names: [
+              Literal.fromObject({
+                value: 'Institut des sciences juridique et philosophique',
+                language: 'fr',
+              }),
+            ],
+          }),
+        )
+      })
+
+      it('ignores accents, case and word order', async () => {
+        expect(await search('PARIS universite', 'institution')).toEqual([
+          'local-UP1',
+        ])
+      })
+
+      it('tolerates typos', async () => {
+        expect(await search('pantheon sorbone', 'institution')).toEqual([
+          'local-UP1',
+        ])
+        expect(await search('filosophique', 'research_unit')).toEqual([
+          'local-ISJPS',
+        ])
+      })
+
+      it('matches the acronym together with the labels', async () => {
+        expect(await search('isjps juridique', 'research_unit')).toEqual([
+          'local-ISJPS',
+        ])
+      })
+
+      // The search filters one token at a time against a single label row, so
+      // a unit whose tokens are spread over several labels must still match.
+      it('matches words coming from two different labels of the same unit', async () => {
+        await organizationUnitDAO.createOrUpdateOrganizationUnit(
+          makeUnit({
+            uid: 'local-MULTI',
+            names: [
+              Literal.fromObject({
+                value: 'Laboratoire de recherche marine',
+                language: 'fr',
+              }),
+              Literal.fromObject({
+                value: 'Marine research laboratory',
+                language: 'en',
+              }),
+            ],
+          }),
+        )
+        expect(await search('laboratoire laboratory', 'research_unit')).toEqual(
+          ['local-MULTI'],
+        )
+        expect(await search('recherche research', 'research_unit')).toEqual([
+          'local-MULTI',
+        ])
+      })
+
+      // The acronym is matched through its own branch, but a unit with no
+      // label is not a selectable perspective — same rule as the blank query.
+      it('excludes a unit whose acronym matches but which has no label', async () => {
+        await organizationUnitDAO.createOrUpdateOrganizationUnit(
+          makeUnit({ uid: 'local-BARE', acronym: 'BARELAB', names: [] }),
+        )
+        const bare = await prisma.organizationUnit.findUnique({
+          where: { uid: 'local-BARE' },
+          include: { labels: true },
+        })
+        expect(bare!.labels).toHaveLength(0)
+        expect(bare!.normalizedAcronym).toBe('barelab')
+
+        expect(await search('barelab', 'research_unit')).toHaveLength(0)
+        const { total } = await organizationUnitDAO.searchOrganizationUnits(
+          'barelab',
           'research_unit',
-        ),
-      ).toBe(1)
-      expect(
-        await organizationUnitDAO.countOrganizationUnits(
-          'alpha',
-          'institution',
-        ),
-      ).toBe(1)
+          1,
+          10,
+        )
+        expect(total).toBe(0)
+      })
+
+      it('ranks whole words above typos', async () => {
+        await organizationUnitDAO.createOrUpdateOrganizationUnit(
+          makeUnit({
+            uid: 'local-ALPHO',
+            names: [Literal.fromObject({ value: 'Alpho lab', language: 'en' })],
+          }),
+        )
+        expect(await search('alpha', 'research_unit')).toEqual([
+          'local-RU1',
+          'local-ALPHO',
+        ])
+      })
     })
   })
 
@@ -449,6 +541,61 @@ describe('OrganizationUnitDAO Integration Tests', () => {
       })
       expect(first!.slug).toBe('org:same')
       expect(second!.slug).toBe('org:same-1')
+    })
+  })
+
+  describe('normalized search columns', () => {
+    it('are set when a unit is created', async () => {
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(
+        makeUnit({
+          uid: 'local-norm',
+          acronym: 'ÉCO',
+          names: [
+            Literal.fromObject({ value: 'Économie Générale', language: 'fr' }),
+          ],
+        }),
+      )
+      const dbUnit = await prisma.organizationUnit.findUnique({
+        where: { uid: 'local-norm' },
+        include: { labels: true },
+      })
+      expect(dbUnit!.normalizedAcronym).toBe('eco')
+      expect(dbUnit!.labels[0].normalizedValue).toBe('economie generale')
+    })
+
+    it('are backfilled for rows written without them', async () => {
+      await prisma.organizationUnit.create({
+        data: {
+          uid: 'local-legacy',
+          acronym: 'ÉCO',
+          category: OrganizationCategory.research_unit,
+          genericType: OrganizationGenericType.unit,
+          labels: {
+            create: [{ kind: 'long', language: 'fr', value: 'Économie' }],
+          },
+        },
+      })
+      // a unit without acronym must not be picked up forever
+      await prisma.organizationUnit.create({
+        data: {
+          uid: 'local-no-acronym',
+          category: OrganizationCategory.research_unit,
+          genericType: OrganizationGenericType.unit,
+        },
+      })
+
+      expect(await organizationUnitDAO.backfillNormalizedSearchColumns(1)).toBe(
+        2,
+      )
+      expect(await organizationUnitDAO.backfillNormalizedSearchColumns(1)).toBe(
+        0,
+      )
+      const dbUnit = await prisma.organizationUnit.findUnique({
+        where: { uid: 'local-legacy' },
+        include: { labels: true },
+      })
+      expect(dbUnit!.normalizedAcronym).toBe('eco')
+      expect(dbUnit!.labels[0].normalizedValue).toBe('economie')
     })
   })
 })

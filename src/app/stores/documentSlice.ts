@@ -209,14 +209,13 @@ export const addDocumentSlice: StateCreator<
           },
         }))
       } catch (error) {
-        console.error('❌ Failed to fetch document by ID', error)
         set((state) => ({
           document: {
             ...state.document,
             error,
             selectedDocument: null,
             loading: false,
-            hydrated: true,
+            hasFetched: true,
           },
         }))
       }

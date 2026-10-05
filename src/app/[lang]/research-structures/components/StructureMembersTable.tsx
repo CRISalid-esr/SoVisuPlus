@@ -18,6 +18,7 @@ import {
   MRT_SortingState,
   useMaterialReactTable,
 } from 'material-react-table'
+import { alphabeticalSortColumn } from '@/components/alphabeticalSortColumn'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
@@ -30,6 +31,8 @@ import {
 } from '@/types/PersonIdentifier'
 import { StructureMemberJson } from '@/types/StructureMember'
 import RateBar from './RateBar'
+import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
+import { searchFieldProps } from '@/components/searchFieldProps'
 
 const IDENTIFIER_DISPLAY_ORDER: PersonIdentifierType[] = [
   PersonIdentifierType.orcid,
@@ -139,7 +142,7 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
 
   const columns = useMemo<MRT_ColumnDef<StructureMemberJson>[]>(
     () => [
-      {
+      alphabeticalSortColumn<StructureMemberJson>({
         id: 'name',
         accessorKey: 'displayName',
         header: t`research_structures_members_column_name`,
@@ -166,8 +169,8 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
             </Typography>
           )
         },
-      },
-      {
+      }),
+      alphabeticalSortColumn<StructureMemberJson>({
         id: 'position',
         accessorKey: 'position',
         header: t`research_structures_members_column_position`,
@@ -180,7 +183,7 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
             </Typography>
           )
         },
-      },
+      }),
       {
         id: 'startDate',
         accessorKey: 'startDate',
@@ -316,6 +319,7 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
       setGlobalFilter(value ?? '')
       setPagination((prev) => ({ ...prev, pageIndex: 0 }))
     },
+    muiSearchTextFieldProps: searchFieldProps(MAX_NAME_SEARCH_QUERY_LENGTH),
     muiPaginationProps: { rowsPerPageOptions: [10, 20, 50] },
     muiTablePaperProps: { variant: 'outlined', elevation: 0 },
     renderTopToolbarCustomActions: () => (

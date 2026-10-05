@@ -45,6 +45,7 @@ import {
   validateConditionalFields,
   type HalFieldKey,
 } from '@/lib/services/hal/halDepositFormConfig'
+import { describeHalDepositFailure } from './halDepositSubmitError'
 import { halDomainsByCode } from '@/types/HalDomains'
 import { halCountries, countryLabel } from '@/types/HalCountries'
 import { LocRelator } from '@/types/LocRelator'
@@ -226,9 +227,11 @@ export default function HalDeposit() {
     !!perspectivePerson &&
     (perspectivePerson.hasIdentifier(PersonIdentifierType.idhals) ||
       perspectivePerson.hasIdentifier(PersonIdentifierType.idhali))
-  const hasHalIdentifiers =
-    hasIdhal &&
-    (canDepositUnauthenticated ||
+  // The two legs are reported separately: they are fixed on different parts of My Account, and a
+  // single conflated message made a missing hal_login look like a missing idHAL during testing.
+  const hasHalLogin =
+    canDepositUnauthenticated ||
+    (!!perspectivePerson &&
       perspectivePerson.hasIdentifier(PersonIdentifierType.hal_login))
 
   const hasHalRecord = selectedDocument.records.some(
@@ -244,16 +247,11 @@ export default function HalDeposit() {
 
   if (!perspectiveUid) return null
 
-  if (!hasHalIdentifiers) {
-    return wrap(
+  // Shared chrome for both HAL-identifier gates: the message differs, the remedy does not.
+  const halIdentifierGate = (message: React.ReactNode) =>
+    wrap(
       <>
-        <Alert severity='info'>
-          {ownPerspective ? (
-            <Trans>hal_deposit_gate_no_hal_id</Trans>
-          ) : (
-            <Trans>hal_deposit_gate_no_hal_id_other</Trans>
-          )}
-        </Alert>
+        <Alert severity='info'>{message}</Alert>
         {ownPerspective && (
           <Button
             sx={{ mt: 2 }}
@@ -264,6 +262,25 @@ export default function HalDeposit() {
           </Button>
         )}
       </>,
+    )
+
+  if (!hasIdhal) {
+    return halIdentifierGate(
+      ownPerspective ? (
+        <Trans>hal_deposit_gate_no_idhal</Trans>
+      ) : (
+        <Trans>hal_deposit_gate_no_idhal_other</Trans>
+      ),
+    )
+  }
+
+  if (!hasHalLogin) {
+    return halIdentifierGate(
+      ownPerspective ? (
+        <Trans>hal_deposit_gate_no_hal_login</Trans>
+      ) : (
+        <Trans>hal_deposit_gate_no_hal_login_other</Trans>
+      ),
     )
   }
 
@@ -296,9 +313,7 @@ export default function HalDeposit() {
     selectedDocument.titles.some((tl) => tl.language === l && tl.value?.trim()),
   )
   const hasBilingualAbstract = ['fr', 'en'].every((l) =>
-    selectedDocument.abstracts.some(
-      (a) => a.language === l && a.value?.trim(),
-    ),
+    selectedDocument.abstracts.some((a) => a.language === l && a.value?.trim()),
   )
   const bilingualTitleMissing = isThesisType && !hasBilingualTitle
   const bilingualAbstractMissing =
@@ -406,8 +421,7 @@ export default function HalDeposit() {
     const result = await createDeposit(uid, form)
     setSubmitting(false)
     if (!result.success) {
-      setError(result.error ?? t`hal_deposit_error_failed`)
-      setStep('form')
+      setError(describeHalDepositFailure(result.reason, documentType))
     }
     // On success the slice sets the deposit, flipping this component to the status panel.
   }
@@ -442,6 +456,8 @@ export default function HalDeposit() {
       .filter(Boolean)
     return wrap(
       <>
+        {/* `error` is only ever set by a submit, which can only be triggered from this step and no
+            longer leaves it — so this is the one place it needs to render. */}
         {error && (
           <Alert severity='error' sx={{ mb: 2 }}>
             {error}
@@ -469,7 +485,9 @@ export default function HalDeposit() {
         <Section title={t`hal_deposit_section_metadata`}>
           <ReviewRow
             label={t`hal_deposit_field_document_type`}
-            value={renderLabel(labelOf(HAL_DOCUMENT_TYPE_OPTIONS, documentType))}
+            value={renderLabel(
+              labelOf(HAL_DOCUMENT_TYPE_OPTIONS, documentType),
+            )}
           />
           <ReviewRow
             label={t`hal_deposit_field_language`}
@@ -610,7 +628,13 @@ export default function HalDeposit() {
         </Section>
 
         <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-          <Button onClick={() => setStep('form')} disabled={submitting}>
+          <Button
+            onClick={() => {
+              setError(null)
+              setStep('form')
+            }}
+            disabled={submitting}
+          >
             <Trans>hal_deposit_button_back</Trans>
           </Button>
           <Button
@@ -1024,7 +1048,10 @@ function BiblioCardBody({
   clampAbstract?: boolean
 }) {
   return (
-    <Paper variant='outlined' sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F7F6' }}>
+    <Paper
+      variant='outlined'
+      sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F7F6' }}
+    >
       <Typography sx={{ fontWeight: 600, mb: 0.5 }}>
         {title || <Trans>hal_deposit_no_title</Trans>}
       </Typography>
@@ -1055,7 +1082,11 @@ function BiblioCardBody({
         </Typography>
         {journalTitle && (
           <Typography variant='body2'>
-            <Typography component='span' variant='caption' color='text.secondary'>
+            <Typography
+              component='span'
+              variant='caption'
+              color='text.secondary'
+            >
               <Trans>hal_deposit_field_journal</Trans>
             </Typography>
             {': '}
@@ -1077,7 +1108,10 @@ function AuthorsList({
   lang: ExtendedLanguageCode
 }) {
   return (
-    <Paper variant='outlined' sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F7F6' }}>
+    <Paper
+      variant='outlined'
+      sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F7F6' }}
+    >
       {contributions.length === 0 ? (
         <Typography variant='body2' color='text.secondary'>
           <Trans>hal_deposit_no_authors</Trans>

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession, Session } from 'next-auth'
-import authOptions from '@/app/auth/auth_options'
+import { requireSession } from '@/app/auth/requireSession'
 import { AureHalAPIClient } from '@/lib/services/AureHalAPIClient'
 
 /**
@@ -10,15 +9,8 @@ import { AureHalAPIClient } from '@/lib/services/AureHalAPIClient'
  * reference data, but we require a logged-in user to avoid an open relay.
  */
 export const GET = async (request: NextRequest) => {
-  const session = (await getServerSession(authOptions)) as Session & {
-    user: { username?: string }
-  }
-  if (!session?.user?.username) {
-    return NextResponse.json(
-      { error: 'User is not authenticated' },
-      { status: 401 },
-    )
-  }
+  const { error: authError } = await requireSession()
+  if (authError) return authError
 
   const query = request.nextUrl.searchParams.get('q')?.trim() ?? ''
   if (query.length < 2) {

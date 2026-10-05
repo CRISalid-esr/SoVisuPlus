@@ -95,7 +95,10 @@ describe('ChatConfigService', () => {
     })
 
     it('substitutes {{institutionName}} from NEXT_PUBLIC_INSTITUTION_NAME', async () => {
-      process.env = { ...OLD_ENV, NEXT_PUBLIC_INSTITUTION_NAME: 'Panthéon-Sorbonne' }
+      process.env = {
+        ...OLD_ENV,
+        NEXT_PUBLIC_INSTITUTION_NAME: 'Panthéon-Sorbonne',
+      }
       const file = await writeFixture({
         systemPrompt: 'Assistant for {{institutionName}}.',
       })
@@ -207,6 +210,88 @@ describe('ChatConfigService', () => {
       const service = ChatConfigService.fromFile(file).build()
       expect(await service.isAvailable()).toBe(true)
     })
+  })
+})
+
+describe('ChatConfigService.isChatEnabled', () => {
+  const OLD_ENV = process.env
+  let warn: jest.SpyInstance
+
+  beforeEach(() => {
+    process.env = { ...OLD_ENV, CRISALID_AGENTS_API_URL: 'http://agents.test' }
+    delete process.env.CHAT_ENABLED
+    warn = jest.spyOn(console, 'warn').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    process.env = OLD_ENV
+    warn.mockRestore()
+  })
+
+  it('is enabled when the switch is on, the URL is set and a config resolves', async () => {
+    const service = ChatConfigService.fromFile(
+      await writeFixture(SAMPLE),
+    ).build()
+    expect(await service.isChatEnabled()).toBe(true)
+    expect(warn).not.toHaveBeenCalled()
+  })
+
+  it('is disabled and logs why when CHAT_ENABLED is false', async () => {
+    process.env.CHAT_ENABLED = ' False '
+    const service = ChatConfigService.fromFile(
+      await writeFixture(SAMPLE),
+    ).build()
+    expect(await service.isChatEnabled()).toBe(false)
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('CHAT_ENABLED is set to false'),
+    )
+  })
+
+  it.each([undefined, '', '   '])(
+    'is disabled and logs why when CRISALID_AGENTS_API_URL is %p',
+    async (value) => {
+      if (value === undefined) delete process.env.CRISALID_AGENTS_API_URL
+      else process.env.CRISALID_AGENTS_API_URL = value
+      const service = ChatConfigService.fromFile(
+        await writeFixture(SAMPLE),
+      ).build()
+      expect(await service.isChatEnabled()).toBe(false)
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('CRISALID_AGENTS_API_URL is not set'),
+      )
+    },
+  )
+
+  it('is disabled and logs the tried paths when no config file resolves', async () => {
+    const service = ChatConfigService.fromFile('/no/such/chat.json').build()
+    expect(await service.isChatEnabled()).toBe(false)
+    expect(warn).toHaveBeenLastCalledWith(
+      expect.stringContaining(
+        'no usable chat config file found (tried: /no/such/chat.json)',
+      ),
+    )
+  })
+
+  it('logs the same reason only once across calls', async () => {
+    process.env.CHAT_ENABLED = 'false'
+    const service = ChatConfigService.fromFile(
+      await writeFixture(SAMPLE),
+    ).build()
+    await service.isChatEnabled()
+    await service.isChatEnabled()
+    expect(warn).toHaveBeenCalledTimes(1)
+  })
+
+  it('logs again when the reason changes', async () => {
+    const service = ChatConfigService.fromFile(
+      await writeFixture(SAMPLE),
+    ).build()
+    process.env.CHAT_ENABLED = 'false'
+    await service.isChatEnabled()
+    process.env.CHAT_ENABLED = 'true'
+    delete process.env.CRISALID_AGENTS_API_URL
+    await service.isChatEnabled()
+    expect(warn).toHaveBeenCalledTimes(2)
   })
 })
 

@@ -46,7 +46,9 @@ const MyAccountPage = () => {
 
   const handleTabChange = (newValue: string) => {
     setSelectedTab(newValue)
-    router.push(`?tab=${newValue}`, { scroll: false }) // Update URL without full page reload
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', newValue)
+    router.push(`?${params.toString()}`, { scroll: false }) // Update URL without full page reload
   }
 
   // Function to render tab content

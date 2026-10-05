@@ -20,16 +20,42 @@ import { OrganizationGroup } from '@/types/IAgent'
 import { SourcePersonDAO } from '@/lib/daos/SourcePersonDAO'
 import { SourcePerson } from '@/types/SourcePerson'
 import { StructureMember } from '@/types/StructureMember'
-import removeAccents from 'remove-accents'
 import { ORCIDIdentifier, OrcidOAuthData } from '@/types/OrcidIdentifier'
 import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
 import { decryptString, encryptString } from '@/utils/crypto/fieldEncryption'
+import { backfillNormalizedColumn } from '@/lib/daos/search/backfillNormalizedColumn'
+import {
+  buildTokenMatch,
+  withWordSimilarityThreshold,
+} from '@/lib/daos/search/trigramSearchSql'
+import { tokenizeSearchQuery } from '@/utils/fuzzySearch/fuzzySearch'
 /**
  * Thrown when an identifier cannot be created because one already exists —
  * either the person already has an identifier of that type, or the value is
  * already used by another person (`@@unique([type, value])`). Callers translate
  * this into a 409 (remove-before-add).
  */
+const organizationUnitWithParentsInclude = {
+  include: {
+    labels: true,
+    parents: { include: { parent: true } },
+    identifiers: true,
+    descriptions: true,
+  },
+} satisfies Prisma.OrganizationUnitDefaultArgs
+
+/** Relations mapped by Person.fromDbPerson for people search results. */
+const peopleSearchInclude = {
+  memberships: {
+    include: { organizationUnit: organizationUnitWithParentsInclude },
+  },
+  employments: {
+    include: { organizationUnit: organizationUnitWithParentsInclude },
+  },
+  identifiers: true,
+  records: { include: { identifiers: true } },
+} satisfies Prisma.PersonInclude
+
 export class IdentifierConflictError extends Error {
   constructor(message = 'Identifier already exists') {
     super(message)
@@ -753,6 +779,11 @@ export class PersonDAO extends AbstractDAO {
     }
   }
 
+  /**
+   * Sidebar people search. A blank query lists everyone by last name;
+   * otherwise every query word must match the normalized name (substring or
+   * pg_trgm typo tolerance) and results are ranked by relevance.
+   */
   public fetchPeople = async (
     searchTerm: string,
     page: number,
@@ -763,68 +794,59 @@ export class PersonDAO extends AbstractDAO {
     total: number
     hasMore: boolean
   }> => {
-    const searchTerms = searchTerm.trim().split(/\s+/).map(removeAccents)
-    const whereClause: Prisma.PersonWhereInput = {
-      AND: searchTerms.map((term) => ({
-        normalizedName: {
-          contains: term,
-          mode: Prisma.QueryMode.insensitive,
-        },
-      })),
+    const skip = (page - 1) * itemsPerPage
+    const tokens = tokenizeSearchQuery(searchTerm)
+
+    if (tokens.length === 0) {
+      const where: Prisma.PersonWhereInput = includeExternal
+        ? {}
+        : { external: false }
+      const [data, total] = await Promise.all([
+        this.prismaClient.person.findMany({
+          where,
+          skip,
+          take: itemsPerPage,
+          include: peopleSearchInclude,
+          orderBy: { lastName: 'asc' },
+        }),
+        this.prismaClient.person.count({ where }),
+      ])
+      return {
+        people: data.map((person) => Person.fromDbPerson(person)),
+        total,
+        hasMore: total > page * itemsPerPage,
+      }
     }
 
-    if (!includeExternal) {
-      whereClause.external = false
-    }
+    const column = Prisma.sql`p."normalizedName"`
+    const match = buildTokenMatch(column, tokens)
+    const where = Prisma.sql`(${includeExternal} OR p.external = false) AND ${match.where}`
+    const [rows, [{ total }]] = await withWordSimilarityThreshold(
+      this.prismaClient,
+      [
+        this.prismaClient.$queryRaw<{ id: number }[]>`
+          SELECT p.id FROM "Person" p
+          WHERE ${where}
+          ORDER BY ${match.score} DESC,
+            similarity(${column}, ${tokens.join(' ')}) DESC,
+            p."lastName" ASC NULLS LAST,
+            p.id ASC
+          LIMIT ${itemsPerPage} OFFSET ${skip}`,
+        this.prismaClient.$queryRaw<{ total: number }[]>`
+          SELECT count(*)::int AS total FROM "Person" p WHERE ${where}`,
+      ],
+    )
 
+    const ids = rows.map((row) => row.id)
     const data = await this.prismaClient.person.findMany({
-      where: whereClause,
-      skip: (page - 1) * itemsPerPage,
-      take: itemsPerPage,
-      include: {
-        memberships: {
-          include: {
-            organizationUnit: {
-              include: {
-                labels: true,
-                parents: { include: { parent: true } },
-                identifiers: true,
-                descriptions: true,
-              },
-            },
-          },
-        },
-        employments: {
-          include: {
-            organizationUnit: {
-              include: {
-                labels: true,
-                parents: { include: { parent: true } },
-                identifiers: true,
-                descriptions: true,
-              },
-            },
-          },
-        },
-        identifiers: true,
-        records: {
-          include: {
-            identifiers: true,
-          },
-        },
-      },
-      orderBy: {
-        lastName: 'asc',
-      },
+      where: { id: { in: ids } },
+      include: peopleSearchInclude,
     })
-
-    const people = data.map((person) => Person.fromDbPerson(person))
-
-    // Fix: Ensure total count query uses the same whereClause
-    const total = await this.prismaClient.person.count({ where: whereClause })
+    const rankById = new Map(ids.map((id, rank) => [id, rank]))
+    data.sort((a, b) => rankById.get(a.id)! - rankById.get(b.id)!)
 
     return {
-      people,
+      people: data.map((person) => Person.fromDbPerson(person)),
       total,
       hasMore: total > page * itemsPerPage,
     }
@@ -1175,5 +1197,39 @@ export class PersonDAO extends AbstractDAO {
         `Failed to fetch person with identifier ${identifier.type}:${identifier.value}`,
       )
     }
+  }
+
+  /**
+   * Fill `normalizedName` for people written without it. Idempotent.
+   * Returns the updated row count.
+   */
+  async backfillNormalizedSearchColumns(batchSize?: number): Promise<number> {
+    return backfillNormalizedColumn(
+      this.prismaClient,
+      async (take) =>
+        (
+          await this.prismaClient.person.findMany({
+            where: { normalizedName: null },
+            select: {
+              id: true,
+              displayName: true,
+              firstName: true,
+              lastName: true,
+            },
+            take,
+          })
+        ).map((row) => ({
+          id: row.id,
+          source:
+            row.displayName?.trim() ||
+            `${row.firstName ?? ''} ${row.lastName ?? ''}`.trim(),
+        })),
+      (id, normalized) =>
+        this.prismaClient.person.update({
+          where: { id },
+          data: { normalizedName: normalized },
+        }),
+      batchSize,
+    )
   }
 }

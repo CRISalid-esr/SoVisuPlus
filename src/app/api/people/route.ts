@@ -1,12 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PersonService } from '@/lib/services/PersonService'
+import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
+import { searchQueryLengthError } from '@/utils/fuzzySearch/searchQueryLength'
+import { requireSession } from '@/app/auth/requireSession'
 
 export const GET = async (req: NextRequest) => {
+  const { error: authError } = await requireSession()
+  if (authError) return authError
+
   const urlParams = req.nextUrl.searchParams
   const searchTerm = urlParams.get('searchTerm') || ''
   const page = parseInt(urlParams.get('page') || '1', 10)
   const includeExternal = urlParams.get('includeExternal') === 'true'
   const itemsPerPage = 10
+
+  const searchLengthError = searchQueryLengthError(
+    [searchTerm],
+    MAX_NAME_SEARCH_QUERY_LENGTH,
+  )
+  if (searchLengthError) {
+    return NextResponse.json({ error: searchLengthError }, { status: 400 })
+  }
 
   const personService = new PersonService()
 

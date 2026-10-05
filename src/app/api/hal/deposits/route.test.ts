@@ -83,12 +83,14 @@ describe('POST /api/hal/deposits', () => {
     mockGetServerSession.mockResolvedValue(null)
     const res = await POST(buildRequest(basePayload))
     expect(res.status).toBe(401)
+    expect(await res.json()).toMatchObject({ reason: 'not_authenticated' })
   })
 
   it('returns 403 when the user has neither deposit_hal nor deposit_hal_unauthenticated', async () => {
     can.mockReturnValue(false)
     const res = await POST(buildRequest(basePayload))
     expect(res.status).toBe(403)
+    expect(await res.json()).toMatchObject({ reason: 'forbidden' })
     expect(service.createHalDeposit).not.toHaveBeenCalled()
   })
 
@@ -173,6 +175,7 @@ describe('POST /api/hal/deposits', () => {
     }
     const res = await POST(buildRequest(payload))
     expect(res.status).toBe(400)
+    expect(await res.json()).toMatchObject({ reason: 'multiple_main_files' })
   })
 
   it('requires a license on the main file', async () => {
@@ -191,6 +194,9 @@ describe('POST /api/hal/deposits', () => {
     }
     const res = await POST(buildRequest(payload, new File(['x'], 'm.pdf')))
     expect(res.status).toBe(400)
+    expect(await res.json()).toMatchObject({
+      reason: 'main_file_license_required',
+    })
   })
 
   it('rejects when a required conditional field is missing (COUV without book title)', async () => {
@@ -258,6 +264,7 @@ describe('POST /api/hal/deposits', () => {
     }
     const res = await POST(buildRequest(payload, new File(['x'], 'm.pdf')))
     expect(res.status).toBe(500)
+    expect(await res.json()).toMatchObject({ reason: 'internal_error' })
     expect(service.deleteHalDeposit).toHaveBeenCalledWith(42)
   })
 })

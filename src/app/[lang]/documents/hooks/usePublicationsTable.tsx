@@ -35,11 +35,18 @@ import {
   MRT_TableInstance,
   MRT_TableOptions,
 } from 'material-react-table'
+import { alphabeticalSortColumn } from '@/components/alphabeticalSortColumn'
 import { t } from '@lingui/core/macro'
 import { Literal } from '@/types/Literal'
 import { getLocalizedValue } from '@/utils/getLocalizedValue'
 import NextLink, { LinkProps } from 'next/link'
 import Highlighter from 'react-highlight-words'
+import { findDocumentSearchChunks } from '@/utils/fuzzySearch/fuzzySearch'
+import {
+  MAX_DOCUMENT_SEARCH_QUERY_LENGTH,
+  MAX_NAME_SEARCH_QUERY_LENGTH,
+} from '@/utils/fuzzySearch/constants'
+import { searchFieldProps } from '@/components/searchFieldProps'
 import { LanguageChips } from '@/components/LanguageChips'
 import { Contribution } from '@/types/Contribution'
 import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
@@ -109,6 +116,10 @@ const DEFAULT_SORTING = [
 // Stable reference for tabs with no filters yet: `columnFilters` feeds the
 // fetch effect and the tableOptions memo, so a fresh [] each render would loop.
 const EMPTY_COLUMN_FILTERS: MRT_ColumnFiltersState = []
+
+// Same limits as the documents API routes, so the user never gets their 400
+const longSearchFieldProps = searchFieldProps(MAX_DOCUMENT_SEARCH_QUERY_LENGTH)
+const nameSearchFieldProps = searchFieldProps(MAX_NAME_SEARCH_QUERY_LENGTH)
 
 const createDocTypeTree = (
   _: (descriptor: Lingui.MessageDescriptor) => string,
@@ -465,13 +476,23 @@ export const usePublicationsTable = (
         .map((date, index) =>
           index === 0 ? date.startOf('year') : date.endOf('year'),
         )
-      setYearsFilter(formattedYears)
+      // Keep only the date filter when the link asks for a reset.
+      if (searchParams.get('resetFilters') === 'true') {
+        setColumnFiltersByTab({
+          [selectedTab]: [{ id: 'date', value: formattedYears }],
+        })
+        setGlobalFilter('')
+        setPagination((previous) => ({ ...previous, pageIndex: 0 }))
+      } else {
+        setYearsFilter(formattedYears)
+      }
       const params = new URLSearchParams(searchParams.toString())
       params.delete('years')
       params.delete('structures')
+      params.delete('resetFilters')
       router.replace(`/${lang}/documents?${params}`)
     }
-  }, [lang, router, searchParams])
+  }, [lang, router, searchParams, selectedTab])
 
   usePublicationsTableStorage(
     globalFilter,
@@ -489,11 +510,11 @@ export const usePublicationsTable = (
     const yearsFilterSet = yearsFilter.length > 0
     if (yearsFilterSet) {
       const dateFilter:
-        | { id: 'date'; value: [string | null, string | null] }
-        | undefined = columnFilters.find((filter) => filter.id === 'date') as {
-        id: 'date'
-        value: [string | null, string | null]
-      }
+        { id: 'date'; value: [string | null, string | null] } | undefined =
+        columnFilters.find((filter) => filter.id === 'date') as {
+          id: 'date'
+          value: [string | null, string | null]
+        }
       if (dateFilter) {
         const newColumnFilters = columnFilters.map((filter) => {
           if (filter.id == 'date') {
@@ -611,9 +632,10 @@ export const usePublicationsTable = (
         //@ts-expect-error:  override filterSelectOptions to accept Element.jsx instead of Element
         filterSelectOptions: typeOptions,
       },
-      {
+      alphabeticalSortColumn<Document>({
         size: 200,
         accessorKey: `titles`,
+        muiFilterTextFieldProps: longSearchFieldProps,
         accessorFn: (row) => {
           return row.titles
         },
@@ -660,7 +682,7 @@ export const usePublicationsTable = (
                     globalFilter,
                     column.getFilterValue() as string,
                   ]}
-                  autoEscape
+                  findChunks={findDocumentSearchChunks}
                   textToHighlight={localizedTitle.value}
                 />
               </Box>
@@ -677,13 +699,14 @@ export const usePublicationsTable = (
             </Box>
           )
         },
-      },
+      }),
       {
         enableSorting: false,
         accessorFn: (row) => {
           return row.contributions
         },
         accessorKey: 'contributions',
+        muiFilterTextFieldProps: nameSearchFieldProps,
         header: t`documents_page_contributors_column`,
         Cell({
           row,
@@ -709,6 +732,7 @@ export const usePublicationsTable = (
           return (
             <HighlighterWithEllipsis
               searchWords={[globalFilter, filterValue as string]}
+              findChunks={findDocumentSearchChunks}
               text={contributors}
             />
           )
@@ -728,7 +752,7 @@ export const usePublicationsTable = (
               <Highlighter
                 highlightClassName='highlight'
                 searchWords={[globalFilter]}
-                autoEscape
+                findChunks={findDocumentSearchChunks}
                 textToHighlight={dateStr}
               />
             )
@@ -740,7 +764,7 @@ export const usePublicationsTable = (
             <Highlighter
               highlightClassName='highlight'
               searchWords={[globalFilter]}
-              autoEscape
+              findChunks={findDocumentSearchChunks}
               textToHighlight={localizedDate}
             />
           )
@@ -750,8 +774,9 @@ export const usePublicationsTable = (
           sx: { '& .MuiBox-root': { gridTemplateColumns: '1fr' } },
         },
       },
-      {
+      alphabeticalSortColumn<Document>({
         accessorKey: 'publishedIn',
+        muiFilterTextFieldProps: nameSearchFieldProps,
         header: t`documents_page_publishedIn_column`,
         Cell({ row, column }) {
           const { journal } = row.original
@@ -762,13 +787,13 @@ export const usePublicationsTable = (
               <Highlighter
                 highlightClassName='highlight'
                 searchWords={[globalFilter, column.getFilterValue() as string]}
-                autoEscape
+                findChunks={findDocumentSearchChunks}
                 textToHighlight={title}
               />
             )
           )
         },
-      },
+      }),
       {
         enableSorting: false,
         accessorKey: 'halStatus',
@@ -927,6 +952,7 @@ export const usePublicationsTable = (
       },
       muiSelectAllCheckboxProps: { disabled: !hasSelectableRow },
       manualFiltering: true,
+      muiSearchTextFieldProps: longSearchFieldProps,
       manualPagination: true,
       manualSorting: true,
       muiTableBodyRowProps: ({

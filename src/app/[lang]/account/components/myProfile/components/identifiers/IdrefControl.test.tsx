@@ -167,11 +167,13 @@ describe('IdrefControl', () => {
     )
   })
 
-  it('self-scoped editor on own account can remove but sees no Add', () => {
+  it('self-scoped editor on own account cannot remove an IdRef', () => {
     setupStore('026404435')
     setupSession(authzSelfScoped)
     renderComponent()
-    expect(screen.getByText('idref_control_remove_button')).toBeInTheDocument()
+    expect(
+      screen.queryByText('idref_control_remove_button'),
+    ).not.toBeInTheDocument()
   })
 
   it('self-scoped editor cannot add an IdRef', () => {

@@ -228,3 +228,38 @@ describe('StructureTreeExplorer selection reporting', () => {
     expect(onSelectionChange).toHaveBeenLastCalledWith('bu')
   })
 })
+
+describe('StructureTreeExplorer search', () => {
+  const search = () =>
+    screen.getByPlaceholderText('research_structures_tree_search_placeholder')
+
+  it('filters the tree once typing pauses, tolerating typos', async () => {
+    const user = userEvent.setup()
+    renderTree()
+
+    await user.type(search(), 'labb')
+    // not filtered yet: the search is debounced
+    expect(screen.queryByText('lab', { selector: '.MuiTreeItem-label' })).toBe(
+      null,
+    )
+
+    expect(
+      await screen.findByText('lab', { selector: '.MuiTreeItem-label' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText('bu', { selector: '.MuiTreeItem-label' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('restores the full tree immediately when cleared', async () => {
+    const user = userEvent.setup()
+    renderTree()
+    await user.type(search(), 'labb')
+    await screen.findByText('lab', { selector: '.MuiTreeItem-label' })
+
+    await user.clear(search())
+
+    // no wait: the pre-search expansion (everything collapsed) is back
+    expect(item('inst')).toHaveAttribute('aria-expanded', 'false')
+  })
+})

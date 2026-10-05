@@ -1,6 +1,11 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import type { ChatConfig, ChatSuggestion, ChatWelcome } from '@/types/ChatConfig'
+import type {
+  ChatConfig,
+  ChatSuggestion,
+  ChatWelcome,
+} from '@/types/ChatConfig'
+import { isChatEnabledByEnv } from '@/utils/chatEnabled'
 
 /**
  * Server-side reader for the AI chat configuration file. Tries a cascade of candidates in priority
@@ -11,7 +16,8 @@ import type { ChatConfig, ChatSuggestion, ChatWelcome } from '@/types/ChatConfig
  * pieces the app needs: the system prompt (injected server-side by the `/api/chat` proxy, with
  * `{{variable}}` placeholders resolved) and the per-locale welcome message + default suggestions
  * (shipped to the browser by the layout). When no candidate loads the config stays null and
- * `isAvailable()` is false, so the widget is hidden. Mirrors `ConceptFilterService`.
+ * `isAvailable()` is false, so the widget is hidden. `isChatEnabled()` is the single gate used by
+ * both the layout (widget) and the `/api/chat` proxy. Mirrors `ConceptFilterService`.
  */
 
 const DEFAULT_LOCALE = 'en'
@@ -39,6 +45,8 @@ export class ChatConfigService {
   private config: ChatConfig | null = null
   private loaded = false
   private loadPromise: Promise<void> | null = null
+  // Last disabled reason logged, so the layout and the proxy do not repeat it on every call.
+  private loggedDisabledReason: string | null = null
 
   private constructor(private readonly filePaths: string[]) {}
 
@@ -52,7 +60,9 @@ export class ChatConfigService {
       this.config = null
       for (const filePath of this.filePaths) {
         try {
-          const parsed = JSON.parse(await fs.readFile(filePath, 'utf8')) as unknown
+          const parsed = JSON.parse(
+            await fs.readFile(filePath, 'utf8'),
+          ) as unknown
           if (isUsableConfig(parsed)) {
             this.config = parsed
             break
@@ -79,6 +89,35 @@ export class ChatConfigService {
   }
 
   /**
+   * Whether the AI chat is usable: `CHAT_ENABLED` is not `false`, `CRISALID_AGENTS_API_URL` is set
+   * and a chat config file resolved. When it is not, the reason is logged once (until it changes)
+   * so an admin can tell why the chat is missing.
+   */
+  public async isChatEnabled(): Promise<boolean> {
+    const reason = await this.getDisabledReason()
+    if (reason === null) {
+      this.loggedDisabledReason = null
+      return true
+    }
+    if (reason !== this.loggedDisabledReason) {
+      console.warn(`[ChatConfigService] AI chat is disabled: ${reason}`)
+      this.loggedDisabledReason = reason
+    }
+    return false
+  }
+
+  private async getDisabledReason(): Promise<string | null> {
+    if (!isChatEnabledByEnv()) return 'CHAT_ENABLED is set to false.'
+    if (!process.env.CRISALID_AGENTS_API_URL?.trim()) {
+      return 'CRISALID_AGENTS_API_URL is not set.'
+    }
+    if (!(await this.isAvailable())) {
+      return `no usable chat config file found (tried: ${this.filePaths.join(', ') || 'none'}).`
+    }
+    return null
+  }
+
+  /**
    * App-provided default variables plus the config file's custom `variables`, the latter winning.
    * App defaults source the (unprefixed) deploy env mapped into the app — e.g. `institutionName`
    * comes from `NEXT_PUBLIC_INSTITUTION_NAME` — so admins never re-type them in the file.
@@ -99,7 +138,10 @@ export class ChatConfigService {
     const raw = this.config?.systemPrompt?.trim() ?? ''
     if (!raw) return ''
     const vars = this.buildVariables()
-    return raw.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key: string) => vars[key] ?? '')
+    return raw.replace(
+      /\{\{\s*(\w+)\s*\}\}/g,
+      (_, key: string) => vars[key] ?? '',
+    )
   }
 
   /**

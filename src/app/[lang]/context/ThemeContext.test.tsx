@@ -28,6 +28,10 @@ describe('ThemeProvider', () => {
     })
   })
 
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
   it('renders with the default theme as system', () => {
     render(
       <ThemeProvider>
@@ -91,6 +95,46 @@ describe('ThemeProvider', () => {
     const lightButton = screen.getByRole('button', { name: /Set Light Theme/i })
     await user.click(lightButton)
     expect(localStorage.getItem('theme-mode')).toBe('light')
+  })
+
+  it('restores saved theme on mount without overwriting it', async () => {
+    localStorage.setItem('theme-mode', 'dark')
+
+    render(
+      <React.StrictMode>
+        <ThemeProvider>
+          <TestComponent />
+        </ThemeProvider>
+      </React.StrictMode>
+    )
+
+    expect(await screen.findByText('Current Theme: dark')).toBeInTheDocument()
+    expect(localStorage.getItem('theme-mode')).toBe('dark')
+  })
+
+  // A language change remounts the [lang] layout, and therefore the provider
+  it('keeps selected theme across remount', async () => {
+    const user = userEvent.setup()
+
+    const { unmount } = render(
+      <React.StrictMode>
+        <ThemeProvider>
+          <TestComponent />
+        </ThemeProvider>
+      </React.StrictMode>
+    )
+    await user.click(screen.getByRole('button', { name: /Set Dark Theme/i }))
+    unmount()
+
+    render(
+      <React.StrictMode>
+        <ThemeProvider>
+          <TestComponent />
+        </ThemeProvider>
+      </React.StrictMode>
+    )
+
+    expect(await screen.findByText('Current Theme: dark')).toBeInTheDocument()
   })
 
   it('throws an error when useThemeContext is used outside ThemeProvider', () => {

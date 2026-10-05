@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as process from 'node:process'
-import { getServerSession, Session } from 'next-auth'
-import authOptions from '@/app/auth/auth_options'
+import { getAuthenticatedSession } from '@/app/auth/requireSession'
 import { UserService } from '@/lib/services/UserService'
 import {
   PersonIdentifier,
@@ -25,10 +24,8 @@ export const GET = async (req: NextRequest) => {
       `${userRedirectionUrl}?error=orcid_authentication_failure_no_code`,
     )
   }
-  const session = (await getServerSession(authOptions)) as Session & {
-    user: { username?: string; orcid?: string; id?: string }
-  }
-  if (!session || !session?.user?.id || !session?.user?.username) {
+  const session = await getAuthenticatedSession()
+  if (!session?.user?.id) {
     return NextResponse.redirect(
       `${userRedirectionUrl}?error=orcid_authentication_failure_no_session`,
     )

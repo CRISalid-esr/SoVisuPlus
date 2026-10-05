@@ -13,7 +13,16 @@ import { OrganizationGroup } from '@/types/IAgent'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import slugify from 'slugify'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-import QueryMode = Prisma.QueryMode
+import {
+  normalizeSearchText,
+  tokenizeSearchQuery,
+} from '@/utils/fuzzySearch/fuzzySearch'
+import { backfillNormalizedColumn } from '@/lib/daos/search/backfillNormalizedColumn'
+import {
+  buildTokenConditions,
+  buildTokenMatch,
+  withWordSimilarityThreshold,
+} from '@/lib/daos/search/trigramSearchSql'
 
 export type { OrganizationGroup }
 
@@ -69,6 +78,9 @@ export class OrganizationUnitDAO extends AbstractDAO {
             nationalType: organizationUnit.nationalType,
             external: organizationUnit.external,
             acronym: organizationUnit.acronym,
+            normalizedAcronym: organizationUnit.acronym
+              ? normalizeSearchText(organizationUnit.acronym)
+              : null,
             localTypes:
               organizationUnit.localTypes as unknown as Prisma.InputJsonValue,
             slug: uniqueSlug,
@@ -150,12 +162,16 @@ export class OrganizationUnitDAO extends AbstractDAO {
             language: name.language,
           },
         },
-        update: { value: name.value },
+        update: {
+          value: name.value,
+          normalizedValue: normalizeSearchText(name.value),
+        },
         create: {
           organizationUnitId,
           kind: 'long',
           language: name.language,
           value: name.value,
+          normalizedValue: normalizeSearchText(name.value),
         },
       })
     }
@@ -490,63 +506,163 @@ export class OrganizationUnitDAO extends AbstractDAO {
   }
 
   /**
-   * Search where-clause for a perspective group: matches on label values,
-   * restricted to the group's categories, always excluding external
-   * structures (registry-created relationship targets without labels) and
-   * hidden ones (a hidden structure is not a selectable perspective, not
-   * even for a structure manager).
+   * Perspective search within a group, always excluding external structures
+   * (registry-created relationship targets without labels) and hidden ones
+   * (a hidden structure is not a selectable perspective, not even for a
+   * structure manager). Only structures with at least one label are
+   * searchable.
+   *
+   * A blank query lists the group; otherwise every query word must match the
+   * structure's normalized acronym or labels (substring or pg_trgm typo
+   * tolerance) and results are ranked by relevance.
    */
-  private searchWhereClause(
-    searchTerm: string,
-    group: OrganizationGroup,
-  ): Prisma.OrganizationUnitWhereInput {
-    return {
-      external: false,
-      hiddenEffective: false,
-      category: { in: groupToCategories(group) },
-      labels: {
-        some: {
-          value: {
-            contains: searchTerm,
-            mode: QueryMode.insensitive,
-          },
-        },
-      },
-    }
-  }
-
-  /**
-   * Get a list of OrganizationUnit records based on a search term
-   * @param searchTerm
-   * @param group - perspective group to search within
-   * @param pageNumber
-   * @param itemsPerPage
-   */
-  async getOrganizationUnits(
+  async searchOrganizationUnits(
     searchTerm: string,
     group: OrganizationGroup,
     pageNumber: number,
     itemsPerPage: number,
-  ): Promise<OrganizationUnit[]> {
-    const organizationUnits = await this.prismaClient.organizationUnit.findMany(
-      {
-        where: this.searchWhereClause(searchTerm, group),
-        skip: (pageNumber - 1) * itemsPerPage,
-        take: itemsPerPage,
-        include: organizationUnitInclude,
-        orderBy: {
-          labels: {
-            _count: 'asc',
-          },
-        },
-      },
+  ): Promise<{ organizationUnits: OrganizationUnit[]; total: number }> {
+    const skip = (pageNumber - 1) * itemsPerPage
+    const categories = groupToCategories(group)
+    const tokens = tokenizeSearchQuery(searchTerm)
+
+    if (tokens.length === 0) {
+      const where: Prisma.OrganizationUnitWhereInput = {
+        external: false,
+        hiddenEffective: false,
+        category: { in: categories },
+        labels: { some: {} },
+      }
+      const [dbUnits, total] = await Promise.all([
+        this.prismaClient.organizationUnit.findMany({
+          where,
+          skip,
+          take: itemsPerPage,
+          include: organizationUnitInclude,
+          orderBy: { labels: { _count: 'asc' } },
+        }),
+        this.prismaClient.organizationUnit.count({ where }),
+      ])
+      return {
+        organizationUnits: dbUnits.map(OrganizationUnit.fromDbOrganizationUnit),
+        total,
+      }
+    }
+
+    // Filter first, one indexable condition per token against a single label
+    // row or the acronym, then aggregate only the survivors for scoring. The
+    // aggregate cannot be filtered through an index, so matching on it would
+    // scan and group the whole group on every search.
+    const labelConditions = buildTokenConditions(
+      Prisma.sql`l."normalizedValue"`,
+      tokens,
     )
-    return organizationUnits.map(OrganizationUnit.fromDbOrganizationUnit)
+    const acronymConditions = buildTokenConditions(
+      Prisma.sql`o."normalizedAcronym"`,
+      tokens,
+    )
+    // A token may come from any label or from the acronym, and different
+    // tokens may come from different labels — so one subquery per token,
+    // ANDed. Uncorrelated on purpose: evaluated once per token rather than
+    // probed once per unit per token.
+    const tokenFilters = tokens.map(
+      (_, index) => Prisma.sql`
+        ou.id IN (
+          SELECT l."organizationUnitId" FROM "OrganizationUnitLabel" l
+          WHERE ${labelConditions[index]}
+          UNION ALL
+          SELECT o.id FROM "OrganizationUnit" o
+          WHERE ${acronymConditions[index]}
+        )`,
+    )
+    const match = buildTokenMatch(Prisma.sql`u.search_text`, tokens)
+    const searchable = Prisma.sql`
+      WITH matched AS (
+        SELECT ou.id
+        FROM "OrganizationUnit" ou
+        WHERE ou.external = false
+          AND ou."hiddenEffective" = false
+          AND ou.category::text = ANY(${categories}::text[])
+          AND ${Prisma.join(tokenFilters, ' AND ')}
+      ),
+      u AS (
+        SELECT ou.id,
+          concat_ws(' ', ou."normalizedAcronym", string_agg(l."normalizedValue", ' ')) AS search_text,
+          count(l.id) AS label_count
+        FROM "OrganizationUnit" ou
+        -- inner join: a unit whose acronym matched but which has no label is
+        -- not searchable, as in the blank-query path
+        JOIN "OrganizationUnitLabel" l ON l."organizationUnitId" = ou.id
+        WHERE ou.id IN (SELECT id FROM matched)
+        GROUP BY ou.id
+      )`
+    const [rows, [{ total }]] = await withWordSimilarityThreshold(
+      this.prismaClient,
+      [
+        this.prismaClient.$queryRaw<{ id: number }[]>`
+          ${searchable}
+          SELECT u.id FROM u
+          ORDER BY ${match.score} DESC, u.label_count ASC, u.id ASC
+          LIMIT ${itemsPerPage} OFFSET ${skip}`,
+        this.prismaClient.$queryRaw<{ total: number }[]>`
+          ${searchable}
+          SELECT count(*)::int AS total FROM u`,
+      ],
+    )
+
+    const ids = rows.map((row) => row.id)
+    const dbUnits = await this.prismaClient.organizationUnit.findMany({
+      where: { id: { in: ids } },
+      include: organizationUnitInclude,
+    })
+    const rankById = new Map(ids.map((id, rank) => [id, rank]))
+    dbUnits.sort((a, b) => rankById.get(a.id)! - rankById.get(b.id)!)
+
+    return {
+      organizationUnits: dbUnits.map(OrganizationUnit.fromDbOrganizationUnit),
+      total,
+    }
   }
 
-  async countOrganizationUnits(searchTerm: string, group: OrganizationGroup) {
-    return this.prismaClient.organizationUnit.count({
-      where: this.searchWhereClause(searchTerm, group),
-    })
+  /**
+   * Fill the search-only normalized columns of labels and acronyms written
+   * before they existed. Idempotent. Returns the updated row count.
+   */
+  async backfillNormalizedSearchColumns(batchSize?: number): Promise<number> {
+    const labels = await backfillNormalizedColumn(
+      this.prismaClient,
+      async (take) =>
+        (
+          await this.prismaClient.organizationUnitLabel.findMany({
+            where: { normalizedValue: null },
+            select: { id: true, value: true },
+            take,
+          })
+        ).map((row) => ({ id: row.id, source: row.value })),
+      (id, normalized) =>
+        this.prismaClient.organizationUnitLabel.update({
+          where: { id },
+          data: { normalizedValue: normalized },
+        }),
+      batchSize,
+    )
+    const acronyms = await backfillNormalizedColumn(
+      this.prismaClient,
+      async (take) =>
+        (
+          await this.prismaClient.organizationUnit.findMany({
+            where: { normalizedAcronym: null, acronym: { not: null } },
+            select: { id: true, acronym: true },
+            take,
+          })
+        ).map((row) => ({ id: row.id, source: row.acronym ?? '' })),
+      (id, normalized) =>
+        this.prismaClient.organizationUnit.update({
+          where: { id },
+          data: { normalizedAcronym: normalized },
+        }),
+      batchSize,
+    )
+    return labels + acronyms
   }
 }

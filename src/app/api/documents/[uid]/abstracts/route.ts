@@ -1,5 +1,4 @@
-import { getServerSession, Session } from 'next-auth'
-import authOptions from '@/app/auth/auth_options'
+import { requireSession } from '@/app/auth/requireSession'
 import { NextResponse } from 'next/server'
 import { DocumentService } from '@/lib/services/DocumentService'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
@@ -12,16 +11,9 @@ export const PUT = async (
 ) => {
   const { uid } = await context.params
 
-  const session = (await getServerSession(authOptions)) as Session & {
-    user: { username?: string }
-  }
-  const userName = session?.user?.username
-  if (!userName) {
-    return NextResponse.json(
-      { error: 'User is not authenticated' },
-      { status: 401 },
-    )
-  }
+  const { session, error: authError } = await requireSession()
+  if (authError) return authError
+  const userName = session.user.username
 
   if (!uid) {
     return NextResponse.json(

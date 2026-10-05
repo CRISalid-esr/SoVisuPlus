@@ -291,6 +291,43 @@ describe('OrganizationUnitService.getStructureMembers (integration)', () => {
     expect(none!.total).toBe(0)
   })
 
+  it('tolerates typos and word order in the name search', async () => {
+    const result = await service.getStructureMembers({
+      ...baseQuery,
+      uid: 'local-ru1',
+      present: false,
+      search: 'durant elodie',
+    })
+    expect(result!.members.map((m) => m.uid)).toEqual(['p-elodie'])
+  })
+
+  it('ranks best matches first under the default name order', async () => {
+    const ru1 = await prisma.organizationUnit.findUnique({
+      where: { uid: 'local-ru1' },
+    })
+    const marta = await prisma.person.create({
+      data: {
+        uid: 'p-marta',
+        slug: 'marta-zeller',
+        firstName: 'Marta',
+        lastName: 'Zeller',
+        displayName: 'Marta Zeller',
+      },
+    })
+    await prisma.membership.create({
+      data: { personId: marta.id, organizationUnitId: ru1!.id },
+    })
+    // "marta" is an exact word for Zeller and a typo of Bob's "Marti(n)":
+    // Zeller comes first although Martin sorts before Zeller by name
+    const result = await service.getStructureMembers({
+      ...baseQuery,
+      uid: 'local-ru1',
+      present: false,
+      search: 'marta',
+    })
+    expect(result!.members.map((m) => m.uid)).toEqual(['p-marta', 'p-bob'])
+  })
+
   it('paginates after sorting', async () => {
     const result = await service.getStructureMembers({
       ...baseQuery,

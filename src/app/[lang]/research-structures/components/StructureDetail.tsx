@@ -4,7 +4,6 @@ import { t } from '@lingui/core/macro'
 import * as Lingui from '@lingui/core'
 import {
   Box,
-  Button,
   Chip,
   FormControlLabel,
   List,
@@ -22,6 +21,7 @@ import { StructureRow } from './directoryRows'
 import { visibleChildren } from './treeExplorerUtils'
 import RateBar from './RateBar'
 import StructureMembersTable from './StructureMembersTable'
+import DashboardLinkButton from './DashboardLinkButton'
 
 const Kpi = ({
   label,
@@ -104,16 +104,13 @@ const StructureDetail = ({
             {row.institutionNames.join(', ')}
           </Typography>
         )}
-        {row.slug && (
-          <Button
-            size='small'
-            variant='outlined'
-            sx={{ mt: 1.5 }}
-            onClick={() => onNavigate(row)}
-          >
-            {t`research_structures_dashboard_link`}
-          </Button>
-        )}
+        <DashboardLinkButton
+          row={row}
+          onNavigate={onNavigate}
+          size='small'
+          variant='outlined'
+          sx={{ mt: 1.5 }}
+        />
         {canManageVisibility && onToggleHidden && (
           <Box sx={{ mt: 1.5 }}>
             <Tooltip

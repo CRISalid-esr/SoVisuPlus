@@ -61,23 +61,23 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
       mediaQuery.removeEventListener('change', handleSystemThemeChange)
   }, [currentTheme])
 
-  // Persist theme preference in localStorage
+  // Restore theme preference from localStorage
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme-mode') as ThemeMode
-    if (savedTheme) {
-      setCurrentTheme(savedTheme)
+    const savedTheme = localStorage.getItem('theme-mode')
+    if (savedTheme && savedTheme in ThemeMode) {
+      setCurrentTheme(savedTheme as ThemeModeType)
     }
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('theme-mode', currentTheme)
     if (currentTheme !== 'system') {
       setResolvedTheme(currentTheme)
     }
   }, [currentTheme])
 
-
+  // Persist only on explicit user choice, so a remount cannot overwrite it
   const setTheme = (theme: ThemeModeType) => {
+    localStorage.setItem('theme-mode', theme)
     setCurrentTheme(theme)
   }
 

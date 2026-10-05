@@ -1,11 +1,17 @@
+// requireSession reads the session through next-auth; authOptions pulls in
+// openid-client, which Jest cannot parse, hence the mocks.
+jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
+jest.mock('@/app/auth/auth_options', () => ({ __esModule: true, default: {} }))
+
 import { NextRequest } from 'next/server'
+import { getServerSession } from 'next-auth'
 import { GET } from './route' // Adjust the path to the actual file
+
+const mockFetchDocumentById = jest.fn()
 
 jest.mock('../../../lib/services/DocumentService', () => ({
   DocumentService: jest.fn().mockImplementation(() => ({
-    fetchDocumentById: jest
-      .fn()
-      .mockResolvedValue({ id: '123', title: 'Test Document' }),
+    fetchDocumentById: mockFetchDocumentById,
   })),
 }))
 
@@ -21,6 +27,13 @@ jest.mock('next/server', () => {
       }),
     },
   }
+})
+
+const mockGetServerSession = getServerSession as jest.Mock
+
+beforeEach(() => {
+  mockGetServerSession.mockResolvedValue({ user: { username: 'jdupont' } })
+  mockFetchDocumentById.mockResolvedValue({ id: '123', title: 'Test Document' })
 })
 
 describe('GET handler', () => {
@@ -44,5 +57,27 @@ describe('GET handler', () => {
     expect(response.status).toBe(400)
     const jsonResponse = await response.json()
     expect(jsonResponse).toEqual({ error: 'Document UID is required' })
+  })
+
+  it('should return 404 if the document does not exist', async () => {
+    mockFetchDocumentById.mockResolvedValue(null)
+
+    const response = await GET({} as NextRequest, {
+      params: Promise.resolve({ uid: 'unknown' }),
+    })
+
+    expect(response.status).toBe(404)
+    const jsonResponse = await response.json()
+    expect(jsonResponse).toEqual({ error: 'Document not found' })
+  })
+
+  it('rejects an anonymous caller', async () => {
+    mockGetServerSession.mockResolvedValue(null)
+
+    const response = await GET({} as NextRequest, {
+      params: Promise.resolve({ uid: '123' }),
+    })
+
+    expect(response.status).toBe(401)
   })
 })

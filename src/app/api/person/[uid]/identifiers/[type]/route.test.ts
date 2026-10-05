@@ -72,7 +72,9 @@ const person = (
 })
 
 const setSession = (authz: unknown) =>
-  (getServerSession as jest.Mock).mockResolvedValue({ user: { authz } })
+  (getServerSession as jest.Mock).mockResolvedValue({
+    user: { username: 'u', authz },
+  })
 
 const ctx = (uid: string, type: string) => ({
   params: Promise.resolve({ uid, type }),
@@ -171,6 +173,24 @@ describe('DELETE /api/person/[uid]/identifiers/[type]', () => {
     )
 
     const res = await DELETE({} as Request, ctx('bob', 'idref'))
+    expect(res.status).toBe(200)
+    expect(mockRemoveIdentifier).toHaveBeenCalled()
+  })
+
+  it('forbids a self-scoped editor from removing their own IdRef', async () => {
+    setSession(selfAuthz('alice'))
+    mockFetchPersonByUid.mockResolvedValue(person('alice'))
+
+    const res = await DELETE({} as Request, ctx('alice', 'idref'))
+    expect(res.status).toBe(403)
+    expect(mockRemoveIdentifier).not.toHaveBeenCalled()
+  })
+
+  it('lets a self-scoped editor remove another non-authenticated identifier', async () => {
+    setSession(selfAuthz('alice'))
+    mockFetchPersonByUid.mockResolvedValue(person('alice'))
+
+    const res = await DELETE({} as Request, ctx('alice', 'idhals'))
     expect(res.status).toBe(200)
     expect(mockRemoveIdentifier).toHaveBeenCalled()
   })

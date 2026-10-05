@@ -1,12 +1,10 @@
-// The route reaches for the session only to decide whether a hidden
-// structure is visible; authOptions pulls in openid-client, which Jest cannot
-// parse, hence the mocks.
+// requireSession reads the session through next-auth; authOptions pulls in
+// openid-client, which Jest cannot parse, hence the mocks.
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('@/app/auth/auth_options', () => ({ __esModule: true, default: {} }))
-jest.mock('@/app/auth/ability', () => ({ hasUnscopedPermission: jest.fn() }))
 
 import { NextRequest } from 'next/server'
-import { hasUnscopedPermission } from '@/app/auth/ability'
+import { getServerSession } from 'next-auth'
 import { GET } from './route'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { Literal } from '@/types/Literal'
@@ -56,7 +54,11 @@ jest.mock('next/server', () => ({
   },
 }))
 
-const mockHasUnscopedPermission = hasUnscopedPermission as jest.Mock
+const mockGetServerSession = getServerSession as jest.Mock
+
+beforeEach(() => {
+  mockGetServerSession.mockResolvedValue({ user: { username: 'jdupont' } })
+})
 
 describe('GET /api/organizations/slug/[slug]', () => {
   let req: NextRequest
@@ -79,23 +81,33 @@ describe('GET /api/organizations/slug/[slug]', () => {
     expect(jsonResponse).toEqual(buildOrganizationUnit())
   })
 
-  it('should return 404 for a hidden structure when the user cannot manage them', async () => {
-    mockHasUnscopedPermission.mockReturnValue(false)
+  it('should return 404 for a hidden structure, even to a structure manager', async () => {
+    mockGetServerSession.mockResolvedValue({
+      user: {
+        username: 'jdupont',
+        authz: {
+          userId: 'u',
+          roleAssignments: [
+            {
+              role: 'structure_manager',
+              permissions: [
+                {
+                  action: 'update',
+                  subject: 'OrganizationUnit',
+                  fields: ['hidden'],
+                },
+              ],
+              scopes: [],
+            },
+          ],
+        },
+      },
+    })
     const response = await GET(req, {
       params: Promise.resolve({ slug: 'org:hidden' }),
     })
 
     expect(response.status).toBe(404)
-  })
-
-  it('should return a hidden structure to a structure manager', async () => {
-    mockHasUnscopedPermission.mockReturnValue(true)
-    const response = await GET(req, {
-      params: Promise.resolve({ slug: 'org:hidden' }),
-    })
-
-    expect(response.status).toBe(200)
-    expect(await response.json()).toEqual(buildOrganizationUnit(true))
   })
 
   it('should return 404 when organization unit is not found', async () => {
@@ -110,5 +122,13 @@ describe('GET /api/organizations/slug/[slug]', () => {
     expect(jsonResponse).toEqual({
       error: 'OrganizationUnit with slug org:efgh not found',
     })
+  })
+
+  it('rejects an anonymous caller', async () => {
+    mockGetServerSession.mockResolvedValue(null)
+
+    const response = await GET(req, { params: Promise.resolve(params) })
+
+    expect(response.status).toBe(401)
   })
 })

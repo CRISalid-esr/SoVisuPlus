@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getServerSession, Session } from 'next-auth'
-import authOptions from '@/app/auth/auth_options'
+import { requireSession } from '@/app/auth/requireSession'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
 import { UserDAO } from '@/lib/daos/UserDAO'
@@ -13,13 +12,8 @@ import { PermissionAction } from '@/types/Permission'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
 
 export const POST = async (request: Request) => {
-  const session = (await getServerSession(authOptions)) as Session & {
-    user: { username?: string }
-  }
-
-  if (!session?.user?.username) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const { session, error: authError } = await requireSession()
+  if (authError) return authError
 
   const { personUid, platforms } = await request.json()
 

@@ -220,4 +220,50 @@ describe('HalControl', () => {
       screen.queryByText('manual_identifier_add_button'),
     ).not.toBeInTheDocument()
   })
+
+  describe('closing the snackbar', () => {
+    afterEach(() => {
+      window.history.replaceState({}, '', '/')
+    })
+
+    it('keeps the perspective param and only strips OAuth feedback params', () => {
+      window.history.replaceState(
+        {},
+        '',
+        '/en/account?perspective=person:other-uid&success=hal_authentication_success',
+      )
+      mockUseSearchParams.mockReturnValue(
+        new URLSearchParams(window.location.search),
+      )
+      makeStore([])
+      renderWithProviders()
+
+      fireEvent.click(screen.getByLabelText('Close'))
+
+      expect(mockReplace).toHaveBeenCalledWith(
+        '/en/account?perspective=person%3Aother-uid',
+        { scroll: false },
+      )
+    })
+
+    it('does not navigate after removing an identifier', async () => {
+      window.history.replaceState(
+        {},
+        '',
+        '/en/account?perspective=person:other-uid',
+      )
+      makeStore([
+        { type: PersonIdentifierType.idhals, value: 'jacques-dupont' },
+      ])
+      renderWithProviders()
+
+      fireEvent.click(screen.getByText('hal_control_remove_button'))
+      fireEvent.click(screen.getByText('hal_control_remove_dialog_confirm'))
+      expect(await screen.findByText('hal_remove_success')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByLabelText('Close'))
+
+      expect(mockReplace).not.toHaveBeenCalled()
+    })
+  })
 })

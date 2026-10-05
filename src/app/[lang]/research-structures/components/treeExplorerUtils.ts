@@ -1,5 +1,6 @@
 import { TreeViewBaseItem } from '@mui/x-tree-view/models'
 import { OrganizationCategory } from '@prisma/client'
+import { fuzzyMatch } from '@/utils/fuzzySearch/fuzzySearch'
 import { StructureRow } from './directoryRows'
 import {
   groupNodeId,
@@ -56,19 +57,14 @@ export const ancestorsOf = (
   return ancestors
 }
 
-export const normalizeForSearch = (value: string): string =>
-  value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-
 export const treeLabel = (row: StructureRow): string =>
   row.name && row.name !== row.acronym
     ? `${row.acronym} — ${row.name}`
     : row.acronym
 
 /**
- * Keep the nodes whose label matches the query and their ancestors. The
+ * Keep the nodes whose label fuzzy-matches the query (case, diacritics,
+ * word order and typos tolerated) and their ancestors. The
  * returned expandedIds are the kept nodes that still have children — the
  * ancestor chain of every match — so the tree can auto-expand them.
  */
@@ -76,14 +72,12 @@ export const filterForest = (
   forest: StructureRow[],
   query: string,
 ): { forest: StructureRow[]; expandedIds: string[] } => {
-  const normalizedQuery = normalizeForSearch(query)
   const expandedIds: string[] = []
   const filterNode = (node: StructureRow): StructureRow | null => {
     // A group header is a container, not a result: it survives only when one
     // of its structures matches.
     const matches =
-      !isGroupNodeId(node.uid) &&
-      normalizeForSearch(treeLabel(node)).includes(normalizedQuery)
+      !isGroupNodeId(node.uid) && fuzzyMatch(query, treeLabel(node))
     const subRows = (node.subRows ?? [])
       .map(filterNode)
       .filter((child): child is StructureRow => child !== null)
