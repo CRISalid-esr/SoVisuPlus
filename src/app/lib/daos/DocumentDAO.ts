@@ -287,10 +287,11 @@ export class DocumentDAO extends AbstractDAO {
         })
       }
 
+      const conceptDAO = new ConceptDAO()
       for (const subject of subjects) {
         let concept: DbConcept
         try {
-          concept = await new ConceptDAO().createOrUpdateConcept(subject)
+          concept = await conceptDAO.createOrUpdateConcept(subject)
         } catch (error) {
           console.error(
             `Failed to create or update concept for subject: ${subject}`,
@@ -313,12 +314,12 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
 
+      const personDAO = new PersonDAO()
+      const authorityOrganizationDAO = new AuthorityOrganizationDAO()
       for (const contribution of contributions) {
         let person: DbPerson
         try {
-          person = await new PersonDAO().createOrUpdatePerson(
-            contribution.person,
-          )
+          person = await personDAO.createOrUpdatePerson(contribution.person)
         } catch (error) {
           console.error(
             `Failed to create or update person for contribution: ${contribution}`,
@@ -359,7 +360,7 @@ export class DocumentDAO extends AbstractDAO {
           let authorityOrganization: DbAuthorityOrganization
           try {
             authorityOrganization =
-              await new AuthorityOrganizationDAO().createOrUpdateAuthorityOrganization(
+              await authorityOrganizationDAO.createOrUpdateAuthorityOrganization(
                 affiliation,
               )
             const { id: authorityId } = authorityOrganization

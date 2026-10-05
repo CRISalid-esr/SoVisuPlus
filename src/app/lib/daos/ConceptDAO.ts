@@ -1,14 +1,9 @@
-import { Concept as DbConcept, LabelType, PrismaClient } from '@prisma/client'
+import { Concept as DbConcept, LabelType } from '@prisma/client'
 import { Concept } from '@/types/Concept'
 import { Literal } from '@/types/Literal'
+import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 
-export class ConceptDAO {
-  private prismaClient: PrismaClient
-
-  constructor(prismaClient?: PrismaClient) {
-    this.prismaClient = prismaClient || new PrismaClient()
-  }
-
+export class ConceptDAO extends AbstractDAO {
   /**
    * Create or update a Concept record in the database.
    * It upserts the concept and its labels based on the provided domain Concept.
