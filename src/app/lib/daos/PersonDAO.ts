@@ -61,6 +61,9 @@ const LOCAL_ONLY_IDENTIFIER_TYPES: PersonIdentifierType[] = [
   PersonIdentifierType.hal_login,
 ]
 
+const isIdHalType = (type: PersonIdentifierType): boolean =>
+  type === PersonIdentifierType.idhals || type === PersonIdentifierType.idhali
+
 export class IdentifierConflictError extends Error {
   constructor(message = 'Identifier already exists') {
     super(message)
@@ -532,7 +535,8 @@ export class PersonDAO extends AbstractDAO {
    * @param personId - The ID of the person
    * @param options - `prune: true` when `identifiers` is the person's complete
    *   set (person AMQP message): identifiers absent from it are deleted, except
-   *   local-only ones, and hal_login is deleted along with the idHAL.
+   *   local-only ones. In both modes, hal_login is deleted when the idHAL is
+   *   removed or changes (type or value).
    * @param retries - The number of retries (to handle conflicts on upsert)
    */
   private async upsertIdentifiers(
@@ -569,6 +573,33 @@ export class PersonDAO extends AbstractDAO {
           }
         }
 
+        // hal_login only authenticates the idHAL(s) it was obtained with
+        const idHalsBefore = new Map(
+          existing
+            .filter((row) => isIdHalType(row.type))
+            .map((row) => [row.type, row.value]),
+        )
+        const idHalsAfter = new Map(prune ? [] : idHalsBefore)
+        for (const identifier of identifiers) {
+          if (isIdHalType(identifier.type)) {
+            idHalsAfter.set(identifier.type, identifier.value)
+          }
+        }
+        // Adding an idHAL of the other type keeps the authentication
+        const idHalsUnchanged =
+          idHalsBefore.size > 0 &&
+          [...idHalsBefore].every(
+            ([type, value]) => idHalsAfter.get(type) === value,
+          )
+        if (
+          existingByType.has(PersonIdentifierType.hal_login) &&
+          !idHalsUnchanged
+        ) {
+          await tx.personIdentifier.deleteMany({
+            where: { personId, type: PersonIdentifierType.hal_login },
+          })
+        }
+
         if (!prune) return
 
         const incomingTypes = identifiers.map((identifier) => identifier.type)
@@ -578,16 +609,6 @@ export class PersonDAO extends AbstractDAO {
             type: { notIn: [...incomingTypes, ...LOCAL_ONLY_IDENTIFIER_TYPES] },
           },
         })
-
-        // hal_login only marks an idHAL as authenticated
-        const hasIdHal =
-          incomingTypes.includes(PersonIdentifierType.idhals) ||
-          incomingTypes.includes(PersonIdentifierType.idhali)
-        if (!hasIdHal) {
-          await tx.personIdentifier.deleteMany({
-            where: { personId, type: PersonIdentifierType.hal_login },
-          })
-        }
       })
     } catch (error: unknown) {
       console.error('Error during identifier upsert:', error as Error)

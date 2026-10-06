@@ -985,6 +985,74 @@ describe('PersonDAO Integration Tests', () => {
         PersonIdentifierType.orcid,
       ])
     })
+
+    test('hal_login is removed when the graph changes the idHAL value', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+      await addHalLogin(dbPerson.id)
+
+      await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-durand'),
+        ]),
+        { authoritative: true },
+      )
+
+      expect(await typesOf(dbPerson.id)).toEqual([PersonIdentifierType.idhals])
+    })
+
+    test('hal_login is removed when the graph switches the idHAL type', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+      await addHalLogin(dbPerson.id)
+
+      await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          new PersonIdentifier(PersonIdentifierType.idhali, '123456'),
+        ]),
+        { authoritative: true },
+      )
+
+      expect(await typesOf(dbPerson.id)).toEqual([PersonIdentifierType.idhali])
+    })
+
+    test('hal_login survives when the graph adds an idHAL of the other type', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+      await addHalLogin(dbPerson.id)
+
+      await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          idhals,
+          new PersonIdentifier(PersonIdentifierType.idhali, '123456'),
+        ]),
+        { authoritative: true },
+      )
+
+      expect(await typesOf(dbPerson.id)).toEqual([
+        PersonIdentifierType.hal_login,
+        PersonIdentifierType.idhali,
+        PersonIdentifierType.idhals,
+      ])
+    })
+
+    test('hal_login is removed when a non-authoritative update changes the idHAL value', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+      await addHalLogin(dbPerson.id)
+
+      await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-durand'),
+        ]),
+      )
+
+      expect(await typesOf(dbPerson.id)).toEqual([PersonIdentifierType.idhals])
+    })
   })
 
   test('createIdentifier throws IdentifierConflictError when the type already exists', async () => {
