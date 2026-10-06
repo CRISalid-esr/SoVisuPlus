@@ -56,6 +56,11 @@ const peopleSearchInclude = {
   records: { include: { identifiers: true } },
 } satisfies Prisma.PersonInclude
 
+/** Identifier types written locally and never sent back by the graph. */
+const LOCAL_ONLY_IDENTIFIER_TYPES: PersonIdentifierType[] = [
+  PersonIdentifierType.hal_login,
+]
+
 export class IdentifierConflictError extends Error {
   constructor(message = 'Identifier already exists') {
     super(message)
@@ -130,7 +135,9 @@ export class PersonDAO extends AbstractDAO {
             dbPerson?.id,
           )
 
-          await this.upsertIdentifiers(person.getIdentifiers(), dbPerson.id)
+          await this.upsertIdentifiers(person.getIdentifiers(), dbPerson.id, {
+            prune: authoritative,
+          })
 
           await this.upsertMemberships(
             person.memberships,
@@ -230,7 +237,9 @@ export class PersonDAO extends AbstractDAO {
           person.getIdentifiers(),
           dbPerson.id,
         )
-        await this.upsertIdentifiers(person.getIdentifiers(), dbPerson.id)
+        await this.upsertIdentifiers(person.getIdentifiers(), dbPerson.id, {
+          prune: false,
+        })
 
         return dbPerson
       } catch (error) {
@@ -516,30 +525,69 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Upsert PersonIdentifiers for a given person
+   * Upsert PersonIdentifiers for a given person. Existing rows are updated in
+   * place rather than recreated, so their id and their OrcidIdentifier
+   * extension (OAuth tokens) survive.
    * @param identifiers - The list of identifiers to upsert
    * @param personId - The ID of the person
+   * @param options - `prune: true` when `identifiers` is the person's complete
+   *   set (person AMQP message): identifiers absent from it are deleted, except
+   *   local-only ones, and hal_login is deleted along with the idHAL.
    * @param retries - The number of retries (to handle conflicts on upsert)
    */
   private async upsertIdentifiers(
     identifiers: PersonIdentifier[],
     personId: number,
+    { prune }: { prune: boolean },
     retries = 0,
   ): Promise<void> {
-    // Remove old identifiers
     try {
-      await this.prismaClient.personIdentifier.deleteMany({
-        where: { personId },
-      })
+      await this.prismaClient.$transaction(async (tx) => {
+        const existing = await tx.personIdentifier.findMany({
+          where: { personId },
+          select: { id: true, type: true, value: true },
+        })
+        const existingByType = new Map(existing.map((row) => [row.type, row]))
 
-      // Insert new identifiers
+        for (const identifier of identifiers) {
+          const current = existingByType.get(identifier.type)
+          if (!current) {
+            await tx.personIdentifier.create({
+              data: {
+                personId,
+                type: identifier.type,
+                value: identifier.value,
+              },
+            })
+          } else if (current.value !== identifier.value) {
+            // OAuth tokens belong to the previous ORCID iD
+            await tx.orcidIdentifier.deleteMany({ where: { id: current.id } })
+            await tx.personIdentifier.update({
+              where: { id: current.id },
+              data: { value: identifier.value },
+            })
+          }
+        }
 
-      await this.prismaClient.personIdentifier.createMany({
-        data: identifiers.map((identifier) => ({
-          personId,
-          type: identifier.type as PersonIdentifierType,
-          value: identifier.value,
-        })),
+        if (!prune) return
+
+        const incomingTypes = identifiers.map((identifier) => identifier.type)
+        await tx.personIdentifier.deleteMany({
+          where: {
+            personId,
+            type: { notIn: [...incomingTypes, ...LOCAL_ONLY_IDENTIFIER_TYPES] },
+          },
+        })
+
+        // hal_login only marks an idHAL as authenticated
+        const hasIdHal =
+          incomingTypes.includes(PersonIdentifierType.idhals) ||
+          incomingTypes.includes(PersonIdentifierType.idhali)
+        if (!hasIdHal) {
+          await tx.personIdentifier.deleteMany({
+            where: { personId, type: PersonIdentifierType.hal_login },
+          })
+        }
       })
     } catch (error: unknown) {
       console.error('Error during identifier upsert:', error as Error)
@@ -549,7 +597,12 @@ export class PersonDAO extends AbstractDAO {
       ) {
         if (retries < 3) {
           console.warn('Retrying identifier upsert...')
-          await this.upsertIdentifiers(identifiers, personId, retries + 1)
+          await this.upsertIdentifiers(
+            identifiers,
+            personId,
+            { prune },
+            retries + 1,
+          )
         } else {
           console.error('Failed to upsert identifiers after 3 retries')
         }
@@ -616,6 +669,61 @@ export class PersonDAO extends AbstractDAO {
 
       throw new Error(
         `Failed to upsert identifier: ${(error as Error).message}`,
+      )
+    }
+  }
+
+  /**
+   * Upsert an idHAL and its companion hal_login in a single transaction, so an
+   * interruption can never leave one without the other.
+   * @param personUid - The UID of the person
+   * @param idHal - The idHAL identifier (idhals or idhali)
+   * @param halLogin - The HAL account login
+   */
+  public async upsertHalIdentifiers(
+    personUid: string,
+    idHal: PersonIdentifier,
+    halLogin: string,
+  ): Promise<void> {
+    if (
+      idHal.type !== PersonIdentifierType.idhals &&
+      idHal.type !== PersonIdentifierType.idhali
+    ) {
+      throw new Error(
+        `upsertHalIdentifiers called with non-idHAL identifier type: ${idHal.type}`,
+      )
+    }
+
+    const person = await this.prismaClient.person.findUnique({
+      where: { uid: personUid },
+      select: { id: true },
+    })
+    if (!person) {
+      throw new Error(`Person with UID ${personUid} not found`)
+    }
+    const personId = person.id
+
+    const identifiers = [
+      new PersonIdentifier(PersonIdentifierType.hal_login, halLogin),
+      idHal,
+    ]
+    try {
+      await this.prismaClient.$transaction(async (tx) => {
+        for (const identifier of identifiers) {
+          await tx.personIdentifier.upsert({
+            where: { personId_type: { personId, type: identifier.type } },
+            update: { value: identifier.value },
+            create: {
+              personId,
+              type: identifier.type,
+              value: identifier.value,
+            },
+          })
+        }
+      })
+    } catch (error) {
+      throw new Error(
+        `Failed to upsert HAL identifiers: ${(error as Error).message}`,
       )
     }
   }

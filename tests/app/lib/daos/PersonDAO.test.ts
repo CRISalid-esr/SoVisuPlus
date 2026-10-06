@@ -642,7 +642,7 @@ describe('PersonDAO Integration Tests', () => {
     )
   })
 
-  test('should remove old identifiers and add new ones for the same person', async () => {
+  test('an authoritative update removes old identifiers and adds new ones', async () => {
     const initialPerson = await prisma.person.create({
       data: {
         uid: person.uid,
@@ -668,7 +668,9 @@ describe('PersonDAO Integration Tests', () => {
       new PersonIdentifier(PersonIdentifierType.idref, 'AB-1234-5678'),
     ])
 
-    const updatedPerson = await personDAO.createOrUpdatePerson(newPersonData)
+    const updatedPerson = await personDAO.createOrUpdatePerson(newPersonData, {
+      authoritative: true,
+    })
 
     const updatedIdentifiers = await prisma.personIdentifier.findMany({
       where: { personId: updatedPerson.id },
@@ -771,6 +773,218 @@ describe('PersonDAO Integration Tests', () => {
       where: { personId: dbPerson.id },
     })
     expect(remaining).toHaveLength(0)
+  })
+
+  describe('upsertHalIdentifiers', () => {
+    test('writes the idHAL and its hal_login', async () => {
+      const dbPerson = await prisma.person.create({
+        data: { uid: 'local-halupsert', email: 'halupsert@example.com' },
+      })
+
+      await personDAO.upsertHalIdentifiers(
+        dbPerson.uid,
+        new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-dupont'),
+        'jdupont',
+      )
+
+      const rows = await prisma.personIdentifier.findMany({
+        where: { personId: dbPerson.id },
+        orderBy: { type: 'asc' },
+      })
+      expect(rows.map((row) => [row.type, row.value])).toEqual([
+        [PersonIdentifierType.hal_login, 'jdupont'],
+        [PersonIdentifierType.idhals, 'jacques-dupont'],
+      ])
+    })
+
+    test('writes nothing when the idHAL cannot be stored', async () => {
+      await prisma.person.create({
+        data: {
+          uid: 'local-halowner',
+          email: 'halowner@example.com',
+          identifiers: {
+            create: {
+              type: PersonIdentifierType.idhals,
+              value: 'jacques-dupont',
+            },
+          },
+        },
+      })
+      const dbPerson = await prisma.person.create({
+        data: { uid: 'local-halrollback', email: 'halrollback@example.com' },
+      })
+
+      await expect(
+        personDAO.upsertHalIdentifiers(
+          dbPerson.uid,
+          new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-dupont'),
+          'jdupont',
+        ),
+      ).rejects.toThrow('Failed to upsert HAL identifiers')
+
+      expect(
+        await prisma.personIdentifier.findMany({
+          where: { personId: dbPerson.id },
+        }),
+      ).toHaveLength(0)
+    })
+  })
+
+  describe('createOrUpdatePerson identifiers', () => {
+    const makeIdentifiedPerson = (identifiers: PersonIdentifier[]): Person =>
+      new Person(
+        'local-identifiers',
+        false,
+        'identifiers@example.com',
+        'Id Person',
+        'Id',
+        'Person',
+        identifiers,
+      )
+
+    const idhals = new PersonIdentifier(
+      PersonIdentifierType.idhals,
+      'jacques-dupont',
+    )
+    const orcid = new PersonIdentifier(
+      PersonIdentifierType.orcid,
+      '0000-0001-2345-6789',
+    )
+
+    const typesOf = async (personId: number) =>
+      (
+        await prisma.personIdentifier.findMany({
+          where: { personId },
+          select: { type: true },
+        })
+      )
+        .map((row) => row.type)
+        .sort()
+
+    const addHalLogin = (personId: number) =>
+      prisma.personIdentifier.create({
+        data: {
+          personId,
+          type: PersonIdentifierType.hal_login,
+          value: 'jdupont',
+        },
+      })
+
+    const addOrcidExtension = async (personId: number) => {
+      const row = await prisma.personIdentifier.findFirstOrThrow({
+        where: { personId, type: PersonIdentifierType.orcid },
+      })
+      await prisma.orcidIdentifier.create({
+        data: {
+          id: row.id,
+          accessToken: 'a',
+          refreshToken: 'r',
+          scope: 's',
+          expiresAt: new Date(),
+        },
+      })
+      return row.id
+    }
+
+    test('hal_login survives an authoritative update that keeps the idHAL', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+      await addHalLogin(dbPerson.id)
+
+      await personDAO.createOrUpdatePerson(makeIdentifiedPerson([idhals]), {
+        authoritative: true,
+      })
+
+      expect(await typesOf(dbPerson.id)).toEqual([
+        PersonIdentifierType.hal_login,
+        PersonIdentifierType.idhals,
+      ])
+    })
+
+    test('hal_login is removed when the graph no longer sends an idHAL', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals, orcid]),
+      )
+      await addHalLogin(dbPerson.id)
+
+      await personDAO.createOrUpdatePerson(makeIdentifiedPerson([orcid]), {
+        authoritative: true,
+      })
+
+      expect(await typesOf(dbPerson.id)).toEqual([PersonIdentifierType.orcid])
+    })
+
+    test('the ORCID OAuth extension survives when the ORCID value is unchanged', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([orcid]),
+      )
+      const orcidRowId = await addOrcidExtension(dbPerson.id)
+
+      await personDAO.createOrUpdatePerson(makeIdentifiedPerson([orcid]), {
+        authoritative: true,
+      })
+
+      const row = await prisma.personIdentifier.findFirstOrThrow({
+        where: { personId: dbPerson.id, type: PersonIdentifierType.orcid },
+      })
+      expect(row.id).toBe(orcidRowId)
+      expect(
+        await prisma.orcidIdentifier.findUnique({ where: { id: orcidRowId } }),
+      ).not.toBeNull()
+    })
+
+    test('the ORCID OAuth extension is dropped when the ORCID value changes', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([orcid]),
+      )
+      const orcidRowId = await addOrcidExtension(dbPerson.id)
+
+      await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          new PersonIdentifier(
+            PersonIdentifierType.orcid,
+            '0000-0002-0000-0000',
+          ),
+        ]),
+        { authoritative: true },
+      )
+
+      const row = await prisma.personIdentifier.findFirstOrThrow({
+        where: { personId: dbPerson.id, type: PersonIdentifierType.orcid },
+      })
+      expect(row.value).toBe('0000-0002-0000-0000')
+      expect(
+        await prisma.orcidIdentifier.findUnique({ where: { id: orcidRowId } }),
+      ).toBeNull()
+    })
+
+    test('an authoritative update deletes identifiers absent from the graph', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals, orcid]),
+      )
+
+      await personDAO.createOrUpdatePerson(makeIdentifiedPerson([orcid]), {
+        authoritative: true,
+      })
+
+      expect(await typesOf(dbPerson.id)).toEqual([PersonIdentifierType.orcid])
+    })
+
+    test('a non-authoritative update keeps identifiers absent from the data', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals, orcid]),
+      )
+      await addHalLogin(dbPerson.id)
+
+      await personDAO.createOrUpdatePerson(makeIdentifiedPerson([orcid]))
+
+      expect(await typesOf(dbPerson.id)).toEqual([
+        PersonIdentifierType.hal_login,
+        PersonIdentifierType.idhals,
+        PersonIdentifierType.orcid,
+      ])
+    })
   })
 
   test('createIdentifier throws IdentifierConflictError when the type already exists', async () => {
