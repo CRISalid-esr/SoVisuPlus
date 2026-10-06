@@ -151,12 +151,8 @@ export class PersonService {
         (await this.personDAO.findIdentifierValue(personUid, type)) !== null
 
       // hal_login is written silently (no Action / no outgoing message).
-      await this.personDAO.upsertIdentifier(
-        new PersonIdentifier(PersonIdentifierType.hal_login, halLogin),
-        personUid,
-      )
       const identifier = new PersonIdentifier(type, value)
-      await this.personDAO.upsertIdentifier(identifier, personUid)
+      await this.personDAO.upsertHalIdentifiers(personUid, identifier, halLogin)
 
       const payload: IdentifierMessagePayload = {
         ...identifier.toJson(),

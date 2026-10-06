@@ -9,6 +9,7 @@ import { IdentifierConflictError } from '@/lib/daos/PersonDAO'
 
 const mockCreateIdentifier = jest.fn()
 const mockUpsertIdentifier = jest.fn()
+const mockUpsertHalIdentifiers = jest.fn()
 const mockUpsertOrcidExt = jest.fn()
 const mockFindIdentifierValue = jest.fn()
 const mockDeleteIdentifier = jest.fn()
@@ -26,6 +27,7 @@ jest.mock('@/lib/daos/PersonDAO', () => {
     PersonDAO: jest.fn().mockImplementation(() => ({
       createIdentifier: mockCreateIdentifier,
       upsertIdentifier: mockUpsertIdentifier,
+      upsertHalIdentifiers: mockUpsertHalIdentifiers,
       upsertOrcidIdentifierExtension: mockUpsertOrcidExt,
       findIdentifierValue: mockFindIdentifierValue,
       deleteIdentifier: mockDeleteIdentifier,
@@ -134,7 +136,6 @@ describe('PersonService identifier operations', () => {
   describe('authenticateHalIdentifier', () => {
     it('writes hal_login silently and emits a single ADD for the idHAL', async () => {
       mockFindIdentifierValue.mockResolvedValue(null)
-      mockUpsertIdentifier.mockResolvedValue({ id: 1 })
 
       await service.authenticateHalIdentifier('p1', {
         type: PersonIdentifierType.idhals,
@@ -142,8 +143,12 @@ describe('PersonService identifier operations', () => {
         halLogin: 'jdoe',
       })
 
-      // hal_login + idHAL upserted
-      expect(mockUpsertIdentifier).toHaveBeenCalledTimes(2)
+      // hal_login + idHAL upserted together
+      expect(mockUpsertHalIdentifiers).toHaveBeenCalledWith(
+        'p1',
+        new PersonIdentifier(PersonIdentifierType.idhals, 'john-doe'),
+        'jdoe',
+      )
       // but only ONE outgoing message, for the idHAL (hal_login is silent)
       expect(mockCreateAction).toHaveBeenCalledTimes(1)
       expect(mockCreateAction).toHaveBeenCalledWith(
@@ -162,7 +167,6 @@ describe('PersonService identifier operations', () => {
 
     it('emits UPDATE when the idHAL already existed', async () => {
       mockFindIdentifierValue.mockResolvedValue('john-doe')
-      mockUpsertIdentifier.mockResolvedValue({ id: 1 })
 
       await service.authenticateHalIdentifier('p1', {
         type: PersonIdentifierType.idhals,
