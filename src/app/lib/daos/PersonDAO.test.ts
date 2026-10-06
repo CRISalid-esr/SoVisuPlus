@@ -49,11 +49,14 @@ jest.mock('@prisma/client', () => {
       findMany: jest.fn(),
       deleteMany: jest.fn(),
       createMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
       findUnique: jest.fn(),
       upsert: jest.fn(),
     },
     orcidIdentifier: {
       upsert: jest.fn(),
+      deleteMany: jest.fn(),
     },
     membership: {
       upsert: jest.fn(),
@@ -156,23 +159,50 @@ describe('PersonDAO', () => {
     )
   })
 
-  it('should call deleteMany and createMany for upsertIdentifiers', async () => {
+  it('should create identifiers missing from the database', async () => {
     ;(mockPrisma.personIdentifier.findMany as jest.Mock).mockResolvedValue([])
 
     await personDAO.createOrUpdatePerson(person)
 
-    expect(mockPrisma.personIdentifier.deleteMany).toHaveBeenCalledWith({
-      where: { personId: expect.any(Number) },
+    expect(mockPrisma.personIdentifier.create).toHaveBeenCalledWith({
+      data: {
+        personId: expect.any(Number),
+        type: 'orcid',
+        value: '0000-0001-2345-6789',
+      },
     })
+    expect(mockPrisma.personIdentifier.update).not.toHaveBeenCalled()
+  })
 
-    expect(mockPrisma.personIdentifier.createMany).toHaveBeenCalledWith({
-      data: [
-        {
-          personId: expect.any(Number),
-          type: 'orcid',
-          value: '0000-0001-2345-6789',
-        },
-      ],
+  it('should keep an unchanged identifier row in place', async () => {
+    ;(mockPrisma.personIdentifier.findMany as jest.Mock)
+      .mockResolvedValueOnce([]) // identifier conflict check
+      .mockResolvedValueOnce([
+        { id: 7, type: 'orcid', value: '0000-0001-2345-6789' },
+      ])
+
+    await personDAO.createOrUpdatePerson(person, { authoritative: true })
+
+    expect(mockPrisma.personIdentifier.create).not.toHaveBeenCalled()
+    expect(mockPrisma.personIdentifier.update).not.toHaveBeenCalled()
+    expect(mockPrisma.orcidIdentifier.deleteMany).not.toHaveBeenCalled()
+  })
+
+  it('should update a changed identifier and drop its ORCID extension', async () => {
+    ;(mockPrisma.personIdentifier.findMany as jest.Mock)
+      .mockResolvedValueOnce([]) // identifier conflict check
+      .mockResolvedValueOnce([
+        { id: 7, type: 'orcid', value: '0000-0002-0000-0000' },
+      ])
+
+    await personDAO.createOrUpdatePerson(person)
+
+    expect(mockPrisma.orcidIdentifier.deleteMany).toHaveBeenCalledWith({
+      where: { id: 7 },
+    })
+    expect(mockPrisma.personIdentifier.update).toHaveBeenCalledWith({
+      where: { id: 7 },
+      data: { value: '0000-0001-2345-6789' },
     })
   })
 
