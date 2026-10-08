@@ -5,6 +5,7 @@ import { Concept } from '@/types/Concept'
 import { Journal } from '@/types/Journal'
 import { Contribution } from '@/types/Contribution'
 import { halTypologyForDocumentType } from '@/lib/services/hal/halDepositFormConfig'
+import { PublicationIdentifierType } from '@prisma/client'
 import xpath from 'xpath'
 
 /** A file to reference in the TEI `editionStmt/edition` (codes already resolved by the caller). */
@@ -199,6 +200,9 @@ export class HalTEIInterchangeService {
     // alongside the datePub already produced above.
     if ((halCode === 'THESE' || halCode === 'HDR') && date)
       this.patchDefenseDate(dom, date)
+
+    const doi = this.resolveDoi(document)
+    if (doi) this.patchDoi(dom, doi)
 
     if (options.localRef) this.patchLocalRef(dom, options.localRef)
     if (options.files?.length) this.patchFiles(dom, options.files)
@@ -418,9 +422,7 @@ export class HalTEIInterchangeService {
     const terms: { lang: string; value: string }[] = []
     for (const subject of subjects) {
       const pref = (lang: string) =>
-        subject.prefLabels.find(
-          (l) => l.language === lang && l.value?.trim(),
-        )
+        subject.prefLabels.find((l) => l.language === lang && l.value?.trim())
       const fr = pref('fr')
       const en = pref('en')
       if (isThesis) {
@@ -597,8 +599,7 @@ export class HalTEIInterchangeService {
     >,
   ): void {
     const textEl = xpath.select1("//*[local-name()='text']", dom) as
-      | Element
-      | undefined
+      Element | undefined
     if (!textEl) return
 
     const back = this.createElement(dom, 'back')
@@ -657,6 +658,43 @@ export class HalTEIInterchangeService {
     const language = this.createElement(dom, 'language')
     language.setAttribute('ident', lang)
     langUsage.appendChild(language)
+  }
+
+  /**
+   * The document DOI, taken from its records and normalised to the bare `10.xxxx/…` form HAL
+   * expects. Returns null when no record has one or when records disagree.
+   */
+  private resolveDoi(document: DocumentClass): string | null {
+    const dois = new Map<string, string>()
+    for (const record of document.records ?? []) {
+      for (const identifier of record.identifiers) {
+        if (identifier.type !== PublicationIdentifierType.doi) continue
+        const doi = (identifier.value ?? '')
+          .trim()
+          .replace(/^(https?:\/\/(dx\.)?doi\.org\/|doi:)/i, '')
+          .trim()
+        if (doi) dois.set(doi.toLowerCase(), doi)
+      }
+    }
+    return dois.size === 1 ? [...dois.values()][0] : null
+  }
+
+  /**
+   * Emit the DOI as `biblStruct/idno[@type="doi"]`. The AOfr schema orders biblStruct children
+   * as analytic, monogr, series, idno, ref, relatedItem.
+   */
+  private patchDoi(dom: Document, doi: string): void {
+    const biblStruct = xpath.select1("//*[local-name()='biblStruct']", dom) as
+      Element | undefined
+    if (!biblStruct) return
+    const idno = this.createElement(dom, 'idno')
+    idno.setAttribute('type', 'doi')
+    this.setText(idno, doi)
+    const nextSibling = xpath.select1(
+      "./*[local-name()='ref' or local-name()='relatedItem']",
+      biblStruct,
+    ) as Node | undefined
+    biblStruct.insertBefore(idno, nextSibling ?? null)
   }
 
   /**
@@ -945,8 +983,7 @@ export class HalTEIInterchangeService {
   ): void {
     const monogr = this.ensureMonogr(dom)
     let meeting = xpath.select1("./*[local-name()='meeting']", monogr) as
-      | Element
-      | undefined
+      Element | undefined
     if (!meeting) {
       meeting = this.createElement(dom, 'meeting')
       this.insertMonogrChild(monogr, meeting)
@@ -1076,8 +1113,7 @@ export class HalTEIInterchangeService {
     if (found) return found
 
     const biblFull = xpath.select1("//*[local-name()='biblFull']", dom) as
-      | Element
-      | undefined
+      Element | undefined
     const el = create()
     if (biblFull) biblFull.appendChild(el)
     return el

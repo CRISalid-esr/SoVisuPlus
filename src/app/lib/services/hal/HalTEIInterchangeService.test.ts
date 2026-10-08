@@ -11,7 +11,10 @@ import { Contribution } from '@/types/Contribution'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
 import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
 import { Person } from '@/types/Person'
-import { DocumentState } from '@prisma/client'
+import { DocumentRecord } from '@/types/DocumentRecord'
+import { PublicationIdentifier } from '@/types/PublicationIdentifier'
+import { BibliographicPlatform } from '@/types/BibliographicPlatform'
+import { DocumentState, PublicationIdentifierType } from '@prisma/client'
 
 const readFixture = (name: string): string => {
   const p = path.join(__dirname, '__fixtures__', name)
@@ -634,6 +637,74 @@ describe('HalTEIInterchangeService', () => {
       expect(edition).toBeGreaterThan(-1)
       expect(publication).toBeGreaterThan(edition)
       expect(source).toBeGreaterThan(publication)
+    })
+
+    describe('DOI', () => {
+      const makeRecord = (uid: string, ...dois: string[]): DocumentRecord =>
+        new DocumentRecord(
+          uid,
+          uid,
+          dois.map(
+            (doi) =>
+              new PublicationIdentifier(PublicationIdentifierType.doi, doi),
+          ),
+          [],
+          [],
+          null,
+          BibliographicPlatform.HAL,
+          [],
+        )
+
+      const docWithRecords = (...records: DocumentRecord[]): DocumentClass => {
+        const doc = makeDoc(DocumentType.Article)
+        doc.records = records
+        return doc
+      }
+
+      it('emits the DOI as biblStruct/idno after monogr', () => {
+        const out = service.toHalTEI(
+          docWithRecords(makeRecord('r-1', '10.1234/abc')),
+        )
+        const idno = out.indexOf('<idno type="doi">10.1234/abc</idno>')
+        expect(idno).toBeGreaterThan(out.indexOf('</monogr>'))
+        expect(idno).toBeLessThan(out.indexOf('</biblStruct>'))
+      })
+
+      it('strips the doi.org URL prefix', () => {
+        const out = service.toHalTEI(
+          docWithRecords(makeRecord('r-1', 'https://doi.org/10.1234/abc')),
+        )
+        expect(out).toContain('<idno type="doi">10.1234/abc</idno>')
+      })
+
+      it('emits a single idno when records share a DOI in different cases', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeRecord('r-1', '10.1234/ABC'),
+            makeRecord('r-2', '10.1234/abc'),
+          ),
+        )
+        expect(out.match(/<idno type="doi">/g)).toHaveLength(1)
+      })
+
+      it('emits no DOI when records disagree', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeRecord('r-1', '10.1234/abc'),
+            makeRecord('r-2', '10.5678/def'),
+          ),
+        )
+        expect(out).not.toContain('type="doi"')
+      })
+
+      it('leaves the TEI unchanged when there is no DOI', () => {
+        const withoutRecords = service.toHalTEI(makeDoc(DocumentType.Article))
+        const withRecordWithoutDoi = service.toHalTEI(
+          docWithRecords(makeRecord('r-1')),
+        )
+        expect(withRecordWithoutDoi).toBe(withoutRecords)
+        expect(withoutRecords).not.toContain('type="doi"')
+      })
     })
   })
 })
