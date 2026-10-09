@@ -783,25 +783,19 @@ export class HalTEIInterchangeService {
   }
 
   /**
-   * Emit the document's internal UID as `<idno type="localRef">` so a later HAL harvest can be
-   * matched back to this document.
-   * NOTE: exact placement to confirm against a real preprod deposit (spec open item); HAL is
-   * expected to preserve and surface this localRef.
+   * Emit the document's internal UID as `monogr/idno[@type="localRef"]` so a later HAL harvest can
+   * be matched back to this document. HAL ignores a localRef placed anywhere else.
    */
   private patchLocalRef(dom: Document, localRef: string): void {
-    const pubStmt = this.ensureElement(
-      dom,
-      "//*[local-name()='biblFull']/*[local-name()='publicationStmt']",
-      () => this.createElement(dom, 'publicationStmt'),
-    )
+    const monogr = this.ensureMonogr(dom)
     this.removeAllWithin(
-      pubStmt,
+      monogr,
       "./*[local-name()='idno' and @type='localRef']",
     )
     const idno = this.createElement(dom, 'idno')
     idno.setAttribute('type', 'localRef')
-    idno.appendChild(dom.createTextNode(localRef))
-    pubStmt.appendChild(idno)
+    this.setText(idno, localRef)
+    this.insertMonogrChild(monogr, idno)
   }
 
   /**

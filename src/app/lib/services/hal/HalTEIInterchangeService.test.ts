@@ -479,12 +479,13 @@ describe('HalTEIInterchangeService', () => {
       }
     })
 
-    it('injects the document UID as <idno type="localRef">', () => {
+    it('injects the document UID as monogr/idno[@type="localRef"]', () => {
       const out = service.toHalTEI(makeDoc(DocumentType.Article), {
         localRef: 'doc-1',
       })
-      expect(out).toContain('type="localRef"')
-      expect(out).toContain('doc-1')
+      expect(out).toMatch(/<monogr>\s*<idno type="localRef">doc-1<\/idno>/)
+      expect(out.match(/type="localRef"/g)).toHaveLength(1)
+      expect(out).not.toContain('publicationStmt')
     })
 
     it('emits a <ref> per file with type/subtype/target/n and an embargo date', () => {
@@ -626,7 +627,7 @@ describe('HalTEIInterchangeService', () => {
 
     it('keeps biblFull child order: editionStmt before publicationStmt before sourceDesc', () => {
       const out = service.toHalTEI(makeDoc(DocumentType.Article), {
-        localRef: 'doc-1',
+        licenceTarget: 'https://creativecommons.org/licenses/by/4.0/',
         files: [
           { fileName: 'doc.pdf', fileType: 'file', fileSource: 'author', n: 1 },
         ],
@@ -778,6 +779,20 @@ describe('HalTEIInterchangeService', () => {
         )
         expect(out).toMatch(/<monogr>\s*<idno type="nnt">2019PA01E012<\/idno>/)
         expect(out.match(/type="nnt"/g)).toHaveLength(1)
+      })
+
+      it('emits the localRef after the NNT in monogr', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.nnt, '2019PA01E012'],
+            ]),
+          ),
+          { halDocumentType: 'THESE', localRef: 'doc-1' },
+        )
+        expect(out).toContain(
+          '<idno type="nnt">2019PA01E012</idno><idno type="localRef">doc-1</idno>',
+        )
       })
 
       it('does not emit the NNT for a non-thesis document', () => {
