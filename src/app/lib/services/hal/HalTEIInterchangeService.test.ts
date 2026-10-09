@@ -767,6 +767,46 @@ describe('HalTEIInterchangeService', () => {
         expect(out).toContain('<idno type="ppn">249912139</idno>')
       })
 
+      it('emits the NNT in monogr for a thesis, never in biblStruct', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.nnt, '2019PA01E012'],
+            ]),
+          ),
+          { halDocumentType: 'THESE' },
+        )
+        expect(out).toMatch(/<monogr>\s*<idno type="nnt">2019PA01E012<\/idno>/)
+        expect(out.match(/type="nnt"/g)).toHaveLength(1)
+      })
+
+      it('does not emit the NNT for a non-thesis document', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.nnt, '2019PA01E012'],
+            ]),
+          ),
+          { halDocumentType: 'ART' },
+        )
+        expect(out).not.toContain('type="nnt"')
+      })
+
+      it('does not emit the NNT when records disagree', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.nnt, '2019PA01E012'],
+            ]),
+            makeTypedRecord('r-2', [
+              [PublicationIdentifierType.nnt, '2020PA01E034'],
+            ]),
+          ),
+          { halDocumentType: 'THESE' },
+        )
+        expect(out).not.toContain('type="nnt"')
+      })
+
       it('emits a PubMed id as pubmed', () => {
         const out = service.toHalTEI(
           docWithRecords(

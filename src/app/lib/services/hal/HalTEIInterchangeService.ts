@@ -201,10 +201,10 @@ export class HalTEIInterchangeService {
     if ((halCode === 'THESE' || halCode === 'HDR') && date)
       this.patchDefenseDate(dom, date)
 
-    this.patchPublicationIdentifiers(
-      dom,
-      this.resolvePublicationIdentifiers(document),
-    )
+    const identifiers = this.resolvePublicationIdentifiers(document)
+    this.patchPublicationIdentifiers(dom, identifiers)
+    const nnt = identifiers.get(PublicationIdentifierType.nnt)
+    if (halCode === 'THESE' && nnt) this.patchNnt(dom, nnt)
 
     if (options.localRef) this.patchLocalRef(dom, options.localRef)
     if (options.files?.length) this.patchFiles(dom, options.files)
@@ -714,19 +714,22 @@ export class HalTEIInterchangeService {
   })
 
   /**
-   * The document's publication identifiers, taken from its records and normalised. A type whose
-   * records disagree (several distinct values) is left out.
+   * The document's publication identifiers sent to HAL (biblStruct types and nnt), taken from its
+   * records and normalised. A type whose records disagree (several distinct values) is left out.
    */
   private resolvePublicationIdentifiers(
     document: DocumentClass,
-  ): { type: string; value: string }[] {
+  ): Map<PublicationIdentifierType, string> {
     const valuesByType = new Map<
       PublicationIdentifierType,
       Map<string, string>
     >()
     for (const record of document.records ?? []) {
       for (const identifier of record.identifiers) {
-        if (!HalTEIInterchangeService.BIBL_STRUCT_IDNO_TYPES[identifier.type])
+        if (
+          !HalTEIInterchangeService.BIBL_STRUCT_IDNO_TYPES[identifier.type] &&
+          identifier.type !== PublicationIdentifierType.nnt
+        )
           continue
         const prefix =
           HalTEIInterchangeService.IDENTIFIER_PREFIXES[identifier.type]
@@ -742,14 +745,11 @@ export class HalTEIInterchangeService {
         valuesByType.set(identifier.type, values)
       }
     }
-    return Object.entries(HalTEIInterchangeService.BIBL_STRUCT_IDNO_TYPES)
-      .map(([type, halType]) => {
-        const values = valuesByType.get(type as PublicationIdentifierType)
-        return values?.size === 1
-          ? { type: halType as string, value: [...values.values()][0] }
-          : null
-      })
-      .filter((x): x is { type: string; value: string } => x !== null)
+    const resolved = new Map<PublicationIdentifierType, string>()
+    for (const [type, values] of valuesByType) {
+      if (values.size === 1) resolved.set(type, [...values.values()][0])
+    }
+    return resolved
   }
 
   /**
@@ -758,9 +758,15 @@ export class HalTEIInterchangeService {
    */
   private patchPublicationIdentifiers(
     dom: Document,
-    identifiers: { type: string; value: string }[],
+    identifiers: Map<PublicationIdentifierType, string>,
   ): void {
-    if (identifiers.length === 0) return
+    const idnos = Object.entries(
+      HalTEIInterchangeService.BIBL_STRUCT_IDNO_TYPES,
+    ).flatMap(([type, halType]) => {
+      const value = identifiers.get(type as PublicationIdentifierType)
+      return value && halType ? [{ type: halType, value }] : []
+    })
+    if (idnos.length === 0) return
     const biblStruct = xpath.select1("//*[local-name()='biblStruct']", dom) as
       Element | undefined
     if (!biblStruct) return
@@ -768,7 +774,7 @@ export class HalTEIInterchangeService {
       "./*[local-name()='ref' or local-name()='relatedItem']",
       biblStruct,
     ) as Node | undefined
-    for (const { type, value } of identifiers) {
+    for (const { type, value } of idnos) {
       const idno = this.createElement(dom, 'idno')
       idno.setAttribute('type', type)
       this.setText(idno, value)
@@ -1102,6 +1108,15 @@ export class HalTEIInterchangeService {
     authority.setAttribute('type', type)
     this.setText(authority, content)
     this.insertMonogrChild(monogr, authority)
+  }
+
+  /** THESE national thesis number → `monogr/idno[@type="nnt"]`. */
+  private patchNnt(dom: Document, nnt: string): void {
+    const monogr = this.ensureMonogr(dom)
+    const idno = this.createElement(dom, 'idno')
+    idno.setAttribute('type', 'nnt')
+    this.setText(idno, nnt)
+    this.insertMonogrChild(monogr, idno)
   }
 
   /** THESE/HDR defense date → a second `monogr/imprint/date[@type="dateDefended"]`. */
