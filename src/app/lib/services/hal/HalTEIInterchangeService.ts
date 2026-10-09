@@ -201,8 +201,10 @@ export class HalTEIInterchangeService {
     if ((halCode === 'THESE' || halCode === 'HDR') && date)
       this.patchDefenseDate(dom, date)
 
-    const doi = this.resolveDoi(document)
-    if (doi) this.patchDoi(dom, doi)
+    this.patchPublicationIdentifiers(
+      dom,
+      this.resolvePublicationIdentifiers(document),
+    )
 
     if (options.localRef) this.patchLocalRef(dom, options.localRef)
     if (options.files?.length) this.patchFiles(dom, options.files)
@@ -661,40 +663,114 @@ export class HalTEIInterchangeService {
   }
 
   /**
-   * The document DOI, taken from its records and normalised to the bare `10.xxxx/…` form HAL
-   * expects. Returns null when no record has one or when records disagree.
+   * Publication identifier types sent as `biblStruct/idno`, keyed by SoVisu+ type, valued by the
+   * HAL TEI `@type`. Types without a HAL counterpart are left out.
    */
-  private resolveDoi(document: DocumentClass): string | null {
-    const dois = new Map<string, string>()
+  private static readonly BIBL_STRUCT_IDNO_TYPES: Readonly<
+    Partial<Record<PublicationIdentifierType, string>>
+  > = Object.freeze({
+    [PublicationIdentifierType.doi]: 'doi',
+    [PublicationIdentifierType.arxiv]: 'arxiv',
+    [PublicationIdentifierType.bibcode]: 'bibcode',
+    [PublicationIdentifierType.biorxiv]: 'biorxiv',
+    [PublicationIdentifierType.cern]: 'cern',
+    [PublicationIdentifierType.chemrxiv]: 'chemrxiv',
+    [PublicationIdentifierType.ensam]: 'ensam',
+    [PublicationIdentifierType.ineris]: 'ineris',
+    [PublicationIdentifierType.inspire]: 'inspire',
+    [PublicationIdentifierType.ird]: 'ird',
+    [PublicationIdentifierType.irstea]: 'irstea',
+    [PublicationIdentifierType.meditagri]: 'meditagri',
+    [PublicationIdentifierType.oatao]: 'oatao',
+    [PublicationIdentifierType.okina]: 'okina',
+    [PublicationIdentifierType.prodinra]: 'prodinra',
+    [PublicationIdentifierType.pubmed]: 'pubmed',
+    [PublicationIdentifierType.pubmedcentral]: 'pubmedcentral',
+    [PublicationIdentifierType.sciencespo]: 'sciencespo',
+    [PublicationIdentifierType.swhid]: 'swhid',
+    [PublicationIdentifierType.wos]: 'wos',
+  })
+
+  /** URL / scheme prefixes stripped so that the bare identifier is sent to HAL. */
+  private static readonly IDENTIFIER_PREFIXES: Readonly<
+    Partial<Record<PublicationIdentifierType, RegExp>>
+  > = Object.freeze({
+    [PublicationIdentifierType.doi]: /^(https?:\/\/(dx\.)?doi\.org\/|doi:)/i,
+    [PublicationIdentifierType.arxiv]:
+      /^(https?:\/\/arxiv\.org\/abs\/|arxiv:)/i,
+    [PublicationIdentifierType.pubmed]:
+      /^https?:\/\/pubmed\.ncbi\.nlm\.nih\.gov\//i,
+  })
+
+  /** Trailing suffixes stripped so that the bare identifier is sent to HAL (the SWORD rejects the ChemRxiv `/vX` version marker). */
+  private static readonly IDENTIFIER_SUFFIXES: Readonly<
+    Partial<Record<PublicationIdentifierType, RegExp>>
+  > = Object.freeze({
+    [PublicationIdentifierType.chemrxiv]: /\/v\d+$/i,
+    [PublicationIdentifierType.pubmed]: /\/$/,
+  })
+
+  /**
+   * The document's publication identifiers, taken from its records and normalised. A type whose
+   * records disagree (several distinct values) is left out.
+   */
+  private resolvePublicationIdentifiers(
+    document: DocumentClass,
+  ): { type: string; value: string }[] {
+    const valuesByType = new Map<
+      PublicationIdentifierType,
+      Map<string, string>
+    >()
     for (const record of document.records ?? []) {
       for (const identifier of record.identifiers) {
-        if (identifier.type !== PublicationIdentifierType.doi) continue
-        const doi = (identifier.value ?? '')
-          .trim()
-          .replace(/^(https?:\/\/(dx\.)?doi\.org\/|doi:)/i, '')
-          .trim()
-        if (doi) dois.set(doi.toLowerCase(), doi)
+        if (!HalTEIInterchangeService.BIBL_STRUCT_IDNO_TYPES[identifier.type])
+          continue
+        const prefix =
+          HalTEIInterchangeService.IDENTIFIER_PREFIXES[identifier.type]
+        const suffix =
+          HalTEIInterchangeService.IDENTIFIER_SUFFIXES[identifier.type]
+        let value = (identifier.value ?? '').trim()
+        if (prefix) value = value.replace(prefix, '')
+        if (suffix) value = value.replace(suffix, '')
+        value = value.trim()
+        if (!value) continue
+        const values = valuesByType.get(identifier.type) ?? new Map()
+        values.set(value.toLowerCase(), value)
+        valuesByType.set(identifier.type, values)
       }
     }
-    return dois.size === 1 ? [...dois.values()][0] : null
+    return Object.entries(HalTEIInterchangeService.BIBL_STRUCT_IDNO_TYPES)
+      .map(([type, halType]) => {
+        const values = valuesByType.get(type as PublicationIdentifierType)
+        return values?.size === 1
+          ? { type: halType as string, value: [...values.values()][0] }
+          : null
+      })
+      .filter((x): x is { type: string; value: string } => x !== null)
   }
 
   /**
-   * Emit the DOI as `biblStruct/idno[@type="doi"]`. The AOfr schema orders biblStruct children
-   * as analytic, monogr, series, idno, ref, relatedItem.
+   * Emit each identifier as `biblStruct/idno`. The AOfr schema orders biblStruct children as
+   * analytic, monogr, series, idno, ref, relatedItem.
    */
-  private patchDoi(dom: Document, doi: string): void {
+  private patchPublicationIdentifiers(
+    dom: Document,
+    identifiers: { type: string; value: string }[],
+  ): void {
+    if (identifiers.length === 0) return
     const biblStruct = xpath.select1("//*[local-name()='biblStruct']", dom) as
       Element | undefined
     if (!biblStruct) return
-    const idno = this.createElement(dom, 'idno')
-    idno.setAttribute('type', 'doi')
-    this.setText(idno, doi)
     const nextSibling = xpath.select1(
       "./*[local-name()='ref' or local-name()='relatedItem']",
       biblStruct,
     ) as Node | undefined
-    biblStruct.insertBefore(idno, nextSibling ?? null)
+    for (const { type, value } of identifiers) {
+      const idno = this.createElement(dom, 'idno')
+      idno.setAttribute('type', type)
+      this.setText(idno, value)
+      biblStruct.insertBefore(idno, nextSibling ?? null)
+    }
   }
 
   /**
