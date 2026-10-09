@@ -11,7 +11,10 @@ import { Contribution } from '@/types/Contribution'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
 import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
 import { Person } from '@/types/Person'
-import { DocumentState } from '@prisma/client'
+import { DocumentRecord } from '@/types/DocumentRecord'
+import { PublicationIdentifier } from '@/types/PublicationIdentifier'
+import { BibliographicPlatform } from '@/types/BibliographicPlatform'
+import { DocumentState, PublicationIdentifierType } from '@prisma/client'
 
 const readFixture = (name: string): string => {
   const p = path.join(__dirname, '__fixtures__', name)
@@ -476,12 +479,13 @@ describe('HalTEIInterchangeService', () => {
       }
     })
 
-    it('injects the document UID as <idno type="localRef">', () => {
+    it('injects the document UID as monogr/idno[@type="localRef"]', () => {
       const out = service.toHalTEI(makeDoc(DocumentType.Article), {
         localRef: 'doc-1',
       })
-      expect(out).toContain('type="localRef"')
-      expect(out).toContain('doc-1')
+      expect(out).toMatch(/<monogr>\s*<idno type="localRef">doc-1<\/idno>/)
+      expect(out.match(/type="localRef"/g)).toHaveLength(1)
+      expect(out).not.toContain('publicationStmt')
     })
 
     it('emits a <ref> per file with type/subtype/target/n and an embargo date', () => {
@@ -623,7 +627,7 @@ describe('HalTEIInterchangeService', () => {
 
     it('keeps biblFull child order: editionStmt before publicationStmt before sourceDesc', () => {
       const out = service.toHalTEI(makeDoc(DocumentType.Article), {
-        localRef: 'doc-1',
+        licenceTarget: 'https://creativecommons.org/licenses/by/4.0/',
         files: [
           { fileName: 'doc.pdf', fileType: 'file', fileSource: 'author', n: 1 },
         ],
@@ -634,6 +638,308 @@ describe('HalTEIInterchangeService', () => {
       expect(edition).toBeGreaterThan(-1)
       expect(publication).toBeGreaterThan(edition)
       expect(source).toBeGreaterThan(publication)
+    })
+
+    describe('publication identifiers', () => {
+      const makeTypedRecord = (
+        uid: string,
+        identifiers: [PublicationIdentifierType, string][],
+      ): DocumentRecord =>
+        new DocumentRecord(
+          uid,
+          uid,
+          identifiers.map(
+            ([type, value]) => new PublicationIdentifier(type, value),
+          ),
+          [],
+          [],
+          null,
+          BibliographicPlatform.HAL,
+          [],
+        )
+
+      const makeRecord = (uid: string, ...dois: string[]): DocumentRecord =>
+        makeTypedRecord(
+          uid,
+          dois.map((doi) => [PublicationIdentifierType.doi, doi]),
+        )
+
+      const docWithRecords = (...records: DocumentRecord[]): DocumentClass => {
+        const doc = makeDoc(DocumentType.Article)
+        doc.records = records
+        return doc
+      }
+
+      it('emits the DOI as biblStruct/idno after monogr', () => {
+        const out = service.toHalTEI(
+          docWithRecords(makeRecord('r-1', '10.1234/abc')),
+        )
+        const idno = out.indexOf('<idno type="doi">10.1234/abc</idno>')
+        expect(idno).toBeGreaterThan(out.indexOf('</monogr>'))
+        expect(idno).toBeLessThan(out.indexOf('</biblStruct>'))
+      })
+
+      it('strips the doi.org URL prefix', () => {
+        const out = service.toHalTEI(
+          docWithRecords(makeRecord('r-1', 'https://doi.org/10.1234/abc')),
+        )
+        expect(out).toContain('<idno type="doi">10.1234/abc</idno>')
+      })
+
+      it('emits a single idno when records share a DOI in different cases', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeRecord('r-1', '10.1234/ABC'),
+            makeRecord('r-2', '10.1234/abc'),
+          ),
+        )
+        expect(out.match(/<idno type="doi">/g)).toHaveLength(1)
+      })
+
+      it('emits no DOI when records disagree', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeRecord('r-1', '10.1234/abc'),
+            makeRecord('r-2', '10.5678/def'),
+          ),
+        )
+        expect(out).not.toContain('type="doi"')
+      })
+
+      it('leaves the TEI unchanged when there is no DOI', () => {
+        const withoutRecords = service.toHalTEI(makeDoc(DocumentType.Article))
+        const withRecordWithoutDoi = service.toHalTEI(
+          docWithRecords(makeRecord('r-1')),
+        )
+        expect(withRecordWithoutDoi).toBe(withoutRecords)
+        expect(withoutRecords).not.toContain('type="doi"')
+      })
+
+      it('emits each supported identifier in its own idno', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.doi, '10.1234/abc'],
+              [PublicationIdentifierType.arxiv, '2101.00001'],
+            ]),
+            makeTypedRecord('r-2', [
+              [PublicationIdentifierType.wos, 'WOS:000123456700001'],
+            ]),
+          ),
+        )
+        expect(out).toContain(
+          '<idno type="doi">10.1234/abc</idno><idno type="arxiv">2101.00001</idno><idno type="wos">WOS:000123456700001</idno>',
+        )
+      })
+
+      it('strips the arXiv scheme prefix', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.arxiv, 'arXiv:2101.00001'],
+            ]),
+          ),
+        )
+        expect(out).toContain('<idno type="arxiv">2101.00001</idno>')
+      })
+
+      it('emits a PII and a PPN, each in its own idno', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.pii, 'S0021-9673(21)00675-0'],
+              [PublicationIdentifierType.ppn, '291708382'],
+            ]),
+          ),
+        )
+        expect(out).toContain(
+          '<idno type="pii">S0021-9673(21)00675-0</idno><idno type="ppn">291708382</idno>',
+        )
+      })
+
+      it('strips the Sudoc URL prefix from a PPN', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.ppn, 'https://www.sudoc.fr/249912139'],
+            ]),
+          ),
+        )
+        expect(out).toContain('<idno type="ppn">249912139</idno>')
+      })
+
+      it('emits the NNT in monogr for a thesis, never in biblStruct', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.nnt, '2019PA01E012'],
+            ]),
+          ),
+          { halDocumentType: 'THESE' },
+        )
+        expect(out).toMatch(/<monogr>\s*<idno type="nnt">2019PA01E012<\/idno>/)
+        expect(out.match(/type="nnt"/g)).toHaveLength(1)
+      })
+
+      it('emits the localRef after the NNT in monogr', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.nnt, '2019PA01E012'],
+            ]),
+          ),
+          { halDocumentType: 'THESE', localRef: 'doc-1' },
+        )
+        expect(out).toContain(
+          '<idno type="nnt">2019PA01E012</idno><idno type="localRef">doc-1</idno>',
+        )
+      })
+
+      it('does not emit the NNT for a non-thesis document', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.nnt, '2019PA01E012'],
+            ]),
+          ),
+          { halDocumentType: 'ART' },
+        )
+        expect(out).not.toContain('type="nnt"')
+      })
+
+      it('does not emit the NNT when records disagree', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.nnt, '2019PA01E012'],
+            ]),
+            makeTypedRecord('r-2', [
+              [PublicationIdentifierType.nnt, '2020PA01E034'],
+            ]),
+          ),
+          { halDocumentType: 'THESE' },
+        )
+        expect(out).not.toContain('type="nnt"')
+      })
+
+      it('emits a PubMed id as pubmed', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.pubmed, '31452104'],
+            ]),
+          ),
+        )
+        expect(out).toContain('<idno type="pubmed">31452104</idno>')
+      })
+
+      it('strips the PubMed URL prefix and trailing slash', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [
+                PublicationIdentifierType.pubmed,
+                'https://pubmed.ncbi.nlm.nih.gov/31452104/',
+              ],
+            ]),
+          ),
+        )
+        expect(out).toContain('<idno type="pubmed">31452104</idno>')
+      })
+
+      it('strips the ChemRxiv /vX version suffix', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [
+                PublicationIdentifierType.chemrxiv,
+                '10.26434/chemrxiv.15008981/v2',
+              ],
+            ]),
+          ),
+        )
+        expect(out).toContain(
+          '<idno type="chemrxiv">10.26434/chemrxiv.15008981</idno>',
+        )
+      })
+
+      it('keeps the ChemRxiv -vX and .vX version suffixes', () => {
+        const dash = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [
+                PublicationIdentifierType.chemrxiv,
+                '10.26434/chemrxiv-2023-sh4p8-v3',
+              ],
+            ]),
+          ),
+        )
+        const dot = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [
+                PublicationIdentifierType.chemrxiv,
+                '10.26434/chemrxiv.12901925.v1',
+              ],
+            ]),
+          ),
+        )
+        expect(dash).toContain(
+          '<idno type="chemrxiv">10.26434/chemrxiv-2023-sh4p8-v3</idno>',
+        )
+        expect(dot).toContain(
+          '<idno type="chemrxiv">10.26434/chemrxiv.12901925.v1</idno>',
+        )
+      })
+
+      it('treats ChemRxiv versions differing only by /vX as one value', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [
+                PublicationIdentifierType.chemrxiv,
+                '10.26434/chemrxiv.15008981/v1',
+              ],
+            ]),
+            makeTypedRecord('r-2', [
+              [
+                PublicationIdentifierType.chemrxiv,
+                '10.26434/chemrxiv.15008981/v2',
+              ],
+            ]),
+          ),
+        )
+        expect(out).toContain(
+          '<idno type="chemrxiv">10.26434/chemrxiv.15008981</idno>',
+        )
+      })
+
+      it('drops only the type whose records disagree', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.doi, '10.1234/abc'],
+              [PublicationIdentifierType.arxiv, '2101.00001'],
+            ]),
+            makeTypedRecord('r-2', [
+              [PublicationIdentifierType.arxiv, '2101.00002'],
+            ]),
+          ),
+        )
+        expect(out).toContain('<idno type="doi">10.1234/abc</idno>')
+        expect(out).not.toContain('type="arxiv"')
+      })
+
+      it('does not emit identifier types unknown to HAL', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.openalex, 'W123456789'],
+            ]),
+          ),
+        )
+        expect(out).not.toContain('W123456789')
+      })
     })
   })
 })
