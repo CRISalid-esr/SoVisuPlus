@@ -742,6 +742,31 @@ describe('HalTEIInterchangeService', () => {
         expect(out).toContain('<idno type="arxiv">2101.00001</idno>')
       })
 
+      it('emits a PII and a PPN, each in its own idno', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.pii, 'S0021-9673(21)00675-0'],
+              [PublicationIdentifierType.ppn, '291708382'],
+            ]),
+          ),
+        )
+        expect(out).toContain(
+          '<idno type="pii">S0021-9673(21)00675-0</idno><idno type="ppn">291708382</idno>',
+        )
+      })
+
+      it('strips the Sudoc URL prefix from a PPN', () => {
+        const out = service.toHalTEI(
+          docWithRecords(
+            makeTypedRecord('r-1', [
+              [PublicationIdentifierType.ppn, 'https://www.sudoc.fr/249912139'],
+            ]),
+          ),
+        )
+        expect(out).toContain('<idno type="ppn">249912139</idno>')
+      })
+
       it('emits a PubMed id as pubmed', () => {
         const out = service.toHalTEI(
           docWithRecords(

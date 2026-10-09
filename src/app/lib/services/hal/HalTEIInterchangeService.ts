@@ -683,6 +683,8 @@ export class HalTEIInterchangeService {
     [PublicationIdentifierType.meditagri]: 'meditagri',
     [PublicationIdentifierType.oatao]: 'oatao',
     [PublicationIdentifierType.okina]: 'okina',
+    [PublicationIdentifierType.pii]: 'pii',
+    [PublicationIdentifierType.ppn]: 'ppn',
     [PublicationIdentifierType.prodinra]: 'prodinra',
     [PublicationIdentifierType.pubmed]: 'pubmed',
     [PublicationIdentifierType.pubmedcentral]: 'pubmedcentral',
@@ -698,6 +700,7 @@ export class HalTEIInterchangeService {
     [PublicationIdentifierType.doi]: /^(https?:\/\/(dx\.)?doi\.org\/|doi:)/i,
     [PublicationIdentifierType.arxiv]:
       /^(https?:\/\/arxiv\.org\/abs\/|arxiv:)/i,
+    [PublicationIdentifierType.ppn]: /^https?:\/\/(www\.)?sudoc\.fr\//i,
     [PublicationIdentifierType.pubmed]:
       /^https?:\/\/pubmed\.ncbi\.nlm\.nih\.gov\//i,
   })
