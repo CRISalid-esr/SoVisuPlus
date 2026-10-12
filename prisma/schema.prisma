@@ -348,9 +348,9 @@ enum PublicationIdentifierType {
   okina
   openalex
   pii
-  pmid
   ppn
   prodinra
+  pubmed
   pubmedcentral
   sciencespo
   swhid
