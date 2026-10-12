@@ -89,16 +89,24 @@ export function useContributionsEditor(
   // Rebuild working state from the baseline whenever the document changes
   // (initial load, or refresh after a save round-trip).
   useEffect(() => {
-    setWorking(baseline.map(workingFromContribution))
+    setWorking(
+      document
+        ? baseline.map((contribution) =>
+            workingFromContribution(contribution, document),
+          )
+        : [],
+    )
     setRankingMode(defaultRankingMode(baseline))
-  }, [baseline])
+  }, [baseline, document])
 
   const contributions = useMemo(
     () => buildContributionsState(working, rankingMode),
     [working, rankingMode],
   )
   const isDirty =
-    !isFrozen && contributionsAreDirty(baseline, working, rankingMode)
+    !isFrozen &&
+    document !== null &&
+    contributionsAreDirty(document, working, rankingMode)
 
   useEffect(() => {
     setContributionsTabDirty(isDirty)
@@ -291,9 +299,15 @@ export function useContributionsEditor(
   }, [isDirty, contributions, saveContributions, setContributionsTabDirty])
 
   const cancel = useCallback(() => {
-    setWorking(baseline.map(workingFromContribution))
+    setWorking(
+      document
+        ? baseline.map((contribution) =>
+            workingFromContribution(contribution, document),
+          )
+        : [],
+    )
     setRankingMode(defaultRankingMode(baseline))
-  }, [baseline])
+  }, [baseline, document])
 
   return {
     working,

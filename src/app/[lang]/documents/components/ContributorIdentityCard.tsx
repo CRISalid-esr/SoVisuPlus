@@ -18,6 +18,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { Contribution } from '@/types/Contribution'
+import { Document } from '@/types/Document'
 import { Trans } from '@lingui/react/macro'
 import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 import { getRuntimeEnv } from '@/utils/runtimeEnv'
@@ -38,8 +39,10 @@ const initialsFromDisplayName = (displayName: string): string => {
 
 const ContributorIdentityCard = ({
   contributor,
+  document,
 }: {
   contributor: Contribution
+  document: Document
 }) => {
   const person = contributor.person
   if (!isPerson(person)) {
@@ -60,9 +63,9 @@ const ContributorIdentityCard = ({
   }
   const identifiersToDisplay = useMemo(() => {
     return person
-      .displayIdentifiers()
+      .displayIdentifiers(document)
       .filter((id) => IDENTIFIERS_TO_SHOW.includes(id.type))
-  }, [person])
+  }, [person, document])
 
   return (
     <Card

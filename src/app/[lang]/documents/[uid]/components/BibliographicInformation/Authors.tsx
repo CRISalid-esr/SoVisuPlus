@@ -54,7 +54,12 @@ const Authors = () => {
       {selectedDocument?.contributions.map((contribution, index) => (
         <Tooltip
           key={index}
-          title={<ContributorIdentityCard contributor={contribution} />}
+          title={
+            <ContributorIdentityCard
+              contributor={contribution}
+              document={selectedDocument}
+            />
+          }
           slotProps={{
             tooltip: {
               sx: {
