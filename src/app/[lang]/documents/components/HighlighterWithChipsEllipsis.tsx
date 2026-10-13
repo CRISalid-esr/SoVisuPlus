@@ -5,6 +5,7 @@ import styles from './HighlighterWithChipsEllipsis.module.css'
 import { Chip, Tooltip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Contribution } from '@/types/Contribution'
+import { Document } from '@/types/Document'
 import { SourceContribution } from '@/types/SourceContribution'
 import { Person } from '@/types/Person'
 import ContributorIdentityCard from '@/app/[lang]/documents/components/ContributorIdentityCard'
@@ -14,10 +15,12 @@ import SourceContributorIdentityCard from '@/app/[lang]/documents/components/Sou
 const HighlighterWithEllipsis = ({
   text,
   contributions,
+  document,
   searchWords,
 }: {
   text: string
   contributions: Contribution[] | SourceContribution[]
+  document: Document
   searchWords: string[]
 }) => {
   const [expanded, setExpanded] = useState(false)
@@ -52,7 +55,12 @@ const HighlighterWithEllipsis = ({
             return (
               <Tooltip
                 key={index}
-                title={<ContributorIdentityCard contributor={contribution} />}
+                title={
+                  <ContributorIdentityCard
+                    contributor={contribution}
+                    document={document}
+                  />
+                }
                 slotProps={{
                   tooltip: {
                     sx: {

@@ -75,8 +75,11 @@ export class PersonIdentifier {
     if (!v) return null
 
     switch (this.type) {
-      case DbPersonIdentifierType.idref:
-        return `https://www.idref.fr/${encodeURIComponent(v)}`
+      case DbPersonIdentifierType.idref: {
+        // accept stored as full URL or plain IdRef
+        const cleaned = v.replace(/^https?:\/\/(www\.)?idref\.fr\//i, '')
+        return `https://www.idref.fr/${encodeURIComponent(cleaned)}`
+      }
 
       case DbPersonIdentifierType.orcid: {
         // accept stored as full URL or plain ORCID
