@@ -14,7 +14,19 @@ import { Person } from '@/types/Person'
 import { DocumentRecord } from '@/types/DocumentRecord'
 import { PublicationIdentifier } from '@/types/PublicationIdentifier'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
-import { DocumentState, PublicationIdentifierType } from '@prisma/client'
+import {
+  PersonIdentifier,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
+import { SourceContribution } from '@/types/SourceContribution'
+import { SourcePerson } from '@/types/SourcePerson'
+import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
+import { LocRelator } from '@/types/LocRelator'
+import {
+  DocumentState,
+  PublicationIdentifierType,
+  SourcePersonIdentifierType,
+} from '@prisma/client'
 
 const readFixture = (name: string): string => {
   const p = path.join(__dirname, '__fixtures__', name)
@@ -529,6 +541,162 @@ describe('HalTEIInterchangeService', () => {
       const out = service.toHalTEI(makeDoc(DocumentType.Article))
       expect(out).not.toContain('editionStmt')
       expect(out).not.toContain('publicationStmt')
+    })
+
+    describe('author identifiers', () => {
+      const makePerson = (ids: [PersonIdentifierType, string][]): Person =>
+        new Person(
+          'p-1',
+          false,
+          null,
+          'Marie Curie',
+          'Marie',
+          'Curie',
+          ids.map(([type, value]) => new PersonIdentifier(type, value)),
+        )
+
+      const authorXml = (
+        person: Person,
+        doc = makeDoc(DocumentType.Article),
+      ) => {
+        doc.contributions = [new Contribution(person, [], [], 1)]
+        const out = service.toHalTEI(doc)
+        return out.slice(out.indexOf('<author'), out.indexOf('</author>'))
+      }
+
+      it('sends only the idhals when every identifier is available', () => {
+        const author = authorXml(
+          makePerson([
+            [PersonIdentifierType.idref, '02725030X'],
+            [PersonIdentifierType.orcid, '0000-0002-0756-0508'],
+            [PersonIdentifierType.idhali, '307'],
+            [PersonIdentifierType.idhals, 'marie-curie'],
+          ]),
+        )
+        expect(author.match(/<idno/g)).toHaveLength(1)
+        expect(author).toContain(
+          '<idno type="idhal" notation="string">marie-curie</idno>',
+        )
+      })
+
+      it('sends the idhali when there is no idhals', () => {
+        const author = authorXml(
+          makePerson([
+            [PersonIdentifierType.orcid, '0000-0002-0756-0508'],
+            [PersonIdentifierType.idhali, '307'],
+          ]),
+        )
+        expect(author.match(/<idno/g)).toHaveLength(1)
+        expect(author).toContain(
+          '<idno type="idhal" notation="numeric">307</idno>',
+        )
+      })
+
+      it('sends the ORCID as a URL when there is no HAL identifier', () => {
+        const author = authorXml(
+          makePerson([
+            [PersonIdentifierType.idref, '02725030X'],
+            [PersonIdentifierType.orcid, '0000-0002-0756-0508'],
+          ]),
+        )
+        expect(author.match(/<idno/g)).toHaveLength(1)
+        expect(author).toContain(
+          '<idno type="ORCID">https://orcid.org/0000-0002-0756-0508</idno>',
+        )
+      })
+
+      it('sends the IdRef as a URL when it is the only known identifier', () => {
+        const author = authorXml(
+          makePerson([[PersonIdentifierType.idref, '02725030X']]),
+        )
+        expect(author).toContain(
+          '<idno type="IdRef">https://www.idref.fr/02725030X</idno>',
+        )
+      })
+
+      it.each([
+        [
+          PersonIdentifierType.idref,
+          'http://www.idref.fr/02725030X',
+          '<idno type="IdRef">https://www.idref.fr/02725030X</idno>',
+        ],
+        [
+          PersonIdentifierType.orcid,
+          'https://orcid.org/0000-0002-0756-0508',
+          '<idno type="ORCID">https://orcid.org/0000-0002-0756-0508</idno>',
+        ],
+      ])('does not double a %s stored as a URL', (type, value, expected) => {
+        expect(authorXml(makePerson([[type, value]]))).toContain(expected)
+      })
+
+      it('sends no idno when the person has no identifier known to HAL', () => {
+        const author = authorXml(
+          makePerson([[PersonIdentifierType.local, 'mcurie']]),
+        )
+        expect(author).not.toContain('<idno')
+      })
+
+      it('falls back to the source persons of the document records', () => {
+        const sourcePerson = new SourcePerson('sp-1', 'M. Curie', 'hal', null, [
+          new SourcePersonIdentifier(
+            SourcePersonIdentifierType.orcid,
+            '0000-0002-0756-0508',
+          ),
+        ])
+        const person = makePerson([])
+        person.records = [sourcePerson]
+        const doc = makeDoc(DocumentType.Article)
+        doc.records = [
+          new DocumentRecord(
+            'rec-1',
+            'rec-1',
+            [],
+            [new SourceContribution(LocRelator.AUTHOR, sourcePerson)],
+            [],
+            null,
+            BibliographicPlatform.HAL,
+            [],
+          ),
+        ]
+        expect(authorXml(person, doc)).toContain(
+          '<idno type="ORCID">https://orcid.org/0000-0002-0756-0508</idno>',
+        )
+      })
+
+      it('places the idno between persName and affiliation', () => {
+        const doc = makeDoc(DocumentType.Article)
+        const org = new AuthorityOrganization(
+          'org-uid-1',
+          ['LPTHE'],
+          null,
+          [],
+          [
+            new AuthorityOrganizationIdentifier(
+              'ror' as never,
+              'https://ror.org/example',
+            ),
+          ],
+        )
+        doc.contributions = [
+          new Contribution(
+            makePerson([[PersonIdentifierType.idhals, 'marie-curie']]),
+            [],
+            [org],
+            1,
+          ),
+        ]
+        const out = service.toHalTEI(doc)
+        const author = out.slice(
+          out.indexOf('<author'),
+          out.indexOf('</author>'),
+        )
+        expect(author.indexOf('</persName>')).toBeLessThan(
+          author.indexOf('<idno'),
+        )
+        expect(author.indexOf('<idno')).toBeLessThan(
+          author.indexOf('<affiliation'),
+        )
+      })
     })
 
     describe('per-type conditional metadata', () => {

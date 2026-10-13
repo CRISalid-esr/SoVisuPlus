@@ -3,9 +3,9 @@ import { Document as DocumentClass, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 import { Concept } from '@/types/Concept'
 import { Journal } from '@/types/Journal'
-import { Contribution } from '@/types/Contribution'
+import { Person } from '@/types/Person'
 import { halTypologyForDocumentType } from '@/lib/services/hal/halDepositFormConfig'
-import { PublicationIdentifierType } from '@prisma/client'
+import { PersonIdentifierType, PublicationIdentifierType } from '@prisma/client'
 import xpath from 'xpath'
 
 /** A file to reference in the TEI `editionStmt/edition` (codes already resolved by the caller). */
@@ -162,7 +162,7 @@ export class HalTEIInterchangeService {
     this.patchDocumentType(dom, halCode, options.domains ?? [])
     this.patchKeywords(dom, document.subjects ?? [], halCode)
     this.patchTitles(dom, document.titles)
-    this.patchAuthors(dom, document.contributions ?? [])
+    this.patchAuthors(dom, document)
     this.patchAbstracts(dom, document.abstracts)
     this.patchLangUsage(dom, lang)
 
@@ -493,7 +493,47 @@ export class HalTEIInterchangeService {
     hal: 'idhal',
   }
 
-  private patchAuthors(dom: Document, contributions: Contribution[]): void {
+  /**
+   * Author identifiers HAL can link to an account, by decreasing priority. Only the first one
+   * available is sent, as `author/idno`; ORCID and IdRef are sent as full URLs.
+   */
+  private static readonly AUTHOR_IDENTIFIER_PRIORITY: ReadonlyArray<{
+    type: string
+    halType: string
+    notation?: 'string' | 'numeric'
+    asUrl?: boolean
+  }> = [
+    { type: PersonIdentifierType.idhals, halType: 'idhal', notation: 'string' },
+    {
+      type: PersonIdentifierType.idhali,
+      halType: 'idhal',
+      notation: 'numeric',
+    },
+    { type: PersonIdentifierType.orcid, halType: 'ORCID', asUrl: true },
+    { type: PersonIdentifierType.idref, halType: 'IdRef', asUrl: true },
+  ]
+
+  private resolveAuthorIdentifier(
+    person: Person,
+    document: DocumentClass,
+  ): { halType: string; notation?: string; value: string } | null {
+    const identifiers = person.displayIdentifiers(document)
+    for (const {
+      type,
+      halType,
+      notation,
+      asUrl,
+    } of HalTEIInterchangeService.AUTHOR_IDENTIFIER_PRIORITY) {
+      const identifier = identifiers.find((id) => id.type === type)
+      if (!identifier) continue
+      const value = asUrl ? identifier.getUrl() : identifier.value.trim()
+      if (value) return { halType, notation, value }
+    }
+    return null
+  }
+
+  private patchAuthors(dom: Document, document: DocumentClass): void {
+    const contributions = document.contributions ?? []
     const analytic = this.ensureElement(
       dom,
       "//*[local-name()='biblStruct']/*[local-name()='analytic']",
@@ -541,6 +581,17 @@ export class HalTEIInterchangeService {
       persName.appendChild(surname)
 
       author.appendChild(persName)
+
+      const identifier = this.resolveAuthorIdentifier(person, document)
+      if (identifier) {
+        const idno = this.createElement(dom, 'idno')
+        idno.setAttribute('type', identifier.halType)
+        if (identifier.notation) {
+          idno.setAttribute('notation', identifier.notation)
+        }
+        idno.appendChild(dom.createTextNode(identifier.value))
+        author.appendChild(idno)
+      }
 
       for (const org of contribution.affiliations) {
         const idnos = org.identifiers

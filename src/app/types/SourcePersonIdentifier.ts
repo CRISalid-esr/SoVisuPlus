@@ -67,8 +67,11 @@ export class SourcePersonIdentifier {
       case DbSourcePersonIdentifierType.openalex:
         return `https://openalex.org/${encodeURIComponent(v)}`
 
-      case DbSourcePersonIdentifierType.idref:
-        return `https://www.idref.fr/${encodeURIComponent(v)}`
+      case DbSourcePersonIdentifierType.idref: {
+        // accept stored as full URL or plain IdRef
+        const cleaned = v.replace(/^https?:\/\/(www\.)?idref\.fr\//i, '')
+        return `https://www.idref.fr/${encodeURIComponent(cleaned)}`
+      }
 
       case DbSourcePersonIdentifierType.orcid: {
         // accept stored as full URL or plain ORCID

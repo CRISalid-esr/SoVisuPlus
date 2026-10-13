@@ -134,6 +134,15 @@ describe('PersonIdentifier', () => {
       expect(id.getUrl()).toBe('https://www.idref.fr/02725030X')
     })
 
+    it.each([
+      'http://www.idref.fr/02725030X',
+      'https://www.idref.fr/02725030X',
+      'https://idref.fr/02725030X',
+    ])('builds IdRef URL from full URL %s', (value) => {
+      const id = new PersonIdentifier(PersonIdentifierType.idref, value)
+      expect(id.getUrl()).toBe('https://www.idref.fr/02725030X')
+    })
+
     it('builds ORCID URL from plain id', () => {
       const id = new PersonIdentifier(
         PersonIdentifierType.orcid,
