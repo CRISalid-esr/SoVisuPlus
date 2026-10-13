@@ -11,7 +11,10 @@ import {
 
 import { IAgent, IAgentJson } from '@/types/IAgent'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
-import { PersonIdentifier as DbPersonIdentifier } from '@prisma/client'
+import {
+  PersonIdentifier as DbPersonIdentifier,
+  SourcePersonIdentifierType,
+} from '@prisma/client'
 import { PersonMembership } from '@/types/PersonMembership'
 import { PersonEmployment } from '@/types/PersonEmployment'
 import { SourcePerson, SourcePersonJson } from '@/types/SourcePerson'
@@ -19,6 +22,7 @@ import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
 import { normalizeSearchText } from '@/utils/fuzzySearch/fuzzySearch'
 import { Authorizable, AuthorizationProperties } from '@/types/authorizable'
 import { organizationPerimeterFromMemberships } from '@/types/organizationScopes'
+import type { Document } from '@/types/Document'
 
 interface PersonJson extends IAgentJson {
   uid: string
@@ -93,26 +97,48 @@ class Person implements IAgent, Authorizable {
 
   /**
    * Identifiers to display in the UI. Returns the person's own identifiers
-   * when present; otherwise falls back to the deduplicated identifiers of the
-   * source-person records (deduplicated on type + value).
+   * when present; otherwise falls back to the identifiers of the person's
+   * source-person records that contribute to a record of the given document.
+   * A type whose source persons disagree (several distinct values) is left out,
+   * and an idhali is left out as soon as a source person carries an idhals.
    */
-  displayIdentifiers(): Array<PersonIdentifier | SourcePersonIdentifier> {
+  displayIdentifiers(
+    document: Document,
+  ): Array<PersonIdentifier | SourcePersonIdentifier> {
     if (this.identifiers.length > 0) {
       return this.identifiers
     }
 
-    const seen = new Set<string>()
-    const deduped: SourcePersonIdentifier[] = []
-    for (const record of this.records) {
-      for (const identifier of record.getIdentifiers()) {
-        const key = `${identifier.type}:${identifier.value}`
-        if (!seen.has(key)) {
-          seen.add(key)
-          deduped.push(identifier)
+    const sourcePersonUids = new Set(this.records.map((record) => record.uid))
+    const identifiersByType = new Map<
+      string,
+      Map<string, SourcePersonIdentifier>
+    >()
+    for (const record of document.records) {
+      for (const contribution of record.contributions) {
+        if (!sourcePersonUids.has(contribution.person.uid)) continue
+        for (const identifier of contribution.person.getIdentifiers()) {
+          const value = identifier.value.trim().toLowerCase()
+          if (!value) continue
+          const identifiers =
+            identifiersByType.get(identifier.type) ?? new Map()
+          if (!identifiers.has(value)) identifiers.set(value, identifier)
+          identifiersByType.set(identifier.type, identifiers)
         }
       }
     }
-    return deduped
+
+    const resolved: SourcePersonIdentifier[] = []
+    for (const identifiers of identifiersByType.values()) {
+      if (identifiers.size === 1) resolved.push(...identifiers.values())
+    }
+    // The idhals is safer and better suited to the HAL deposit than the idhali,
+    // so the idhali is only kept when no source person carries an idhals.
+    return identifiersByType.has(SourcePersonIdentifierType.idhals)
+      ? resolved.filter(
+          (identifier) => identifier.type !== SourcePersonIdentifierType.idhali,
+        )
+      : resolved
   }
 
   setIdentifiers(value: PersonIdentifier[]) {

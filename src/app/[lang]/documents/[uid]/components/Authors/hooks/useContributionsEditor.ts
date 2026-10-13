@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useStore from '@/stores/global_store'
+import { Contribution } from '@/types/Contribution'
 import { Document } from '@/types/Document'
 import { LocRelator } from '@/types/LocRelator'
 import { AureHalAuthorDoc } from '@/lib/services/AureHalAPIClient'
@@ -86,19 +87,31 @@ export function useContributionsEditor(
   // returns `waiting_for_update` and keeps the tab frozen.
   const isFrozen = document?.isFrozen ?? false
 
-  // Rebuild working state from the baseline whenever the document changes
-  // (initial load, or refresh after a save round-trip).
+  // Rebuild working state from the baseline whenever the document's
+  // contributions change (initial load, or refresh after a save round-trip).
+  // A save only changes the document state: the edits must stay displayed.
+  const lastBaseline = useRef<Contribution[] | null>(null)
   useEffect(() => {
-    setWorking(baseline.map(workingFromContribution))
+    if (lastBaseline.current === baseline) return
+    lastBaseline.current = baseline
+    setWorking(
+      document
+        ? baseline.map((contribution) =>
+            workingFromContribution(contribution, document),
+          )
+        : [],
+    )
     setRankingMode(defaultRankingMode(baseline))
-  }, [baseline])
+  }, [baseline, document])
 
   const contributions = useMemo(
     () => buildContributionsState(working, rankingMode),
     [working, rankingMode],
   )
   const isDirty =
-    !isFrozen && contributionsAreDirty(baseline, working, rankingMode)
+    !isFrozen &&
+    document !== null &&
+    contributionsAreDirty(document, working, rankingMode)
 
   useEffect(() => {
     setContributionsTabDirty(isDirty)
@@ -291,9 +304,15 @@ export function useContributionsEditor(
   }, [isDirty, contributions, saveContributions, setContributionsTabDirty])
 
   const cancel = useCallback(() => {
-    setWorking(baseline.map(workingFromContribution))
+    setWorking(
+      document
+        ? baseline.map((contribution) =>
+            workingFromContribution(contribution, document),
+          )
+        : [],
+    )
     setRankingMode(defaultRankingMode(baseline))
-  }, [baseline])
+  }, [baseline, document])
 
   return {
     working,

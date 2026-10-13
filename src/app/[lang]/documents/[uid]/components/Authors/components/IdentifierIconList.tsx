@@ -24,8 +24,12 @@ const IdentifierIconList = ({
 }: {
   identifiers: WorkingIdentifier[]
 }) => {
+  const hasIdHalS = identifiers.some(
+    (id) => id.type === PersonIdentifierType.idhals,
+  )
   const ordered = [...identifiers]
     .filter((id) => ICON_BY_TYPE[id.type])
+    .filter((id) => !(hasIdHalS && id.type === PersonIdentifierType.idhali))
     .sort(
       (a, b) => DISPLAY_ORDER.indexOf(a.type) - DISPLAY_ORDER.indexOf(b.type),
     )

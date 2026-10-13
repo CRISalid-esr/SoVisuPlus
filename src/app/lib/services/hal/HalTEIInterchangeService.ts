@@ -3,8 +3,9 @@ import { Document as DocumentClass, DocumentType } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 import { Concept } from '@/types/Concept'
 import { Journal } from '@/types/Journal'
-import { Contribution } from '@/types/Contribution'
+import { Person } from '@/types/Person'
 import { halTypologyForDocumentType } from '@/lib/services/hal/halDepositFormConfig'
+import { PersonIdentifierType, PublicationIdentifierType } from '@prisma/client'
 import xpath from 'xpath'
 
 /** A file to reference in the TEI `editionStmt/edition` (codes already resolved by the caller). */
@@ -161,7 +162,7 @@ export class HalTEIInterchangeService {
     this.patchDocumentType(dom, halCode, options.domains ?? [])
     this.patchKeywords(dom, document.subjects ?? [], halCode)
     this.patchTitles(dom, document.titles)
-    this.patchAuthors(dom, document.contributions ?? [])
+    this.patchAuthors(dom, document)
     this.patchAbstracts(dom, document.abstracts)
     this.patchLangUsage(dom, lang)
 
@@ -199,6 +200,11 @@ export class HalTEIInterchangeService {
     // alongside the datePub already produced above.
     if ((halCode === 'THESE' || halCode === 'HDR') && date)
       this.patchDefenseDate(dom, date)
+
+    const identifiers = this.resolvePublicationIdentifiers(document)
+    this.patchPublicationIdentifiers(dom, identifiers)
+    const nnt = identifiers.get(PublicationIdentifierType.nnt)
+    if (halCode === 'THESE' && nnt) this.patchNnt(dom, nnt)
 
     if (options.localRef) this.patchLocalRef(dom, options.localRef)
     if (options.files?.length) this.patchFiles(dom, options.files)
@@ -418,9 +424,7 @@ export class HalTEIInterchangeService {
     const terms: { lang: string; value: string }[] = []
     for (const subject of subjects) {
       const pref = (lang: string) =>
-        subject.prefLabels.find(
-          (l) => l.language === lang && l.value?.trim(),
-        )
+        subject.prefLabels.find((l) => l.language === lang && l.value?.trim())
       const fr = pref('fr')
       const en = pref('en')
       if (isThesis) {
@@ -489,7 +493,47 @@ export class HalTEIInterchangeService {
     hal: 'idhal',
   }
 
-  private patchAuthors(dom: Document, contributions: Contribution[]): void {
+  /**
+   * Author identifiers HAL can link to an account, by decreasing priority. Only the first one
+   * available is sent, as `author/idno`; ORCID and IdRef are sent as full URLs.
+   */
+  private static readonly AUTHOR_IDENTIFIER_PRIORITY: ReadonlyArray<{
+    type: string
+    halType: string
+    notation?: 'string' | 'numeric'
+    asUrl?: boolean
+  }> = [
+    { type: PersonIdentifierType.idhals, halType: 'idhal', notation: 'string' },
+    {
+      type: PersonIdentifierType.idhali,
+      halType: 'idhal',
+      notation: 'numeric',
+    },
+    { type: PersonIdentifierType.orcid, halType: 'ORCID', asUrl: true },
+    { type: PersonIdentifierType.idref, halType: 'IdRef', asUrl: true },
+  ]
+
+  private resolveAuthorIdentifier(
+    person: Person,
+    document: DocumentClass,
+  ): { halType: string; notation?: string; value: string } | null {
+    const identifiers = person.displayIdentifiers(document)
+    for (const {
+      type,
+      halType,
+      notation,
+      asUrl,
+    } of HalTEIInterchangeService.AUTHOR_IDENTIFIER_PRIORITY) {
+      const identifier = identifiers.find((id) => id.type === type)
+      if (!identifier) continue
+      const value = asUrl ? identifier.getUrl() : identifier.value.trim()
+      if (value) return { halType, notation, value }
+    }
+    return null
+  }
+
+  private patchAuthors(dom: Document, document: DocumentClass): void {
+    const contributions = document.contributions ?? []
     const analytic = this.ensureElement(
       dom,
       "//*[local-name()='biblStruct']/*[local-name()='analytic']",
@@ -537,6 +581,17 @@ export class HalTEIInterchangeService {
       persName.appendChild(surname)
 
       author.appendChild(persName)
+
+      const identifier = this.resolveAuthorIdentifier(person, document)
+      if (identifier) {
+        const idno = this.createElement(dom, 'idno')
+        idno.setAttribute('type', identifier.halType)
+        if (identifier.notation) {
+          idno.setAttribute('notation', identifier.notation)
+        }
+        idno.appendChild(dom.createTextNode(identifier.value))
+        author.appendChild(idno)
+      }
 
       for (const org of contribution.affiliations) {
         const idnos = org.identifiers
@@ -597,8 +652,7 @@ export class HalTEIInterchangeService {
     >,
   ): void {
     const textEl = xpath.select1("//*[local-name()='text']", dom) as
-      | Element
-      | undefined
+      Element | undefined
     if (!textEl) return
 
     const back = this.createElement(dom, 'back')
@@ -660,25 +714,139 @@ export class HalTEIInterchangeService {
   }
 
   /**
-   * Emit the document's internal UID as `<idno type="localRef">` so a later HAL harvest can be
-   * matched back to this document.
-   * NOTE: exact placement to confirm against a real preprod deposit (spec open item); HAL is
-   * expected to preserve and surface this localRef.
+   * Publication identifier types sent as `biblStruct/idno`, keyed by SoVisu+ type, valued by the
+   * HAL TEI `@type`. Types without a HAL counterpart are left out.
+   */
+  private static readonly BIBL_STRUCT_IDNO_TYPES: Readonly<
+    Partial<Record<PublicationIdentifierType, string>>
+  > = Object.freeze({
+    [PublicationIdentifierType.doi]: 'doi',
+    [PublicationIdentifierType.arxiv]: 'arxiv',
+    [PublicationIdentifierType.bibcode]: 'bibcode',
+    [PublicationIdentifierType.biorxiv]: 'biorxiv',
+    [PublicationIdentifierType.cern]: 'cern',
+    [PublicationIdentifierType.chemrxiv]: 'chemrxiv',
+    [PublicationIdentifierType.ensam]: 'ensam',
+    [PublicationIdentifierType.ineris]: 'ineris',
+    [PublicationIdentifierType.inspire]: 'inspire',
+    [PublicationIdentifierType.ird]: 'ird',
+    [PublicationIdentifierType.irstea]: 'irstea',
+    [PublicationIdentifierType.meditagri]: 'meditagri',
+    [PublicationIdentifierType.oatao]: 'oatao',
+    [PublicationIdentifierType.okina]: 'okina',
+    [PublicationIdentifierType.pii]: 'pii',
+    [PublicationIdentifierType.ppn]: 'ppn',
+    [PublicationIdentifierType.prodinra]: 'prodinra',
+    [PublicationIdentifierType.pubmed]: 'pubmed',
+    [PublicationIdentifierType.pubmedcentral]: 'pubmedcentral',
+    [PublicationIdentifierType.sciencespo]: 'sciencespo',
+    [PublicationIdentifierType.swhid]: 'swhid',
+    [PublicationIdentifierType.wos]: 'wos',
+  })
+
+  /** URL / scheme prefixes stripped so that the bare identifier is sent to HAL. */
+  private static readonly IDENTIFIER_PREFIXES: Readonly<
+    Partial<Record<PublicationIdentifierType, RegExp>>
+  > = Object.freeze({
+    [PublicationIdentifierType.doi]: /^(https?:\/\/(dx\.)?doi\.org\/|doi:)/i,
+    [PublicationIdentifierType.arxiv]:
+      /^(https?:\/\/arxiv\.org\/abs\/|arxiv:)/i,
+    [PublicationIdentifierType.ppn]: /^https?:\/\/(www\.)?sudoc\.fr\//i,
+    [PublicationIdentifierType.pubmed]:
+      /^https?:\/\/pubmed\.ncbi\.nlm\.nih\.gov\//i,
+  })
+
+  /** Trailing suffixes stripped so that the bare identifier is sent to HAL (the SWORD rejects the ChemRxiv `/vX` version marker). */
+  private static readonly IDENTIFIER_SUFFIXES: Readonly<
+    Partial<Record<PublicationIdentifierType, RegExp>>
+  > = Object.freeze({
+    [PublicationIdentifierType.chemrxiv]: /\/v\d+$/i,
+    [PublicationIdentifierType.pubmed]: /\/$/,
+  })
+
+  /**
+   * The document's publication identifiers sent to HAL (biblStruct types and nnt), taken from its
+   * records and normalised. A type whose records disagree (several distinct values) is left out.
+   */
+  private resolvePublicationIdentifiers(
+    document: DocumentClass,
+  ): Map<PublicationIdentifierType, string> {
+    const valuesByType = new Map<
+      PublicationIdentifierType,
+      Map<string, string>
+    >()
+    for (const record of document.records ?? []) {
+      for (const identifier of record.identifiers) {
+        if (
+          !HalTEIInterchangeService.BIBL_STRUCT_IDNO_TYPES[identifier.type] &&
+          identifier.type !== PublicationIdentifierType.nnt
+        )
+          continue
+        const prefix =
+          HalTEIInterchangeService.IDENTIFIER_PREFIXES[identifier.type]
+        const suffix =
+          HalTEIInterchangeService.IDENTIFIER_SUFFIXES[identifier.type]
+        let value = (identifier.value ?? '').trim()
+        if (prefix) value = value.replace(prefix, '')
+        if (suffix) value = value.replace(suffix, '')
+        value = value.trim()
+        if (!value) continue
+        const values = valuesByType.get(identifier.type) ?? new Map()
+        values.set(value.toLowerCase(), value)
+        valuesByType.set(identifier.type, values)
+      }
+    }
+    const resolved = new Map<PublicationIdentifierType, string>()
+    for (const [type, values] of valuesByType) {
+      if (values.size === 1) resolved.set(type, [...values.values()][0])
+    }
+    return resolved
+  }
+
+  /**
+   * Emit each identifier as `biblStruct/idno`. The AOfr schema orders biblStruct children as
+   * analytic, monogr, series, idno, ref, relatedItem.
+   */
+  private patchPublicationIdentifiers(
+    dom: Document,
+    identifiers: Map<PublicationIdentifierType, string>,
+  ): void {
+    const idnos = Object.entries(
+      HalTEIInterchangeService.BIBL_STRUCT_IDNO_TYPES,
+    ).flatMap(([type, halType]) => {
+      const value = identifiers.get(type as PublicationIdentifierType)
+      return value && halType ? [{ type: halType, value }] : []
+    })
+    if (idnos.length === 0) return
+    const biblStruct = xpath.select1("//*[local-name()='biblStruct']", dom) as
+      Element | undefined
+    if (!biblStruct) return
+    const nextSibling = xpath.select1(
+      "./*[local-name()='ref' or local-name()='relatedItem']",
+      biblStruct,
+    ) as Node | undefined
+    for (const { type, value } of idnos) {
+      const idno = this.createElement(dom, 'idno')
+      idno.setAttribute('type', type)
+      this.setText(idno, value)
+      biblStruct.insertBefore(idno, nextSibling ?? null)
+    }
+  }
+
+  /**
+   * Emit the document's internal UID as `monogr/idno[@type="localRef"]` so a later HAL harvest can
+   * be matched back to this document. HAL ignores a localRef placed anywhere else.
    */
   private patchLocalRef(dom: Document, localRef: string): void {
-    const pubStmt = this.ensureElement(
-      dom,
-      "//*[local-name()='biblFull']/*[local-name()='publicationStmt']",
-      () => this.createElement(dom, 'publicationStmt'),
-    )
+    const monogr = this.ensureMonogr(dom)
     this.removeAllWithin(
-      pubStmt,
+      monogr,
       "./*[local-name()='idno' and @type='localRef']",
     )
     const idno = this.createElement(dom, 'idno')
     idno.setAttribute('type', 'localRef')
-    idno.appendChild(dom.createTextNode(localRef))
-    pubStmt.appendChild(idno)
+    this.setText(idno, localRef)
+    this.insertMonogrChild(monogr, idno)
   }
 
   /**
@@ -945,8 +1113,7 @@ export class HalTEIInterchangeService {
   ): void {
     const monogr = this.ensureMonogr(dom)
     let meeting = xpath.select1("./*[local-name()='meeting']", monogr) as
-      | Element
-      | undefined
+      Element | undefined
     if (!meeting) {
       meeting = this.createElement(dom, 'meeting')
       this.insertMonogrChild(monogr, meeting)
@@ -986,6 +1153,15 @@ export class HalTEIInterchangeService {
     authority.setAttribute('type', type)
     this.setText(authority, content)
     this.insertMonogrChild(monogr, authority)
+  }
+
+  /** THESE national thesis number → `monogr/idno[@type="nnt"]`. */
+  private patchNnt(dom: Document, nnt: string): void {
+    const monogr = this.ensureMonogr(dom)
+    const idno = this.createElement(dom, 'idno')
+    idno.setAttribute('type', 'nnt')
+    this.setText(idno, nnt)
+    this.insertMonogrChild(monogr, idno)
   }
 
   /** THESE/HDR defense date → a second `monogr/imprint/date[@type="dateDefended"]`. */
@@ -1076,8 +1252,7 @@ export class HalTEIInterchangeService {
     if (found) return found
 
     const biblFull = xpath.select1("//*[local-name()='biblFull']", dom) as
-      | Element
-      | undefined
+      Element | undefined
     const el = create()
     if (biblFull) biblFull.appendChild(el)
     return el
