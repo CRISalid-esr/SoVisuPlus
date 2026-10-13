@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useStore from '@/stores/global_store'
+import { Contribution } from '@/types/Contribution'
 import { Document } from '@/types/Document'
 import { LocRelator } from '@/types/LocRelator'
 import { AureHalAuthorDoc } from '@/lib/services/AureHalAPIClient'
@@ -86,9 +87,13 @@ export function useContributionsEditor(
   // returns `waiting_for_update` and keeps the tab frozen.
   const isFrozen = document?.isFrozen ?? false
 
-  // Rebuild working state from the baseline whenever the document changes
-  // (initial load, or refresh after a save round-trip).
+  // Rebuild working state from the baseline whenever the document's
+  // contributions change (initial load, or refresh after a save round-trip).
+  // A save only changes the document state: the edits must stay displayed.
+  const lastBaseline = useRef<Contribution[] | null>(null)
   useEffect(() => {
+    if (lastBaseline.current === baseline) return
+    lastBaseline.current = baseline
     setWorking(
       document
         ? baseline.map((contribution) =>
