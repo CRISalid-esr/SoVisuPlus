@@ -2792,13 +2792,11 @@ msgstr "Resize the panels"
 msgid "research_structures_tree_search_placeholder"
 msgstr "Search for a structure…"
 
-#: src/app/[lang]/documents/components/HighlighterWithChipsEllipsis.tsx:169
-#: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:57
+#: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:70
 msgid "see_less_contributors"
 msgstr "see less co-authors"
 
-#: src/app/[lang]/documents/components/HighlighterWithChipsEllipsis.tsx:161
-#: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:49
+#: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:62
 msgid "see_more_contributors"
 msgstr "see more co-authors"
 

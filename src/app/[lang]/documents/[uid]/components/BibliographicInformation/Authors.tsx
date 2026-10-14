@@ -1,12 +1,12 @@
 import { Trans } from '@lingui/react/macro'
 import useStore from '@/stores/global_store'
 import EditIcon from '@mui/icons-material/Edit'
-import { Box, Button, Chip, Tooltip } from '@mui/material'
+import { Box, Button, Chip } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Person } from '@/types/Person'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
-import ContributorIdentityCard from '@/app/[lang]/documents/components/ContributorIdentityCard'
+import ContributorIdentityTooltip from '@/app/[lang]/documents/components/ContributorIdentityTooltip'
 import { PermissionAction } from '@/types/Permission'
 import { Can } from '@casl/react'
 import { useSession } from 'next-auth/react'
@@ -52,23 +52,10 @@ const Authors = () => {
       }}
     >
       {selectedDocument?.contributions.map((contribution, index) => (
-        <Tooltip
+        <ContributorIdentityTooltip
           key={index}
-          title={
-            <ContributorIdentityCard
-              contributor={contribution}
-              document={selectedDocument}
-            />
-          }
-          slotProps={{
-            tooltip: {
-              sx: {
-                backgroundColor: 'transparent',
-                padding: 0,
-                border: 'none',
-              },
-            },
-          }}
+          contribution={contribution}
+          document={selectedDocument}
         >
           <Chip
             key={index}
@@ -96,7 +83,7 @@ const Authors = () => {
             }}
             label={contribution.person.displayName}
           />
-        </Tooltip>
+        </ContributorIdentityTooltip>
       ))}
       <Can
         I={PermissionAction.update}
