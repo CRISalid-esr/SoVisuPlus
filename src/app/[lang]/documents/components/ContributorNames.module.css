@@ -1,0 +1,7 @@
+.contributorName {
+  cursor: pointer;
+}
+
+.contributorName:hover {
+  text-decoration: underline;
+}

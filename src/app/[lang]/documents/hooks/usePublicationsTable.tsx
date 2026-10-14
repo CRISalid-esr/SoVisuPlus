@@ -48,8 +48,7 @@ import {
 } from '@/utils/fuzzySearch/constants'
 import { searchFieldProps } from '@/components/searchFieldProps'
 import { LanguageChips } from '@/components/LanguageChips'
-import { Contribution } from '@/types/Contribution'
-import HighlighterWithEllipsis from '@/app/[lang]/documents/components/HighlighterWithEllipsis'
+import ContributorNames from '@/app/[lang]/documents/components/ContributorNames'
 import dayjs, { Dayjs } from 'dayjs'
 import { LocaleDateFormats } from '@/types/LocaleDateFormats'
 import HalStatusCell from '@/app/[lang]/documents/components/HalStatusCell'
@@ -712,28 +711,14 @@ export const usePublicationsTable = (
           row,
           column,
         }: {
-          row: { original: { contributions: Array<Contribution> } }
+          row: { original: Document }
           column: MRT_Column<Document>
         }) {
-          const contributors = row.original.contributions
-            .map((contribution: Contribution) => {
-              const person = contribution.person
-              const { firstName, lastName } = person
-              let name = [firstName, lastName].filter(Boolean).join(' ')
-              if (name.match(/^\s*$/)) {
-                name = person.getDisplayName()
-              }
-              return name
-            })
-            .filter(Boolean)
-            .join(', ')
-          const filterValue = column.getFilterValue()
-
           return (
-            <HighlighterWithEllipsis
-              searchWords={[globalFilter, filterValue as string]}
+            <ContributorNames
+              document={row.original}
+              searchWords={[globalFilter, column.getFilterValue() as string]}
               findChunks={findDocumentSearchChunks}
-              text={contributors}
             />
           )
         },
