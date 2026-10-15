@@ -227,6 +227,9 @@ const usePublicationsTableStorage = (
   const { currentPerspective } = useStore((state) => state.user)
 
   useEffect(() => {
+    // A perspective still loading is not a perspective change: resetting now
+    // would wipe the filters before the perspective is even known.
+    if (!currentPerspective) return
     const raw = sessionStorage.getItem('mrt_pagination_publication_table')
     if (raw) {
       const data = JSON.parse(raw)
@@ -459,7 +462,33 @@ export const usePublicationsTable = (
 
   const [pagination, setPagination] = useState(initialPagination)
 
+  const { currentPerspective } = useStore((state) => state.user)
+
+  usePublicationsTableStorage(
+    globalFilter,
+    sorting,
+    structuresFilter,
+    columnFiltersByTab,
+    pagination,
+    setPagination,
+    setGlobalFilter,
+    setColumnFiltersByTab,
+    setStructuresFilter,
+  )
+
+  // Declared after usePublicationsTableStorage so that, in a commit where the
+  // perspective changes, these filters are applied after its reset.
   useEffect(() => {
+    // Wait for the perspective the link targets: filters applied earlier would
+    // be wiped by the perspective-change reset.
+    const perspectiveSlugFromUrl = searchParams.get('perspective')
+    if (
+      !currentPerspective ||
+      (perspectiveSlugFromUrl &&
+        currentPerspective.slug !== perspectiveSlugFromUrl)
+    ) {
+      return
+    }
     const rawStructures: { uid: string; name: string }[] = JSON.parse(
       decodeURIComponent(searchParams.get('structures') || '[]'),
     )
@@ -491,19 +520,7 @@ export const usePublicationsTable = (
       params.delete('resetFilters')
       router.replace(`/${lang}/documents?${params}`)
     }
-  }, [lang, router, searchParams, selectedTab])
-
-  usePublicationsTableStorage(
-    globalFilter,
-    sorting,
-    structuresFilter,
-    columnFiltersByTab,
-    pagination,
-    setPagination,
-    setGlobalFilter,
-    setColumnFiltersByTab,
-    setStructuresFilter,
-  )
+  }, [currentPerspective, lang, router, searchParams, selectedTab])
 
   useEffect(() => {
     const yearsFilterSet = yearsFilter.length > 0
