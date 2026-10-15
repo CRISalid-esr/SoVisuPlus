@@ -23,6 +23,10 @@ import { DashboardDocumentData } from '@/types/DashboardDocumentData'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { useSearchParams } from 'next/navigation'
+import {
+  isModifiedEvent,
+  useGuardedRouter,
+} from '@/app/[lang]/components/NavigationGuard/NavigationGuardProvider'
 
 registerMap('world', JSON.stringify(geoJson))
 
@@ -35,6 +39,7 @@ const CollaborationMap = ({
   const theme = useTheme()
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
   const searchParams = useSearchParams()
+  const router = useGuardedRouter()
 
   const chartRef = useRef<ReactEcharts>(null)
   const lockedPointRef = useRef<number[] | null>(null)
@@ -284,6 +289,29 @@ const CollaborationMap = ({
     [lang, searchParams, yearRange],
   )
 
+  /**
+   * The tooltip links are raw HTML that Next.js does not intercept: route
+   * plain clicks through the client router to avoid a full page reload.
+   * Modified clicks keep their native behaviour (new tab or window).
+   */
+  const handleTooltipLinkClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      const anchor = (event.target as Element).closest('a')
+      const href = anchor?.getAttribute('href')
+      if (
+        !href ||
+        !event.currentTarget.contains(anchor) ||
+        isModifiedEvent(event) ||
+        event.defaultPrevented
+      ) {
+        return
+      }
+      event.preventDefault()
+      router.push(href)
+    },
+    [router],
+  )
+
   const option: ChartOption = useMemo(
     () => ({
       geo: {
@@ -457,7 +485,10 @@ const CollaborationMap = ({
   // echarts instance, resetting the user's zoom/pan and re-running the initial
   // layout race on every fetch. The spinner is overlaid instead.
   return (
-    <Box sx={{ position: 'relative', minHeight: '600px' }}>
+    <Box
+      sx={{ position: 'relative', minHeight: '600px' }}
+      onClick={handleTooltipLinkClick}
+    >
       <ReactEcharts
         onChartReady={onChartReady}
         onEvents={onEvents}
