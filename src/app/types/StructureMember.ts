@@ -12,6 +12,7 @@ export interface StructureMemberJson {
   oaRate: number
   halRate: number
   identifiers: PersonIdentifierJson[]
+  canEditAccount: boolean
 }
 
 const toIsoDate = (date: Date | null): string | null =>
@@ -28,6 +29,8 @@ export class StructureMember {
   public halRate = 0
   /** Position label resolved by the service from the corps code. */
   public position: string | null = null
+  /** Whether the viewer may edit this person's account, set by the service. */
+  public canEditAccount = false
 
   constructor(
     public personId: number,
@@ -93,6 +96,7 @@ export class StructureMember {
       oaRate: this.oaRate,
       halRate: this.halRate,
       identifiers: this.identifiers.map((identifier) => identifier.toJson()),
+      canEditAccount: this.canEditAccount,
     }
   }
 }

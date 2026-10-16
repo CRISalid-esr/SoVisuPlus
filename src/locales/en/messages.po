@@ -1703,6 +1703,8 @@ msgstr "Type"
 
 #: src/app/[lang]/dashboard/components/PersonIdentityCard.tsx:212
 #: src/app/[lang]/dashboard/components/PersonIdentityCard.tsx:216
+#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:296
+#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:300
 msgid "edit_account_tooltip"
 msgstr "Edit account"
 

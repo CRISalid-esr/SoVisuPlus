@@ -14,6 +14,10 @@ import {
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
+import {
+  organizationUnitInclude,
+  organizationUnitParentsInclude,
+} from '@/prisma-schema/extended-client'
 import { PersonEmployment } from '@/types/PersonEmployment'
 import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
 import { OrganizationGroup } from '@/types/IAgent'
@@ -1167,6 +1171,36 @@ export class PersonDAO extends AbstractDAO {
         ? await this.prismaClient.employment.findMany({ where, select })
         : await this.prismaClient.membership.findMany({ where, select })
     return rows.map(StructureMember.fromDb)
+  }
+
+  /**
+   * Memberships of a set of people, with each organization's direct parents,
+   * grouped by person id. Enough to compute their authorization perimeters.
+   */
+  public async fetchMembershipsByPersonIds(
+    personIds: number[],
+  ): Promise<Map<number, PersonMembership[]>> {
+    const byPerson = new Map<number, PersonMembership[]>()
+    if (personIds.length === 0) {
+      return byPerson
+    }
+    const rows = await this.prismaClient.membership.findMany({
+      where: { personId: { in: personIds } },
+      include: {
+        organizationUnit: {
+          include: {
+            ...organizationUnitInclude,
+            ...organizationUnitParentsInclude,
+          },
+        },
+      },
+    })
+    for (const row of rows) {
+      const memberships = byPerson.get(row.personId) ?? []
+      memberships.push(PersonMembership.fromDbPersonMembership(row))
+      byPerson.set(row.personId, memberships)
+    }
+    return byPerson
   }
 
   /**
