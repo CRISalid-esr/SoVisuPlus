@@ -1701,6 +1701,11 @@ msgstr "Titre"
 msgid "documents_page_type_column"
 msgstr "Type"
 
+#: src/app/[lang]/dashboard/components/PersonIdentityCard.tsx:212
+#: src/app/[lang]/dashboard/components/PersonIdentityCard.tsx:216
+msgid "edit_account_tooltip"
+msgstr "Modifier le compte"
+
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:217
 msgid "edit_field_add_language_button_label"
 msgstr "Ajouter une langue"
