@@ -4,6 +4,12 @@ import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { OrganizationRelation } from '@/types/OrganizationRelation'
 import { Literal } from '@/types/Literal'
 import prisma from '@/lib/daos/prisma'
+import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { StructureMember } from '@/types/StructureMember'
+import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
+import { PermissionAction, PermissionSubject } from '@/types/Permission'
+import { EntityType } from '@/types/UserRoleScope'
+import { Scope } from '@/types/authz'
 import { OrganizationCategory, OrganizationGenericType } from '@prisma/client'
 
 const makeOrg = (
@@ -500,5 +506,178 @@ describe('OrganizationUnitService structure visibility (integration)', () => {
 
   it('returns null for an unknown structure', async () => {
     expect(await service.setHidden('nope', true)).toBeNull()
+  })
+})
+
+describe('OrganizationUnitService.markEditableAccounts (integration)', () => {
+  let service: OrganizationUnitService
+  let members: StructureMember[]
+  let fetchMembershipsSpy: jest.SpyInstance
+
+  const accountEditor = (scopes: Scope[], personUid: string | null = null) =>
+    makeAuthzContext({
+      personUid,
+      roleAssignments: [
+        makeAssignment(
+          'account_editor',
+          [
+            {
+              action: PermissionAction.update,
+              subject: PermissionSubject.Person,
+              fields: ['identifiers'],
+            },
+          ],
+          scopes,
+        ),
+      ],
+    })
+
+  const editableUids = () =>
+    members.filter((member) => member.canEditAccount).map((m) => m.uid)
+
+  beforeAll(() => {
+    service = new OrganizationUnitService()
+  })
+
+  beforeEach(async () => {
+    const organizationUnitDAO = new OrganizationUnitDAO()
+    const ru1 = makeOrg(
+      'local-ru1',
+      OrganizationCategory.research_unit,
+      OrganizationGenericType.unit,
+      [institutionRelation('local-up1')],
+    )
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      makeOrg(
+        'local-up1',
+        OrganizationCategory.institution,
+        OrganizationGenericType.institution,
+      ),
+    )
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(ru1)
+    await organizationUnitDAO.createOrUpdateOrganizationUnit(
+      makeOrg(
+        'local-team1',
+        OrganizationCategory.team,
+        OrganizationGenericType.team,
+        [new OrganizationRelation(ru1, 'part_of')],
+      ),
+    )
+    const orgId = async (uid: string) =>
+      (await prisma.organizationUnit.findUnique({ where: { uid } }))!.id
+
+    // Alice: member of the unit; Tom: member of the unit's team only;
+    // Eve: employed by the institution, no membership
+    const people = [
+      { uid: 'p-alice', membershipOf: 'local-ru1' },
+      { uid: 'p-tom', membershipOf: 'local-team1' },
+      { uid: 'p-eve', employmentOf: 'local-up1' },
+    ]
+    members = []
+    for (const { uid, membershipOf, employmentOf } of people) {
+      const person = await prisma.person.create({
+        data: { uid, slug: uid, displayName: uid },
+      })
+      if (membershipOf) {
+        await prisma.membership.create({
+          data: {
+            personId: person.id,
+            organizationUnitId: await orgId(membershipOf),
+          },
+        })
+      }
+      if (employmentOf) {
+        await prisma.employment.create({
+          data: {
+            personId: person.id,
+            organizationUnitId: await orgId(employmentOf),
+          },
+        })
+      }
+      members.push(
+        new StructureMember(
+          person.id,
+          uid,
+          uid,
+          uid,
+          '',
+          '',
+          null,
+          null,
+          null,
+          [],
+        ),
+      )
+    }
+
+    fetchMembershipsSpy = jest.spyOn(
+      PersonDAO.prototype,
+      'fetchMembershipsByPersonIds',
+    )
+  })
+
+  afterEach(() => {
+    fetchMembershipsSpy.mockRestore()
+  })
+
+  it('marks nobody without the account_editor right, without querying', async () => {
+    await service.markEditableAccounts(members, makeAuthzContext({}))
+
+    expect(editableUids()).toEqual([])
+    expect(fetchMembershipsSpy).not.toHaveBeenCalled()
+  })
+
+  it('marks everybody with a global right, without querying', async () => {
+    await service.markEditableAccounts(members, accountEditor([]))
+
+    expect(editableUids()).toEqual(['p-alice', 'p-tom', 'p-eve'])
+    expect(fetchMembershipsSpy).not.toHaveBeenCalled()
+  })
+
+  it('marks only the viewer with a self-scoped right, without querying', async () => {
+    await service.markEditableAccounts(
+      members,
+      accountEditor(
+        [{ entityType: EntityType.Person, entityUid: 'p-tom' }],
+        'p-tom',
+      ),
+    )
+
+    expect(editableUids()).toEqual(['p-tom'])
+    expect(fetchMembershipsSpy).not.toHaveBeenCalled()
+  })
+
+  it('marks the direct members of a unit-scoped right, in a single query', async () => {
+    await service.markEditableAccounts(
+      members,
+      accountEditor([
+        { entityType: EntityType.ResearchUnit, entityUid: 'local-ru1' },
+      ]),
+    )
+
+    expect(editableUids()).toEqual(['p-alice'])
+    expect(fetchMembershipsSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it('marks the team members of a team-scoped right', async () => {
+    await service.markEditableAccounts(
+      members,
+      accountEditor([
+        { entityType: EntityType.Team, entityUid: 'local-team1' },
+      ]),
+    )
+
+    expect(editableUids()).toEqual(['p-tom'])
+  })
+
+  it('marks the members of supervised units, not the employees, for an institution-scoped right', async () => {
+    await service.markEditableAccounts(
+      members,
+      accountEditor([
+        { entityType: EntityType.Institution, entityUid: 'local-up1' },
+      ]),
+    )
+
+    expect(editableUids()).toEqual(['p-alice'])
   })
 })

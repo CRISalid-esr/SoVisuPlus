@@ -72,6 +72,10 @@ export const GET = async (
         { status: 404 },
       )
     }
+    await organizationUnitService.markEditableAccounts(
+      result.members,
+      session.user.authz,
+    )
     return NextResponse.json({
       members: result.members.map((member) => member.toJson()),
       total: result.total,

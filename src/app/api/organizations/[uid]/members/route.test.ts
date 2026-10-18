@@ -8,6 +8,7 @@ import { getServerSession } from 'next-auth'
 import { GET } from './route'
 
 const mockGetStructureMembers = jest.fn()
+const mockMarkEditableAccounts = jest.fn()
 
 jest.mock('@/lib/services/OrganizationUnitService', () => ({
   STRUCTURE_MEMBER_SORT_KEYS: ['name'],
@@ -16,6 +17,7 @@ jest.mock('@/lib/services/OrganizationUnitService', () => ({
       hiddenEffective: false,
     }),
     getStructureMembers: mockGetStructureMembers,
+    markEditableAccounts: mockMarkEditableAccounts,
   })),
 }))
 
@@ -62,6 +64,23 @@ describe('GET /api/organizations/[uid]/members', () => {
     expect(mockGetStructureMembers).toHaveBeenCalledWith(
       expect.objectContaining({ uid: 'ru1', search: 'durand' }),
     )
+  })
+
+  it('marks the editable accounts with the session authorization context', async () => {
+    const authz = { personUid: 'p1', roleAssignments: [] }
+    mockGetServerSession.mockResolvedValue({
+      user: { username: 'jdupont', authz },
+    })
+    const members = [{ toJson: () => ({ uid: 'p2', canEditAccount: true }) }]
+    mockGetStructureMembers.mockResolvedValue({ members, total: 1 })
+
+    const response = await call('')
+
+    expect(mockMarkEditableAccounts).toHaveBeenCalledWith(members, authz)
+    expect(await response.json()).toEqual({
+      members: [{ uid: 'p2', canEditAccount: true }],
+      total: 1,
+    })
   })
 
   it('rejects a search longer than the name search limit', async () => {

@@ -5,6 +5,7 @@ import * as Lingui from '@lingui/core'
 import {
   Box,
   FormControlLabel,
+  IconButton,
   Link as MuiLink,
   Switch,
   Tooltip,
@@ -20,6 +21,8 @@ import {
 } from 'material-react-table'
 import { alphabeticalSortColumn } from '@/components/alphabeticalSortColumn'
 import Image from 'next/image'
+import NextLink from 'next/link'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import useStore from '@/stores/global_store'
@@ -283,10 +286,26 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
         id: 'identifiers',
         header: t`research_structures_members_column_identifiers`,
         enableSorting: false,
-        size: 130,
+        size: 150,
         Cell({ row }) {
+          const member = row.original
           return (
-            <MemberIdentifierIcons identifiers={row.original.identifiers} />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <MemberIdentifierIcons identifiers={member.identifiers} />
+              {member.canEditAccount && member.slug && (
+                <Tooltip title={t`edit_account_tooltip`}>
+                  <IconButton
+                    component={NextLink}
+                    href={`/${lang}/account?perspective=${encodeURIComponent(member.slug)}`}
+                    aria-label={t`edit_account_tooltip`}
+                    size='small'
+                    sx={{ p: 0.25 }}
+                  >
+                    <EditOutlinedIcon fontSize='small' />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Box>
           )
         },
       },
