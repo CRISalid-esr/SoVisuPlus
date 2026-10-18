@@ -466,16 +466,16 @@ export class OrganizationUnitDAO extends AbstractDAO {
    * `hiddenUids` carry `hiddenEffective`, every other one does not.
    */
   public async applyEffectiveHidden(hiddenUids: string[]): Promise<void> {
-    await this.prismaClient.$transaction([
-      this.prismaClient.organizationUnit.updateMany({
+    await this.transaction(async (tx) => {
+      await tx.organizationUnit.updateMany({
         where: { uid: { in: hiddenUids }, hiddenEffective: false },
         data: { hiddenEffective: true },
-      }),
-      this.prismaClient.organizationUnit.updateMany({
+      })
+      await tx.organizationUnit.updateMany({
         where: { uid: { notIn: hiddenUids }, hiddenEffective: true },
         data: { hiddenEffective: false },
-      }),
-    ])
+      })
+    })
   }
 
   /**

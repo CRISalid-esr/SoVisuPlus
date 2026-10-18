@@ -182,7 +182,8 @@ export class PersonDAO extends AbstractDAO {
           if (
             error instanceof PrismaClientKnownRequestError &&
             error.code === 'P2002' && // Unique constraint violation
-            baseSlug
+            baseSlug &&
+            !this.inTransaction
           ) {
             console.error(
               `Slug collision detected for '${uniqueSlug}', retrying...`,
@@ -259,7 +260,7 @@ export class PersonDAO extends AbstractDAO {
           if (fields.some((field) => String(field).includes('uid'))) {
             throw new PersonAlreadyExistsError(person.uid)
           }
-          if (baseSlug) {
+          if (baseSlug && !this.inTransaction) {
             console.error(
               `Slug collision detected for '${uniqueSlug}', retrying...`,
             )
@@ -324,7 +325,7 @@ export class PersonDAO extends AbstractDAO {
     personId: number,
     replace?: { keepOrgUids: string[] },
   ): Promise<void> {
-    const organizationUnitDAO = new OrganizationUnitDAO()
+    const organizationUnitDAO = new OrganizationUnitDAO(this.prismaClient)
     const resolved: { unitId: number; membership: PersonMembership }[] = []
     for (const membership of memberships) {
       const dbOrganizationUnit =
@@ -374,7 +375,7 @@ export class PersonDAO extends AbstractDAO {
     }
 
     if (replace) {
-      await this.prismaClient.$transaction(write)
+      await this.transaction(write)
     } else {
       await write(this.prismaClient)
     }
@@ -395,7 +396,7 @@ export class PersonDAO extends AbstractDAO {
     personId: number,
     replace?: { keepOrgUids: string[] },
   ): Promise<void> {
-    const organizationUnitDAO = new OrganizationUnitDAO()
+    const organizationUnitDAO = new OrganizationUnitDAO(this.prismaClient)
     const resolved: { unitId: number; employment: PersonEmployment }[] = []
     for (const employment of employments) {
       const dbOrganizationUnit =
@@ -445,7 +446,7 @@ export class PersonDAO extends AbstractDAO {
     }
 
     if (replace) {
-      await this.prismaClient.$transaction(write)
+      await this.transaction(write)
     } else {
       await write(this.prismaClient)
     }
@@ -468,7 +469,7 @@ export class PersonDAO extends AbstractDAO {
     personId: number,
     replace = false,
   ): Promise<void> {
-    const sourcePersonDAO = new SourcePersonDAO()
+    const sourcePersonDAO = new SourcePersonDAO(this.prismaClient)
     for (const record of records) {
       await sourcePersonDAO.createOrUpdateSourcePerson(record, personId)
     }
@@ -550,7 +551,7 @@ export class PersonDAO extends AbstractDAO {
     retries = 0,
   ): Promise<void> {
     try {
-      await this.prismaClient.$transaction(async (tx) => {
+      await this.transaction(async (tx) => {
         const existing = await tx.personIdentifier.findMany({
           where: { personId },
           select: { id: true, type: true, value: true },
@@ -620,7 +621,7 @@ export class PersonDAO extends AbstractDAO {
         error instanceof PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        if (retries < 3) {
+        if (retries < 3 && !this.inTransaction) {
           console.warn('Retrying identifier upsert...')
           await this.upsertIdentifiers(
             identifiers,
@@ -684,7 +685,7 @@ export class PersonDAO extends AbstractDAO {
         error instanceof PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        if (retries < 3) {
+        if (retries < 3 && !this.inTransaction) {
           console.warn('Retrying identifier upsert...')
           // recursive call : return the retry result !
           return this.upsertIdentifier(identifier, personUid, retries + 1)
@@ -733,7 +734,7 @@ export class PersonDAO extends AbstractDAO {
       idHal,
     ]
     try {
-      await this.prismaClient.$transaction(async (tx) => {
+      await this.transaction(async (tx) => {
         for (const identifier of identifiers) {
           await tx.personIdentifier.upsert({
             where: { personId_type: { personId, type: identifier.type } },
