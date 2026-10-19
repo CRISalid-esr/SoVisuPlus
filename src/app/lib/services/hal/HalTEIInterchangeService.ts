@@ -957,28 +957,53 @@ export class HalTEIInterchangeService {
     })
 
   /**
-   * The journal's ISSNs sent to HAL, keyed by HAL TEI type. A format with several distinct values
-   * is left out, as are ISSNs without a format.
+   * The journal's ISSNs sent to HAL, keyed by HAL TEI type: the ISSN-L in the format it is listed
+   * with (Online first), then the first ISSN of each remaining format, then ISSNs without a format
+   * (including an ISSN-L listed nowhere) to fill a remaining slot.
    */
   private resolveJournalIdentifiers(journal: Journal): Map<string, string> {
-    const valuesByType = new Map<string, Map<string, string>>()
-    for (const identifier of journal.identifiers ?? []) {
-      if (identifier.type !== 'issn' || !identifier.format) continue
-      const halType =
-        HalTEIInterchangeService.ISSN_IDNO_TYPES[identifier.format]
-      const value = (identifier.value ?? '').trim()
-      if (!halType || !value) continue
-      const values = valuesByType.get(halType) ?? new Map()
-      values.set(value.toLowerCase(), value)
-      valuesByType.set(halType, values)
+    const issns = (journal.identifiers ?? [])
+      .filter((id) => id.type === 'issn' || id.type === 'issn-l')
+      .map((id) => ({ value: (id.value ?? '').trim(), format: id.format }))
+      .filter((id) => id.value)
+    const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
+    const halType = (format: string | null) =>
+      format ? HalTEIInterchangeService.ISSN_IDNO_TYPES[format] : undefined
+
+    let issn: string | null = null
+    let eissn: string | null = null
+
+    const issnL = journal.issnL?.trim() ?? ''
+    if (issnL) {
+      const matches = issns.filter((id) => same(id.value, issnL))
+      if (matches.some((id) => halType(id.format) === 'eissn')) eissn = issnL
+      else if (matches.some((id) => halType(id.format) === 'issn')) issn = issnL
     }
+
+    const isSelected = (value: string) =>
+      [issn, eissn].some((v) => v && same(v, value))
+
+    for (const id of issns) {
+      if (isSelected(id.value)) continue
+      const type = halType(id.format)
+      if (type === 'eissn' && !eissn) eissn = id.value
+      if (type === 'issn' && !issn) issn = id.value
+    }
+
+    const unformatted = issns.filter((id) => !id.format).map((id) => id.value)
+    if (issnL && !issns.some((id) => same(id.value, issnL)))
+      unformatted.unshift(issnL)
+    for (const value of unformatted) {
+      if (issn && eissn) break
+      if (isSelected(value)) continue
+      if (eissn) issn = value
+      else if (issn) eissn = value
+      else issn = value
+    }
+
     const resolved = new Map<string, string>()
-    for (const halType of Object.values(
-      HalTEIInterchangeService.ISSN_IDNO_TYPES,
-    )) {
-      const values = valuesByType.get(halType)
-      if (values?.size === 1) resolved.set(halType, [...values.values()][0])
-    }
+    if (issn) resolved.set('issn', issn)
+    if (eissn) resolved.set('eissn', eissn)
     return resolved
   }
 
