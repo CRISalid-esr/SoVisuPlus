@@ -7,6 +7,7 @@ import { DocumentType, Document as DocumentClass } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 import { Concept } from '@/types/Concept'
 import { Journal } from '@/types/Journal'
+import { JournalIdentifier } from '@/types/JournalIdentifier'
 import { Contribution } from '@/types/Contribution'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
 import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
@@ -1108,6 +1109,96 @@ describe('HalTEIInterchangeService', () => {
         )
         expect(out).not.toContain('W123456789')
       })
+    })
+
+    describe('journal identifiers', () => {
+      const docWithJournal = (
+        identifiers: [string, string | null][],
+      ): DocumentClass => {
+        const doc = makeDoc(DocumentType.Article)
+        doc.journal = new Journal(
+          'Foundations of Physics',
+          '0015-9018',
+          'Springer',
+          identifiers.map(
+            ([value, format]) => new JournalIdentifier('issn', value, format),
+          ),
+        )
+        return doc
+      }
+
+      it('emits the print and online ISSNs in monogr before the journal title', () => {
+        const out = service.toHalTEI(
+          docWithJournal([
+            ['1572-9516', 'Online'],
+            ['0015-9018', 'Print'],
+          ]),
+          { halDocumentType: 'ART' },
+        )
+        expect(out).toContain(
+          '<idno type="issn">0015-9018</idno><idno type="eissn">1572-9516</idno><title level="j">Foundations of Physics</title>',
+        )
+      })
+
+      it('drops a format with several distinct values and keeps the other', () => {
+        const out = service.toHalTEI(
+          docWithJournal([
+            ['0015-9018', 'Print'],
+            ['0015-9026', 'Print'],
+            ['1572-9516', 'Online'],
+          ]),
+          { halDocumentType: 'ART' },
+        )
+        expect(out).not.toContain('type="issn"')
+        expect(out).toContain('<idno type="eissn">1572-9516</idno>')
+      })
+
+      it('emits a single ISSN when values differ only by case', () => {
+        const out = service.toHalTEI(
+          docWithJournal([
+            ['0004-637X', 'Print'],
+            ['0004-637x', 'Print'],
+          ]),
+          { halDocumentType: 'ART' },
+        )
+        expect(out.match(/type="issn"/g)).toHaveLength(1)
+      })
+
+      it('does not emit ISSNs without a format', () => {
+        const out = service.toHalTEI(docWithJournal([['0015-9018', null]]), {
+          halDocumentType: 'ART',
+        })
+        expect(out).not.toContain('type="issn"')
+        expect(out).not.toContain('type="eissn"')
+      })
+
+      it('does not emit ISSNs when the document has no journal', () => {
+        const out = service.toHalTEI(makeDoc(DocumentType.Article), {
+          halDocumentType: 'ART',
+        })
+        expect(out).not.toContain('type="issn"')
+      })
+
+      it('emits the ISSNs for a COMM', () => {
+        const out = service.toHalTEI(docWithJournal([['0015-9018', 'Print']]), {
+          halDocumentType: 'COMM',
+        })
+        expect(out).toContain('<idno type="issn">0015-9018</idno>')
+      })
+
+      it.each(['THESE', 'COUV'])(
+        'does not emit the ISSNs for a %s but keeps the journal title',
+        (halDocumentType) => {
+          const out = service.toHalTEI(
+            docWithJournal([['0015-9018', 'Print']]),
+            { halDocumentType },
+          )
+          expect(out).not.toContain('type="issn"')
+          expect(out).toContain(
+            '<title level="j">Foundations of Physics</title>',
+          )
+        },
+      )
     })
   })
 })

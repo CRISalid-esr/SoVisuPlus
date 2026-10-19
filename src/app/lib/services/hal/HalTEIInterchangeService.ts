@@ -167,12 +167,17 @@ export class HalTEIInterchangeService {
     this.patchLangUsage(dom, lang)
 
     if (document.journal) {
-      this.patchJournalAndImprint(dom, document.journal, {
-        volume: document.volume ?? null,
-        issue: document.issue ?? null,
-        pages: document.pages ?? null,
-        publicationDate: date,
-      })
+      this.patchJournalAndImprint(
+        dom,
+        document.journal,
+        {
+          volume: document.volume ?? null,
+          issue: document.issue ?? null,
+          pages: document.pages ?? null,
+          publicationDate: date,
+        },
+        HalTEIInterchangeService.JOURNAL_HAL_TYPES.includes(halCode),
+      )
     } else if (date) {
       this.patchProductionDate(dom, date)
     }
@@ -937,6 +942,46 @@ export class HalTEIInterchangeService {
     return false
   }
 
+  /** HAL types whose deposit carries the journal's ISSNs. */
+  private static readonly JOURNAL_HAL_TYPES: readonly string[] = Object.freeze([
+    'ART',
+    'COMM',
+    'POSTER',
+  ])
+
+  /** ISSN formats sent as `monogr/idno`, keyed by SoVisu+ format, valued by the HAL TEI `@type`. */
+  private static readonly ISSN_IDNO_TYPES: Readonly<Record<string, string>> =
+    Object.freeze({
+      Print: 'issn',
+      Online: 'eissn',
+    })
+
+  /**
+   * The journal's ISSNs sent to HAL, keyed by HAL TEI type. A format with several distinct values
+   * is left out, as are ISSNs without a format.
+   */
+  private resolveJournalIdentifiers(journal: Journal): Map<string, string> {
+    const valuesByType = new Map<string, Map<string, string>>()
+    for (const identifier of journal.identifiers ?? []) {
+      if (identifier.type !== 'issn' || !identifier.format) continue
+      const halType =
+        HalTEIInterchangeService.ISSN_IDNO_TYPES[identifier.format]
+      const value = (identifier.value ?? '').trim()
+      if (!halType || !value) continue
+      const values = valuesByType.get(halType) ?? new Map()
+      values.set(value.toLowerCase(), value)
+      valuesByType.set(halType, values)
+    }
+    const resolved = new Map<string, string>()
+    for (const halType of Object.values(
+      HalTEIInterchangeService.ISSN_IDNO_TYPES,
+    )) {
+      const values = valuesByType.get(halType)
+      if (values?.size === 1) resolved.set(halType, [...values.values()][0])
+    }
+    return resolved
+  }
+
   private patchJournalAndImprint(
     dom: Document,
     journal: Journal,
@@ -946,12 +991,22 @@ export class HalTEIInterchangeService {
       pages: string | null
       publicationDate: string | null
     },
+    withIdentifiers: boolean,
   ): void {
     const monogr = this.ensureElement(
       dom,
       "//*[local-name()='biblStruct']/*[local-name()='monogr']",
       () => this.createElement(dom, 'monogr'),
     )
+
+    if (withIdentifiers) {
+      for (const [type, value] of this.resolveJournalIdentifiers(journal)) {
+        const idno = this.createElement(dom, 'idno')
+        idno.setAttribute('type', type)
+        this.setText(idno, value)
+        this.insertMonogrChild(monogr, idno)
+      }
+    }
 
     const journalTitle = this.ensureElementWithin(
       monogr,
