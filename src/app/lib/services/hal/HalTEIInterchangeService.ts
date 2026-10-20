@@ -15,7 +15,7 @@ export type HalFileDescriptor = {
   fileType: string
   /** HAL fileSource code → `ref/@subtype` (author | greenPublisher | …). */
   fileSource: string
-  /** Embargo date `YYYY-MM-DD` → `date/@notBefore`; null/undefined = immediately visible. */
+  /** Embargo date `YYYY-MM-DD` → `ref/date/@notBefore`; null/undefined = immediately visible. */
   notBefore?: string | null
   /** 1-based sequence index → `ref/@n`. */
   n: number
@@ -856,7 +856,7 @@ export class HalTEIInterchangeService {
 
   /**
    * Reference each attached file in `editionStmt/edition` as a `<ref>` (with its embargo date as
-   * a preceding sibling `<date notBefore>` when delayed). `@type` is the file kind, `@subtype`
+   * a child `<date notBefore>` when delayed — the AOfr XSD rejects a `<date>` after a `<ref>`). `@type` is the file kind, `@subtype`
    * the file source, `@target` the filename used in the ZIP.
    */
   private patchFiles(dom: Document, files: HalFileDescriptor[]): void {
@@ -872,16 +872,16 @@ export class HalTEIInterchangeService {
     )
 
     for (const f of files) {
-      if (f.notBefore) {
-        const date = this.createElement(dom, 'date')
-        date.setAttribute('notBefore', f.notBefore)
-        edition.appendChild(date)
-      }
       const ref = this.createElement(dom, 'ref')
       ref.setAttribute('type', f.fileType)
       ref.setAttribute('subtype', f.fileSource)
       ref.setAttribute('target', f.fileName)
       ref.setAttribute('n', String(f.n))
+      if (f.notBefore) {
+        const date = this.createElement(dom, 'date')
+        date.setAttribute('notBefore', f.notBefore)
+        ref.appendChild(date)
+      }
       edition.appendChild(ref)
     }
   }
