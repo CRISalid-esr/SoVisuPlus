@@ -71,14 +71,22 @@ const authzSelfScoped = makeAuthzContext({
 
 const authzNoPermission = makeAuthzContext({ roleAssignments: [] })
 
-const mockPerson = (idrefValue?: string) => ({
+const mockPerson = (idrefValue?: string, validated = false) => ({
   uid: 'person-test-uid',
   getIdentifiers: () =>
     idrefValue
-      ? [new PersonIdentifier(PersonIdentifierType.idref, idrefValue)]
+      ? [
+          new PersonIdentifier(
+            PersonIdentifierType.idref,
+            idrefValue,
+            validated,
+          ),
+        ]
       : [],
   isIdentifierAuthenticated: () => false,
-  hasIdentifier: () => false,
+  isIdentifierValidated: () => !!idrefValue && validated,
+  hasIdentifier: (type: PersonIdentifierType) =>
+    !!idrefValue && type === PersonIdentifierType.idref,
   authzProperties: {
     __type: 'Person',
     perimeter: { Person: ['person-test-uid'], ResearchUnit: [] },
@@ -87,9 +95,14 @@ const mockPerson = (idrefValue?: string) => ({
 
 const mockAddPersonIdentifier = jest.fn()
 const mockRemovePersonIdentifier = jest.fn()
+const mockValidatePersonIdentifier = jest.fn()
 
-const setupStore = (idrefValue?: string, ownPerspective = true) => {
-  const person = mockPerson(idrefValue)
+const setupStore = (
+  idrefValue?: string,
+  ownPerspective = true,
+  validated = false,
+) => {
+  const person = mockPerson(idrefValue, validated)
   ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
     selector({
       user: {
@@ -98,6 +111,7 @@ const setupStore = (idrefValue?: string, ownPerspective = true) => {
         ownPerspective,
         addPersonIdentifier: mockAddPersonIdentifier,
         removePersonIdentifier: mockRemovePersonIdentifier,
+        validatePersonIdentifier: mockValidatePersonIdentifier,
       },
     }),
   )
@@ -119,6 +133,7 @@ describe('IdrefControl', () => {
     jest.clearAllMocks()
     mockAddPersonIdentifier.mockResolvedValue({ success: true })
     mockRemovePersonIdentifier.mockResolvedValue({ success: true })
+    mockValidatePersonIdentifier.mockResolvedValue({ success: true })
   })
 
   it('wide-scoped editor sees an Add button when no IdRef exists', () => {
@@ -195,5 +210,56 @@ describe('IdrefControl', () => {
     expect(
       screen.queryByText('idref_control_remove_button'),
     ).not.toBeInTheDocument()
+  })
+
+  it('wide-scoped editor validates a non-validated IdRef after confirmation', async () => {
+    setupStore('026404435')
+    setupSession(authzGlobal)
+    renderComponent()
+
+    expect(
+      screen.queryByTestId('identifier-validated-badge'),
+    ).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('identifier_validate_button'))
+    fireEvent.click(screen.getByText('identifier_validate_dialog_confirm'))
+
+    await waitFor(() =>
+      expect(mockValidatePersonIdentifier).toHaveBeenCalledWith(
+        'person-test-uid',
+        PersonIdentifierType.idref,
+      ),
+    )
+    expect(
+      await screen.findByText('identifier_validate_success'),
+    ).toBeInTheDocument()
+  })
+
+  it('validated IdRef shows the badge and no validate button', () => {
+    setupStore('026404435', true, true)
+    setupSession(authzGlobal)
+    renderComponent()
+
+    expect(screen.getByTestId('identifier-validated-badge')).toBeInTheDocument()
+    expect(
+      screen.queryByText('identifier_validate_button'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('self-scoped editor cannot validate an IdRef', () => {
+    setupStore('026404435')
+    setupSession(authzSelfScoped)
+    renderComponent()
+
+    expect(
+      screen.queryByText('identifier_validate_button'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('validated badge is shown to a viewer without permission', () => {
+    setupStore('026404435', false, true)
+    setupSession(authzNoPermission)
+    renderComponent()
+
+    expect(screen.getByTestId('identifier-validated-badge')).toBeInTheDocument()
   })
 })

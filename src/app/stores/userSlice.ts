@@ -29,6 +29,10 @@ export interface UserSlice {
       personUid: string,
       type: string,
     ) => Promise<{ success: boolean }>
+    validatePersonIdentifier: (
+      personUid: string,
+      type: string,
+    ) => Promise<{ success: boolean }>
   }
 }
 
@@ -142,6 +146,24 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
         return { success: true }
       } catch (error) {
         console.error('Failed to remove identifier', error)
+        return { success: false }
+      }
+    },
+    validatePersonIdentifier: async (personUid: string, type: string) => {
+      try {
+        const response = await fetch(
+          `/api/person/${personUid}/identifiers/${type}`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ validated: true }),
+          },
+        )
+        if (!response.ok) return { success: false }
+        await get().user.refreshPerspective()
+        return { success: true }
+      } catch (error) {
+        console.error('Failed to validate identifier', error)
         return { success: false }
       }
     },

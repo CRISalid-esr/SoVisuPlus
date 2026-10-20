@@ -22,6 +22,8 @@ import { OrcidLoginButton } from '@/app/[lang]/account/components/myProfile/comp
 import ManualIdentifierAddForm from './ManualIdentifierAddForm'
 import OrcidInfoBox from './OrcidInfoBox'
 import { useIdentifierCapabilities } from './useIdentifierCapabilities'
+import ValidatedBadge from './ValidatedBadge'
+import ValidateIdentifierButton from './ValidateIdentifierButton'
 import { Trans } from '@lingui/react'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import LinkIcon from '@mui/icons-material/Link'
@@ -46,12 +48,18 @@ const OrcidControl = () => {
       ? connectedUser?.person
       : currentPerspective
 
-  const { isAuthenticated, canAuthenticate, canAddUnauthenticated, canRemove } =
-    useIdentifierCapabilities(
-      person,
-      DbPersonIdentifierType.orcid,
-      ownPerspective,
-    )
+  const {
+    isAuthenticated,
+    isValidated,
+    canAuthenticate,
+    canAddUnauthenticated,
+    canRemove,
+    canValidate,
+  } = useIdentifierCapabilities(
+    person,
+    DbPersonIdentifierType.orcid,
+    ownPerspective,
+  )
 
   const [open, setOpen] = useState(false)
   const [severity, setSeverity] = useState<'success' | 'error'>('success')
@@ -91,7 +99,8 @@ const OrcidControl = () => {
     }
   }, [searchParams, ownPerspective])
 
-  const hasAnyCapability = canAuthenticate || canAddUnauthenticated || canRemove
+  const hasAnyCapability =
+    canAuthenticate || canAddUnauthenticated || canRemove || canValidate
 
   const remove = async () => {
     if (!person?.uid) return
@@ -216,9 +225,12 @@ const OrcidControl = () => {
           minWidth: 0,
         }}
       >
-        <Typography variant='subtitle1' fontWeight='bold'>
-          ORCID
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant='subtitle1' fontWeight='bold'>
+            ORCID
+          </Typography>
+          {orcid && isValidated && !isLinked && <ValidatedBadge />}
+        </Box>
         {orcidPid}
       </Paper>
     )
@@ -252,9 +264,26 @@ const OrcidControl = () => {
               </Box>
             </Tooltip>
           )}
+          {orcid && isValidated && !isLinked && <ValidatedBadge />}
         </Box>
 
-        {orcidPid}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            flexWrap: 'wrap',
+            minWidth: 0,
+          }}
+        >
+          {orcidPid}
+          {orcid && canValidate && person?.uid && (
+            <ValidateIdentifierButton
+              personUid={person.uid}
+              type={DbPersonIdentifierType.orcid}
+            />
+          )}
+        </Box>
 
         {orcid && canRemove && (
           <Button

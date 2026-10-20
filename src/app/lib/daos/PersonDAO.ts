@@ -553,7 +553,7 @@ export class PersonDAO extends AbstractDAO {
       await this.prismaClient.$transaction(async (tx) => {
         const existing = await tx.personIdentifier.findMany({
           where: { personId },
-          select: { id: true, type: true, value: true },
+          select: { id: true, type: true, value: true, validated: true },
         })
         const existingByType = new Map(existing.map((row) => [row.type, row]))
 
@@ -565,6 +565,7 @@ export class PersonDAO extends AbstractDAO {
                 personId,
                 type: identifier.type,
                 value: identifier.value,
+                validated: identifier.validated,
               },
             })
           } else if (current.value !== identifier.value) {
@@ -572,7 +573,17 @@ export class PersonDAO extends AbstractDAO {
             await tx.orcidIdentifier.deleteMany({ where: { id: current.id } })
             await tx.personIdentifier.update({
               where: { id: current.id },
-              data: { value: identifier.value },
+              data: {
+                value: identifier.value,
+                validated: identifier.validated,
+              },
+            })
+          } else if (identifier.validated && !current.validated) {
+            // Validation is only ever raised by the graph: a local validation
+            // must survive a sync that precedes its processing by the graph
+            await tx.personIdentifier.update({
+              where: { id: current.id },
+              data: { validated: true },
             })
           }
         }
@@ -777,6 +788,7 @@ export class PersonDAO extends AbstractDAO {
           personId: person.id,
           type: identifier.type as PersonIdentifierType,
           value: identifier.value,
+          validated: identifier.validated,
         },
       })
     } catch (error) {
@@ -806,6 +818,21 @@ export class PersonDAO extends AbstractDAO {
       select: { value: true },
     })
     return row?.value ?? null
+  }
+
+  /**
+   * Mark a person's identifier of the given type as validated.
+   * @returns whether an identifier row was updated
+   */
+  public async markIdentifierValidated(
+    personUid: string,
+    type: PersonIdentifierType,
+  ): Promise<boolean> {
+    const { count } = await this.prismaClient.personIdentifier.updateMany({
+      where: { person: { uid: personUid }, type },
+      data: { validated: true },
+    })
+    return count > 0
   }
 
   public async upsertOrcidIdentifierExtension(

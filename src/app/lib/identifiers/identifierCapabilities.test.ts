@@ -1,4 +1,5 @@
 import {
+  canValidateIdentifier,
   computeIdentifierCapabilities,
   identifierRemovalRequiresWideScope,
   identifierSupportsAuth,
@@ -108,5 +109,34 @@ describe('computeIdentifierCapabilities', () => {
     expect(
       computeIdentifierCapabilities({ ...wide, isOwn: false }).canRemove,
     ).toBe(true)
+  })
+})
+
+describe('canValidateIdentifier', () => {
+  const base = {
+    canManage: true,
+    isWide: true,
+    exists: true,
+    isValidated: false,
+  }
+
+  it('wide-scoped editor can validate an existing non-validated identifier', () => {
+    expect(canValidateIdentifier(base)).toBe(true)
+  })
+
+  it('self-scoped editor cannot validate', () => {
+    expect(canValidateIdentifier({ ...base, isWide: false })).toBe(false)
+  })
+
+  it('no manage permission (out of perimeter) → cannot validate', () => {
+    expect(canValidateIdentifier({ ...base, canManage: false })).toBe(false)
+  })
+
+  it('no identifier → nothing to validate', () => {
+    expect(canValidateIdentifier({ ...base, exists: false })).toBe(false)
+  })
+
+  it('already validated (or authenticated) → cannot validate again', () => {
+    expect(canValidateIdentifier({ ...base, isValidated: true })).toBe(false)
   })
 })

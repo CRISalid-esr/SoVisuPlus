@@ -1053,6 +1053,88 @@ describe('PersonDAO Integration Tests', () => {
 
       expect(await typesOf(dbPerson.id)).toEqual([PersonIdentifierType.idhals])
     })
+
+    const validatedOf = async (personId: number, type: PersonIdentifierType) =>
+      (
+        await prisma.personIdentifier.findFirstOrThrow({
+          where: { personId, type },
+        })
+      ).validated
+
+    test('the validated flag is taken from the graph on creation', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          new PersonIdentifier(
+            PersonIdentifierType.idhals,
+            'jacques-dupont',
+            true,
+          ),
+        ]),
+      )
+
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        true,
+      )
+    })
+
+    test('the graph raises the validated flag of an unchanged identifier', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+
+      await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          new PersonIdentifier(
+            PersonIdentifierType.idhals,
+            'jacques-dupont',
+            true,
+          ),
+        ]),
+        { authoritative: true },
+      )
+
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        true,
+      )
+    })
+
+    test('a local validation survives a sync where the graph does not report it yet', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+      await personDAO.markIdentifierValidated(
+        'local-identifiers',
+        PersonIdentifierType.idhals,
+      )
+
+      await personDAO.createOrUpdatePerson(makeIdentifiedPerson([idhals]), {
+        authoritative: true,
+      })
+
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        true,
+      )
+    })
+
+    test('a value change takes the validated flag from the graph', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+      await personDAO.markIdentifierValidated(
+        'local-identifiers',
+        PersonIdentifierType.idhals,
+      )
+
+      await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-durand'),
+        ]),
+      )
+
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        false,
+      )
+    })
   })
 
   test('createIdentifier throws IdentifierConflictError when the type already exists', async () => {
