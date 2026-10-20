@@ -525,7 +525,40 @@ describe('HalTEIInterchangeService', () => {
       expect(out).toContain('n="1"')
       expect(out).toContain('type="annex"')
       expect(out).toContain('target="data.csv"')
-      expect(out).toContain('notBefore="2026-12-24"')
+      expect(out).toMatch(
+        /<ref[^>]*target="doc\.pdf"[^>]*>\s*<date notBefore="2026-12-24"\/>\s*<\/ref>/,
+      )
+      expect(out).toMatch(/<ref[^>]*target="data\.csv"[^>]*\/>/)
+    })
+
+    // AOfr XSD: <edition> is a sequence date*, ref*, fs? — a <date> after a <ref> is invalid.
+    it('nests each embargo date inside its own <ref> when several files are embargoed', () => {
+      const out = service.toHalTEI(makeDoc(DocumentType.Article), {
+        files: [
+          {
+            fileName: 'doc.pdf',
+            fileType: 'file',
+            fileSource: 'author',
+            notBefore: '2026-12-24',
+            n: 1,
+          },
+          {
+            fileName: 'annex.pdf',
+            fileType: 'annex',
+            fileSource: 'author',
+            notBefore: '2027-06-24',
+            n: 2,
+          },
+        ],
+      })
+      expect(out).toMatch(
+        /<ref[^>]*target="doc\.pdf"[^>]*>\s*<date notBefore="2026-12-24"\/>\s*<\/ref>/,
+      )
+      expect(out).toMatch(
+        /<ref[^>]*target="annex\.pdf"[^>]*>\s*<date notBefore="2027-06-24"\/>\s*<\/ref>/,
+      )
+      expect(out).not.toMatch(/<edition>\s*<date/)
+      expect(out).not.toMatch(/<\/ref>\s*<date/)
     })
 
     it('emits availability/licence with the resolved @target', () => {
