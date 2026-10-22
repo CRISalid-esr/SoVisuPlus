@@ -2,7 +2,7 @@
 
 ### Manual Installation
 
-> **Node.js 24.19.0 is required** It is pinned identically in `.nvmrc`,
+> **Node.js 24.22.1 is required** It is pinned identically in `.nvmrc`,
 > in `package.json` (`engines.node`), in CI and in `docker/staging/Dockerfile`, so local
 > development, continuous integration and production all run the same runtime. With
 > [nvm](https://github.com/nvm-sh/nvm), run `nvm use` in the project root to select it
