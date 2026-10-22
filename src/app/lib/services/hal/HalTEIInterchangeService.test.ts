@@ -7,6 +7,7 @@ import { DocumentType, Document as DocumentClass } from '@/types/Document'
 import { Literal } from '@/types/Literal'
 import { Concept } from '@/types/Concept'
 import { Journal } from '@/types/Journal'
+import { JournalIdentifier } from '@/types/JournalIdentifier'
 import { Contribution } from '@/types/Contribution'
 import { AuthorityOrganization } from '@/types/AuthorityOrganization'
 import { AuthorityOrganizationIdentifier } from '@/types/AuthorityOrganizationIdentifier'
@@ -524,7 +525,40 @@ describe('HalTEIInterchangeService', () => {
       expect(out).toContain('n="1"')
       expect(out).toContain('type="annex"')
       expect(out).toContain('target="data.csv"')
-      expect(out).toContain('notBefore="2026-12-24"')
+      expect(out).toMatch(
+        /<ref[^>]*target="doc\.pdf"[^>]*>\s*<date notBefore="2026-12-24"\/>\s*<\/ref>/,
+      )
+      expect(out).toMatch(/<ref[^>]*target="data\.csv"[^>]*\/>/)
+    })
+
+    // AOfr XSD: <edition> is a sequence date*, ref*, fs? — a <date> after a <ref> is invalid.
+    it('nests each embargo date inside its own <ref> when several files are embargoed', () => {
+      const out = service.toHalTEI(makeDoc(DocumentType.Article), {
+        files: [
+          {
+            fileName: 'doc.pdf',
+            fileType: 'file',
+            fileSource: 'author',
+            notBefore: '2026-12-24',
+            n: 1,
+          },
+          {
+            fileName: 'annex.pdf',
+            fileType: 'annex',
+            fileSource: 'author',
+            notBefore: '2027-06-24',
+            n: 2,
+          },
+        ],
+      })
+      expect(out).toMatch(
+        /<ref[^>]*target="doc\.pdf"[^>]*>\s*<date notBefore="2026-12-24"\/>\s*<\/ref>/,
+      )
+      expect(out).toMatch(
+        /<ref[^>]*target="annex\.pdf"[^>]*>\s*<date notBefore="2027-06-24"\/>\s*<\/ref>/,
+      )
+      expect(out).not.toMatch(/<edition>\s*<date/)
+      expect(out).not.toMatch(/<\/ref>\s*<date/)
     })
 
     it('emits availability/licence with the resolved @target', () => {
@@ -1108,6 +1142,227 @@ describe('HalTEIInterchangeService', () => {
         )
         expect(out).not.toContain('W123456789')
       })
+    })
+
+    describe('journal identifiers', () => {
+      const docWithJournal = (
+        identifiers: [string, string | null][],
+        issnL = '',
+      ): DocumentClass => {
+        const doc = makeDoc(DocumentType.Article)
+        doc.journal = new Journal(
+          'Foundations of Physics',
+          issnL,
+          'Springer',
+          identifiers.map(
+            ([value, format]) => new JournalIdentifier('issn', value, format),
+          ),
+        )
+        return doc
+      }
+
+      const issnsOf = (doc: DocumentClass) => {
+        const out = service.toHalTEI(doc, { halDocumentType: 'ART' })
+        return {
+          issn: out.match(/<idno type="issn">([^<]*)<\/idno>/g) ?? [],
+          eissn: out.match(/<idno type="eissn">([^<]*)<\/idno>/g) ?? [],
+        }
+      }
+
+      it('emits the print and online ISSNs in monogr before the journal title', () => {
+        const out = service.toHalTEI(
+          docWithJournal([
+            ['1572-9516', 'Online'],
+            ['0015-9018', 'Print'],
+          ]),
+          { halDocumentType: 'ART' },
+        )
+        expect(out).toContain(
+          '<idno type="issn">0015-9018</idno><idno type="eissn">1572-9516</idno><title level="j">Foundations of Physics</title>',
+        )
+      })
+
+      it('sends an ISSN-L listed as Online as the eissn', () => {
+        expect(
+          issnsOf(
+            docWithJournal(
+              [
+                ['0015-9018', 'Print'],
+                ['1572-9516', 'Online'],
+                ['1111-2222', 'Online'],
+              ],
+              '1111-2222',
+            ),
+          ),
+        ).toEqual({
+          issn: ['<idno type="issn">0015-9018</idno>'],
+          eissn: ['<idno type="eissn">1111-2222</idno>'],
+        })
+      })
+
+      it('prefers the ISSN-L among several print ISSNs', () => {
+        expect(
+          issnsOf(
+            docWithJournal(
+              [
+                ['0015-9018', 'Print'],
+                ['0015-9026', 'Print'],
+              ],
+              '0015-9026',
+            ),
+          ).issn,
+        ).toEqual(['<idno type="issn">0015-9026</idno>'])
+      })
+
+      it('sends an ISSN-L listed in both formats as the eissn only', () => {
+        expect(
+          issnsOf(
+            docWithJournal(
+              [
+                ['0015-9018', 'Print'],
+                ['0015-9018', 'Online'],
+              ],
+              '0015-9018',
+            ),
+          ),
+        ).toEqual({
+          issn: [],
+          eissn: ['<idno type="eissn">0015-9018</idno>'],
+        })
+      })
+
+      it('takes the first ISSN of each format when the ISSN-L matches none', () => {
+        expect(
+          issnsOf(
+            docWithJournal(
+              [
+                ['0015-9018', 'Print'],
+                ['0015-9026', 'Print'],
+                ['1572-9516', 'Online'],
+                ['1572-9524', 'Online'],
+              ],
+              '9999-9999',
+            ),
+          ),
+        ).toEqual({
+          issn: ['<idno type="issn">0015-9018</idno>'],
+          eissn: ['<idno type="eissn">1572-9516</idno>'],
+        })
+      })
+
+      it('emits a single ISSN when values differ only by case', () => {
+        const out = service.toHalTEI(
+          docWithJournal([
+            ['0004-637X', 'Print'],
+            ['0004-637x', 'Print'],
+          ]),
+          { halDocumentType: 'ART' },
+        )
+        expect(out.match(/type="issn"/g)).toHaveLength(1)
+      })
+
+      it('sends a lone ISSN without a format as the issn', () => {
+        expect(issnsOf(docWithJournal([['0015-9018', null]]))).toEqual({
+          issn: ['<idno type="issn">0015-9018</idno>'],
+          eissn: [],
+        })
+      })
+
+      it('fills the eissn with an ISSN without a format when a print one exists', () => {
+        expect(
+          issnsOf(
+            docWithJournal([
+              ['1572-9516', null],
+              ['0015-9018', 'Print'],
+            ]),
+          ).eissn,
+        ).toEqual(['<idno type="eissn">1572-9516</idno>'])
+      })
+
+      it('fills the issn with an ISSN without a format when an online one exists', () => {
+        expect(
+          issnsOf(
+            docWithJournal([
+              ['0015-9018', null],
+              ['1572-9516', 'Online'],
+            ]),
+          ).issn,
+        ).toEqual(['<idno type="issn">0015-9018</idno>'])
+      })
+
+      it('sends two ISSNs without a format as issn then eissn', () => {
+        expect(
+          issnsOf(
+            docWithJournal([
+              ['0015-9018', null],
+              ['1572-9516', null],
+              ['1572-9524', null],
+            ]),
+          ),
+        ).toEqual({
+          issn: ['<idno type="issn">0015-9018</idno>'],
+          eissn: ['<idno type="eissn">1572-9516</idno>'],
+        })
+      })
+
+      it('skips an ISSN without a format already selected under another case', () => {
+        expect(
+          issnsOf(
+            docWithJournal([
+              ['0004-637X', 'Print'],
+              ['0004-637x', null],
+            ]),
+          ),
+        ).toEqual({
+          issn: ['<idno type="issn">0004-637X</idno>'],
+          eissn: [],
+        })
+      })
+
+      it('uses an ISSN-L listed in no identifier as an ISSN without a format', () => {
+        expect(
+          issnsOf(
+            docWithJournal(
+              [
+                ['0015-9018', null],
+                ['1572-9516', 'Online'],
+              ],
+              '0015-9026',
+            ),
+          ),
+        ).toEqual({
+          issn: ['<idno type="issn">0015-9026</idno>'],
+          eissn: ['<idno type="eissn">1572-9516</idno>'],
+        })
+      })
+
+      it('does not emit ISSNs when the document has no journal', () => {
+        const out = service.toHalTEI(makeDoc(DocumentType.Article), {
+          halDocumentType: 'ART',
+        })
+        expect(out).not.toContain('type="issn"')
+      })
+
+      it('emits the ISSNs for a COMM', () => {
+        const out = service.toHalTEI(docWithJournal([['0015-9018', 'Print']]), {
+          halDocumentType: 'COMM',
+        })
+        expect(out).toContain('<idno type="issn">0015-9018</idno>')
+      })
+
+      it.each(['THESE', 'COUV'])(
+        'does not emit the ISSNs for a %s but keeps the journal title',
+        (halDocumentType) => {
+          const out = service.toHalTEI(
+            docWithJournal([['0015-9018', 'Print']]),
+            { halDocumentType },
+          )
+          expect(out).not.toContain('type="issn"')
+          expect(out).toContain(
+            '<title level="j">Foundations of Physics</title>',
+          )
+        },
+      )
     })
   })
 })

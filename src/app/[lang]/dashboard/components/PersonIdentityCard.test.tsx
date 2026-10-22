@@ -8,7 +8,15 @@ import { Person } from '@/types/Person'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { PersonMembership } from '@/types/PersonMembership'
 import { IAgent } from '@/types/IAgent'
-import { PersonIdentifierType } from '@prisma/client'
+import { OrganizationCategory, PersonIdentifierType } from '@prisma/client'
+import { useSession } from 'next-auth/react'
+import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
+import { PermissionAction, PermissionSubject } from '@/types/Permission'
+import { EntityType } from '@/types/UserRoleScope'
+
+jest.mock('next-auth/react', () => ({
+  useSession: jest.fn(() => ({ data: null })),
+}))
 
 const pushMock = jest.fn()
 
@@ -78,6 +86,7 @@ const mkPerson = (): Person => {
         uid: 'rs1',
         acronym: 'IRJS',
         slug: 'irjs',
+        category: OrganizationCategory.research_unit,
       },
     } as PersonMembership,
   ]
@@ -96,10 +105,42 @@ const mkPerson = (): Person => {
   )
 }
 
+// Session of a user holding account_editor scoped to the given research unit
+const mockAccountEditorSession = (researchUnitUid: string) => {
+  ;(useSession as jest.Mock).mockReturnValue({
+    data: {
+      user: {
+        authz: makeAuthzContext({
+          personUid: 'editor-uid',
+          roleAssignments: [
+            makeAssignment(
+              'account_editor',
+              [
+                {
+                  action: PermissionAction.update,
+                  subject: PermissionSubject.Person,
+                  fields: ['identifiers'],
+                },
+              ],
+              [
+                {
+                  entityType: EntityType.ResearchUnit,
+                  entityUid: researchUnitUid,
+                },
+              ],
+            ),
+          ],
+        }),
+      },
+    },
+  })
+}
+
 // ---------- tests ----------
 describe('PersonIdentityCard', () => {
   beforeEach(() => {
     pushMock.mockClear()
+    ;(useSession as jest.Mock).mockReturnValue({ data: null })
     Lingui.i18n.activate('en')
   })
 
@@ -141,6 +182,36 @@ describe('PersonIdentityCard', () => {
     expect(
       screen.getByText('02725030X').closest('a')?.getAttribute('href'),
     ).toBe('https://www.idref.fr/02725030X')
+  })
+
+  it('hides the edit account button without the account_editor right', () => {
+    render(<PersonIdentityCard person={mkPerson()} />)
+
+    expect(
+      screen.queryByRole('link', { name: 'edit_account_tooltip' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('links to the account page when the user can edit the person identifiers', () => {
+    mockAccountEditorSession('rs1')
+
+    render(<PersonIdentityCard person={mkPerson()} />)
+
+    expect(
+      screen
+        .getByRole('link', { name: 'edit_account_tooltip' })
+        .getAttribute('href'),
+    ).toBe('/en/account?perspective=pascal-renard')
+  })
+
+  it('hides the edit account button when the right is scoped elsewhere', () => {
+    mockAccountEditorSession('other-unit')
+
+    render(<PersonIdentityCard person={mkPerson()} />)
+
+    expect(
+      screen.queryByRole('link', { name: 'edit_account_tooltip' }),
+    ).not.toBeInTheDocument()
   })
 
   it('throws if a non-Person agent is provided', () => {

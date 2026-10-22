@@ -15,7 +15,7 @@ export type HalFileDescriptor = {
   fileType: string
   /** HAL fileSource code → `ref/@subtype` (author | greenPublisher | …). */
   fileSource: string
-  /** Embargo date `YYYY-MM-DD` → `date/@notBefore`; null/undefined = immediately visible. */
+  /** Embargo date `YYYY-MM-DD` → `ref/date/@notBefore`; null/undefined = immediately visible. */
   notBefore?: string | null
   /** 1-based sequence index → `ref/@n`. */
   n: number
@@ -167,12 +167,17 @@ export class HalTEIInterchangeService {
     this.patchLangUsage(dom, lang)
 
     if (document.journal) {
-      this.patchJournalAndImprint(dom, document.journal, {
-        volume: document.volume ?? null,
-        issue: document.issue ?? null,
-        pages: document.pages ?? null,
-        publicationDate: date,
-      })
+      this.patchJournalAndImprint(
+        dom,
+        document.journal,
+        {
+          volume: document.volume ?? null,
+          issue: document.issue ?? null,
+          pages: document.pages ?? null,
+          publicationDate: date,
+        },
+        HalTEIInterchangeService.JOURNAL_HAL_TYPES.includes(halCode),
+      )
     } else if (date) {
       this.patchProductionDate(dom, date)
     }
@@ -851,7 +856,7 @@ export class HalTEIInterchangeService {
 
   /**
    * Reference each attached file in `editionStmt/edition` as a `<ref>` (with its embargo date as
-   * a preceding sibling `<date notBefore>` when delayed). `@type` is the file kind, `@subtype`
+   * a child `<date notBefore>` when delayed — the AOfr XSD rejects a `<date>` after a `<ref>`). `@type` is the file kind, `@subtype`
    * the file source, `@target` the filename used in the ZIP.
    */
   private patchFiles(dom: Document, files: HalFileDescriptor[]): void {
@@ -867,16 +872,16 @@ export class HalTEIInterchangeService {
     )
 
     for (const f of files) {
-      if (f.notBefore) {
-        const date = this.createElement(dom, 'date')
-        date.setAttribute('notBefore', f.notBefore)
-        edition.appendChild(date)
-      }
       const ref = this.createElement(dom, 'ref')
       ref.setAttribute('type', f.fileType)
       ref.setAttribute('subtype', f.fileSource)
       ref.setAttribute('target', f.fileName)
       ref.setAttribute('n', String(f.n))
+      if (f.notBefore) {
+        const date = this.createElement(dom, 'date')
+        date.setAttribute('notBefore', f.notBefore)
+        ref.appendChild(date)
+      }
       edition.appendChild(ref)
     }
   }
@@ -937,6 +942,71 @@ export class HalTEIInterchangeService {
     return false
   }
 
+  /** HAL types whose deposit carries the journal's ISSNs. */
+  private static readonly JOURNAL_HAL_TYPES: readonly string[] = Object.freeze([
+    'ART',
+    'COMM',
+    'POSTER',
+  ])
+
+  /** ISSN formats sent as `monogr/idno`, keyed by SoVisu+ format, valued by the HAL TEI `@type`. */
+  private static readonly ISSN_IDNO_TYPES: Readonly<Record<string, string>> =
+    Object.freeze({
+      Print: 'issn',
+      Online: 'eissn',
+    })
+
+  /**
+   * The journal's ISSNs sent to HAL, keyed by HAL TEI type: the ISSN-L in the format it is listed
+   * with (Online first), then the first ISSN of each remaining format, then ISSNs without a format
+   * (including an ISSN-L listed nowhere) to fill a remaining slot.
+   */
+  private resolveJournalIdentifiers(journal: Journal): Map<string, string> {
+    const issns = (journal.identifiers ?? [])
+      .filter((id) => id.type === 'issn' || id.type === 'issn-l')
+      .map((id) => ({ value: (id.value ?? '').trim(), format: id.format }))
+      .filter((id) => id.value)
+    const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
+    const halType = (format: string | null) =>
+      format ? HalTEIInterchangeService.ISSN_IDNO_TYPES[format] : undefined
+
+    let issn: string | null = null
+    let eissn: string | null = null
+
+    const issnL = journal.issnL?.trim() ?? ''
+    if (issnL) {
+      const matches = issns.filter((id) => same(id.value, issnL))
+      if (matches.some((id) => halType(id.format) === 'eissn')) eissn = issnL
+      else if (matches.some((id) => halType(id.format) === 'issn')) issn = issnL
+    }
+
+    const isSelected = (value: string) =>
+      [issn, eissn].some((v) => v && same(v, value))
+
+    for (const id of issns) {
+      if (isSelected(id.value)) continue
+      const type = halType(id.format)
+      if (type === 'eissn' && !eissn) eissn = id.value
+      if (type === 'issn' && !issn) issn = id.value
+    }
+
+    const unformatted = issns.filter((id) => !id.format).map((id) => id.value)
+    if (issnL && !issns.some((id) => same(id.value, issnL)))
+      unformatted.unshift(issnL)
+    for (const value of unformatted) {
+      if (issn && eissn) break
+      if (isSelected(value)) continue
+      if (eissn) issn = value
+      else if (issn) eissn = value
+      else issn = value
+    }
+
+    const resolved = new Map<string, string>()
+    if (issn) resolved.set('issn', issn)
+    if (eissn) resolved.set('eissn', eissn)
+    return resolved
+  }
+
   private patchJournalAndImprint(
     dom: Document,
     journal: Journal,
@@ -946,12 +1016,22 @@ export class HalTEIInterchangeService {
       pages: string | null
       publicationDate: string | null
     },
+    withIdentifiers: boolean,
   ): void {
     const monogr = this.ensureElement(
       dom,
       "//*[local-name()='biblStruct']/*[local-name()='monogr']",
       () => this.createElement(dom, 'monogr'),
     )
+
+    if (withIdentifiers) {
+      for (const [type, value] of this.resolveJournalIdentifiers(journal)) {
+        const idno = this.createElement(dom, 'idno')
+        idno.setAttribute('type', type)
+        this.setText(idno, value)
+        this.insertMonogrChild(monogr, idno)
+      }
+    }
 
     const journalTitle = this.ensureElementWithin(
       monogr,

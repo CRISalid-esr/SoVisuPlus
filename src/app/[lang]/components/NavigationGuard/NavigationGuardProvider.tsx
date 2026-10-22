@@ -170,7 +170,7 @@ type GuardedLinkProps = LinkProps &
     ref?: Ref<HTMLAnchorElement>
   }
 
-const isModifiedEvent = (event: React.MouseEvent): boolean =>
+export const isModifiedEvent = (event: React.MouseEvent): boolean =>
   event.metaKey ||
   event.ctrlKey ||
   event.shiftKey ||

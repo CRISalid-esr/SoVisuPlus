@@ -1701,6 +1701,13 @@ msgstr "Titre"
 msgid "documents_page_type_column"
 msgstr "Type"
 
+#: src/app/[lang]/dashboard/components/PersonIdentityCard.tsx:212
+#: src/app/[lang]/dashboard/components/PersonIdentityCard.tsx:216
+#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:296
+#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:300
+msgid "edit_account_tooltip"
+msgstr "Modifier le compte"
+
 #: src/app/[lang]/documents/[uid]/components/BibliographicInformation/EditLocaleText.tsx:217
 msgid "edit_field_add_language_button_label"
 msgstr "Ajouter une langue"
@@ -2792,13 +2799,11 @@ msgstr "Redimensionner les panneaux"
 msgid "research_structures_tree_search_placeholder"
 msgstr "Rechercher une structure…"
 
-#: src/app/[lang]/documents/components/HighlighterWithChipsEllipsis.tsx:169
-#: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:57
+#: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:70
 msgid "see_less_contributors"
 msgstr "Voir moins"
 
-#: src/app/[lang]/documents/components/HighlighterWithChipsEllipsis.tsx:161
-#: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:49
+#: src/app/[lang]/documents/components/HighlighterWithEllipsis.tsx:62
 msgid "see_more_contributors"
 msgstr "Voir plus"
 

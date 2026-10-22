@@ -1,7 +1,16 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { Box, Card, CardContent, Stack, Typography } from '@mui/material'
+import {
+  Box,
+  Card,
+  CardContent,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useTheme } from '@mui/material/styles'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -12,6 +21,10 @@ import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { IAgent } from '@/types/IAgent'
 import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
+import { useSession } from 'next-auth/react'
+import { t } from '@lingui/core/macro'
+import { abilityFromAuthzContext } from '@/app/auth/ability'
+import { PermissionAction } from '@/types/Permission'
 
 const IDENTIFIERS_TO_SHOW: DbPersonIdentifierType[] = [
   DbPersonIdentifierType.idhals,
@@ -35,6 +48,13 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
   const searchParams = useSearchParams()
   const lang = (Lingui.i18n.locale || 'ul') as ExtendedLanguageCode
   const displayName = person.getDisplayName(lang) || ''
+  const { data: session } = useSession()
+  const ability = useMemo(
+    () => abilityFromAuthzContext(session?.user?.authz),
+    [session?.user?.authz],
+  )
+  const canEditAccount =
+    !!person.slug && ability.can(PermissionAction.update, person, 'identifiers')
 
   const navigateToPerspective = (slug: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -188,6 +208,19 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
                 <Box key={`${id.type}:${id.value}`}>{badge}</Box>
               )
             })}
+            {canEditAccount && (
+              <Tooltip title={t`edit_account_tooltip`} arrow>
+                <IconButton
+                  component={Link}
+                  href={`/${lang}/account?perspective=${encodeURIComponent(person.slug!)}`}
+                  aria-label={t`edit_account_tooltip`}
+                  size='small'
+                  sx={{ mt: 0.8, p: 0.5, alignSelf: 'center' }}
+                >
+                  <EditOutlinedIcon fontSize='small' />
+                </IconButton>
+              </Tooltip>
+            )}
           </Stack>
         </Stack>
       </CardContent>

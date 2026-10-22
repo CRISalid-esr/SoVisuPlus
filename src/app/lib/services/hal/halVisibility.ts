@@ -1,6 +1,6 @@
 /**
  * File visibility / embargo options (as used by the deposit form) → the file's open-access
- * date, emitted as `editionStmt/edition/date/@notBefore` in the AOfr TEI.
+ * date, emitted as `editionStmt/edition/ref/date/@notBefore` in the AOfr TEI.
  *
  * `now` means immediate availability — no `<date notBefore>` is emitted. The other codes are
  * offsets from the deposit date.

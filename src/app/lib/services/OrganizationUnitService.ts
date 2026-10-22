@@ -11,6 +11,15 @@ import { createFuzzyScorer } from '@/utils/fuzzySearch/fuzzySearch'
 import { OrganizationDirectoryEntry } from '@/types/OrganizationDirectory'
 import { computeEffectiveHidden } from '@/lib/services/organizationVisibility'
 import { Literal } from '@/types/Literal'
+import { AuthzContext } from '@/types/authz'
+import { PermissionAction } from '@/types/Permission'
+import { organizationPerimeterFromMemberships } from '@/types/organizationScopes'
+import {
+  abilityFromAuthzContext,
+  EMPTY_PRINCIPAL,
+  hasUnscopedPermission,
+  hasWiderThanSelfPersonScope,
+} from '@/app/auth/ability'
 import {
   OAStatus,
   OrganizationCategory,
@@ -405,6 +414,61 @@ export class OrganizationUnitService {
     const total = members.length
     const start = (query.page - 1) * query.pageSize
     return { members: members.slice(start, start + query.pageSize), total }
+  }
+
+  /**
+   * Set `canEditAccount` on each member: whether the viewer may edit the
+   * person's identifiers (the account_editor right), with the same perimeter
+   * rule as the identifier routes. Meant for one page of members: the
+   * memberships are only fetched when a scoped right has to be resolved.
+   */
+  async markEditableAccounts(
+    members: StructureMember[],
+    authz: AuthzContext = EMPTY_PRINCIPAL,
+  ): Promise<void> {
+    const ability = abilityFromAuthzContext(authz)
+    const setAll = (canEdit: (member: StructureMember) => boolean) => {
+      for (const member of members) {
+        member.canEditAccount = canEdit(member)
+      }
+    }
+
+    if (!ability.can(PermissionAction.update, 'Person', 'identifiers')) {
+      setAll(() => false)
+      return
+    }
+    if (hasUnscopedPermission(authz, 'update', 'Person', 'identifiers')) {
+      setAll(() => true)
+      return
+    }
+    if (
+      !hasWiderThanSelfPersonScope(authz, 'update', 'Person', 'identifiers')
+    ) {
+      setAll((member) => member.uid === authz.personUid)
+      return
+    }
+
+    const membershipsByPersonId =
+      await new PersonDAO().fetchMembershipsByPersonIds(
+        members.map((member) => member.personId),
+      )
+    setAll((member) =>
+      ability.can(
+        PermissionAction.update,
+        {
+          authzProperties: {
+            __type: 'Person',
+            perimeter: {
+              Person: [member.uid],
+              ...organizationPerimeterFromMemberships(
+                membershipsByPersonId.get(member.personId),
+              ),
+            },
+          },
+        },
+        'identifiers',
+      ),
+    )
   }
 
   async fetchOrganizationUnitBySlug(
