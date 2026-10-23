@@ -9,14 +9,13 @@ import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import { InputJsonValue } from '@prisma/client/runtime/library'
+import { runInTransaction } from '@/lib/daos/transaction'
 
 export class PersonService {
   private personDAO: PersonDAO
-  private actionDAO: ActionDAO
 
   constructor() {
     this.personDAO = new PersonDAO()
-    this.actionDAO = new ActionDAO()
   }
 
   async fetchPeople(
@@ -48,13 +47,17 @@ export class PersonService {
    * `authenticated` flag is derived from the operation (manual add → false,
    * authentication → true) and stamped into the message payload — it is never
    * persisted. See specs/872-refactor-account-edition-workflow/prompt.md.
+   *
+   * `actionDAO` is the transaction-bound DAO of the calling flow, so the
+   * action commits (or rolls back) together with the identifier write.
    */
   private async recordIdentifierAction(
+    actionDAO: ActionDAO,
     personUid: string,
     actionType: ActionType,
     parameters: InputJsonValue,
   ): Promise<void> {
-    await this.actionDAO.createAction({
+    await actionDAO.createAction({
       actionType,
       targetType: ActionTargetType.PERSON,
       targetUid: personUid,
@@ -74,20 +77,29 @@ export class PersonService {
     identifier: PersonIdentifier,
   ): Promise<void> {
     try {
-      await this.personDAO.createIdentifier(identifier, personUid)
+      await runInTransaction(async (tx) => {
+        const personDAO = new PersonDAO(tx)
+        const actionDAO = new ActionDAO(tx)
+        await personDAO.createIdentifier(identifier, personUid)
+        const payload: IdentifierMessagePayload = {
+          ...identifier.toJson(),
+          authenticated: false,
+        }
+        await this.recordIdentifierAction(
+          actionDAO,
+          personUid,
+          ActionType.ADD,
+          {
+            identifier: payload,
+          },
+        )
+      })
     } catch (error) {
       if (error instanceof IdentifierConflictError) throw error
       const message = `Error adding identifier (type=${identifier.type}, value=${identifier.value}, personUid=${personUid})`
       console.error(message, error)
       throw new Error(message)
     }
-    const payload: IdentifierMessagePayload = {
-      ...identifier.toJson(),
-      authenticated: false,
-    }
-    await this.recordIdentifierAction(personUid, ActionType.ADD, {
-      identifier: payload,
-    })
   }
 
   /**
@@ -100,30 +112,32 @@ export class PersonService {
     identifier: ORCIDIdentifier,
   ): Promise<void> {
     try {
-      const existed =
-        (await this.personDAO.findIdentifierValue(
+      await runInTransaction(async (tx) => {
+        const personDAO = new PersonDAO(tx)
+        const actionDAO = new ActionDAO(tx)
+        const existed =
+          (await personDAO.findIdentifierValue(
+            personUid,
+            PersonIdentifierType.orcid,
+          )) !== null
+
+        const persisted = await personDAO.upsertIdentifier(
+          identifier,
           personUid,
-          PersonIdentifierType.orcid,
-        )) !== null
+        )
+        await personDAO.upsertOrcidIdentifierExtension(persisted.id, identifier)
 
-      const persisted = await this.personDAO.upsertIdentifier(
-        identifier,
-        personUid,
-      )
-      await this.personDAO.upsertOrcidIdentifierExtension(
-        persisted.id,
-        identifier,
-      )
-
-      const payload: IdentifierMessagePayload = {
-        ...identifier.toJson(),
-        authenticated: true,
-      }
-      await this.recordIdentifierAction(
-        personUid,
-        existed ? ActionType.UPDATE : ActionType.ADD,
-        { identifier: payload },
-      )
+        const payload: IdentifierMessagePayload = {
+          ...identifier.toJson(),
+          authenticated: true,
+        }
+        await this.recordIdentifierAction(
+          actionDAO,
+          personUid,
+          existed ? ActionType.UPDATE : ActionType.ADD,
+          { identifier: payload },
+        )
+      })
     } catch (error) {
       const message = `Error authenticating ORCID identifier (personUid=${personUid}, value=${identifier.value})`
       console.error(message, error)
@@ -147,22 +161,27 @@ export class PersonService {
   ): Promise<void> {
     const { type, value, halLogin } = params
     try {
-      const existed =
-        (await this.personDAO.findIdentifierValue(personUid, type)) !== null
+      await runInTransaction(async (tx) => {
+        const personDAO = new PersonDAO(tx)
+        const actionDAO = new ActionDAO(tx)
+        const existed =
+          (await personDAO.findIdentifierValue(personUid, type)) !== null
 
-      // hal_login is written silently (no Action / no outgoing message).
-      const identifier = new PersonIdentifier(type, value)
-      await this.personDAO.upsertHalIdentifiers(personUid, identifier, halLogin)
+        // hal_login is written silently (no Action / no outgoing message).
+        const identifier = new PersonIdentifier(type, value)
+        await personDAO.upsertHalIdentifiers(personUid, identifier, halLogin)
 
-      const payload: IdentifierMessagePayload = {
-        ...identifier.toJson(),
-        authenticated: true,
-      }
-      await this.recordIdentifierAction(
-        personUid,
-        existed ? ActionType.UPDATE : ActionType.ADD,
-        { identifier: payload },
-      )
+        const payload: IdentifierMessagePayload = {
+          ...identifier.toJson(),
+          authenticated: true,
+        }
+        await this.recordIdentifierAction(
+          actionDAO,
+          personUid,
+          existed ? ActionType.UPDATE : ActionType.ADD,
+          { identifier: payload },
+        )
+      })
     } catch (error) {
       const message = `Error authenticating HAL identifier (type=${type}, value=${value}, personUid=${personUid})`
       console.error(message, error)
@@ -175,11 +194,20 @@ export class PersonService {
     type: PersonIdentifierType,
   ): Promise<void> {
     try {
-      const value = await this.personDAO.findIdentifierValue(personUid, type)
-      await this.personDAO.deleteIdentifier(personUid, type)
-      await this.recordIdentifierAction(personUid, ActionType.REMOVE, {
-        type,
-        value,
+      await runInTransaction(async (tx) => {
+        const personDAO = new PersonDAO(tx)
+        const actionDAO = new ActionDAO(tx)
+        const value = await personDAO.findIdentifierValue(personUid, type)
+        await personDAO.deleteIdentifier(personUid, type)
+        await this.recordIdentifierAction(
+          actionDAO,
+          personUid,
+          ActionType.REMOVE,
+          {
+            type,
+            value,
+          },
+        )
       })
     } catch (error) {
       const message = `Error removing identifier (type=${type}, personUid=${personUid})`

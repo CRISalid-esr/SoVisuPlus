@@ -16,6 +16,7 @@ Each major feature is backed by a spec document in `specs/<branch-name>/prompt.m
 | `add-hide-structure-option-and-permission`       | [`specs/add-hide-structure-option-and-permission/prompt.md`](specs/add-hide-structure-option-and-permission/prompt.md)             |
 | `feat-make-search-fuzzy`                         | [`specs/feat-make-search-fuzzy/prompt.md`](specs/feat-make-search-fuzzy/prompt.md)                                                 |
 | `882-no-self-deletion-of-idref-for-a-researcher` | [`specs/882-no-self-deletion-of-idref-for-a-researcher/prompt.md`](specs/882-no-self-deletion-of-idref-for-a-researcher/prompt.md) |
+| `982-allow-cross-dao-transactions`               | [`specs/982-allow-cross-dao-transactions/prompt.md`](specs/982-allow-cross-dao-transactions/prompt.md)                             |
 
 ## Git commits
 

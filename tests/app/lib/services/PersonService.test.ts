@@ -13,6 +13,7 @@ import {
 } from '@/types/PersonIdentifier'
 import { IdentifierConflictError } from '@/lib/daos/PersonDAO'
 import { ActionType, ActionTargetType } from '@/types/Action'
+import { ActionDAO } from '@/lib/daos/ActionDAO'
 
 describe('PersonService Integration Tests', () => {
   let personService: PersonService
@@ -22,6 +23,7 @@ describe('PersonService Integration Tests', () => {
   })
 
   afterEach(async () => {
+    jest.restoreAllMocks()
     await prisma.action.deleteMany()
     await prisma.person.deleteMany()
   })
@@ -395,6 +397,106 @@ describe('PersonService Integration Tests', () => {
       where: { targetUid: person.uid, actionType: ActionType.REMOVE },
     })
     expect(action).not.toBeNull()
+  })
+
+  describe('identifier write and Action are atomic', () => {
+    const createPerson = (uid: string) =>
+      prisma.person.create({
+        data: {
+          uid,
+          email: `${uid}@example.com`,
+          firstName: 'Atomic',
+          lastName: 'Test',
+          normalizedName: 'atomic test',
+          external: false,
+        },
+      })
+
+    const failActionCreation = () =>
+      jest
+        .spyOn(ActionDAO.prototype, 'createAction')
+        .mockRejectedValueOnce(new Error('action failure'))
+
+    const identifiersOf = (personId: number) =>
+      prisma.personIdentifier.findMany({ where: { personId } })
+
+    test('addIdentifier rolls back the identifier when the action fails', async () => {
+      const person = await createPerson('person-atomic-add')
+      failActionCreation()
+
+      await expect(
+        personService.addIdentifier(
+          person.uid,
+          new PersonIdentifier(PersonIdentifierType.idref, '127220747'),
+        ),
+      ).rejects.toThrow('Error adding identifier')
+
+      expect(await identifiersOf(person.id)).toHaveLength(0)
+      expect(await prisma.action.count()).toBe(0)
+    })
+
+    test('authenticateOrcidIdentifier rolls back the identifier and its extension when the action fails', async () => {
+      const person = await createPerson('person-atomic-orcid')
+      failActionCreation()
+
+      await expect(
+        personService.authenticateOrcidIdentifier(
+          person.uid,
+          new ORCIDIdentifier('0000-0001-2345-6789', {
+            accessToken: 'a',
+            refreshToken: 'r',
+            tokenType: 'bearer',
+            scope: ['/read-limited'],
+            obtainedAt: new Date('2026-01-01T00:00:00.000Z'),
+            expiresAt: new Date('2026-01-01T01:00:00.000Z'),
+          }),
+        ),
+      ).rejects.toThrow('Error authenticating ORCID identifier')
+
+      expect(await identifiersOf(person.id)).toHaveLength(0)
+      expect(await prisma.orcidIdentifier.count()).toBe(0)
+      expect(await prisma.action.count()).toBe(0)
+    })
+
+    test('authenticateHalIdentifier rolls back idHAL and hal_login when the action fails', async () => {
+      const person = await createPerson('person-atomic-hal')
+      failActionCreation()
+
+      await expect(
+        personService.authenticateHalIdentifier(person.uid, {
+          type: PersonIdentifierType.idhals,
+          value: 'jane-doe',
+          halLogin: 'jdoe',
+        }),
+      ).rejects.toThrow('Error authenticating HAL identifier')
+
+      expect(await identifiersOf(person.id)).toHaveLength(0)
+      expect(await prisma.action.count()).toBe(0)
+    })
+
+    test('removeIdentifier keeps the identifier when the action fails', async () => {
+      const person = await prisma.person.create({
+        data: {
+          uid: 'person-atomic-remove',
+          email: 'atomic-remove@example.com',
+          firstName: 'Atomic',
+          lastName: 'Remove',
+          normalizedName: 'atomic remove',
+          external: false,
+          identifiers: {
+            create: { type: PersonIdentifierType.idref, value: '127220747' },
+          },
+        },
+      })
+      failActionCreation()
+
+      await expect(
+        personService.removeIdentifier(person.uid, PersonIdentifierType.idref),
+      ).rejects.toThrow('Error removing identifier')
+
+      expect(await identifiersOf(person.id)).toHaveLength(1)
+      expect(await prisma.action.count()).toBe(0)
+    })
   })
 
   test('should throw if ORCID oauth data is missing', async () => {

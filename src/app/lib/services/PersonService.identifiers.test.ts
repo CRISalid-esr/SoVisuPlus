@@ -41,6 +41,13 @@ jest.mock('@/lib/daos/ActionDAO', () => ({
   })),
 }))
 
+// Run the transaction callback against a stand-in client: the DAOs are mocked
+jest.mock('@/lib/daos/transaction', () => ({
+  runInTransaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>) =>
+    fn({}),
+  ),
+}))
+
 const orcidOauth = () => ({
   accessToken: 'a',
   refreshToken: 'r',
