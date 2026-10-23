@@ -538,6 +538,9 @@ model PersonIdentifier {
   person   Person               @relation(fields: [personId], references: [id], onDelete: Cascade)
   personId Int
 
+  // Confirmed by a privileged user without authentication (synced from the graph)
+  validated Boolean @default(false)
+
   orcidIdentifier OrcidIdentifier?
 
   @@unique([type, value]) // The same identifer should not be used twice

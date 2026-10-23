@@ -7,10 +7,7 @@ import { PersonIdentifierWithRelations as DBPersonIdentifier } from '@/prisma-sc
 import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 
 export type OrcidScope =
-  | '/read-limited'
-  | '/person/update'
-  | '/activities/update'
-  | '/authenticate'
+  '/read-limited' | '/person/update' | '/activities/update' | '/authenticate'
 
 export type OrcidIdentifierJson = {
   scope: OrcidScope[]
@@ -39,8 +36,12 @@ export type OrcidOAuthData = {
 export class ORCIDIdentifier extends PersonIdentifier {
   public oauth?: OrcidOAuthData
 
-  constructor(orcid: string, oauth?: OrcidOAuthData) {
-    super(DbPersonIdentifierType.orcid, ORCIDIdentifier.normalize(orcid))
+  constructor(orcid: string, oauth?: OrcidOAuthData, validated = false) {
+    super(
+      DbPersonIdentifierType.orcid,
+      ORCIDIdentifier.normalize(orcid),
+      validated,
+    )
     this.oauth = oauth
   }
 
@@ -113,18 +114,23 @@ export class ORCIDIdentifier extends PersonIdentifier {
     const ext = json.oauth
     const scopeStr = ext?.scope ?? null
 
-    return new ORCIDIdentifier(json.value, {
-      tokenType: ext!.tokenType ?? null,
-      scope: ext!.scope,
-      obtainedAt: new Date(ext!.obtainedAt),
-      expiresAt: new Date(ext!.expiresAt),
-      createdAt: new Date(ext!.createdAt),
-      updatedAt: new Date(ext!.updatedAt),
-    })
+    return new ORCIDIdentifier(
+      json.value,
+      {
+        tokenType: ext!.tokenType ?? null,
+        scope: ext!.scope,
+        obtainedAt: new Date(ext!.obtainedAt),
+        expiresAt: new Date(ext!.expiresAt),
+        createdAt: new Date(ext!.createdAt),
+        updatedAt: new Date(ext!.updatedAt),
+      },
+      json.validated ?? false,
+    )
   }
 
   static fromDB(
-    identifier: Omit<DBPersonIdentifier, 'id' | 'personId'>,
+    identifier: Omit<DBPersonIdentifier, 'id' | 'personId' | 'validated'> &
+      Partial<Pick<DBPersonIdentifier, 'validated'>>,
   ): ORCIDIdentifier {
     if (identifier.type !== DbPersonIdentifierType.orcid) {
       throw new Error(
@@ -138,13 +144,17 @@ export class ORCIDIdentifier extends PersonIdentifier {
     }
 
     const scopeStr = identifier.orcidIdentifier.scope
-    return new ORCIDIdentifier(identifier.value, {
-      tokenType: identifier.orcidIdentifier.tokenType ?? null,
-      scope: ORCIDIdentifier.parseOrcidScope(scopeStr),
-      obtainedAt: identifier.orcidIdentifier.obtainedAt,
-      expiresAt: identifier.orcidIdentifier.expiresAt,
-      createdAt: identifier.orcidIdentifier.createdAt,
-      updatedAt: identifier.orcidIdentifier.updatedAt,
-    })
+    return new ORCIDIdentifier(
+      identifier.value,
+      {
+        tokenType: identifier.orcidIdentifier.tokenType ?? null,
+        scope: ORCIDIdentifier.parseOrcidScope(scopeStr),
+        obtainedAt: identifier.orcidIdentifier.obtainedAt,
+        expiresAt: identifier.orcidIdentifier.expiresAt,
+        createdAt: identifier.orcidIdentifier.createdAt,
+        updatedAt: identifier.orcidIdentifier.updatedAt,
+      },
+      identifier.validated ?? false,
+    )
   }
 }

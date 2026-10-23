@@ -169,6 +169,7 @@ describe('PersonDAO', () => {
         personId: expect.any(Number),
         type: 'orcid',
         value: '0000-0001-2345-6789',
+        validated: false,
       },
     })
     expect(mockPrisma.personIdentifier.update).not.toHaveBeenCalled()
@@ -202,7 +203,7 @@ describe('PersonDAO', () => {
     })
     expect(mockPrisma.personIdentifier.update).toHaveBeenCalledWith({
       where: { id: 7 },
-      data: { value: '0000-0001-2345-6789' },
+      data: { value: '0000-0001-2345-6789', validated: false },
     })
   })
 

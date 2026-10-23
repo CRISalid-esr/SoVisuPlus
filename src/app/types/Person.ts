@@ -188,6 +188,16 @@ class Person implements IAgent, Authorizable {
     return false
   }
 
+  /**
+   * Whether the identifier of the given type is validated. Authentication
+   * implies validation, so an authenticated identifier is always validated.
+   */
+  isIdentifierValidated(type: PersonIdentifierType): boolean {
+    const identifier = this.identifiers.find((id) => id.type === type)
+    if (!identifier) return false
+    return identifier.validated || this.isIdentifierAuthenticated(type)
+  }
+
   private static computeDisplayName(
     firstName?: string | null,
     lastName?: string | null,
@@ -248,6 +258,7 @@ class Person implements IAgent, Authorizable {
       return ORCIDIdentifier.fromDB({
         type: x.type,
         value: x.value,
+        validated: x.validated,
         orcidIdentifier: x.orcidIdentifier,
       })
     }
@@ -255,6 +266,7 @@ class Person implements IAgent, Authorizable {
     return PersonIdentifier.fromDB({
       type: x.type,
       value: x.value,
+      validated: x.validated,
     })
   }
 

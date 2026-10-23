@@ -83,20 +83,26 @@ const setupSession = (authz: unknown) => {
 
 const mockAddPersonIdentifier = jest.fn()
 const mockRemovePersonIdentifier = jest.fn()
+const mockValidatePersonIdentifier = jest.fn()
 
 const makeStore = (
-  identifiers: Array<{ type: string; value: string }>,
+  identifiers: Array<{ type: string; value: string; validated?: boolean }>,
   ownPerspective = true,
 ) => {
   const has = (type: string) => identifiers.some((i) => i.type === type)
+  const isAuthenticated = (type: string) =>
+    (type === PersonIdentifierType.idhals ||
+      type === PersonIdentifierType.idhali) &&
+    has(PersonIdentifierType.hal_login)
   const person = {
     uid: 'person-uid',
     getIdentifiers: () => identifiers,
     hasIdentifier: (type: string) => has(type),
-    isIdentifierAuthenticated: (type: string) =>
-      (type === PersonIdentifierType.idhals ||
-        type === PersonIdentifierType.idhali) &&
-      has(PersonIdentifierType.hal_login),
+    isIdentifierAuthenticated: isAuthenticated,
+    isIdentifierValidated: (type: string) =>
+      has(type) &&
+      (!!identifiers.find((i) => i.type === type)?.validated ||
+        isAuthenticated(type)),
     authzProperties: {
       __type: 'Person',
       perimeter: { Person: ['person-uid'], ResearchUnit: [] },
@@ -110,6 +116,7 @@ const makeStore = (
         ownPerspective,
         addPersonIdentifier: mockAddPersonIdentifier,
         removePersonIdentifier: mockRemovePersonIdentifier,
+        validatePersonIdentifier: mockValidatePersonIdentifier,
       },
     }),
   )
@@ -121,7 +128,54 @@ describe('HalControl', () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams())
     mockAddPersonIdentifier.mockResolvedValue({ success: true })
     mockRemovePersonIdentifier.mockResolvedValue({ success: true })
+    mockValidatePersonIdentifier.mockResolvedValue({ success: true })
     setupSession(authzGlobal)
+  })
+
+  it('non-validated idHAL: wide editor validates it with its stored type', async () => {
+    makeStore([{ type: PersonIdentifierType.idhali, value: '12345' }])
+    renderWithProviders()
+
+    fireEvent.click(screen.getByText('identifier_validate_button'))
+    fireEvent.click(screen.getByText('identifier_validate_dialog_confirm'))
+
+    await waitFor(() =>
+      expect(mockValidatePersonIdentifier).toHaveBeenCalledWith(
+        'person-uid',
+        PersonIdentifierType.idhali,
+      ),
+    )
+  })
+
+  it('validated idHAL: badge, no validate button', () => {
+    makeStore([
+      {
+        type: PersonIdentifierType.idhals,
+        value: 'jacques-dupont',
+        validated: true,
+      },
+    ])
+    renderWithProviders()
+
+    expect(screen.getByTestId('identifier-validated-badge')).toBeInTheDocument()
+    expect(
+      screen.queryByText('identifier_validate_button'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('authenticated idHAL: no validate button and no validated badge', () => {
+    makeStore([
+      { type: PersonIdentifierType.idhals, value: 'jacques-dupont' },
+      { type: PersonIdentifierType.hal_login, value: 'jdupont' },
+    ])
+    renderWithProviders()
+
+    expect(
+      screen.queryByText('identifier_validate_button'),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByTestId('identifier-validated-badge'),
+    ).not.toBeInTheDocument()
   })
 
   it('no HAL identifier: shows auth button and manual add form', () => {

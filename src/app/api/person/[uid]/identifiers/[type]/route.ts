@@ -12,6 +12,7 @@ import {
 } from '@/types/PersonIdentifier'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import {
+  canValidateIdentifier,
   computeIdentifierCapabilities,
   identifierRemovalRequiresWideScope,
   identifierSupportsAuth,
@@ -201,6 +202,69 @@ export const DELETE = async (_request: Request, context: RouteContext) => {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error(`❌ Error removing ${identifierType} identifier:`, error)
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 },
+    )
+  }
+}
+
+export const PATCH = async (request: Request, context: RouteContext) => {
+  const { session, error: authError } = await requireSession()
+  if (authError) return authError
+
+  const resolved = await resolveContext(context)
+  if ('error' in resolved) return resolved.error
+  const { uid, identifierType } = resolved
+
+  let body: { validated?: unknown }
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+  // Validation cannot be undone: only `validated: true` is accepted.
+  if (body?.validated !== true) {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  const personDAO = new PersonDAO()
+  const person = await personDAO.fetchPersonByUid(uid)
+  if (!person) {
+    return NextResponse.json({ error: 'Person not found' }, { status: 404 })
+  }
+  if (!person.hasIdentifier(identifierType)) {
+    return NextResponse.json({ error: 'Identifier not found' }, { status: 404 })
+  }
+
+  const ability = abilityFromAuthzContext(session.user.authz)
+  const canManage = ability.can(PermissionAction.update, person, 'identifiers')
+  const isWide = hasWiderThanSelfPersonScope(
+    session.user.authz,
+    'update',
+    'Person',
+    'identifiers',
+  )
+  if (!canManage || !isWide) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const isValidated = person.isIdentifierValidated(identifierType)
+  if (
+    !canValidateIdentifier({ canManage, isWide, exists: true, isValidated })
+  ) {
+    return NextResponse.json(
+      { error: 'identifier_already_validated' },
+      { status: 409 },
+    )
+  }
+
+  try {
+    const personService = new PersonService()
+    await personService.validateIdentifier(uid, identifierType)
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error(`❌ Error validating ${identifierType} identifier:`, error)
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 },

@@ -67,14 +67,18 @@ export class PersonService {
   /**
    * Manually add a non-authenticated identifier (create-only). Value changes
    * are handled as remove-then-add, so this throws {@link IdentifierConflictError}
-   * (surfaced as a 409) when an identifier already exists.
+   * (surfaced as a 409) when an identifier already exists. A manual add is made
+   * by a privileged user, so the identifier is stored as validated.
    */
   async addIdentifier(
     personUid: string,
     identifier: PersonIdentifier,
   ): Promise<void> {
     try {
-      await this.personDAO.createIdentifier(identifier, personUid)
+      await this.personDAO.createIdentifier(
+        new PersonIdentifier(identifier.type, identifier.value, true),
+        personUid,
+      )
     } catch (error) {
       if (error instanceof IdentifierConflictError) throw error
       const message = `Error adding identifier (type=${identifier.type}, value=${identifier.value}, personUid=${personUid})`
@@ -165,6 +169,35 @@ export class PersonService {
       )
     } catch (error) {
       const message = `Error authenticating HAL identifier (type=${type}, value=${value}, personUid=${personUid})`
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
+
+  /**
+   * Validate an existing non-authenticated identifier without changing its
+   * value. Emits an UPDATE message (authenticated: false), which the graph
+   * handles as a validation.
+   */
+  async validateIdentifier(
+    personUid: string,
+    type: PersonIdentifierType,
+  ): Promise<void> {
+    try {
+      const value = await this.personDAO.findIdentifierValue(personUid, type)
+      if (value === null) {
+        throw new Error('Identifier not found')
+      }
+      await this.personDAO.markIdentifierValidated(personUid, type)
+      const payload: IdentifierMessagePayload = {
+        ...new PersonIdentifier(type, value).toJson(),
+        authenticated: false,
+      }
+      await this.recordIdentifierAction(personUid, ActionType.UPDATE, {
+        identifier: payload,
+      })
+    } catch (error) {
+      const message = `Error validating identifier (type=${type}, personUid=${personUid})`
       console.error(message, error)
       throw new Error(message)
     }

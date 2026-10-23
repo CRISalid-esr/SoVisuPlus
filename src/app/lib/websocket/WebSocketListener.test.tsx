@@ -95,7 +95,7 @@ describe('WebSocketListener', () => {
         connectedUser: mockUser,
         currentPerspective: connectedUserPerson,
         ownPerspective: true,
-      unavailablePerspectiveSlug: null,
+        unavailablePerspectiveSlug: null,
         loading: false,
         error: null,
         fetchConnectedUser: jest.fn(),
@@ -104,6 +104,7 @@ describe('WebSocketListener', () => {
         refreshPerspective: jest.fn(),
         addPersonIdentifier: jest.fn(),
         removePersonIdentifier: jest.fn(),
+        validatePersonIdentifier: jest.fn(),
       },
       document: {
         selectedDocument: document,
