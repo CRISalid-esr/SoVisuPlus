@@ -206,7 +206,7 @@ const HalControl = () => {
           <Typography variant='subtitle1' fontWeight='bold'>
             HAL
           </Typography>
-          {hasHalIdentifier && isValidated && !isLinked && <ValidatedBadge />}
+          {hasHalIdentifier && isValidated && <ValidatedBadge />}
         </Box>
         {hasHalIdentifier && halValue ? (
           <IdentifierPill
@@ -248,7 +248,7 @@ const HalControl = () => {
               </Box>
             </Tooltip>
           )}
-          {hasHalIdentifier && isValidated && !isLinked && <ValidatedBadge />}
+          {hasHalIdentifier && isValidated && <ValidatedBadge />}
         </Box>
 
         <Box

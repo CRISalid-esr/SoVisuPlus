@@ -196,16 +196,14 @@ describe('OrcidControl', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('authenticated ORCID: no validate button and no validated badge', () => {
+  it('authenticated ORCID: validated badge, no validate button', () => {
     setupStore({ person: buildPerson([authenticatedOrcid]) })
     renderWithProviders()
 
     expect(
       screen.queryByText('identifier_validate_button'),
     ).not.toBeInTheDocument()
-    expect(
-      screen.queryByTestId('identifier-validated-badge'),
-    ).not.toBeInTheDocument()
+    expect(screen.getByTestId('identifier-validated-badge')).toBeInTheDocument()
   })
 
   it('authenticated ORCID: shows link icon + Remove, no auth button', () => {

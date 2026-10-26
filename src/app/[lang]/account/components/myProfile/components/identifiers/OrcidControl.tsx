@@ -230,7 +230,7 @@ const OrcidControl = () => {
           <Typography variant='subtitle1' fontWeight='bold'>
             ORCID
           </Typography>
-          {orcid && isValidated && !isLinked && <ValidatedBadge />}
+          {orcid && isValidated && <ValidatedBadge />}
         </Box>
         {orcidPid}
       </Paper>
@@ -265,7 +265,7 @@ const OrcidControl = () => {
               </Box>
             </Tooltip>
           )}
-          {orcid && isValidated && !isLinked && <ValidatedBadge />}
+          {orcid && isValidated && <ValidatedBadge />}
         </Box>
 
         <Box

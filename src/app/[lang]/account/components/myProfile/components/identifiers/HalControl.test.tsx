@@ -163,7 +163,7 @@ describe('HalControl', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('authenticated idHAL: no validate button and no validated badge', () => {
+  it('authenticated idHAL: validated badge, no validate button', () => {
     makeStore([
       { type: PersonIdentifierType.idhals, value: 'jacques-dupont' },
       { type: PersonIdentifierType.hal_login, value: 'jdupont' },
@@ -173,9 +173,7 @@ describe('HalControl', () => {
     expect(
       screen.queryByText('identifier_validate_button'),
     ).not.toBeInTheDocument()
-    expect(
-      screen.queryByTestId('identifier-validated-badge'),
-    ).not.toBeInTheDocument()
+    expect(screen.getByTestId('identifier-validated-badge')).toBeInTheDocument()
   })
 
   it('no HAL identifier: shows auth button and manual add form', () => {

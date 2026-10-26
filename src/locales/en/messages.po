@@ -2408,7 +2408,7 @@ msgstr "Identifier validated"
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/ValidatedBadge.tsx:9
 msgid "identifier_validated_tooltip"
-msgstr "Validated (not authenticated)"
+msgstr "Validated"
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx:207
 msgid "idref_control_add_button"

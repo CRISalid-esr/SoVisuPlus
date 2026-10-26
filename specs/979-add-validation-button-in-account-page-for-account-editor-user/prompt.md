@@ -61,8 +61,9 @@ of this person, 409 already validated or authenticated, 200 on success.
 
 - `ValidateIdentifierButton` (button + confirmation dialog + snackbar) next to the
   identifier in `IdrefControl`, `OrcidControl`, `HalControl`, when `canValidate`.
-- `ValidatedBadge` next to the control title for validated, non-authenticated
-  identifiers — visible to every viewer (authenticated ones keep their link icon).
+- `ValidatedBadge` next to the control title for every validated identifier,
+  authenticated ones included (they also keep their link icon) — visible to every
+  viewer.
 
 ## Deployment order
 

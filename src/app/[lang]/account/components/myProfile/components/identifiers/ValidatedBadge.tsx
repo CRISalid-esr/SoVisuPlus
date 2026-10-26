@@ -4,7 +4,7 @@ import { Box, Tooltip } from '@mui/material'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { t } from '@lingui/core/macro'
 
-// Marks an identifier validated by a privileged user without authentication
+// Marks a validated identifier (authentication implies validation)
 const ValidatedBadge = () => (
   <Tooltip title={t`identifier_validated_tooltip`} arrow>
     <Box
