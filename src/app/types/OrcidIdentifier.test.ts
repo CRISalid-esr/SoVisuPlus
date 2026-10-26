@@ -71,6 +71,7 @@ describe('ORCIDIdentifier', () => {
       const json = {
         type: DbPersonIdentifierType.orcid,
         value: '0000-0001-7990-9804',
+        validated: false,
         oauth: {
           scope: ['/read-limited'] as OrcidScope[],
           tokenType: 'bearer',
@@ -88,10 +89,12 @@ describe('ORCIDIdentifier', () => {
       const jsonMissingOauth = {
         type: DbPersonIdentifierType.orcid,
         value: '0000-0001-7990-9804',
+        validated: false,
       }
       const jsonNullOauth = {
         type: DbPersonIdentifierType.orcid,
         value: '0000-0001-7990-9804',
+        validated: false,
         oauth: null,
       }
 
@@ -107,6 +110,7 @@ describe('ORCIDIdentifier', () => {
       const id = ORCIDIdentifier.fromJson({
         type: DbPersonIdentifierType.orcid,
         value: '0000-0001-7990-9804',
+        validated: false,
         oauth: {
           scope: ['/read-limited', '/authenticate'],
           tokenType: 'bearer',
@@ -135,6 +139,7 @@ describe('ORCIDIdentifier', () => {
         ORCIDIdentifier.fromJson({
           type: DbPersonIdentifierType.idref,
           value: '02725030X',
+          validated: false,
           oauth: null,
         }),
       ).toThrow(/ORCIDIdentifier\.fromJson called with type=/)

@@ -1239,7 +1239,7 @@ export class PersonDAO extends AbstractDAO {
           displayName: true,
           firstName: true,
           lastName: true,
-          identifiers: { select: { type: true, value: true } },
+          identifiers: { select: { type: true, value: true, validated: true } },
         },
       },
     } as const

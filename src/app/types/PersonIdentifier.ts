@@ -4,7 +4,7 @@ import { PersonIdentifierWithRelations as DBPersonIdentifier } from '@/prisma-sc
 export type PersonIdentifierJson = {
   type: string
   value: string
-  validated?: boolean
+  validated: boolean
 }
 
 /**
@@ -13,7 +13,10 @@ export type PersonIdentifierJson = {
  * (manual add → false, authentication → true); it is never persisted as a
  * column — see specs/872-refactor-account-edition-workflow/prompt.md.
  */
-export type IdentifierMessagePayload = PersonIdentifierJson & {
+export type IdentifierMessagePayload = Pick<
+  PersonIdentifierJson,
+  'type' | 'value'
+> & {
   authenticated: boolean
 }
 
@@ -109,7 +112,16 @@ export class PersonIdentifier {
     return {
       type: this.type,
       value: this.value,
+      validated: this.validated,
     }
+  }
+
+  /**
+   * Identifier fields sent to the graph. Only the listed fields are sent:
+   * the graph derives the validation from the operation, not from a flag.
+   */
+  toMessagePayload(authenticated: boolean): IdentifierMessagePayload {
+    return { type: this.type, value: this.value, authenticated }
   }
 
   static typeFromString(type: string): DbPersonIdentifierType {

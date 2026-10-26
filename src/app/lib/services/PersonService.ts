@@ -1,7 +1,6 @@
 import { IdentifierConflictError, PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 import {
-  IdentifierMessagePayload,
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
@@ -95,10 +94,7 @@ export class PersonService {
       console.error(message, error)
       throw new Error(message)
     }
-    const payload: IdentifierMessagePayload = {
-      ...identifier.toJson(),
-      authenticated: false,
-    }
+    const payload = identifier.toMessagePayload(false)
     await this.recordIdentifierAction(personUid, ActionType.ADD, {
       identifier: payload,
     })
@@ -129,10 +125,7 @@ export class PersonService {
         identifier,
       )
 
-      const payload: IdentifierMessagePayload = {
-        ...identifier.toJson(),
-        authenticated: true,
-      }
+      const payload = identifier.toMessagePayload(true)
       await this.recordIdentifierAction(
         personUid,
         existed ? ActionType.UPDATE : ActionType.ADD,
@@ -168,10 +161,7 @@ export class PersonService {
       const identifier = new PersonIdentifier(type, value)
       await this.personDAO.upsertHalIdentifiers(personUid, identifier, halLogin)
 
-      const payload: IdentifierMessagePayload = {
-        ...identifier.toJson(),
-        authenticated: true,
-      }
+      const payload = identifier.toMessagePayload(true)
       await this.recordIdentifierAction(
         personUid,
         existed ? ActionType.UPDATE : ActionType.ADD,
@@ -198,10 +188,7 @@ export class PersonService {
       if (value === null) {
         throw new Error('Identifier not found')
       }
-      const payload: IdentifierMessagePayload = {
-        ...new PersonIdentifier(type, value).toJson(),
-        authenticated: false,
-      }
+      const payload = new PersonIdentifier(type, value).toMessagePayload(false)
       await this.personDAO.markIdentifierValidated(
         personUid,
         type,

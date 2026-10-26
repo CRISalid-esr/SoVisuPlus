@@ -58,7 +58,11 @@ export class StructureMember {
       displayName: string | null
       firstName: string | null
       lastName: string | null
-      identifiers: { type: DbPersonIdentifierType; value: string }[]
+      identifiers: {
+        type: DbPersonIdentifierType
+        value: string
+        validated: boolean
+      }[]
     }
   }): StructureMember {
     const { person } = row
@@ -79,7 +83,11 @@ export class StructureMember {
         .filter((identifier) => identifier.value.trim() !== '')
         .map(
           (identifier) =>
-            new PersonIdentifier(identifier.type, identifier.value),
+            new PersonIdentifier(
+              identifier.type,
+              identifier.value,
+              identifier.validated,
+            ),
         ),
     )
   }
