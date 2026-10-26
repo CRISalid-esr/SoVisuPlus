@@ -8,7 +8,12 @@ import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { Literal } from '@/types/Literal'
 import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
 import { SourcePerson } from '@/types/SourcePerson'
-import { OrganizationCategory, OrganizationGenericType } from '@prisma/client'
+import {
+  ActionTargetType,
+  ActionType,
+  OrganizationCategory,
+  OrganizationGenericType,
+} from '@prisma/client'
 import {
   PersonIdentifier,
   PersonIdentifierType,
@@ -1098,7 +1103,31 @@ describe('PersonDAO Integration Tests', () => {
       )
     })
 
-    test('a local validation survives a sync where the graph does not report it yet', async () => {
+    test('markIdentifierValidated leaves the flag unset when the action cannot be recorded', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+
+      await expect(
+        personDAO.markIdentifierValidated(
+          'local-identifiers',
+          PersonIdentifierType.idhals,
+          {
+            actionType: 'INVALID' as ActionType,
+            targetType: ActionTargetType.PERSON,
+            targetUid: 'local-identifiers',
+            parameters: {},
+            personUid: 'local-identifiers',
+          },
+        ),
+      ).rejects.toThrow()
+
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        false,
+      )
+    })
+
+    test('the person message lowers a validation the graph does not report', async () => {
       const dbPerson = await personDAO.createOrUpdatePerson(
         makeIdentifiedPerson([idhals]),
       )
@@ -1112,8 +1141,109 @@ describe('PersonDAO Integration Tests', () => {
       })
 
       expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        false,
+      )
+    })
+
+    test('a document contributor sync also takes the flag from the graph', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+      await personDAO.markIdentifierValidated(
+        'local-identifiers',
+        PersonIdentifierType.idhals,
+      )
+
+      await personDAO.createOrUpdatePerson(makeIdentifiedPerson([idhals]))
+
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        false,
+      )
+    })
+
+    test('a validation change keeps the hal_login and the ORCID OAuth extension', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals, orcid]),
+      )
+      await addHalLogin(dbPerson.id)
+      const orcidRowId = await addOrcidExtension(dbPerson.id)
+      await personDAO.markIdentifierValidated(
+        'local-identifiers',
+        PersonIdentifierType.idhals,
+      )
+
+      // Document contributor sync: the graph reports neither as validated
+      await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          idhals,
+          new PersonIdentifier(
+            PersonIdentifierType.orcid,
+            '0000-0001-2345-6789',
+            true,
+          ),
+        ]),
+      )
+
+      expect(await typesOf(dbPerson.id)).toEqual(
+        expect.arrayContaining([
+          PersonIdentifierType.hal_login,
+          PersonIdentifierType.idhals,
+          PersonIdentifierType.orcid,
+        ]),
+      )
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        false,
+      )
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.orcid)).toBe(
         true,
       )
+      expect(
+        await prisma.orcidIdentifier.findUnique({ where: { id: orcidRowId } }),
+      ).not.toBeNull()
+    })
+
+    test('syncIdentifiersValidation aligns the flag on matching type and value only', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          idhals,
+          new PersonIdentifier(PersonIdentifierType.idref, '123456789'),
+        ]),
+      )
+
+      const updated = await personDAO.syncIdentifiersValidation(
+        'local-identifiers',
+        [
+          new PersonIdentifier(
+            PersonIdentifierType.idhals,
+            'jacques-dupont',
+            true,
+          ),
+          new PersonIdentifier(PersonIdentifierType.idref, '987654321', true),
+        ],
+      )
+
+      expect(updated).toBe(1)
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        true,
+      )
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idref)).toBe(
+        false,
+      )
+    })
+
+    test('fetchInternalPersonUidsWithIdentifierTypes returns internal holders only', async () => {
+      await personDAO.createOrUpdatePerson(makeIdentifiedPerson([idhals]))
+
+      expect(
+        await personDAO.fetchInternalPersonUidsWithIdentifierTypes([
+          PersonIdentifierType.idhals,
+        ]),
+      ).toEqual(['local-identifiers'])
+      expect(
+        await personDAO.fetchInternalPersonUidsWithIdentifierTypes([
+          PersonIdentifierType.idref,
+        ]),
+      ).toEqual([])
     })
 
     test('a value change takes the validated flag from the graph', async () => {

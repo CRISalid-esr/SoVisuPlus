@@ -5,7 +5,7 @@ import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
-import { ActionDAO } from '@/lib/daos/ActionDAO'
+import { ActionDAO, CreateActionParams } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import { InputJsonValue } from '@prisma/client/runtime/library'
@@ -54,14 +54,24 @@ export class PersonService {
     actionType: ActionType,
     parameters: InputJsonValue,
   ): Promise<void> {
-    await this.actionDAO.createAction({
+    await this.actionDAO.createAction(
+      this.identifierAction(personUid, actionType, parameters),
+    )
+  }
+
+  private identifierAction(
+    personUid: string,
+    actionType: ActionType,
+    parameters: InputJsonValue,
+  ): CreateActionParams {
+    return {
       actionType,
       targetType: ActionTargetType.PERSON,
       targetUid: personUid,
       path: 'identifiers',
       parameters,
       personUid,
-    })
+    }
   }
 
   /**
@@ -188,14 +198,17 @@ export class PersonService {
       if (value === null) {
         throw new Error('Identifier not found')
       }
-      await this.personDAO.markIdentifierValidated(personUid, type)
       const payload: IdentifierMessagePayload = {
         ...new PersonIdentifier(type, value).toJson(),
         authenticated: false,
       }
-      await this.recordIdentifierAction(personUid, ActionType.UPDATE, {
-        identifier: payload,
-      })
+      await this.personDAO.markIdentifierValidated(
+        personUid,
+        type,
+        this.identifierAction(personUid, ActionType.UPDATE, {
+          identifier: payload,
+        }),
+      )
     } catch (error) {
       const message = `Error validating identifier (type=${type}, personUid=${personUid})`
       console.error(message, error)

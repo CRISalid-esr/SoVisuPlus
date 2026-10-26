@@ -12,6 +12,7 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
+import { CreateActionParams } from '@/lib/daos/ActionDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
 import {
@@ -578,12 +579,11 @@ export class PersonDAO extends AbstractDAO {
                 validated: identifier.validated,
               },
             })
-          } else if (identifier.validated && !current.validated) {
-            // Validation is only ever raised by the graph: a local validation
-            // must survive a sync that precedes its processing by the graph
+          } else if (identifier.validated !== current.validated) {
+            // The graph is the source of truth for the validation state
             await tx.personIdentifier.update({
               where: { id: current.id },
-              data: { validated: true },
+              data: { validated: identifier.validated },
             })
           }
         }
@@ -821,18 +821,68 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Mark a person's identifier of the given type as validated.
+   * Mark a person's identifier of the given type as validated. When an action
+   * is given, it is recorded in the same transaction so the flag is never set
+   * without the outgoing message.
    * @returns whether an identifier row was updated
    */
   public async markIdentifierValidated(
     personUid: string,
     type: PersonIdentifierType,
+    action?: CreateActionParams,
   ): Promise<boolean> {
-    const { count } = await this.prismaClient.personIdentifier.updateMany({
-      where: { person: { uid: personUid }, type },
-      data: { validated: true },
+    return this.prismaClient.$transaction(async (tx) => {
+      const { count } = await tx.personIdentifier.updateMany({
+        where: { person: { uid: personUid }, type },
+        data: { validated: true },
+      })
+      if (action) {
+        await tx.action.create({ data: { path: null, ...action } })
+      }
+      return count > 0
     })
-    return count > 0
+  }
+
+  /**
+   * UIDs of internal persons holding at least one identifier of the given types.
+   */
+  public async fetchInternalPersonUidsWithIdentifierTypes(
+    types: PersonIdentifierType[],
+  ): Promise<string[]> {
+    const people = await this.prismaClient.person.findMany({
+      where: {
+        external: false,
+        identifiers: { some: { type: { in: types } } },
+      },
+      select: { uid: true },
+      orderBy: { id: 'asc' },
+    })
+    return people.map((person) => person.uid)
+  }
+
+  /**
+   * Align the `validated` flag of a person's identifiers with the given ones,
+   * matched on type and value. Values are never changed.
+   * @returns the number of identifier rows updated
+   */
+  public async syncIdentifiersValidation(
+    personUid: string,
+    identifiers: PersonIdentifier[],
+  ): Promise<number> {
+    let updated = 0
+    for (const identifier of identifiers) {
+      const { count } = await this.prismaClient.personIdentifier.updateMany({
+        where: {
+          person: { uid: personUid },
+          type: identifier.type,
+          value: identifier.value,
+          validated: !identifier.validated,
+        },
+        data: { validated: identifier.validated },
+      })
+      updated += count
+    }
+    return updated
   }
 
   public async upsertOrcidIdentifierExtension(

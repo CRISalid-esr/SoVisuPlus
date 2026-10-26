@@ -179,7 +179,12 @@ describe('PersonDAO', () => {
     ;(mockPrisma.personIdentifier.findMany as jest.Mock)
       .mockResolvedValueOnce([]) // identifier conflict check
       .mockResolvedValueOnce([
-        { id: 7, type: 'orcid', value: '0000-0001-2345-6789' },
+        {
+          id: 7,
+          type: 'orcid',
+          value: '0000-0001-2345-6789',
+          validated: false,
+        },
       ])
 
     await personDAO.createOrUpdatePerson(person, { authoritative: true })

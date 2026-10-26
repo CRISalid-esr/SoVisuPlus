@@ -15,44 +15,51 @@ import {
 import { Trans } from '@lingui/react/macro'
 import useStore from '@/stores/global_store'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { contentCenteredSnackbarSx } from '@/app/[lang]/components/contentCenteredSnackbarSx'
 
 interface ValidateIdentifierButtonProps {
   personUid: string
   type: PersonIdentifierType
+  /** Whether the button is shown; the component stays mounted to keep its feedback */
+  show: boolean
 }
 
 // Validates an existing identifier without authenticating it, after confirmation
 const ValidateIdentifierButton = ({
   personUid,
   type,
+  show,
 }: ValidateIdentifierButtonProps) => {
   const { validatePersonIdentifier } = useStore((s) => s.user)
   const [openConfirm, setOpenConfirm] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [result, setResult] = useState<boolean | null>(null)
+  // Kept on close so the message does not change during the exit transition
+  const [feedback, setFeedback] = useState({ open: false, success: false })
 
   const validate = async () => {
     setOpenConfirm(false)
     setSaving(true)
     const { success } = await validatePersonIdentifier(personUid, type)
     setSaving(false)
-    setResult(success)
+    setFeedback({ open: true, success })
   }
 
   return (
     <>
-      <Button
-        color='success'
-        variant='outlined'
-        onClick={() => setOpenConfirm(true)}
-        disabled={saving}
-        startIcon={
-          saving ? <CircularProgress size={14} color='inherit' /> : undefined
-        }
-        sx={{ minWidth: 'fit-content', alignSelf: 'flex-start' }}
-      >
-        <Trans>identifier_validate_button</Trans>
-      </Button>
+      {show && (
+        <Button
+          color='success'
+          variant='outlined'
+          onClick={() => setOpenConfirm(true)}
+          disabled={saving}
+          startIcon={
+            saving ? <CircularProgress size={14} color='inherit' /> : undefined
+          }
+          sx={{ minWidth: 'fit-content', alignSelf: 'flex-start' }}
+        >
+          <Trans>identifier_validate_button</Trans>
+        </Button>
+      )}
 
       <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
         <DialogTitle>
@@ -74,17 +81,18 @@ const ValidateIdentifierButton = ({
       </Dialog>
 
       <Snackbar
-        open={result !== null}
+        open={feedback.open}
         autoHideDuration={6000}
-        onClose={() => setResult(null)}
+        onClose={() => setFeedback((f) => ({ ...f, open: false }))}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={contentCenteredSnackbarSx}
       >
         <Alert
-          onClose={() => setResult(null)}
-          severity={result ? 'success' : 'error'}
+          onClose={() => setFeedback((f) => ({ ...f, open: false }))}
+          severity={feedback.success ? 'success' : 'error'}
           sx={{ width: '100%' }}
         >
-          {result ? (
+          {feedback.success ? (
             <Trans>identifier_validate_success</Trans>
           ) : (
             <Trans>identifier_validate_failure</Trans>

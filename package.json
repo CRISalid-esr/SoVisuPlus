@@ -37,6 +37,8 @@
     "renormalize:search-columns": "ts-node --project tsconfig.listener.json src/scripts/renormalize_search_columns.ts",
     "renormalize:search-columns:js": "node dist-listener/src/scripts/renormalize_search_columns.js",
     "backfill:search-columns:js": "node dist-listener/src/scripts/backfill_search_columns.js",
+    "sync:identifiers-validation": "ts-node --project tsconfig.listener.json src/scripts/sync_identifiers_validation.ts",
+    "sync:identifiers-validation:js": "node dist-listener/src/scripts/sync_identifiers_validation.js",
     "dispatch_actions": "ts-node --project tsconfig.listener.json src/scripts/dispatch_actions.ts",
     "dispatch_actions:js": "node dist-listener/src/scripts/dispatch_actions.js",
     "dispatch_action": "npm run dispatch_actions --",

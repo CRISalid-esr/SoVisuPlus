@@ -49,6 +49,7 @@ query Documents($where: DocumentWhere) {
         identifiers {
           type
           value
+          validated
         }
         names {
           first_names {

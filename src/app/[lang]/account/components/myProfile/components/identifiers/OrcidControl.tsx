@@ -29,6 +29,7 @@ import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import LinkIcon from '@mui/icons-material/Link'
 import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 import { isPerson } from '@/types/Person'
+import { contentCenteredSnackbarSx } from '@/app/[lang]/components/contentCenteredSnackbarSx'
 
 const ORCID_REGEX = /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/i
 
@@ -277,10 +278,11 @@ const OrcidControl = () => {
           }}
         >
           {orcidPid}
-          {orcid && canValidate && person?.uid && (
+          {orcid && person?.uid && (
             <ValidateIdentifierButton
               personUid={person.uid}
               type={DbPersonIdentifierType.orcid}
+              show={canValidate}
             />
           )}
         </Box>
@@ -374,6 +376,7 @@ const OrcidControl = () => {
         autoHideDuration={6000}
         onClose={handleClose}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={contentCenteredSnackbarSx}
       >
         <Alert onClose={handleClose} severity={severity} sx={{ width: '100%' }}>
           {renderMessage()}

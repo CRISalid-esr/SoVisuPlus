@@ -3,18 +3,20 @@ import { ActionTargetType, ActionType } from '@prisma/client'
 import { Action } from '@/types/Action'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 
+export type CreateActionParams = {
+  actionType: ActionType
+  targetType: ActionTargetType
+  targetUid: string
+  path?: string | null
+  parameters: InputJsonValue
+  personUid: string
+}
+
 export class ActionDAO extends AbstractDAO {
   /**
    * Create a new Action entry
    */
-  async createAction(params: {
-    actionType: ActionType
-    targetType: ActionTargetType
-    targetUid: string
-    path?: string | null
-    parameters: InputJsonValue
-    personUid: string
-  }): Promise<Action> {
+  async createAction(params: CreateActionParams): Promise<Action> {
     const {
       actionType,
       targetType,

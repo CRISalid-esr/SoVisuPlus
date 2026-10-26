@@ -28,6 +28,7 @@ import LinkIcon from '@mui/icons-material/Link'
 import { PersonIdentifierType } from '@prisma/client'
 import { isPerson } from '@/types/Person'
 import IdentifierPill from './IdentifierPill'
+import { contentCenteredSnackbarSx } from '@/app/[lang]/components/contentCenteredSnackbarSx'
 
 const IDHAL_S_REGEX = /^[a-z0-9-]+$/i
 const IDHAL_I_REGEX = /^\d+$/
@@ -267,8 +268,12 @@ const HalControl = () => {
             />
           )}
 
-          {hasHalIdentifier && halType && canValidate && person?.uid && (
-            <ValidateIdentifierButton personUid={person.uid} type={halType} />
+          {hasHalIdentifier && halType && person?.uid && (
+            <ValidateIdentifierButton
+              personUid={person.uid}
+              type={halType}
+              show={canValidate}
+            />
           )}
 
           {isLinked && halLogin && (
@@ -366,6 +371,7 @@ const HalControl = () => {
         autoHideDuration={6000}
         onClose={handleClose}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={contentCenteredSnackbarSx}
       >
         <Alert onClose={handleClose} severity={severity} sx={{ width: '100%' }}>
           {renderMessage()}

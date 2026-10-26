@@ -233,10 +233,9 @@ export const PATCH = async (request: Request, context: RouteContext) => {
   if (!person) {
     return NextResponse.json({ error: 'Person not found' }, { status: 404 })
   }
-  if (!person.hasIdentifier(identifierType)) {
-    return NextResponse.json({ error: 'Identifier not found' }, { status: 404 })
-  }
 
+  // Permission is checked before existence so the response does not reveal
+  // which identifiers a person holds to unauthorised users.
   const ability = abilityFromAuthzContext(session.user.authz)
   const canManage = ability.can(PermissionAction.update, person, 'identifiers')
   const isWide = hasWiderThanSelfPersonScope(
@@ -247,6 +246,9 @@ export const PATCH = async (request: Request, context: RouteContext) => {
   )
   if (!canManage || !isWide) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+  if (!person.hasIdentifier(identifierType)) {
+    return NextResponse.json({ error: 'Identifier not found' }, { status: 404 })
   }
 
   const isValidated = person.isIdentifierValidated(identifierType)

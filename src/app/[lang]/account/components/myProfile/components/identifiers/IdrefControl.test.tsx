@@ -182,6 +182,24 @@ describe('IdrefControl', () => {
     )
   })
 
+  it('keeps the success message while the snackbar closes', async () => {
+    setupStore('026404435')
+    setupSession(authzGlobal)
+    renderComponent()
+
+    fireEvent.click(screen.getByText('idref_control_remove_button'))
+    fireEvent.click(screen.getByText('idref_control_remove_dialog_confirm'))
+    await screen.findByText('idref_control_remove_success')
+
+    // Closing starts the exit transition: the content must not switch to an error
+    fireEvent.click(screen.getByLabelText('Close'))
+
+    expect(screen.getByText('idref_control_remove_success')).toBeInTheDocument()
+    expect(screen.getByRole('alert', { hidden: true })).toHaveClass(
+      'MuiAlert-standardSuccess',
+    )
+  })
+
   it('self-scoped editor on own account cannot remove an IdRef', () => {
     setupStore('026404435')
     setupSession(authzSelfScoped)

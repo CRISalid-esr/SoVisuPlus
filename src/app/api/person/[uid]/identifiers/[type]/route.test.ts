@@ -283,6 +283,14 @@ describe('PATCH /api/person/[uid]/identifiers/[type]', () => {
     expect(res.status).toBe(404)
   })
 
+  it('answers 403, not 404, to an unauthorised user when the identifier is missing', async () => {
+    setSession(selfAuthz('alice'))
+    mockFetchPersonByUid.mockResolvedValue(person('bob'))
+
+    const res = await PATCH(patchReq({ validated: true }), ctx('bob', 'idref'))
+    expect(res.status).toBe(403)
+  })
+
   it('rejects any body other than { validated: true } with 400', async () => {
     setSession(wideAuthz('librarian'))
     mockFetchPersonByUid.mockResolvedValue(

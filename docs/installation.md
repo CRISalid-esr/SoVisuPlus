@@ -145,6 +145,9 @@ Following table gives detailed information on each environment variable:
 6. Run the Prisma migration with `npx prisma migrate dev --name init`.
    On an existing database, fill the fuzzy-search columns of previously imported data with
    `npm run backfill:search-columns` (idempotent; the Docker image runs it at startup).
+   Once, after deploying the person identifier `validated` column, align it with the graph with
+   `npm run sync:identifiers-validation` (`sync:identifiers-validation:js` in the Docker image;
+   idempotent, queries Apollo for every internal person, so it is not run at startup).
 7. Run the development server with `npm run dev`.
 
 To enable the AMQP listener, start a RabbitMQ instance on your local machine, fill in the `.env` file with the RabbitMQ parameters (`AMQP_USER`, `AMQP_PASSWORD`, `AMQP_HOST`, `AMQP_PORT`, `AMQP_EXCHANGE_NAME`, `AMQP_INTERACTIVE_QUEUE_NAME`, `AMQP_BATCH_QUEUE_NAME`) and run the listener: `npm run dev:listener`

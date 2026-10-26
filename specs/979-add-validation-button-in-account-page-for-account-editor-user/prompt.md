@@ -29,11 +29,17 @@ Builds on the account-edition model of
 
 - New column `PersonIdentifier.validated Boolean @default(false)`.
 - The graph (IKG) is the source of truth: Apollo exposes `validated` on
-  `AgentIdentifier` (crisalid-apollo), queried in `person.graphql` and stored by
+  `AgentIdentifier` (crisalid-apollo), queried in `person.graphql` and
+  `document.graphql` (contributors) and stored by
   `PersonDAO.upsertIdentifiers` during person sync.
-- Sync rule: on creation or value change the flag is taken from the graph; for an
-  unchanged identifier the graph can only **raise** it. A local validation thus
-  survives a sync that precedes the graph's processing of the UPDATE message.
+- Sync rule: every graph sync (person message and document contributors, both
+  query `validated`) takes the flag from the graph, so a validation the IKG
+  rejected is cleared by the next sync of that person. A sync arriving between
+  the click and the IKG's processing briefly clears the local validation; the
+  IKG's own person update restores it.
+- Existing data: `npm run sync:identifiers-validation` aligns the flag with the
+  graph once after deployment (identifiers validated in the IKG before the
+  column existed).
 
 ## Outgoing message
 
@@ -41,6 +47,7 @@ Builds on the account-edition model of
 | -------------------- | ----------- | --------------------------- | ------------------------------------------------------- |
 | Validate (unchanged) | `UPDATE`    | `task.people.person.update` | `{ identifier: { type, value, authenticated: false } }` |
 
+The action is recorded in the same transaction as the local `validated` flag.
 The IKG handles it in `confirm_identifier`, which sets `validated = true`.
 No IKG change is needed.
 
@@ -60,4 +67,5 @@ of this person, 409 already validated or authenticated, 200 on success.
 ## Deployment order
 
 crisalid-apollo must expose `AgentIdentifier.validated` **before** this version of
-SoVisuPlus is deployed: the person query requests the field.
+SoVisuPlus is deployed: the person and document queries request the field, so
+both person and document syncs would fail without it.
