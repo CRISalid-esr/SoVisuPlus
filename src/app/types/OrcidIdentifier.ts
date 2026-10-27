@@ -124,7 +124,7 @@ export class ORCIDIdentifier extends PersonIdentifier {
         createdAt: new Date(ext!.createdAt),
         updatedAt: new Date(ext!.updatedAt),
       },
-      json.validated ?? false,
+      json.validated,
     )
   }
 

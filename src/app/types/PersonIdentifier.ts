@@ -152,7 +152,7 @@ export class PersonIdentifier {
       typeof json.type === 'string'
         ? PersonIdentifier.typeFromString(json.type)
         : json.type
-    return new PersonIdentifier(type, json.value, json.validated ?? false)
+    return new PersonIdentifier(type, json.value, json.validated)
   }
 
   static fromDB(
