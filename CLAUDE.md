@@ -4,18 +4,19 @@
 
 Each major feature is backed by a spec document in `specs/<branch-name>/prompt.md`, where `<branch-name>` is the Git branch the feature is developed on. Read the relevant spec before working on a feature branch — it captures the intent, scope, and design decisions that are not otherwise visible from the code.
 
-| Branch                                           | Spec                                                                                                                               |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `838-automated-hal-deposit`                      | [`specs/838-automated-hal-deposit/prompt.md`](specs/838-automated-hal-deposit/prompt.md)                                           |
-| `send-global-contributor-update-message`         | [`specs/send-global-contributor-update-message/prompt.md`](specs/send-global-contributor-update-message/prompt.md)                 |
-| `868-improve-graph-error-reporting-user-actions` | [`specs/868-improve-graph-error-reporting-user-actions/prompt.md`](specs/868-improve-graph-error-reporting-user-actions/prompt.md) |
-| `872-refactor-account-edition-workflow`          | [`specs/872-refactor-account-edition-workflow/prompt.md`](specs/872-refactor-account-edition-workflow/prompt.md)                   |
-| `874-new-research-structure-model`               | [`specs/874-new-research-structure-model/prompt.md`](specs/874-new-research-structure-model/prompt.md)                             |
-| `structures-tree-master-detail`                  | [`specs/structures-tree-master-detail/prompt.md`](specs/structures-tree-master-detail/prompt.md)                                   |
-| `replace-person-affiliations-and-source-records` | [`specs/replace-person-affiliations-and-source-records/prompt.md`](specs/replace-person-affiliations-and-source-records/prompt.md) |
-| `add-hide-structure-option-and-permission`       | [`specs/add-hide-structure-option-and-permission/prompt.md`](specs/add-hide-structure-option-and-permission/prompt.md)             |
-| `feat-make-search-fuzzy`                         | [`specs/feat-make-search-fuzzy/prompt.md`](specs/feat-make-search-fuzzy/prompt.md)                                                 |
-| `882-no-self-deletion-of-idref-for-a-researcher` | [`specs/882-no-self-deletion-of-idref-for-a-researcher/prompt.md`](specs/882-no-self-deletion-of-idref-for-a-researcher/prompt.md) |
+| Branch                                                              | Spec                                                                                                                                                                     |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `838-automated-hal-deposit`                                         | [`specs/838-automated-hal-deposit/prompt.md`](specs/838-automated-hal-deposit/prompt.md)                                                                                 |
+| `send-global-contributor-update-message`                            | [`specs/send-global-contributor-update-message/prompt.md`](specs/send-global-contributor-update-message/prompt.md)                                                       |
+| `868-improve-graph-error-reporting-user-actions`                    | [`specs/868-improve-graph-error-reporting-user-actions/prompt.md`](specs/868-improve-graph-error-reporting-user-actions/prompt.md)                                       |
+| `872-refactor-account-edition-workflow`                             | [`specs/872-refactor-account-edition-workflow/prompt.md`](specs/872-refactor-account-edition-workflow/prompt.md)                                                         |
+| `874-new-research-structure-model`                                  | [`specs/874-new-research-structure-model/prompt.md`](specs/874-new-research-structure-model/prompt.md)                                                                   |
+| `structures-tree-master-detail`                                     | [`specs/structures-tree-master-detail/prompt.md`](specs/structures-tree-master-detail/prompt.md)                                                                         |
+| `replace-person-affiliations-and-source-records`                    | [`specs/replace-person-affiliations-and-source-records/prompt.md`](specs/replace-person-affiliations-and-source-records/prompt.md)                                       |
+| `add-hide-structure-option-and-permission`                          | [`specs/add-hide-structure-option-and-permission/prompt.md`](specs/add-hide-structure-option-and-permission/prompt.md)                                                   |
+| `feat-make-search-fuzzy`                                            | [`specs/feat-make-search-fuzzy/prompt.md`](specs/feat-make-search-fuzzy/prompt.md)                                                                                       |
+| `882-no-self-deletion-of-idref-for-a-researcher`                    | [`specs/882-no-self-deletion-of-idref-for-a-researcher/prompt.md`](specs/882-no-self-deletion-of-idref-for-a-researcher/prompt.md)                                       |
+| `979-add-validation-button-in-account-page-for-account-editor-user` | [`specs/979-add-validation-button-in-account-page-for-account-editor-user/prompt.md`](specs/979-add-validation-button-in-account-page-for-account-editor-user/prompt.md) |
 
 ## Git commits
 

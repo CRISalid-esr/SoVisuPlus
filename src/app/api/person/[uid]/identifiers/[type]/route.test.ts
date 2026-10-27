@@ -1,9 +1,10 @@
-import { PUT, DELETE } from './route'
+import { PUT, DELETE, PATCH } from './route'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 
 const mockFetchPersonByUid = jest.fn()
 const mockAddIdentifier = jest.fn()
 const mockRemoveIdentifier = jest.fn()
+const mockValidateIdentifier = jest.fn()
 
 jest.mock('@/lib/daos/PersonDAO', () => ({
   PersonDAO: jest.fn().mockImplementation(() => ({
@@ -16,6 +17,7 @@ jest.mock('@/lib/services/PersonService', () => ({
   PersonService: jest.fn().mockImplementation(() => ({
     addIdentifier: mockAddIdentifier,
     removeIdentifier: mockRemoveIdentifier,
+    validateIdentifier: mockValidateIdentifier,
   })),
 }))
 
@@ -60,11 +62,16 @@ const selfAuthz = (personUid: string) =>
 
 const person = (
   uid: string,
-  { has = [] as PersonIdentifierType[], authenticated = false } = {},
+  {
+    has = [] as PersonIdentifierType[],
+    authenticated = false,
+    validated = false,
+  } = {},
 ) => ({
   uid,
   hasIdentifier: (t: PersonIdentifierType) => has.includes(t),
   isIdentifierAuthenticated: () => authenticated,
+  isIdentifierValidated: () => validated || authenticated,
   authzProperties: {
     __type: 'Person',
     perimeter: { Person: [uid], ResearchUnit: [] },
@@ -193,5 +200,105 @@ describe('DELETE /api/person/[uid]/identifiers/[type]', () => {
     const res = await DELETE({} as Request, ctx('alice', 'idhals'))
     expect(res.status).toBe(200)
     expect(mockRemoveIdentifier).toHaveBeenCalled()
+  })
+})
+
+const patchReq = (body: unknown) =>
+  ({ json: async () => body }) as unknown as Request
+
+describe('PATCH /api/person/[uid]/identifiers/[type]', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockValidateIdentifier.mockResolvedValue(undefined)
+  })
+
+  it('lets a wide editor validate a non-validated identifier on another account', async () => {
+    setSession(wideAuthz('librarian'))
+    mockFetchPersonByUid.mockResolvedValue(
+      person('bob', { has: [PersonIdentifierType.idref] }),
+    )
+
+    const res = await PATCH(patchReq({ validated: true }), ctx('bob', 'idref'))
+    expect(res.status).toBe(200)
+    expect(mockValidateIdentifier).toHaveBeenCalledWith(
+      'bob',
+      PersonIdentifierType.idref,
+    )
+  })
+
+  it('lets a wide editor validate an identifier on their own account', async () => {
+    setSession(wideAuthz('alice'))
+    mockFetchPersonByUid.mockResolvedValue(
+      person('alice', { has: [PersonIdentifierType.orcid] }),
+    )
+
+    const res = await PATCH(
+      patchReq({ validated: true }),
+      ctx('alice', 'orcid'),
+    )
+    expect(res.status).toBe(200)
+    expect(mockValidateIdentifier).toHaveBeenCalled()
+  })
+
+  it('forbids a self-scoped editor from validating', async () => {
+    setSession(selfAuthz('alice'))
+    mockFetchPersonByUid.mockResolvedValue(
+      person('alice', { has: [PersonIdentifierType.idhals] }),
+    )
+
+    const res = await PATCH(
+      patchReq({ validated: true }),
+      ctx('alice', 'idhals'),
+    )
+    expect(res.status).toBe(403)
+    expect(mockValidateIdentifier).not.toHaveBeenCalled()
+  })
+
+  it('returns 409 when the identifier is already validated', async () => {
+    setSession(wideAuthz('librarian'))
+    mockFetchPersonByUid.mockResolvedValue(
+      person('bob', { has: [PersonIdentifierType.idref], validated: true }),
+    )
+
+    const res = await PATCH(patchReq({ validated: true }), ctx('bob', 'idref'))
+    expect(res.status).toBe(409)
+    expect(mockValidateIdentifier).not.toHaveBeenCalled()
+  })
+
+  it('returns 409 when the identifier is authenticated', async () => {
+    setSession(wideAuthz('librarian'))
+    mockFetchPersonByUid.mockResolvedValue(
+      person('bob', { has: [PersonIdentifierType.orcid], authenticated: true }),
+    )
+
+    const res = await PATCH(patchReq({ validated: true }), ctx('bob', 'orcid'))
+    expect(res.status).toBe(409)
+  })
+
+  it('returns 404 when the person has no identifier of that type', async () => {
+    setSession(wideAuthz('librarian'))
+    mockFetchPersonByUid.mockResolvedValue(person('bob'))
+
+    const res = await PATCH(patchReq({ validated: true }), ctx('bob', 'idref'))
+    expect(res.status).toBe(404)
+  })
+
+  it('answers 403, not 404, to an unauthorised user when the identifier is missing', async () => {
+    setSession(selfAuthz('alice'))
+    mockFetchPersonByUid.mockResolvedValue(person('bob'))
+
+    const res = await PATCH(patchReq({ validated: true }), ctx('bob', 'idref'))
+    expect(res.status).toBe(403)
+  })
+
+  it('rejects any body other than { validated: true } with 400', async () => {
+    setSession(wideAuthz('librarian'))
+    mockFetchPersonByUid.mockResolvedValue(
+      person('bob', { has: [PersonIdentifierType.idref] }),
+    )
+
+    const res = await PATCH(patchReq({ validated: false }), ctx('bob', 'idref'))
+    expect(res.status).toBe(400)
+    expect(mockValidateIdentifier).not.toHaveBeenCalled()
   })
 })

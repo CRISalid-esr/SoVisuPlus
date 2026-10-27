@@ -2382,6 +2382,34 @@ msgstr "Copy"
 msgid "identifier_pill_expand"
 msgstr "Expand"
 
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ValidateIdentifierButton.tsx:59
+msgid "identifier_validate_button"
+msgstr "Validate"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ValidateIdentifierButton.tsx:76
+msgid "identifier_validate_dialog_confirm"
+msgstr "Validate"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ValidateIdentifierButton.tsx:68
+msgid "identifier_validate_dialog_text"
+msgstr "The identifier will be marked as validated without being authenticated. This action cannot be undone."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ValidateIdentifierButton.tsx:64
+msgid "identifier_validate_dialog_title"
+msgstr "Validate this identifier?"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ValidateIdentifierButton.tsx:95
+msgid "identifier_validate_failure"
+msgstr "Failed to validate the identifier"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ValidateIdentifierButton.tsx:93
+msgid "identifier_validate_success"
+msgstr "Identifier validated"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ValidatedBadge.tsx:9
+msgid "identifier_validated_tooltip"
+msgstr "Validated"
+
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx:207
 msgid "idref_control_add_button"
 msgstr "Add"

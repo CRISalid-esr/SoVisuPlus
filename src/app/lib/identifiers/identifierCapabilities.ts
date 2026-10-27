@@ -58,3 +58,26 @@ export const computeIdentifierCapabilities = ({
     canManage &&
     (removalRequiresWide ? isWide : isAuthenticated ? isOwn : isOwn || isWide),
 })
+
+export type IdentifierValidationInput = {
+  /** `ability.can(update, person, 'identifiers')` — encodes the scope perimeter. */
+  canManage: boolean
+  /** The user holds the permission through a scope wider than their own Person. */
+  isWide: boolean
+  /** The person holds an identifier of this type. */
+  exists: boolean
+  /** The identifier is already validated (authentication implies validation). */
+  isValidated: boolean
+}
+
+/**
+ * Validate an existing identifier without authenticating it — wide-scoped
+ * editors only, on any account in their perimeter (including their own).
+ */
+export const canValidateIdentifier = ({
+  canManage,
+  isWide,
+  exists,
+  isValidated,
+}: IdentifierValidationInput): boolean =>
+  canManage && isWide && exists && !isValidated

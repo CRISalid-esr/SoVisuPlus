@@ -2382,6 +2382,34 @@ msgstr "Copier"
 msgid "identifier_pill_expand"
 msgstr "Développer"
 
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ValidateIdentifierButton.tsx:59
+msgid "identifier_validate_button"
+msgstr "Valider"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ValidateIdentifierButton.tsx:76
+msgid "identifier_validate_dialog_confirm"
+msgstr "Valider"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ValidateIdentifierButton.tsx:68
+msgid "identifier_validate_dialog_text"
+msgstr "L'identifiant sera marqué comme validé sans être authentifié. Cette action est irréversible."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ValidateIdentifierButton.tsx:64
+msgid "identifier_validate_dialog_title"
+msgstr "Valider cet identifiant ?"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ValidateIdentifierButton.tsx:95
+msgid "identifier_validate_failure"
+msgstr "Échec de la validation de l'identifiant"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ValidateIdentifierButton.tsx:93
+msgid "identifier_validate_success"
+msgstr "Identifiant validé"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/ValidatedBadge.tsx:9
+msgid "identifier_validated_tooltip"
+msgstr "Validé"
+
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx:207
 msgid "idref_control_add_button"
 msgstr "Ajouter"

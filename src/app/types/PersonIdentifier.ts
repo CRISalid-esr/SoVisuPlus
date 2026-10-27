@@ -4,6 +4,7 @@ import { PersonIdentifierWithRelations as DBPersonIdentifier } from '@/prisma-sc
 export type PersonIdentifierJson = {
   type: string
   value: string
+  validated: boolean
 }
 
 /**
@@ -12,7 +13,10 @@ export type PersonIdentifierJson = {
  * (manual add → false, authentication → true); it is never persisted as a
  * column — see specs/872-refactor-account-edition-workflow/prompt.md.
  */
-export type IdentifierMessagePayload = PersonIdentifierJson & {
+export type IdentifierMessagePayload = Pick<
+  PersonIdentifierJson,
+  'type' | 'value'
+> & {
   authenticated: boolean
 }
 
@@ -20,6 +24,8 @@ export class PersonIdentifier {
   constructor(
     public type: DbPersonIdentifierType,
     public value: string,
+    /** Confirmed by a privileged user without authentication. */
+    public validated: boolean = false,
   ) {
     this.value = this.value.trim()
     if (!this.value) {
@@ -106,7 +112,16 @@ export class PersonIdentifier {
     return {
       type: this.type,
       value: this.value,
+      validated: this.validated,
     }
+  }
+
+  /**
+   * Identifier fields sent to the graph. Only the listed fields are sent:
+   * the graph derives the validation from the operation, not from a flag.
+   */
+  toMessagePayload(authenticated: boolean): IdentifierMessagePayload {
+    return { type: this.type, value: this.value, authenticated }
   }
 
   static typeFromString(type: string): DbPersonIdentifierType {
@@ -137,13 +152,18 @@ export class PersonIdentifier {
       typeof json.type === 'string'
         ? PersonIdentifier.typeFromString(json.type)
         : json.type
-    return new PersonIdentifier(type, json.value)
+    return new PersonIdentifier(type, json.value, json.validated)
   }
 
   static fromDB(
-    identifier: Omit<DBPersonIdentifier, 'id' | 'personId' | 'orcidIdentifier'>,
+    identifier: Pick<DBPersonIdentifier, 'type' | 'value'> &
+      Partial<Pick<DBPersonIdentifier, 'validated'>>,
   ): PersonIdentifier {
-    return new PersonIdentifier(identifier.type, identifier.value)
+    return new PersonIdentifier(
+      identifier.type,
+      identifier.value,
+      identifier.validated ?? false,
+    )
   }
 }
 

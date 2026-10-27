@@ -65,6 +65,7 @@ describe('HarvestingStateEventWorker', () => {
     expect(personDAO.fetchPersonByIdentifier).toHaveBeenCalledWith({
       type: PersonIdentifierType.local,
       value: 'user-001',
+      validated: false,
     })
   })
 })

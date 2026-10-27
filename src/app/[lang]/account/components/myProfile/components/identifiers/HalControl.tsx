@@ -22,10 +22,13 @@ import { HalLoginButton } from '@/app/[lang]/account/components/myProfile/compon
 import ManualIdentifierAddForm from './ManualIdentifierAddForm'
 import HalInfoBox from './HalInfoBox'
 import { useIdentifierCapabilities } from './useIdentifierCapabilities'
+import ValidatedBadge from './ValidatedBadge'
+import ValidateIdentifierButton from './ValidateIdentifierButton'
 import LinkIcon from '@mui/icons-material/Link'
 import { PersonIdentifierType } from '@prisma/client'
 import { isPerson } from '@/types/Person'
 import IdentifierPill from './IdentifierPill'
+import { contentCenteredSnackbarSx } from '@/app/[lang]/components/contentCenteredSnackbarSx'
 
 const IDHAL_S_REGEX = /^[a-z0-9-]+$/i
 const IDHAL_I_REGEX = /^\d+$/
@@ -72,12 +75,18 @@ const HalControl = () => {
   const halKind =
     halType === PersonIdentifierType.idhals ? 'idHal_s' : 'idHal_i'
 
-  const { isAuthenticated, canAuthenticate, canAddUnauthenticated, canRemove } =
-    useIdentifierCapabilities(
-      person,
-      halType ?? PersonIdentifierType.idhals,
-      ownPerspective,
-    )
+  const {
+    isAuthenticated,
+    isValidated,
+    canAuthenticate,
+    canAddUnauthenticated,
+    canRemove,
+    canValidate,
+  } = useIdentifierCapabilities(
+    person,
+    halType ?? PersonIdentifierType.idhals,
+    ownPerspective,
+  )
 
   const hasHalIdentifier = Boolean(halValue)
   const isLinked = hasHalIdentifier && isAuthenticated
@@ -112,7 +121,8 @@ const HalControl = () => {
     }
   }, [searchParams, ownPerspective])
 
-  const hasAnyCapability = canAuthenticate || canAddUnauthenticated || canRemove
+  const hasAnyCapability =
+    canAuthenticate || canAddUnauthenticated || canRemove || canValidate
 
   const remove = async () => {
     if (!person?.uid || !halType) return
@@ -192,9 +202,12 @@ const HalControl = () => {
           borderRadius: 2,
         }}
       >
-        <Typography variant='subtitle1' fontWeight='bold'>
-          HAL
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant='subtitle1' fontWeight='bold'>
+            HAL
+          </Typography>
+          {hasHalIdentifier && isValidated && <ValidatedBadge />}
+        </Box>
         {hasHalIdentifier && halValue ? (
           <IdentifierPill
             value={halValue}
@@ -235,6 +248,7 @@ const HalControl = () => {
               </Box>
             </Tooltip>
           )}
+          {hasHalIdentifier && isValidated && <ValidatedBadge />}
         </Box>
 
         <Box
@@ -251,6 +265,14 @@ const HalControl = () => {
               iconLabel='HAL'
               iconColor='#4A90D9'
               subLabel={halKind}
+            />
+          )}
+
+          {hasHalIdentifier && halType && person?.uid && (
+            <ValidateIdentifierButton
+              personUid={person.uid}
+              type={halType}
+              show={canValidate}
             />
           )}
 
@@ -349,6 +371,7 @@ const HalControl = () => {
         autoHideDuration={6000}
         onClose={handleClose}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={contentCenteredSnackbarSx}
       >
         <Alert onClose={handleClose} severity={severity} sx={{ width: '100%' }}>
           {renderMessage()}

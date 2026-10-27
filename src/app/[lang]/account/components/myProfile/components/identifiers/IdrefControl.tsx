@@ -25,6 +25,9 @@ import { t } from '@lingui/core/macro'
 import IdRefInfoBox from './IdRefInfoBox'
 import IdentifierPill from './IdentifierPill'
 import { useIdentifierCapabilities } from './useIdentifierCapabilities'
+import ValidatedBadge from './ValidatedBadge'
+import ValidateIdentifierButton from './ValidateIdentifierButton'
+import { contentCenteredSnackbarSx } from '@/app/[lang]/components/contentCenteredSnackbarSx'
 
 const IDREF_REGEX = /^\d{8}[\dX]$/i
 
@@ -43,11 +46,12 @@ const IdrefControl = () => {
       ? connectedUser?.person
       : currentPerspective
 
-  const { canAddUnauthenticated, canRemove } = useIdentifierCapabilities(
-    person,
-    PersonIdentifierType.idref,
-    ownPerspective,
-  )
+  const { canAddUnauthenticated, canRemove, canValidate, isValidated } =
+    useIdentifierCapabilities(
+      person,
+      PersonIdentifierType.idref,
+      ownPerspective,
+    )
 
   const idref = person
     ?.getIdentifiers()
@@ -124,6 +128,10 @@ const IdrefControl = () => {
     }
   }
 
+  // Keep the content on close so it does not change during the exit transition
+  const closeSnackbar = () =>
+    setSnackbar((s) => (s ? { ...s, open: false } : s))
+
   const remove = async () => {
     if (!person?.uid) return
     setOpenConfirm(false)
@@ -153,9 +161,12 @@ const IdrefControl = () => {
           borderRadius: 2,
         }}
       >
-        <Typography variant='subtitle1' fontWeight='bold'>
-          IdRef
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant='subtitle1' fontWeight='bold'>
+            IdRef
+          </Typography>
+          {idref && isValidated && <ValidatedBadge />}
+        </Box>
 
         {idref ? (
           <>
@@ -178,6 +189,13 @@ const IdrefControl = () => {
                 <Typography variant='body2' color='text.secondary'>
                   {idref.value}
                 </Typography>
+              )}
+              {person?.uid && (
+                <ValidateIdentifierButton
+                  personUid={person.uid}
+                  type={PersonIdentifierType.idref}
+                  show={canValidate}
+                />
               )}
             </Box>
             <IdRefInfoBox idrefId={idref.value} />
@@ -286,11 +304,12 @@ const IdrefControl = () => {
       <Snackbar
         open={snackbar?.open ?? false}
         autoHideDuration={6000}
-        onClose={() => setSnackbar(null)}
+        onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={contentCenteredSnackbarSx}
       >
         <Alert
-          onClose={() => setSnackbar(null)}
+          onClose={closeSnackbar}
           severity={snackbar?.success ? 'success' : 'error'}
           sx={{ width: '100%' }}
         >

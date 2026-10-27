@@ -6,6 +6,7 @@ query PeopleQuery($where: PersonWhere) {
     identifiers {
       type
       value
+      validated
     }
     names {
       first_names {

@@ -87,6 +87,7 @@ describe('HarvestingResultEventWorker', () => {
     expect(personDAO.fetchPersonByIdentifier).toHaveBeenCalledWith({
       type: PersonIdentifierType.local,
       value: 'person-123',
+      validated: false,
     })
   })
 })

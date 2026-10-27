@@ -102,6 +102,7 @@ const setupSession = (authz: unknown) => {
 
 const mockAddPersonIdentifier = jest.fn()
 const mockRemovePersonIdentifier = jest.fn()
+const mockValidatePersonIdentifier = jest.fn()
 
 const setupStore = ({
   person = null,
@@ -121,6 +122,7 @@ const setupStore = ({
           ownPerspective,
           addPersonIdentifier: mockAddPersonIdentifier,
           removePersonIdentifier: mockRemovePersonIdentifier,
+          validatePersonIdentifier: mockValidatePersonIdentifier,
         },
       }),
   )
@@ -161,7 +163,47 @@ describe('OrcidControl', () => {
     mockUseSearchParams.mockReturnValue(new URLSearchParams())
     mockAddPersonIdentifier.mockResolvedValue({ success: true })
     mockRemovePersonIdentifier.mockResolvedValue({ success: true })
+    mockValidatePersonIdentifier.mockResolvedValue({ success: true })
     setupSession(authzGlobal)
+  })
+
+  it('non-validated ORCID: wide editor validates it', async () => {
+    setupStore({ person: buildPerson([plainOrcid]) })
+    renderWithProviders()
+
+    fireEvent.click(screen.getByText('identifier_validate_button'))
+    fireEvent.click(screen.getByText('identifier_validate_dialog_confirm'))
+
+    await waitFor(() =>
+      expect(mockValidatePersonIdentifier).toHaveBeenCalledWith(
+        'person-uid',
+        PersonIdentifierType.orcid,
+      ),
+    )
+  })
+
+  it('validated ORCID: badge, no validate button', () => {
+    setupStore({
+      person: buildPerson([
+        new ORCIDIdentifier('0000-0001-7990-9804', undefined, true),
+      ]),
+    })
+    renderWithProviders()
+
+    expect(screen.getByTestId('identifier-validated-badge')).toBeInTheDocument()
+    expect(
+      screen.queryByText('identifier_validate_button'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('authenticated ORCID: validated badge, no validate button', () => {
+    setupStore({ person: buildPerson([authenticatedOrcid]) })
+    renderWithProviders()
+
+    expect(
+      screen.queryByText('identifier_validate_button'),
+    ).not.toBeInTheDocument()
+    expect(screen.getByTestId('identifier-validated-badge')).toBeInTheDocument()
   })
 
   it('authenticated ORCID: shows link icon + Remove, no auth button', () => {

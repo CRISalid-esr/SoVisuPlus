@@ -1,11 +1,10 @@
 import { IdentifierConflictError, PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 import {
-  IdentifierMessagePayload,
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
-import { ActionDAO } from '@/lib/daos/ActionDAO'
+import { ActionDAO, CreateActionParams } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import { InputJsonValue } from '@prisma/client/runtime/library'
@@ -54,37 +53,48 @@ export class PersonService {
     actionType: ActionType,
     parameters: InputJsonValue,
   ): Promise<void> {
-    await this.actionDAO.createAction({
+    await this.actionDAO.createAction(
+      this.identifierAction(personUid, actionType, parameters),
+    )
+  }
+
+  private identifierAction(
+    personUid: string,
+    actionType: ActionType,
+    parameters: InputJsonValue,
+  ): CreateActionParams {
+    return {
       actionType,
       targetType: ActionTargetType.PERSON,
       targetUid: personUid,
       path: 'identifiers',
       parameters,
       personUid,
-    })
+    }
   }
 
   /**
    * Manually add a non-authenticated identifier (create-only). Value changes
    * are handled as remove-then-add, so this throws {@link IdentifierConflictError}
-   * (surfaced as a 409) when an identifier already exists.
+   * (surfaced as a 409) when an identifier already exists. A manual add is made
+   * by a privileged user, so the identifier is stored as validated.
    */
   async addIdentifier(
     personUid: string,
     identifier: PersonIdentifier,
   ): Promise<void> {
     try {
-      await this.personDAO.createIdentifier(identifier, personUid)
+      await this.personDAO.createIdentifier(
+        new PersonIdentifier(identifier.type, identifier.value, true),
+        personUid,
+      )
     } catch (error) {
       if (error instanceof IdentifierConflictError) throw error
       const message = `Error adding identifier (type=${identifier.type}, value=${identifier.value}, personUid=${personUid})`
       console.error(message, error)
       throw new Error(message)
     }
-    const payload: IdentifierMessagePayload = {
-      ...identifier.toJson(),
-      authenticated: false,
-    }
+    const payload = identifier.toMessagePayload(false)
     await this.recordIdentifierAction(personUid, ActionType.ADD, {
       identifier: payload,
     })
@@ -115,10 +125,7 @@ export class PersonService {
         identifier,
       )
 
-      const payload: IdentifierMessagePayload = {
-        ...identifier.toJson(),
-        authenticated: true,
-      }
+      const payload = identifier.toMessagePayload(true)
       await this.recordIdentifierAction(
         personUid,
         existed ? ActionType.UPDATE : ActionType.ADD,
@@ -154,10 +161,7 @@ export class PersonService {
       const identifier = new PersonIdentifier(type, value)
       await this.personDAO.upsertHalIdentifiers(personUid, identifier, halLogin)
 
-      const payload: IdentifierMessagePayload = {
-        ...identifier.toJson(),
-        authenticated: true,
-      }
+      const payload = identifier.toMessagePayload(true)
       await this.recordIdentifierAction(
         personUid,
         existed ? ActionType.UPDATE : ActionType.ADD,
@@ -165,6 +169,35 @@ export class PersonService {
       )
     } catch (error) {
       const message = `Error authenticating HAL identifier (type=${type}, value=${value}, personUid=${personUid})`
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
+
+  /**
+   * Validate an existing non-authenticated identifier without changing its
+   * value. Emits an UPDATE message (authenticated: false), which the graph
+   * handles as a validation.
+   */
+  async validateIdentifier(
+    personUid: string,
+    type: PersonIdentifierType,
+  ): Promise<void> {
+    try {
+      const value = await this.personDAO.findIdentifierValue(personUid, type)
+      if (value === null) {
+        throw new Error('Identifier not found')
+      }
+      const payload = new PersonIdentifier(type, value).toMessagePayload(false)
+      await this.personDAO.markIdentifierValidated(
+        personUid,
+        type,
+        this.identifierAction(personUid, ActionType.UPDATE, {
+          identifier: payload,
+        }),
+      )
+    } catch (error) {
+      const message = `Error validating identifier (type=${type}, personUid=${personUid})`
       console.error(message, error)
       throw new Error(message)
     }
