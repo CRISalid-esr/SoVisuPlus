@@ -8,12 +8,16 @@ import {
 } from '@prisma/client'
 import { Person } from '@/types/Person'
 import {
+  IdentifierConflictReason,
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
 import { CreateActionParams } from '@/lib/daos/ActionDAO'
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import {
+  isUniqueConstraintError,
+  UniqueConstraintError,
+} from '@/lib/daos/prismaErrors'
 import { PersonMembership } from '@/types/PersonMembership'
 import {
   organizationUnitInclude,
@@ -70,11 +74,26 @@ const isIdHalType = (type: PersonIdentifierType): boolean =>
   type === PersonIdentifierType.idhals || type === PersonIdentifierType.idhali
 
 export class IdentifierConflictError extends Error {
-  constructor(message = 'Identifier already exists') {
+  constructor(
+    public readonly reason: IdentifierConflictReason = 'slot_taken',
+    message = 'Identifier already exists',
+  ) {
     super(message)
     this.name = 'IdentifierConflictError'
   }
 }
+
+/**
+ * Reads which unique constraint a P2002 error hit: (type, value) means the
+ * value belongs to another person; (personId, type) means this person already
+ * has an identifier of that type.
+ */
+const identifierConflictReason = (
+  error: UniqueConstraintError,
+): IdentifierConflictReason =>
+  String(error.meta?.target ?? '').includes('value')
+    ? 'used_by_another_person'
+    : 'slot_taken'
 
 /**
  * Thrown by {@link PersonDAO.createPerson} when a person with the same uid
@@ -180,11 +199,7 @@ export class PersonDAO extends AbstractDAO {
           // return value, so there is no need to re-fetch them here.
           return dbPerson
         } catch (error) {
-          if (
-            error instanceof PrismaClientKnownRequestError &&
-            error.code === 'P2002' && // Unique constraint violation
-            baseSlug
-          ) {
+          if (isUniqueConstraintError(error) && baseSlug) {
             console.error(
               `Slug collision detected for '${uniqueSlug}', retrying...`,
             )
@@ -251,10 +266,7 @@ export class PersonDAO extends AbstractDAO {
 
         return dbPerson
       } catch (error) {
-        if (
-          error instanceof PrismaClientKnownRequestError &&
-          error.code === 'P2002'
-        ) {
+        if (isUniqueConstraintError(error)) {
           const target = error.meta?.target
           const fields = Array.isArray(target) ? target : [String(target)]
           if (fields.some((field) => String(field).includes('uid'))) {
@@ -627,10 +639,7 @@ export class PersonDAO extends AbstractDAO {
       })
     } catch (error: unknown) {
       console.error('Error during identifier upsert:', error as Error)
-      if (
-        error instanceof PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      ) {
+      if (isUniqueConstraintError(error)) {
         if (retries < 3) {
           console.warn('Retrying identifier upsert...')
           await this.upsertIdentifiers(
@@ -656,6 +665,7 @@ export class PersonDAO extends AbstractDAO {
    * @param personUid - The UID of the person
    * @param retries - The number of retries (to handle conflicts on upsert)
    * @returns The created or updated PersonIdentifier record
+   * @throws IdentifierConflictError when the value belongs to another person
    */
   public async upsertIdentifier(
     identifier: PersonIdentifier,
@@ -691,10 +701,11 @@ export class PersonDAO extends AbstractDAO {
         },
       })
     } catch (error) {
-      if (
-        error instanceof PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      ) {
+      if (isUniqueConstraintError(error)) {
+        // Retrying cannot help when the value belongs to another person
+        if (identifierConflictReason(error) === 'used_by_another_person') {
+          throw new IdentifierConflictError('used_by_another_person')
+        }
         if (retries < 3) {
           console.warn('Retrying identifier upsert...')
           // recursive call : return the retry result !
@@ -792,16 +803,36 @@ export class PersonDAO extends AbstractDAO {
         },
       })
     } catch (error) {
-      if (
-        error instanceof PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      ) {
-        throw new IdentifierConflictError()
+      if (isUniqueConstraintError(error)) {
+        throw new IdentifierConflictError(identifierConflictReason(error))
       }
       throw new Error(
         `Failed to create identifier: ${(error as Error).message}`,
       )
     }
+  }
+
+  /**
+   * True when a person other than `personUid` holds one of the given
+   * identifiers (same type and value).
+   */
+  public async isAnyIdentifierHeldByAnotherPerson(
+    personUid: string,
+    identifiers: PersonIdentifier[],
+  ): Promise<boolean> {
+    if (identifiers.length === 0) return false
+
+    const row = await this.prismaClient.personIdentifier.findFirst({
+      where: {
+        OR: identifiers.map((identifier) => ({
+          type: identifier.type as PersonIdentifierType,
+          value: identifier.value,
+        })),
+        person: { uid: { not: personUid } },
+      },
+      select: { id: true },
+    })
+    return row !== null
   }
 
   /**

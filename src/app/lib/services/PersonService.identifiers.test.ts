@@ -14,10 +14,14 @@ const mockUpsertOrcidExt = jest.fn()
 const mockFindIdentifierValue = jest.fn()
 const mockDeleteIdentifier = jest.fn()
 const mockCreateAction = jest.fn()
+const mockIsAnyIdentifierHeldByAnotherPerson = jest.fn()
 
 jest.mock('@/lib/daos/PersonDAO', () => {
   class IdentifierConflictError extends Error {
-    constructor(message = 'Identifier already exists') {
+    constructor(
+      public readonly reason = 'slot_taken',
+      message = 'Identifier already exists',
+    ) {
       super(message)
       this.name = 'IdentifierConflictError'
     }
@@ -31,6 +35,8 @@ jest.mock('@/lib/daos/PersonDAO', () => {
       upsertOrcidIdentifierExtension: mockUpsertOrcidExt,
       findIdentifierValue: mockFindIdentifierValue,
       deleteIdentifier: mockDeleteIdentifier,
+      isAnyIdentifierHeldByAnotherPerson:
+        mockIsAnyIdentifierHeldByAnotherPerson,
     })),
   }
 })
@@ -55,6 +61,7 @@ describe('PersonService identifier operations', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockIsAnyIdentifierHeldByAnotherPerson.mockResolvedValue(false)
     service = new PersonService()
   })
 

@@ -101,6 +101,19 @@ export class PersonService {
   }
 
   /**
+   * True when a person other than `personUid` holds one of the identifiers.
+   */
+  async isAnyIdentifierUsedByAnotherPerson(
+    personUid: string,
+    identifiers: PersonIdentifier[],
+  ): Promise<boolean> {
+    return this.personDAO.isAnyIdentifierHeldByAnotherPerson(
+      personUid,
+      identifiers,
+    )
+  }
+
+  /**
    * Persist an authenticated ORCID (base row + encrypted OAuth extension) and
    * emit an ADD (when the ORCID did not exist) or UPDATE (in-place
    * authentication of an existing value) message marked authenticated.

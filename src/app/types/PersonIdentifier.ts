@@ -20,6 +20,15 @@ export type IdentifierMessagePayload = Pick<
   authenticated: boolean
 }
 
+/**
+ * Why an identifier write was rejected: the person already holds an identifier
+ * of that type, or the value belongs to another person.
+ */
+export type IdentifierConflictReason = 'slot_taken' | 'used_by_another_person'
+
+/** The two forms (idHal_s / idHal_i) under which one HAL identity is stored. */
+export type IdHalForms = { idhals?: string; idhali?: string }
+
 export class PersonIdentifier {
   constructor(
     public type: DbPersonIdentifierType,
@@ -166,5 +175,17 @@ export class PersonIdentifier {
     )
   }
 }
+
+/** The identifiers behind the idHAL forms of one HAL account. */
+export const idHalFormsToIdentifiers = (
+  forms: IdHalForms,
+): PersonIdentifier[] => [
+  ...(forms.idhals
+    ? [new PersonIdentifier(DbPersonIdentifierType.idhals, forms.idhals)]
+    : []),
+  ...(forms.idhali
+    ? [new PersonIdentifier(DbPersonIdentifierType.idhali, forms.idhali)]
+    : []),
+]
 
 export { DbPersonIdentifierType as PersonIdentifierType }

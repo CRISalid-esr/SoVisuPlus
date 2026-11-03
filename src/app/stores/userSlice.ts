@@ -3,6 +3,7 @@ import { User } from '@/types/User'
 import { IAgent, IAgentClass } from '@/types/IAgent'
 import { Person } from '@/types/Person'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
+import { IdentifierConflictReason } from '@/types/PersonIdentifier'
 
 export interface UserSlice {
   user: {
@@ -24,7 +25,7 @@ export interface UserSlice {
       personUid: string,
       type: string,
       value: string,
-    ) => Promise<{ success: boolean; conflict?: boolean }>
+    ) => Promise<{ success: boolean; conflict?: IdentifierConflictReason }>
     removePersonIdentifier: (
       personUid: string,
       type: string,
@@ -109,8 +110,9 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
         },
       }))
     },
-    // Add-only: a value change is a remove-then-add. A 409 means an identifier
-    // of that type already exists and must be removed first (conflict flag).
+    // Add-only: a value change is a remove-then-add. A 409 means either an
+    // identifier of that type already exists and must be removed first, or the
+    // value belongs to another person (conflict reason).
     addPersonIdentifier: async (
       personUid: string,
       type: string,
@@ -125,8 +127,18 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
             body: JSON.stringify({ value }),
           },
         )
+        if (response.status === 409) {
+          const body = await response.json().catch(() => ({}))
+          return {
+            success: false,
+            conflict:
+              body?.error === 'identifier_used_by_another_person'
+                ? 'used_by_another_person'
+                : 'slot_taken',
+          }
+        }
         if (!response.ok) {
-          return { success: false, conflict: response.status === 409 }
+          return { success: false }
         }
         await get().user.refreshPerspective()
         return { success: true }

@@ -15,6 +15,7 @@ import {
   OrganizationGenericType,
 } from '@prisma/client'
 import {
+  idHalFormsToIdentifiers,
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
@@ -1281,12 +1282,149 @@ describe('PersonDAO Integration Tests', () => {
       },
     })
 
+    const promise = personDAO.createIdentifier(
+      new PersonIdentifier(PersonIdentifierType.idref, '111111111'),
+      dbPerson.uid,
+    )
+    await expect(promise).rejects.toBeInstanceOf(IdentifierConflictError)
+    await expect(promise).rejects.toMatchObject({ reason: 'slot_taken' })
+  })
+
+  test('createIdentifier reports a value held by another person', async () => {
+    await prisma.person.create({
+      data: {
+        uid: 'local-createowner',
+        email: 'createowner@example.com',
+        identifiers: {
+          create: { type: PersonIdentifierType.idref, value: '127220747' },
+        },
+      },
+    })
+    const dbPerson = await prisma.person.create({
+      data: { uid: 'local-createother', email: 'createother@example.com' },
+    })
+
     await expect(
       personDAO.createIdentifier(
-        new PersonIdentifier(PersonIdentifierType.idref, '111111111'),
+        new PersonIdentifier(PersonIdentifierType.idref, '127220747'),
         dbPerson.uid,
       ),
-    ).rejects.toBeInstanceOf(IdentifierConflictError)
+    ).rejects.toMatchObject({ reason: 'used_by_another_person' })
+  })
+
+  test('upsertIdentifier reports a value held by another person', async () => {
+    await prisma.person.create({
+      data: {
+        uid: 'local-upsertowner',
+        email: 'upsertowner@example.com',
+        identifiers: {
+          create: {
+            type: PersonIdentifierType.orcid,
+            value: '0000-0002-1825-0097',
+          },
+        },
+      },
+    })
+    const dbPerson = await prisma.person.create({
+      data: { uid: 'local-upsertother', email: 'upsertother@example.com' },
+    })
+
+    await expect(
+      personDAO.upsertIdentifier(
+        new PersonIdentifier(PersonIdentifierType.orcid, '0000-0002-1825-0097'),
+        dbPerson.uid,
+      ),
+    ).rejects.toMatchObject({ reason: 'used_by_another_person' })
+    expect(
+      await prisma.personIdentifier.findMany({
+        where: { personId: dbPerson.id },
+      }),
+    ).toHaveLength(0)
+  })
+
+  describe('isAnyIdentifierHeldByAnotherPerson', () => {
+    beforeEach(async () => {
+      await prisma.person.create({
+        data: {
+          uid: 'local-idhalowner',
+          email: 'idhalowner@example.com',
+          identifiers: {
+            create: { type: PersonIdentifierType.idhali, value: '12345' },
+          },
+        },
+      })
+    })
+
+    test('detects the other form held by another person', async () => {
+      expect(
+        await personDAO.isAnyIdentifierHeldByAnotherPerson(
+          'local-someone',
+          idHalFormsToIdentifiers({
+            idhals: 'jacques-dupont',
+            idhali: '12345',
+          }),
+        ),
+      ).toBe(true)
+    })
+
+    test('ignores the idHAL held by the person themselves', async () => {
+      expect(
+        await personDAO.isAnyIdentifierHeldByAnotherPerson(
+          'local-idhalowner',
+          idHalFormsToIdentifiers({
+            idhals: 'jacques-dupont',
+            idhali: '12345',
+          }),
+        ),
+      ).toBe(false)
+    })
+
+    test('matches on type and value, for any identifier type', async () => {
+      await prisma.person.create({
+        data: {
+          uid: 'local-orcidowner',
+          email: 'orcidowner@example.com',
+          identifiers: {
+            create: {
+              type: PersonIdentifierType.orcid,
+              value: '0000-0002-1825-0097',
+            },
+          },
+        },
+      })
+
+      expect(
+        await personDAO.isAnyIdentifierHeldByAnotherPerson('local-someone', [
+          new PersonIdentifier(
+            PersonIdentifierType.orcid,
+            '0000-0002-1825-0097',
+          ),
+        ]),
+      ).toBe(true)
+      // Same value under another type is not a match
+      expect(
+        await personDAO.isAnyIdentifierHeldByAnotherPerson('local-someone', [
+          new PersonIdentifier(PersonIdentifierType.idhals, '12345'),
+        ]),
+      ).toBe(false)
+    })
+
+    test('returns false when no form is held elsewhere', async () => {
+      expect(
+        await personDAO.isAnyIdentifierHeldByAnotherPerson(
+          'local-someone',
+          idHalFormsToIdentifiers({
+            idhals: 'jacques-dupont',
+          }),
+        ),
+      ).toBe(false)
+      expect(
+        await personDAO.isAnyIdentifierHeldByAnotherPerson(
+          'local-someone',
+          idHalFormsToIdentifiers({}),
+        ),
+      ).toBe(false)
+    })
   })
 
   test('should append -1 to the slug when a second person with the same name is added', async () => {
