@@ -182,6 +182,10 @@ export const ID_HAL_TYPES: DbPersonIdentifierType[] = [
   DbPersonIdentifierType.idhali,
 ]
 
+/** Whether the type is one of the two idHAL forms. */
+export const isIdHalType = (type: DbPersonIdentifierType): boolean =>
+  ID_HAL_TYPES.includes(type)
+
 /** The identifiers behind the idHAL forms of one HAL account. */
 export const idHalFormsToIdentifiers = (
   forms: IdHalForms,

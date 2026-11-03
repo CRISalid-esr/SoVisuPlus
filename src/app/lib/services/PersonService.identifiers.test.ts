@@ -13,6 +13,7 @@ const mockUpsertIdentifier = jest.fn()
 const mockUpsertHalIdentifiers = jest.fn()
 const mockUpsertOrcidExt = jest.fn()
 const mockFindIdentifierValue = jest.fn()
+const mockFindIdentifiers = jest.fn()
 const mockDeleteIdentifier = jest.fn()
 const mockCreateAction = jest.fn()
 const mockIsAnyIdentifierHeldByAnotherPerson = jest.fn()
@@ -36,6 +37,7 @@ jest.mock('@/lib/daos/PersonDAO', () => {
       upsertHalIdentifiers: mockUpsertHalIdentifiers,
       upsertOrcidIdentifierExtension: mockUpsertOrcidExt,
       findIdentifierValue: mockFindIdentifierValue,
+      findIdentifiers: mockFindIdentifiers,
       deleteIdentifier: mockDeleteIdentifier,
       isAnyIdentifierHeldByAnotherPerson:
         mockIsAnyIdentifierHeldByAnotherPerson,
@@ -65,6 +67,15 @@ const orcidOauth = () => ({
   expiresAt: new Date('2026-06-01'),
 })
 
+/** [actionType, parameters] of the actions passed to a DAO write. */
+const actionsOf = (mock: jest.Mock, argIndex: number) =>
+  (
+    mock.mock.calls[0][argIndex] as {
+      actionType: string
+      parameters: unknown
+    }[]
+  ).map((action) => [action.actionType, action.parameters])
+
 describe('PersonService identifier operations', () => {
   let service: PersonService
 
@@ -82,22 +93,27 @@ describe('PersonService identifier operations', () => {
         new PersonIdentifier(PersonIdentifierType.idref, '123456789'),
       )
 
-      expect(mockCreateIdentifiers).toHaveBeenCalledTimes(1)
-      expect(mockCreateAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          actionType: ActionType.ADD,
-          targetType: ActionTargetType.PERSON,
-          path: 'identifiers',
-          personUid: 'p1',
-          parameters: {
-            identifier: {
-              type: 'idref',
-              value: '123456789',
-              authenticated: false,
+      // The ADD is recorded in the same transaction as the identifier
+      expect(mockCreateIdentifiers).toHaveBeenCalledWith(
+        [new PersonIdentifier(PersonIdentifierType.idref, '123456789', true)],
+        'p1',
+        [
+          expect.objectContaining({
+            actionType: ActionType.ADD,
+            targetType: ActionTargetType.PERSON,
+            path: 'identifiers',
+            personUid: 'p1',
+            parameters: {
+              identifier: {
+                type: 'idref',
+                value: '123456789',
+                authenticated: false,
+              },
             },
-          },
-        }),
+          }),
+        ],
       )
+      expect(mockCreateAction).not.toHaveBeenCalled()
     })
 
     it('rethrows IdentifierConflictError and records no action', async () => {
@@ -164,13 +180,9 @@ describe('PersonService identifier operations', () => {
           new PersonIdentifier(PersonIdentifierType.idhali, '12345', true),
         ],
         'p1',
+        expect.any(Array),
       )
-      expect(
-        mockCreateAction.mock.calls.map(([action]) => [
-          action.actionType,
-          action.parameters,
-        ]),
-      ).toEqual([
+      expect(actionsOf(mockCreateIdentifiers, 2)).toEqual([
         [
           ActionType.ADD,
           {
@@ -234,6 +246,7 @@ describe('PersonService identifier operations', () => {
       expect(mockCreateIdentifiers).toHaveBeenCalledWith(
         [new PersonIdentifier(PersonIdentifierType.idhals, 'john-doe', true)],
         'p1',
+        expect.any(Array),
       )
     })
 
@@ -261,6 +274,7 @@ describe('PersonService identifier operations', () => {
       expect(mockCreateIdentifiers).toHaveBeenCalledWith(
         [new PersonIdentifier(PersonIdentifierType.idhals, 'john-doe', true)],
         'p1',
+        expect.any(Array),
       )
       errorSpy.mockRestore()
     })
@@ -322,15 +336,15 @@ describe('PersonService identifier operations', () => {
   })
 
   describe('authenticateHalIdentifier', () => {
-    it('writes hal_login silently and emits one ADD per idHAL form', async () => {
-      mockFindIdentifierValue.mockResolvedValue(null)
+    it('writes hal_login silently and records one ADD per idHAL form in the same transaction', async () => {
+      mockFindIdentifiers.mockResolvedValue([])
 
       await service.authenticateHalIdentifier('p1', {
         halLogin: 'jdoe',
         forms: { idhals: 'john-doe', idhali: '12345' },
       })
 
-      // hal_login + both idHAL forms upserted together
+      // hal_login + both idHAL forms upserted together, with their actions
       expect(mockUpsertHalIdentifiers).toHaveBeenCalledWith(
         'p1',
         [
@@ -338,70 +352,62 @@ describe('PersonService identifier operations', () => {
           new PersonIdentifier(PersonIdentifierType.idhali, '12345'),
         ],
         'jdoe',
+        expect.any(Array),
       )
       // one outgoing message per idHAL form (hal_login is silent)
-      expect(mockCreateAction).toHaveBeenCalledTimes(2)
-      expect(mockCreateAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          actionType: ActionType.ADD,
-          parameters: {
+      expect(actionsOf(mockUpsertHalIdentifiers, 3)).toEqual([
+        [
+          ActionType.ADD,
+          {
             identifier: {
               type: 'idhals',
               value: 'john-doe',
               authenticated: true,
             },
           },
-        }),
-      )
-      expect(mockCreateAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          actionType: ActionType.ADD,
-          parameters: {
-            identifier: {
-              type: 'idhali',
-              value: '12345',
-              authenticated: true,
-            },
+        ],
+        [
+          ActionType.ADD,
+          {
+            identifier: { type: 'idhali', value: '12345', authenticated: true },
           },
-        }),
-      )
+        ],
+      ])
+      expect(mockCreateAction).not.toHaveBeenCalled()
     })
 
-    it('emits UPDATE for the stored form and ADD for the missing one', async () => {
-      mockFindIdentifierValue.mockImplementation(
-        async (_uid: string, type: PersonIdentifierType) =>
-          type === PersonIdentifierType.idhali ? '12345' : null,
-      )
+    it('records UPDATE for the stored form and ADD for the missing one', async () => {
+      mockFindIdentifiers.mockResolvedValue([
+        new PersonIdentifier(PersonIdentifierType.idhali, '12345'),
+      ])
 
       await service.authenticateHalIdentifier('p1', {
         halLogin: 'jdoe',
         forms: { idhals: 'john-doe', idhali: '12345' },
       })
 
-      expect(mockCreateAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          actionType: ActionType.UPDATE,
-          parameters: {
-            identifier: { type: 'idhali', value: '12345', authenticated: true },
-          },
-        }),
-      )
-      expect(mockCreateAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          actionType: ActionType.ADD,
-          parameters: {
+      expect(actionsOf(mockUpsertHalIdentifiers, 3)).toEqual([
+        [
+          ActionType.ADD,
+          {
             identifier: {
               type: 'idhals',
               value: 'john-doe',
               authenticated: true,
             },
           },
-        }),
-      )
+        ],
+        [
+          ActionType.UPDATE,
+          {
+            identifier: { type: 'idhali', value: '12345', authenticated: true },
+          },
+        ],
+      ])
     })
 
     it('stores only the form the HAL account has', async () => {
-      mockFindIdentifierValue.mockResolvedValue(null)
+      mockFindIdentifiers.mockResolvedValue([])
 
       await service.authenticateHalIdentifier('p1', {
         halLogin: 'jdoe',
@@ -412,8 +418,9 @@ describe('PersonService identifier operations', () => {
         'p1',
         [new PersonIdentifier(PersonIdentifierType.idhali, '12345')],
         'jdoe',
+        expect.any(Array),
       )
-      expect(mockCreateAction).toHaveBeenCalledTimes(1)
+      expect(actionsOf(mockUpsertHalIdentifiers, 3)).toHaveLength(1)
     })
   })
 
@@ -446,70 +453,50 @@ describe('PersonService identifier operations', () => {
   })
 
   describe('removeIdentifier', () => {
-    it('emits no REMOVE when nothing is stored', async () => {
-      mockFindIdentifierValue.mockResolvedValue(null)
-
-      await service.removeIdentifier('p1', PersonIdentifierType.idref)
-
-      expect(mockDeleteIdentifier).toHaveBeenCalled()
-      expect(mockCreateAction).not.toHaveBeenCalled()
-    })
-
-    it('deletes and emits a REMOVE carrying type and value', async () => {
-      mockFindIdentifierValue.mockResolvedValue('123456789')
+    it('records no REMOVE when nothing is stored', async () => {
+      mockFindIdentifiers.mockResolvedValue([])
 
       await service.removeIdentifier('p1', PersonIdentifierType.idref)
 
       expect(mockDeleteIdentifier).toHaveBeenCalledWith(
         'p1',
         PersonIdentifierType.idref,
+        [],
       )
-      expect(mockCreateAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          actionType: ActionType.REMOVE,
-          parameters: { type: PersonIdentifierType.idref, value: '123456789' },
-        }),
-      )
+    })
+
+    it('deletes and records a REMOVE carrying type and value in the same transaction', async () => {
+      mockFindIdentifiers.mockResolvedValue([
+        new PersonIdentifier(PersonIdentifierType.idref, '123456789'),
+      ])
+
+      await service.removeIdentifier('p1', PersonIdentifierType.idref)
+
+      expect(mockFindIdentifiers).toHaveBeenCalledWith('p1', [
+        PersonIdentifierType.idref,
+      ])
+      expect(actionsOf(mockDeleteIdentifier, 2)).toEqual([
+        [ActionType.REMOVE, { type: 'idref', value: '123456789' }],
+      ])
+      expect(mockCreateAction).not.toHaveBeenCalled()
     })
 
     it('removes both idHAL forms with one REMOVE per stored form', async () => {
-      mockFindIdentifierValue.mockImplementation(
-        async (_uid: string, type: PersonIdentifierType) =>
-          type === PersonIdentifierType.idhals ? 'john-doe' : '12345',
-      )
+      mockFindIdentifiers.mockResolvedValue([
+        new PersonIdentifier(PersonIdentifierType.idhals, 'john-doe'),
+        new PersonIdentifier(PersonIdentifierType.idhali, '12345'),
+      ])
 
       await service.removeIdentifier('p1', PersonIdentifierType.idhals)
 
-      expect(mockDeleteIdentifier).toHaveBeenCalledWith(
-        'p1',
+      expect(mockFindIdentifiers).toHaveBeenCalledWith('p1', [
         PersonIdentifierType.idhals,
-      )
-      expect(
-        mockCreateAction.mock.calls.map(([action]) => [
-          action.actionType,
-          action.parameters,
-        ]),
-      ).toEqual([
+        PersonIdentifierType.idhali,
+      ])
+      expect(actionsOf(mockDeleteIdentifier, 2)).toEqual([
         [ActionType.REMOVE, { type: 'idhals', value: 'john-doe' }],
         [ActionType.REMOVE, { type: 'idhali', value: '12345' }],
       ])
-    })
-
-    it('emits no REMOVE for an idHAL form that is not stored', async () => {
-      mockFindIdentifierValue.mockImplementation(
-        async (_uid: string, type: PersonIdentifierType) =>
-          type === PersonIdentifierType.idhali ? '12345' : null,
-      )
-
-      await service.removeIdentifier('p1', PersonIdentifierType.idhali)
-
-      expect(mockCreateAction).toHaveBeenCalledTimes(1)
-      expect(mockCreateAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          actionType: ActionType.REMOVE,
-          parameters: { type: 'idhali', value: '12345' },
-        }),
-      )
     })
   })
 })

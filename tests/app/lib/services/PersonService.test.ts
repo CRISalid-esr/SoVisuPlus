@@ -335,6 +335,42 @@ describe('PersonService Integration Tests', () => {
     ])
   })
 
+  test('validateIdentifier writes no action when every form is already validated', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-validate-done',
+        email: 'validate-done@example.com',
+        firstName: 'Paul',
+        lastName: 'Martin',
+        normalizedName: 'paul martin',
+        external: false,
+        identifiers: {
+          create: [
+            {
+              type: PersonIdentifierType.idhals,
+              value: 'paul-martin',
+              validated: true,
+            },
+            {
+              type: PersonIdentifierType.idhali,
+              value: '12345',
+              validated: true,
+            },
+          ],
+        },
+      },
+    })
+
+    await personService.validateIdentifier(
+      person.uid,
+      PersonIdentifierType.idhals,
+    )
+
+    expect(
+      await prisma.action.count({ where: { targetUid: person.uid } }),
+    ).toBe(0)
+  })
+
   test('validateIdentifier fails without writing an action when the identifier is missing', async () => {
     const person = await prisma.person.create({
       data: {

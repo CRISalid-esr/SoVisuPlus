@@ -1,5 +1,5 @@
 import {
-  ID_HAL_TYPES,
+  isIdHalType,
   PersonIdentifier,
   PersonIdentifierJson,
   PersonIdentifierType,
@@ -180,10 +180,7 @@ class Person implements IAgent, Authorizable {
       )
       return orcid instanceof ORCIDIdentifier && !!orcid.oauth
     }
-    if (
-      type === PersonIdentifierType.idhals ||
-      type === PersonIdentifierType.idhali
-    ) {
+    if (isIdHalType(type)) {
       return this.hasIdentifier(PersonIdentifierType.hal_login)
     }
     return false
@@ -198,9 +195,9 @@ class Person implements IAgent, Authorizable {
     const identifier = this.identifiers.find((id) => id.type === type)
     if (!identifier) return false
     if (this.isIdentifierAuthenticated(type)) return true
-    if (ID_HAL_TYPES.includes(type)) {
+    if (isIdHalType(type)) {
       return this.identifiers
-        .filter((id) => ID_HAL_TYPES.includes(id.type as PersonIdentifierType))
+        .filter((id) => isIdHalType(id.type as PersonIdentifierType))
         .every((id) => id.validated)
     }
     return identifier.validated

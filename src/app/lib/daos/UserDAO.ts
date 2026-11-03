@@ -4,7 +4,7 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
-import { identifiersWithOrcidGrantInclude } from '@/lib/daos/PersonDAO'
+import { identifiersWithOrcidGrantInclude } from '@/lib/daos/personIncludes'
 import { User } from '@/types/User'
 import { EntityType } from '@/types/UserRoleScope'
 

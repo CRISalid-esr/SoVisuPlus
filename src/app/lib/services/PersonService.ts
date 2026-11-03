@@ -4,6 +4,7 @@ import {
   ID_HAL_TYPES,
   IdHalForms,
   idHalFormsToIdentifiers,
+  isIdHalType,
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
@@ -12,9 +13,6 @@ import { ActionTargetType, ActionType } from '@/types/Action'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 import { AureHalAPIClient, idHalFormsOf } from '@/lib/services/AureHalAPIClient'
-
-const isIdHalType = (type: PersonIdentifierType): boolean =>
-  type === PersonIdentifierType.idhals || type === PersonIdentifierType.idhali
 
 export class PersonService {
   private personDAO: PersonDAO
@@ -114,17 +112,17 @@ export class PersonService {
           (added) => new PersonIdentifier(added.type, added.value, true),
         ),
         personUid,
+        identifiers.map((added) =>
+          this.identifierAction(personUid, ActionType.ADD, {
+            identifier: added.toMessagePayload(false),
+          }),
+        ),
       )
     } catch (error) {
       if (error instanceof IdentifierConflictError) throw error
       const message = `Error adding identifier (type=${identifier.type}, value=${identifier.value}, personUid=${personUid})`
       console.error(message, error)
       throw new Error(message)
-    }
-    for (const added of identifiers) {
-      await this.recordIdentifierAction(personUid, ActionType.ADD, {
-        identifier: added.toMessagePayload(false),
-      })
     }
   }
 
@@ -240,26 +238,25 @@ export class PersonService {
         throw new IdentifierConflictError('used_by_another_person')
       }
 
-      const existed = await Promise.all(
-        idHals.map(
-          async (idHal) =>
-            (await this.personDAO.findIdentifierValue(
-              personUid,
-              idHal.type as PersonIdentifierType,
-            )) !== null,
+      const storedTypes = new Set(
+        (await this.personDAO.findIdentifiers(personUid, ID_HAL_TYPES)).map(
+          (stored) => stored.type,
         ),
       )
 
       // hal_login is written silently (no Action / no outgoing message).
-      await this.personDAO.upsertHalIdentifiers(personUid, idHals, halLogin)
-
-      for (const [index, idHal] of idHals.entries()) {
-        await this.recordIdentifierAction(
-          personUid,
-          existed[index] ? ActionType.UPDATE : ActionType.ADD,
-          { identifier: idHal.toMessagePayload(true) },
-        )
-      }
+      await this.personDAO.upsertHalIdentifiers(
+        personUid,
+        idHals,
+        halLogin,
+        idHals.map((idHal) =>
+          this.identifierAction(
+            personUid,
+            storedTypes.has(idHal.type) ? ActionType.UPDATE : ActionType.ADD,
+            { identifier: idHal.toMessagePayload(true) },
+          ),
+        ),
+      )
     } catch (error) {
       if (error instanceof IdentifierConflictError) throw error
       const message = `Error authenticating HAL identifier (idhals=${forms.idhals}, idhali=${forms.idhali}, personUid=${personUid})`
@@ -312,25 +309,17 @@ export class PersonService {
   ): Promise<void> {
     try {
       const types = isIdHalType(type) ? ID_HAL_TYPES : [type]
-      const removed = (
-        await Promise.all(
-          types.map(async (removedType) => ({
-            type: removedType,
-            value: await this.personDAO.findIdentifierValue(
-              personUid,
-              removedType,
-            ),
-          })),
-        )
-      ).filter((identifier) => identifier.value !== null)
-      await this.personDAO.deleteIdentifier(personUid, type)
-      for (const identifier of removed) {
-        await this.recordIdentifierAction(
-          personUid,
-          ActionType.REMOVE,
-          identifier,
-        )
-      }
+      const removed = await this.personDAO.findIdentifiers(personUid, types)
+      await this.personDAO.deleteIdentifier(
+        personUid,
+        type,
+        removed.map((identifier) =>
+          this.identifierAction(personUid, ActionType.REMOVE, {
+            type: identifier.type,
+            value: identifier.value,
+          }),
+        ),
+      )
     } catch (error) {
       const message = `Error removing identifier (type=${type}, personUid=${personUid})`
       console.error(message, error)

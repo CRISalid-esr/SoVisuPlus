@@ -1526,6 +1526,82 @@ describe('PersonDAO Integration Tests', () => {
     ).toHaveLength(0)
   })
 
+  describe('identifier writes and their actions are atomic', () => {
+    const invalidAction = (personUid: string) => ({
+      actionType: 'INVALID' as ActionType,
+      targetType: ActionTargetType.PERSON,
+      targetUid: personUid,
+      parameters: {},
+      personUid,
+    })
+
+    const typesOf = async (personId: number) =>
+      (
+        await prisma.personIdentifier.findMany({
+          where: { personId },
+          select: { type: true },
+        })
+      )
+        .map((row) => row.type)
+        .sort()
+
+    test('createIdentifiers writes nothing when an action cannot be recorded', async () => {
+      const dbPerson = await prisma.person.create({
+        data: { uid: 'local-atomic-add', email: 'atomic-add@example.com' },
+      })
+
+      await expect(
+        personDAO.createIdentifiers(
+          [
+            new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-dupont'),
+            new PersonIdentifier(PersonIdentifierType.idhali, '12345'),
+          ],
+          dbPerson.uid,
+          [invalidAction(dbPerson.uid)],
+        ),
+      ).rejects.toThrow()
+
+      expect(await typesOf(dbPerson.id)).toEqual([])
+    })
+
+    test('upsertHalIdentifiers writes nothing when an action cannot be recorded', async () => {
+      const dbPerson = await prisma.person.create({
+        data: { uid: 'local-atomic-hal', email: 'atomic-hal@example.com' },
+      })
+
+      await expect(
+        personDAO.upsertHalIdentifiers(
+          dbPerson.uid,
+          [new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-dupont')],
+          'jdupont',
+          [invalidAction(dbPerson.uid)],
+        ),
+      ).rejects.toThrow()
+
+      expect(await typesOf(dbPerson.id)).toEqual([])
+    })
+
+    test('deleteIdentifier keeps the identifier when an action cannot be recorded', async () => {
+      const dbPerson = await prisma.person.create({
+        data: {
+          uid: 'local-atomic-remove',
+          email: 'atomic-remove@example.com',
+          identifiers: {
+            create: { type: PersonIdentifierType.idref, value: '127220747' },
+          },
+        },
+      })
+
+      await expect(
+        personDAO.deleteIdentifier(dbPerson.uid, PersonIdentifierType.idref, [
+          invalidAction(dbPerson.uid),
+        ]),
+      ).rejects.toThrow()
+
+      expect(await typesOf(dbPerson.id)).toEqual([PersonIdentifierType.idref])
+    })
+  })
+
   describe('isAnyIdentifierHeldByAnotherPerson', () => {
     beforeEach(async () => {
       await prisma.person.create({
