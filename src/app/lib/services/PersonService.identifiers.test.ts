@@ -249,6 +249,24 @@ describe('PersonService identifier operations', () => {
     })
   })
 
+  describe('authenticateOrcidIdentifier conflicts', () => {
+    it('rethrows IdentifierConflictError and records no action', async () => {
+      mockFindIdentifierValue.mockResolvedValue(null)
+      mockUpsertIdentifier.mockRejectedValue(
+        new IdentifierConflictError('used_by_another_person'),
+      )
+
+      await expect(
+        service.authenticateOrcidIdentifier(
+          'p1',
+          new ORCIDIdentifier('0000-0002-1825-0097', orcidOauth()),
+        ),
+      ).rejects.toMatchObject({ reason: 'used_by_another_person' })
+      expect(mockUpsertOrcidExt).not.toHaveBeenCalled()
+      expect(mockCreateAction).not.toHaveBeenCalled()
+    })
+  })
+
   describe('authenticateHalIdentifier', () => {
     it('writes hal_login silently and emits a single ADD for the idHAL', async () => {
       mockFindIdentifierValue.mockResolvedValue(null)

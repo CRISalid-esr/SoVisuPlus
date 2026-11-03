@@ -377,6 +377,16 @@ msgid "orcid_authentication_value_mismatch"
 msgstr "L'ORCID authentifié diffère de celui déjà enregistré. Supprimez l'ORCID existant avant d'en authentifier un autre."
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:145
+msgid "orcid_authentication_used_by_another_person"
+msgstr "Cet ORCID est déjà associé à une autre personne."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:149
+msgid "orcid_authentication_used_by_another_person_contact_support"
+msgstr "Cet ORCID est déjà associé à une autre personne. Veuillez contacter le support."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:135
 msgid "orcid_insert_failure"
 msgstr "Échec de l'enregistrement de l'identifiant ORCID."
@@ -395,6 +405,11 @@ msgstr "Échec de l'ajout de l'identifiant ORCID."
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:141
 msgid "orcid_manual_add_conflict"
 msgstr "Un identifiant ORCID existe déjà. Supprimez-le avant d'en ajouter un nouveau."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:153
+msgid "orcid_manual_add_used_by_another_person"
+msgstr "Cet ORCID est déjà associé à une autre personne."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:143
@@ -2563,6 +2578,10 @@ msgstr "Impossible de charger la fiche ORCID."
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidInfoBox.tsx:127
 msgid "orcid_info_box_not_found"
 msgstr "Aucune fiche ORCID publique trouvée pour cet iD."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidInfoBox.tsx:152
+msgid "orcid_info_box_used_by_another_person"
+msgstr "Cet ORCID est déjà associé à une autre personne : il ne peut pas être ajouté."
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidInfoBox.tsx:151
 msgid "orcid_info_box_other_names"

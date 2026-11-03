@@ -377,6 +377,16 @@ msgid "orcid_authentication_value_mismatch"
 msgstr "The authenticated ORCID differs from the one already recorded. Remove the existing ORCID before authenticating a different one."
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:145
+msgid "orcid_authentication_used_by_another_person"
+msgstr "This ORCID is already linked to another person."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:149
+msgid "orcid_authentication_used_by_another_person_contact_support"
+msgstr "This ORCID is already linked to another person. Please contact support."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:135
 msgid "orcid_insert_failure"
 msgstr "Failed to save the ORCID identifier."
@@ -395,6 +405,11 @@ msgstr "Failed to add the ORCID identifier."
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:141
 msgid "orcid_manual_add_conflict"
 msgstr "An ORCID identifier already exists. Remove it before adding a new one."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:153
+msgid "orcid_manual_add_used_by_another_person"
+msgstr "This ORCID is already linked to another person."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:143
@@ -2563,6 +2578,10 @@ msgstr "Could not load the ORCID record."
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidInfoBox.tsx:127
 msgid "orcid_info_box_not_found"
 msgstr "No public ORCID record found for this iD."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidInfoBox.tsx:152
+msgid "orcid_info_box_used_by_another_person"
+msgstr "This ORCID is already linked to another person: it cannot be added."
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidInfoBox.tsx:151
 msgid "orcid_info_box_other_names"

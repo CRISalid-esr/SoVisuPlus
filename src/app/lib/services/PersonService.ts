@@ -169,6 +169,7 @@ export class PersonService {
    * Persist an authenticated ORCID (base row + encrypted OAuth extension) and
    * emit an ADD (when the ORCID did not exist) or UPDATE (in-place
    * authentication of an existing value) message marked authenticated.
+   * Throws {@link IdentifierConflictError} when another person holds the ORCID.
    */
   async authenticateOrcidIdentifier(
     personUid: string,
@@ -197,6 +198,7 @@ export class PersonService {
         { identifier: payload },
       )
     } catch (error) {
+      if (error instanceof IdentifierConflictError) throw error
       const message = `Error authenticating ORCID identifier (personUid=${personUid}, value=${identifier.value})`
       console.error(message, error)
       throw new Error(message)

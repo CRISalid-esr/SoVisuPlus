@@ -7,9 +7,12 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { PersonService } from '@/lib/services/PersonService'
-import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { IdentifierConflictError, PersonDAO } from '@/lib/daos/PersonDAO'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
-import { abilityFromAuthzContext } from '@/app/auth/ability'
+import {
+  abilityFromAuthzContext,
+  hasWiderThanSelfPersonScope,
+} from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 
 export const GET = async (req: NextRequest) => {
@@ -136,6 +139,20 @@ export const GET = async (req: NextRequest) => {
       orcidIdentifier,
     )
   } catch (error) {
+    if (error instanceof IdentifierConflictError) {
+      // Users who cannot edit other accounts are pointed to the support
+      const conflictError = hasWiderThanSelfPersonScope(
+        session.user.authz,
+        'update',
+        'Person',
+        'identifiers',
+      )
+        ? 'orcid_authentication_used_by_another_person'
+        : 'orcid_authentication_used_by_another_person_contact_support'
+      return NextResponse.redirect(
+        `${userRedirectionUrl}?error=${conflictError}`,
+      )
+    }
     console.error('Error adding ORCID identifier / OAuth data', error)
     return NextResponse.redirect(
       `${userRedirectionUrl}?error=orcid_insert_failure`,
