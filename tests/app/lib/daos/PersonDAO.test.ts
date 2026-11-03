@@ -755,6 +755,42 @@ describe('PersonDAO Integration Tests', () => {
     ).rejects.toThrow('Person with UID nonexistent-uid not found')
   })
 
+  test('fetching a person by uid or slug reports an authenticated ORCID without its tokens', async () => {
+    const dbPerson = await prisma.person.create({
+      data: {
+        uid: 'local-orcidgrant',
+        slug: 'person:orcidgrant',
+        email: 'orcidgrant@example.com',
+        identifiers: {
+          create: {
+            type: PersonIdentifierType.orcid,
+            value: '0000-0002-1825-0097',
+          },
+        },
+      },
+      include: { identifiers: true },
+    })
+    await prisma.orcidIdentifier.create({
+      data: {
+        id: dbPerson.identifiers[0].id,
+        accessToken: 'secret-access',
+        refreshToken: 'secret-refresh',
+        scope: '/authenticate',
+        expiresAt: new Date('2027-01-01'),
+      },
+    })
+
+    for (const person of [
+      await personDAO.fetchPersonByUid('local-orcidgrant'),
+      await personDAO.fetchPersonBySlug('person:orcidgrant'),
+    ]) {
+      expect(
+        person?.isIdentifierAuthenticated(PersonIdentifierType.orcid),
+      ).toBe(true)
+      expect(JSON.stringify(person)).not.toContain('secret-')
+    }
+  })
+
   test('deleting an idHAL cascades to its companion hal_login', async () => {
     const dbPerson = await prisma.person.create({
       data: {

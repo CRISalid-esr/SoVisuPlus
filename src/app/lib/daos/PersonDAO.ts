@@ -65,6 +65,32 @@ const peopleSearchInclude = {
   records: { include: { identifiers: true } },
 } satisfies Prisma.PersonInclude
 
+/**
+ * Person identifiers with the ORCID OAuth grant metadata, which tells whether an
+ * ORCID is authenticated. The tokens are never selected.
+ */
+export const identifiersWithOrcidGrantInclude = {
+  include: {
+    orcidIdentifier: {
+      select: {
+        id: true,
+        scope: true,
+        tokenType: true,
+        obtainedAt: true,
+        expiresAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    },
+  },
+} satisfies Prisma.PersonIdentifierDefaultArgs
+
+/** Relations mapped by Person.fromDbPerson for a single person's account. */
+const personDetailInclude = {
+  ...peopleSearchInclude,
+  identifiers: identifiersWithOrcidGrantInclude,
+} satisfies Prisma.PersonInclude
+
 /** Identifier types written locally and never sent back by the graph. */
 const LOCAL_ONLY_IDENTIFIER_TYPES: PersonIdentifierType[] = [
   PersonIdentifierType.hal_login,
@@ -1097,38 +1123,7 @@ export class PersonDAO extends AbstractDAO {
     try {
       const dbPerson = await this.prismaClient.person.findUnique({
         where: { slug },
-        include: {
-          memberships: {
-            include: {
-              organizationUnit: {
-                include: {
-                  labels: true,
-                  parents: { include: { parent: true } },
-                  identifiers: true,
-                  descriptions: true,
-                },
-              },
-            },
-          },
-          employments: {
-            include: {
-              organizationUnit: {
-                include: {
-                  labels: true,
-                  parents: { include: { parent: true } },
-                  identifiers: true,
-                  descriptions: true,
-                },
-              },
-            },
-          },
-          identifiers: true,
-          records: {
-            include: {
-              identifiers: true,
-            },
-          },
-        },
+        include: personDetailInclude,
       })
 
       if (!dbPerson) {
@@ -1339,38 +1334,7 @@ export class PersonDAO extends AbstractDAO {
     try {
       const dbPerson = await this.prismaClient.person.findUnique({
         where: { uid },
-        include: {
-          memberships: {
-            include: {
-              organizationUnit: {
-                include: {
-                  labels: true,
-                  parents: { include: { parent: true } },
-                  identifiers: true,
-                  descriptions: true,
-                },
-              },
-            },
-          },
-          employments: {
-            include: {
-              organizationUnit: {
-                include: {
-                  labels: true,
-                  parents: { include: { parent: true } },
-                  identifiers: true,
-                  descriptions: true,
-                },
-              },
-            },
-          },
-          identifiers: true,
-          records: {
-            include: {
-              identifiers: true,
-            },
-          },
-        },
+        include: personDetailInclude,
       })
 
       if (!dbPerson) {
