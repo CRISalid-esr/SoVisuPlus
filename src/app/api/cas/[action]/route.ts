@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as process from 'node:process'
 import { getAuthenticatedSession } from '@/app/auth/requireSession'
-import { AureHalAPIClient } from '@/lib/services/AureHalAPIClient'
+import { AureHalAPIClient, idHalFormsOf } from '@/lib/services/AureHalAPIClient'
 import { PersonService } from '@/lib/services/PersonService'
-import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { IdentifierConflictError, PersonDAO } from '@/lib/daos/PersonDAO'
 import { UserService } from '@/lib/services/UserService'
 import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { parseCasTicketValidationResult } from '@/app/utils/parseCasTicketValidationResult'
-import { abilityFromAuthzContext } from '@/app/auth/ability'
+import {
+  abilityFromAuthzContext,
+  hasWiderThanSelfPersonScope,
+} from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 
 const isLoginOrLogout = (action: string): action is 'login' | 'logout' =>
@@ -185,8 +188,21 @@ export async function GET(
       type: resolvedType,
       value: resolvedValue,
       halLogin,
+      forms: idHalFormsOf(idHalDoc),
     })
   } catch (e) {
+    if (e instanceof IdentifierConflictError) {
+      // Users who cannot edit other accounts are pointed to the support
+      const error = hasWiderThanSelfPersonScope(
+        session.user.authz,
+        'update',
+        'Person',
+        'identifiers',
+      )
+        ? 'hal_identifier_used_by_another_person'
+        : 'hal_identifier_used_by_another_person_contact_support'
+      return NextResponse.redirect(`${userRedirectionUrl}?error=${error}`)
+    }
     console.error('[HAL] DB write failed', e)
     return NextResponse.redirect(
       `${userRedirectionUrl}?error=hal_identifier_insert_failure`,

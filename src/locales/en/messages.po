@@ -548,6 +548,16 @@ msgid "hal_manual_add_conflict"
 msgstr "An idHAL identifier already exists. Remove it before adding a new one."
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:183
+msgid "hal_identifier_used_by_another_person"
+msgstr "This idHAL is already linked to another person."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:186
+msgid "hal_identifier_used_by_another_person_contact_support"
+msgstr "This idHAL is already linked to another person. Please contact support."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:173
 msgid "hal_remove_success"
 msgstr "HAL identifier removed."
@@ -2349,6 +2359,10 @@ msgstr "Linked identifiers"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx:130
 msgid "hal_info_box_not_found"
 msgstr "No HAL author found for this idHAL."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx:154
+msgid "hal_info_box_used_by_another_person"
+msgstr "This idHAL is already linked to another person: it cannot be added."
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx:113
 msgid "hal_info_box_title"

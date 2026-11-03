@@ -1,6 +1,8 @@
 import { IdentifierConflictError, PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 import {
+  IdHalForms,
+  idHalFormsToIdentifiers,
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
@@ -8,14 +10,20 @@ import { ActionDAO, CreateActionParams } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import { InputJsonValue } from '@prisma/client/runtime/library'
+import { AureHalAPIClient, idHalFormsOf } from '@/lib/services/AureHalAPIClient'
+
+const isIdHalType = (type: PersonIdentifierType): boolean =>
+  type === PersonIdentifierType.idhals || type === PersonIdentifierType.idhali
 
 export class PersonService {
   private personDAO: PersonDAO
   private actionDAO: ActionDAO
+  private aureHalClient: AureHalAPIClient
 
   constructor() {
     this.personDAO = new PersonDAO()
     this.actionDAO = new ActionDAO()
+    this.aureHalClient = new AureHalAPIClient()
   }
 
   async fetchPeople(
@@ -77,13 +85,29 @@ export class PersonService {
    * Manually add a non-authenticated identifier (create-only). Value changes
    * are handled as remove-then-add, so this throws {@link IdentifierConflictError}
    * (surfaced as a 409) when an identifier already exists. A manual add is made
-   * by a privileged user, so the identifier is stored as validated.
+   * by a privileged user, so the identifier is stored as validated. An idHAL
+   * is also rejected when another person holds the other form of the same HAL
+   * account.
    */
   async addIdentifier(
     personUid: string,
     identifier: PersonIdentifier,
   ): Promise<void> {
     try {
+      if (isIdHalType(identifier.type as PersonIdentifierType)) {
+        const forms = await this.resolveIdHalForms(
+          identifier.type as PersonIdentifierType,
+          identifier.value,
+        )
+        if (
+          await this.isAnyIdentifierUsedByAnotherPerson(
+            personUid,
+            idHalFormsToIdentifiers(forms),
+          )
+        ) {
+          throw new IdentifierConflictError('used_by_another_person')
+        }
+      }
       await this.personDAO.createIdentifier(
         new PersonIdentifier(identifier.type, identifier.value, true),
         personUid,
@@ -111,6 +135,34 @@ export class PersonService {
       personUid,
       identifiers,
     )
+  }
+
+  /**
+   * Both idHAL forms of the HAL account behind a manually entered idHAL, looked
+   * up in AureHAL. Falls back to the entered form alone when the account is not
+   * found or AureHAL is down: a HAL outage must not block the add.
+   */
+  private async resolveIdHalForms(
+    type: PersonIdentifierType,
+    value: string,
+  ): Promise<IdHalForms> {
+    const entered: IdHalForms =
+      type === PersonIdentifierType.idhals
+        ? { idhals: value }
+        : { idhali: value }
+    try {
+      const author = await this.aureHalClient.findAuthorByIdHal(
+        value,
+        type === PersonIdentifierType.idhals ? 'idhals' : 'idhali',
+      )
+      return author ? { ...idHalFormsOf(author), ...entered } : entered
+    } catch (error) {
+      console.error(
+        `[AureHAL] lookup failed, only the entered idHAL is checked (${type}=${value})`,
+        error,
+      )
+      return entered
+    }
   }
 
   /**
@@ -156,6 +208,8 @@ export class PersonService {
    * emits no message of its own — it is internal (it marks the idHAL as
    * authenticated and feeds HAL deposits). Emits ADD (new idHAL) or UPDATE
    * (in-place authentication of an existing value) for the idHAL, authenticated.
+   * Throws {@link IdentifierConflictError} when another person holds one of the
+   * HAL account's idHAL forms (`forms`, as returned by AureHAL).
    */
   async authenticateHalIdentifier(
     personUid: string,
@@ -163,10 +217,20 @@ export class PersonService {
       type: PersonIdentifierType
       value: string
       halLogin: string
+      forms: IdHalForms
     },
   ): Promise<void> {
-    const { type, value, halLogin } = params
+    const { type, value, halLogin, forms } = params
     try {
+      if (
+        await this.isAnyIdentifierUsedByAnotherPerson(
+          personUid,
+          idHalFormsToIdentifiers(forms),
+        )
+      ) {
+        throw new IdentifierConflictError('used_by_another_person')
+      }
+
       const existed =
         (await this.personDAO.findIdentifierValue(personUid, type)) !== null
 
@@ -181,6 +245,7 @@ export class PersonService {
         { identifier: payload },
       )
     } catch (error) {
+      if (error instanceof IdentifierConflictError) throw error
       const message = `Error authenticating HAL identifier (type=${type}, value=${value}, personUid=${personUid})`
       console.error(message, error)
       throw new Error(message)
