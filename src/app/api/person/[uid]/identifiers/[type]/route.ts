@@ -3,6 +3,7 @@ import { PersonService } from '@/lib/services/PersonService'
 import { IdentifierConflictError, PersonDAO } from '@/lib/daos/PersonDAO'
 import {
   abilityFromAuthzContext,
+  hasFullAccess,
   hasWiderThanSelfPersonScope,
 } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
@@ -183,7 +184,7 @@ export const DELETE = async (_request: Request, context: RouteContext) => {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  // An authenticated identifier can only be removed on the owner's own account.
+  // An authenticated identifier can only be removed by its owner or an admin.
   // A non-authenticated one can also be removed by a wide-scoped editor.
   const { canRemove } = computeIdentifierCapabilities({
     canManage: true, // already checked above
@@ -194,6 +195,7 @@ export const DELETE = async (_request: Request, context: RouteContext) => {
       'Person',
       'identifiers',
     ),
+    isAdmin: hasFullAccess(session.user.authz),
     isAuthenticated: person.isIdentifierAuthenticated(identifierType),
     supportsAuth: identifierSupportsAuth(identifierType),
     removalRequiresWide: identifierRemovalRequiresWideScope(identifierType),

@@ -104,6 +104,10 @@ export const hasWiderThanSelfPersonScope = (
 const isFullAccess = (perm: { action: string; subject: string }): boolean =>
   perm.action === 'manage' && perm.subject === 'all'
 
+/** Whether the user holds the admin wildcard (`manage` on `all`). */
+export const hasFullAccess = (p: AuthzContext = EMPTY_PRINCIPAL): boolean =>
+  (p?.roleAssignments ?? []).some((ra) => ra.permissions.some(isFullAccess))
+
 /**
  * Returns true if the user holds a matching permission through a grant that no
  * scope narrows — either an **unscoped** role assignment, or the `manage` /

@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import {
   abilityFromAuthzContext,
   EMPTY_PRINCIPAL,
+  hasFullAccess,
   hasWiderThanSelfPersonScope,
 } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
@@ -76,6 +77,7 @@ export const useIdentifierCapabilities = (
         canManage,
         isOwn: ownPerspective,
         isWide,
+        isAdmin: hasFullAccess(authz),
         isAuthenticated,
         supportsAuth: identifierSupportsAuth(type),
         removalRequiresWide: identifierRemovalRequiresWideScope(type),
