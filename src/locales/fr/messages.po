@@ -2447,6 +2447,10 @@ msgstr "Ajouter"
 msgid "idref_control_add_conflict"
 msgstr "Un identifiant IdRef existe déjà. Supprimez-le avant d'en ajouter un nouveau."
 
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx:330
+msgid "idref_control_add_used_by_another_person"
+msgstr "Cet IdRef est déjà associé à une autre personne."
+
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx:301
 msgid "idref_control_add_failure"
 msgstr "Échec de l'ajout de l'identifiant IdRef."
@@ -2506,6 +2510,10 @@ msgstr "Erreur lors du chargement des informations IdRef"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx:118
 msgid "idref_info_box_not_found"
 msgstr "Personne non trouvée dans le répertoire IdRef"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx:141
+msgid "idref_info_box_used_by_another_person"
+msgstr "Cet IdRef est déjà associé à une autre personne : il ne peut pas être ajouté."
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx:149
 msgid "idref_info_box_other_identifiers"

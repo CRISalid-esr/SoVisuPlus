@@ -2447,6 +2447,10 @@ msgstr "Add"
 msgid "idref_control_add_conflict"
 msgstr "An IdRef identifier already exists. Remove it before adding a new one."
 
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx:330
+msgid "idref_control_add_used_by_another_person"
+msgstr "This IdRef is already linked to another person."
+
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx:301
 msgid "idref_control_add_failure"
 msgstr "Failed to add the IdRef identifier."
@@ -2506,6 +2510,10 @@ msgstr "Error loading IdRef information"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx:118
 msgid "idref_info_box_not_found"
 msgstr "Person not found in IdRef directory"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx:141
+msgid "idref_info_box_used_by_another_person"
+msgstr "This IdRef is already linked to another person: it cannot be added."
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx:149
 msgid "idref_info_box_other_identifiers"

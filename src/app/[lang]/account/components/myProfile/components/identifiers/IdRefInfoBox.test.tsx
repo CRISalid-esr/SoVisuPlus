@@ -77,6 +77,32 @@ describe('IdRefInfoBox', () => {
     expect(screen.getByText('Publication B')).toBeInTheDocument()
   })
 
+  it('warns and does not call onReady when another person holds the IdRef', async () => {
+    const onReady = jest.fn()
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: jest
+        .fn()
+        .mockResolvedValue({ ...PERSON_DATA, usedByAnotherPerson: true }),
+    })
+
+    renderComponent({
+      idrefId: '127220747',
+      personUid: 'bob',
+      forceOpen: true,
+      onReady,
+    })
+
+    expect(
+      await screen.findByText('idref_info_box_used_by_another_person'),
+    ).toBeInTheDocument()
+    expect(onReady).not.toHaveBeenCalled()
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/idref/127220747?personUid=bob',
+    )
+  })
+
   it('shows the not-found message ID on a 404 response', async () => {
     ;(global.fetch as jest.Mock).mockResolvedValue({
       ok: false,
