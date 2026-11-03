@@ -311,7 +311,7 @@ describe('AuthZ (identifier capability matrix) – integration', () => {
     })
   })
 
-  test('admin, another account: can remove an authenticated identifier', async () => {
+  test('admin, another account: can add and remove, authenticated or not', async () => {
     await createPersonWithUser('local-admin')
     await createPersonWithUser('local-bob')
     await assignRoleToPersonUid('admin', 'local-admin', null)
@@ -322,8 +322,20 @@ describe('AuthZ (identifier capability matrix) – integration', () => {
       PersonIdentifierType.orcid,
       true,
     )
-    expect(auth.canRemove).toBe(true)
-    expect(auth.canAuthenticate).toBe(false)
+    expect(auth).toEqual({
+      canAuthenticate: false, // authentication is the account owner's own login
+      canAddUnauthenticated: true,
+      canRemove: true,
+    })
+
+    const idref = await capsFor(
+      'local-admin',
+      'local-bob',
+      PersonIdentifierType.idref,
+      false,
+    )
+    expect(idref.canAddUnauthenticated).toBe(true)
+    expect(idref.canRemove).toBe(true)
   })
 
   test('self-scoped editor on someone else’s account: no capability at all', async () => {
