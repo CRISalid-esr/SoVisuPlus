@@ -5,7 +5,11 @@ import {
   OrganizationGenericType,
 } from '@prisma/client'
 import { Person } from '@/types/Person'
-import { PersonAlreadyExistsError, PersonDAO } from '@/lib/daos/PersonDAO'
+import {
+  IdentifierConflictError,
+  PersonAlreadyExistsError,
+  PersonDAO,
+} from '@/lib/daos/PersonDAO'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { PersonMembership } from '@/types/PersonMembership'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
@@ -324,6 +328,84 @@ describe('PersonDAO', () => {
       await expect(personDAO.createPerson(person)).rejects.toThrow(
         PersonAlreadyExistsError,
       )
+    })
+  })
+
+  describe('identifier unique-constraint conflicts', () => {
+    // In the Next.js server bundle, Prisma errors are not instances of the
+    // PrismaClientKnownRequestError class imported by the DAO: only the shape
+    // (code + meta) can be relied on.
+    const foreignP2002 = (target: string[]) =>
+      Object.assign(new Error('Unique constraint failed'), {
+        code: 'P2002',
+        meta: { target },
+      })
+
+    beforeEach(() => {
+      ;(mockPrisma.person.findUnique as jest.Mock).mockResolvedValue({ id: 5 })
+    })
+
+    it('createIdentifier reports a value held by another person', async () => {
+      ;(mockPrisma.personIdentifier.create as jest.Mock).mockRejectedValue(
+        foreignP2002(['type', 'value']),
+      )
+
+      const promise = personDAO.createIdentifier(
+        new PersonIdentifier(PersonIdentifierType.orcid, '0000-0002-8947-4151'),
+        'local-johndoe',
+      )
+
+      await expect(promise).rejects.toBeInstanceOf(IdentifierConflictError)
+      await expect(promise).rejects.toMatchObject({
+        reason: 'used_by_another_person',
+      })
+    })
+
+    it('createIdentifier reports a type the person already holds', async () => {
+      ;(mockPrisma.personIdentifier.create as jest.Mock).mockRejectedValue(
+        foreignP2002(['personId', 'type']),
+      )
+
+      await expect(
+        personDAO.createIdentifier(
+          new PersonIdentifier(
+            PersonIdentifierType.orcid,
+            '0000-0002-8947-4151',
+          ),
+          'local-johndoe',
+        ),
+      ).rejects.toMatchObject({ reason: 'slot_taken' })
+    })
+
+    it('upsertIdentifier reports a value held by another person without retrying', async () => {
+      ;(mockPrisma.personIdentifier.upsert as jest.Mock).mockRejectedValue(
+        foreignP2002(['type', 'value']),
+      )
+
+      await expect(
+        personDAO.upsertIdentifier(
+          new PersonIdentifier(
+            PersonIdentifierType.orcid,
+            '0000-0002-8947-4151',
+          ),
+          'local-johndoe',
+        ),
+      ).rejects.toMatchObject({ reason: 'used_by_another_person' })
+      expect(mockPrisma.personIdentifier.upsert).toHaveBeenCalledTimes(1)
+    })
+
+    it('upsertIdentifier retries other unique-constraint conflicts', async () => {
+      ;(mockPrisma.personIdentifier.upsert as jest.Mock)
+        .mockRejectedValueOnce(foreignP2002(['personId', 'type']))
+        .mockResolvedValueOnce({ id: 9 })
+
+      const row = await personDAO.upsertIdentifier(
+        new PersonIdentifier(PersonIdentifierType.orcid, '0000-0002-8947-4151'),
+        'local-johndoe',
+      )
+
+      expect(row).toEqual({ id: 9 })
+      expect(mockPrisma.personIdentifier.upsert).toHaveBeenCalledTimes(2)
     })
   })
 

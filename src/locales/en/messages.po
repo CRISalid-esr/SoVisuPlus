@@ -377,6 +377,16 @@ msgid "orcid_authentication_value_mismatch"
 msgstr "The authenticated ORCID differs from the one already recorded. Remove the existing ORCID before authenticating a different one."
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:145
+msgid "orcid_authentication_used_by_another_person"
+msgstr "This ORCID is already linked to another person."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:149
+msgid "orcid_authentication_used_by_another_person_contact_support"
+msgstr "This ORCID is already linked to another person. Please contact support."
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:135
 msgid "orcid_insert_failure"
 msgstr "Failed to save the ORCID identifier."
@@ -395,6 +405,11 @@ msgstr "Failed to add the ORCID identifier."
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:141
 msgid "orcid_manual_add_conflict"
 msgstr "An ORCID identifier already exists. Remove it before adding a new one."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:153
+msgid "orcid_manual_add_used_by_another_person"
+msgstr "This ORCID is already linked to another person."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidControl.tsx:143
@@ -546,6 +561,16 @@ msgstr "Failed to add the idHAL identifier."
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:171
 msgid "hal_manual_add_conflict"
 msgstr "An idHAL identifier already exists. Remove it before adding a new one."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:183
+msgid "hal_identifier_used_by_another_person"
+msgstr "This idHAL is already linked to another person."
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:186
+msgid "hal_identifier_used_by_another_person_contact_support"
+msgstr "This idHAL is already linked to another person. Please contact support."
 
 #. js-lingui-explicit-id
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalControl.tsx:173
@@ -2350,6 +2375,10 @@ msgstr "Linked identifiers"
 msgid "hal_info_box_not_found"
 msgstr "No HAL author found for this idHAL."
 
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx:154
+msgid "hal_info_box_used_by_another_person"
+msgstr "This idHAL is already linked to another person: it cannot be added."
+
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx:113
 msgid "hal_info_box_title"
 msgstr "HAL author"
@@ -2418,6 +2447,10 @@ msgstr "Add"
 msgid "idref_control_add_conflict"
 msgstr "An IdRef identifier already exists. Remove it before adding a new one."
 
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx:330
+msgid "idref_control_add_used_by_another_person"
+msgstr "This IdRef is already linked to another person."
+
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx:301
 msgid "idref_control_add_failure"
 msgstr "Failed to add the IdRef identifier."
@@ -2477,6 +2510,10 @@ msgstr "Error loading IdRef information"
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx:118
 msgid "idref_info_box_not_found"
 msgstr "Person not found in IdRef directory"
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx:141
+msgid "idref_info_box_used_by_another_person"
+msgstr "This IdRef is already linked to another person: it cannot be added."
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdRefInfoBox.tsx:149
 msgid "idref_info_box_other_identifiers"
@@ -2549,6 +2586,10 @@ msgstr "Could not load the ORCID record."
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidInfoBox.tsx:127
 msgid "orcid_info_box_not_found"
 msgstr "No public ORCID record found for this iD."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidInfoBox.tsx:152
+msgid "orcid_info_box_used_by_another_person"
+msgstr "This ORCID is already linked to another person: it cannot be added."
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/OrcidInfoBox.tsx:151
 msgid "orcid_info_box_other_names"

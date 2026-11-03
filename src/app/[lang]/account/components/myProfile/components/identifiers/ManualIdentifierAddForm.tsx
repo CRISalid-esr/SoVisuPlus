@@ -13,7 +13,10 @@ import AddIcon from '@mui/icons-material/Add'
 import { Trans } from '@lingui/react/macro'
 import { t } from '@lingui/core/macro'
 import useStore from '@/stores/global_store'
-import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import {
+  IdentifierConflictReason,
+  PersonIdentifierType,
+} from '@/types/PersonIdentifier'
 
 export type IdentifierVariant = {
   type: PersonIdentifierType
@@ -33,7 +36,10 @@ type Props = {
   /** One variant → no switcher; several → a switcher is shown at the line end. */
   variants: IdentifierVariant[]
   inputLabel: string
-  onResult: (result: { success: boolean; conflict?: boolean }) => void
+  onResult: (result: {
+    success: boolean
+    conflict?: IdentifierConflictReason
+  }) => void
   /**
    * Optional confirmation step. When provided, the user must Verify before Save:
    * the returned preview is rendered and Save stays disabled until it calls

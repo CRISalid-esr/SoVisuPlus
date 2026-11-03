@@ -179,6 +179,12 @@ const HalControl = () => {
         return <Trans id='hal_manual_add_failure' />
       case 'hal_manual_add_conflict':
         return <Trans id='hal_manual_add_conflict' />
+      case 'hal_identifier_used_by_another_person':
+        return <Trans id='hal_identifier_used_by_another_person' />
+      case 'hal_identifier_used_by_another_person_contact_support':
+        return (
+          <Trans id='hal_identifier_used_by_another_person_contact_support' />
+        )
       case 'hal_remove_success':
         return <Trans id='hal_remove_success' />
       case 'hal_remove_failure':
@@ -325,6 +331,7 @@ const HalControl = () => {
                 kind={
                   type === PersonIdentifierType.idhali ? 'idhali' : 'idhals'
                 }
+                personUid={person.uid}
                 forceOpen
                 onReady={onReady}
               />
@@ -334,9 +341,11 @@ const HalControl = () => {
                 r.success,
                 r.success
                   ? 'hal_manual_add_success'
-                  : r.conflict
-                    ? 'hal_manual_add_conflict'
-                    : 'hal_manual_add_failure',
+                  : r.conflict === 'used_by_another_person'
+                    ? 'hal_identifier_used_by_another_person'
+                    : r.conflict
+                      ? 'hal_manual_add_conflict'
+                      : 'hal_manual_add_failure',
               )
             }
           />

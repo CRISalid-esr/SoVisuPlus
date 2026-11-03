@@ -141,6 +141,14 @@ const OrcidControl = () => {
         return <Trans id={'orcid_authentication_failure_user_not_found'} />
       case 'orcid_authentication_value_mismatch':
         return <Trans id={'orcid_authentication_value_mismatch'} />
+      case 'orcid_authentication_used_by_another_person':
+        return <Trans id={'orcid_authentication_used_by_another_person'} />
+      case 'orcid_authentication_used_by_another_person_contact_support':
+        return (
+          <Trans
+            id={'orcid_authentication_used_by_another_person_contact_support'}
+          />
+        )
       case 'orcid_insert_failure':
         return <Trans id={'orcid_insert_failure'} />
       case 'orcid_manual_add_success':
@@ -149,6 +157,8 @@ const OrcidControl = () => {
         return <Trans id={'orcid_manual_add_failure'} />
       case 'orcid_manual_add_conflict':
         return <Trans id={'orcid_manual_add_conflict'} />
+      case 'orcid_manual_add_used_by_another_person':
+        return <Trans id={'orcid_manual_add_used_by_another_person'} />
       case 'orcid_remove_success':
         return <Trans id={'orcid_remove_success'} />
       case 'orcid_remove_failure':
@@ -320,16 +330,23 @@ const OrcidControl = () => {
             ]}
             inputLabel='ORCID'
             renderPreview={({ value, onReady }) => (
-              <OrcidInfoBox orcid={value} forceOpen onReady={onReady} />
+              <OrcidInfoBox
+                orcid={value}
+                personUid={person.uid}
+                forceOpen
+                onReady={onReady}
+              />
             )}
             onResult={(r) =>
               notify(
                 r.success,
                 r.success
                   ? 'orcid_manual_add_success'
-                  : r.conflict
-                    ? 'orcid_manual_add_conflict'
-                    : 'orcid_manual_add_failure',
+                  : r.conflict === 'used_by_another_person'
+                    ? 'orcid_manual_add_used_by_another_person'
+                    : r.conflict
+                      ? 'orcid_manual_add_conflict'
+                      : 'orcid_manual_add_failure',
               )
             }
           />

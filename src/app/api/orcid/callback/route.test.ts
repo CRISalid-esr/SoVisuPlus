@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { GET } from './route'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
+import { IdentifierConflictError } from '@/lib/daos/PersonDAO'
 
 const mockAuthenticateOrcidIdentifier = jest.fn()
 const mockGetUserByPersonIdentifier = jest.fn()
@@ -22,6 +23,11 @@ jest.mock('@/lib/daos/PersonDAO', () => ({
   PersonDAO: jest.fn().mockImplementation(() => ({
     findIdentifierValue: mockFindIdentifierValue,
   })),
+  IdentifierConflictError: class extends Error {
+    constructor(public readonly reason = 'slot_taken') {
+      super('Identifier already exists')
+    }
+  },
 }))
 
 jest.mock('next/server', () => ({
@@ -290,6 +296,79 @@ describe('GET /api/orcid/callback', () => {
 
     expect(response.headers.get('location')).toBe(
       'https://sovisuplus.example.com/fr/account?error=orcid_insert_failure',
+    )
+  })
+
+  it('should redirect with a dedicated error when another person holds the ORCID', async () => {
+    mockGetUserByPersonIdentifier.mockResolvedValueOnce({
+      person: mockPerson('person-uid'),
+    })
+    const tokenResponse = okToken()
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => tokenResponse,
+      text: async () => JSON.stringify(tokenResponse),
+    })
+    mockAuthenticateOrcidIdentifier.mockRejectedValueOnce(
+      new IdentifierConflictError('used_by_another_person'),
+    )
+
+    const req = makeReq(
+      'https://example.com/api/orcid/callback?code=abc123&lang=fr',
+    )
+    const response = await GET(req)
+
+    expect(response.headers.get('location')).toBe(
+      'https://sovisuplus.example.com/fr/account?error=orcid_authentication_used_by_another_person',
+    )
+  })
+
+  it('should ask a self-scoped user to contact the support when another person holds the ORCID', async () => {
+    mockGetUserByPersonIdentifier.mockResolvedValueOnce({
+      person: mockPerson('person-uid'),
+    })
+    const tokenResponse = okToken()
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => tokenResponse,
+      text: async () => JSON.stringify(tokenResponse),
+    })
+    mockAuthenticateOrcidIdentifier.mockRejectedValueOnce(
+      new IdentifierConflictError('used_by_another_person'),
+    )
+
+    const req = makeReq(
+      'https://example.com/api/orcid/callback?code=abc123&lang=fr',
+    )
+    const { getServerSession } = jest.requireMock('next-auth') as {
+      getServerSession: jest.Mock
+    }
+    getServerSession.mockResolvedValue({
+      user: {
+        ...mockSession.user,
+        authz: makeAuthzContext({
+          personUid: 'person-uid',
+          roleAssignments: [
+            makeAssignment(
+              'account_editor',
+              [
+                {
+                  action: PermissionAction.update,
+                  subject: PermissionSubject.Person,
+                  fields: ['identifiers'],
+                },
+              ],
+              [{ entityType: 'Person', entityUid: 'person-uid' }],
+            ),
+          ],
+        }),
+      },
+    })
+
+    const response = await GET(req)
+
+    expect(response.headers.get('location')).toBe(
+      'https://sovisuplus.example.com/fr/account?error=orcid_authentication_used_by_another_person_contact_support',
     )
   })
 })

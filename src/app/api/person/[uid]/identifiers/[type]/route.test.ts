@@ -1,5 +1,6 @@
 import { PUT, DELETE, PATCH } from './route'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { IdentifierConflictError } from '@/lib/daos/PersonDAO'
 
 const mockFetchPersonByUid = jest.fn()
 const mockAddIdentifier = jest.fn()
@@ -10,7 +11,11 @@ jest.mock('@/lib/daos/PersonDAO', () => ({
   PersonDAO: jest.fn().mockImplementation(() => ({
     fetchPersonByUid: mockFetchPersonByUid,
   })),
-  IdentifierConflictError: class extends Error {},
+  IdentifierConflictError: class extends Error {
+    constructor(public readonly reason = 'slot_taken') {
+      super('Identifier already exists')
+    }
+  },
 }))
 
 jest.mock('@/lib/services/PersonService', () => ({
@@ -133,6 +138,30 @@ describe('PUT /api/person/[uid]/identifiers/[type]', () => {
 
     const res = await PUT(putReq('john-doe'), ctx('bob', 'idhals'))
     expect(res.status).toBe(409)
+  })
+
+  it('returns 409 identifier_already_exists on a slot conflict from the service', async () => {
+    setSession(wideAuthz('librarian'))
+    mockFetchPersonByUid.mockResolvedValue(person('bob'))
+    mockAddIdentifier.mockRejectedValue(
+      new IdentifierConflictError('slot_taken'),
+    )
+
+    const res = await PUT(putReq('026404435'), ctx('bob', 'idref'))
+    expect(res.status).toBe(409)
+    expect(res.body).toEqual({ error: 'identifier_already_exists' })
+  })
+
+  it('returns 409 identifier_used_by_another_person when another person holds the value', async () => {
+    setSession(wideAuthz('librarian'))
+    mockFetchPersonByUid.mockResolvedValue(person('bob'))
+    mockAddIdentifier.mockRejectedValue(
+      new IdentifierConflictError('used_by_another_person'),
+    )
+
+    const res = await PUT(putReq('john-doe'), ctx('bob', 'idhals'))
+    expect(res.status).toBe(409)
+    expect(res.body).toEqual({ error: 'identifier_used_by_another_person' })
   })
 
   it('forbids a self-scoped editor from adding (wide scope required)', async () => {

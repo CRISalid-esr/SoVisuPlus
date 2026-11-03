@@ -48,6 +48,39 @@ describe('HalInfoBox', () => {
     expect(url).toContain('/api/aurehal/author?value=elise-dupont&kind=idhals')
   })
 
+  it('passes personUid to the preview request', async () => {
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ fullName_s: 'Elise Dupont' }),
+    })
+
+    renderBox({ personUid: 'bob' })
+
+    await screen.findByText('Elise Dupont')
+    const url = (global.fetch as jest.Mock).mock.calls[0][0] as string
+    expect(url).toContain('personUid=bob')
+  })
+
+  it('warns and does not call onReady when another person holds the idHAL', async () => {
+    const onReady = jest.fn()
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        fullName_s: 'Elise Dupont',
+        usedByAnotherPerson: true,
+      }),
+    })
+
+    renderBox({ onReady, personUid: 'bob' })
+
+    expect(
+      await screen.findByText('hal_info_box_used_by_another_person'),
+    ).toBeInTheDocument()
+    expect(onReady).not.toHaveBeenCalled()
+  })
+
   it('shows a not-found message and still calls onReady on 404', async () => {
     const onReady = jest.fn()
     ;(global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 404 })

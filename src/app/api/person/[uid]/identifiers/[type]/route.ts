@@ -146,7 +146,12 @@ export const PUT = async (request: Request, context: RouteContext) => {
   } catch (error) {
     if (error instanceof IdentifierConflictError) {
       return NextResponse.json(
-        { error: 'identifier_already_exists' },
+        {
+          error:
+            error.reason === 'used_by_another_person'
+              ? 'identifier_used_by_another_person'
+              : 'identifier_already_exists',
+        },
         { status: 409 },
       )
     }

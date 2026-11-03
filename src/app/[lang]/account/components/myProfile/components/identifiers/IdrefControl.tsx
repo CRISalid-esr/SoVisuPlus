@@ -121,9 +121,12 @@ const IdrefControl = () => {
       setSnackbar({
         open: true,
         success: false,
-        messageId: result.conflict
-          ? 'idref_control_add_conflict'
-          : 'idref_control_add_failure',
+        messageId:
+          result.conflict === 'used_by_another_person'
+            ? 'idref_control_add_used_by_another_person'
+            : result.conflict
+              ? 'idref_control_add_conflict'
+              : 'idref_control_add_failure',
       })
     }
   }
@@ -249,6 +252,7 @@ const IdrefControl = () => {
             {verifying && (
               <IdRefInfoBox
                 idrefId={verifyingValue}
+                personUid={person?.uid}
                 forceOpen
                 onReady={() => setCanConfirm(true)}
               />
@@ -321,6 +325,10 @@ const IdrefControl = () => {
           )}
           {snackbar?.messageId === 'idref_control_add_conflict' && (
             <Trans>idref_control_add_conflict</Trans>
+          )}
+          {snackbar?.messageId ===
+            'idref_control_add_used_by_another_person' && (
+            <Trans>idref_control_add_used_by_another_person</Trans>
           )}
           {snackbar?.messageId === 'idref_control_remove_success' && (
             <Trans>idref_control_remove_success</Trans>
