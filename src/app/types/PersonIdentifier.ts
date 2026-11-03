@@ -176,6 +176,12 @@ export class PersonIdentifier {
   }
 }
 
+/** The two forms of an idHAL (one HAL account). */
+export const ID_HAL_TYPES: DbPersonIdentifierType[] = [
+  DbPersonIdentifierType.idhals,
+  DbPersonIdentifierType.idhali,
+]
+
 /** The identifiers behind the idHAL forms of one HAL account. */
 export const idHalFormsToIdentifiers = (
   forms: IdHalForms,

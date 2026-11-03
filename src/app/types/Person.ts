@@ -1,4 +1,5 @@
 import {
+  ID_HAL_TYPES,
   PersonIdentifier,
   PersonIdentifierJson,
   PersonIdentifierType,
@@ -191,11 +192,18 @@ class Person implements IAgent, Authorizable {
   /**
    * Whether the identifier of the given type is validated. Authentication
    * implies validation, so an authenticated identifier is always validated.
+   * An idHAL is validated only when each of its stored forms is.
    */
   isIdentifierValidated(type: PersonIdentifierType): boolean {
     const identifier = this.identifiers.find((id) => id.type === type)
     if (!identifier) return false
-    return identifier.validated || this.isIdentifierAuthenticated(type)
+    if (this.isIdentifierAuthenticated(type)) return true
+    if (ID_HAL_TYPES.includes(type)) {
+      return this.identifiers
+        .filter((id) => ID_HAL_TYPES.includes(id.type as PersonIdentifierType))
+        .every((id) => id.validated)
+    }
+    return identifier.validated
   }
 
   private static computeDisplayName(

@@ -294,6 +294,47 @@ describe('PersonService Integration Tests', () => {
     })
   })
 
+  test('validateIdentifier validates each non-validated idHAL form, with one UPDATE per form', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-validate-idhal',
+        email: 'validate-idhal@example.com',
+        firstName: 'Paul',
+        lastName: 'Martin',
+        normalizedName: 'paul martin',
+        external: false,
+        identifiers: {
+          create: [
+            {
+              type: PersonIdentifierType.idhals,
+              value: 'paul-martin',
+              validated: true,
+            },
+            { type: PersonIdentifierType.idhali, value: '12345' },
+          ],
+        },
+      },
+    })
+
+    await personService.validateIdentifier(
+      person.uid,
+      PersonIdentifierType.idhals,
+    )
+
+    const identifiers = await prisma.personIdentifier.findMany({
+      where: { personId: person.id },
+    })
+    expect(identifiers.every((identifier) => identifier.validated)).toBe(true)
+
+    // The idhals was already validated: only the idhali is announced
+    const actions = await prisma.action.findMany({
+      where: { targetUid: person.uid, path: 'identifiers' },
+    })
+    expect(actions.map((action) => action.parameters)).toEqual([
+      { identifier: { type: 'idhali', value: '12345', authenticated: false } },
+    ])
+  })
+
   test('validateIdentifier fails without writing an action when the identifier is missing', async () => {
     const person = await prisma.person.create({
       data: {
@@ -448,11 +489,11 @@ describe('PersonService Integration Tests', () => {
       personService.removeIdentifier(person.uid, PersonIdentifierType.idref),
     ).resolves.toBeUndefined()
 
-    // A REMOVE action is still written (service always records intent)
+    // Nothing was stored: no REMOVE without a value is sent to the graph
     const action = await prisma.action.findFirst({
       where: { targetUid: person.uid, actionType: ActionType.REMOVE },
     })
-    expect(action).not.toBeNull()
+    expect(action).toBeNull()
   })
 
   test('should throw if ORCID oauth data is missing', async () => {

@@ -8,6 +8,7 @@ import {
 } from '@prisma/client'
 import { Person } from '@/types/Person'
 import {
+  ID_HAL_TYPES,
   IdentifierConflictReason,
   PersonIdentifier,
   PersonIdentifierType,
@@ -578,8 +579,8 @@ export class PersonDAO extends AbstractDAO {
    * @param personId - The ID of the person
    * @param options - `prune: true` when `identifiers` is the person's complete
    *   set (person AMQP message): identifiers absent from it are deleted, except
-   *   local-only ones. In both modes, hal_login is deleted when the idHAL is
-   *   removed or changes (type or value).
+   *   local-only ones. In both modes, hal_login is deleted when no stored
+   *   idHAL form is kept or one changes value.
    * @param retries - The number of retries (to handle conflicts on upsert)
    */
   private async upsertIdentifiers(
@@ -638,15 +639,21 @@ export class PersonDAO extends AbstractDAO {
             idHalsAfter.set(identifier.type, identifier.value)
           }
         }
-        // Adding an idHAL of the other type keeps the authentication
-        const idHalsUnchanged =
-          idHalsBefore.size > 0 &&
-          [...idHalsBefore].every(
+        // The authentication holds while one stored form is kept and no form
+        // changes value. Adding or dropping the other form keeps it: the graph
+        // applies the two forms of an account one message at a time.
+        const idHalsBeforeList = [...idHalsBefore]
+        const authenticationHolds =
+          idHalsBeforeList.some(
             ([type, value]) => idHalsAfter.get(type) === value,
+          ) &&
+          idHalsBeforeList.every(
+            ([type, value]) =>
+              !idHalsAfter.has(type) || idHalsAfter.get(type) === value,
           )
         if (
           existingByType.has(PersonIdentifierType.hal_login) &&
-          !idHalsUnchanged
+          !authenticationHolds
         ) {
           await tx.personIdentifier.deleteMany({
             where: { personId, type: PersonIdentifierType.hal_login },
@@ -747,23 +754,28 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Upsert an idHAL and its companion hal_login in a single transaction, so an
-   * interruption can never leave one without the other.
+   * Upsert the idHAL(s) of a HAL account and their companion hal_login in a
+   * single transaction, so an interruption can never leave one without the
+   * other. Throws {@link IdentifierConflictError} when another person holds
+   * one of the values.
    * @param personUid - The UID of the person
-   * @param idHal - The idHAL identifier (idhals or idhali)
+   * @param idHals - The idHAL forms of the account (idhals and/or idhali)
    * @param halLogin - The HAL account login
    */
   public async upsertHalIdentifiers(
     personUid: string,
-    idHal: PersonIdentifier,
+    idHals: PersonIdentifier[],
     halLogin: string,
   ): Promise<void> {
-    if (
-      idHal.type !== PersonIdentifierType.idhals &&
-      idHal.type !== PersonIdentifierType.idhali
-    ) {
+    if (idHals.length === 0) {
+      throw new Error('upsertHalIdentifiers called without any idHAL')
+    }
+    const nonIdHal = idHals.find(
+      (idHal) => !isIdHalType(idHal.type as PersonIdentifierType),
+    )
+    if (nonIdHal) {
       throw new Error(
-        `upsertHalIdentifiers called with non-idHAL identifier type: ${idHal.type}`,
+        `upsertHalIdentifiers called with non-idHAL identifier type: ${nonIdHal.type}`,
       )
     }
 
@@ -778,7 +790,7 @@ export class PersonDAO extends AbstractDAO {
 
     const identifiers = [
       new PersonIdentifier(PersonIdentifierType.hal_login, halLogin),
-      idHal,
+      ...idHals,
     ]
     try {
       await this.prismaClient.$transaction(async (tx) => {
@@ -795,6 +807,9 @@ export class PersonDAO extends AbstractDAO {
         }
       })
     } catch (error) {
+      if (isUniqueConstraintError(error)) {
+        throw new IdentifierConflictError(identifierConflictReason(error))
+      }
       throw new Error(
         `Failed to upsert HAL identifiers: ${(error as Error).message}`,
       )
@@ -802,15 +817,16 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Create an identifier row for a person. Unlike {@link upsertIdentifier} this
-   * never overwrites an existing value: identifier changes are handled as
-   * remove-then-add. Throws {@link IdentifierConflictError} when a row of that
-   * type already exists for the person, or the value is already used elsewhere.
+   * Create identifier rows for a person, all or none. Unlike
+   * {@link upsertIdentifier} this never overwrites an existing value: identifier
+   * changes are handled as remove-then-add. Throws {@link IdentifierConflictError}
+   * when a row of one of the types already exists for the person, or a value is
+   * already used elsewhere.
    */
-  public async createIdentifier(
-    identifier: PersonIdentifier,
+  public async createIdentifiers(
+    identifiers: PersonIdentifier[],
     personUid: string,
-  ): Promise<DbPersonIdentifier> {
+  ): Promise<void> {
     const person = await this.prismaClient.person.findUnique({
       where: { uid: personUid },
       select: { id: true },
@@ -820,20 +836,20 @@ export class PersonDAO extends AbstractDAO {
     }
 
     try {
-      return await this.prismaClient.personIdentifier.create({
-        data: {
+      await this.prismaClient.personIdentifier.createMany({
+        data: identifiers.map((identifier) => ({
           personId: person.id,
           type: identifier.type as PersonIdentifierType,
           value: identifier.value,
           validated: identifier.validated,
-        },
+        })),
       })
     } catch (error) {
       if (isUniqueConstraintError(error)) {
         throw new IdentifierConflictError(identifierConflictReason(error))
       }
       throw new Error(
-        `Failed to create identifier: ${(error as Error).message}`,
+        `Failed to create identifiers: ${(error as Error).message}`,
       )
     }
   }
@@ -862,6 +878,23 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
+   * The person's identifiers of the given types, with their validated flag.
+   */
+  public async findIdentifiers(
+    personUid: string,
+    types: PersonIdentifierType[],
+  ): Promise<PersonIdentifier[]> {
+    const rows = await this.prismaClient.personIdentifier.findMany({
+      where: { person: { uid: personUid }, type: { in: types } },
+      select: { type: true, value: true, validated: true },
+      orderBy: { type: 'asc' },
+    })
+    return rows.map(
+      (row) => new PersonIdentifier(row.type, row.value, row.validated),
+    )
+  }
+
+  /**
    * Returns the stored value of a person's identifier of the given type, or
    * null if the person has none. Used by the authentication consistency check
    * and to carry the value on REMOVE messages.
@@ -878,22 +911,22 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Mark a person's identifier of the given type as validated. When an action
-   * is given, it is recorded in the same transaction so the flag is never set
-   * without the outgoing message.
+   * Mark a person's identifiers of the given types as validated. The actions
+   * are recorded in the same transaction so a flag is never set without its
+   * outgoing message.
    * @returns whether an identifier row was updated
    */
-  public async markIdentifierValidated(
+  public async markIdentifiersValidated(
     personUid: string,
-    type: PersonIdentifierType,
-    action?: CreateActionParams,
+    types: PersonIdentifierType[],
+    actions: CreateActionParams[] = [],
   ): Promise<boolean> {
     return this.prismaClient.$transaction(async (tx) => {
       const { count } = await tx.personIdentifier.updateMany({
-        where: { person: { uid: personUid }, type },
+        where: { person: { uid: personUid }, type: { in: types } },
         data: { validated: true },
       })
-      if (action) {
+      for (const action of actions) {
         await tx.action.create({ data: { path: null, ...action } })
       }
       return count > 0
@@ -1359,13 +1392,12 @@ export class PersonDAO extends AbstractDAO {
     if (!person) {
       throw new Error(`Person with UID ${personUid} not found`)
     }
-    // Removing an idHAL also removes its companion hal_login: hal_login is not a
-    // user-managed identifier, it only marks the idHAL as authenticated.
-    const types: PersonIdentifierType[] =
-      type === PersonIdentifierType.idhals ||
-      type === PersonIdentifierType.idhali
-        ? [type, PersonIdentifierType.hal_login]
-        : [type]
+    // Removing an idHAL removes both its forms (they are one HAL account) and
+    // its companion hal_login: hal_login is not a user-managed identifier, it
+    // only marks the idHAL as authenticated.
+    const types: PersonIdentifierType[] = isIdHalType(type)
+      ? [...ID_HAL_TYPES, PersonIdentifierType.hal_login]
+      : [type]
     await this.prismaClient.personIdentifier.deleteMany({
       where: { personId: person.id, type: { in: types } },
     })

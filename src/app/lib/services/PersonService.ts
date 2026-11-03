@@ -1,6 +1,7 @@
 import { IdentifierConflictError, PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 import {
+  ID_HAL_TYPES,
   IdHalForms,
   idHalFormsToIdentifiers,
   PersonIdentifier,
@@ -85,31 +86,33 @@ export class PersonService {
    * Manually add a non-authenticated identifier (create-only). Value changes
    * are handled as remove-then-add, so this throws {@link IdentifierConflictError}
    * (surfaced as a 409) when an identifier already exists. A manual add is made
-   * by a privileged user, so the identifier is stored as validated. An idHAL
-   * is also rejected when another person holds the other form of the same HAL
-   * account.
+   * by a privileged user, so the identifier is stored as validated. For an
+   * idHAL, every form of the HAL account found in AureHAL is stored, and the add
+   * is rejected when another person holds one of them.
    */
   async addIdentifier(
     personUid: string,
     identifier: PersonIdentifier,
   ): Promise<void> {
+    let identifiers = [identifier]
     try {
       if (isIdHalType(identifier.type as PersonIdentifierType)) {
-        const forms = await this.resolveIdHalForms(
-          identifier.type as PersonIdentifierType,
-          identifier.value,
+        identifiers = idHalFormsToIdentifiers(
+          await this.resolveIdHalForms(
+            identifier.type as PersonIdentifierType,
+            identifier.value,
+          ),
         )
         if (
-          await this.isAnyIdentifierUsedByAnotherPerson(
-            personUid,
-            idHalFormsToIdentifiers(forms),
-          )
+          await this.isAnyIdentifierUsedByAnotherPerson(personUid, identifiers)
         ) {
           throw new IdentifierConflictError('used_by_another_person')
         }
       }
-      await this.personDAO.createIdentifier(
-        new PersonIdentifier(identifier.type, identifier.value, true),
+      await this.personDAO.createIdentifiers(
+        identifiers.map(
+          (added) => new PersonIdentifier(added.type, added.value, true),
+        ),
         personUid,
       )
     } catch (error) {
@@ -118,10 +121,11 @@ export class PersonService {
       console.error(message, error)
       throw new Error(message)
     }
-    const payload = identifier.toMessagePayload(false)
-    await this.recordIdentifierAction(personUid, ActionType.ADD, {
-      identifier: payload,
-    })
+    for (const added of identifiers) {
+      await this.recordIdentifierAction(personUid, ActionType.ADD, {
+        identifier: added.toMessagePayload(false),
+      })
+    }
   }
 
   /**
@@ -206,49 +210,59 @@ export class PersonService {
   }
 
   /**
-   * Persist an authenticated idHAL. The companion `hal_login` is written but
+   * Persist the authenticated idHAL(s) of a HAL account: every form it has
+   * (`forms`, as returned by AureHAL) is stored, so a missing form is added
+   * next to the one already known. The companion `hal_login` is written but
    * emits no message of its own — it is internal (it marks the idHAL as
-   * authenticated and feeds HAL deposits). Emits ADD (new idHAL) or UPDATE
-   * (in-place authentication of an existing value) for the idHAL, authenticated.
-   * Throws {@link IdentifierConflictError} when another person holds one of the
-   * HAL account's idHAL forms (`forms`, as returned by AureHAL).
+   * authenticated and feeds HAL deposits). Emits, for each idHAL form, ADD (new)
+   * or UPDATE (in-place authentication of an existing value), authenticated.
+   * Throws {@link IdentifierConflictError} when another person holds one of
+   * the forms or the HAL login.
    */
   async authenticateHalIdentifier(
     personUid: string,
     params: {
-      type: PersonIdentifierType
-      value: string
       halLogin: string
       forms: IdHalForms
     },
   ): Promise<void> {
-    const { type, value, halLogin, forms } = params
+    const { halLogin, forms } = params
+    const idHals = idHalFormsToIdentifiers(forms)
     try {
+      // The HAL account is taken when another person holds one of its idHAL
+      // forms or has authenticated with the same login.
       if (
-        await this.isAnyIdentifierUsedByAnotherPerson(
-          personUid,
-          idHalFormsToIdentifiers(forms),
-        )
+        await this.isAnyIdentifierUsedByAnotherPerson(personUid, [
+          ...idHals,
+          new PersonIdentifier(PersonIdentifierType.hal_login, halLogin),
+        ])
       ) {
         throw new IdentifierConflictError('used_by_another_person')
       }
 
-      const existed =
-        (await this.personDAO.findIdentifierValue(personUid, type)) !== null
+      const existed = await Promise.all(
+        idHals.map(
+          async (idHal) =>
+            (await this.personDAO.findIdentifierValue(
+              personUid,
+              idHal.type as PersonIdentifierType,
+            )) !== null,
+        ),
+      )
 
       // hal_login is written silently (no Action / no outgoing message).
-      const identifier = new PersonIdentifier(type, value)
-      await this.personDAO.upsertHalIdentifiers(personUid, identifier, halLogin)
+      await this.personDAO.upsertHalIdentifiers(personUid, idHals, halLogin)
 
-      const payload = identifier.toMessagePayload(true)
-      await this.recordIdentifierAction(
-        personUid,
-        existed ? ActionType.UPDATE : ActionType.ADD,
-        { identifier: payload },
-      )
+      for (const [index, idHal] of idHals.entries()) {
+        await this.recordIdentifierAction(
+          personUid,
+          existed[index] ? ActionType.UPDATE : ActionType.ADD,
+          { identifier: idHal.toMessagePayload(true) },
+        )
+      }
     } catch (error) {
       if (error instanceof IdentifierConflictError) throw error
-      const message = `Error authenticating HAL identifier (type=${type}, value=${value}, personUid=${personUid})`
+      const message = `Error authenticating HAL identifier (idhals=${forms.idhals}, idhali=${forms.idhali}, personUid=${personUid})`
       console.error(message, error)
       throw new Error(message)
     }
@@ -256,25 +270,30 @@ export class PersonService {
 
   /**
    * Validate an existing non-authenticated identifier without changing its
-   * value. Emits an UPDATE message (authenticated: false), which the graph
-   * handles as a validation.
+   * value. Validating an idHAL validates each of its stored forms. Emits an
+   * UPDATE message (authenticated: false) per newly validated identifier, which
+   * the graph handles as a validation.
    */
   async validateIdentifier(
     personUid: string,
     type: PersonIdentifierType,
   ): Promise<void> {
     try {
-      const value = await this.personDAO.findIdentifierValue(personUid, type)
-      if (value === null) {
+      const types = isIdHalType(type) ? ID_HAL_TYPES : [type]
+      const stored = await this.personDAO.findIdentifiers(personUid, types)
+      if (stored.length === 0) {
         throw new Error('Identifier not found')
       }
-      const payload = new PersonIdentifier(type, value).toMessagePayload(false)
-      await this.personDAO.markIdentifierValidated(
+      const toValidate = stored.filter((identifier) => !identifier.validated)
+      if (toValidate.length === 0) return
+      await this.personDAO.markIdentifiersValidated(
         personUid,
-        type,
-        this.identifierAction(personUid, ActionType.UPDATE, {
-          identifier: payload,
-        }),
+        toValidate.map((identifier) => identifier.type as PersonIdentifierType),
+        toValidate.map((identifier) =>
+          this.identifierAction(personUid, ActionType.UPDATE, {
+            identifier: identifier.toMessagePayload(false),
+          }),
+        ),
       )
     } catch (error) {
       const message = `Error validating identifier (type=${type}, personUid=${personUid})`
@@ -283,17 +302,35 @@ export class PersonService {
     }
   }
 
+  /**
+   * Remove an identifier and emit a REMOVE message per stored value (none when
+   * nothing was stored). Removing an idHAL removes both its forms.
+   */
   async removeIdentifier(
     personUid: string,
     type: PersonIdentifierType,
   ): Promise<void> {
     try {
-      const value = await this.personDAO.findIdentifierValue(personUid, type)
+      const types = isIdHalType(type) ? ID_HAL_TYPES : [type]
+      const removed = (
+        await Promise.all(
+          types.map(async (removedType) => ({
+            type: removedType,
+            value: await this.personDAO.findIdentifierValue(
+              personUid,
+              removedType,
+            ),
+          })),
+        )
+      ).filter((identifier) => identifier.value !== null)
       await this.personDAO.deleteIdentifier(personUid, type)
-      await this.recordIdentifierAction(personUid, ActionType.REMOVE, {
-        type,
-        value,
-      })
+      for (const identifier of removed) {
+        await this.recordIdentifierAction(
+          personUid,
+          ActionType.REMOVE,
+          identifier,
+        )
+      }
     } catch (error) {
       const message = `Error removing identifier (type=${type}, personUid=${personUid})`
       console.error(message, error)

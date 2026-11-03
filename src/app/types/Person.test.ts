@@ -206,6 +206,43 @@ describe('Person', () => {
   })
 })
 
+describe('Person.isIdentifierValidated', () => {
+  const personWith = (identifiers: PersonIdentifier[]) =>
+    new Person('P1', false, null, 'Jane Doe', 'Jane', 'Doe', identifiers)
+
+  it('requires every stored idHAL form to be validated', () => {
+    const person = personWith([
+      new PersonIdentifier(PersonIdentifierType.idhals, 'jane-doe', true),
+      new PersonIdentifier(PersonIdentifierType.idhali, '12345', false),
+    ])
+
+    expect(person.isIdentifierValidated(PersonIdentifierType.idhals)).toBe(
+      false,
+    )
+    expect(person.isIdentifierValidated(PersonIdentifierType.idhali)).toBe(
+      false,
+    )
+  })
+
+  it('treats a single validated idHAL form as validated', () => {
+    const person = personWith([
+      new PersonIdentifier(PersonIdentifierType.idhals, 'jane-doe', true),
+    ])
+
+    expect(person.isIdentifierValidated(PersonIdentifierType.idhals)).toBe(true)
+  })
+
+  it('treats an authenticated idHAL as validated', () => {
+    const person = personWith([
+      new PersonIdentifier(PersonIdentifierType.idhals, 'jane-doe'),
+      new PersonIdentifier(PersonIdentifierType.idhali, '12345'),
+      new PersonIdentifier(PersonIdentifierType.hal_login, 'jdoe'),
+    ])
+
+    expect(person.isIdentifierValidated(PersonIdentifierType.idhals)).toBe(true)
+  })
+})
+
 describe('Person.displayIdentifiers', () => {
   const sourcePerson = (
     uid: string,

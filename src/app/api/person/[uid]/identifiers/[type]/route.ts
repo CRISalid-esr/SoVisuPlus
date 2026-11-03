@@ -28,8 +28,9 @@ const ALLOWED_TYPES: Partial<Record<PersonIdentifierType, RegExp>> = {
   [PersonIdentifierType.idhali]: /^\d+$/,
 }
 
-// idHAL is a single logical identity: adding one variant is rejected while the
-// other is present (remove-before-add), so a person never holds both.
+// idHAL is a single logical identity (one HAL account, two forms): adding one
+// form is rejected while either is present (remove-before-add). The add itself
+// stores both forms of the account.
 const IDHAL_TYPES: PersonIdentifierType[] = [
   PersonIdentifierType.idhals,
   PersonIdentifierType.idhali,

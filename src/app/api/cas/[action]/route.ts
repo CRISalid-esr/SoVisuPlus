@@ -150,14 +150,12 @@ export async function GET(
     )
   }
 
-  const resolvedType = idHalDoc.idHal_s
-    ? PersonIdentifierType.idhals
-    : PersonIdentifierType.idhali
-  const resolvedValue = idHalDoc.idHal_s ?? String(idHalDoc.idHal_i)
+  const halForms = idHalFormsOf(idHalDoc)
 
-  // Authentication only confirms an existing idHAL. If a (non-authenticated)
-  // idHAL is already stored and the one HAL returns differs — in type or value —
-  // the existing identifier must be removed first; we never replace it in place.
+  // Authentication only confirms the stored idHAL(s): each stored form must be
+  // the same form of the HAL account (idhals ↔ idHal_s, idhali ↔ idHal_i). A
+  // form not stored yet is added; a different one must be removed first — we
+  // never replace it in place.
   const personDAO = new PersonDAO()
   const storedIdhals = await personDAO.findIdentifierValue(
     user.person.uid,
@@ -167,15 +165,9 @@ export async function GET(
     user.person.uid,
     PersonIdentifierType.idhali,
   )
-  const existingType = storedIdhals
-    ? PersonIdentifierType.idhals
-    : storedIdhali
-      ? PersonIdentifierType.idhali
-      : null
-  const existingValue = storedIdhals ?? storedIdhali
   if (
-    existingValue !== null &&
-    (existingType !== resolvedType || existingValue !== resolvedValue)
+    (storedIdhals !== null && storedIdhals !== halForms.idhals) ||
+    (storedIdhali !== null && storedIdhali !== halForms.idhali)
   ) {
     return NextResponse.redirect(
       `${userRedirectionUrl}?error=hal_authentication_value_mismatch`,
@@ -185,10 +177,8 @@ export async function GET(
   const personService = new PersonService()
   try {
     await personService.authenticateHalIdentifier(user.person.uid, {
-      type: resolvedType,
-      value: resolvedValue,
       halLogin,
-      forms: idHalFormsOf(idHalDoc),
+      forms: halForms,
     })
   } catch (e) {
     if (e instanceof IdentifierConflictError) {

@@ -345,13 +345,18 @@ describe('PersonDAO', () => {
       ;(mockPrisma.person.findUnique as jest.Mock).mockResolvedValue({ id: 5 })
     })
 
-    it('createIdentifier reports a value held by another person', async () => {
-      ;(mockPrisma.personIdentifier.create as jest.Mock).mockRejectedValue(
+    it('createIdentifiers reports a value held by another person', async () => {
+      ;(mockPrisma.personIdentifier.createMany as jest.Mock).mockRejectedValue(
         foreignP2002(['type', 'value']),
       )
 
-      const promise = personDAO.createIdentifier(
-        new PersonIdentifier(PersonIdentifierType.orcid, '0000-0002-8947-4151'),
+      const promise = personDAO.createIdentifiers(
+        [
+          new PersonIdentifier(
+            PersonIdentifierType.orcid,
+            '0000-0002-8947-4151',
+          ),
+        ],
         'local-johndoe',
       )
 
@@ -361,17 +366,19 @@ describe('PersonDAO', () => {
       })
     })
 
-    it('createIdentifier reports a type the person already holds', async () => {
-      ;(mockPrisma.personIdentifier.create as jest.Mock).mockRejectedValue(
+    it('createIdentifiers reports a type the person already holds', async () => {
+      ;(mockPrisma.personIdentifier.createMany as jest.Mock).mockRejectedValue(
         foreignP2002(['personId', 'type']),
       )
 
       await expect(
-        personDAO.createIdentifier(
-          new PersonIdentifier(
-            PersonIdentifierType.orcid,
-            '0000-0002-8947-4151',
-          ),
+        personDAO.createIdentifiers(
+          [
+            new PersonIdentifier(
+              PersonIdentifierType.orcid,
+              '0000-0002-8947-4151',
+            ),
+          ],
           'local-johndoe',
         ),
       ).rejects.toMatchObject({ reason: 'slot_taken' })
