@@ -48,6 +48,7 @@ const mockState = {
             id: 1,
             uid: '12345',
             acronym: 'ABC',
+            halCollection: 'ABC-COLL',
             external: false,
             slug: 'org:abc',
           },
@@ -63,12 +64,14 @@ const mockState = {
             id: 2,
             uid: '67890',
             acronym: 'DEF',
+            halCollection: 'DEF-COLL',
             external: false,
             slug: 'org:def',
           },
         },
       ],
       membershipAcronyms: ['ABC', 'DEF'],
+      membershipHalCollections: ['ABC-COLL', 'DEF-COLL'],
       hasIdentifier: () => true,
     },
   },
@@ -320,7 +323,7 @@ describe('HalStatusCell Component', () => {
       true,
       [
         mockState.user.currentPerspective.memberships[0].organizationUnit
-          .acronym,
+          .halCollection,
       ],
       'file',
     )
@@ -363,7 +366,7 @@ describe('HalStatusCell Component', () => {
     expect(mockedHalStatusCellBadge).toHaveBeenCalledWith(
       expect.objectContaining({
         type: HalStatusCellType.NotInSyncWithCollection,
-        acronyms: ['ABC', 'DEF'],
+        acronyms: ['ABC-COLL', 'DEF-COLL'],
         documentUid: 'doc1',
         halUrl: 'https://url-to-record-1/',
         isOutOfCollection: true,
@@ -380,7 +383,7 @@ describe('HalStatusCell Component', () => {
       true,
       [
         mockState.user.currentPerspective.memberships[0].organizationUnit
-          .acronym,
+          .halCollection,
       ],
       'file',
     )
@@ -399,7 +402,7 @@ describe('HalStatusCell Component', () => {
     expect(mockedHalStatusCellBadge).toHaveBeenCalledWith(
       expect.objectContaining({
         type: HalStatusCellType.NotInSyncWithCollection,
-        acronyms: ['ABC', 'DEF'],
+        acronyms: ['ABC-COLL', 'DEF-COLL'],
         documentUid: 'doc1',
         halUrl: 'https://url-to-record-1/',
         isOutOfCollection: false,
@@ -415,7 +418,7 @@ describe('HalStatusCell Component', () => {
       true,
       [
         mockState.user.currentPerspective.memberships[0].organizationUnit
-          .acronym,
+          .halCollection,
       ],
       'notice',
     )

@@ -65,6 +65,12 @@ describe('OrganizationUnitDAO', () => {
         value: 'https://ror.org/01',
       },
     ],
+    null,
+    false,
+    [],
+    false,
+    false,
+    'RS001-COLL',
   )
 
   it('should upsert an organization unit', async () => {
@@ -94,6 +100,7 @@ describe('OrganizationUnitDAO', () => {
       acronym: 'RS001',
       normalizedAcronym: 'rs001',
       localTypes: [],
+      halCollection: 'RS001-COLL',
       slug: 'org:rs001',
     }
     expect(mockPrisma.organizationUnit.upsert).toHaveBeenCalledWith({

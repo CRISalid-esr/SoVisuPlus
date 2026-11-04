@@ -83,6 +83,7 @@ export class OrganizationUnitDAO extends AbstractDAO {
               : null,
             localTypes:
               organizationUnit.localTypes as unknown as Prisma.InputJsonValue,
+            halCollection: organizationUnit.halCollection,
             slug: uniqueSlug,
           }
           const dbOrganizationUnit =

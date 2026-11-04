@@ -7,11 +7,7 @@ export interface IAgentJson {
 }
 
 export type AgentType =
-  | 'person'
-  | 'institution'
-  | 'research_unit'
-  | 'other_structure'
-  | 'team'
+  'person' | 'institution' | 'research_unit' | 'other_structure' | 'team'
 const AGENT_TYPE_VALUES = new Set<AgentType>([
   'person',
   'institution',
@@ -42,6 +38,7 @@ export interface IAgent extends IEntity {
   slug: string | null //TODO make non-nullable
 
   get membershipAcronyms(): string[]
+  get membershipHalCollections(): string[]
   get membershipSignatures(): string[]
 
   getDisplayName(language?: ExtendedLanguageCode): string

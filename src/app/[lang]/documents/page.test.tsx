@@ -151,6 +151,7 @@ const mockState = {
       hasIdentifier: () => true,
       memberships: [],
       membershipAcronyms: ['ABC', 'DEF'],
+      membershipHalCollections: ['ABC-COLL', 'DEF-COLL'],
     },
     ownPerspective: true,
   },
@@ -294,7 +295,7 @@ describe('DocumentsPage Component', () => {
         contributorType: 'person',
         contributorUid: '',
         requestId: 1,
-        halCollectionCodes: JSON.stringify(['ABC', 'DEF']),
+        halCollectionCodes: JSON.stringify(['ABC-COLL', 'DEF-COLL']),
         areHalCollectionCodesOmitted: false,
       })
     })
@@ -317,7 +318,7 @@ describe('DocumentsPage Component', () => {
         contributorType: 'person',
         contributorUid: '',
         requestId: 1,
-        halCollectionCodes: JSON.stringify(['ABC', 'DEF']),
+        halCollectionCodes: JSON.stringify(['ABC-COLL', 'DEF-COLL']),
         areHalCollectionCodesOmitted: false,
       })
     })

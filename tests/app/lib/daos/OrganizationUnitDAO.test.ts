@@ -16,6 +16,7 @@ const makeUnit = ({
   identifiers = [],
   external = false,
   localTypes = [],
+  halCollection = null,
 }: {
   uid: string
   acronym?: string | null
@@ -27,6 +28,7 @@ const makeUnit = ({
   identifiers?: { type: string; value: string }[]
   external?: boolean
   localTypes?: Literal[]
+  halCollection?: string | null
 }): OrganizationUnit =>
   new OrganizationUnit(
     uid,
@@ -40,6 +42,9 @@ const makeUnit = ({
     null,
     external,
     localTypes,
+    false,
+    false,
+    halCollection,
   )
 
 describe('OrganizationUnitDAO Integration Tests', () => {
@@ -67,6 +72,7 @@ describe('OrganizationUnitDAO Integration Tests', () => {
           { type: 'ror', value: 'ROR-1' },
         ],
         localTypes: [Literal.fromObject({ value: 'Centre', language: 'fr' })],
+        halCollection: 'RS-COLL',
       })
 
       await organizationUnitDAO.createOrUpdateOrganizationUnit(unit)
@@ -85,6 +91,21 @@ describe('OrganizationUnitDAO Integration Tests', () => {
       expect(dbUnit!.descriptions).toHaveLength(1)
       expect(dbUnit!.identifiers).toHaveLength(2)
       expect(dbUnit!.localTypes).toEqual([{ value: 'Centre', language: 'fr' }])
+      expect(dbUnit!.halCollection).toBe('RS-COLL')
+    })
+
+    it('replaces the HAL collection with the value from the graph on update', async () => {
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(
+        makeUnit({ uid: 'local-RS010', halCollection: 'OLD-COLL' }),
+      )
+      await organizationUnitDAO.createOrUpdateOrganizationUnit(
+        makeUnit({ uid: 'local-RS010', halCollection: 'NEW-COLL' }),
+      )
+
+      const dbUnit = await prisma.organizationUnit.findUnique({
+        where: { uid: 'local-RS010' },
+      })
+      expect(dbUnit!.halCollection).toBe('NEW-COLL')
     })
 
     it('authoritatively replaces labels, descriptions and identifiers on update', async () => {

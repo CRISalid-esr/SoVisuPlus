@@ -82,6 +82,7 @@ const makeUnsupportedAgent = (): IAgent => {
     slug: 'x1',
     type: 'unknown' as AgentType,
     membershipAcronyms: [],
+    membershipHalCollections: [],
     membershipSignatures: [],
     getDisplayName: () => 'Unknown Agent',
   }

@@ -156,6 +156,7 @@ describe('OrganizationUnit', () => {
       id: 1,
       uid: 'RS123',
       acronym: 'ABC',
+      halCollection: 'ABC-COLL',
       genericType: OrganizationGenericType.unit,
       category: OrganizationCategory.research_unit,
       nationalType: 'UMR',
@@ -231,6 +232,7 @@ describe('OrganizationUnit', () => {
     expect(result.nationalType).toBe('UMR')
     expect(result.slug).toBe('abc')
     expect(result.external).toBe(false)
+    expect(result.halCollection).toBe('ABC-COLL')
     // only long labels become names
     expect(result.names).toEqual(
       expect.arrayContaining([
@@ -281,6 +283,7 @@ describe('OrganizationUnit', () => {
       id: 2,
       uid: 'RS456',
       acronym: null,
+      halCollection: null,
       genericType: OrganizationGenericType.unit,
       category: OrganizationCategory.research_unit,
       nationalType: null,

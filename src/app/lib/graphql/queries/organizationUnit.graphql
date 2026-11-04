@@ -4,6 +4,7 @@ query OrganizationUnitsQuery($where: OrganizationUnitWhere) {
     external
     generic_type
     national_type
+    hal_collection
     types
     long_labels {
       value

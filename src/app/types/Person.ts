@@ -76,6 +76,12 @@ class Person implements IAgent, Authorizable {
       .filter((acronym) => acronym !== null)
   }
 
+  get membershipHalCollections(): string[] {
+    return this.memberships
+      .map(({ organizationUnit: { halCollection } }) => halCollection)
+      .filter((halCollection) => halCollection !== null)
+  }
+
   get membershipSignatures(): string[] {
     return []
   }

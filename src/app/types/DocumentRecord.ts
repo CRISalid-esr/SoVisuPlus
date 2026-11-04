@@ -106,19 +106,19 @@ export class DocumentRecord {
         const { memberships } = perspective as Person
 
         const collections = memberships
-          .map(({ organizationUnit: { acronym } }) => acronym)
-          .filter((acronym) =>
-            acronym ? this.halCollectionCodes.includes(acronym) : false,
+          .map(({ organizationUnit: { halCollection } }) => halCollection)
+          .filter((halCollection) => halCollection !== null)
+          .filter((halCollection) =>
+            this.halCollectionCodes.includes(halCollection),
           )
-          .filter((acronym) => acronym != null)
 
         return collections.length > 0 ? collections : null
       }
       case 'research_unit': {
-        const { acronym } = perspective as OrganizationUnit
+        const { halCollection } = perspective as OrganizationUnit
 
-        return acronym && this.halCollectionCodes.includes(acronym)
-          ? [acronym]
+        return halCollection && this.halCollectionCodes.includes(halCollection)
+          ? [halCollection]
           : null
       }
       case 'institution':

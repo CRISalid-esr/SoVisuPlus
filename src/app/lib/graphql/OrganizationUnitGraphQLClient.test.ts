@@ -2,6 +2,7 @@ import {
   GraphOrganizationUnitResponse,
   OrganizationUnitGraphQLClient,
 } from '@/lib/graphql/OrganizationUnitGraphQLClient'
+import { halCollectionCodeFromUrl } from '@/lib/graphql/organizationHydration'
 import { OrganizationCategory, OrganizationGenericType } from '@prisma/client'
 
 const makeResponse = (
@@ -11,6 +12,7 @@ const makeResponse = (
   external: false,
   generic_type: 'unit',
   national_type: 'UMR',
+  hal_collection: 'https://hal.science/ERC',
   types: ['OrganizationUnit', 'Unit', 'ResearchUnit'],
   long_labels: [
     { value: 'Example Research Center', language: 'en' },
@@ -55,6 +57,15 @@ describe('OrganizationUnitGraphQLClient hydration', () => {
       { type: 'ror', value: 'ROR-EXAMPLE' },
     ])
     expect(organizationUnit!.external).toBe(false)
+    expect(organizationUnit!.halCollection).toBe('ERC')
+  })
+
+  it('sets no HAL collection when the graph has none', () => {
+    const organizationUnit = client.hydrate(
+      makeResponse({ hal_collection: null }),
+    )
+
+    expect(organizationUnit!.halCollection).toBeNull()
   })
 
   it.each([
@@ -210,5 +221,23 @@ describe('OrganizationUnitGraphQLClient hydration', () => {
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       expect.stringContaining('unknown_type'),
     )
+  })
+})
+
+describe('halCollectionCodeFromUrl', () => {
+  it.each([
+    ['https://hal.science/ERC', 'ERC'],
+    ['https://hal.science/ERC/', 'ERC'],
+    ['  https://hal.science/ERC  ', 'ERC'],
+    ['https://hal.science/ERC?lang=fr', 'ERC'],
+    ['ERC', 'ERC'],
+    [' ERC ', 'ERC'],
+    ['https://hal.science/', null],
+    ['', null],
+    ['   ', null],
+    [null, null],
+    [undefined, null],
+  ])('extracts the collection code from %j → %j', (value, expected) => {
+    expect(halCollectionCodeFromUrl(value)).toBe(expected)
   })
 })

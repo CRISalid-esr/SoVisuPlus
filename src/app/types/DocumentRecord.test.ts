@@ -22,7 +22,11 @@ import { PersonMembership } from '@/types/PersonMembership'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { Literal } from '@/types/Literal'
 
-const makeResearchUnit = (uid: string, acronym: string) =>
+const makeResearchUnit = (
+  uid: string,
+  acronym: string,
+  halCollection: string | null = null,
+) =>
   new OrganizationUnit(
     uid,
     acronym,
@@ -35,6 +39,12 @@ const makeResearchUnit = (uid: string, acronym: string) =>
       { type: OrganizationIdentifierType.hal, value: '12345' },
       { type: OrganizationIdentifierType.ror, value: '67890' },
     ],
+    null,
+    false,
+    [],
+    false,
+    false,
+    halCollection,
   )
 
 describe('DocumentRecord type', () => {
@@ -167,8 +177,9 @@ describe('DocumentRecord type', () => {
         new PersonIdentifier(PersonIdentifierType.local, '12345'),
       ],
       [
-        new PersonMembership(makeResearchUnit('RS123', 'ABC')),
-        new PersonMembership(makeResearchUnit('RS123', 'DEF')),
+        new PersonMembership(makeResearchUnit('RS123', 'U-ABC', 'ABC')),
+        new PersonMembership(makeResearchUnit('RS123', 'U-DEF', 'DEF')),
+        new PersonMembership(makeResearchUnit('RS123', 'NOCOLL')),
       ],
     )
 
@@ -183,7 +194,11 @@ describe('DocumentRecord type', () => {
         new PersonIdentifier(PersonIdentifierType.orcid, '0000-0002-1825-0097'),
         new PersonIdentifier(PersonIdentifierType.local, '12345'),
       ],
-      [new PersonMembership(makeResearchUnit('RS123', 'GHI'))],
+      [
+        new PersonMembership(makeResearchUnit('RS123', 'U-GHI', 'GHI')),
+        // acronym equal to a collection code but no HAL collection: no match
+        new PersonMembership(makeResearchUnit('RS123', 'ABC')),
+      ],
     )
 
     expect(mockDocument.isResearchUnitInCollectionCodes(mockPerson1)).toEqual([
@@ -194,15 +209,20 @@ describe('DocumentRecord type', () => {
       null,
     )
 
-    const mockResearchUnit1 = makeResearchUnit('RS123', 'DEF')
+    const mockResearchUnit1 = makeResearchUnit('RS123', 'U-DEF', 'DEF')
 
-    const mockResearchUnit2 = makeResearchUnit('RS123', 'GHI')
+    const mockResearchUnit2 = makeResearchUnit('RS123', 'U-GHI', 'GHI')
+
+    const mockResearchUnit3 = makeResearchUnit('RS123', 'DEF')
 
     expect(
       mockDocument.isResearchUnitInCollectionCodes(mockResearchUnit1),
     ).toEqual(['DEF'])
     expect(
       mockDocument.isResearchUnitInCollectionCodes(mockResearchUnit2),
+    ).toEqual(null)
+    expect(
+      mockDocument.isResearchUnitInCollectionCodes(mockResearchUnit3),
     ).toEqual(null)
   })
 })

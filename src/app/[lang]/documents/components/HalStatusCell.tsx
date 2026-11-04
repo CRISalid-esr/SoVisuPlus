@@ -79,7 +79,7 @@ const HalStatusCell = ({ row }: { row: { original: Document } }) => {
     )
   }
 
-  const acronyms = currentPerspective?.membershipAcronyms || []
+  const acronyms = currentPerspective?.membershipHalCollections || []
 
   return (
     <HalStatusCellBadge
