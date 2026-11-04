@@ -969,7 +969,67 @@ export class PersonDAO extends AbstractDAO {
     return updated
   }
 
+  /**
+   * Persist an authenticated ORCID in a single transaction: the identifier row,
+   * its encrypted OAuth extension and the outgoing actions. Throws
+   * {@link IdentifierConflictError} when another person holds the ORCID.
+   */
+  public async upsertAuthenticatedOrcidIdentifier(
+    personUid: string,
+    identifier: ORCIDIdentifier,
+    actions: CreateActionParams[] = [],
+  ): Promise<void> {
+    const person = await this.prismaClient.person.findUnique({
+      where: { uid: personUid },
+      select: { id: true },
+    })
+    if (!person) {
+      throw new Error(`Person with UID ${personUid} not found`)
+    }
+
+    try {
+      await this.prismaClient.$transaction(async (tx) => {
+        const row = await tx.personIdentifier.upsert({
+          where: {
+            personId_type: {
+              personId: person.id,
+              type: PersonIdentifierType.orcid,
+            },
+          },
+          update: { value: identifier.value },
+          create: {
+            personId: person.id,
+            type: PersonIdentifierType.orcid,
+            value: identifier.value,
+          },
+        })
+        await this.writeOrcidIdentifierExtension(tx, row.id, identifier)
+        await recordActions(tx, actions)
+      })
+    } catch (error) {
+      if (
+        isUniqueConstraintError(error) &&
+        identifierConflictReason(error) === 'used_by_another_person'
+      ) {
+        throw new IdentifierConflictError('used_by_another_person')
+      }
+      throw error
+    }
+  }
+
   public async upsertOrcidIdentifierExtension(
+    personIdentifierId: number,
+    identifier: ORCIDIdentifier,
+  ): Promise<void> {
+    await this.writeOrcidIdentifierExtension(
+      this.prismaClient,
+      personIdentifierId,
+      identifier,
+    )
+  }
+
+  private async writeOrcidIdentifierExtension(
+    client: Prisma.TransactionClient,
     personIdentifierId: number,
     identifier: ORCIDIdentifier,
   ): Promise<void> {
@@ -981,7 +1041,7 @@ export class PersonDAO extends AbstractDAO {
     }
 
     // The identifier itself should have been created in the service layer at previous step.
-    const base = await this.prismaClient.personIdentifier.findUnique({
+    const base = await client.personIdentifier.findUnique({
       where: { id: personIdentifierId },
       select: { id: true, type: true },
     })
@@ -1028,7 +1088,7 @@ export class PersonDAO extends AbstractDAO {
     }
 
     // Note that we could override the tokens with null values on update
-    await this.prismaClient.orcidIdentifier.upsert({
+    await client.orcidIdentifier.upsert({
       where: { id: personIdentifierId },
       create: data,
       update: data,

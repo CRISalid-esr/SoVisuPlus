@@ -9,13 +9,11 @@ import { ActionTargetType, ActionType } from '@/types/Action'
 import { IdentifierConflictError } from '@/lib/daos/PersonDAO'
 
 const mockCreateIdentifiers = jest.fn()
-const mockUpsertIdentifier = jest.fn()
 const mockUpsertHalIdentifiers = jest.fn()
-const mockUpsertOrcidExt = jest.fn()
+const mockUpsertAuthenticatedOrcid = jest.fn()
 const mockFindIdentifierValue = jest.fn()
 const mockFindIdentifiers = jest.fn()
 const mockDeleteIdentifier = jest.fn()
-const mockCreateAction = jest.fn()
 const mockIsAnyIdentifierHeldByAnotherPerson = jest.fn()
 const mockFindAuthorByIdHal = jest.fn()
 
@@ -33,9 +31,8 @@ jest.mock('@/lib/daos/PersonDAO', () => {
     IdentifierConflictError,
     PersonDAO: jest.fn().mockImplementation(() => ({
       createIdentifiers: mockCreateIdentifiers,
-      upsertIdentifier: mockUpsertIdentifier,
       upsertHalIdentifiers: mockUpsertHalIdentifiers,
-      upsertOrcidIdentifierExtension: mockUpsertOrcidExt,
+      upsertAuthenticatedOrcidIdentifier: mockUpsertAuthenticatedOrcid,
       findIdentifierValue: mockFindIdentifierValue,
       findIdentifiers: mockFindIdentifiers,
       deleteIdentifier: mockDeleteIdentifier,
@@ -49,12 +46,6 @@ jest.mock('@/lib/services/AureHalAPIClient', () => ({
   ...jest.requireActual('@/lib/services/AureHalAPIClient'),
   AureHalAPIClient: jest.fn().mockImplementation(() => ({
     findAuthorByIdHal: mockFindAuthorByIdHal,
-  })),
-}))
-
-jest.mock('@/lib/daos/ActionDAO', () => ({
-  ActionDAO: jest.fn().mockImplementation(() => ({
-    createAction: mockCreateAction,
   })),
 }))
 
@@ -113,7 +104,6 @@ describe('PersonService identifier operations', () => {
           }),
         ],
       )
-      expect(mockCreateAction).not.toHaveBeenCalled()
     })
 
     it('rethrows IdentifierConflictError and records no action', async () => {
@@ -124,7 +114,6 @@ describe('PersonService identifier operations', () => {
           new PersonIdentifier(PersonIdentifierType.idref, '123456789'),
         ),
       ).rejects.toBeInstanceOf(IdentifierConflictError)
-      expect(mockCreateAction).not.toHaveBeenCalled()
     })
 
     it('does not look up AureHAL for a non-idHAL identifier', async () => {
@@ -224,7 +213,6 @@ describe('PersonService identifier operations', () => {
         reason: 'used_by_another_person',
       })
       expect(mockCreateIdentifiers).not.toHaveBeenCalled()
-      expect(mockCreateAction).not.toHaveBeenCalled()
     })
 
     it('checks only the entered form when AureHAL does not know the idHAL', async () => {
@@ -284,43 +272,44 @@ describe('PersonService identifier operations', () => {
     const identifier = () =>
       new ORCIDIdentifier('0000-0002-1825-0097', orcidOauth())
 
-    it('emits ADD (authenticated) when no ORCID existed', async () => {
+    it('records an ADD (authenticated) in the same transaction when no ORCID existed', async () => {
       mockFindIdentifierValue.mockResolvedValue(null)
-      mockUpsertIdentifier.mockResolvedValue({ id: 7 })
 
       await service.authenticateOrcidIdentifier('p1', identifier())
 
-      expect(mockUpsertOrcidExt).toHaveBeenCalledWith(7, expect.anything())
-      expect(mockCreateAction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          actionType: ActionType.ADD,
-          parameters: {
-            identifier: {
-              type: 'orcid',
-              value: '0000-0002-1825-0097',
-              authenticated: true,
+      expect(mockUpsertAuthenticatedOrcid).toHaveBeenCalledWith(
+        'p1',
+        identifier(),
+        [
+          expect.objectContaining({
+            actionType: ActionType.ADD,
+            parameters: {
+              identifier: {
+                type: 'orcid',
+                value: '0000-0002-1825-0097',
+                authenticated: true,
+              },
             },
-          },
-        }),
+          }),
+        ],
       )
     })
 
-    it('emits UPDATE (authenticated) when the ORCID already existed', async () => {
+    it('records an UPDATE (authenticated) when the ORCID already existed', async () => {
       mockFindIdentifierValue.mockResolvedValue('0000-0002-1825-0097')
-      mockUpsertIdentifier.mockResolvedValue({ id: 7 })
 
       await service.authenticateOrcidIdentifier('p1', identifier())
 
-      expect(mockCreateAction).toHaveBeenCalledWith(
-        expect.objectContaining({ actionType: ActionType.UPDATE }),
-      )
+      expect(actionsOf(mockUpsertAuthenticatedOrcid, 2)).toEqual([
+        [ActionType.UPDATE, expect.anything()],
+      ])
     })
   })
 
   describe('authenticateOrcidIdentifier conflicts', () => {
-    it('rethrows IdentifierConflictError and records no action', async () => {
+    it('rethrows IdentifierConflictError', async () => {
       mockFindIdentifierValue.mockResolvedValue(null)
-      mockUpsertIdentifier.mockRejectedValue(
+      mockUpsertAuthenticatedOrcid.mockRejectedValue(
         new IdentifierConflictError('used_by_another_person'),
       )
 
@@ -330,8 +319,6 @@ describe('PersonService identifier operations', () => {
           new ORCIDIdentifier('0000-0002-1825-0097', orcidOauth()),
         ),
       ).rejects.toMatchObject({ reason: 'used_by_another_person' })
-      expect(mockUpsertOrcidExt).not.toHaveBeenCalled()
-      expect(mockCreateAction).not.toHaveBeenCalled()
     })
   })
 
@@ -373,7 +360,6 @@ describe('PersonService identifier operations', () => {
           },
         ],
       ])
-      expect(mockCreateAction).not.toHaveBeenCalled()
     })
 
     it('records UPDATE for the stored form and ADD for the missing one', async () => {
@@ -448,7 +434,6 @@ describe('PersonService identifier operations', () => {
         ],
       )
       expect(mockUpsertHalIdentifiers).not.toHaveBeenCalled()
-      expect(mockCreateAction).not.toHaveBeenCalled()
     })
   })
 
@@ -478,7 +463,6 @@ describe('PersonService identifier operations', () => {
       expect(actionsOf(mockDeleteIdentifier, 2)).toEqual([
         [ActionType.REMOVE, { type: 'idref', value: '123456789' }],
       ])
-      expect(mockCreateAction).not.toHaveBeenCalled()
     })
 
     it('removes both idHAL forms with one REMOVE per stored form', async () => {

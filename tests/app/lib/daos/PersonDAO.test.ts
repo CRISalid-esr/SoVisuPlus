@@ -19,6 +19,7 @@ import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
+import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 
 describe('PersonDAO Integration Tests', () => {
   let personDAO: PersonDAO
@@ -1578,6 +1579,59 @@ describe('PersonDAO Integration Tests', () => {
         ),
       ).rejects.toThrow()
 
+      expect(await typesOf(dbPerson.id)).toEqual([])
+    })
+
+    const authenticatedOrcid = () =>
+      new ORCIDIdentifier('0000-0001-2345-6789', {
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        tokenType: 'bearer',
+        scope: ['/authenticate'],
+        obtainedAt: new Date('2026-01-01T00:00:00.000Z'),
+        expiresAt: new Date('2026-01-01T01:00:00.000Z'),
+      })
+
+    test('upsertAuthenticatedOrcidIdentifier writes nothing when an action cannot be recorded', async () => {
+      const dbPerson = await prisma.person.create({
+        data: { uid: 'local-atomic-orcid', email: 'atomic-orcid@example.com' },
+      })
+
+      await expect(
+        personDAO.upsertAuthenticatedOrcidIdentifier(
+          dbPerson.uid,
+          authenticatedOrcid(),
+          [invalidAction(dbPerson.uid)],
+        ),
+      ).rejects.toThrow()
+
+      expect(await typesOf(dbPerson.id)).toEqual([])
+      expect(await prisma.orcidIdentifier.count()).toBe(0)
+    })
+
+    test('upsertAuthenticatedOrcidIdentifier reports an ORCID held by another person', async () => {
+      await prisma.person.create({
+        data: {
+          uid: 'local-orcid-owner',
+          email: 'orcid-owner@example.com',
+          identifiers: {
+            create: {
+              type: PersonIdentifierType.orcid,
+              value: '0000-0001-2345-6789',
+            },
+          },
+        },
+      })
+      const dbPerson = await prisma.person.create({
+        data: { uid: 'local-orcid-other', email: 'orcid-other@example.com' },
+      })
+
+      await expect(
+        personDAO.upsertAuthenticatedOrcidIdentifier(
+          dbPerson.uid,
+          authenticatedOrcid(),
+        ),
+      ).rejects.toMatchObject({ reason: 'used_by_another_person' })
       expect(await typesOf(dbPerson.id)).toEqual([])
     })
 

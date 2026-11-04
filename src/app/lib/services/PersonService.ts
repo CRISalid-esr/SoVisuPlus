@@ -8,7 +8,7 @@ import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
-import { ActionDAO, CreateActionParams } from '@/lib/daos/ActionDAO'
+import { CreateActionParams } from '@/lib/daos/ActionDAO'
 import { ActionTargetType, ActionType } from '@/types/Action'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import { InputJsonValue } from '@prisma/client/runtime/library'
@@ -16,12 +16,10 @@ import { AureHalAPIClient, idHalFormsOf } from '@/lib/services/AureHalAPIClient'
 
 export class PersonService {
   private personDAO: PersonDAO
-  private actionDAO: ActionDAO
   private aureHalClient: AureHalAPIClient
 
   constructor() {
     this.personDAO = new PersonDAO()
-    this.actionDAO = new ActionDAO()
     this.aureHalClient = new AureHalAPIClient()
   }
 
@@ -50,21 +48,12 @@ export class PersonService {
   }
 
   /**
-   * Records a person-identifier change as an outgoing action. The
-   * `authenticated` flag is derived from the operation (manual add → false,
-   * authentication → true) and stamped into the message payload — it is never
-   * persisted. See specs/872-refactor-account-edition-workflow/prompt.md.
+   * A person-identifier change as an outgoing action, recorded by the DAO in
+   * the same transaction as the change. The `authenticated` flag is derived
+   * from the operation (manual add → false, authentication → true) and stamped
+   * into the message payload — it is never persisted. See
+   * specs/872-refactor-account-edition-workflow/prompt.md.
    */
-  private async recordIdentifierAction(
-    personUid: string,
-    actionType: ActionType,
-    parameters: InputJsonValue,
-  ): Promise<void> {
-    await this.actionDAO.createAction(
-      this.identifierAction(personUid, actionType, parameters),
-    )
-  }
-
   private identifierAction(
     personUid: string,
     actionType: ActionType,
@@ -169,8 +158,8 @@ export class PersonService {
 
   /**
    * Persist an authenticated ORCID (base row + encrypted OAuth extension) and
-   * emit an ADD (when the ORCID did not exist) or UPDATE (in-place
-   * authentication of an existing value) message marked authenticated.
+   * its ADD (when the ORCID did not exist) or UPDATE (in-place authentication
+   * of an existing value) message marked authenticated, in one transaction.
    * Throws {@link IdentifierConflictError} when another person holds the ORCID.
    */
   async authenticateOrcidIdentifier(
@@ -184,20 +173,16 @@ export class PersonService {
           PersonIdentifierType.orcid,
         )) !== null
 
-      const persisted = await this.personDAO.upsertIdentifier(
-        identifier,
+      await this.personDAO.upsertAuthenticatedOrcidIdentifier(
         personUid,
-      )
-      await this.personDAO.upsertOrcidIdentifierExtension(
-        persisted.id,
         identifier,
-      )
-
-      const payload = identifier.toMessagePayload(true)
-      await this.recordIdentifierAction(
-        personUid,
-        existed ? ActionType.UPDATE : ActionType.ADD,
-        { identifier: payload },
+        [
+          this.identifierAction(
+            personUid,
+            existed ? ActionType.UPDATE : ActionType.ADD,
+            { identifier: identifier.toMessagePayload(true) },
+          ),
+        ],
       )
     } catch (error) {
       if (error instanceof IdentifierConflictError) throw error
