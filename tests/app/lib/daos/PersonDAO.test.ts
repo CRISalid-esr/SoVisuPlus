@@ -1497,36 +1497,6 @@ describe('PersonDAO Integration Tests', () => {
     ).toBe(0)
   })
 
-  test('upsertIdentifier reports a value held by another person', async () => {
-    await prisma.person.create({
-      data: {
-        uid: 'local-upsertowner',
-        email: 'upsertowner@example.com',
-        identifiers: {
-          create: {
-            type: PersonIdentifierType.orcid,
-            value: '0000-0002-1825-0097',
-          },
-        },
-      },
-    })
-    const dbPerson = await prisma.person.create({
-      data: { uid: 'local-upsertother', email: 'upsertother@example.com' },
-    })
-
-    await expect(
-      personDAO.upsertIdentifier(
-        new PersonIdentifier(PersonIdentifierType.orcid, '0000-0002-1825-0097'),
-        dbPerson.uid,
-      ),
-    ).rejects.toMatchObject({ reason: 'used_by_another_person' })
-    expect(
-      await prisma.personIdentifier.findMany({
-        where: { personId: dbPerson.id },
-      }),
-    ).toHaveLength(0)
-  })
-
   describe('identifier writes and their actions are atomic', () => {
     const invalidAction = (personUid: string) => ({
       actionType: 'INVALID' as ActionType,

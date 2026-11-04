@@ -3,7 +3,6 @@ import {
   OrganizationCategory,
   OrganizationRelationKind,
   Person as DbPerson,
-  PersonIdentifier as DbPersonIdentifier,
   Prisma,
 } from '@prisma/client'
 import { Person } from '@/types/Person'
@@ -682,67 +681,6 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Upsert a single PersonIdentifier for a given person
-   * @param identifier - The identifier to upsert
-   * @param personUid - The UID of the person
-   * @param retries - The number of retries (to handle conflicts on upsert)
-   * @returns The created or updated PersonIdentifier record
-   * @throws IdentifierConflictError when the value belongs to another person
-   */
-  public async upsertIdentifier(
-    identifier: PersonIdentifier,
-    personUid: string,
-    retries = 0,
-  ): Promise<DbPersonIdentifier> {
-    const person = await this.prismaClient.person.findUnique({
-      where: { uid: personUid },
-      select: { id: true },
-    })
-
-    if (!person) {
-      throw new Error(`Person with UID ${personUid} not found`)
-    }
-
-    const personId = person.id
-
-    try {
-      return await this.prismaClient.personIdentifier.upsert({
-        where: {
-          personId_type: {
-            personId,
-            type: identifier.type as PersonIdentifierType,
-          },
-        },
-        update: {
-          value: identifier.value,
-        },
-        create: {
-          personId,
-          type: identifier.type as PersonIdentifierType,
-          value: identifier.value,
-        },
-      })
-    } catch (error) {
-      if (isUniqueConstraintError(error)) {
-        // Retrying cannot help when the value belongs to another person
-        if (identifierConflictReason(error) === 'used_by_another_person') {
-          throw new IdentifierConflictError('used_by_another_person')
-        }
-        if (retries < 3) {
-          console.warn('Retrying identifier upsert...')
-          // recursive call : return the retry result !
-          return this.upsertIdentifier(identifier, personUid, retries + 1)
-        }
-        throw new Error('Failed to upsert identifier after 3 retries (P2002)')
-      }
-
-      throw new Error(
-        `Failed to upsert identifier: ${(error as Error).message}`,
-      )
-    }
-  }
-
-  /**
    * Upsert the idHAL(s) of a HAL account and their companion hal_login in a
    * single transaction, so an interruption can never leave one without the
    * other. Throws {@link IdentifierConflictError} when another person holds
@@ -979,6 +917,20 @@ export class PersonDAO extends AbstractDAO {
     identifier: ORCIDIdentifier,
     actions: CreateActionParams[] = [],
   ): Promise<void> {
+    const oauth = identifier.oauth
+    if (!oauth) {
+      throw new Error(
+        `Missing OAuth data for ORCID identifier (value=${identifier.value})`,
+      )
+    }
+    // Minimum fields for persistence (the OAuth callback always provides them)
+    const { accessToken, refreshToken, scope } = oauth
+    if (!accessToken || !refreshToken || !scope) {
+      throw new Error(
+        `Missing accessToken/refreshToken for ORCID identifier (value=${identifier.value})`,
+      )
+    }
+
     const person = await this.prismaClient.person.findUnique({
       where: { uid: personUid },
       select: { id: true },
@@ -1003,7 +955,25 @@ export class PersonDAO extends AbstractDAO {
             value: identifier.value,
           },
         })
-        await this.writeOrcidIdentifierExtension(tx, row.id, identifier)
+
+        // The tokens are bound (AAD) to the identifier row created just above
+        const keyring = loadKeyringFromEnv()
+        const aad = PersonDAO.getORCIDIdentifierAad(row.id)
+        const data = {
+          id: row.id,
+          accessToken: encryptString(accessToken, keyring, { aad }),
+          refreshToken: encryptString(refreshToken, keyring, { aad }),
+          scope: scope.join(' '),
+          tokenType: oauth.tokenType,
+          obtainedAt: oauth.obtainedAt,
+          expiresAt: oauth.expiresAt,
+        }
+        await tx.orcidIdentifier.upsert({
+          where: { id: row.id },
+          create: data,
+          update: data,
+        })
+
         await recordActions(tx, actions)
       })
     } catch (error) {
@@ -1015,84 +985,6 @@ export class PersonDAO extends AbstractDAO {
       }
       throw error
     }
-  }
-
-  public async upsertOrcidIdentifierExtension(
-    personIdentifierId: number,
-    identifier: ORCIDIdentifier,
-  ): Promise<void> {
-    await this.writeOrcidIdentifierExtension(
-      this.prismaClient,
-      personIdentifierId,
-      identifier,
-    )
-  }
-
-  private async writeOrcidIdentifierExtension(
-    client: Prisma.TransactionClient,
-    personIdentifierId: number,
-    identifier: ORCIDIdentifier,
-  ): Promise<void> {
-    // Redundant check: idetifier type is hard coded in the ORCIDIdentifier class
-    if (identifier.type !== PersonIdentifierType.orcid) {
-      throw new Error(
-        `upsertOrcidIdentifierExtension called with non-ORCID identifier type: ${identifier.type}`,
-      )
-    }
-
-    // The identifier itself should have been created in the service layer at previous step.
-    const base = await client.personIdentifier.findUnique({
-      where: { id: personIdentifierId },
-      select: { id: true, type: true },
-    })
-    if (!base) {
-      throw new Error(
-        `PersonIdentifier with id=${personIdentifierId} not found`,
-      )
-    }
-    if (base.type !== PersonIdentifierType.orcid) {
-      throw new Error(
-        `PersonIdentifier id=${personIdentifierId} is not ORCID (found type=${base.type})`,
-      )
-    }
-
-    const oauth = identifier.oauth
-    if (!oauth) {
-      throw new Error(
-        `Missing OAuth data for ORCID identifier (personIdentifierId=${personIdentifierId})`,
-      )
-    }
-
-    // Require minimum fields for persistence (callback should always provide these)
-    if (!oauth.accessToken || !oauth.refreshToken || !oauth.scope) {
-      throw new Error(
-        `Missing accessToken/refreshToken for ORCID identifier (personIdentifierId=${personIdentifierId})`,
-      )
-    }
-
-    const keyring = loadKeyringFromEnv()
-    // aad is bound to the record being created/updated
-    const aad = PersonDAO.getORCIDIdentifierAad(personIdentifierId)
-
-    // Serialize scopes
-    const scopeStr = oauth.scope.join(' ')
-
-    const data = {
-      id: personIdentifierId,
-      accessToken: encryptString(oauth.accessToken, keyring, { aad }),
-      refreshToken: encryptString(oauth.refreshToken, keyring, { aad }),
-      scope: scopeStr,
-      tokenType: oauth.tokenType,
-      obtainedAt: oauth.obtainedAt,
-      expiresAt: oauth.expiresAt,
-    }
-
-    // Note that we could override the tokens with null values on update
-    await client.orcidIdentifier.upsert({
-      where: { id: personIdentifierId },
-      create: data,
-      update: data,
-    })
   }
 
   public static getORCIDIdentifierAad(personIdentifierId: number): string {
