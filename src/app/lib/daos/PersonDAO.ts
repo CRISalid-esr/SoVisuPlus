@@ -1270,7 +1270,14 @@ export class PersonDAO extends AbstractDAO {
           displayName: true,
           firstName: true,
           lastName: true,
-          identifiers: { select: { type: true, value: true, validated: true } },
+          identifiers: {
+            select: {
+              type: true,
+              value: true,
+              validated: true,
+              orcidIdentifier: { select: { id: true } },
+            },
+          },
         },
       },
     } as const
