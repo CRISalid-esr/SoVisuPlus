@@ -154,7 +154,9 @@ describe('NotInSyncHalCollectionCard Component', () => {
         { exact: false },
       ),
     ).toBeInTheDocument()
-    expect(screen.queryByText('ABC, DEF', { exact: false })).toBeInTheDocument()
+    expect(
+      screen.queryByText('ABC and DEF', { exact: false }),
+    ).toBeInTheDocument()
   })
 
   it('should not displays out of collection warning if isOutOfCollection is false', async () => {

@@ -151,7 +151,10 @@ const mockState = {
       hasIdentifier: () => true,
       memberships: [],
       membershipAcronyms: ['ABC', 'DEF'],
-      membershipHalCollections: ['ABC-COLL', 'DEF-COLL'],
+      currentHalCollectionUnits: [
+        { acronym: 'ABC', halCollection: 'ABC-COLL' },
+        { acronym: 'DEF', halCollection: 'DEF-COLL' },
+      ],
     },
     ownPerspective: true,
   },

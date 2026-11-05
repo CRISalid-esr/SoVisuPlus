@@ -335,7 +335,9 @@ const usePublicationsTableDataFetching = (
       contributorType: contributorType,
       requestId: nextRequestId,
       halCollectionCodes: JSON.stringify(
-        currentPerspective.membershipHalCollections,
+        currentPerspective.currentHalCollectionUnits.map(
+          ({ halCollection }) => halCollection,
+        ),
       ),
       // Kept wired to false: the "incomplete HAL filling" filter is not exposed
       // by any tab for now, but the plumbing stays ready for a future tab.
@@ -374,7 +376,9 @@ const usePublicationsTableDataFetching = (
         contributorType: contributorType,
         requestId: nextCountDocumentsRequestId,
         halCollectionCodes: JSON.stringify(
-          currentPerspective.membershipHalCollections,
+          currentPerspective.currentHalCollectionUnits.map(
+            ({ halCollection }) => halCollection,
+          ),
         ),
         areHalCollectionCodesOmitted: false,
       }).catch((error) => {

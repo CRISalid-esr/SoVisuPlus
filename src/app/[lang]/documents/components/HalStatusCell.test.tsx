@@ -71,7 +71,10 @@ const mockState = {
         },
       ],
       membershipAcronyms: ['ABC', 'DEF'],
-      membershipHalCollections: ['ABC-COLL', 'DEF-COLL'],
+      currentHalCollectionUnits: [
+        { acronym: 'ABC', halCollection: 'ABC-COLL' },
+        { acronym: 'DEF', halCollection: 'DEF-COLL' },
+      ],
       hasIdentifier: () => true,
     },
   },
@@ -343,6 +346,7 @@ describe('HalStatusCell Component', () => {
       expect.objectContaining({
         type: HalStatusCellType.InCollection,
         halSubmitType: 'file',
+        acronyms: ['ABC'],
         halUrl: 'https://url-to-record-1/',
       }),
       undefined,
@@ -366,7 +370,7 @@ describe('HalStatusCell Component', () => {
     expect(mockedHalStatusCellBadge).toHaveBeenCalledWith(
       expect.objectContaining({
         type: HalStatusCellType.NotInSyncWithCollection,
-        acronyms: ['ABC-COLL', 'DEF-COLL'],
+        acronyms: ['ABC', 'DEF'],
         documentUid: 'doc1',
         halUrl: 'https://url-to-record-1/',
         isOutOfCollection: true,
@@ -402,7 +406,7 @@ describe('HalStatusCell Component', () => {
     expect(mockedHalStatusCellBadge).toHaveBeenCalledWith(
       expect.objectContaining({
         type: HalStatusCellType.NotInSyncWithCollection,
-        acronyms: ['ABC-COLL', 'DEF-COLL'],
+        acronyms: ['ABC', 'DEF'],
         documentUid: 'doc1',
         halUrl: 'https://url-to-record-1/',
         isOutOfCollection: false,

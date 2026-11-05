@@ -1,3 +1,4 @@
+import type { HalCollectionUnit } from '@/types/HalCollectionUnit'
 import { IEntity } from '@/types/IEntity'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 
@@ -38,7 +39,8 @@ export interface IAgent extends IEntity {
   slug: string | null //TODO make non-nullable
 
   get membershipAcronyms(): string[]
-  get membershipHalCollections(): string[]
+  /** Structures with a HAL collection used for the "in HAL collection" status */
+  get currentHalCollectionUnits(): HalCollectionUnit[]
   get membershipSignatures(): string[]
 
   getDisplayName(language?: ExtendedLanguageCode): string

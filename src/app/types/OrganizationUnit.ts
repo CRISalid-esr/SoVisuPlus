@@ -4,6 +4,7 @@ import {
   OrganizationIdentifierType,
 } from '@/types/OrganizationUnitIdentifier'
 import { AgentType, IAgent } from '@/types/IAgent'
+import { HalCollectionUnit } from '@/types/HalCollectionUnit'
 import { Literal } from '@/types/Literal'
 import { OrganizationRelation } from '@/types/OrganizationRelation'
 import { ExtendedLanguageCode } from './ExtendLanguageCode'
@@ -95,8 +96,10 @@ class OrganizationUnit implements IAgent {
     return this.acronym ? [this.acronym] : []
   }
 
-  get membershipHalCollections(): string[] {
-    return this.halCollection ? [this.halCollection] : []
+  get currentHalCollectionUnits(): HalCollectionUnit[] {
+    return this.halCollection
+      ? [{ acronym: this.acronym, halCollection: this.halCollection }]
+      : []
   }
 
   get membershipSignatures(): string[] {

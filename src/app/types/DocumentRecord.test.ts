@@ -202,12 +202,40 @@ describe('DocumentRecord type', () => {
     )
 
     expect(mockDocument.isResearchUnitInCollectionCodes(mockPerson1)).toEqual([
-      'ABC',
-      'DEF',
+      'U-ABC',
+      'U-DEF',
     ])
     expect(mockDocument.isResearchUnitInCollectionCodes(mockPerson2)).toEqual(
       null,
     )
+
+    const mockPerson3 = new Person(
+      'P456',
+      true,
+      'example@example.com',
+      'Jane Doe',
+      'Jane',
+      'Doe',
+      [],
+      [
+        // ended membership: ignored
+        new PersonMembership(
+          makeResearchUnit('RS1', 'U-ABC', 'ABC'),
+          null,
+          'Mon Jan 01 2001',
+        ),
+        // membership ending in the future: current
+        new PersonMembership(
+          makeResearchUnit('RS2', 'U-DEF', 'DEF'),
+          null,
+          'Fri Jan 01 2999',
+        ),
+      ],
+    )
+
+    expect(mockDocument.isResearchUnitInCollectionCodes(mockPerson3)).toEqual([
+      'U-DEF',
+    ])
 
     const mockResearchUnit1 = makeResearchUnit('RS123', 'U-DEF', 'DEF')
 
@@ -217,7 +245,7 @@ describe('DocumentRecord type', () => {
 
     expect(
       mockDocument.isResearchUnitInCollectionCodes(mockResearchUnit1),
-    ).toEqual(['DEF'])
+    ).toEqual(['U-DEF'])
     expect(
       mockDocument.isResearchUnitInCollectionCodes(mockResearchUnit2),
     ).toEqual(null)

@@ -8,6 +8,7 @@ import AttachFileOffIcon from '@/app/theme/icons/AttachFileOffIcon'
 import { isPerson, Person } from '@/types/Person'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import { isResearchUnit, OrganizationUnit } from '@/types/OrganizationUnit'
+import { halCollectionUnitLabel } from '@/types/HalCollectionUnit'
 
 const halSubmitTypeToHalSubmitTypeIcon = (halSubmitType: string | null) => {
   switch (halSubmitType) {
@@ -79,7 +80,9 @@ const HalStatusCell = ({ row }: { row: { original: Document } }) => {
     )
   }
 
-  const acronyms = currentPerspective?.membershipHalCollections || []
+  const acronyms = (currentPerspective?.currentHalCollectionUnits ?? []).map(
+    halCollectionUnitLabel,
+  )
 
   return (
     <HalStatusCellBadge

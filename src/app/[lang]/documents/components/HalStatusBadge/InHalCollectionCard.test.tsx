@@ -95,7 +95,9 @@ describe('InHalCollectionCard Component', () => {
     expect(
       screen.queryByText('hal_submit_type_notice', { exact: false }),
     ).toBeInTheDocument()
-    expect(screen.queryByText('ABC, DEF', { exact: false })).toBeInTheDocument()
+    expect(
+      screen.queryByText('ABC and DEF', { exact: false }),
+    ).toBeInTheDocument()
   })
 
   it('should not displays see hal file button if hal url is null', async () => {

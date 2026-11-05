@@ -5,8 +5,7 @@ import {
 } from '@/types/BibliographicPlatform'
 import { Literal } from '@/types/Literal'
 import { IAgent } from '@/types/IAgent'
-import { Person } from '@/types/Person'
-import { OrganizationUnit } from '@/types/OrganizationUnit'
+import { halCollectionUnitLabel } from '@/types/HalCollectionUnit'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 import {
   SourceRecordType,
@@ -96,35 +95,26 @@ export class DocumentRecord {
       : SourceRecordType.Document
   }
 
+  /**
+   * Structures of the perspective whose HAL collection contains this record:
+   * the current memberships of a person, or the research unit itself.
+   * @returns the labels (acronyms) of the matching structures, or null when none
+   */
   isResearchUnitInCollectionCodes(perspective: IAgent | null): string[] | null {
-    if (!perspective) {
+    if (
+      !perspective ||
+      (perspective.type !== 'person' && perspective.type !== 'research_unit')
+    ) {
       return null
     }
 
-    switch (perspective.type) {
-      case 'person': {
-        const { memberships } = perspective as Person
+    const labels = perspective.currentHalCollectionUnits
+      .filter(({ halCollection }) =>
+        this.halCollectionCodes.includes(halCollection),
+      )
+      .map(halCollectionUnitLabel)
 
-        const collections = memberships
-          .map(({ organizationUnit: { halCollection } }) => halCollection)
-          .filter((halCollection) => halCollection !== null)
-          .filter((halCollection) =>
-            this.halCollectionCodes.includes(halCollection),
-          )
-
-        return collections.length > 0 ? collections : null
-      }
-      case 'research_unit': {
-        const { halCollection } = perspective as OrganizationUnit
-
-        return halCollection && this.halCollectionCodes.includes(halCollection)
-          ? [halCollection]
-          : null
-      }
-      case 'institution':
-      default:
-        return null
-    }
+    return labels.length > 0 ? labels : null
   }
 
   private setUrl(value: string) {

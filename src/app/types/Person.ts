@@ -16,6 +16,7 @@ import {
   SourcePersonIdentifierType,
 } from '@prisma/client'
 import { PersonMembership } from '@/types/PersonMembership'
+import { HalCollectionUnit } from '@/types/HalCollectionUnit'
 import { PersonEmployment } from '@/types/PersonEmployment'
 import { SourcePerson, SourcePersonJson } from '@/types/SourcePerson'
 import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
@@ -76,10 +77,14 @@ class Person implements IAgent, Authorizable {
       .filter((acronym) => acronym !== null)
   }
 
-  get membershipHalCollections(): string[] {
+  get currentHalCollectionUnits(): HalCollectionUnit[] {
     return this.memberships
-      .map(({ organizationUnit: { halCollection } }) => halCollection)
-      .filter((halCollection) => halCollection !== null)
+      .filter((membership) => PersonMembership.isCurrent(membership))
+      .map(({ organizationUnit: { acronym, halCollection } }) => ({
+        acronym,
+        halCollection,
+      }))
+      .filter((unit): unit is HalCollectionUnit => !!unit.halCollection)
   }
 
   get membershipSignatures(): string[] {
