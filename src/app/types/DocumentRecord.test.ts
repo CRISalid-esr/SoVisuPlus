@@ -148,7 +148,7 @@ describe('DocumentRecord type', () => {
     )
   })
 
-  it('DocumentRecord isResearchUnitInCollectionCodes function', async () => {
+  it('DocumentRecord matchingHalCollectionLabels function', async () => {
     const mockDocument = new DocumentRecord(
       'hal-123',
       'hal0001',
@@ -163,7 +163,7 @@ describe('DocumentRecord type', () => {
       HalSubmitType.file,
     )
 
-    expect(mockDocument.isResearchUnitInCollectionCodes(null)).toEqual(null)
+    expect(mockDocument.matchingHalCollectionLabels(null)).toEqual(null)
 
     const mockPerson1 = new Person(
       'P123',
@@ -201,13 +201,11 @@ describe('DocumentRecord type', () => {
       ],
     )
 
-    expect(mockDocument.isResearchUnitInCollectionCodes(mockPerson1)).toEqual([
+    expect(mockDocument.matchingHalCollectionLabels(mockPerson1)).toEqual([
       'U-ABC',
       'U-DEF',
     ])
-    expect(mockDocument.isResearchUnitInCollectionCodes(mockPerson2)).toEqual(
-      null,
-    )
+    expect(mockDocument.matchingHalCollectionLabels(mockPerson2)).toEqual(null)
 
     const mockPerson3 = new Person(
       'P456',
@@ -233,7 +231,7 @@ describe('DocumentRecord type', () => {
       ],
     )
 
-    expect(mockDocument.isResearchUnitInCollectionCodes(mockPerson3)).toEqual([
+    expect(mockDocument.matchingHalCollectionLabels(mockPerson3)).toEqual([
       'U-DEF',
     ])
 
@@ -243,14 +241,54 @@ describe('DocumentRecord type', () => {
 
     const mockResearchUnit3 = makeResearchUnit('RS123', 'DEF')
 
-    expect(
-      mockDocument.isResearchUnitInCollectionCodes(mockResearchUnit1),
-    ).toEqual(['U-DEF'])
-    expect(
-      mockDocument.isResearchUnitInCollectionCodes(mockResearchUnit2),
-    ).toEqual(null)
-    expect(
-      mockDocument.isResearchUnitInCollectionCodes(mockResearchUnit3),
-    ).toEqual(null)
+    expect(mockDocument.matchingHalCollectionLabels(mockResearchUnit1)).toEqual(
+      ['U-DEF'],
+    )
+    expect(mockDocument.matchingHalCollectionLabels(mockResearchUnit2)).toEqual(
+      null,
+    )
+    expect(mockDocument.matchingHalCollectionLabels(mockResearchUnit3)).toEqual(
+      null,
+    )
   })
+
+  it.each([
+    [OrganizationCategory.team, OrganizationGenericType.team],
+    [OrganizationCategory.institution, OrganizationGenericType.institution],
+  ])(
+    'matches HAL collections of any structure perspective (%s)',
+    (category, genericType) => {
+      const record = new DocumentRecord(
+        'hal-123',
+        'hal0001',
+        [],
+        [],
+        [SourceRecordType.Document],
+        new Date('2022-01-01T00:00:00.000Z'),
+        BibliographicPlatform.HAL,
+        [],
+        'https://example.com',
+        ['ABC'],
+        HalSubmitType.file,
+      )
+      const structure = new OrganizationUnit(
+        'S1',
+        'S-ABC',
+        [],
+        [],
+        category,
+        genericType,
+        null,
+        [],
+        null,
+        false,
+        [],
+        false,
+        false,
+        'ABC',
+      )
+
+      expect(record.matchingHalCollectionLabels(structure)).toEqual(['S-ABC'])
+    },
+  )
 })

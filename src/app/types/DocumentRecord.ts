@@ -97,14 +97,11 @@ export class DocumentRecord {
 
   /**
    * Structures of the perspective whose HAL collection contains this record:
-   * the current memberships of a person, or the research unit itself.
+   * the current memberships of a person, or the structure itself.
    * @returns the labels (acronyms) of the matching structures, or null when none
    */
-  isResearchUnitInCollectionCodes(perspective: IAgent | null): string[] | null {
-    if (
-      !perspective ||
-      (perspective.type !== 'person' && perspective.type !== 'research_unit')
-    ) {
+  matchingHalCollectionLabels(perspective: IAgent | null): string[] | null {
+    if (!perspective) {
       return null
     }
 

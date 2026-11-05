@@ -63,8 +63,7 @@ const HalStatusCell = ({ row }: { row: { original: Document } }) => {
   const { url, halSubmitType } = halRecord
   const halSubmitTypeIcon = halSubmitTypeToHalSubmitTypeIcon(halSubmitType)
 
-  const collections =
-    halRecord.isResearchUnitInCollectionCodes(currentPerspective)
+  const collections = halRecord.matchingHalCollectionLabels(currentPerspective)
 
   const hasBeenUpdated = row.original.hasBeenUpdated()
 
