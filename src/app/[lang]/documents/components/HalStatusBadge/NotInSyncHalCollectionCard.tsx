@@ -18,6 +18,8 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { Plural, Trans } from '@lingui/react/macro'
 import { t } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react'
+import { formatList } from '@/utils/formatList'
 import { Cached, Close, OpenInNew } from '@mui/icons-material'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
@@ -43,12 +45,13 @@ const NotInSyncHalCollectionCard = ({
   documentUid,
 }: NotInSyncHalCollectionCardProps) => {
   const theme = useTheme()
+  const { i18n } = useLingui()
   const router = useRouter()
   const pathname = usePathname()
   const lang = pathname.split('/')[1]
   const searchParams = useSearchParams()
   const numberOfAcronyms = acronyms?.length || 0
-  const formattedAcronyms = acronyms?.join(', ') || ''
+  const formattedAcronyms = formatList(acronyms ?? [], i18n.locale)
 
   const navigateToAuthorsPage = () => {
     if (documentUid) {

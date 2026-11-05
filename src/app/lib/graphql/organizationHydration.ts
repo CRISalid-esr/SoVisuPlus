@@ -20,6 +20,7 @@ export interface GraphOrganizationUnitNode {
   external?: boolean | null
   generic_type?: string | null
   national_type?: string | null
+  hal_collection?: string | null
   types: string[]
   long_labels: GraphLiteral[]
   short_labels: GraphLiteral[]
@@ -94,6 +95,31 @@ export const genericTypeFromCategory = (
 ): OrganizationGenericType => GENERIC_TYPE_BY_CATEGORY[category]
 
 /**
+ * Extract the HAL collection code from the value stored in the graph.
+ * The graph stores the full collection URL (e.g. "https://hal.science/ERC"):
+ * the code is its last path segment. A bare code is returned as is.
+ * @returns the collection code, or null when the value is blank
+ */
+export const halCollectionCodeFromUrl = (
+  value: string | null | undefined,
+): string | null => {
+  const trimmed = value?.trim()
+  if (!trimmed) {
+    return null
+  }
+  let url: URL
+  try {
+    url = new URL(trimmed)
+  } catch {
+    return trimmed
+  }
+  const segments = url.pathname.split('/').filter(Boolean)
+  return segments.length > 0
+    ? decodeURIComponent(segments[segments.length - 1])
+    : null
+}
+
+/**
  * Hydrate a graph node into a shallow OrganizationUnit (no relationships).
  * Returns null when the concrete category cannot be determined
  * (a unit node without mission label) — callers must skip the node.
@@ -153,5 +179,8 @@ export const hydrateOrganizationNode = (
         value: localType.value,
       }),
     ),
+    false,
+    false,
+    halCollectionCodeFromUrl(node.hal_collection),
   )
 }

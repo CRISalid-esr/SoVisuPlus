@@ -9,6 +9,25 @@ class PersonMembership {
     public positionCode?: string | null,
   ) {}
 
+  /**
+   * A membership is current when it has no end date or ends after today.
+   * Accepts plain JSON memberships, which have no class methods.
+   */
+  static isCurrent(
+    membership: Pick<PersonMembership, 'endDate'>,
+    now: Date = new Date(),
+  ): boolean {
+    if (!membership.endDate) {
+      return true
+    }
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    )
+    return new Date(membership.endDate) > startOfToday
+  }
+
   static fromDbPersonMembership(
     membership: MembershipWithRelations,
   ): PersonMembership {

@@ -1,3 +1,4 @@
+import type { HalCollectionUnit } from '@/types/HalCollectionUnit'
 import { IEntity } from '@/types/IEntity'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 
@@ -7,11 +8,7 @@ export interface IAgentJson {
 }
 
 export type AgentType =
-  | 'person'
-  | 'institution'
-  | 'research_unit'
-  | 'other_structure'
-  | 'team'
+  'person' | 'institution' | 'research_unit' | 'other_structure' | 'team'
 const AGENT_TYPE_VALUES = new Set<AgentType>([
   'person',
   'institution',
@@ -42,6 +39,8 @@ export interface IAgent extends IEntity {
   slug: string | null //TODO make non-nullable
 
   get membershipAcronyms(): string[]
+  /** Structures with a HAL collection used for the "in HAL collection" status */
+  get currentHalCollectionUnits(): HalCollectionUnit[]
   get membershipSignatures(): string[]
 
   getDisplayName(language?: ExtendedLanguageCode): string

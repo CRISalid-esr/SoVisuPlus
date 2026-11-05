@@ -5,8 +5,7 @@ import {
 } from '@/types/BibliographicPlatform'
 import { Literal } from '@/types/Literal'
 import { IAgent } from '@/types/IAgent'
-import { Person } from '@/types/Person'
-import { OrganizationUnit } from '@/types/OrganizationUnit'
+import { halCollectionUnitLabel } from '@/types/HalCollectionUnit'
 import { getStringInLocale } from '@/utils/getStringInLocale'
 import {
   SourceRecordType,
@@ -96,35 +95,23 @@ export class DocumentRecord {
       : SourceRecordType.Document
   }
 
-  isResearchUnitInCollectionCodes(perspective: IAgent | null): string[] | null {
+  /**
+   * Structures of the perspective whose HAL collection contains this record:
+   * the current memberships of a person, or the structure itself.
+   * @returns the labels (acronyms) of the matching structures, or null when none
+   */
+  matchingHalCollectionLabels(perspective: IAgent | null): string[] | null {
     if (!perspective) {
       return null
     }
 
-    switch (perspective.type) {
-      case 'person': {
-        const { memberships } = perspective as Person
+    const labels = perspective.currentHalCollectionUnits
+      .filter(({ halCollection }) =>
+        this.halCollectionCodes.includes(halCollection),
+      )
+      .map(halCollectionUnitLabel)
 
-        const collections = memberships
-          .map(({ organizationUnit: { acronym } }) => acronym)
-          .filter((acronym) =>
-            acronym ? this.halCollectionCodes.includes(acronym) : false,
-          )
-          .filter((acronym) => acronym != null)
-
-        return collections.length > 0 ? collections : null
-      }
-      case 'research_unit': {
-        const { acronym } = perspective as OrganizationUnit
-
-        return acronym && this.halCollectionCodes.includes(acronym)
-          ? [acronym]
-          : null
-      }
-      case 'institution':
-      default:
-        return null
-    }
+    return labels.length > 0 ? labels : null
   }
 
   private setUrl(value: string) {
