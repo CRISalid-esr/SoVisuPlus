@@ -3207,3 +3207,8 @@ msgstr "Download as SVG"
 #: src/app/[lang]/components/WordStream/WordStream.tsx:203
 msgid "wordstream_no_data_to_display"
 msgstr "No data to display"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/InHalCollectionCard.tsx:40
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:54
+msgid "list_conjunction_and"
+msgstr "and"

@@ -155,7 +155,7 @@ describe('NotInSyncHalCollectionCard Component', () => {
       ),
     ).toBeInTheDocument()
     expect(
-      screen.queryByText('ABC and DEF', { exact: false }),
+      screen.queryByText('ABC list_conjunction_and DEF', { exact: false }),
     ).toBeInTheDocument()
   })
 
