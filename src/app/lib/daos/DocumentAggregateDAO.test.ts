@@ -107,6 +107,7 @@ describe('DocumentAggregateDAO', () => {
         },
       },
       select: {
+        id: true,
         publicationDateStart: true,
         publicationDate: true,
         subjects: {
@@ -129,6 +130,8 @@ describe('DocumentAggregateDAO', () => {
           },
         },
       },
+      orderBy: { id: 'asc' },
+      take: 1000,
     })
 
     // Assert: output rows
@@ -228,5 +231,37 @@ describe('DocumentAggregateDAO', () => {
     // Only 2015 stays in range
     expect(res).toHaveLength(1)
     expect(res[0].year).toBe(2015)
+    // The range is also applied in the query
+    expect(mockPrisma.document.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          publicationDateStart: {
+            gte: new Date('2013-01-01T00:00:00.000Z'),
+            lt: new Date('2019-01-01T00:00:00.000Z'),
+          },
+        }),
+      }),
+    )
+  })
+
+  it('loads documents in batches', async () => {
+    const doc = (id: number) => ({
+      id,
+      publicationDateStart: new Date('2020-01-01T00:00:00.000Z'),
+      publicationDate: null,
+      subjects: [],
+      contributions: [],
+    })
+    ;(mockPrisma.document.findMany as jest.Mock)
+      .mockResolvedValueOnce(Array.from({ length: 1000 }, (_, i) => doc(i + 1)))
+      .mockResolvedValueOnce([doc(1001)])
+
+    const res = await dao.fetchDocsForPersonAggregation(['p1'])
+
+    expect(res).toHaveLength(1001)
+    expect(mockPrisma.document.findMany).toHaveBeenCalledTimes(2)
+    expect(mockPrisma.document.findMany).toHaveBeenLastCalledWith(
+      expect.objectContaining({ cursor: { id: 1000 }, skip: 1, take: 1000 }),
+    )
   })
 })

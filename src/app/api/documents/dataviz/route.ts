@@ -27,9 +27,31 @@ export const GET = async (req: NextRequest) => {
         { status: 404 },
       )
     }
+    const fromYear = Number(urlParams.get('fromYear'))
+    const toYear = Number(urlParams.get('toYear'))
+    if (
+      !urlParams.get('fromYear') ||
+      !urlParams.get('toYear') ||
+      !Number.isInteger(fromYear) ||
+      !Number.isInteger(toYear) ||
+      fromYear > toYear
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "'fromYear' and 'toYear' must be integer years, fromYear <= toYear.",
+        },
+        { status: 400 },
+      )
+    }
     const documentService = new DocumentService()
     const { publicationsPerYear, perimeterUids } =
-      await documentService.documentsPerYear(contributorUid, contributorType)
+      await documentService.documentsPerYear(
+        contributorUid,
+        contributorType,
+        fromYear,
+        toYear,
+      )
 
     return NextResponse.json({
       documents: publicationsPerYear,

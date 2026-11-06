@@ -26,6 +26,7 @@ import { Literal, LiteralJson } from '@/types/Literal'
 import { AuthorityOrganizationDAO } from '@/lib/daos/AuthorityOrganizationDAO'
 import { HalStatusFilterValue } from '@/types/HalStatusFilter'
 import { DashboardDocumentData } from '@/types/DashboardDocumentData'
+import { batchPageArgs, fetchInBatches } from '@/lib/daos/fetchInBatches'
 import {
   normalizeSearchText,
   tokenizeDocumentSearchQuery,
@@ -1031,77 +1032,108 @@ export class DocumentDAO extends AbstractDAO {
     }))
   }
 
-  public async fetchOAYearDocuments(
+  /**
+   * Documents of the perimeter, with a publication date, contributed with one
+   * of the perspective roles. Shared by the dashboard queries.
+   */
+  private dashboardDocumentsWhere(
     contributorUids: string[],
-  ): Promise<{ documents: DashboardDocumentData[] }> {
+  ): Prisma.DocumentWhereInput {
     const perspectiveRolesFilter: string[] = parseStrArrayEnvVar(
       process.env.PERSPECTIVE_ROLES_FILTER,
     )
+    return {
+      publicationDate: { not: null },
+      contributions: {
+        some: {
+          person: {
+            uid: { in: contributorUids },
+          },
+          ...(perspectiveRolesFilter.length > 0 && {
+            roles: { hasSome: perspectiveRolesFilter },
+          }),
+        },
+      },
+    }
+  }
 
-    const dbDocuments = await this.prismaClient.document.findMany({
-      select: {
-        uid: true,
-        oaStatus: true,
-        publicationDate: true,
-        upwOAStatus: true,
-        contributions: {
-          select: {
-            person: {
-              select: {
-                uid: true,
-                displayName: true,
-              },
-            },
-            affiliations: {
-              select: {
-                uid: true,
-                displayNames: true,
-                places: true,
-              },
-            },
-          },
-        },
-      },
-      where: {
-        publicationDate: { not: null },
-        contributions: {
-          some: {
-            person: {
-              uid: { in: contributorUids },
-            },
-            ...(perspectiveRolesFilter.length > 0 && {
-              roles: { hasSome: perspectiveRolesFilter },
-            }),
-          },
-        },
-      },
-      orderBy: [
-        {
-          publicationDate: 'desc',
-        },
-      ],
+  /** Oldest publication year of the perimeter, null when it has no document. */
+  public async fetchOldestPublicationYear(
+    contributorUids: string[],
+  ): Promise<number | null> {
+    if (contributorUids.length === 0) return null
+    const { _min } = await this.prismaClient.document.aggregate({
+      _min: { publicationDateStart: true },
+      where: this.dashboardDocumentsWhere(contributorUids),
     })
+    return _min.publicationDateStart?.getUTCFullYear() ?? null
+  }
+
+  /**
+   * Dashboard documents published between fromYear and toYear (inclusive),
+   * most recent first. Loaded in batches to stay under the bind variables limit.
+   */
+  public async fetchOAYearDocuments(
+    contributorUids: string[],
+    fromYear: number,
+    toYear: number,
+  ): Promise<{ documents: DashboardDocumentData[] }> {
+    if (contributorUids.length === 0) return { documents: [] }
+    const where: Prisma.DocumentWhereInput = {
+      ...this.dashboardDocumentsWhere(contributorUids),
+      publicationDateStart: {
+        gte: new Date(Date.UTC(fromYear, 0, 1)),
+        lt: new Date(Date.UTC(toYear + 1, 0, 1)),
+      },
+    }
+
+    const dbDocuments = await fetchInBatches((cursorId, batchSize) =>
+      this.prismaClient.document.findMany({
+        select: {
+          id: true,
+          uid: true,
+          oaStatus: true,
+          publicationDate: true,
+          upwOAStatus: true,
+          contributions: {
+            select: {
+              person: { select: { uid: true } },
+              affiliations: {
+                select: {
+                  uid: true,
+                  displayNames: true,
+                  places: true,
+                },
+              },
+            },
+          },
+        },
+        where,
+        ...batchPageArgs(cursorId, batchSize),
+      }),
+    )
 
     return {
-      documents: dbDocuments.map((doc) => {
-        return {
-          ...doc,
-          contributions: doc.contributions.map((contribution) => {
-            return {
-              ...contribution,
-              affiliations: contribution.affiliations.map((affiliation) => {
-                return {
-                  ...affiliation,
-                  places: affiliation.places as {
-                    latitude: number
-                    longitude: number
-                  }[],
-                }
-              }),
-            }
-          }),
-        }
-      }),
+      documents: dbDocuments
+        .sort((a, b) =>
+          (b.publicationDate ?? '').localeCompare(a.publicationDate ?? ''),
+        )
+        .map((doc) => ({
+          uid: doc.uid,
+          oaStatus: doc.oaStatus,
+          publicationDate: doc.publicationDate,
+          upwOAStatus: doc.upwOAStatus,
+          contributions: doc.contributions.map((contribution) => ({
+            ...contribution,
+            affiliations: contribution.affiliations.map((affiliation) => ({
+              ...affiliation,
+              places: affiliation.places as {
+                latitude: number
+                longitude: number
+              }[],
+            })),
+          })),
+        })),
     }
   }
 

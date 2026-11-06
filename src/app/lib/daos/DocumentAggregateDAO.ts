@@ -1,4 +1,6 @@
+import { Prisma } from '@prisma/client'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
+import { batchPageArgs, fetchInBatches } from '@/lib/daos/fetchInBatches'
 import { Concept } from '@/types/Concept'
 import { Literal } from '@/types/Literal'
 import { Person } from '@/types/Person'
@@ -28,40 +30,56 @@ export class DocumentAggregateDAO extends AbstractDAO {
       return []
     }
 
-    const docs = await this.prismaClient.document.findMany({
-      where: {
-        contributions: {
-          some: {
-            person: {
-              uid: { in: contributorUids },
-            },
+    const where: Prisma.DocumentWhereInput = {
+      contributions: {
+        some: {
+          person: {
+            uid: { in: contributorUids },
           },
         },
       },
-      select: {
-        publicationDateStart: true,
-        publicationDate: true,
-        subjects: {
-          select: {
-            uid: true,
-            uri: true,
-            labels: { select: { language: true, value: true, type: true } },
-          },
+      ...((opts?.fromYear || opts?.toYear) && {
+        publicationDateStart: {
+          ...(opts?.fromYear && {
+            gte: new Date(Date.UTC(opts.fromYear, 0, 1)),
+          }),
+          ...(opts?.toYear && {
+            lt: new Date(Date.UTC(opts.toYear + 1, 0, 1)),
+          }),
         },
-        contributions: {
-          select: {
-            person: {
-              select: {
-                uid: true,
-                displayName: true,
-                firstName: true,
-                lastName: true,
+      }),
+    }
+
+    const docs = await fetchInBatches((cursorId, batchSize) =>
+      this.prismaClient.document.findMany({
+        where,
+        select: {
+          id: true,
+          publicationDateStart: true,
+          publicationDate: true,
+          subjects: {
+            select: {
+              uid: true,
+              uri: true,
+              labels: { select: { language: true, value: true, type: true } },
+            },
+          },
+          contributions: {
+            select: {
+              person: {
+                select: {
+                  uid: true,
+                  displayName: true,
+                  firstName: true,
+                  lastName: true,
+                },
               },
             },
           },
         },
-      },
-    })
+        ...batchPageArgs(cursorId, batchSize),
+      }),
+    )
 
     const yearOf = (d: {
       publicationDateStart: Date | null

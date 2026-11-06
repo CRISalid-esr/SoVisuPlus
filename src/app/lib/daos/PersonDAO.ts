@@ -1179,47 +1179,15 @@ export class PersonDAO extends AbstractDAO {
    * Fetch the people whose documents make up an organization perspective
    * (see organizationPerimeterWhereClause for the per-group rules).
    */
-  fetchPeopleByOrganizationPerimeter = async (
+  fetchPersonUidsByOrganizationPerimeter = async (
     organizationUid: string,
     group: OrganizationGroup,
-  ): Promise<Person[]> => {
+  ): Promise<string[]> => {
     const people = await this.prismaClient.person.findMany({
       where: this.organizationPerimeterWhereClause(organizationUid, group),
-      include: {
-        memberships: {
-          include: {
-            organizationUnit: {
-              include: {
-                labels: true,
-                parents: { include: { parent: true } },
-                identifiers: true,
-                descriptions: true,
-              },
-            },
-          },
-        },
-        employments: {
-          include: {
-            organizationUnit: {
-              include: {
-                labels: true,
-                parents: { include: { parent: true } },
-                identifiers: true,
-                descriptions: true,
-              },
-            },
-          },
-        },
-        identifiers: true,
-        records: {
-          include: {
-            identifiers: true,
-          },
-        },
-      },
+      select: { uid: true },
     })
-
-    return people.map((person) => Person.fromDbPerson(person))
+    return people.map((person) => person.uid)
   }
 
   /**

@@ -57,7 +57,9 @@ describe('GET handler', () => {
 
   beforeEach(() => {
     req = {
-      nextUrl: new URL('http://localhost/api/endpoint?contributorType=person'),
+      nextUrl: new URL(
+        'http://localhost/api/endpoint?contributorType=person&fromYear=2020&toYear=2024',
+      ),
     } as unknown as NextRequest
   })
 
@@ -83,6 +85,20 @@ describe('GET handler', () => {
 
     const jsonResponse = await response.json()
     expect(jsonResponse.perimeterUids).toEqual(['person-1', 'person-2'])
+  })
+
+  it.each([
+    ['missing years', 'contributorType=person'],
+    ['non integer year', 'contributorType=person&fromYear=abc&toYear=2024'],
+    ['reversed range', 'contributorType=person&fromYear=2024&toYear=2020'],
+  ])('rejects a request with %s', async (_label, query) => {
+    const badReq = {
+      nextUrl: new URL(`http://localhost/api/endpoint?${query}`),
+    } as unknown as NextRequest
+
+    const response = await GET(badReq)
+
+    expect(response.status).toBe(400)
   })
 
   it('rejects an anonymous caller', async () => {
