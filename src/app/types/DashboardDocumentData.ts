@@ -15,7 +15,6 @@ export type DashboardDocumentData = {
   contributions: {
     person: {
       uid: string
-      displayName: string | null
     }
     affiliations: {
       uid: string

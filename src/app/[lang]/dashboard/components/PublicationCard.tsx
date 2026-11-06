@@ -1,3 +1,4 @@
+import { DashboardDocumentData } from '@/types/DashboardDocumentData'
 import { Box, CircularProgress, Typography } from '@mui/material'
 import { t } from '@lingui/core/macro'
 import ReactEcharts from 'echarts-for-react'
@@ -32,29 +33,7 @@ type ChartOption = ComposeOption<
 type PublicationCardProps = {
   yearRange: [number, number]
   loading: boolean
-  data: Record<
-    number,
-    {
-      uid: string
-      oaStatus: OAStatus | null
-      publicationDate: string | null
-      upwOAStatus: OAStatus | null
-      contributions: {
-        person: {
-          uid: string
-          displayName: string | null
-        }
-        affiliations: {
-          uid: string
-          displayNames: string[]
-          places: {
-            latitude: number
-            longitude: number
-          }[]
-        }[]
-      }[]
-    }[]
-  >
+  data: Record<number, DashboardDocumentData[]>
 }
 
 const PublicationCard = ({
