@@ -47,7 +47,8 @@ const IDENTIFIER_DISPLAY_ORDER: PersonIdentifierType[] = [
 const formatDate = (value: string | null, locale: string): string =>
   value ? new Date(value).toLocaleDateString(locale) : '—'
 
-const MemberIdentifierIcons = ({
+/** Identifier icons of a member; validated ones get a green outline. */
+export const MemberIdentifierIcons = ({
   identifiers,
 }: {
   identifiers: StructureMemberJson['identifiers']
@@ -68,17 +69,38 @@ const MemberIdentifierIcons = ({
       {displayed.map((identifier) => {
         const url = identifier.getUrl()
         const icon = (
-          <Image
-            src={identifier.getIcon()}
-            alt={identifier.getLabel()}
-            width={18}
-            height={18}
-          />
+          <Box
+            component='span'
+            data-testid={
+              identifier.validated ? 'member-identifier-validated' : undefined
+            }
+            sx={{
+              display: 'inline-flex',
+              p: '2px',
+              borderRadius: '50%',
+              border: '2px solid',
+              borderColor: identifier.validated
+                ? 'success.main'
+                : 'transparent',
+            }}
+          >
+            <Image
+              src={identifier.getIcon()}
+              alt={identifier.getLabel()}
+              width={18}
+              height={18}
+            />
+          </Box>
         )
+        const title = `${identifier.getLabel()} : ${identifier.value}`
         return (
           <Tooltip
             key={`${identifier.type}-${identifier.value}`}
-            title={`${identifier.getLabel()} : ${identifier.value}`}
+            title={
+              identifier.validated
+                ? `${title} (${t`identifier_validated_tooltip`})`
+                : title
+            }
           >
             {url ? (
               <MuiLink
