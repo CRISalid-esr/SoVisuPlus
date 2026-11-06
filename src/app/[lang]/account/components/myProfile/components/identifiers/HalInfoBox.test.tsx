@@ -93,13 +93,37 @@ describe('HalInfoBox', () => {
     await waitFor(() => expect(onReady).toHaveBeenCalled())
   })
 
-  it('shows an error and does not call onReady on a non-404 failure', async () => {
+  it('shows an error but still lets the user save when HAL is unavailable (502)', async () => {
     const onReady = jest.fn()
     ;(global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 502 })
 
     renderBox({ onReady })
 
     expect(await screen.findByText('hal_info_box_error')).toBeInTheDocument()
+    expect(onReady).toHaveBeenCalled()
+  })
+
+  it('shows a check error and keeps Save disabled on any other failure', async () => {
+    const onReady = jest.fn()
+    ;(global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 500 })
+
+    renderBox({ onReady })
+
+    expect(
+      await screen.findByText('hal_info_box_check_error'),
+    ).toBeInTheDocument()
+    expect(onReady).not.toHaveBeenCalled()
+  })
+
+  it('keeps Save disabled when the request fails', async () => {
+    const onReady = jest.fn()
+    ;(global.fetch as jest.Mock).mockRejectedValue(new Error('network'))
+
+    renderBox({ onReady })
+
+    expect(
+      await screen.findByText('hal_info_box_check_error'),
+    ).toBeInTheDocument()
     expect(onReady).not.toHaveBeenCalled()
   })
 })

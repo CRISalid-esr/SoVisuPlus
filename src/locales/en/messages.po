@@ -2363,9 +2363,13 @@ msgstr "In 6 months"
 msgid "hal_deposit_visibility_now"
 msgstr "Immediately"
 
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx
+msgid "hal_info_box_check_error"
+msgstr "This idHAL cannot be checked right now. Please try again later."
+
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx:136
 msgid "hal_info_box_error"
-msgstr "Could not load the HAL author."
+msgstr "This idHAL cannot be checked with HAL right now. You can still save it."
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx:163
 msgid "hal_info_box_linked_identifiers"
