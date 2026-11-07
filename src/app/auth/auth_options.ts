@@ -17,6 +17,7 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { AuthzContext } from '@/types/authz'
+import { refreshKeycloakAccessTokenIfNeeded } from '@/app/auth/keycloakTokens'
 
 declare module 'next-auth' {
   interface User {
@@ -38,6 +39,8 @@ declare module 'next-auth' {
       personUid?: string | null
       authz?: AuthzContext
     }
+    /** `'RefreshTokenExpired'` when the Keycloak access token could not be refreshed. */
+    error?: string
   }
 }
 
@@ -48,6 +51,12 @@ declare module 'next-auth/jwt' {
     userId?: number
     personUid?: string | null
     authz?: AuthzContext
+    /** Keycloak access token, forwarded as Bearer to the Crisalid Agents chat API. */
+    accessToken?: string
+    refreshToken?: string
+    /** Access token expiry, seconds since the epoch. */
+    accessTokenExpiresAt?: number
+    error?: 'RefreshTokenExpired'
   }
 }
 
@@ -108,16 +117,8 @@ const authOptions: AuthOptions = {
     maxAge: getJwtMaxAgeSeconds(),
   },
   callbacks: {
-    async signIn({
-      user,
-      account,
-      profile,
-    }: {
-      user: NextAuthUser
-      account: Account | null
-      profile?: Profile
-    }) {
-      console.info('signIn callback', user, account, profile)
+    async signIn({ user, profile }: { user: NextAuthUser; profile?: Profile }) {
+      console.info('signIn callback', user, profile)
       const userService = new UserService()
       const username = (profile as KeycloakProfile)?.preferred_username
       const authenticationProfile: AuthenticationProfile = {
@@ -139,7 +140,16 @@ const authOptions: AuthOptions = {
       user?: NextAuthUser
       profile?: Profile
     }) {
-      console.info('jwt callback', token, account, user, profile)
+      console.info('jwt callback', user, profile)
+      if (account) {
+        // Sign-in: keep the Keycloak tokens in the (encrypted) JWT, never in the session.
+        token.accessToken = account.access_token
+        token.refreshToken = account.refresh_token
+        token.accessTokenExpiresAt = account.expires_at
+        delete token.error
+      } else {
+        await refreshKeycloakAccessTokenIfNeeded(token)
+      }
       if (profile) {
         const username = (profile as KeycloakProfile)?.preferred_username
         // temporary : if username is an eppn, strip domain part
@@ -179,7 +189,6 @@ const authOptions: AuthOptions = {
       return token
     },
     async session({ session, token }: { session: Session; token: JWT }) {
-      console.info('session callback', session, token)
       if (token && session.user) {
         console.info('enriching session user from token')
         session.user.id = token.id as string
@@ -189,6 +198,7 @@ const authOptions: AuthOptions = {
         session.user.personUid = token.personUid ?? null
         session.user.authz = token.authz
       }
+      session.error = token.error
       return session
     },
   },

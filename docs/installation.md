@@ -140,7 +140,6 @@ Following table gives detailed information on each environment variable:
 | CHAT_ENABLED                              | Kill switch for the AI chat assistant. The chat is enabled unless this is exactly `false` (case-insensitive, surrounding spaces ignored). When disabled, the chat widget is not rendered and `POST /api/chat` returns 404. The other chat conditions (`CRISALID_AGENTS_API_URL`, resolved chat config) still apply; see [AI chat configuration](#ai-chat-configuration).   | n       | server          | n                  | prod                                   | n                  |
 | CRISALID_AGENTS_API_URL                   | Base URL of the Crisalid Agents API backing the AI chat assistant (e.g. `http://crisalid-agents-chat-api:9100`); the server-side `/api/chat` proxy appends the `/agents/{name}/chat` endpoint path. Used only on the server (never exposed to the browser); the chat widget is displayed only when this variable is set and non-empty (and `CHAT_ENABLED` is not `false`). | n       | server          | y                  | prod                                   | n                  |
 | CRISALID_AGENTS_AGENT                     | Name of the agent served by the Crisalid Agents API that the chat assistant talks to (`POST /agents/{name}/chat`). Optional: defaults to `generic_agent`.                                                                                                                                                                                                                  | n       | server          | n                  | prod                                   | n                  |
-| CRISALID_AGENTS_API_KEY                   | API key used by the server to authenticate against the Crisalid Agents API.                                                                                                                                                                                                                                                                                                | y       | server          | y                  | prod                                   | n                  |
 
 6. Run the Prisma migration with `npx prisma migrate dev --name init`.
    On an existing database, fill the fuzzy-search columns of previously imported data with
@@ -161,6 +160,14 @@ is located at the repository root - it is also used as a fallback if chat.json i
 The chat widget is displayed only when `CHAT_ENABLED` is not `false` **and** `CRISALID_AGENTS_API_URL` is set **and** a config file resolves. Set `CHAT_ENABLED=false` to turn the chat off explicitly. When any of these conditions is not met, the widget is hidden, `POST /api/chat` returns 404, and the server logs the reason once (`[ChatConfigService] AI chat is disabled: …` — `CHAT_ENABLED` set to false, `CRISALID_AGENTS_API_URL` not set, or no usable chat config file found, with the paths tried).
 
 Locally, `cp chat.sample.json chat.json` and edit it (the sample alone already works as a fallback).
+
+The `/api/chat` proxy authenticates to the Crisalid Agents API with the signed-in user's Keycloak
+access token (`Authorization: Bearer`), kept in the NextAuth JWT and refreshed with the refresh
+token before it expires; there is no shared API key. The Keycloak client `sovisuplus` must carry the
+`crisalid-agents-audience` default client scope (configured in crisalid-deployment) so that its
+access tokens are accepted by the agents API. When the Keycloak session has ended and the token can
+no longer be refreshed, the proxy answers `401 {"error": "reauthentication_required"}` and the
+widget invites the user to sign in again; the rest of the application is unaffected.
 
 The file holds:
 
