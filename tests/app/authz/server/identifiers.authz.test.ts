@@ -10,7 +10,7 @@ import type { RolesFileSeed } from '@/lib/services/RoleConfigService'
 import { PermissionAction } from '@/types/Permission'
 import { EntityType } from '@/types/UserRoleScope'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
-import { hasWiderThanSelfPersonScope } from '@/app/auth/ability'
+import { hasFullAccess, hasWiderThanSelfPersonScope } from '@/app/auth/ability'
 import {
   canValidateIdentifier,
   computeIdentifierCapabilities,
@@ -28,6 +28,12 @@ const ROLES_SEED: RolesFileSeed = {
       permissions: [
         { action: 'update', subject: 'Person', fields: ['identifiers'] },
       ],
+    },
+    {
+      name: 'admin',
+      description: 'Full access',
+      system: true,
+      permissions: [{ action: 'manage', subject: 'all', fields: [] }],
     },
     {
       name: 'person_name_editor',
@@ -202,6 +208,7 @@ describe('AuthZ (identifier capability matrix) – integration', () => {
         'Person',
         'identifiers',
       ),
+      isAdmin: hasFullAccess(ctx),
       isAuthenticated,
       supportsAuth: identifierSupportsAuth(type),
       removalRequiresWide: identifierRemovalRequiresWideScope(type),
@@ -302,6 +309,33 @@ describe('AuthZ (identifier capability matrix) – integration', () => {
       canAddUnauthenticated: true, // slot is occupied → UI won't offer add; remove is blocked
       canRemove: false,
     })
+  })
+
+  test('admin, another account: can add and remove, authenticated or not', async () => {
+    await createPersonWithUser('local-admin')
+    await createPersonWithUser('local-bob')
+    await assignRoleToPersonUid('admin', 'local-admin', null)
+
+    const auth = await capsFor(
+      'local-admin',
+      'local-bob',
+      PersonIdentifierType.orcid,
+      true,
+    )
+    expect(auth).toEqual({
+      canAuthenticate: false, // authentication is the account owner's own login
+      canAddUnauthenticated: true,
+      canRemove: true,
+    })
+
+    const idref = await capsFor(
+      'local-admin',
+      'local-bob',
+      PersonIdentifierType.idref,
+      false,
+    )
+    expect(idref.canAddUnauthenticated).toBe(true)
+    expect(idref.canRemove).toBe(true)
   })
 
   test('self-scoped editor on someone else’s account: no capability at all', async () => {

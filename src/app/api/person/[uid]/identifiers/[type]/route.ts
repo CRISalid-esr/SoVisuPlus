@@ -3,10 +3,13 @@ import { PersonService } from '@/lib/services/PersonService'
 import { IdentifierConflictError, PersonDAO } from '@/lib/daos/PersonDAO'
 import {
   abilityFromAuthzContext,
+  hasFullAccess,
   hasWiderThanSelfPersonScope,
 } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import {
+  ID_HAL_TYPES,
+  isIdHalType,
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
@@ -27,13 +30,6 @@ const ALLOWED_TYPES: Partial<Record<PersonIdentifierType, RegExp>> = {
   [PersonIdentifierType.idhals]: /^[a-z0-9-]+$/i,
   [PersonIdentifierType.idhali]: /^\d+$/,
 }
-
-// idHAL is a single logical identity: adding one variant is rejected while the
-// other is present (remove-before-add), so a person never holds both.
-const IDHAL_TYPES: PersonIdentifierType[] = [
-  PersonIdentifierType.idhals,
-  PersonIdentifierType.idhali,
-]
 
 type RouteContext = { params: Promise<{ uid: string; type: string }> }
 
@@ -123,10 +119,10 @@ export const PUT = async (request: Request, context: RouteContext) => {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  // Remove-before-add: an existing identifier must be removed first. idHAL
-  // variants share one slot.
-  const conflictTypes = IDHAL_TYPES.includes(identifierType)
-    ? IDHAL_TYPES
+  // Remove-before-add: an existing identifier must be removed first. The two
+  // idHAL forms (one HAL account) share one slot; the add stores both.
+  const conflictTypes = isIdHalType(identifierType)
+    ? ID_HAL_TYPES
     : [identifierType]
   const alreadyPresent = conflictTypes.some((t) => person.hasIdentifier(t))
   if (alreadyPresent) {
@@ -182,7 +178,7 @@ export const DELETE = async (_request: Request, context: RouteContext) => {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  // An authenticated identifier can only be removed on the owner's own account.
+  // An authenticated identifier can only be removed by its owner or an admin.
   // A non-authenticated one can also be removed by a wide-scoped editor.
   const { canRemove } = computeIdentifierCapabilities({
     canManage: true, // already checked above
@@ -193,6 +189,7 @@ export const DELETE = async (_request: Request, context: RouteContext) => {
       'Person',
       'identifiers',
     ),
+    isAdmin: hasFullAccess(session.user.authz),
     isAuthenticated: person.isIdentifierAuthenticated(identifierType),
     supportsAuth: identifierSupportsAuth(identifierType),
     removalRequiresWide: identifierRemovalRequiresWideScope(identifierType),

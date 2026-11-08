@@ -34,6 +34,7 @@ describe('computeIdentifierCapabilities', () => {
     canManage: true,
     isOwn: true,
     isWide: false,
+    isAdmin: false,
     isAuthenticated: false,
     supportsAuth: true,
     removalRequiresWide: false,
@@ -87,6 +88,27 @@ describe('computeIdentifierCapabilities', () => {
       isAuthenticated: true,
     })
     expect(other.canRemove).toBe(false)
+  })
+
+  it('admin can remove an authenticated identifier on another account', () => {
+    expect(
+      computeIdentifierCapabilities({
+        ...base,
+        isOwn: false,
+        isAdmin: true,
+        isAuthenticated: true,
+      }).canRemove,
+    ).toBe(true)
+  })
+
+  it('admin can remove a wide-only identifier', () => {
+    expect(
+      computeIdentifierCapabilities({
+        ...base,
+        isAdmin: true,
+        removalRequiresWide: true,
+      }).canRemove,
+    ).toBe(true)
   })
 
   it('authenticated identifier on own account can be removed', () => {

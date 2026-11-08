@@ -2367,9 +2367,13 @@ msgstr "Dans 6 mois"
 msgid "hal_deposit_visibility_now"
 msgstr "Immédiatement"
 
-#: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx:146
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx
+msgid "hal_info_box_check_error"
+msgstr "Impossible de vérifier cet idHAL pour le moment. Veuillez réessayer plus tard."
+
+#: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx:136
 msgid "hal_info_box_error"
-msgstr "Impossible de charger l'auteur HAL."
+msgstr "Impossible de vérifier cet idHAL auprès de HAL pour le moment. Vous pouvez tout de même l'enregistrer."
 
 #: src/app/[lang]/account/components/myProfile/components/identifiers/HalInfoBox.tsx:178
 msgid "hal_info_box_linked_identifiers"

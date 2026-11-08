@@ -1,4 +1,5 @@
 import {
+  isIdHalType,
   PersonIdentifier,
   PersonIdentifierJson,
   PersonIdentifierType,
@@ -190,10 +191,7 @@ class Person implements IAgent, Authorizable {
       )
       return orcid instanceof ORCIDIdentifier && !!orcid.oauth
     }
-    if (
-      type === PersonIdentifierType.idhals ||
-      type === PersonIdentifierType.idhali
-    ) {
+    if (isIdHalType(type)) {
       return this.hasIdentifier(PersonIdentifierType.hal_login)
     }
     return false
@@ -202,11 +200,18 @@ class Person implements IAgent, Authorizable {
   /**
    * Whether the identifier of the given type is validated. Authentication
    * implies validation, so an authenticated identifier is always validated.
+   * An idHAL is validated only when each of its stored forms is.
    */
   isIdentifierValidated(type: PersonIdentifierType): boolean {
     const identifier = this.identifiers.find((id) => id.type === type)
     if (!identifier) return false
-    return identifier.validated || this.isIdentifierAuthenticated(type)
+    if (this.isIdentifierAuthenticated(type)) return true
+    if (isIdHalType(type)) {
+      return this.identifiers
+        .filter((id) => isIdHalType(id.type as PersonIdentifierType))
+        .every((id) => id.validated)
+    }
+    return identifier.validated
   }
 
   private static computeDisplayName(

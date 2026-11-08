@@ -12,6 +12,8 @@ export type IdentifierCapabilityInput = {
   isOwn: boolean
   /** The user holds the permission through a scope wider than their own Person. */
   isWide: boolean
+  /** The user is an admin (`manage` on `all`). */
+  isAdmin: boolean
   /** The identifier of this type is authenticated (derived, never stored). */
   isAuthenticated: boolean
   /** The identifier type has an authentication workflow (ORCID, idHAL). */
@@ -25,7 +27,7 @@ export type IdentifierCapabilities = {
   canAuthenticate: boolean
   /** Add a non-authenticated identifier — wide-scoped editors only. */
   canAddUnauthenticated: boolean
-  /** Remove the identifier (authenticated → own account only; see `identifierRemovalRequiresWideScope`). */
+  /** Remove the identifier (authenticated → owner or admin only; see `identifierRemovalRequiresWideScope`). */
   canRemove: boolean
 }
 
@@ -48,6 +50,7 @@ export const computeIdentifierCapabilities = ({
   canManage,
   isOwn,
   isWide,
+  isAdmin,
   isAuthenticated,
   supportsAuth,
   removalRequiresWide,
@@ -56,7 +59,12 @@ export const computeIdentifierCapabilities = ({
   canAddUnauthenticated: canManage && isWide,
   canRemove:
     canManage &&
-    (removalRequiresWide ? isWide : isAuthenticated ? isOwn : isOwn || isWide),
+    (isAdmin ||
+      (removalRequiresWide
+        ? isWide
+        : isAuthenticated
+          ? isOwn
+          : isOwn || isWide)),
 })
 
 export type IdentifierValidationInput = {

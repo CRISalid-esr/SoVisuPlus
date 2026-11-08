@@ -66,9 +66,17 @@ const scopesToCondition = (scopes: Scope[]): Array<MongoQuery | undefined> => {
   return conds.length ? conds : [undefined]
 }
 
+/** `manage` on `all`: the admin wildcard, which no scope narrows. */
+const isFullAccess = (perm: { action: string; subject: string }): boolean =>
+  perm.action === 'manage' && perm.subject === 'all'
+
 /**
  * Returns true if the user holds at least one matching permission that is NOT scoped
- * to their own Person entity (i.e. global, ResearchUnit, Institution, …).
+ * to their own Person entity (i.e. global, ResearchUnit, Institution, …), or the
+ * `manage` / `all` admin wildcard.
+ *
+ * As in CASL, `manage` matches any action and `all` any subject, and a
+ * permission carrying no field restriction matches any requested field.
  *
  * @param p       - the authz context to inspect
  * @param action  - the permission action to look for (e.g. 'update')
@@ -81,12 +89,16 @@ export const hasWiderThanSelfPersonScope = (
   subject: string,
   field?: string,
 ): boolean => {
-  for (const ra of p.roleAssignments) {
+  for (const ra of p?.roleAssignments ?? []) {
+    if (ra.permissions.some(isFullAccess)) return true
+
     const hasPerm = ra.permissions.some(
       (perm) =>
-        perm.action === action &&
-        perm.subject === subject &&
-        (field === undefined || (perm.fields ?? []).includes(field)),
+        (perm.action === action || perm.action === 'manage') &&
+        (perm.subject === subject || perm.subject === 'all') &&
+        (field === undefined ||
+          !perm.fields?.length ||
+          perm.fields.includes(field)),
     )
     if (!hasPerm) continue
 
@@ -100,9 +112,9 @@ export const hasWiderThanSelfPersonScope = (
   return false
 }
 
-/** `manage` on `all`: the admin wildcard, which no scope narrows. */
-const isFullAccess = (perm: { action: string; subject: string }): boolean =>
-  perm.action === 'manage' && perm.subject === 'all'
+/** Whether the user holds the admin wildcard (`manage` on `all`). */
+export const hasFullAccess = (p: AuthzContext = EMPTY_PRINCIPAL): boolean =>
+  (p?.roleAssignments ?? []).some((ra) => ra.permissions.some(isFullAccess))
 
 /**
  * Returns true if the user holds a matching permission through a grant that no

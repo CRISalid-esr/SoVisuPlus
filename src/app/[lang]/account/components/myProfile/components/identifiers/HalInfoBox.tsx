@@ -21,6 +21,7 @@ type LoadState =
   | { status: 'loading' }
   | { status: 'loaded'; data: AureHalAuthorPreview }
   | { status: 'not_found' }
+  | { status: 'hal_unavailable' }
   | { status: 'error' }
 
 /** Preview response: the author, plus whether another person holds it. */
@@ -34,7 +35,7 @@ type HalInfoBoxProps = {
   /** Person the idHAL is added to; enables the "used by another person" check. */
   personUid?: string
   forceOpen?: boolean
-  onReady?: () => void // called when data loaded or not found (ready for user decision)
+  onReady?: () => void // called when the user may save: author loaded and free, not found, or HAL unavailable
 }
 
 /**
@@ -67,6 +68,13 @@ const HalInfoBox = ({
         onReady?.()
         return
       }
+      // A HAL outage must not block the add: the server still checks the idHAL
+      if (res.status === 502) {
+        setState({ status: 'hal_unavailable' })
+        onReady?.()
+        return
+      }
+      // Any other failure (e.g. the usage check): keep Save disabled
       if (!res.ok) {
         setState({ status: 'error' })
         return
@@ -141,9 +149,15 @@ const HalInfoBox = ({
           </Typography>
         )}
 
-        {state.status === 'error' && (
+        {state.status === 'hal_unavailable' && (
           <Typography variant='body2' color='error'>
             <Trans>hal_info_box_error</Trans>
+          </Typography>
+        )}
+
+        {state.status === 'error' && (
+          <Typography variant='body2' color='error'>
+            <Trans>hal_info_box_check_error</Trans>
           </Typography>
         )}
 

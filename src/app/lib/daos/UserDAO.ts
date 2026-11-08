@@ -4,6 +4,7 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
+import { identifiersWithOrcidGrantInclude } from '@/lib/daos/personIncludes'
 import { User } from '@/types/User'
 import { EntityType } from '@/types/UserRoleScope'
 
@@ -50,22 +51,7 @@ export class UserDAO extends AbstractDAO {
         include: {
           person: {
             include: {
-              identifiers: {
-                include: {
-                  orcidIdentifier: {
-                    select: {
-                      id: true,
-                      scope: true,
-                      tokenType: true,
-                      obtainedAt: true,
-                      expiresAt: true,
-                      createdAt: true,
-                      updatedAt: true,
-                      // !! don't expose tokens
-                    },
-                  },
-                },
-              },
+              identifiers: identifiersWithOrcidGrantInclude,
               memberships: {
                 include: {
                   organizationUnit: {
