@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import { requireSession } from '@/app/auth/requireSession'
-import { getSessionAccessToken } from '@/app/auth/keycloakTokenStore'
+import { KeycloakTokenService } from '@/lib/services/KeycloakTokenService'
 import { CrisalidAgentsChatClient } from '@/lib/services/CrisalidAgentsChatClient'
 import { chatConfigService } from '@/lib/services/ChatConfigService'
 
@@ -9,7 +9,7 @@ import { chatConfigService } from '@/lib/services/ChatConfigService'
  * Backend proxy for the Crisalid Agents chat API. Keeps the browser from calling the agents
  * backend directly (it has no CORS and is server-to-server only). A logged-in user is required,
  * and the call upstream is made on their behalf: the signed-in person's Keycloak access token,
- * read from the token store with the session id of the NextAuth JWT, is forwarded as
+ * obtained from `KeycloakTokenService` with the session id of the NextAuth JWT, is forwarded as
  * `Authorization: Bearer`. The agents backend resolves "me"/"my" from the token's claims. Without
  * a usable access token (unknown session, or the refresh token expired with the Keycloak session)
  * the route answers `401 {error: 'reauthentication_required'}`; the widget invites the person to
@@ -81,13 +81,14 @@ export const POST = async (request: NextRequest) => {
   const { error: authError } = await requireSession()
   if (authError) return authError
 
-  // The token store refreshes the access token when it is about to expire.
+  // The service refreshes the access token when it is about to expire.
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
   })
   if (!token?.sid) return reauthenticationRequired()
-  let accessToken = await getSessionAccessToken(token.sid)
+  const tokenService = new KeycloakTokenService()
+  let accessToken = await tokenService.getSessionAccessToken(token.sid)
   if (!accessToken) return reauthenticationRequired()
 
   try {
@@ -119,7 +120,7 @@ export const POST = async (request: NextRequest) => {
     let upstream = await client.streamChat(body, accessToken, request.signal)
     if (await isTokenExpiring(upstream)) {
       // One forced refresh and one retry; a second refusal means the person must sign in again.
-      accessToken = await getSessionAccessToken(token.sid, {
+      accessToken = await tokenService.getSessionAccessToken(token.sid, {
         forceRefresh: true,
       })
       if (!accessToken) return reauthenticationRequired()

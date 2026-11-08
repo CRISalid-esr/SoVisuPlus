@@ -3,16 +3,17 @@
  */
 import { getServerSession } from 'next-auth'
 import { getToken } from 'next-auth/jwt'
-import { getSessionAccessToken } from '@/app/auth/keycloakTokenStore'
+import { KeycloakTokenService } from '@/lib/services/KeycloakTokenService'
 import { chatConfigService } from '@/lib/services/ChatConfigService'
 import { POST } from './route'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('next-auth/jwt', () => ({ getToken: jest.fn() }))
 jest.mock('@/app/auth/auth_options', () => ({ __esModule: true, default: {} }))
-jest.mock('@/app/auth/keycloakTokenStore', () => ({
-  getSessionAccessToken: jest.fn(),
-}))
+jest.mock('@/lib/services/KeycloakTokenService', () => {
+  const service = { getSessionAccessToken: jest.fn() }
+  return { KeycloakTokenService: jest.fn(() => service) }
+})
 jest.mock('@/lib/services/ChatConfigService', () => ({
   chatConfigService: {
     getSystemPrompt: jest.fn().mockResolvedValue(''),
@@ -30,7 +31,8 @@ jest.mock('next/server', () => ({
 
 const mockSession = getServerSession as jest.Mock
 const mockGetToken = getToken as jest.Mock
-const mockAccessToken = getSessionAccessToken as jest.Mock
+const mockAccessToken = new KeycloakTokenService()
+  .getSessionAccessToken as jest.Mock
 const mockGetSystemPrompt = chatConfigService.getSystemPrompt as jest.Mock
 const mockIsChatEnabled = chatConfigService.isChatEnabled as jest.Mock
 
