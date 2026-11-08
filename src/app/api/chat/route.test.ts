@@ -3,19 +3,15 @@
  */
 import { getServerSession } from 'next-auth'
 import { getToken } from 'next-auth/jwt'
-import {
-  accessTokenNeedsRefresh,
-  refreshKeycloakAccessToken,
-} from '@/app/auth/keycloakTokens'
+import { getSessionAccessToken } from '@/app/auth/keycloakTokenStore'
 import { chatConfigService } from '@/lib/services/ChatConfigService'
 import { POST } from './route'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
 jest.mock('next-auth/jwt', () => ({ getToken: jest.fn() }))
 jest.mock('@/app/auth/auth_options', () => ({ __esModule: true, default: {} }))
-jest.mock('@/app/auth/keycloakTokens', () => ({
-  accessTokenNeedsRefresh: jest.fn(),
-  refreshKeycloakAccessToken: jest.fn(),
+jest.mock('@/app/auth/keycloakTokenStore', () => ({
+  getSessionAccessToken: jest.fn(),
 }))
 jest.mock('@/lib/services/ChatConfigService', () => ({
   chatConfigService: {
@@ -34,8 +30,7 @@ jest.mock('next/server', () => ({
 
 const mockSession = getServerSession as jest.Mock
 const mockGetToken = getToken as jest.Mock
-const mockNeedsRefresh = accessTokenNeedsRefresh as jest.Mock
-const mockRefresh = refreshKeycloakAccessToken as jest.Mock
+const mockAccessToken = getSessionAccessToken as jest.Mock
 const mockGetSystemPrompt = chatConfigService.getSystemPrompt as jest.Mock
 const mockIsChatEnabled = chatConfigService.isChatEnabled as jest.Mock
 
@@ -66,13 +61,11 @@ describe('POST /api/chat', () => {
     mockSession.mockResolvedValue({
       user: { username: 'jdoe', name: 'Jane Doe', personUid: 'person-123' },
     })
-    mockGetToken.mockResolvedValue({
-      username: 'jdoe',
-      accessToken: 'access-1',
-      refreshToken: 'refresh-1',
-      accessTokenExpiresAt: 9999999999,
-    })
-    mockNeedsRefresh.mockReturnValue(false)
+    mockGetToken.mockResolvedValue({ username: 'jdoe', sid: 'sid-1' })
+    // Default: the store hands out the current access token without refreshing.
+    mockAccessToken.mockImplementation(async (_sid, options) =>
+      options?.forceRefresh ? 'access-2' : 'access-1',
+    )
     // Default: no system prompt configured (cleared by clearAllMocks above).
     mockGetSystemPrompt.mockResolvedValue('')
     mockIsChatEnabled.mockResolvedValue(true)
@@ -101,7 +94,7 @@ describe('POST /api/chat', () => {
     expect(mockSession).not.toHaveBeenCalled()
   })
 
-  it('requires reauthentication when the JWT carries no access token', async () => {
+  it('requires reauthentication when the JWT carries no Keycloak session id', async () => {
     mockGetToken.mockResolvedValue({ username: 'jdoe' })
     global.fetch = jest.fn() as jest.Mock
 
@@ -109,6 +102,7 @@ describe('POST /api/chat', () => {
 
     expect(res.status).toBe(401)
     expect(res.body).toEqual({ error: 'reauthentication_required' })
+    expect(mockAccessToken).not.toHaveBeenCalled()
     expect(global.fetch).not.toHaveBeenCalled()
   })
 
@@ -123,11 +117,8 @@ describe('POST /api/chat', () => {
     expect(global.fetch).not.toHaveBeenCalled()
   })
 
-  it('requires reauthentication when the refresh token expired', async () => {
-    mockGetToken.mockResolvedValue({
-      username: 'jdoe',
-      error: 'RefreshTokenExpired',
-    })
+  it('requires reauthentication when the store has no usable token for the session', async () => {
+    mockAccessToken.mockResolvedValue(null)
     global.fetch = jest.fn() as jest.Mock
 
     const res = await POST(makeReq({ message: {}, messages: [] }))
@@ -259,7 +250,8 @@ describe('POST /api/chat', () => {
 
     expect(res.status).toBe(401)
     expect(await res.text()).toBe('{"error":"wrong_audience"}')
-    expect(mockRefresh).not.toHaveBeenCalled()
+    // No forced refresh: only token_expiring triggers one.
+    expect(mockAccessToken).toHaveBeenCalledTimes(1)
   })
 
   it('returns 502 when the upstream request fails', async () => {
@@ -274,12 +266,7 @@ describe('POST /api/chat', () => {
     expect(res.status).toBe(502)
   })
 
-  it('refreshes an access token about to expire before calling upstream', async () => {
-    mockNeedsRefresh.mockReturnValue(true)
-    mockRefresh.mockImplementation(async (token) => {
-      token.accessToken = 'access-2'
-      return token
-    })
+  it('asks the store for the access token of the session before calling upstream', async () => {
     global.fetch = jest
       .fn()
       .mockResolvedValue(new Response('ok\n', { status: 200 })) as jest.Mock
@@ -287,16 +274,13 @@ describe('POST /api/chat', () => {
     const res = await POST(makeReq({ message: {}, messages: [] }))
 
     expect(res.status).toBe(200)
-    expect(mockRefresh).toHaveBeenCalledTimes(1)
+    expect(mockAccessToken).toHaveBeenCalledTimes(1)
+    expect(mockAccessToken).toHaveBeenCalledWith('sid-1')
     const init = (global.fetch as jest.Mock).mock.calls[0][1]
-    expect(init.headers.Authorization).toBe('Bearer access-2')
+    expect(init.headers.Authorization).toBe('Bearer access-1')
   })
 
-  it('retries once with a refreshed token when upstream answers token_expiring', async () => {
-    mockRefresh.mockImplementation(async (token) => {
-      token.accessToken = 'access-2'
-      return token
-    })
+  it('retries once with a force-refreshed token when upstream answers token_expiring', async () => {
     global.fetch = jest
       .fn()
       .mockResolvedValueOnce(tokenExpiring())
@@ -308,7 +292,10 @@ describe('POST /api/chat', () => {
 
     expect(res.status).toBe(200)
     expect(await res.text()).toBe('data: {"type":"start","messageId":"m1"}\n\n')
-    expect(mockRefresh).toHaveBeenCalledTimes(1)
+    expect(mockAccessToken).toHaveBeenCalledTimes(2)
+    expect(mockAccessToken).toHaveBeenLastCalledWith('sid-1', {
+      forceRefresh: true,
+    })
     expect(global.fetch).toHaveBeenCalledTimes(2)
     const calls = (global.fetch as jest.Mock).mock.calls
     expect(calls[0][1].headers.Authorization).toBe('Bearer access-1')
@@ -318,11 +305,9 @@ describe('POST /api/chat', () => {
   })
 
   it('requires reauthentication when the forced refresh fails', async () => {
-    mockRefresh.mockImplementation(async (token) => {
-      delete token.accessToken
-      token.error = 'RefreshTokenExpired'
-      return token
-    })
+    mockAccessToken.mockImplementation(async (_sid, options) =>
+      options?.forceRefresh ? null : 'access-1',
+    )
     global.fetch = jest.fn().mockResolvedValue(tokenExpiring()) as jest.Mock
 
     const res = await POST(makeReq({ message: {}, messages: [] }))
@@ -333,17 +318,13 @@ describe('POST /api/chat', () => {
   })
 
   it('requires reauthentication when the retry is refused again', async () => {
-    mockRefresh.mockImplementation(async (token) => {
-      token.accessToken = 'access-2'
-      return token
-    })
     global.fetch = jest.fn().mockResolvedValue(tokenExpiring()) as jest.Mock
 
     const res = await POST(makeReq({ message: {}, messages: [] }))
 
     expect(res.status).toBe(401)
     expect(res.body).toEqual({ error: 'reauthentication_required' })
-    expect(mockRefresh).toHaveBeenCalledTimes(1)
+    expect(mockAccessToken).toHaveBeenCalledTimes(2)
     expect(global.fetch).toHaveBeenCalledTimes(2)
   })
 

@@ -162,8 +162,10 @@ The chat widget is displayed only when `CHAT_ENABLED` is not `false` **and** `CR
 Locally, `cp chat.sample.json chat.json` and edit it (the sample alone already works as a fallback).
 
 The `/api/chat` proxy authenticates to the Crisalid Agents API with the signed-in user's Keycloak
-access token (`Authorization: Bearer`), kept in the NextAuth JWT and refreshed with the refresh
-token before it expires; there is no shared API key. The Keycloak client `sovisuplus` must carry the
+access token (`Authorization: Bearer`). The access and refresh tokens are kept in the
+`KeycloakSession` table, encrypted with the field-encryption keyring (`FIELD_ENC_*`) and keyed on
+the Keycloak session id that the NextAuth JWT carries; the access token is refreshed before it
+expires, the row is deleted at sign-out. The Keycloak client `sovisuplus` must carry the
 `crisalid-agents-audience` default client scope (configured in crisalid-deployment) so that its
 access tokens are accepted by the agents API. When the Keycloak session has ended and the token can
 no longer be refreshed, the proxy answers `401 {"error": "reauthentication_required"}` and the

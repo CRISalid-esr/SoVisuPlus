@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import { requireSession } from '@/app/auth/requireSession'
-import {
-  accessTokenNeedsRefresh,
-  refreshKeycloakAccessToken,
-} from '@/app/auth/keycloakTokens'
+import { getSessionAccessToken } from '@/app/auth/keycloakTokenStore'
 import { CrisalidAgentsChatClient } from '@/lib/services/CrisalidAgentsChatClient'
 import { chatConfigService } from '@/lib/services/ChatConfigService'
 
@@ -12,12 +9,11 @@ import { chatConfigService } from '@/lib/services/ChatConfigService'
  * Backend proxy for the Crisalid Agents chat API. Keeps the browser from calling the agents
  * backend directly (it has no CORS and is server-to-server only). A logged-in user is required,
  * and the call upstream is made on their behalf: the signed-in person's Keycloak access token,
- * stored in the NextAuth JWT (encrypted cookie, read server-side with `getToken`), is forwarded
- * as `Authorization: Bearer`. The agents backend resolves "me"/"my" from the token's claims, so no
- * identity is injected in the conversation here. Without a usable access token (no token, or the
- * refresh token expired with the Keycloak session) the route answers
- * `401 {error: 'reauthentication_required'}`; the widget invites the person to sign in again while
- * the rest of the application keeps working on the NextAuth session.
+ * read from the token store with the session id of the NextAuth JWT, is forwarded as
+ * `Authorization: Bearer`. The agents backend resolves "me"/"my" from the token's claims. Without
+ * a usable access token (unknown session, or the refresh token expired with the Keycloak session)
+ * the route answers `401 {error: 'reauthentication_required'}`; the widget invites the person to
+ * sign in again while the rest of the application keeps working on the NextAuth session.
  *
  * Token lifetime: the backend refuses a token with less than two minutes left
  * (`401 {error: 'token_expiring'}`). The route refreshes the token ahead of that window before
@@ -85,25 +81,18 @@ export const POST = async (request: NextRequest) => {
   const { error: authError } = await requireSession()
   if (authError) return authError
 
-  // The access token lives in the NextAuth JWT, not in the session object. The cookie is only
-  // rewritten by the session endpoint, so the token read here may be older than the one the
-  // `jwt` callback last refreshed: refresh it here as well when it is about to expire.
+  // The token store refreshes the access token when it is about to expire.
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
   })
-  if (!token || token.error || !token.accessToken) {
-    return reauthenticationRequired()
-  }
-  if (accessTokenNeedsRefresh(token)) {
-    await refreshKeycloakAccessToken(token)
-    if (!token.accessToken) return reauthenticationRequired()
-  }
+  if (!token?.sid) return reauthenticationRequired()
+  let accessToken = await getSessionAccessToken(token.sid)
+  if (!accessToken) return reauthenticationRequired()
 
   try {
     // Forwarded (mostly) verbatim: `{ conversationId?, message, messages }`. The backend rebuilds
-    // context from this body each turn (it is stateless). Any `user` field is ignored: the
-    // backend knows who asks from the bearer token.
+    // context from this body each turn (it is stateless). Any `user` field is ignored.
     const body = await request.json()
     delete body.user
 
@@ -127,20 +116,14 @@ export const POST = async (request: NextRequest) => {
     ]
 
     const client = new CrisalidAgentsChatClient()
-    let upstream = await client.streamChat(
-      body,
-      token.accessToken,
-      request.signal,
-    )
+    let upstream = await client.streamChat(body, accessToken, request.signal)
     if (await isTokenExpiring(upstream)) {
       // One forced refresh and one retry; a second refusal means the person must sign in again.
-      await refreshKeycloakAccessToken(token)
-      if (!token.accessToken) return reauthenticationRequired()
-      upstream = await client.streamChat(
-        body,
-        token.accessToken,
-        request.signal,
-      )
+      accessToken = await getSessionAccessToken(token.sid, {
+        forceRefresh: true,
+      })
+      if (!accessToken) return reauthenticationRequired()
+      upstream = await client.streamChat(body, accessToken, request.signal)
       if (await isTokenExpiring(upstream)) return reauthenticationRequired()
     }
     if (!upstream.ok) {
