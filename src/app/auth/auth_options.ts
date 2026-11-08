@@ -17,7 +17,7 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { AuthzContext } from '@/types/authz'
-import { refreshKeycloakAccessTokenIfNeeded } from '@/app/auth/keycloakTokens'
+import { KeycloakTokenService } from '@/lib/services/KeycloakTokenService'
 
 declare module 'next-auth' {
   interface User {
@@ -39,8 +39,6 @@ declare module 'next-auth' {
       personUid?: string | null
       authz?: AuthzContext
     }
-    /** `'RefreshTokenExpired'` when the Keycloak access token could not be refreshed. */
-    error?: string
   }
 }
 
@@ -51,12 +49,8 @@ declare module 'next-auth/jwt' {
     userId?: number
     personUid?: string | null
     authz?: AuthzContext
-    /** Keycloak access token, forwarded as Bearer to the Crisalid Agents chat API. */
-    accessToken?: string
-    refreshToken?: string
-    /** Access token expiry, seconds since the epoch. */
-    accessTokenExpiresAt?: number
-    error?: 'RefreshTokenExpired'
+    /** Keycloak session id (`sid` claim): key of the tokens kept by `KeycloakTokenService`. */
+    sid?: string
   }
 }
 
@@ -142,13 +136,20 @@ const authOptions: AuthOptions = {
     }) {
       console.info('jwt callback', user, profile)
       if (account) {
-        // Sign-in: keep the Keycloak tokens in the (encrypted) JWT, never in the session.
-        token.accessToken = account.access_token
-        token.refreshToken = account.refresh_token
-        token.accessTokenExpiresAt = account.expires_at
-        delete token.error
-      } else {
-        await refreshKeycloakAccessTokenIfNeeded(token)
+        // Sign-in: the Keycloak tokens go to the KeycloakSession table, the JWT keeps the session id.
+        const sid =
+          (profile as KeycloakProfile & { sid?: string })?.sid ??
+          account.session_state
+        if (typeof sid === 'string' && sid) {
+          token.sid = sid
+          try {
+            await new KeycloakTokenService().storeSessionTokens(sid, account)
+          } catch (e) {
+            console.warn('[auth/jwt] failed to store the Keycloak tokens:', e)
+          }
+        } else {
+          console.warn('[auth/jwt] no Keycloak session id: tokens not stored')
+        }
       }
       if (profile) {
         const username = (profile as KeycloakProfile)?.preferred_username
@@ -198,8 +199,14 @@ const authOptions: AuthOptions = {
         session.user.personUid = token.personUid ?? null
         session.user.authz = token.authz
       }
-      session.error = token.error
       return session
+    },
+  },
+  events: {
+    async signOut({ token }: { token: JWT }) {
+      if (token?.sid) {
+        await new KeycloakTokenService().forgetSessionTokens(token.sid)
+      }
     },
   },
   pages: {

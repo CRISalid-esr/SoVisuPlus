@@ -548,6 +548,24 @@ model PersonIdentifier {
   @@index([personId])
 }
 
+/// Keycloak tokens of a signed-in user, keyed on the Keycloak session id (`sid` claim), encrypted
+/// at rest. One row per SSO session: written at sign-in, rewritten on refresh, deleted at sign-out,
+/// swept once the refresh token has expired.
+model KeycloakSession {
+  sid                   String   @id
+  userId                Int?
+  accessToken           String
+  refreshToken          String
+  /// Access token expiry, seconds since the epoch
+  accessTokenExpiresAt  Int
+  /// Refresh token expiry, seconds since the epoch: the row is useless after that
+  refreshTokenExpiresAt Int
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([refreshTokenExpiresAt])
+}
+
 model OrcidIdentifier {
   // same primary key as base row (1–1)
   id         Int              @id
