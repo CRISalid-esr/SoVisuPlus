@@ -216,6 +216,38 @@ describe('createAiChatAdapter', () => {
     }
   })
 
+  it('asks to sign in again when the proxy requires reauthentication', async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response('{"error":"reauthentication_required"}', {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    ) as jest.Mock
+
+    const adapter = createAiChatAdapter()
+    await expect(send(adapter)).rejects.toThrow(
+      'ai_chat_error_reauthentication_required',
+    )
+  })
+
+  it('does not send a user field in the request body', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(
+        ndjsonResponse([{ type: 'finish', messageId: 'm1' }]),
+      ) as jest.Mock
+
+    const adapter = createAiChatAdapter()
+    await send(adapter)
+
+    const init = (global.fetch as jest.Mock).mock.calls[0][1]
+    expect(Object.keys(JSON.parse(init.body)).sort()).toEqual([
+      'conversationId',
+      'message',
+      'messages',
+    ])
+  })
+
   it('rejects with a network-failure message when the proxy fetch throws', async () => {
     global.fetch = jest
       .fn()

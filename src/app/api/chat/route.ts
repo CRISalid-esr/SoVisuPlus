@@ -1,13 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getToken } from 'next-auth/jwt'
 import { requireSession } from '@/app/auth/requireSession'
+import {
+  accessTokenNeedsRefresh,
+  refreshKeycloakAccessToken,
+} from '@/app/auth/keycloakTokens'
 import { CrisalidAgentsChatClient } from '@/lib/services/CrisalidAgentsChatClient'
 import { chatConfigService } from '@/lib/services/ChatConfigService'
 
 /**
  * Backend proxy for the Crisalid Agents chat API. Keeps the browser from calling the agents
- * backend directly (it has no CORS and is server-to-server only) and keeps the secret
- * `CRISALID_AGENTS_API_KEY` on the server. Auth-only: a logged-in user is required to avoid an
- * open relay.
+ * backend directly (it has no CORS and is server-to-server only). A logged-in user is required,
+ * and the call upstream is made on their behalf: the signed-in person's Keycloak access token,
+ * stored in the NextAuth JWT (encrypted cookie, read server-side with `getToken`), is forwarded
+ * as `Authorization: Bearer`. The agents backend resolves "me"/"my" from the token's claims, so no
+ * identity is injected in the conversation here. Without a usable access token (no token, or the
+ * refresh token expired with the Keycloak session) the route answers
+ * `401 {error: 'reauthentication_required'}`; the widget invites the person to sign in again while
+ * the rest of the application keeps working on the NextAuth session.
+ *
+ * Token lifetime: the backend refuses a token with less than two minutes left
+ * (`401 {error: 'token_expiring'}`). The route refreshes the token ahead of that window before
+ * calling upstream, and on `token_expiring` forces one refresh and retries once.
  *
  * The upstream response (NDJSON, one chunk per line) is re-framed as Server-Sent Events
  * (`data: <json>\n\n`, `text/event-stream`) before being streamed to the client. The payloads
@@ -20,17 +34,8 @@ import { chatConfigService } from '@/lib/services/ChatConfigService'
 // Never cache or buffer the streamed response.
 export const dynamic = 'force-dynamic'
 
-type ClientUser = {
-  firstName?: string
-  lastName?: string
-  uid?: string
-}
-
-type SessionUser = {
-  username?: string
-  name?: string | null
-  personUid?: string | null
-}
+const reauthenticationRequired = () =>
+  NextResponse.json({ error: 'reauthentication_required' }, { status: 401 })
 
 /**
  * Re-frames the upstream NDJSON stream as SSE: each non-empty line becomes one
@@ -59,27 +64,15 @@ const ndjsonToSse = (): TransformStream<Uint8Array, Uint8Array> => {
   })
 }
 
-/**
- * A one-line, machine-and-human readable description of the signed-in user, for the agent to scope
- * "me"/"my" queries to the right person in the knowledge graph. Prefers the identity the client
- * read from the store (person firstName/lastName/uid), falling back to the session.
- */
-const buildUserContext = (
-  client: ClientUser | undefined,
-  session: SessionUser,
-): string => {
-  const displayName = [client?.firstName, client?.lastName]
-    .filter((part) => part && part.trim())
-    .join(' ')
-    .trim()
-  const name = displayName || session.name || session.username || 'unknown'
-  const uid = client?.uid || session.personUid || undefined
-  return (
-    `Current signed-in user — name: "${name}", ` +
-    `${uid ? `person UID: ${uid}` : 'person UID: (unavailable)'}. ` +
-    `When the user says "me", "my", or "I", it refers to this person; use the person UID to ` +
-    `scope knowledge-graph queries about them.`
-  )
+/** True for the backend's "fewer than two minutes left on the token" refusal. */
+const isTokenExpiring = async (upstream: Response): Promise<boolean> => {
+  if (upstream.status !== 401) return false
+  try {
+    const payload = await upstream.clone().json()
+    return payload?.error === 'token_expiring'
+  } catch {
+    return false
+  }
 }
 
 export const POST = async (request: NextRequest) => {
@@ -89,52 +82,67 @@ export const POST = async (request: NextRequest) => {
     return NextResponse.json({ error: 'AI chat is disabled' }, { status: 404 })
   }
 
-  const { session, error: authError } = await requireSession()
+  const { error: authError } = await requireSession()
   if (authError) return authError
+
+  // The access token lives in the NextAuth JWT, not in the session object. The cookie is only
+  // rewritten by the session endpoint, so the token read here may be older than the one the
+  // `jwt` callback last refreshed: refresh it here as well when it is about to expire.
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  })
+  if (!token || token.error || !token.accessToken) {
+    return reauthenticationRequired()
+  }
+  if (accessTokenNeedsRefresh(token)) {
+    await refreshKeycloakAccessToken(token)
+    if (!token.accessToken) return reauthenticationRequired()
+  }
 
   try {
     // Forwarded (mostly) verbatim: `{ conversationId?, message, messages }`. The backend rebuilds
-    // context from this body each turn (it is stateless). `user` (the store's connected-user
-    // identity) is consumed here to build the prompt and is not forwarded.
+    // context from this body each turn (it is stateless). Any `user` field is ignored: the
+    // backend knows who asks from the bearer token.
     const body = await request.json()
-    const clientUser: ClientUser | undefined = body.user
     delete body.user
 
-    // System context injected server-side. The agents API has no dedicated fields, so both are
-    // prepended as `role:"system"` messages (honoured, layered after the agent's own prompt). The
-    // client rebuilds `messages` each turn without them, so there is no accumulation.
-    const systemMessages: {
-      role: 'system'
-      parts: { type: 'text'; text: string }[]
-    }[] = []
-
-    // 1) The configured system prompt (shapes agent behaviour), if any.
+    // The configured system prompt (shapes agent behaviour), if any. The agents API has no
+    // dedicated field, so it is prepended as a `role:"system"` message (honoured, layered after
+    // the agent's own prompt). The client rebuilds `messages` each turn without it, so there is
+    // no accumulation.
     const systemPrompt = await chatConfigService.getSystemPrompt()
-    if (systemPrompt) {
-      systemMessages.push({
-        role: 'system',
-        parts: [{ type: 'text', text: systemPrompt }],
-      })
-    }
-
-    // 2) The signed-in user's identity (name + person UID) — lets the agent resolve "me"/"my"
-    //    and scope knowledge-graph queries to this person.
-    systemMessages.push({
-      role: 'system',
-      parts: [
-        { type: 'text', text: buildUserContext(clientUser, session.user) },
-      ],
-    })
+    const systemMessages = systemPrompt
+      ? [
+          {
+            role: 'system',
+            parts: [{ type: 'text', text: systemPrompt }],
+          },
+        ]
+      : []
 
     body.messages = [
       ...systemMessages,
       ...(Array.isArray(body.messages) ? body.messages : []),
     ]
 
-    const upstream = await new CrisalidAgentsChatClient().streamChat(
+    const client = new CrisalidAgentsChatClient()
+    let upstream = await client.streamChat(
       body,
+      token.accessToken,
       request.signal,
     )
+    if (await isTokenExpiring(upstream)) {
+      // One forced refresh and one retry; a second refusal means the person must sign in again.
+      await refreshKeycloakAccessToken(token)
+      if (!token.accessToken) return reauthenticationRequired()
+      upstream = await client.streamChat(
+        body,
+        token.accessToken,
+        request.signal,
+      )
+      if (await isTokenExpiring(upstream)) return reauthenticationRequired()
+    }
     if (!upstream.ok) {
       // Error responses are not streams — pass them through untouched so the client
       // can map the status code to a user-facing message.

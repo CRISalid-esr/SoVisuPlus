@@ -14,8 +14,10 @@ import { t } from '@lingui/core/macro'
  * The Crisalid Agents backend is stateless — it stores no conversations and exposes no
  * list/history endpoints. So conversation and message state is owned here, in memory, for the
  * lifetime of the adapter instance (it resets on a full page reload). `sendMessage` /
- * `regenerate` POST to our own same-origin `/api/chat` proxy, which injects the secret API key
- * and streams the backend's NDJSON response straight back.
+ * `regenerate` POST to our own same-origin `/api/chat` proxy, which forwards the signed-in
+ * user's Keycloak access token to the backend and streams the NDJSON response straight back.
+ * When that token can no longer be refreshed (Keycloak session ended), the proxy answers
+ * `401 {error: 'reauthentication_required'}` and the person is invited to sign in again.
  *
  * The proxy re-frames the backend's NDJSON as SSE (`data: <json>\n\n`, `text/event-stream`) so
  * reverse proxies in front of the deployment stream it unbuffered. Each event's payload is
@@ -34,13 +36,29 @@ const getMessageText = (message: ChatMessage): string =>
 const nowIso = () => new Date().toISOString()
 
 // Translated, status-appropriate message for a failed chat request. Each `t` call is a static
-// id so the extractor picks it up.
-const errorMessageForStatus = (status: number): string => {
+// id so the extractor picks it up. A 401 whose body is `{error: 'reauthentication_required'}`
+// (the proxy could not obtain a usable access token) gets its own message.
+const errorMessageForResponse = async (response: Response): Promise<string> => {
+  const { status } = response
   if (status === 400) return t`ai_chat_error_bad_request`
+  if (status === 401 && (await isReauthenticationRequired(response))) {
+    return t`ai_chat_error_reauthentication_required`
+  }
   if (status === 401 || status === 403) return t`ai_chat_error_unauthorized`
   if (status === 404) return t`ai_chat_error_not_found`
   if (status >= 500) return t`ai_chat_error_server`
   return t`ai_chat_error_generic`
+}
+
+const isReauthenticationRequired = async (
+  response: Response,
+): Promise<boolean> => {
+  try {
+    const payload = await response.clone().json()
+    return payload?.error === 'reauthentication_required'
+  } catch {
+    return false
+  }
 }
 
 export interface AiChatSeedConversation {
@@ -48,13 +66,6 @@ export interface AiChatSeedConversation {
   id?: string
   title?: string
   messages: { role: ChatRole; text: string }[]
-}
-
-/** Signed-in user's identity, sent with each turn so the agent can scope "me"/"my" queries. */
-export interface AiChatUser {
-  firstName?: string
-  lastName?: string
-  uid?: string
 }
 
 export interface CreateAiChatAdapterOptions {
@@ -67,18 +78,12 @@ export interface CreateAiChatAdapterOptions {
    * required for the split list / back-arrow UI to engage.
    */
   seed?: AiChatSeedConversation[]
-  /**
-   * Resolves the current user's identity at send time (read from the store, which may load after
-   * the adapter is created). Included in each request body so the proxy can add it to the prompt.
-   */
-  getUser?: () => AiChatUser | null | undefined
 }
 
 export function createAiChatAdapter(
   options: CreateAiChatAdapterOptions = {},
 ): ChatAdapter {
   const apiPath = options.apiPath ?? DEFAULT_API_PATH
-  const getUser = options.getUser ?? (() => undefined)
 
   // Source of truth for what `listConversations` / `listMessages` return.
   const conversations = new Map<string, ChatConversation>()
@@ -145,7 +150,7 @@ export function createAiChatAdapter(
       throw new Error(t`ai_chat_error_network`)
     }
     if (!response.ok || !response.body) {
-      throw new Error(errorMessageForStatus(response.status))
+      throw new Error(await errorMessageForResponse(response))
     }
 
     let reader: ReadableStreamDefaultReader<Uint8Array> | undefined
@@ -245,7 +250,7 @@ export function createAiChatAdapter(
       registerConversation(id, getMessageText(message))
       appendMessage(id, message)
       return streamFromProxy(
-        { conversationId: id, message, messages, user: getUser() ?? undefined },
+        { conversationId: id, message, messages },
         id,
         signal,
       )
@@ -257,7 +262,7 @@ export function createAiChatAdapter(
       const id = conversationId ?? crypto.randomUUID()
       registerConversation(id, getMessageText(message))
       return streamFromProxy(
-        { conversationId: id, message, messages, user: getUser() ?? undefined },
+        { conversationId: id, message, messages },
         id,
         signal,
       )

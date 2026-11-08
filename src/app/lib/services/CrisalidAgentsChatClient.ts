@@ -5,11 +5,13 @@
  * The base URL comes from `CRISALID_AGENTS_API_URL` (e.g. `http://localhost:9100`
  * or the internal `http://crisalid-agents-chat-api:9100`); the endpoint path is appended
  * here, so the env var holds only the base. The agent to talk to comes from
- * `CRISALID_AGENTS_AGENT` (default `generic_agent`). The API key (`CRISALID_AGENTS_API_KEY`)
- * is optional: it is injected here, server-side only, so it never reaches the browser — the
- * client-side chat adapter talks to our own `/api/chat` proxy, which calls this. When no key is
- * configured we send the request without one and let the agent backend enforce (or waive)
- * authorization; its own `ENABLE_API_KEYS` toggle decides whether a key is required.
+ * `CRISALID_AGENTS_AGENT` (default `generic_agent`).
+ *
+ * The backend authenticates the signed-in person, not the SoVisu+ server: each call carries the
+ * user's Keycloak access token as `Authorization: Bearer`. The token is read from the NextAuth
+ * JWT by the server-side `/api/chat` proxy (the browser never sees it) and passed to
+ * `streamChat`. The backend checks its audience and remaining lifetime and answers `401` with
+ * `{"error": "token_expiring"}` when fewer than two minutes remain.
  *
  * The backend streams `application/x-ndjson`; `streamChat` returns the raw upstream `Response`
  * so the caller can pass its `.body` straight through without buffering.
@@ -18,7 +20,6 @@ const DEFAULT_AGENT = 'generic_agent'
 
 export class CrisalidAgentsChatClient {
   private readonly chatUrl: string
-  private readonly apiKey: string | undefined
 
   constructor() {
     const baseUrl = process.env.CRISALID_AGENTS_API_URL
@@ -28,25 +29,24 @@ export class CrisalidAgentsChatClient {
     // The env var is a base URL; the endpoint path lives in code.
     const agent = process.env.CRISALID_AGENTS_AGENT || DEFAULT_AGENT
     this.chatUrl = `${baseUrl.replace(/\/+$/, '')}/agents/${encodeURIComponent(agent)}/chat`
-    // Optional — omitted from the request when unset; the backend decides if it is required.
-    this.apiKey = process.env.CRISALID_AGENTS_API_KEY || undefined
   }
 
   /**
    * POST a chat turn upstream and return the raw streaming response. `body` is forwarded
-   * verbatim (`{ conversationId?, message, messages }`); `signal` lets a client disconnect
-   * abort the upstream request.
+   * verbatim (`{ conversationId?, message, messages }`); `accessToken` is the user's Keycloak
+   * access token; `signal` lets a client disconnect abort the upstream request.
    */
-  async streamChat(body: unknown, signal?: AbortSignal): Promise<Response> {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    }
-    if (this.apiKey) {
-      headers['x-api-key'] = this.apiKey
-    }
+  async streamChat(
+    body: unknown,
+    accessToken: string,
+    signal?: AbortSignal,
+  ): Promise<Response> {
     return fetch(this.chatUrl, {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
       body: JSON.stringify(body),
       signal,
     })
