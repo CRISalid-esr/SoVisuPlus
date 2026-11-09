@@ -217,9 +217,11 @@ const DashboardPage = () => {
             <Typography>{t`dashboard_page_publication_by_year_graph_start_year_selection_label`}</Typography>
             <Select
               value={yearRange[0]}
-              onChange={(event) =>
-                setYearRange([event.target.value as number, yearRange[1]])
-              }
+              onChange={(event) => {
+                // Push the end year forward so the range never ends before it starts.
+                const start = event.target.value as number
+                setYearRange([start, Math.max(start, yearRange[1])])
+              }}
             >
               {Array.from(
                 {
