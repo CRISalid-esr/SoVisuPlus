@@ -1397,7 +1397,7 @@ describe('DocumentDAO', () => {
 
   describe('dashboard queries', () => {
     const dashboardWhere = {
-      publicationDate: { not: null },
+      publicationDateStart: { not: null },
       contributions: {
         some: {
           person: { uid: { in: ['local-123'] } },
@@ -1406,11 +1406,16 @@ describe('DocumentDAO', () => {
       },
     }
 
-    const dbDocument = (id: number, publicationDate: string) => ({
+    const dbDocument = (
+      id: number,
+      publicationDate: string,
+      publicationDateStart: string,
+    ) => ({
       id,
       uid: `doc-${id}`,
       oaStatus: 'GREEN',
       publicationDate,
+      publicationDateStart: new Date(publicationDateStart),
       upwOAStatus: 'DIAMOND',
       contributions: [
         {
@@ -1431,7 +1436,7 @@ describe('DocumentDAO', () => {
 
     it('fetches the documents of the year range with the minimal select', async () => {
       ;(mockPrisma.document.findMany as jest.Mock).mockResolvedValue([
-        dbDocument(1, '2022'),
+        dbDocument(1, '2022', '2022-01-01T00:00:00.000Z'),
       ])
 
       const result = await documentDAO.fetchOAYearDocuments(
@@ -1442,6 +1447,7 @@ describe('DocumentDAO', () => {
 
       expect(result.documents).toEqual([
         {
+          year: 2022,
           uid: 'doc-1',
           oaStatus: 'GREEN',
           publicationDate: '2022',
@@ -1469,6 +1475,7 @@ describe('DocumentDAO', () => {
           uid: true,
           oaStatus: true,
           publicationDate: true,
+          publicationDateStart: true,
           upwOAStatus: true,
           contributions: {
             select: {
@@ -1491,13 +1498,15 @@ describe('DocumentDAO', () => {
       })
     })
 
-    it('loads documents in batches and sorts them by publication date desc', async () => {
+    it('loads documents in batches and sorts them by publication date start desc', async () => {
       const firstBatch = Array.from({ length: 1000 }, (_, i) =>
-        dbDocument(i + 1, '2021'),
+        dbDocument(i + 1, '2021', '2021-01-01T00:00:00.000Z'),
       )
       ;(mockPrisma.document.findMany as jest.Mock)
         .mockResolvedValueOnce(firstBatch)
-        .mockResolvedValueOnce([dbDocument(1001, '2023-05')])
+        .mockResolvedValueOnce([
+          dbDocument(1001, '2023-05', '2023-05-01T00:00:00.000Z'),
+        ])
 
       const result = await documentDAO.fetchOAYearDocuments(
         ['local-123'],
@@ -1511,6 +1520,7 @@ describe('DocumentDAO', () => {
       )
       expect(result.documents).toHaveLength(1001)
       expect(result.documents[0].uid).toBe('doc-1001')
+      expect(result.documents[0].year).toBe(2023)
     })
 
     it('does not query when the perimeter is empty', async () => {

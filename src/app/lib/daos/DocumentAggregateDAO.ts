@@ -31,6 +31,15 @@ export class DocumentAggregateDAO extends AbstractDAO {
     }
 
     const where: Prisma.DocumentWhereInput = {
+      publicationDateStart: {
+        not: null,
+        ...(opts?.fromYear && {
+          gte: new Date(Date.UTC(opts.fromYear, 0, 1)),
+        }),
+        ...(opts?.toYear && {
+          lt: new Date(Date.UTC(opts.toYear + 1, 0, 1)),
+        }),
+      },
       contributions: {
         some: {
           person: {
@@ -38,16 +47,6 @@ export class DocumentAggregateDAO extends AbstractDAO {
           },
         },
       },
-      ...((opts?.fromYear || opts?.toYear) && {
-        publicationDateStart: {
-          ...(opts?.fromYear && {
-            gte: new Date(Date.UTC(opts.fromYear, 0, 1)),
-          }),
-          ...(opts?.toYear && {
-            lt: new Date(Date.UTC(opts.toYear + 1, 0, 1)),
-          }),
-        },
-      }),
     }
 
     const docs = await fetchInBatches((cursorId, batchSize) =>
@@ -56,7 +55,6 @@ export class DocumentAggregateDAO extends AbstractDAO {
         select: {
           id: true,
           publicationDateStart: true,
-          publicationDate: true,
           subjects: {
             select: {
               uid: true,
@@ -81,27 +79,11 @@ export class DocumentAggregateDAO extends AbstractDAO {
       }),
     )
 
-    const yearOf = (d: {
-      publicationDateStart: Date | null
-      publicationDate: string | null
-    }): number | null => {
-      if (d.publicationDateStart) return d.publicationDateStart.getUTCFullYear()
-      if (d.publicationDate) {
-        const m = d.publicationDate.match(/^(\d{4})/)
-        if (m) {
-          const y = Number(m[1])
-          if (!Number.isNaN(y) && y > 0) return y
-        }
-      }
-      return null
-    }
-
     const out: DocumentForWordStreamAggregation[] = []
 
     for (const d of docs) {
-      const year = yearOf(d)
-      if (opts?.fromYear && year !== null && year < opts.fromYear) continue
-      if (opts?.toYear && year !== null && year > opts.toYear) continue
+      // Never null: the where clause requires publicationDateStart.
+      const year = d.publicationDateStart!.getUTCFullYear()
 
       // exclude ALL queried contributors from coauthors
       const coauthors: WordStreamCoAuthors[] = (d.contributions || [])

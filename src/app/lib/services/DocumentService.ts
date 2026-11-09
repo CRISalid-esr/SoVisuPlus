@@ -19,7 +19,6 @@ import {
 } from '@/lib/daos/HalDepositDAO'
 import { HalDeposit } from '@/types/HalDeposit'
 import { Person } from '@/types/Person'
-import dayjs from 'dayjs'
 import { Literal, LiteralJson } from '@/types/Literal'
 import { ContributionActionParameters } from '@/types/ContributionAction'
 import { InputJsonValue } from '@prisma/client/runtime/library'
@@ -255,16 +254,9 @@ export class DocumentService {
       )
       const publicationsPerYear = documents.reduce<
         Record<number, DashboardDocumentData[]>
-      >((acc, doc) => {
-        const publicationDate = doc.publicationDate
-        if (publicationDate) {
-          const parsedDate = dayjs(publicationDate)
-          if (parsedDate.isValid()) {
-            const year = parsedDate.year()
-            acc[year] ??= []
-            acc[year].push(doc)
-          }
-        }
+      >((acc, { year, ...doc }) => {
+        acc[year] ??= []
+        acc[year].push(doc)
         return acc
       }, {})
       // The perimeter is what separates the perspective's own contributors from

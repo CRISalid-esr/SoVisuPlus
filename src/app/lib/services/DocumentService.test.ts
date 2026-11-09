@@ -219,6 +219,7 @@ describe('DocumentService', () => {
     const mockResponse = {
       documents: [
         {
+          year: 2022,
           uid: 'doc-123',
           oaStatus: 'GREEN',
           publicationDate: '2022',
@@ -299,6 +300,29 @@ describe('DocumentService', () => {
       2020,
       2024,
     )
+  })
+
+  it('groups documents by the year computed from publicationDateStart', async () => {
+    const doc = {
+      uid: 'doc-1',
+      oaStatus: null,
+      // Display string disagrees with the start year: the start year wins.
+      publicationDate: '2021-12',
+      upwOAStatus: null,
+      contributions: [],
+    }
+    mockFetchOAYearDocuments.mockResolvedValue({
+      documents: [{ ...doc, year: 2022 }],
+    })
+
+    const { publicationsPerYear } = await documentService.documentsPerYear(
+      'local-124',
+      'person',
+      2020,
+      2024,
+    )
+
+    expect(publicationsPerYear).toEqual({ 2022: [doc] })
   })
 
   it('returns the oldest publication year of the perspective perimeter', async () => {

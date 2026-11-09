@@ -1043,7 +1043,7 @@ export class DocumentDAO extends AbstractDAO {
       process.env.PERSPECTIVE_ROLES_FILTER,
     )
     return {
-      publicationDate: { not: null },
+      publicationDateStart: { not: null },
       contributions: {
         some: {
           person: {
@@ -1077,7 +1077,7 @@ export class DocumentDAO extends AbstractDAO {
     contributorUids: string[],
     fromYear: number,
     toYear: number,
-  ): Promise<{ documents: DashboardDocumentData[] }> {
+  ): Promise<{ documents: (DashboardDocumentData & { year: number })[] }> {
     if (contributorUids.length === 0) return { documents: [] }
     const where: Prisma.DocumentWhereInput = {
       ...this.dashboardDocumentsWhere(contributorUids),
@@ -1094,6 +1094,7 @@ export class DocumentDAO extends AbstractDAO {
           uid: true,
           oaStatus: true,
           publicationDate: true,
+          publicationDateStart: true,
           upwOAStatus: true,
           contributions: {
             select: {
@@ -1115,10 +1116,14 @@ export class DocumentDAO extends AbstractDAO {
 
     return {
       documents: dbDocuments
-        .sort((a, b) =>
-          (b.publicationDate ?? '').localeCompare(a.publicationDate ?? ''),
+        .sort(
+          (a, b) =>
+            (b.publicationDateStart?.getTime() ?? 0) -
+            (a.publicationDateStart?.getTime() ?? 0),
         )
         .map((doc) => ({
+          // Never null: the where clause requires publicationDateStart.
+          year: doc.publicationDateStart!.getUTCFullYear(),
           uid: doc.uid,
           oaStatus: doc.oaStatus,
           publicationDate: doc.publicationDate,
