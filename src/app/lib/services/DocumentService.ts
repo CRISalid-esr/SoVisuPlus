@@ -19,7 +19,6 @@ import {
 } from '@/lib/daos/HalDepositDAO'
 import { HalDeposit } from '@/types/HalDeposit'
 import { Person } from '@/types/Person'
-import dayjs from 'dayjs'
 import { Literal, LiteralJson } from '@/types/Literal'
 import { ContributionActionParameters } from '@/types/ContributionAction'
 import { InputJsonValue } from '@prisma/client/runtime/library'
@@ -171,14 +170,12 @@ export class DocumentService {
       case 'team':
         // One-hop expansion through organization relationships; the
         // per-group perimeter rules live in the DAO.
-        contributorUids = (
-          contributorUid
-            ? await this.personDAO.fetchPeopleByOrganizationPerimeter(
-                contributorUid,
-                contributorType,
-              )
-            : []
-        ).map((person) => person.uid)
+        contributorUids = contributorUid
+          ? await this.personDAO.fetchPersonUidsByOrganizationPerimeter(
+              contributorUid,
+              contributorType,
+            )
+          : []
         break
     }
 
@@ -227,26 +224,39 @@ export class DocumentService {
     }
   }
 
-  async documentsPerYear(contributorUid: string, contributorType: AgentType) {
+  /** Oldest publication year of the perspective, to bound the dashboard year range. */
+  async oldestPublicationYear(
+    contributorUid: string,
+    contributorType: AgentType,
+  ): Promise<number | null> {
+    const contributorUids = await this.buildContributorUidArray(
+      contributorUid,
+      contributorType,
+    )
+    return this.documentDAO.fetchOldestPublicationYear(contributorUids)
+  }
+
+  async documentsPerYear(
+    contributorUid: string,
+    contributorType: AgentType,
+    fromYear: number,
+    toYear: number,
+  ) {
     const contributorUids = await this.buildContributorUidArray(
       contributorUid,
       contributorType,
     )
     try {
-      const { documents } =
-        await this.documentDAO.fetchOAYearDocuments(contributorUids)
+      const { documents } = await this.documentDAO.fetchOAYearDocuments(
+        contributorUids,
+        fromYear,
+        toYear,
+      )
       const publicationsPerYear = documents.reduce<
         Record<number, DashboardDocumentData[]>
-      >((acc, doc) => {
-        const publicationDate = doc.publicationDate
-        if (publicationDate) {
-          const parsedDate = dayjs(publicationDate)
-          if (parsedDate.isValid()) {
-            const year = parsedDate.year()
-            acc[year] ??= []
-            acc[year].push(doc)
-          }
-        }
+      >((acc, { year, ...doc }) => {
+        acc[year] ??= []
+        acc[year].push(doc)
         return acc
       }, {})
       // The perimeter is what separates the perspective's own contributors from

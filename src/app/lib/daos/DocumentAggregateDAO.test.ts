@@ -37,7 +37,6 @@ describe('DocumentAggregateDAO', () => {
     ;(mockPrisma.document.findMany as jest.Mock).mockResolvedValue([
       {
         publicationDateStart: new Date('2018-05-04T00:00:00.000Z'),
-        publicationDate: null,
         subjects: [
           {
             uid: 'c1',
@@ -75,8 +74,7 @@ describe('DocumentAggregateDAO', () => {
         ],
       },
       {
-        publicationDateStart: null,
-        publicationDate: '2019-03',
+        publicationDateStart: new Date('2019-03-01T00:00:00.000Z'),
         subjects: [],
         contributions: [
           {
@@ -98,6 +96,7 @@ describe('DocumentAggregateDAO', () => {
     // Assert: prisma call shape
     expect(mockPrisma.document.findMany).toHaveBeenCalledWith({
       where: {
+        publicationDateStart: { not: null },
         contributions: {
           some: {
             person: {
@@ -107,8 +106,8 @@ describe('DocumentAggregateDAO', () => {
         },
       },
       select: {
+        id: true,
         publicationDateStart: true,
-        publicationDate: true,
         subjects: {
           select: {
             uid: true,
@@ -129,6 +128,8 @@ describe('DocumentAggregateDAO', () => {
           },
         },
       },
+      orderBy: { id: 'asc' },
+      take: 1000,
     })
 
     // Assert: output rows
@@ -168,65 +169,52 @@ describe('DocumentAggregateDAO', () => {
     expect(r2.coauthors).toEqual([])
   })
 
-  it('applies fromYear/toYear filters', async () => {
+  it('applies fromYear/toYear filters in the query', async () => {
     ;(mockPrisma.document.findMany as jest.Mock).mockResolvedValue([
       {
-        publicationDateStart: new Date('2010-01-01T00:00:00.000Z'),
-        publicationDate: null,
-        subjects: [],
-        contributions: [
-          {
-            person: {
-              uid: 'p1',
-              displayName: 'A',
-              normalizedName: 'a',
-              firstName: 'A',
-              lastName: 'A',
-            },
-          },
-        ],
-      },
-      {
         publicationDateStart: new Date('2015-06-01T00:00:00.000Z'),
-        publicationDate: null,
         subjects: [],
-        contributions: [
-          {
-            person: {
-              uid: 'p2',
-              displayName: 'B',
-              normalizedName: 'b',
-              firstName: 'B',
-              lastName: 'B',
-            },
-          },
-        ],
-      },
-      {
-        publicationDateStart: null,
-        publicationDate: '2020-02',
-        subjects: [],
-        contributions: [
-          {
-            person: {
-              uid: 'p3',
-              displayName: 'C',
-              normalizedName: 'c',
-              firstName: 'C',
-              lastName: 'C',
-            },
-          },
-        ],
+        contributions: [],
       },
     ])
 
-    const res = await dao.fetchDocsForPersonAggregation(['p1', 'p2', 'p3'], {
+    const res = await dao.fetchDocsForPersonAggregation(['p1'], {
       fromYear: 2013,
       toYear: 2018,
     })
 
-    // Only 2015 stays in range
     expect(res).toHaveLength(1)
     expect(res[0].year).toBe(2015)
+    expect(mockPrisma.document.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          publicationDateStart: {
+            not: null,
+            gte: new Date('2013-01-01T00:00:00.000Z'),
+            lt: new Date('2019-01-01T00:00:00.000Z'),
+          },
+        }),
+      }),
+    )
+  })
+
+  it('loads documents in batches', async () => {
+    const doc = (id: number) => ({
+      id,
+      publicationDateStart: new Date('2020-01-01T00:00:00.000Z'),
+      subjects: [],
+      contributions: [],
+    })
+    ;(mockPrisma.document.findMany as jest.Mock)
+      .mockResolvedValueOnce(Array.from({ length: 1000 }, (_, i) => doc(i + 1)))
+      .mockResolvedValueOnce([doc(1001)])
+
+    const res = await dao.fetchDocsForPersonAggregation(['p1'])
+
+    expect(res).toHaveLength(1001)
+    expect(mockPrisma.document.findMany).toHaveBeenCalledTimes(2)
+    expect(mockPrisma.document.findMany).toHaveBeenLastCalledWith(
+      expect.objectContaining({ cursor: { id: 1000 }, skip: 1, take: 1000 }),
+    )
   })
 })

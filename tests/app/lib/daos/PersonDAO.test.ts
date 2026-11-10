@@ -383,7 +383,7 @@ describe('PersonDAO Integration Tests', () => {
     expect(unlinked!.personId).toBeNull()
   })
 
-  describe('fetchPeopleByOrganizationPerimeter', () => {
+  describe('fetchPersonUidsByOrganizationPerimeter', () => {
     const makeOrg = (
       uid: string,
       acronym: string,
@@ -539,23 +539,19 @@ describe('PersonDAO Integration Tests', () => {
     })
 
     test('institution: members of research units member_of it, no direct members, no support units', async () => {
-      const people = await personDAO.fetchPeopleByOrganizationPerimeter(
+      const uids = await personDAO.fetchPersonUidsByOrganizationPerimeter(
         'local-UP1',
         'institution',
       )
-      expect(people.map((p) => p.uid).sort()).toEqual(['p-ru1'])
+      expect(uids.sort()).toEqual(['p-ru1'])
     })
 
     test('other_structure: direct members plus members of attached units', async () => {
-      const people = await personDAO.fetchPeopleByOrganizationPerimeter(
+      const uids = await personDAO.fetchPersonUidsByOrganizationPerimeter(
         'local-FAC1',
         'other_structure',
       )
-      expect(people.map((p) => p.uid).sort()).toEqual([
-        'p-fac1',
-        'p-ru2',
-        'p-t1',
-      ])
+      expect(uids.sort()).toEqual(['p-fac1', 'p-ru2', 'p-t1'])
     })
 
     test('fetched person publishes one-hop authorization perimeters', async () => {
@@ -574,18 +570,18 @@ describe('PersonDAO Integration Tests', () => {
     })
 
     test('research_unit and team: direct members only', async () => {
-      const researchUnitPeople =
-        await personDAO.fetchPeopleByOrganizationPerimeter(
+      const researchUnitUids =
+        await personDAO.fetchPersonUidsByOrganizationPerimeter(
           'local-RU1',
           'research_unit',
         )
-      expect(researchUnitPeople.map((p) => p.uid)).toEqual(['p-ru1'])
+      expect(researchUnitUids).toEqual(['p-ru1'])
 
-      const teamPeople = await personDAO.fetchPeopleByOrganizationPerimeter(
+      const teamUids = await personDAO.fetchPersonUidsByOrganizationPerimeter(
         'local-T1',
         'team',
       )
-      expect(teamPeople.map((p) => p.uid)).toEqual(['p-t1'])
+      expect(teamUids).toEqual(['p-t1'])
     })
   })
 
