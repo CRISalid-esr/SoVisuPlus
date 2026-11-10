@@ -12,7 +12,7 @@ export type WordStreamCoAuthors = Pick<
 >
 
 export type DocumentForWordStreamAggregation = {
-  year: number | null
+  year: number
   subjects: WordStreamConcept[]
   coauthors: WordStreamCoAuthors[]
 }
@@ -82,8 +82,9 @@ export class DocumentAggregateDAO extends AbstractDAO {
     const out: DocumentForWordStreamAggregation[] = []
 
     for (const d of docs) {
-      // Never null: the where clause requires publicationDateStart.
-      const year = d.publicationDateStart!.getUTCFullYear()
+      // Already excluded by the where clause; narrows the Prisma type.
+      if (d.publicationDateStart === null) continue
+      const year = d.publicationDateStart.getUTCFullYear()
 
       // exclude ALL queried contributors from coauthors
       const coauthors: WordStreamCoAuthors[] = (d.contributions || [])

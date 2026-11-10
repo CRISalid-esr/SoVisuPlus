@@ -1116,14 +1116,17 @@ export class DocumentDAO extends AbstractDAO {
 
     return {
       documents: dbDocuments
+        // Already guaranteed by the where clause; narrows the Prisma type.
+        .filter(
+          (doc): doc is typeof doc & { publicationDateStart: Date } =>
+            doc.publicationDateStart !== null,
+        )
         .sort(
           (a, b) =>
-            (b.publicationDateStart?.getTime() ?? 0) -
-            (a.publicationDateStart?.getTime() ?? 0),
+            b.publicationDateStart.getTime() - a.publicationDateStart.getTime(),
         )
         .map((doc) => ({
-          // Never null: the where clause requires publicationDateStart.
-          year: doc.publicationDateStart!.getUTCFullYear(),
+          year: doc.publicationDateStart.getUTCFullYear(),
           uid: doc.uid,
           oaStatus: doc.oaStatus,
           publicationDate: doc.publicationDate,
