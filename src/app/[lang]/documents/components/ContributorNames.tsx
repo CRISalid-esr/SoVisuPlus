@@ -42,12 +42,18 @@ const ContributorNames = ({
 
   const handleMouseOver = (event: MouseEvent<HTMLSpanElement>) => {
     const nameElement = (event.target as HTMLElement).closest<HTMLElement>(
-      '[data-index]',
+      '[data-contributor-index]',
     )
-    if (!nameElement || nameElement === hovered?.anchorEl) return
-    const { contribution } =
-      namedContributions[Number(nameElement.dataset.index)]
-    setHovered({ contribution, anchorEl: nameElement })
+    if (
+      !nameElement ||
+      !event.currentTarget.contains(nameElement) ||
+      nameElement === hovered?.anchorEl
+    )
+      return
+    const named =
+      namedContributions[Number(nameElement.dataset.contributorIndex)]
+    if (!named) return
+    setHovered({ contribution: named.contribution, anchorEl: nameElement })
   }
 
   return (
@@ -70,7 +76,7 @@ const ContributorNames = ({
             ).map(({ contribution, name }, index) => (
               <Fragment key={contribution.person.uid}>
                 {index > 0 && ', '}
-                <span data-index={index} className={styles.contributorName}>
+                <span data-contributor-index={index} className={styles.contributorName}>
                   <Highlighter
                     highlightClassName='highlight'
                     searchWords={searchWords}
