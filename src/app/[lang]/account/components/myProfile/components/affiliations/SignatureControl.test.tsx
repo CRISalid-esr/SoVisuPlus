@@ -95,6 +95,32 @@ describe('SignatureControl Component', () => {
     ).toBeInTheDocument()
   })
 
+  it("displays the perspective person's signatures when viewing another account", () => {
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({
+        user: {
+          ...mockState.user,
+          ownPerspective: false,
+          currentPerspective: {
+            uid: 'local-asmith',
+            type: 'person',
+            membershipSignatures: ['XYZ_Signature'],
+          },
+        },
+      }),
+    )
+
+    render(
+      <I18nProvider i18n={i18n}>
+        <SignatureControl />
+      </I18nProvider>,
+    )
+    expect(screen.getByText('XYZ_Signature')).toBeInTheDocument()
+    expect(
+      screen.queryByText('ABC_Signature,DEF_Signature'),
+    ).not.toBeInTheDocument()
+  })
+
   it('signature copy button works', async () => {
     render(
       <I18nProvider i18n={i18n}>

@@ -88,6 +88,30 @@ describe('UnitsControl Component', () => {
     ).toBeInTheDocument()
   })
 
+  it("displays the perspective person's memberships when viewing another account", () => {
+    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({
+        user: {
+          ...mockState.user,
+          ownPerspective: false,
+          currentPerspective: {
+            uid: 'local-asmith',
+            type: 'person',
+            membershipAcronyms: ['XYZ'],
+          },
+        },
+      }),
+    )
+
+    render(
+      <I18nProvider i18n={i18n}>
+        <UnitsControl />
+      </I18nProvider>,
+    )
+    expect(screen.getByText('XYZ')).toBeInTheDocument()
+    expect(screen.queryByText('ABC,DEF')).not.toBeInTheDocument()
+  })
+
   it('displays message if no membership', async () => {
     const mockStateWithoutUnits = {
       ...mockState,

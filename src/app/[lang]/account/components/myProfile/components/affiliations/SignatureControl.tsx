@@ -1,13 +1,20 @@
 'use client'
 import { Box, IconButton, Paper, Snackbar, Typography } from '@mui/material'
 import useStore from '@/stores/global_store'
+import { isPerson } from '@/types/Person'
 import { Trans } from '@lingui/react'
 import { useState } from 'react'
 import { ContentCopy } from '@mui/icons-material'
 
 const SignatureControl = () => {
-  const { connectedUser } = useStore((state) => state.user)
-  const person = connectedUser?.person
+  const { connectedUser, currentPerspective, ownPerspective } = useStore(
+    (state) => state.user,
+  )
+  // When viewing another person's account, read their affiliations from currentPerspective
+  const person =
+    ownPerspective || !currentPerspective || !isPerson(currentPerspective)
+      ? connectedUser?.person
+      : currentPerspective
   const signatures = person?.membershipSignatures ?? []
   const [open, setOpen] = useState<boolean>(false)
 
