@@ -81,9 +81,14 @@ const DashboardPage = () => {
   // Year range bounds: the oldest publication year of the perspective sets the
   // selectable years and the default range (last five years).
   useEffect(() => {
-    const contributorUid = currentPerspective?.uid
-    const contributorType = currentPerspective?.type
+    const contributorUid = uid
+    const contributorType = entityType
     if (!contributorType || !contributorUid) return
+    // Drop the previous perspective's data so it is never shown under the new
+    // perspective's name, even if the requests below fail.
+    setDocuments({})
+    setPerimeterUids([])
+    setOldestYear(null)
     const controller = new AbortController()
     const fetchOldestYear = async () => {
       setLoading(true)
@@ -112,13 +117,13 @@ const DashboardPage = () => {
     }
     fetchOldestYear()
     return () => controller.abort()
-  }, [currentPerspective, currentYear, initYearRangeForPerspective])
+  }, [uid, entityType, currentYear, initYearRangeForPerspective])
 
   // Documents of the selected year range, once the range belongs to the
   // current perspective (avoids a request with the previous perspective's range).
   useEffect(() => {
-    const contributorUid = currentPerspective?.uid
-    const contributorType = currentPerspective?.type
+    const contributorUid = uid
+    const contributorType = entityType
     if (!contributorType || !contributorUid) return
     if (yearRangePerspectiveUid !== contributorUid) return
     const [fromYear, toYear] = yearRange
@@ -146,7 +151,7 @@ const DashboardPage = () => {
     }
     fetchData()
     return () => controller.abort()
-  }, [currentPerspective, yearRange, yearRangePerspectiveUid])
+  }, [uid, entityType, yearRange, yearRangePerspectiveUid])
 
   const wsSliderHaveChanges = !(
     pendingWSTopN === appliedWSTopN &&
