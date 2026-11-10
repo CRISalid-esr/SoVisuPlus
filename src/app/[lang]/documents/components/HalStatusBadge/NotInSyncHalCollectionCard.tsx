@@ -18,14 +18,20 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { Plural, Trans } from '@lingui/react/macro'
 import { t } from '@lingui/core/macro'
+import { Trans as TransById } from '@lingui/react'
 import { joinWithConjunction } from '@/utils/joinWithConjunction'
 import { Cached, Close, OpenInNew } from '@mui/icons-material'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { HalSubmitType } from '@prisma/client'
+
+// Affiliation links are hidden (plain text shown instead) until updating a document in HAL (PUT) is implemented
+const AFFILIATION_LINK_ENABLED = false
 
 export type NotInSyncHalCollectionCardProps = {
   update: boolean
   acronyms: string[] | null
   icon?: React.ReactElement | null
+  halSubmitType: HalSubmitType | null
   halSubmitTypeStr: string | null
   isOutOfCollection: boolean
   halUrl: string | null
@@ -37,6 +43,7 @@ const NotInSyncHalCollectionCard = ({
   icon,
   update,
   acronyms,
+  halSubmitType,
   halSubmitTypeStr,
   isOutOfCollection,
   halUrl,
@@ -133,7 +140,35 @@ const NotInSyncHalCollectionCard = ({
             {halSubmitTypeStr}
           </Typography>
 
-          {isOutOfCollection && (
+          {isOutOfCollection && numberOfAcronyms === 0 && (
+            <Stack alignItems='center' spacing={theme.spacing(2)}>
+              <Alert severity='warning' sx={{ wordBreak: 'break-word' }}>
+                <AlertTitle>{t`documents_page_hal_status_badge_no_collection_tooltip_card_info_box_header`}</AlertTitle>
+                <Box sx={{ alignItems: 'center' }}>
+                  <TransById
+                    id='documents_page_hal_status_badge_no_collection_tooltip_card_info_box_message'
+                    values={{ halSubmitType: halSubmitType ?? 'other' }}
+                  />{' '}
+                  {t`documents_page_hal_status_badge_no_collection_tooltip_card_info_box_check`}{' '}
+                  {AFFILIATION_LINK_ENABLED ? (
+                    <Link
+                      component={'button'}
+                      onClick={navigateToAuthorsPage}
+                      sx={{ padding: 0, verticalAlign: 'baseline' }}
+                      aria-label='see affiliations'
+                    >
+                      {t`documents_page_hal_status_badge_no_collection_tooltip_card_info_box_link`}
+                    </Link>
+                  ) : (
+                    t`documents_page_hal_status_badge_no_collection_tooltip_card_info_box_link`
+                  )}
+                  .
+                </Box>
+              </Alert>
+            </Stack>
+          )}
+
+          {isOutOfCollection && numberOfAcronyms > 0 && (
             <Stack alignItems='center' spacing={theme.spacing(2)}>
               <Alert severity='warning' sx={{ wordBreak: 'break-word' }}>
                 <AlertTitle>
@@ -149,13 +184,19 @@ const NotInSyncHalCollectionCard = ({
                     one={`${halSubmitTypeStr} documents_page_hal_status_badge_outside_collection_tooltip_card_info_box_message ${formattedAcronyms}`}
                     other={`${halSubmitTypeStr} documents_page_hal_status_badge_outside_collections_tooltip_card_info_box_message ${formattedAcronyms}`}
                   />
-                  {t`documents_page_hal_status_badge_outside_collection_tooltip_card_info_box_link`}
-                  <Link
-                    component={'button'}
-                    onClick={navigateToAuthorsPage}
-                    sx={{ padding: 0, verticalAlign: 'baseline' }}
-                    aria-label='see affiliation'
-                  ></Link>
+                  {AFFILIATION_LINK_ENABLED ? (
+                    <Link
+                      component={'button'}
+                      onClick={navigateToAuthorsPage}
+                      sx={{ padding: 0, verticalAlign: 'baseline' }}
+                      aria-label='see affiliation'
+                    >
+                      {t`documents_page_hal_status_badge_outside_collection_tooltip_card_info_box_link`}
+                    </Link>
+                  ) : (
+                    t`documents_page_hal_status_badge_outside_collection_tooltip_card_info_box_link`
+                  )}
+                  .
                 </Box>
               </Alert>
             </Stack>

@@ -4,6 +4,7 @@ import { i18n } from '@lingui/core'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import { t } from '@lingui/core/macro'
+import { HalSubmitType } from '@prisma/client'
 import NotInSyncHalCollectionCard, {
   NotInSyncHalCollectionCardProps,
 } from '@/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard'
@@ -54,6 +55,7 @@ describe('NotInSyncHalCollectionCard Component', () => {
       isOutOfCollection: true,
       icon: icon,
       acronyms: ['ABC'],
+      halSubmitType: HalSubmitType.file,
       halSubmitTypeStr: t`hal_submit_type_file`,
       halUrl: 'url',
       onClose: mockClose,
@@ -89,13 +91,16 @@ describe('NotInSyncHalCollectionCard Component', () => {
         { exact: false },
       ),
     ).toBeInTheDocument()
-    const link = screen.getByRole('button', { name: /see affiliation/ })
-    expect(link).toBeInTheDocument()
-    fireEvent.click(link)
-    expect(mockRouter.push).toHaveBeenCalledTimes(1)
-    let pushedUrl = (mockRouter.push as jest.Mock).mock.calls[0][0] as string
-    expect(pushedUrl).toContain('/en/documents/doc1')
-    expect(pushedUrl).toContain('tab=authors')
+    // Hidden until updating a document in HAL is implemented
+    expect(
+      screen.queryByRole('button', { name: 'see affiliation' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(
+        'documents_page_hal_status_badge_outside_collection_tooltip_card_info_box_link',
+        { exact: false },
+      ),
+    ).toBeInTheDocument()
 
     //with halUrl set and update true
     expect(
@@ -113,8 +118,8 @@ describe('NotInSyncHalCollectionCard Component', () => {
     )
     expect(updateInHALButton).toBeInTheDocument()
     if (updateInHALButton) fireEvent.click(updateInHALButton)
-    expect(mockRouter.push).toHaveBeenCalledTimes(2)
-    pushedUrl = (mockRouter.push as jest.Mock).mock.calls[1][0] as string
+    expect(mockRouter.push).toHaveBeenCalledTimes(1)
+    const pushedUrl = (mockRouter.push as jest.Mock).mock.calls[0][0] as string
     expect(pushedUrl).toContain('/en/documents/doc1')
     expect(pushedUrl).toContain('tab=update_in_hal')
 
@@ -137,6 +142,7 @@ describe('NotInSyncHalCollectionCard Component', () => {
       isOutOfCollection: true,
       icon: icon,
       acronyms: ['ABC', 'DEF'],
+      halSubmitType: HalSubmitType.file,
       halSubmitTypeStr: t`hal_submit_type_file`,
       halUrl: 'url',
       onClose: mockClose,
@@ -165,6 +171,7 @@ describe('NotInSyncHalCollectionCard Component', () => {
       isOutOfCollection: false,
       icon: icon,
       acronyms: ['ABC', 'DEF'],
+      halSubmitType: HalSubmitType.file,
       halSubmitTypeStr: t`hal_submit_type_file`,
       halUrl: 'url',
       onClose: mockClose,
@@ -201,6 +208,7 @@ describe('NotInSyncHalCollectionCard Component', () => {
       isOutOfCollection: true,
       icon: icon,
       acronyms: ['ABC', 'DEF'],
+      halSubmitType: HalSubmitType.file,
       halSubmitTypeStr: t`hal_submit_type_file`,
       halUrl: null,
       onClose: mockClose,
@@ -232,6 +240,7 @@ describe('NotInSyncHalCollectionCard Component', () => {
       isOutOfCollection: true,
       icon: icon,
       acronyms: ['ABC', 'DEF'],
+      halSubmitType: HalSubmitType.file,
       halSubmitTypeStr: t`hal_submit_type_file`,
       halUrl: 'url',
       onClose: mockClose,
@@ -257,5 +266,47 @@ describe('NotInSyncHalCollectionCard Component', () => {
       'documents_page_hal_status_badge_tooltip_card_see_file',
     )
     expect(seeFileButton).toBeInTheDocument()
+  })
+
+  it('displays the no collection message when no affiliation structure has a HAL collection', async () => {
+    renderComponent({
+      update: false,
+      isOutOfCollection: true,
+      icon: icon,
+      acronyms: [],
+      halSubmitType: HalSubmitType.notice,
+      halSubmitTypeStr: t`hal_submit_type_notice`,
+      halUrl: 'url',
+      onClose: mockClose,
+      documentUid: 'doc1',
+    })
+
+    expect(
+      screen.queryByText(
+        'documents_page_hal_status_badge_no_collection_tooltip_card_info_box_header',
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText(
+        'documents_page_hal_status_badge_no_collection_tooltip_card_info_box_message',
+        { exact: false },
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText(
+        'documents_page_hal_status_badge_outside_collection_tooltip_card_info_box_message',
+        { exact: false },
+      ),
+    ).not.toBeInTheDocument()
+    // Hidden until updating a document in HAL is implemented
+    expect(
+      screen.queryByRole('button', { name: 'see affiliations' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(
+        'documents_page_hal_status_badge_no_collection_tooltip_card_info_box_link',
+        { exact: false },
+      ),
+    ).toBeInTheDocument()
   })
 })

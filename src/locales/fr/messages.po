@@ -1556,9 +1556,26 @@ msgstr "Des différences ont été détectées entre SoVisu+ et HAL."
 msgid "documents_page_hal_status_badge_not_in_sync_with_hal_tooltip_card_update_button"
 msgstr "Mettre à jour sur HAL"
 
-#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:152
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:194
 msgid "documents_page_hal_status_badge_outside_collection_tooltip_card_info_box_link"
 msgstr "affiliation"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:146
+msgid "documents_page_hal_status_badge_no_collection_tooltip_card_info_box_header"
+msgstr "Absent des collections"
+
+#. js-lingui-explicit-id
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:148
+msgid "documents_page_hal_status_badge_no_collection_tooltip_card_info_box_message"
+msgstr "{halSubmitType, select, file {Le fichier} notice {La notice} annex {L'annexe} other {Le document}} ne figure dans aucune des collections de vos organismes de rattachement."
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:152
+msgid "documents_page_hal_status_badge_no_collection_tooltip_card_info_box_check"
+msgstr "Si vous pensez que c'est une erreur, vérifiez les"
+
+#: src/app/[lang]/documents/components/HalStatusBadge/NotInSyncHalCollectionCard.tsx:160
+msgid "documents_page_hal_status_badge_no_collection_tooltip_card_info_box_link"
+msgstr "affiliations"
 
 #: src/app/[lang]/documents/components/HalStatusBadge/OutsideHalMissingIdCard.tsx:102
 msgid "documents_page_hal_status_badge_tooltip_card_missing_id_create_id_label"
