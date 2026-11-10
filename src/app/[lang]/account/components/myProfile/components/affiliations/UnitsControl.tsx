@@ -1,12 +1,19 @@
 import { Paper, Typography } from '@mui/material'
 import useStore from '@/stores/global_store'
+import { isPerson } from '@/types/Person'
 import { Trans } from '@lingui/react'
 import { Plural } from '@lingui/react/macro'
 import React from 'react'
 
 const UnitsControl = () => {
-  const { connectedUser } = useStore((state) => state.user)
-  const person = connectedUser?.person
+  const { connectedUser, currentPerspective, ownPerspective } = useStore(
+    (state) => state.user,
+  )
+  // When viewing another person's account, read their affiliations from currentPerspective
+  const person =
+    ownPerspective || !currentPerspective || !isPerson(currentPerspective)
+      ? connectedUser?.person
+      : currentPerspective
   const units = person?.membershipAcronyms ?? []
   const nbUnits = units?.length || 0
 
