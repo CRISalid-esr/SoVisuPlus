@@ -175,6 +175,7 @@ const HalStatusCellBadge = ({
               update={hasBeenUpdated}
               icon={icon}
               acronyms={acronyms}
+              halSubmitType={halSubmitType}
               halSubmitTypeStr={halSubmitTypeTranslation(halSubmitType)}
               isOutOfCollection={isOutOfCollection}
               halUrl={halUrl}
