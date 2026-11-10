@@ -17,6 +17,7 @@ Each major feature is backed by a spec document in `specs/<branch-name>/prompt.m
 | `feat-make-search-fuzzy`                                            | [`specs/feat-make-search-fuzzy/prompt.md`](specs/feat-make-search-fuzzy/prompt.md)                                                                                       |
 | `882-no-self-deletion-of-idref-for-a-researcher`                    | [`specs/882-no-self-deletion-of-idref-for-a-researcher/prompt.md`](specs/882-no-self-deletion-of-idref-for-a-researcher/prompt.md)                                       |
 | `979-add-validation-button-in-account-page-for-account-editor-user` | [`specs/979-add-validation-button-in-account-page-for-account-editor-user/prompt.md`](specs/979-add-validation-button-in-account-page-for-account-editor-user/prompt.md) |
+| `870-allow-transient-sso`                                           | [`specs/870-allow-transient-sso/prompt.md`](specs/870-allow-transient-sso/prompt.md)                                                                                     |
 
 ## Git commits
 
