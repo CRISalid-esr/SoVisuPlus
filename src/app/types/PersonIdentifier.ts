@@ -4,6 +4,7 @@ import { PersonIdentifierWithRelations as DBPersonIdentifier } from '@/prisma-sc
 export type PersonIdentifierJson = {
   type: string
   value: string
+  validated: boolean
 }
 
 /**
@@ -12,14 +13,28 @@ export type PersonIdentifierJson = {
  * (manual add → false, authentication → true); it is never persisted as a
  * column — see specs/872-refactor-account-edition-workflow/prompt.md.
  */
-export type IdentifierMessagePayload = PersonIdentifierJson & {
+export type IdentifierMessagePayload = Pick<
+  PersonIdentifierJson,
+  'type' | 'value'
+> & {
   authenticated: boolean
 }
+
+/**
+ * Why an identifier write was rejected: the person already holds an identifier
+ * of that type, or the value belongs to another person.
+ */
+export type IdentifierConflictReason = 'slot_taken' | 'used_by_another_person'
+
+/** The two forms (idHal_s / idHal_i) under which one HAL identity is stored. */
+export type IdHalForms = { idhals?: string; idhali?: string }
 
 export class PersonIdentifier {
   constructor(
     public type: DbPersonIdentifierType,
     public value: string,
+    /** Confirmed by a privileged user without authentication. */
+    public validated: boolean = false,
   ) {
     this.value = this.value.trim()
     if (!this.value) {
@@ -106,7 +121,16 @@ export class PersonIdentifier {
     return {
       type: this.type,
       value: this.value,
+      validated: this.validated,
     }
+  }
+
+  /**
+   * Identifier fields sent to the graph. Only the listed fields are sent:
+   * the graph derives the validation from the operation, not from a flag.
+   */
+  toMessagePayload(authenticated: boolean): IdentifierMessagePayload {
+    return { type: this.type, value: this.value, authenticated }
   }
 
   static typeFromString(type: string): DbPersonIdentifierType {
@@ -137,14 +161,41 @@ export class PersonIdentifier {
       typeof json.type === 'string'
         ? PersonIdentifier.typeFromString(json.type)
         : json.type
-    return new PersonIdentifier(type, json.value)
+    return new PersonIdentifier(type, json.value, json.validated)
   }
 
   static fromDB(
-    identifier: Omit<DBPersonIdentifier, 'id' | 'personId' | 'orcidIdentifier'>,
+    identifier: Pick<DBPersonIdentifier, 'type' | 'value'> &
+      Partial<Pick<DBPersonIdentifier, 'validated'>>,
   ): PersonIdentifier {
-    return new PersonIdentifier(identifier.type, identifier.value)
+    return new PersonIdentifier(
+      identifier.type,
+      identifier.value,
+      identifier.validated ?? false,
+    )
   }
 }
+
+/** The two forms of an idHAL (one HAL account). */
+export const ID_HAL_TYPES: DbPersonIdentifierType[] = [
+  DbPersonIdentifierType.idhals,
+  DbPersonIdentifierType.idhali,
+]
+
+/** Whether the type is one of the two idHAL forms. */
+export const isIdHalType = (type: DbPersonIdentifierType): boolean =>
+  ID_HAL_TYPES.includes(type)
+
+/** The identifiers behind the idHAL forms of one HAL account. */
+export const idHalFormsToIdentifiers = (
+  forms: IdHalForms,
+): PersonIdentifier[] => [
+  ...(forms.idhals
+    ? [new PersonIdentifier(DbPersonIdentifierType.idhals, forms.idhals)]
+    : []),
+  ...(forms.idhali
+    ? [new PersonIdentifier(DbPersonIdentifierType.idhali, forms.idhali)]
+    : []),
+]
 
 export { DbPersonIdentifierType as PersonIdentifierType }

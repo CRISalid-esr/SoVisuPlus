@@ -14,6 +14,7 @@ import WebSocketListener from '@/lib/websocket/WebSocketListener'
 import { NavigationGuardProvider } from '@/app/[lang]/components/NavigationGuard/NavigationGuardProvider'
 import AiChatWidget from 'src/app/[lang]/components/AiChatWidget'
 import PerspectiveUnavailable from '@/app/[lang]/components/PerspectiveUnavailable'
+import { MAIN_CONTENT_OFFSET_VAR } from '@/app/[lang]/components/contentCenteredSnackbarSx'
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const [open, setOpen] = useState(true) // Determines if the drawer is expanded or collapsed
@@ -27,6 +28,9 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const searchParams = useSearchParams()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
+  // Width taken by the sidebar on the left of the main content
+  const sidebarOffset = isMobile ? '0px' : open ? '280px' : '72px'
 
   const handleToggleDrawer = () => {
     setOpen((prev) => !prev)
@@ -101,7 +105,13 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       >
         <WebSocketListener />
         <NavigationGuardProvider>
-          <Box sx={{ display: 'flex', height: '100vh' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              height: '100vh',
+              [MAIN_CONTENT_OFFSET_VAR]: sidebarOffset,
+            }}
+          >
             {/* AppBar for mobile */}
             {isMobile && <Appbar handleToggleDrawer={handleToggleDrawer} />}
             {/* Sidebar */}
@@ -116,8 +126,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               sx={{
                 flexGrow: 1,
                 padding: !isMobile ? '32px' : '24px 16px', // Add some padding on mobile
-                marginLeft:
-                  !isMobile && open ? '280px' : !isMobile ? '72px' : 0, // Adjust for Sidebar width
+                marginLeft: sidebarOffset, // Adjust for Sidebar width
                 marginTop: isMobile ? '64px' : 0, // Adjust for AppBar height (typically 64px on mobile)
                 overflowY: 'auto', // Allow scrolling if content overflows
                 position: 'relative', // Ensure main is properly positioned

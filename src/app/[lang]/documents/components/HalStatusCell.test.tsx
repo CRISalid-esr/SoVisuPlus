@@ -48,6 +48,7 @@ const mockState = {
             id: 1,
             uid: '12345',
             acronym: 'ABC',
+            halCollection: 'ABC-COLL',
             external: false,
             slug: 'org:abc',
           },
@@ -63,12 +64,17 @@ const mockState = {
             id: 2,
             uid: '67890',
             acronym: 'DEF',
+            halCollection: 'DEF-COLL',
             external: false,
             slug: 'org:def',
           },
         },
       ],
       membershipAcronyms: ['ABC', 'DEF'],
+      currentHalCollectionUnits: [
+        { acronym: 'ABC', halCollection: 'ABC-COLL' },
+        { acronym: 'DEF', halCollection: 'DEF-COLL' },
+      ],
       hasIdentifier: () => true,
     },
   },
@@ -320,7 +326,7 @@ describe('HalStatusCell Component', () => {
       true,
       [
         mockState.user.currentPerspective.memberships[0].organizationUnit
-          .acronym,
+          .halCollection,
       ],
       'file',
     )
@@ -340,6 +346,7 @@ describe('HalStatusCell Component', () => {
       expect.objectContaining({
         type: HalStatusCellType.InCollection,
         halSubmitType: 'file',
+        acronyms: ['ABC'],
         halUrl: 'https://url-to-record-1/',
       }),
       undefined,
@@ -380,7 +387,7 @@ describe('HalStatusCell Component', () => {
       true,
       [
         mockState.user.currentPerspective.memberships[0].organizationUnit
-          .acronym,
+          .halCollection,
       ],
       'file',
     )
@@ -415,7 +422,7 @@ describe('HalStatusCell Component', () => {
       true,
       [
         mockState.user.currentPerspective.memberships[0].organizationUnit
-          .acronym,
+          .halCollection,
       ],
       'notice',
     )

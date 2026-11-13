@@ -17,6 +17,7 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { AuthzContext } from '@/types/authz'
+import { KeycloakTokenService } from '@/lib/services/KeycloakTokenService'
 
 declare module 'next-auth' {
   interface User {
@@ -48,6 +49,8 @@ declare module 'next-auth/jwt' {
     userId?: number
     personUid?: string | null
     authz?: AuthzContext
+    /** Keycloak session id (`sid` claim): key of the tokens kept by `KeycloakTokenService`. */
+    sid?: string
   }
 }
 
@@ -108,16 +111,8 @@ const authOptions: AuthOptions = {
     maxAge: getJwtMaxAgeSeconds(),
   },
   callbacks: {
-    async signIn({
-      user,
-      account,
-      profile,
-    }: {
-      user: NextAuthUser
-      account: Account | null
-      profile?: Profile
-    }) {
-      console.info('signIn callback', user, account, profile)
+    async signIn({ user, profile }: { user: NextAuthUser; profile?: Profile }) {
+      console.info('signIn callback', user, profile)
       const userService = new UserService()
       const username = (profile as KeycloakProfile)?.preferred_username
       const authenticationProfile: AuthenticationProfile = {
@@ -139,7 +134,23 @@ const authOptions: AuthOptions = {
       user?: NextAuthUser
       profile?: Profile
     }) {
-      console.info('jwt callback', token, account, user, profile)
+      console.info('jwt callback', user, profile)
+      if (account) {
+        // Sign-in: the Keycloak tokens go to the KeycloakSession table, the JWT keeps the session id.
+        const sid =
+          (profile as KeycloakProfile & { sid?: string })?.sid ??
+          account.session_state
+        if (typeof sid === 'string' && sid) {
+          token.sid = sid
+          try {
+            await new KeycloakTokenService().storeSessionTokens(sid, account)
+          } catch (e) {
+            console.warn('[auth/jwt] failed to store the Keycloak tokens:', e)
+          }
+        } else {
+          console.warn('[auth/jwt] no Keycloak session id: tokens not stored')
+        }
+      }
       if (profile) {
         const username = (profile as KeycloakProfile)?.preferred_username
         // temporary : if username is an eppn, strip domain part
@@ -179,7 +190,6 @@ const authOptions: AuthOptions = {
       return token
     },
     async session({ session, token }: { session: Session; token: JWT }) {
-      console.info('session callback', session, token)
       if (token && session.user) {
         console.info('enriching session user from token')
         session.user.id = token.id as string
@@ -190,6 +200,13 @@ const authOptions: AuthOptions = {
         session.user.authz = token.authz
       }
       return session
+    },
+  },
+  events: {
+    async signOut({ token }: { token: JWT }) {
+      if (token?.sid) {
+        await new KeycloakTokenService().forgetSessionTokens(token.sid)
+      }
     },
   },
   pages: {

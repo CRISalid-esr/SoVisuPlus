@@ -22,7 +22,11 @@ import { PersonMembership } from '@/types/PersonMembership'
 import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { Literal } from '@/types/Literal'
 
-const makeResearchUnit = (uid: string, acronym: string) =>
+const makeResearchUnit = (
+  uid: string,
+  acronym: string,
+  halCollection: string | null = null,
+) =>
   new OrganizationUnit(
     uid,
     acronym,
@@ -35,6 +39,12 @@ const makeResearchUnit = (uid: string, acronym: string) =>
       { type: OrganizationIdentifierType.hal, value: '12345' },
       { type: OrganizationIdentifierType.ror, value: '67890' },
     ],
+    null,
+    false,
+    [],
+    false,
+    false,
+    halCollection,
   )
 
 describe('DocumentRecord type', () => {
@@ -138,7 +148,7 @@ describe('DocumentRecord type', () => {
     )
   })
 
-  it('DocumentRecord isResearchUnitInCollectionCodes function', async () => {
+  it('DocumentRecord matchingHalCollectionLabels function', async () => {
     const mockDocument = new DocumentRecord(
       'hal-123',
       'hal0001',
@@ -153,7 +163,7 @@ describe('DocumentRecord type', () => {
       HalSubmitType.file,
     )
 
-    expect(mockDocument.isResearchUnitInCollectionCodes(null)).toEqual(null)
+    expect(mockDocument.matchingHalCollectionLabels(null)).toEqual(null)
 
     const mockPerson1 = new Person(
       'P123',
@@ -167,8 +177,9 @@ describe('DocumentRecord type', () => {
         new PersonIdentifier(PersonIdentifierType.local, '12345'),
       ],
       [
-        new PersonMembership(makeResearchUnit('RS123', 'ABC')),
-        new PersonMembership(makeResearchUnit('RS123', 'DEF')),
+        new PersonMembership(makeResearchUnit('RS123', 'U-ABC', 'ABC')),
+        new PersonMembership(makeResearchUnit('RS123', 'U-DEF', 'DEF')),
+        new PersonMembership(makeResearchUnit('RS123', 'NOCOLL')),
       ],
     )
 
@@ -183,26 +194,101 @@ describe('DocumentRecord type', () => {
         new PersonIdentifier(PersonIdentifierType.orcid, '0000-0002-1825-0097'),
         new PersonIdentifier(PersonIdentifierType.local, '12345'),
       ],
-      [new PersonMembership(makeResearchUnit('RS123', 'GHI'))],
+      [
+        new PersonMembership(makeResearchUnit('RS123', 'U-GHI', 'GHI')),
+        // acronym equal to a collection code but no HAL collection: no match
+        new PersonMembership(makeResearchUnit('RS123', 'ABC')),
+      ],
     )
 
-    expect(mockDocument.isResearchUnitInCollectionCodes(mockPerson1)).toEqual([
-      'ABC',
-      'DEF',
+    expect(mockDocument.matchingHalCollectionLabels(mockPerson1)).toEqual([
+      'U-ABC',
+      'U-DEF',
     ])
-    expect(mockDocument.isResearchUnitInCollectionCodes(mockPerson2)).toEqual(
+    expect(mockDocument.matchingHalCollectionLabels(mockPerson2)).toEqual(null)
+
+    const mockPerson3 = new Person(
+      'P456',
+      true,
+      'example@example.com',
+      'Jane Doe',
+      'Jane',
+      'Doe',
+      [],
+      [
+        // ended membership: ignored
+        new PersonMembership(
+          makeResearchUnit('RS1', 'U-ABC', 'ABC'),
+          null,
+          'Mon Jan 01 2001',
+        ),
+        // membership ending in the future: current
+        new PersonMembership(
+          makeResearchUnit('RS2', 'U-DEF', 'DEF'),
+          null,
+          'Fri Jan 01 2999',
+        ),
+      ],
+    )
+
+    expect(mockDocument.matchingHalCollectionLabels(mockPerson3)).toEqual([
+      'U-DEF',
+    ])
+
+    const mockResearchUnit1 = makeResearchUnit('RS123', 'U-DEF', 'DEF')
+
+    const mockResearchUnit2 = makeResearchUnit('RS123', 'U-GHI', 'GHI')
+
+    const mockResearchUnit3 = makeResearchUnit('RS123', 'DEF')
+
+    expect(mockDocument.matchingHalCollectionLabels(mockResearchUnit1)).toEqual(
+      ['U-DEF'],
+    )
+    expect(mockDocument.matchingHalCollectionLabels(mockResearchUnit2)).toEqual(
       null,
     )
-
-    const mockResearchUnit1 = makeResearchUnit('RS123', 'DEF')
-
-    const mockResearchUnit2 = makeResearchUnit('RS123', 'GHI')
-
-    expect(
-      mockDocument.isResearchUnitInCollectionCodes(mockResearchUnit1),
-    ).toEqual(['DEF'])
-    expect(
-      mockDocument.isResearchUnitInCollectionCodes(mockResearchUnit2),
-    ).toEqual(null)
+    expect(mockDocument.matchingHalCollectionLabels(mockResearchUnit3)).toEqual(
+      null,
+    )
   })
+
+  it.each([
+    [OrganizationCategory.team, OrganizationGenericType.team],
+    [OrganizationCategory.institution, OrganizationGenericType.institution],
+  ])(
+    'matches HAL collections of any structure perspective (%s)',
+    (category, genericType) => {
+      const record = new DocumentRecord(
+        'hal-123',
+        'hal0001',
+        [],
+        [],
+        [SourceRecordType.Document],
+        new Date('2022-01-01T00:00:00.000Z'),
+        BibliographicPlatform.HAL,
+        [],
+        'https://example.com',
+        ['ABC'],
+        HalSubmitType.file,
+      )
+      const structure = new OrganizationUnit(
+        'S1',
+        'S-ABC',
+        [],
+        [],
+        category,
+        genericType,
+        null,
+        [],
+        null,
+        false,
+        [],
+        false,
+        false,
+        'ABC',
+      )
+
+      expect(record.matchingHalCollectionLabels(structure)).toEqual(['S-ABC'])
+    },
+  )
 })

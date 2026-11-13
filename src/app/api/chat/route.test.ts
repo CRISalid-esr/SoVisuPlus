@@ -2,11 +2,18 @@
  * @jest-environment node
  */
 import { getServerSession } from 'next-auth'
+import { getToken } from 'next-auth/jwt'
+import { KeycloakTokenService } from '@/lib/services/KeycloakTokenService'
 import { chatConfigService } from '@/lib/services/ChatConfigService'
 import { POST } from './route'
 
 jest.mock('next-auth', () => ({ getServerSession: jest.fn() }))
+jest.mock('next-auth/jwt', () => ({ getToken: jest.fn() }))
 jest.mock('@/app/auth/auth_options', () => ({ __esModule: true, default: {} }))
+jest.mock('@/lib/services/KeycloakTokenService', () => {
+  const service = { getSessionAccessToken: jest.fn() }
+  return { KeycloakTokenService: jest.fn(() => service) }
+})
 jest.mock('@/lib/services/ChatConfigService', () => ({
   chatConfigService: {
     getSystemPrompt: jest.fn().mockResolvedValue(''),
@@ -23,6 +30,9 @@ jest.mock('next/server', () => ({
 }))
 
 const mockSession = getServerSession as jest.Mock
+const mockGetToken = getToken as jest.Mock
+const mockAccessToken = new KeycloakTokenService()
+  .getSessionAccessToken as jest.Mock
 const mockGetSystemPrompt = chatConfigService.getSystemPrompt as jest.Mock
 const mockIsChatEnabled = chatConfigService.isChatEnabled as jest.Mock
 
@@ -33,6 +43,9 @@ const makeReq = (body: unknown) =>
     signal: new AbortController().signal,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }) as any
+
+const tokenExpiring = () =>
+  new Response('{"error":"token_expiring"}', { status: 401 })
 
 const ORIGINAL_FETCH = global.fetch
 
@@ -45,11 +58,16 @@ describe('POST /api/chat', () => {
       ...OLD_ENV,
       // Base URL only — the client appends the `/agents/{name}/chat` endpoint path.
       CRISALID_AGENTS_API_URL: 'http://agents.test',
-      CRISALID_AGENTS_API_KEY: 'secret-key',
+      NEXTAUTH_SECRET: 'nextauth-secret',
     }
     mockSession.mockResolvedValue({
       user: { username: 'jdoe', name: 'Jane Doe', personUid: 'person-123' },
     })
+    mockGetToken.mockResolvedValue({ username: 'jdoe', sid: 'sid-1' })
+    // Default: the store hands out the current access token without refreshing.
+    mockAccessToken.mockImplementation(async (_sid, options) =>
+      options?.forceRefresh ? 'access-2' : 'access-1',
+    )
     // Default: no system prompt configured (cleared by clearAllMocks above).
     mockGetSystemPrompt.mockResolvedValue('')
     mockIsChatEnabled.mockResolvedValue(true)
@@ -78,6 +96,54 @@ describe('POST /api/chat', () => {
     expect(mockSession).not.toHaveBeenCalled()
   })
 
+  it('requires reauthentication when the JWT carries no Keycloak session id', async () => {
+    mockGetToken.mockResolvedValue({ username: 'jdoe' })
+    global.fetch = jest.fn() as jest.Mock
+
+    const res = await POST(makeReq({ message: {}, messages: [] }))
+
+    expect(res.status).toBe(401)
+    expect(res.body).toEqual({ error: 'reauthentication_required' })
+    expect(mockAccessToken).not.toHaveBeenCalled()
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it('requires reauthentication when the JWT could not be read', async () => {
+    mockGetToken.mockResolvedValue(null)
+    global.fetch = jest.fn() as jest.Mock
+
+    const res = await POST(makeReq({ message: {}, messages: [] }))
+
+    expect(res.status).toBe(401)
+    expect(res.body).toEqual({ error: 'reauthentication_required' })
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it('requires reauthentication when the store has no usable token for the session', async () => {
+    mockAccessToken.mockResolvedValue(null)
+    global.fetch = jest.fn() as jest.Mock
+
+    const res = await POST(makeReq({ message: {}, messages: [] }))
+
+    expect(res.status).toBe(401)
+    expect(res.body).toEqual({ error: 'reauthentication_required' })
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  it('reads the JWT from the request with the NextAuth secret', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(new Response('ok\n', { status: 200 })) as jest.Mock
+    const req = makeReq({ message: {}, messages: [] })
+
+    await POST(req)
+
+    expect(mockGetToken).toHaveBeenCalledWith({
+      req,
+      secret: 'nextauth-secret',
+    })
+  })
+
   it('targets the agent named by CRISALID_AGENTS_AGENT', async () => {
     process.env.CRISALID_AGENTS_AGENT = 'sorbobot'
     global.fetch = jest
@@ -98,7 +164,7 @@ describe('POST /api/chat', () => {
     expect(url).toBe('http://agents.test/agents/sorbobot/chat')
   })
 
-  it('forwards the body with the api key and streams the response back', async () => {
+  it('forwards the body with the bearer token and streams the response back', async () => {
     const upstream = new Response('{"type":"start","messageId":"m1"}\n', {
       status: 200,
       headers: { 'Content-Type': 'application/x-ndjson' },
@@ -116,24 +182,20 @@ describe('POST /api/chat', () => {
     }
     const res = await POST(makeReq(body))
 
-    // Upstream call carries the secret key and the forwarded body.
+    // Upstream call carries the user's access token and the forwarded body.
     expect(global.fetch).toHaveBeenCalledTimes(1)
     const [url, init] = (global.fetch as jest.Mock).mock.calls[0]
     expect(url).toBe('http://agents.test/agents/generic_agent/chat')
     expect(init.method).toBe('POST')
-    expect(init.headers['x-api-key']).toBe('secret-key')
+    expect(init.headers.Authorization).toBe('Bearer access-1')
+    expect(init.headers).not.toHaveProperty('x-api-key')
 
-    // The user turn and conversation id are forwarded unchanged; the user-identity system
-    // message is prepended into `messages`.
+    // The user turn and conversation id are forwarded unchanged; without a configured system
+    // prompt nothing is prepended (the identity comes from the token, not the conversation).
     const forwarded = JSON.parse(init.body)
     expect(forwarded.conversationId).toBe('c1')
     expect(forwarded.message).toEqual(body.message)
-    expect(forwarded.messages).toHaveLength(1)
-    expect(forwarded.messages[0].role).toBe('system')
-    // No client `user` in the body → identity falls back to the session (name + person uid).
-    const identity = forwarded.messages[0].parts[0].text
-    expect(identity).toContain('Jane Doe')
-    expect(identity).toContain('person-123')
+    expect(forwarded.messages).toEqual([])
 
     // The upstream NDJSON is re-framed as SSE: one `data:` event per line, payload unchanged.
     expect(res.status).toBe(200)
@@ -179,14 +241,34 @@ describe('POST /api/chat', () => {
     expect(await res.text()).toBe('{"detail":"boom"}')
   })
 
+  it('passes an upstream 401 other than token_expiring through', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(
+        new Response('{"error":"wrong_audience"}', { status: 401 }),
+      ) as jest.Mock
+
+    const res = await POST(makeReq({ message: {}, messages: [] }))
+
+    expect(res.status).toBe(401)
+    expect(await res.text()).toBe('{"error":"wrong_audience"}')
+    // No forced refresh: only token_expiring triggers one.
+    expect(mockAccessToken).toHaveBeenCalledTimes(1)
+  })
+
   it('returns 502 when the upstream request fails', async () => {
     global.fetch = jest.fn().mockRejectedValue(new Error('down')) as jest.Mock
     const res = await POST(makeReq({ message: {}, messages: [] }))
     expect(res.status).toBe(502)
   })
 
-  it('proxies without an api key when none is configured', async () => {
-    delete process.env.CRISALID_AGENTS_API_KEY
+  it('returns 502 when the endpoint url is not configured', async () => {
+    delete process.env.CRISALID_AGENTS_API_URL
+    const res = await POST(makeReq({ message: {}, messages: [] }))
+    expect(res.status).toBe(502)
+  })
+
+  it('asks the store for the access token of the session before calling upstream', async () => {
     global.fetch = jest
       .fn()
       .mockResolvedValue(new Response('ok\n', { status: 200 })) as jest.Mock
@@ -194,14 +276,58 @@ describe('POST /api/chat', () => {
     const res = await POST(makeReq({ message: {}, messages: [] }))
 
     expect(res.status).toBe(200)
+    expect(mockAccessToken).toHaveBeenCalledTimes(1)
+    expect(mockAccessToken).toHaveBeenCalledWith('sid-1')
     const init = (global.fetch as jest.Mock).mock.calls[0][1]
-    expect(init.headers).not.toHaveProperty('x-api-key')
+    expect(init.headers.Authorization).toBe('Bearer access-1')
   })
 
-  it('returns 502 when the endpoint url is not configured', async () => {
-    delete process.env.CRISALID_AGENTS_API_URL
+  it('retries once with a force-refreshed token when upstream answers token_expiring', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(tokenExpiring())
+      .mockResolvedValueOnce(
+        new Response('{"type":"start","messageId":"m1"}\n', { status: 200 }),
+      ) as jest.Mock
+
     const res = await POST(makeReq({ message: {}, messages: [] }))
-    expect(res.status).toBe(502)
+
+    expect(res.status).toBe(200)
+    expect(await res.text()).toBe('data: {"type":"start","messageId":"m1"}\n\n')
+    expect(mockAccessToken).toHaveBeenCalledTimes(2)
+    expect(mockAccessToken).toHaveBeenLastCalledWith('sid-1', {
+      forceRefresh: true,
+    })
+    expect(global.fetch).toHaveBeenCalledTimes(2)
+    const calls = (global.fetch as jest.Mock).mock.calls
+    expect(calls[0][1].headers.Authorization).toBe('Bearer access-1')
+    expect(calls[1][1].headers.Authorization).toBe('Bearer access-2')
+    // The same body is resent.
+    expect(calls[1][1].body).toBe(calls[0][1].body)
+  })
+
+  it('requires reauthentication when the forced refresh fails', async () => {
+    mockAccessToken.mockImplementation(async (_sid, options) =>
+      options?.forceRefresh ? null : 'access-1',
+    )
+    global.fetch = jest.fn().mockResolvedValue(tokenExpiring()) as jest.Mock
+
+    const res = await POST(makeReq({ message: {}, messages: [] }))
+
+    expect(res.status).toBe(401)
+    expect(res.body).toEqual({ error: 'reauthentication_required' })
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('requires reauthentication when the retry is refused again', async () => {
+    global.fetch = jest.fn().mockResolvedValue(tokenExpiring()) as jest.Mock
+
+    const res = await POST(makeReq({ message: {}, messages: [] }))
+
+    expect(res.status).toBe(401)
+    expect(res.body).toEqual({ error: 'reauthentication_required' })
+    expect(mockAccessToken).toHaveBeenCalledTimes(2)
+    expect(global.fetch).toHaveBeenCalledTimes(2)
   })
 
   it('prepends the configured system prompt to the forwarded messages', async () => {
@@ -215,39 +341,32 @@ describe('POST /api/chat', () => {
       role: 'user',
       parts: [{ type: 'text', text: 'hi' }],
     }
+    const history = [
+      { id: 'a0', role: 'assistant', parts: [{ type: 'text', text: 'yo' }] },
+    ]
     await POST(
-      makeReq({ conversationId: 'c1', message: userMessage, messages: [] }),
+      makeReq({
+        conversationId: 'c1',
+        message: userMessage,
+        messages: history,
+      }),
     )
 
     const init = (global.fetch as jest.Mock).mock.calls[0][1]
     const forwarded = JSON.parse(init.body)
-    // System prompt first, then the user-identity message, then the conversation.
-    expect(forwarded.messages[0]).toEqual({
-      role: 'system',
-      parts: [{ type: 'text', text: 'Be concise. No jokes.' }],
-    })
-    expect(forwarded.messages[1].role).toBe('system')
-    expect(forwarded.messages[1].parts[0].text).toContain('person-123')
+    // System prompt first, then the conversation; no identity message.
+    expect(forwarded.messages).toEqual([
+      {
+        role: 'system',
+        parts: [{ type: 'text', text: 'Be concise. No jokes.' }],
+      },
+      ...history,
+    ])
     // The original user turn is preserved unchanged.
     expect(forwarded.message).toEqual(userMessage)
   })
 
-  it('always includes the user-identity system message even without a system prompt', async () => {
-    mockGetSystemPrompt.mockResolvedValue('')
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue(new Response('ok\n', { status: 200 })) as jest.Mock
-
-    await POST(makeReq({ message: {}, messages: [] }))
-
-    const init = (global.fetch as jest.Mock).mock.calls[0][1]
-    const messages = JSON.parse(init.body).messages
-    expect(messages).toHaveLength(1)
-    expect(messages[0].role).toBe('system')
-    expect(messages[0].parts[0].text).toContain('Jane Doe')
-  })
-
-  it('builds the identity from the client user (store) and does not forward it', async () => {
+  it('ignores a user field sent by the client', async () => {
     global.fetch = jest
       .fn()
       .mockResolvedValue(new Response('ok\n', { status: 200 })) as jest.Mock
@@ -262,28 +381,8 @@ describe('POST /api/chat', () => {
 
     const init = (global.fetch as jest.Mock).mock.calls[0][1]
     const forwarded = JSON.parse(init.body)
-    // `user` is consumed to build the prompt, not forwarded to the agent.
     expect(forwarded.user).toBeUndefined()
-    const identity = forwarded.messages[0].parts[0].text
-    expect(identity).toContain('Marie Curie')
-    expect(identity).toContain('p-999')
-    // Client identity wins over the session fallback.
-    expect(identity).not.toContain('Jane Doe')
-    expect(identity).not.toContain('person-123')
-  })
-
-  it('marks the person UID as unavailable when the session has none', async () => {
-    mockSession.mockResolvedValue({
-      user: { username: 'jdoe', personUid: null },
-    })
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue(new Response('ok\n', { status: 200 })) as jest.Mock
-
-    await POST(makeReq({ message: {}, messages: [] }))
-
-    const init = (global.fetch as jest.Mock).mock.calls[0][1]
-    const identity = JSON.parse(init.body).messages[0].parts[0].text
-    expect(identity).toContain('(unavailable)')
+    expect(forwarded.messages).toEqual([])
+    expect(init.body).not.toContain('Curie')
   })
 })

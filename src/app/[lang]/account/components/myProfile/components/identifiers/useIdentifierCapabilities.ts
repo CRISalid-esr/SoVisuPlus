@@ -5,12 +5,14 @@ import { useSession } from 'next-auth/react'
 import {
   abilityFromAuthzContext,
   EMPTY_PRINCIPAL,
+  hasFullAccess,
   hasWiderThanSelfPersonScope,
 } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { Person } from '@/types/Person'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
 import {
+  canValidateIdentifier,
   computeIdentifierCapabilities,
   identifierRemovalRequiresWideScope,
   identifierSupportsAuth,
@@ -25,6 +27,10 @@ export type IdentifierCapabilities = {
   canAddUnauthenticated: boolean
   /** Remove the identifier, honouring the authenticated/own-account rules. */
   canRemove: boolean
+  /** The identifier of this type is validated (authentication implies it). */
+  isValidated: boolean
+  /** Validate the identifier without authenticating — wide-scoped editors only. */
+  canValidate: boolean
 }
 
 /**
@@ -56,12 +62,22 @@ export const useIdentifierCapabilities = (
       'identifiers',
     )
 
+    const isValidated = person?.isIdentifierValidated(type) ?? false
+
     return {
       isAuthenticated,
+      isValidated,
+      canValidate: canValidateIdentifier({
+        canManage,
+        isWide,
+        exists: person?.hasIdentifier(type) ?? false,
+        isValidated,
+      }),
       ...computeIdentifierCapabilities({
         canManage,
         isOwn: ownPerspective,
         isWide,
+        isAdmin: hasFullAccess(authz),
         isAuthenticated,
         supportsAuth: identifierSupportsAuth(type),
         removalRequiresWide: identifierRemovalRequiresWideScope(type),

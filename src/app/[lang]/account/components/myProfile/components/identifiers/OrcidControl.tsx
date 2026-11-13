@@ -22,11 +22,14 @@ import { OrcidLoginButton } from '@/app/[lang]/account/components/myProfile/comp
 import ManualIdentifierAddForm from './ManualIdentifierAddForm'
 import OrcidInfoBox from './OrcidInfoBox'
 import { useIdentifierCapabilities } from './useIdentifierCapabilities'
+import ValidatedBadge from './ValidatedBadge'
+import ValidateIdentifierButton from './ValidateIdentifierButton'
 import { Trans } from '@lingui/react'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import LinkIcon from '@mui/icons-material/Link'
 import { PersonIdentifierType as DbPersonIdentifierType } from '@prisma/client'
 import { isPerson } from '@/types/Person'
+import { contentCenteredSnackbarSx } from '@/app/[lang]/components/contentCenteredSnackbarSx'
 
 const ORCID_REGEX = /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/i
 
@@ -46,12 +49,18 @@ const OrcidControl = () => {
       ? connectedUser?.person
       : currentPerspective
 
-  const { isAuthenticated, canAuthenticate, canAddUnauthenticated, canRemove } =
-    useIdentifierCapabilities(
-      person,
-      DbPersonIdentifierType.orcid,
-      ownPerspective,
-    )
+  const {
+    isAuthenticated,
+    isValidated,
+    canAuthenticate,
+    canAddUnauthenticated,
+    canRemove,
+    canValidate,
+  } = useIdentifierCapabilities(
+    person,
+    DbPersonIdentifierType.orcid,
+    ownPerspective,
+  )
 
   const [open, setOpen] = useState(false)
   const [severity, setSeverity] = useState<'success' | 'error'>('success')
@@ -91,7 +100,8 @@ const OrcidControl = () => {
     }
   }, [searchParams, ownPerspective])
 
-  const hasAnyCapability = canAuthenticate || canAddUnauthenticated || canRemove
+  const hasAnyCapability =
+    canAuthenticate || canAddUnauthenticated || canRemove || canValidate
 
   const remove = async () => {
     if (!person?.uid) return
@@ -131,6 +141,14 @@ const OrcidControl = () => {
         return <Trans id={'orcid_authentication_failure_user_not_found'} />
       case 'orcid_authentication_value_mismatch':
         return <Trans id={'orcid_authentication_value_mismatch'} />
+      case 'orcid_authentication_used_by_another_person':
+        return <Trans id={'orcid_authentication_used_by_another_person'} />
+      case 'orcid_authentication_used_by_another_person_contact_support':
+        return (
+          <Trans
+            id={'orcid_authentication_used_by_another_person_contact_support'}
+          />
+        )
       case 'orcid_insert_failure':
         return <Trans id={'orcid_insert_failure'} />
       case 'orcid_manual_add_success':
@@ -139,6 +157,8 @@ const OrcidControl = () => {
         return <Trans id={'orcid_manual_add_failure'} />
       case 'orcid_manual_add_conflict':
         return <Trans id={'orcid_manual_add_conflict'} />
+      case 'orcid_manual_add_used_by_another_person':
+        return <Trans id={'orcid_manual_add_used_by_another_person'} />
       case 'orcid_remove_success':
         return <Trans id={'orcid_remove_success'} />
       case 'orcid_remove_failure':
@@ -216,9 +236,12 @@ const OrcidControl = () => {
           minWidth: 0,
         }}
       >
-        <Typography variant='subtitle1' fontWeight='bold'>
-          ORCID
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant='subtitle1' fontWeight='bold'>
+            ORCID
+          </Typography>
+          {orcid && isValidated && <ValidatedBadge />}
+        </Box>
         {orcidPid}
       </Paper>
     )
@@ -252,9 +275,27 @@ const OrcidControl = () => {
               </Box>
             </Tooltip>
           )}
+          {orcid && isValidated && <ValidatedBadge />}
         </Box>
 
-        {orcidPid}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            flexWrap: 'wrap',
+            minWidth: 0,
+          }}
+        >
+          {orcidPid}
+          {orcid && person?.uid && (
+            <ValidateIdentifierButton
+              personUid={person.uid}
+              type={DbPersonIdentifierType.orcid}
+              show={canValidate}
+            />
+          )}
+        </Box>
 
         {orcid && canRemove && (
           <Button
@@ -289,16 +330,23 @@ const OrcidControl = () => {
             ]}
             inputLabel='ORCID'
             renderPreview={({ value, onReady }) => (
-              <OrcidInfoBox orcid={value} forceOpen onReady={onReady} />
+              <OrcidInfoBox
+                orcid={value}
+                personUid={person.uid}
+                forceOpen
+                onReady={onReady}
+              />
             )}
             onResult={(r) =>
               notify(
                 r.success,
                 r.success
                   ? 'orcid_manual_add_success'
-                  : r.conflict
-                    ? 'orcid_manual_add_conflict'
-                    : 'orcid_manual_add_failure',
+                  : r.conflict === 'used_by_another_person'
+                    ? 'orcid_manual_add_used_by_another_person'
+                    : r.conflict
+                      ? 'orcid_manual_add_conflict'
+                      : 'orcid_manual_add_failure',
               )
             }
           />
@@ -345,6 +393,7 @@ const OrcidControl = () => {
         autoHideDuration={6000}
         onClose={handleClose}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={contentCenteredSnackbarSx}
       >
         <Alert onClose={handleClose} severity={severity} sx={{ width: '100%' }}>
           {renderMessage()}

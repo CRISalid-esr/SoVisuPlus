@@ -44,6 +44,7 @@ export class StructureMember {
     public endDate: string | null,
     /** Raw corps code of the row this member came from (employments only). */
     public positionCode: string | null,
+    /** `validated` holds the effective validation (flag or authentication). */
     public identifiers: PersonIdentifier[],
   ) {}
 
@@ -58,10 +59,34 @@ export class StructureMember {
       displayName: string | null
       firstName: string | null
       lastName: string | null
-      identifiers: { type: DbPersonIdentifierType; value: string }[]
+      identifiers: {
+        type: DbPersonIdentifierType
+        value: string
+        validated: boolean
+        orcidIdentifier: { id: number } | null
+      }[]
     }
   }): StructureMember {
     const { person } = row
+    const hasHalLogin = person.identifiers.some(
+      (identifier) => identifier.type === DbPersonIdentifierType.hal_login,
+    )
+    // Same rule as Person.isIdentifierValidated: authentication implies validation.
+    const isEffectivelyValidated = (
+      identifier: (typeof person.identifiers)[number],
+    ): boolean => {
+      if (identifier.validated) return true
+      if (identifier.type === DbPersonIdentifierType.orcid) {
+        return identifier.orcidIdentifier !== null
+      }
+      if (
+        identifier.type === DbPersonIdentifierType.idhals ||
+        identifier.type === DbPersonIdentifierType.idhali
+      ) {
+        return hasHalLogin
+      }
+      return false
+    }
     const displayName =
       person.displayName ??
       [person.firstName, person.lastName].filter(Boolean).join(' ')
@@ -79,7 +104,11 @@ export class StructureMember {
         .filter((identifier) => identifier.value.trim() !== '')
         .map(
           (identifier) =>
-            new PersonIdentifier(identifier.type, identifier.value),
+            new PersonIdentifier(
+              identifier.type,
+              identifier.value,
+              isEffectivelyValidated(identifier),
+            ),
         ),
     )
   }
@@ -95,7 +124,11 @@ export class StructureMember {
       publicationsCount: this.publicationsCount,
       oaRate: this.oaRate,
       halRate: this.halRate,
-      identifiers: this.identifiers.map((identifier) => identifier.toJson()),
+      // The validation state is only disclosed to viewers who may edit the account.
+      identifiers: this.identifiers.map((identifier) => ({
+        ...identifier.toJson(),
+        validated: this.canEditAccount && identifier.validated,
+      })),
       canEditAccount: this.canEditAccount,
     }
   }

@@ -4,6 +4,7 @@ import {
   OrganizationIdentifierType,
 } from '@/types/OrganizationUnitIdentifier'
 import { AgentType, IAgent } from '@/types/IAgent'
+import { HalCollectionUnit } from '@/types/HalCollectionUnit'
 import { Literal } from '@/types/Literal'
 import { OrganizationRelation } from '@/types/OrganizationRelation'
 import { ExtendedLanguageCode } from './ExtendLanguageCode'
@@ -27,6 +28,7 @@ interface OrganizationUnitJson {
   identifiers: OrganizationUnitIdentifier[]
   hidden: boolean
   hiddenEffective: boolean
+  halCollection: string | null
 }
 
 const ORGANIZATION_AGENT_TYPES = new Set<AgentType>([
@@ -66,6 +68,8 @@ class OrganizationUnit implements IAgent {
      * every one of its parents is. This is the flag display code filters on.
      */
     public hiddenEffective: boolean = false,
+    /** HAL collection code of the structure (e.g. "ERC"), null when unknown. */
+    public halCollection: string | null = null,
   ) {
     this.identifiers = _identifiers
   }
@@ -90,6 +94,12 @@ class OrganizationUnit implements IAgent {
 
   get membershipAcronyms(): string[] {
     return this.acronym ? [this.acronym] : []
+  }
+
+  get currentHalCollectionUnits(): HalCollectionUnit[] {
+    return this.halCollection
+      ? [{ acronym: this.acronym, halCollection: this.halCollection }]
+      : []
   }
 
   get membershipSignatures(): string[] {
@@ -176,6 +186,7 @@ class OrganizationUnit implements IAgent {
         : [],
       organizationUnit.hidden,
       organizationUnit.hiddenEffective,
+      organizationUnit.halCollection,
     )
     hydrated.parents =
       organizationUnit.parents?.map(
@@ -219,6 +230,7 @@ class OrganizationUnit implements IAgent {
         : [],
       organizationUnit.hidden,
       organizationUnit.hiddenEffective,
+      organizationUnit.halCollection,
     )
   }
 
@@ -237,6 +249,7 @@ class OrganizationUnit implements IAgent {
       organizationUnit.localTypes?.map(Literal.fromObject) || [],
       organizationUnit.hidden || false,
       organizationUnit.hiddenEffective || false,
+      organizationUnit.halCollection || null,
     )
   }
 }

@@ -38,9 +38,12 @@ const DashboardPage = () => {
   const theme = useTheme()
   const { _ } = useLingui()
   const { currentPerspective } = useStore((state) => state.user)
-  const { yearRange, setYearRange, initYearRangeForPerspective } = useStore(
-    (state) => state.dashboard,
-  )
+  const {
+    yearRange,
+    yearRangePerspectiveUid,
+    setYearRange,
+    initYearRangeForPerspective,
+  } = useStore((state) => state.dashboard)
   const [documents, setDocuments] = useState<
     Record<number, DashboardDocumentData[]>
   >([])
@@ -75,38 +78,69 @@ const DashboardPage = () => {
     setAppliedWSFontRange([DEFAULT_MIN_FONT, DEFAULT_MAX_FONT])
   }, [uid, entityType, currentYear])
 
+  // Year range bounds: the oldest publication year of the perspective sets the
+  // selectable years and the default range (last five years).
   useEffect(() => {
-    const contributorUid = currentPerspective?.uid
-    const contributorType = currentPerspective?.type
+    const contributorUid = uid
+    const contributorType = entityType
     if (!contributorType || !contributorUid) return
+    // Drop the previous perspective's data so it is never shown under the new
+    // perspective's name, even if the requests below fail.
+    setDocuments({})
+    setPerimeterUids([])
+    setOldestYear(null)
     const controller = new AbortController()
-    const fetchData = async () => {
+    const fetchOldestYear = async () => {
       setLoading(true)
       try {
         const response = await fetch(
-          `/api/documents/dataviz?contributorUid=${contributorUid}&contributorType=${contributorType}`,
+          `/api/documents/dataviz/years?contributorUid=${contributorUid}&contributorType=${contributorType}`,
           { signal: controller.signal },
         )
         if (!response.ok) {
-          throw new Error('Failed to fetch documents per year')
+          throw new Error('Failed to fetch oldest publication year')
         }
-        const res = await response.json()
-        const documents: Record<number, DashboardDocumentData[]> = res.documents
-        const perimeterUids: string[] = res.perimeterUids ?? []
-        const years = Object.keys(documents)
-          .map(Number)
-          .filter((year) => !Number.isNaN(year))
-        const oldestYear = years.length == 0 ? null : Math.min(...years)
+        const { oldestYear }: { oldestYear: number | null } =
+          await response.json()
         const start = oldestYear
           ? oldestYear <= currentYear - 5
             ? currentYear - 5
             : oldestYear
           : currentYear
         setOldestYear(oldestYear)
-        if (contributorUid)
-          initYearRangeForPerspective(contributorUid, [start, currentYear])
-        setDocuments(documents)
-        setPerimeterUids(perimeterUids)
+        initYearRangeForPerspective(contributorUid, [start, currentYear])
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return
+        console.error('Error while fetching oldest publication year', error)
+        setLoading(false)
+      }
+    }
+    fetchOldestYear()
+    return () => controller.abort()
+  }, [uid, entityType, currentYear, initYearRangeForPerspective])
+
+  // Documents of the selected year range, once the range belongs to the
+  // current perspective (avoids a request with the previous perspective's range).
+  useEffect(() => {
+    const contributorUid = uid
+    const contributorType = entityType
+    if (!contributorType || !contributorUid) return
+    if (yearRangePerspectiveUid !== contributorUid) return
+    const [fromYear, toYear] = yearRange
+    const controller = new AbortController()
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch(
+          `/api/documents/dataviz?contributorUid=${contributorUid}&contributorType=${contributorType}&fromYear=${fromYear}&toYear=${toYear}`,
+          { signal: controller.signal },
+        )
+        if (!response.ok) {
+          throw new Error('Failed to fetch documents per year')
+        }
+        const res = await response.json()
+        setDocuments(res.documents)
+        setPerimeterUids(res.perimeterUids ?? [])
       } catch (error) {
         // An aborted fetch means a newer request (or unmount) superseded this
         // one — leave the loading state to it.
@@ -117,7 +151,7 @@ const DashboardPage = () => {
     }
     fetchData()
     return () => controller.abort()
-  }, [currentPerspective, currentYear, initYearRangeForPerspective])
+  }, [uid, entityType, yearRange, yearRangePerspectiveUid])
 
   const wsSliderHaveChanges = !(
     pendingWSTopN === appliedWSTopN &&
@@ -188,9 +222,11 @@ const DashboardPage = () => {
             <Typography>{t`dashboard_page_publication_by_year_graph_start_year_selection_label`}</Typography>
             <Select
               value={yearRange[0]}
-              onChange={(event) =>
-                setYearRange([event.target.value as number, yearRange[1]])
-              }
+              onChange={(event) => {
+                // Push the end year forward so the range never ends before it starts.
+                const start = event.target.value as number
+                setYearRange([start, Math.max(start, yearRange[1])])
+              }}
             >
               {Array.from(
                 {

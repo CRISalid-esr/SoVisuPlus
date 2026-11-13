@@ -47,6 +47,30 @@ describe('OrcidInfoBox', () => {
     expect(url).toContain('/api/orcid/person/0000-0002-1825-0097')
   })
 
+  it('warns and does not call onReady when another person holds the ORCID', async () => {
+    const onReady = jest.fn()
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        givenNames: 'Josiah',
+        familyName: 'Carberry',
+        otherNames: [],
+        affiliations: [],
+        usedByAnotherPerson: true,
+      }),
+    })
+
+    renderBox({ onReady, personUid: 'bob' })
+
+    expect(
+      await screen.findByText('orcid_info_box_used_by_another_person'),
+    ).toBeInTheDocument()
+    expect(onReady).not.toHaveBeenCalled()
+    const url = (global.fetch as jest.Mock).mock.calls[0][0] as string
+    expect(url).toContain('personUid=bob')
+  })
+
   it('shows a not-found message and still calls onReady on 404', async () => {
     const onReady = jest.fn()
     ;(global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 404 })

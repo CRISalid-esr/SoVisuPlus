@@ -65,6 +65,7 @@ describe('PersonIdentifier', () => {
       const id = PersonIdentifier.fromJson({
         type: 'orcid',
         value: '0000-0002',
+        validated: false,
       })
       expect(id.type).toBe(PersonIdentifierType.orcid)
       expect(id.value).toBe('0000-0002')
@@ -74,9 +75,34 @@ describe('PersonIdentifier', () => {
       const id = PersonIdentifier.fromJson({
         type: PersonIdentifierType.idref,
         value: '02725030X',
+        validated: false,
       })
       expect(id.type).toBe(PersonIdentifierType.idref)
       expect(id.value).toBe('02725030X')
+    })
+  })
+
+  describe('serialization', () => {
+    const identifier = new PersonIdentifier(
+      PersonIdentifierType.idref,
+      '02725030X',
+      true,
+    )
+
+    it('toJson includes the validated flag', () => {
+      expect(identifier.toJson()).toEqual({
+        type: PersonIdentifierType.idref,
+        value: '02725030X',
+        validated: true,
+      })
+    })
+
+    it('toMessagePayload sends only type, value and authenticated', () => {
+      expect(identifier.toMessagePayload(false)).toEqual({
+        type: PersonIdentifierType.idref,
+        value: '02725030X',
+        authenticated: false,
+      })
     })
   })
 

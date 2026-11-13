@@ -73,7 +73,6 @@ export class DocumentAggregateService {
     const selectedTopics = new Set(topics)
 
     for (const doc of documentsForWordStream) {
-      if (doc.year == null) continue
       const year = doc.year
 
       if (
@@ -262,7 +261,6 @@ export class DocumentAggregateService {
   ): number[] {
     const s = new Set<number>()
     for (const d of docs) {
-      if (d.year == null) continue
       if (fromYear && d.year < fromYear) continue
       if (toYear && d.year > toYear) continue
       s.add(d.year)

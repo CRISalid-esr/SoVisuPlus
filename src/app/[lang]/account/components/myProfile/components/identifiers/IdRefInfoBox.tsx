@@ -4,6 +4,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Alert,
   Box,
   Chip,
   CircularProgress,
@@ -20,18 +21,24 @@ import { IdRefPersonData } from '@/lib/services/IdRefService'
 type LoadState =
   | { status: 'idle' }
   | { status: 'loading' }
-  | { status: 'loaded'; data: IdRefPersonData }
+  | { status: 'loaded'; data: IdRefPersonPreview }
   | { status: 'not_found' }
   | { status: 'error' }
 
+/** Preview response: the record, plus whether another person holds it. */
+type IdRefPersonPreview = IdRefPersonData & { usedByAnotherPerson?: boolean }
+
 type IdRefInfoBoxProps = {
   idrefId: string
+  /** Person the IdRef is added to; enables the "used by another person" check. */
+  personUid?: string
   forceOpen?: boolean
   onReady?: () => void // called when data loaded or not found (ready for user decision)
 }
 
 const IdRefInfoBox = ({
   idrefId,
+  personUid,
   forceOpen = false,
   onReady,
 }: IdRefInfoBoxProps) => {
@@ -44,7 +51,8 @@ const IdRefInfoBox = ({
     loadedIdRef.current = id
     setState({ status: 'loading' })
     try {
-      const res = await fetch(`/api/idref/${encodeURIComponent(id)}`)
+      const query = personUid ? `?${new URLSearchParams({ personUid })}` : ''
+      const res = await fetch(`/api/idref/${encodeURIComponent(id)}${query}`)
       if (res.status === 404) {
         setState({ status: 'not_found' })
         onReady?.()
@@ -54,9 +62,10 @@ const IdRefInfoBox = ({
         setState({ status: 'error' })
         return
       }
-      const data: IdRefPersonData = await res.json()
+      const data: IdRefPersonPreview = await res.json()
       setState({ status: 'loaded', data })
-      onReady?.()
+      // An IdRef held by another person cannot be added: keep Save disabled
+      if (!data.usedByAnotherPerson) onReady?.()
     } catch {
       setState({ status: 'error' })
     }
@@ -127,6 +136,11 @@ const IdRefInfoBox = ({
 
         {state.status === 'loaded' && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            {state.data.usedByAnotherPerson && (
+              <Alert severity='warning'>
+                <Trans>idref_info_box_used_by_another_person</Trans>
+              </Alert>
+            )}
             <Box>
               <Typography variant='body1' fontWeight='medium'>
                 {state.data.firstName} {state.data.lastName}

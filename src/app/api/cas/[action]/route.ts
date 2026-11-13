@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as process from 'node:process'
 import { getAuthenticatedSession } from '@/app/auth/requireSession'
-import { AureHalAPIClient } from '@/lib/services/AureHalAPIClient'
+import { AureHalAPIClient, idHalFormsOf } from '@/lib/services/AureHalAPIClient'
 import { PersonService } from '@/lib/services/PersonService'
-import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { IdentifierConflictError, PersonDAO } from '@/lib/daos/PersonDAO'
 import { UserService } from '@/lib/services/UserService'
 import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { parseCasTicketValidationResult } from '@/app/utils/parseCasTicketValidationResult'
-import { abilityFromAuthzContext } from '@/app/auth/ability'
+import {
+  abilityFromAuthzContext,
+  hasWiderThanSelfPersonScope,
+} from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 
 const isLoginOrLogout = (action: string): action is 'login' | 'logout' =>
@@ -147,14 +150,12 @@ export async function GET(
     )
   }
 
-  const resolvedType = idHalDoc.idHal_s
-    ? PersonIdentifierType.idhals
-    : PersonIdentifierType.idhali
-  const resolvedValue = idHalDoc.idHal_s ?? String(idHalDoc.idHal_i)
+  const halForms = idHalFormsOf(idHalDoc)
 
-  // Authentication only confirms an existing idHAL. If a (non-authenticated)
-  // idHAL is already stored and the one HAL returns differs — in type or value —
-  // the existing identifier must be removed first; we never replace it in place.
+  // Authentication only confirms the stored idHAL(s): each stored form must be
+  // the same form of the HAL account (idhals ↔ idHal_s, idhali ↔ idHal_i). A
+  // form not stored yet is added; a different one must be removed first — we
+  // never replace it in place.
   const personDAO = new PersonDAO()
   const storedIdhals = await personDAO.findIdentifierValue(
     user.person.uid,
@@ -164,15 +165,9 @@ export async function GET(
     user.person.uid,
     PersonIdentifierType.idhali,
   )
-  const existingType = storedIdhals
-    ? PersonIdentifierType.idhals
-    : storedIdhali
-      ? PersonIdentifierType.idhali
-      : null
-  const existingValue = storedIdhals ?? storedIdhali
   if (
-    existingValue !== null &&
-    (existingType !== resolvedType || existingValue !== resolvedValue)
+    (storedIdhals !== null && storedIdhals !== halForms.idhals) ||
+    (storedIdhali !== null && storedIdhali !== halForms.idhali)
   ) {
     return NextResponse.redirect(
       `${userRedirectionUrl}?error=hal_authentication_value_mismatch`,
@@ -182,11 +177,22 @@ export async function GET(
   const personService = new PersonService()
   try {
     await personService.authenticateHalIdentifier(user.person.uid, {
-      type: resolvedType,
-      value: resolvedValue,
       halLogin,
+      forms: halForms,
     })
   } catch (e) {
+    if (e instanceof IdentifierConflictError) {
+      // Users who cannot edit other accounts are pointed to the support
+      const error = hasWiderThanSelfPersonScope(
+        session.user.authz,
+        'update',
+        'Person',
+        'identifiers',
+      )
+        ? 'hal_identifier_used_by_another_person'
+        : 'hal_identifier_used_by_another_person_contact_support'
+      return NextResponse.redirect(`${userRedirectionUrl}?error=${error}`)
+    }
     console.error('[HAL] DB write failed', e)
     return NextResponse.redirect(
       `${userRedirectionUrl}?error=hal_identifier_insert_failure`,

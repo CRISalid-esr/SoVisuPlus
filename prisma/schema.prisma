@@ -538,11 +538,32 @@ model PersonIdentifier {
   person   Person               @relation(fields: [personId], references: [id], onDelete: Cascade)
   personId Int
 
+  // Confirmed by a privileged user without authentication (synced from the graph)
+  validated Boolean @default(false)
+
   orcidIdentifier OrcidIdentifier?
 
   @@unique([type, value]) // The same identifer should not be used twice
   @@unique([personId, type]) // A person should not have more than one identifier of the same type
   @@index([personId])
+}
+
+/// Keycloak tokens of a signed-in user, keyed on the Keycloak session id (`sid` claim), encrypted
+/// at rest. One row per SSO session: written at sign-in, rewritten on refresh, deleted at sign-out,
+/// swept once the refresh token has expired.
+model KeycloakSession {
+  sid                   String   @id
+  userId                Int?
+  accessToken           String
+  refreshToken          String
+  /// Access token expiry, seconds since the epoch
+  accessTokenExpiresAt  Int
+  /// Refresh token expiry, seconds since the epoch: the row is useless after that
+  refreshTokenExpiresAt Int
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([refreshTokenExpiresAt])
 }
 
 model OrcidIdentifier {
@@ -607,6 +628,8 @@ model OrganizationUnit {
   normalizedAcronym String?
   slug              String?                 @unique
   localTypes        Json? // [{ value, language }] — display only
+  /// HAL collection code (e.g. "ERC"), extracted from the collection URL sent by the graph
+  halCollection     String?
 
   /// Explicit visibility toggle, set from the UI by a structure_manager.
   /// Never written by the ETL upsert, so it survives graph events.

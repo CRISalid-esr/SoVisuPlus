@@ -1,4 +1,6 @@
+import { Prisma } from '@prisma/client'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
+import { batchPageArgs, fetchInBatches } from '@/lib/daos/fetchInBatches'
 import { Concept } from '@/types/Concept'
 import { Literal } from '@/types/Literal'
 import { Person } from '@/types/Person'
@@ -10,7 +12,7 @@ export type WordStreamCoAuthors = Pick<
 >
 
 export type DocumentForWordStreamAggregation = {
-  year: number | null
+  year: number
   subjects: WordStreamConcept[]
   coauthors: WordStreamCoAuthors[]
 }
@@ -28,62 +30,61 @@ export class DocumentAggregateDAO extends AbstractDAO {
       return []
     }
 
-    const docs = await this.prismaClient.document.findMany({
-      where: {
-        contributions: {
-          some: {
-            person: {
-              uid: { in: contributorUids },
-            },
+    const where: Prisma.DocumentWhereInput = {
+      publicationDateStart: {
+        not: null,
+        ...(opts?.fromYear && {
+          gte: new Date(Date.UTC(opts.fromYear, 0, 1)),
+        }),
+        ...(opts?.toYear && {
+          lt: new Date(Date.UTC(opts.toYear + 1, 0, 1)),
+        }),
+      },
+      contributions: {
+        some: {
+          person: {
+            uid: { in: contributorUids },
           },
         },
       },
-      select: {
-        publicationDateStart: true,
-        publicationDate: true,
-        subjects: {
-          select: {
-            uid: true,
-            uri: true,
-            labels: { select: { language: true, value: true, type: true } },
+    }
+
+    const docs = await fetchInBatches((cursorId, batchSize) =>
+      this.prismaClient.document.findMany({
+        where,
+        select: {
+          id: true,
+          publicationDateStart: true,
+          subjects: {
+            select: {
+              uid: true,
+              uri: true,
+              labels: { select: { language: true, value: true, type: true } },
+            },
           },
-        },
-        contributions: {
-          select: {
-            person: {
-              select: {
-                uid: true,
-                displayName: true,
-                firstName: true,
-                lastName: true,
+          contributions: {
+            select: {
+              person: {
+                select: {
+                  uid: true,
+                  displayName: true,
+                  firstName: true,
+                  lastName: true,
+                },
               },
             },
           },
         },
-      },
-    })
-
-    const yearOf = (d: {
-      publicationDateStart: Date | null
-      publicationDate: string | null
-    }): number | null => {
-      if (d.publicationDateStart) return d.publicationDateStart.getUTCFullYear()
-      if (d.publicationDate) {
-        const m = d.publicationDate.match(/^(\d{4})/)
-        if (m) {
-          const y = Number(m[1])
-          if (!Number.isNaN(y) && y > 0) return y
-        }
-      }
-      return null
-    }
+        ...batchPageArgs(cursorId, batchSize),
+      }),
+    )
 
     const out: DocumentForWordStreamAggregation[] = []
 
     for (const d of docs) {
-      const year = yearOf(d)
-      if (opts?.fromYear && year !== null && year < opts.fromYear) continue
-      if (opts?.toYear && year !== null && year > opts.toYear) continue
+      // Already excluded by the where clause; narrows the Prisma type.
+      if (d.publicationDateStart === null) continue
+      const year = d.publicationDateStart.getUTCFullYear()
 
       // exclude ALL queried contributors from coauthors
       const coauthors: WordStreamCoAuthors[] = (d.contributions || [])

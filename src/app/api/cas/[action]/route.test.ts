@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { GET } from './route'
 import { parseCasTicketValidationResult } from '@/utils/parseCasTicketValidationResult'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { IdentifierConflictError } from '@/lib/daos/PersonDAO'
 
 const mockAuthenticateHalIdentifier = jest.fn()
 const mockGetUserByPersonIdentifier = jest.fn()
@@ -24,9 +25,15 @@ jest.mock('@/lib/daos/PersonDAO', () => ({
   PersonDAO: jest.fn().mockImplementation(() => ({
     findIdentifierValue: mockFindIdentifierValue,
   })),
+  IdentifierConflictError: class extends Error {
+    constructor(public readonly reason = 'slot_taken') {
+      super('Identifier already exists')
+    }
+  },
 }))
 
 jest.mock('@/lib/services/AureHalAPIClient', () => ({
+  ...jest.requireActual('@/lib/services/AureHalAPIClient'),
   AureHalAPIClient: jest.fn().mockImplementation(() => ({
     findAuthorByUid: mockFindAuthorByUid,
   })),
@@ -66,6 +73,23 @@ const authzWithPermission = makeAuthzContext({
         fields: ['identifiers'],
       },
     ]),
+  ],
+})
+
+const selfScopedAuthz = makeAuthzContext({
+  personUid: 'person-uid',
+  roleAssignments: [
+    makeAssignment(
+      'account_editor',
+      [
+        {
+          action: PermissionAction.update,
+          subject: PermissionSubject.Person,
+          fields: ['identifiers'],
+        },
+      ],
+      [{ entityType: 'Person', entityUid: 'person-uid' }],
+    ),
   ],
 })
 
@@ -137,10 +161,78 @@ describe('GET /api/cas/[action] stores HAL identifiers', () => {
     // A single authentication call carrying the idHAL + hal_login
     expect(mockAuthenticateHalIdentifier).toHaveBeenCalledTimes(1)
     expect(mockAuthenticateHalIdentifier).toHaveBeenCalledWith('person-uid', {
-      type: PersonIdentifierType.idhals,
-      value: 'jacques-dupont',
       halLogin: 'jdupont',
+      forms: { idhals: 'jacques-dupont', idhali: '1161147' },
     })
+  })
+
+  it('redirects with a dedicated error when another person holds the idHAL', async () => {
+    mockGetUserByPersonIdentifier.mockResolvedValue({
+      person: mockPerson('person-uid'),
+    })
+    ;(fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      text: jest.fn().mockResolvedValue('<xml>ok</xml>'),
+    })
+    ;(parseCasTicketValidationResult as jest.Mock).mockReturnValue(casTicket())
+    mockFindAuthorByUid.mockResolvedValue({
+      idHal_s: 'jacques-dupont',
+      idHal_i: 1161147,
+    })
+    mockAuthenticateHalIdentifier.mockRejectedValueOnce(
+      new IdentifierConflictError('used_by_another_person'),
+    )
+
+    const req: NextRequest = {
+      nextUrl: new URL(
+        'https://example.com/api/cas/login?ticket=ST-abc123&lang=en',
+      ),
+    } as unknown as NextRequest
+    const ctx = { params: Promise.resolve({ action: 'login' }) }
+
+    const response = await GET(req, ctx)
+
+    expect(response.headers.get('location')).toBe(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/en/account?error=hal_identifier_used_by_another_person`,
+    )
+  })
+
+  it('asks a self-scoped user to contact the support when another person holds the idHAL', async () => {
+    mockGetUserByPersonIdentifier.mockResolvedValue({
+      person: mockPerson('person-uid'),
+    })
+    ;(fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      text: jest.fn().mockResolvedValue('<xml>ok</xml>'),
+    })
+    ;(parseCasTicketValidationResult as jest.Mock).mockReturnValue(casTicket())
+    mockFindAuthorByUid.mockResolvedValue({
+      idHal_s: 'jacques-dupont',
+      idHal_i: 1161147,
+    })
+    mockAuthenticateHalIdentifier.mockRejectedValueOnce(
+      new IdentifierConflictError('used_by_another_person'),
+    )
+
+    const req: NextRequest = {
+      nextUrl: new URL(
+        'https://example.com/api/cas/login?ticket=ST-abc123&lang=en',
+      ),
+    } as unknown as NextRequest
+    const ctx = { params: Promise.resolve({ action: 'login' }) }
+
+    const { getServerSession } = jest.requireMock('next-auth') as {
+      getServerSession: jest.Mock
+    }
+    getServerSession.mockResolvedValue({
+      user: { ...mockSession.user, authz: selfScopedAuthz },
+    })
+
+    const response = await GET(req, ctx)
+
+    expect(response.headers.get('location')).toBe(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/en/account?error=hal_identifier_used_by_another_person_contact_support`,
+    )
   })
 
   it('fails with a mismatch error when the stored idHAL differs', async () => {
@@ -174,6 +266,62 @@ describe('GET /api/cas/[action] stores HAL identifiers', () => {
       `${process.env.NEXT_PUBLIC_BASE_URL}/en/account?error=hal_authentication_value_mismatch`,
     )
     expect(mockAuthenticateHalIdentifier).not.toHaveBeenCalled()
+  })
+
+  describe('stored idHAL of the other form', () => {
+    const login = async () => {
+      mockGetUserByPersonIdentifier.mockResolvedValue({
+        person: mockPerson('person-uid'),
+      })
+      ;(fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        text: jest.fn().mockResolvedValue('<xml>ok</xml>'),
+      })
+      ;(parseCasTicketValidationResult as jest.Mock).mockReturnValue(
+        casTicket(),
+      )
+      mockFindAuthorByUid.mockResolvedValue({
+        idHal_s: 'jacques-dupont',
+        idHal_i: 1161147,
+      })
+      const req = {
+        nextUrl: new URL(
+          'https://example.com/api/cas/login?ticket=ST-abc123&lang=en',
+        ),
+      } as unknown as NextRequest
+      return GET(req, { params: Promise.resolve({ action: 'login' }) })
+    }
+
+    it('authenticates both forms when the stored idhali is the same HAL account', async () => {
+      mockFindIdentifierValue.mockImplementation(
+        async (_uid: string, type: PersonIdentifierType) =>
+          type === PersonIdentifierType.idhali ? '1161147' : null,
+      )
+
+      const response = await login()
+
+      expect(response.headers.get('location')).toBe(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/en/account?success=hal_authentication_success`,
+      )
+      expect(mockAuthenticateHalIdentifier).toHaveBeenCalledWith('person-uid', {
+        halLogin: 'jdupont',
+        forms: { idhals: 'jacques-dupont', idhali: '1161147' },
+      })
+    })
+
+    it('fails with a mismatch error when the stored idhali is another HAL account', async () => {
+      mockFindIdentifierValue.mockImplementation(
+        async (_uid: string, type: PersonIdentifierType) =>
+          type === PersonIdentifierType.idhali ? '999' : null,
+      )
+
+      const response = await login()
+
+      expect(response.headers.get('location')).toBe(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/en/account?error=hal_authentication_value_mismatch`,
+      )
+      expect(mockAuthenticateHalIdentifier).not.toHaveBeenCalled()
+    })
   })
 
   it('should redirect with missing-data error if uid is missing', async () => {

@@ -247,6 +247,8 @@ describe('PersonService Integration Tests', () => {
     })
     expect(identifier).not.toBeNull()
     expect(identifier!.value).toBe('127220747')
+    // A manual add is made by a privileged user: stored as validated
+    expect(identifier!.validated).toBe(true)
 
     const action = await prisma.action.findFirst({
       where: { targetUid: person.uid, path: 'identifiers' },
@@ -254,6 +256,139 @@ describe('PersonService Integration Tests', () => {
     expect(action).not.toBeNull()
     expect(action!.actionType).toBe(ActionType.ADD)
     expect(action!.targetType).toBe(ActionTargetType.PERSON)
+  })
+
+  test('validateIdentifier marks the identifier validated and writes an UPDATE action', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-validate-1',
+        email: 'validate@example.com',
+        firstName: 'Paul',
+        lastName: 'Martin',
+        normalizedName: 'paul martin',
+        external: false,
+        identifiers: {
+          create: { type: PersonIdentifierType.idref, value: '127220747' },
+        },
+      },
+    })
+
+    await personService.validateIdentifier(
+      person.uid,
+      PersonIdentifierType.idref,
+    )
+
+    const identifier = await prisma.personIdentifier.findFirstOrThrow({
+      where: { personId: person.id, type: PersonIdentifierType.idref },
+    })
+    expect(identifier.validated).toBe(true)
+    expect(identifier.value).toBe('127220747')
+
+    const actions = await prisma.action.findMany({
+      where: { targetUid: person.uid, path: 'identifiers' },
+    })
+    expect(actions).toHaveLength(1)
+    expect(actions[0].actionType).toBe(ActionType.UPDATE)
+    expect(actions[0].parameters).toEqual({
+      identifier: { type: 'idref', value: '127220747', authenticated: false },
+    })
+  })
+
+  test('validateIdentifier validates each non-validated idHAL form, with one UPDATE per form', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-validate-idhal',
+        email: 'validate-idhal@example.com',
+        firstName: 'Paul',
+        lastName: 'Martin',
+        normalizedName: 'paul martin',
+        external: false,
+        identifiers: {
+          create: [
+            {
+              type: PersonIdentifierType.idhals,
+              value: 'paul-martin',
+              validated: true,
+            },
+            { type: PersonIdentifierType.idhali, value: '12345' },
+          ],
+        },
+      },
+    })
+
+    await personService.validateIdentifier(
+      person.uid,
+      PersonIdentifierType.idhals,
+    )
+
+    const identifiers = await prisma.personIdentifier.findMany({
+      where: { personId: person.id },
+    })
+    expect(identifiers.every((identifier) => identifier.validated)).toBe(true)
+
+    // The idhals was already validated: only the idhali is announced
+    const actions = await prisma.action.findMany({
+      where: { targetUid: person.uid, path: 'identifiers' },
+    })
+    expect(actions.map((action) => action.parameters)).toEqual([
+      { identifier: { type: 'idhali', value: '12345', authenticated: false } },
+    ])
+  })
+
+  test('validateIdentifier writes no action when every form is already validated', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-validate-done',
+        email: 'validate-done@example.com',
+        firstName: 'Paul',
+        lastName: 'Martin',
+        normalizedName: 'paul martin',
+        external: false,
+        identifiers: {
+          create: [
+            {
+              type: PersonIdentifierType.idhals,
+              value: 'paul-martin',
+              validated: true,
+            },
+            {
+              type: PersonIdentifierType.idhali,
+              value: '12345',
+              validated: true,
+            },
+          ],
+        },
+      },
+    })
+
+    await personService.validateIdentifier(
+      person.uid,
+      PersonIdentifierType.idhals,
+    )
+
+    expect(
+      await prisma.action.count({ where: { targetUid: person.uid } }),
+    ).toBe(0)
+  })
+
+  test('validateIdentifier fails without writing an action when the identifier is missing', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-validate-2',
+        email: 'validate2@example.com',
+        firstName: 'Paul',
+        lastName: 'Martin',
+        normalizedName: 'paul martin',
+        external: false,
+      },
+    })
+
+    await expect(
+      personService.validateIdentifier(person.uid, PersonIdentifierType.idref),
+    ).rejects.toThrow()
+    expect(
+      await prisma.action.count({ where: { targetUid: person.uid } }),
+    ).toBe(0)
   })
 
   test('addIdentifier rejects a second identifier of the same type (remove-before-add)', async () => {
@@ -390,11 +525,11 @@ describe('PersonService Integration Tests', () => {
       personService.removeIdentifier(person.uid, PersonIdentifierType.idref),
     ).resolves.toBeUndefined()
 
-    // A REMOVE action is still written (service always records intent)
+    // Nothing was stored: no REMOVE without a value is sent to the graph
     const action = await prisma.action.findFirst({
       where: { targetUid: person.uid, actionType: ActionType.REMOVE },
     })
-    expect(action).not.toBeNull()
+    expect(action).toBeNull()
   })
 
   test('should throw if ORCID oauth data is missing', async () => {

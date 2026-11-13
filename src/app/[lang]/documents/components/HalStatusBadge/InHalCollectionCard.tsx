@@ -15,6 +15,7 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { Plural, Trans } from '@lingui/react/macro'
 import { t } from '@lingui/core/macro'
+import { joinWithConjunction } from '@/utils/joinWithConjunction'
 import { Close, OpenInNew } from '@mui/icons-material'
 
 export type InHalCollectionCardProps = {
@@ -34,7 +35,10 @@ const InHalCollectionCard = ({
 }: InHalCollectionCardProps) => {
   const theme = useTheme()
   const numberOfAcronyms = acronyms.length
-  const formattedAcronyms = acronyms.join(', ')
+  const formattedAcronyms = joinWithConjunction(
+    acronyms,
+    t`list_conjunction_and`,
+  )
 
   const seeHalFile = () => {
     if (halUrl) {

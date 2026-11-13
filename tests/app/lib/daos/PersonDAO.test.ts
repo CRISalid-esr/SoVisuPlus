@@ -1,4 +1,4 @@
-import { PersonDAO } from '@/lib/daos/PersonDAO'
+import { IdentifierConflictError, PersonDAO } from '@/lib/daos/PersonDAO'
 import { Person } from '@/types/Person'
 import prisma from '@/lib/daos/prisma'
 import { PersonMembership } from '@/types/PersonMembership'
@@ -8,11 +8,18 @@ import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { Literal } from '@/types/Literal'
 import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
 import { SourcePerson } from '@/types/SourcePerson'
-import { OrganizationCategory, OrganizationGenericType } from '@prisma/client'
 import {
+  ActionTargetType,
+  ActionType,
+  OrganizationCategory,
+  OrganizationGenericType,
+} from '@prisma/client'
+import {
+  idHalFormsToIdentifiers,
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
+import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 
 describe('PersonDAO Integration Tests', () => {
   let personDAO: PersonDAO
@@ -376,7 +383,7 @@ describe('PersonDAO Integration Tests', () => {
     expect(unlinked!.personId).toBeNull()
   })
 
-  describe('fetchPeopleByOrganizationPerimeter', () => {
+  describe('fetchPersonUidsByOrganizationPerimeter', () => {
     const makeOrg = (
       uid: string,
       acronym: string,
@@ -532,23 +539,19 @@ describe('PersonDAO Integration Tests', () => {
     })
 
     test('institution: members of research units member_of it, no direct members, no support units', async () => {
-      const people = await personDAO.fetchPeopleByOrganizationPerimeter(
+      const uids = await personDAO.fetchPersonUidsByOrganizationPerimeter(
         'local-UP1',
         'institution',
       )
-      expect(people.map((p) => p.uid).sort()).toEqual(['p-ru1'])
+      expect(uids.sort()).toEqual(['p-ru1'])
     })
 
     test('other_structure: direct members plus members of attached units', async () => {
-      const people = await personDAO.fetchPeopleByOrganizationPerimeter(
+      const uids = await personDAO.fetchPersonUidsByOrganizationPerimeter(
         'local-FAC1',
         'other_structure',
       )
-      expect(people.map((p) => p.uid).sort()).toEqual([
-        'p-fac1',
-        'p-ru2',
-        'p-t1',
-      ])
+      expect(uids.sort()).toEqual(['p-fac1', 'p-ru2', 'p-t1'])
     })
 
     test('fetched person publishes one-hop authorization perimeters', async () => {
@@ -567,18 +570,18 @@ describe('PersonDAO Integration Tests', () => {
     })
 
     test('research_unit and team: direct members only', async () => {
-      const researchUnitPeople =
-        await personDAO.fetchPeopleByOrganizationPerimeter(
+      const researchUnitUids =
+        await personDAO.fetchPersonUidsByOrganizationPerimeter(
           'local-RU1',
           'research_unit',
         )
-      expect(researchUnitPeople.map((p) => p.uid)).toEqual(['p-ru1'])
+      expect(researchUnitUids).toEqual(['p-ru1'])
 
-      const teamPeople = await personDAO.fetchPeopleByOrganizationPerimeter(
+      const teamUids = await personDAO.fetchPersonUidsByOrganizationPerimeter(
         'local-T1',
         'team',
       )
-      expect(teamPeople.map((p) => p.uid)).toEqual(['p-t1'])
+      expect(teamUids).toEqual(['p-t1'])
     })
   })
 
@@ -749,7 +752,43 @@ describe('PersonDAO Integration Tests', () => {
     ).rejects.toThrow('Person with UID nonexistent-uid not found')
   })
 
-  test('deleting an idHAL cascades to its companion hal_login', async () => {
+  test('fetching a person by uid or slug reports an authenticated ORCID without its tokens', async () => {
+    const dbPerson = await prisma.person.create({
+      data: {
+        uid: 'local-orcidgrant',
+        slug: 'person:orcidgrant',
+        email: 'orcidgrant@example.com',
+        identifiers: {
+          create: {
+            type: PersonIdentifierType.orcid,
+            value: '0000-0002-1825-0097',
+          },
+        },
+      },
+      include: { identifiers: true },
+    })
+    await prisma.orcidIdentifier.create({
+      data: {
+        id: dbPerson.identifiers[0].id,
+        accessToken: 'secret-access',
+        refreshToken: 'secret-refresh',
+        scope: '/authenticate',
+        expiresAt: new Date('2027-01-01'),
+      },
+    })
+
+    for (const person of [
+      await personDAO.fetchPersonByUid('local-orcidgrant'),
+      await personDAO.fetchPersonBySlug('person:orcidgrant'),
+    ]) {
+      expect(
+        person?.isIdentifierAuthenticated(PersonIdentifierType.orcid),
+      ).toBe(true)
+      expect(JSON.stringify(person)).not.toContain('secret-')
+    }
+  })
+
+  test('deleting an idHAL removes both forms and the companion hal_login', async () => {
     const dbPerson = await prisma.person.create({
       data: {
         uid: 'local-halcascade',
@@ -760,7 +799,9 @@ describe('PersonDAO Integration Tests', () => {
           createMany: {
             data: [
               { type: PersonIdentifierType.idhals, value: 'jacques-dupont' },
+              { type: PersonIdentifierType.idhali, value: '1161147' },
               { type: PersonIdentifierType.hal_login, value: 'jdupont' },
+              { type: PersonIdentifierType.idref, value: '127220747' },
             ],
           },
         },
@@ -772,32 +813,78 @@ describe('PersonDAO Integration Tests', () => {
     const remaining = await prisma.personIdentifier.findMany({
       where: { personId: dbPerson.id },
     })
-    expect(remaining).toHaveLength(0)
+    expect(remaining.map(({ type }) => type)).toEqual([
+      PersonIdentifierType.idref,
+    ])
   })
 
   describe('upsertHalIdentifiers', () => {
-    test('writes the idHAL and its hal_login', async () => {
+    test('writes the idHAL forms and their hal_login', async () => {
       const dbPerson = await prisma.person.create({
         data: { uid: 'local-halupsert', email: 'halupsert@example.com' },
       })
 
       await personDAO.upsertHalIdentifiers(
         dbPerson.uid,
-        new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-dupont'),
+        [
+          new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-dupont'),
+          new PersonIdentifier(PersonIdentifierType.idhali, '12345'),
+        ],
         'jdupont',
       )
 
       const rows = await prisma.personIdentifier.findMany({
         where: { personId: dbPerson.id },
-        orderBy: { type: 'asc' },
       })
-      expect(rows.map((row) => [row.type, row.value])).toEqual([
+      expect(
+        rows
+          .map((row) => [row.type, row.value])
+          .sort(([a], [b]) => a.localeCompare(b)),
+      ).toEqual([
         [PersonIdentifierType.hal_login, 'jdupont'],
+        [PersonIdentifierType.idhali, '12345'],
         [PersonIdentifierType.idhals, 'jacques-dupont'],
       ])
     })
 
-    test('writes nothing when the idHAL cannot be stored', async () => {
+    test('adds the missing form next to the stored one', async () => {
+      const dbPerson = await prisma.person.create({
+        data: {
+          uid: 'local-halmissing',
+          email: 'halmissing@example.com',
+          identifiers: {
+            create: { type: PersonIdentifierType.idhali, value: '12345' },
+          },
+        },
+      })
+
+      await personDAO.upsertHalIdentifiers(
+        dbPerson.uid,
+        [
+          new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-dupont'),
+          new PersonIdentifier(PersonIdentifierType.idhali, '12345'),
+        ],
+        'jdupont',
+      )
+
+      const types = (
+        await prisma.personIdentifier.findMany({
+          where: { personId: dbPerson.id },
+          select: { type: true },
+        })
+      )
+        .map((row) => row.type)
+        .sort()
+      expect(types).toEqual(
+        [
+          PersonIdentifierType.hal_login,
+          PersonIdentifierType.idhali,
+          PersonIdentifierType.idhals,
+        ].sort(),
+      )
+    })
+
+    test('writes nothing and reports a conflict when the idHAL is held by another person', async () => {
       await prisma.person.create({
         data: {
           uid: 'local-halowner',
@@ -817,10 +904,10 @@ describe('PersonDAO Integration Tests', () => {
       await expect(
         personDAO.upsertHalIdentifiers(
           dbPerson.uid,
-          new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-dupont'),
+          [new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-dupont')],
           'jdupont',
         ),
-      ).rejects.toThrow('Failed to upsert HAL identifiers')
+      ).rejects.toThrow(IdentifierConflictError)
 
       expect(
         await prisma.personIdentifier.findMany({
@@ -1039,6 +1126,52 @@ describe('PersonDAO Integration Tests', () => {
       ])
     })
 
+    test('hal_login survives the graph applying the two idHAL forms one message at a time', async () => {
+      const idhali = new PersonIdentifier(PersonIdentifierType.idhali, '123456')
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals, idhali]),
+      )
+      await addHalLogin(dbPerson.id)
+
+      // First message: the graph has applied only one form so far
+      await personDAO.createOrUpdatePerson(makeIdentifiedPerson([idhals]), {
+        authoritative: true,
+      })
+      await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals, idhali]),
+        { authoritative: true },
+      )
+
+      expect(await typesOf(dbPerson.id)).toEqual([
+        PersonIdentifierType.hal_login,
+        PersonIdentifierType.idhali,
+        PersonIdentifierType.idhals,
+      ])
+    })
+
+    test('hal_login is removed when a stored idHAL form changes value next to a kept one', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          idhals,
+          new PersonIdentifier(PersonIdentifierType.idhali, '123456'),
+        ]),
+      )
+      await addHalLogin(dbPerson.id)
+
+      await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          idhals,
+          new PersonIdentifier(PersonIdentifierType.idhali, '654321'),
+        ]),
+        { authoritative: true },
+      )
+
+      expect(await typesOf(dbPerson.id)).toEqual([
+        PersonIdentifierType.idhali,
+        PersonIdentifierType.idhals,
+      ])
+    })
+
     test('hal_login is removed when a non-authoritative update changes the idHAL value', async () => {
       const dbPerson = await personDAO.createOrUpdatePerson(
         makeIdentifiedPerson([idhals]),
@@ -1053,9 +1186,214 @@ describe('PersonDAO Integration Tests', () => {
 
       expect(await typesOf(dbPerson.id)).toEqual([PersonIdentifierType.idhals])
     })
+
+    const validatedOf = async (personId: number, type: PersonIdentifierType) =>
+      (
+        await prisma.personIdentifier.findFirstOrThrow({
+          where: { personId, type },
+        })
+      ).validated
+
+    test('the validated flag is taken from the graph on creation', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          new PersonIdentifier(
+            PersonIdentifierType.idhals,
+            'jacques-dupont',
+            true,
+          ),
+        ]),
+      )
+
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        true,
+      )
+    })
+
+    test('the graph raises the validated flag of an unchanged identifier', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+
+      await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          new PersonIdentifier(
+            PersonIdentifierType.idhals,
+            'jacques-dupont',
+            true,
+          ),
+        ]),
+        { authoritative: true },
+      )
+
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        true,
+      )
+    })
+
+    test('markIdentifiersValidated leaves the flag unset when the action cannot be recorded', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+
+      await expect(
+        personDAO.markIdentifiersValidated(
+          'local-identifiers',
+          [PersonIdentifierType.idhals],
+          [
+            {
+              actionType: 'INVALID' as ActionType,
+              targetType: ActionTargetType.PERSON,
+              targetUid: 'local-identifiers',
+              parameters: {},
+              personUid: 'local-identifiers',
+            },
+          ],
+        ),
+      ).rejects.toThrow()
+
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        false,
+      )
+    })
+
+    test('the person message lowers a validation the graph does not report', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+      await personDAO.markIdentifiersValidated('local-identifiers', [
+        PersonIdentifierType.idhals,
+      ])
+
+      await personDAO.createOrUpdatePerson(makeIdentifiedPerson([idhals]), {
+        authoritative: true,
+      })
+
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        false,
+      )
+    })
+
+    test('a document contributor sync also takes the flag from the graph', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+      await personDAO.markIdentifiersValidated('local-identifiers', [
+        PersonIdentifierType.idhals,
+      ])
+
+      await personDAO.createOrUpdatePerson(makeIdentifiedPerson([idhals]))
+
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        false,
+      )
+    })
+
+    test('a validation change keeps the hal_login and the ORCID OAuth extension', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals, orcid]),
+      )
+      await addHalLogin(dbPerson.id)
+      const orcidRowId = await addOrcidExtension(dbPerson.id)
+      await personDAO.markIdentifiersValidated('local-identifiers', [
+        PersonIdentifierType.idhals,
+      ])
+
+      // Document contributor sync: the graph reports neither as validated
+      await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          idhals,
+          new PersonIdentifier(
+            PersonIdentifierType.orcid,
+            '0000-0001-2345-6789',
+            true,
+          ),
+        ]),
+      )
+
+      expect(await typesOf(dbPerson.id)).toEqual(
+        expect.arrayContaining([
+          PersonIdentifierType.hal_login,
+          PersonIdentifierType.idhals,
+          PersonIdentifierType.orcid,
+        ]),
+      )
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        false,
+      )
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.orcid)).toBe(
+        true,
+      )
+      expect(
+        await prisma.orcidIdentifier.findUnique({ where: { id: orcidRowId } }),
+      ).not.toBeNull()
+    })
+
+    test('syncIdentifiersValidation aligns the flag on matching type and value only', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          idhals,
+          new PersonIdentifier(PersonIdentifierType.idref, '123456789'),
+        ]),
+      )
+
+      const updated = await personDAO.syncIdentifiersValidation(
+        'local-identifiers',
+        [
+          new PersonIdentifier(
+            PersonIdentifierType.idhals,
+            'jacques-dupont',
+            true,
+          ),
+          new PersonIdentifier(PersonIdentifierType.idref, '987654321', true),
+        ],
+      )
+
+      expect(updated).toBe(1)
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        true,
+      )
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idref)).toBe(
+        false,
+      )
+    })
+
+    test('fetchInternalPersonUidsWithIdentifierTypes returns internal holders only', async () => {
+      await personDAO.createOrUpdatePerson(makeIdentifiedPerson([idhals]))
+
+      expect(
+        await personDAO.fetchInternalPersonUidsWithIdentifierTypes([
+          PersonIdentifierType.idhals,
+        ]),
+      ).toEqual(['local-identifiers'])
+      expect(
+        await personDAO.fetchInternalPersonUidsWithIdentifierTypes([
+          PersonIdentifierType.idref,
+        ]),
+      ).toEqual([])
+    })
+
+    test('a value change takes the validated flag from the graph', async () => {
+      const dbPerson = await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([idhals]),
+      )
+      await personDAO.markIdentifiersValidated('local-identifiers', [
+        PersonIdentifierType.idhals,
+      ])
+
+      await personDAO.createOrUpdatePerson(
+        makeIdentifiedPerson([
+          new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-durand'),
+        ]),
+      )
+
+      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
+        false,
+      )
+    })
   })
 
-  test('createIdentifier throws IdentifierConflictError when the type already exists', async () => {
+  test('createIdentifiers throws IdentifierConflictError when the type already exists', async () => {
     const { IdentifierConflictError } = await import('@/lib/daos/PersonDAO')
     const dbPerson = await prisma.person.create({
       data: {
@@ -1069,12 +1407,304 @@ describe('PersonDAO Integration Tests', () => {
       },
     })
 
+    const promise = personDAO.createIdentifiers(
+      [new PersonIdentifier(PersonIdentifierType.idref, '111111111')],
+      dbPerson.uid,
+    )
+    await expect(promise).rejects.toBeInstanceOf(IdentifierConflictError)
+    await expect(promise).rejects.toMatchObject({ reason: 'slot_taken' })
+  })
+
+  test('createIdentifiers reports a value held by another person', async () => {
+    await prisma.person.create({
+      data: {
+        uid: 'local-createowner',
+        email: 'createowner@example.com',
+        identifiers: {
+          create: { type: PersonIdentifierType.idref, value: '127220747' },
+        },
+      },
+    })
+    const dbPerson = await prisma.person.create({
+      data: { uid: 'local-createother', email: 'createother@example.com' },
+    })
+
     await expect(
-      personDAO.createIdentifier(
-        new PersonIdentifier(PersonIdentifierType.idref, '111111111'),
+      personDAO.createIdentifiers(
+        [new PersonIdentifier(PersonIdentifierType.idref, '127220747')],
         dbPerson.uid,
       ),
-    ).rejects.toBeInstanceOf(IdentifierConflictError)
+    ).rejects.toMatchObject({ reason: 'used_by_another_person' })
+  })
+
+  test('createIdentifiers stores both idHAL forms', async () => {
+    const dbPerson = await prisma.person.create({
+      data: { uid: 'local-createboth', email: 'createboth@example.com' },
+    })
+
+    await personDAO.createIdentifiers(
+      [
+        new PersonIdentifier(PersonIdentifierType.idhals, 'jane-doe', true),
+        new PersonIdentifier(PersonIdentifierType.idhali, '424242', true),
+      ],
+      dbPerson.uid,
+    )
+
+    const rows = await prisma.personIdentifier.findMany({
+      where: { personId: dbPerson.id },
+      orderBy: { type: 'asc' },
+    })
+    expect(
+      rows.map(({ type, value, validated }) => [type, value, validated]),
+    ).toEqual([
+      [PersonIdentifierType.idhals, 'jane-doe', true],
+      [PersonIdentifierType.idhali, '424242', true],
+    ])
+  })
+
+  test('createIdentifiers writes nothing when one form is held by another person', async () => {
+    await prisma.person.create({
+      data: {
+        uid: 'local-createformowner',
+        email: 'createformowner@example.com',
+        identifiers: {
+          create: { type: PersonIdentifierType.idhali, value: '424242' },
+        },
+      },
+    })
+    const dbPerson = await prisma.person.create({
+      data: {
+        uid: 'local-createformother',
+        email: 'createformother@example.com',
+      },
+    })
+
+    await expect(
+      personDAO.createIdentifiers(
+        [
+          new PersonIdentifier(PersonIdentifierType.idhals, 'jane-doe'),
+          new PersonIdentifier(PersonIdentifierType.idhali, '424242'),
+        ],
+        dbPerson.uid,
+      ),
+    ).rejects.toMatchObject({ reason: 'used_by_another_person' })
+    expect(
+      await prisma.personIdentifier.count({ where: { personId: dbPerson.id } }),
+    ).toBe(0)
+  })
+
+  describe('identifier writes and their actions are atomic', () => {
+    const invalidAction = (personUid: string) => ({
+      actionType: 'INVALID' as ActionType,
+      targetType: ActionTargetType.PERSON,
+      targetUid: personUid,
+      parameters: {},
+      personUid,
+    })
+
+    const typesOf = async (personId: number) =>
+      (
+        await prisma.personIdentifier.findMany({
+          where: { personId },
+          select: { type: true },
+        })
+      )
+        .map((row) => row.type)
+        .sort()
+
+    test('createIdentifiers writes nothing when an action cannot be recorded', async () => {
+      const dbPerson = await prisma.person.create({
+        data: { uid: 'local-atomic-add', email: 'atomic-add@example.com' },
+      })
+
+      await expect(
+        personDAO.createIdentifiers(
+          [
+            new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-dupont'),
+            new PersonIdentifier(PersonIdentifierType.idhali, '12345'),
+          ],
+          dbPerson.uid,
+          [invalidAction(dbPerson.uid)],
+        ),
+      ).rejects.toThrow()
+
+      expect(await typesOf(dbPerson.id)).toEqual([])
+    })
+
+    test('upsertHalIdentifiers writes nothing when an action cannot be recorded', async () => {
+      const dbPerson = await prisma.person.create({
+        data: { uid: 'local-atomic-hal', email: 'atomic-hal@example.com' },
+      })
+
+      await expect(
+        personDAO.upsertHalIdentifiers(
+          dbPerson.uid,
+          [new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-dupont')],
+          'jdupont',
+          [invalidAction(dbPerson.uid)],
+        ),
+      ).rejects.toThrow()
+
+      expect(await typesOf(dbPerson.id)).toEqual([])
+    })
+
+    const authenticatedOrcid = () =>
+      new ORCIDIdentifier('0000-0001-2345-6789', {
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        tokenType: 'bearer',
+        scope: ['/authenticate'],
+        obtainedAt: new Date('2026-01-01T00:00:00.000Z'),
+        expiresAt: new Date('2026-01-01T01:00:00.000Z'),
+      })
+
+    test('upsertAuthenticatedOrcidIdentifier writes nothing when an action cannot be recorded', async () => {
+      const dbPerson = await prisma.person.create({
+        data: { uid: 'local-atomic-orcid', email: 'atomic-orcid@example.com' },
+      })
+
+      await expect(
+        personDAO.upsertAuthenticatedOrcidIdentifier(
+          dbPerson.uid,
+          authenticatedOrcid(),
+          [invalidAction(dbPerson.uid)],
+        ),
+      ).rejects.toThrow()
+
+      expect(await typesOf(dbPerson.id)).toEqual([])
+      expect(await prisma.orcidIdentifier.count()).toBe(0)
+    })
+
+    test('upsertAuthenticatedOrcidIdentifier reports an ORCID held by another person', async () => {
+      await prisma.person.create({
+        data: {
+          uid: 'local-orcid-owner',
+          email: 'orcid-owner@example.com',
+          identifiers: {
+            create: {
+              type: PersonIdentifierType.orcid,
+              value: '0000-0001-2345-6789',
+            },
+          },
+        },
+      })
+      const dbPerson = await prisma.person.create({
+        data: { uid: 'local-orcid-other', email: 'orcid-other@example.com' },
+      })
+
+      await expect(
+        personDAO.upsertAuthenticatedOrcidIdentifier(
+          dbPerson.uid,
+          authenticatedOrcid(),
+        ),
+      ).rejects.toMatchObject({ reason: 'used_by_another_person' })
+      expect(await typesOf(dbPerson.id)).toEqual([])
+    })
+
+    test('deleteIdentifier keeps the identifier when an action cannot be recorded', async () => {
+      const dbPerson = await prisma.person.create({
+        data: {
+          uid: 'local-atomic-remove',
+          email: 'atomic-remove@example.com',
+          identifiers: {
+            create: { type: PersonIdentifierType.idref, value: '127220747' },
+          },
+        },
+      })
+
+      await expect(
+        personDAO.deleteIdentifier(dbPerson.uid, PersonIdentifierType.idref, [
+          invalidAction(dbPerson.uid),
+        ]),
+      ).rejects.toThrow()
+
+      expect(await typesOf(dbPerson.id)).toEqual([PersonIdentifierType.idref])
+    })
+  })
+
+  describe('isAnyIdentifierHeldByAnotherPerson', () => {
+    beforeEach(async () => {
+      await prisma.person.create({
+        data: {
+          uid: 'local-idhalowner',
+          email: 'idhalowner@example.com',
+          identifiers: {
+            create: { type: PersonIdentifierType.idhali, value: '12345' },
+          },
+        },
+      })
+    })
+
+    test('detects the other form held by another person', async () => {
+      expect(
+        await personDAO.isAnyIdentifierHeldByAnotherPerson(
+          'local-someone',
+          idHalFormsToIdentifiers({
+            idhals: 'jacques-dupont',
+            idhali: '12345',
+          }),
+        ),
+      ).toBe(true)
+    })
+
+    test('ignores the idHAL held by the person themselves', async () => {
+      expect(
+        await personDAO.isAnyIdentifierHeldByAnotherPerson(
+          'local-idhalowner',
+          idHalFormsToIdentifiers({
+            idhals: 'jacques-dupont',
+            idhali: '12345',
+          }),
+        ),
+      ).toBe(false)
+    })
+
+    test('matches on type and value, for any identifier type', async () => {
+      await prisma.person.create({
+        data: {
+          uid: 'local-orcidowner',
+          email: 'orcidowner@example.com',
+          identifiers: {
+            create: {
+              type: PersonIdentifierType.orcid,
+              value: '0000-0002-1825-0097',
+            },
+          },
+        },
+      })
+
+      expect(
+        await personDAO.isAnyIdentifierHeldByAnotherPerson('local-someone', [
+          new PersonIdentifier(
+            PersonIdentifierType.orcid,
+            '0000-0002-1825-0097',
+          ),
+        ]),
+      ).toBe(true)
+      // Same value under another type is not a match
+      expect(
+        await personDAO.isAnyIdentifierHeldByAnotherPerson('local-someone', [
+          new PersonIdentifier(PersonIdentifierType.idhals, '12345'),
+        ]),
+      ).toBe(false)
+    })
+
+    test('returns false when no form is held elsewhere', async () => {
+      expect(
+        await personDAO.isAnyIdentifierHeldByAnotherPerson(
+          'local-someone',
+          idHalFormsToIdentifiers({
+            idhals: 'jacques-dupont',
+          }),
+        ),
+      ).toBe(false)
+      expect(
+        await personDAO.isAnyIdentifierHeldByAnotherPerson(
+          'local-someone',
+          idHalFormsToIdentifiers({}),
+        ),
+      ).toBe(false)
+    })
   })
 
   test('should append -1 to the slug when a second person with the same name is added', async () => {

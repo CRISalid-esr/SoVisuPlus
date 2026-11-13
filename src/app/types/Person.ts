@@ -1,4 +1,5 @@
 import {
+  isIdHalType,
   PersonIdentifier,
   PersonIdentifierJson,
   PersonIdentifierType,
@@ -16,6 +17,7 @@ import {
   SourcePersonIdentifierType,
 } from '@prisma/client'
 import { PersonMembership } from '@/types/PersonMembership'
+import { HalCollectionUnit } from '@/types/HalCollectionUnit'
 import { PersonEmployment } from '@/types/PersonEmployment'
 import { SourcePerson, SourcePersonJson } from '@/types/SourcePerson'
 import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
@@ -74,6 +76,16 @@ class Person implements IAgent, Authorizable {
     return this.memberships
       .map(({ organizationUnit: { acronym } }) => acronym)
       .filter((acronym) => acronym !== null)
+  }
+
+  get currentHalCollectionUnits(): HalCollectionUnit[] {
+    return this.memberships
+      .filter((membership) => PersonMembership.isCurrent(membership))
+      .map(({ organizationUnit: { acronym, halCollection } }) => ({
+        acronym,
+        halCollection,
+      }))
+      .filter((unit): unit is HalCollectionUnit => !!unit.halCollection)
   }
 
   get membershipSignatures(): string[] {
@@ -179,13 +191,27 @@ class Person implements IAgent, Authorizable {
       )
       return orcid instanceof ORCIDIdentifier && !!orcid.oauth
     }
-    if (
-      type === PersonIdentifierType.idhals ||
-      type === PersonIdentifierType.idhali
-    ) {
+    if (isIdHalType(type)) {
       return this.hasIdentifier(PersonIdentifierType.hal_login)
     }
     return false
+  }
+
+  /**
+   * Whether the identifier of the given type is validated. Authentication
+   * implies validation, so an authenticated identifier is always validated.
+   * An idHAL is validated only when each of its stored forms is.
+   */
+  isIdentifierValidated(type: PersonIdentifierType): boolean {
+    const identifier = this.identifiers.find((id) => id.type === type)
+    if (!identifier) return false
+    if (this.isIdentifierAuthenticated(type)) return true
+    if (isIdHalType(type)) {
+      return this.identifiers
+        .filter((id) => isIdHalType(id.type as PersonIdentifierType))
+        .every((id) => id.validated)
+    }
+    return identifier.validated
   }
 
   private static computeDisplayName(
@@ -248,6 +274,7 @@ class Person implements IAgent, Authorizable {
       return ORCIDIdentifier.fromDB({
         type: x.type,
         value: x.value,
+        validated: x.validated,
         orcidIdentifier: x.orcidIdentifier,
       })
     }
@@ -255,6 +282,7 @@ class Person implements IAgent, Authorizable {
     return PersonIdentifier.fromDB({
       type: x.type,
       value: x.value,
+      validated: x.validated,
     })
   }
 

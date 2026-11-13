@@ -10,8 +10,9 @@ import type { RolesFileSeed } from '@/lib/services/RoleConfigService'
 import { PermissionAction } from '@/types/Permission'
 import { EntityType } from '@/types/UserRoleScope'
 import { PersonDAO } from '@/lib/daos/PersonDAO'
-import { hasWiderThanSelfPersonScope } from '@/app/auth/ability'
+import { hasFullAccess, hasWiderThanSelfPersonScope } from '@/app/auth/ability'
 import {
+  canValidateIdentifier,
   computeIdentifierCapabilities,
   identifierRemovalRequiresWideScope,
   identifierSupportsAuth,
@@ -27,6 +28,12 @@ const ROLES_SEED: RolesFileSeed = {
       permissions: [
         { action: 'update', subject: 'Person', fields: ['identifiers'] },
       ],
+    },
+    {
+      name: 'admin',
+      description: 'Full access',
+      system: true,
+      permissions: [{ action: 'manage', subject: 'all', fields: [] }],
     },
     {
       name: 'person_name_editor',
@@ -201,6 +208,7 @@ describe('AuthZ (identifier capability matrix) – integration', () => {
         'Person',
         'identifiers',
       ),
+      isAdmin: hasFullAccess(ctx),
       isAuthenticated,
       supportsAuth: identifierSupportsAuth(type),
       removalRequiresWide: identifierRemovalRequiresWideScope(type),
@@ -303,6 +311,33 @@ describe('AuthZ (identifier capability matrix) – integration', () => {
     })
   })
 
+  test('admin, another account: can add and remove, authenticated or not', async () => {
+    await createPersonWithUser('local-admin')
+    await createPersonWithUser('local-bob')
+    await assignRoleToPersonUid('admin', 'local-admin', null)
+
+    const auth = await capsFor(
+      'local-admin',
+      'local-bob',
+      PersonIdentifierType.orcid,
+      true,
+    )
+    expect(auth).toEqual({
+      canAuthenticate: false, // authentication is the account owner's own login
+      canAddUnauthenticated: true,
+      canRemove: true,
+    })
+
+    const idref = await capsFor(
+      'local-admin',
+      'local-bob',
+      PersonIdentifierType.idref,
+      false,
+    )
+    expect(idref.canAddUnauthenticated).toBe(true)
+    expect(idref.canRemove).toBe(true)
+  })
+
   test('self-scoped editor on someone else’s account: no capability at all', async () => {
     await createPersonWithUser('local-alice')
     await createPersonWithUser('local-bob')
@@ -339,5 +374,92 @@ describe('AuthZ (identifier capability matrix) – integration', () => {
       canAddUnauthenticated: false,
       canRemove: false,
     })
+  })
+})
+
+describe('AuthZ (identifier validation) – integration', () => {
+  const personDAO = new PersonDAO()
+
+  beforeEach(async () => {
+    await resetAuthzDb()
+    await seedRoles(ROLES_SEED)
+  })
+
+  afterAll(async () => {
+    await prisma.$disconnect()
+  })
+
+  const addIdref = (personId: number, validated = false) =>
+    prisma.personIdentifier.create({
+      data: {
+        personId,
+        type: PersonIdentifierType.idref,
+        value: `12722074${personId % 10}`,
+        validated,
+      },
+    })
+
+  const canValidateFor = async (actorUid: string, targetUid: string) => {
+    const { ability, ctx } = await abilityForPersonUid(actorUid)
+    const target = await personDAO.fetchPersonByUid(targetUid)
+    return canValidateIdentifier({
+      canManage: ability.can(PermissionAction.update, target!, 'identifiers'),
+      isWide: hasWiderThanSelfPersonScope(
+        ctx,
+        'update',
+        'Person',
+        'identifiers',
+      ),
+      exists: target!.hasIdentifier(PersonIdentifierType.idref),
+      isValidated: target!.isIdentifierValidated(PersonIdentifierType.idref),
+    })
+  }
+
+  test('wide editor can validate on another account and on their own', async () => {
+    const { person: librarian } = await createPersonWithUser('local-librarian')
+    const { person: bob } = await createPersonWithUser('local-bob')
+    await addIdref(librarian.id)
+    await addIdref(bob.id)
+    await assignRoleToPersonUid('account_editor', 'local-librarian', null)
+
+    expect(await canValidateFor('local-librarian', 'local-bob')).toBe(true)
+    expect(await canValidateFor('local-librarian', 'local-librarian')).toBe(
+      true,
+    )
+  })
+
+  test('wide editor cannot validate an already validated identifier', async () => {
+    await createPersonWithUser('local-librarian')
+    const { person: bob } = await createPersonWithUser('local-bob')
+    await addIdref(bob.id, true)
+    await assignRoleToPersonUid('account_editor', 'local-librarian', null)
+
+    expect(await canValidateFor('local-librarian', 'local-bob')).toBe(false)
+  })
+
+  test('editor scoped to another person can validate that person only', async () => {
+    await createPersonWithUser('local-alice')
+    const { person: bob } = await createPersonWithUser('local-bob')
+    const { person: carol } = await createPersonWithUser('local-carol')
+    await addIdref(bob.id)
+    await addIdref(carol.id)
+    await assignRoleToPersonUid('account_editor', 'local-alice', {
+      entityType: EntityType.Person,
+      entityUid: 'local-bob',
+    })
+
+    expect(await canValidateFor('local-alice', 'local-bob')).toBe(true)
+    expect(await canValidateFor('local-alice', 'local-carol')).toBe(false)
+  })
+
+  test('self-scoped editor cannot validate their own identifier', async () => {
+    const { person: alice } = await createPersonWithUser('local-alice')
+    await addIdref(alice.id)
+    await assignRoleToPersonUid('account_editor', 'local-alice', {
+      entityType: EntityType.Person,
+      entityUid: 'local-alice',
+    })
+
+    expect(await canValidateFor('local-alice', 'local-alice')).toBe(false)
   })
 })

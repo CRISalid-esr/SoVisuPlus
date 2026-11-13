@@ -1,4 +1,5 @@
 import { createHash } from 'crypto'
+import { IdHalForms } from '@/types/PersonIdentifier'
 
 export type AureHalAuthorIdentifiers = {
   idHal_i?: number
@@ -41,6 +42,14 @@ export type IdHalKind = 'idhals' | 'idhali'
  */
 export function authorDocHasIdentifier(doc: AureHalAuthorDoc): boolean {
   return Boolean(doc.idHal_s || doc.orcidId_s?.length || doc.idrefId_s?.length)
+}
+
+/** The idHAL forms (idhals / idhali) carried by a HAL author doc. */
+export function idHalFormsOf(doc: AureHalAuthorIdentifiers): IdHalForms {
+  return {
+    idhals: doc.idHal_s || undefined,
+    idhali: doc.idHal_i !== undefined ? String(doc.idHal_i) : undefined,
+  }
 }
 
 /** One organisation entry from /search/authorstructure (an author's affiliations). */

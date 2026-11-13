@@ -16,6 +16,7 @@ import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
 export interface GraphPersonIdentifier {
   type: string
   value: string
+  validated?: boolean | null
 }
 
 export interface GraphSourcePersonIdentifierResponse {
@@ -152,6 +153,7 @@ export class PersonGraphQLClient extends AbstractGraphQLClient {
             return new PersonIdentifier(
               PersonIdentifier.typeFromString(identifier.type),
               identifier.value,
+              identifier.validated ?? false,
             )
           } catch {
             console.warn(

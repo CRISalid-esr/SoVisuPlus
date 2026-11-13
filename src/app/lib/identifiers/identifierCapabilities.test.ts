@@ -1,4 +1,5 @@
 import {
+  canValidateIdentifier,
   computeIdentifierCapabilities,
   identifierRemovalRequiresWideScope,
   identifierSupportsAuth,
@@ -33,6 +34,7 @@ describe('computeIdentifierCapabilities', () => {
     canManage: true,
     isOwn: true,
     isWide: false,
+    isAdmin: false,
     isAuthenticated: false,
     supportsAuth: true,
     removalRequiresWide: false,
@@ -88,6 +90,27 @@ describe('computeIdentifierCapabilities', () => {
     expect(other.canRemove).toBe(false)
   })
 
+  it('admin can remove an authenticated identifier on another account', () => {
+    expect(
+      computeIdentifierCapabilities({
+        ...base,
+        isOwn: false,
+        isAdmin: true,
+        isAuthenticated: true,
+      }).canRemove,
+    ).toBe(true)
+  })
+
+  it('admin can remove a wide-only identifier', () => {
+    expect(
+      computeIdentifierCapabilities({
+        ...base,
+        isAdmin: true,
+        removalRequiresWide: true,
+      }).canRemove,
+    ).toBe(true)
+  })
+
   it('authenticated identifier on own account can be removed', () => {
     expect(
       computeIdentifierCapabilities({ ...base, isAuthenticated: true })
@@ -108,5 +131,34 @@ describe('computeIdentifierCapabilities', () => {
     expect(
       computeIdentifierCapabilities({ ...wide, isOwn: false }).canRemove,
     ).toBe(true)
+  })
+})
+
+describe('canValidateIdentifier', () => {
+  const base = {
+    canManage: true,
+    isWide: true,
+    exists: true,
+    isValidated: false,
+  }
+
+  it('wide-scoped editor can validate an existing non-validated identifier', () => {
+    expect(canValidateIdentifier(base)).toBe(true)
+  })
+
+  it('self-scoped editor cannot validate', () => {
+    expect(canValidateIdentifier({ ...base, isWide: false })).toBe(false)
+  })
+
+  it('no manage permission (out of perimeter) → cannot validate', () => {
+    expect(canValidateIdentifier({ ...base, canManage: false })).toBe(false)
+  })
+
+  it('no identifier → nothing to validate', () => {
+    expect(canValidateIdentifier({ ...base, exists: false })).toBe(false)
+  })
+
+  it('already validated (or authenticated) → cannot validate again', () => {
+    expect(canValidateIdentifier({ ...base, isValidated: true })).toBe(false)
   })
 })

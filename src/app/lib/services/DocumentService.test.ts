@@ -28,6 +28,7 @@ describe('DocumentService', () => {
   let mockModifyTitles: jest.Mock
   let mockModifyAbstracts: jest.Mock
   let mockCreateAction: jest.Mock
+  let mockFetchOldestPublicationYear: jest.Mock
   let mockCreateOrUpdateConcept: jest.Mock
   let mockMarkDocumentsWaitingForUpdate: jest.Mock
   let mockUpdateDocumentTypeByUid: jest.Mock
@@ -35,6 +36,7 @@ describe('DocumentService', () => {
   beforeEach(() => {
     mockFetchDocuments = jest.fn()
     mockFetchOAYearDocuments = jest.fn()
+    mockFetchOldestPublicationYear = jest.fn()
     mockfetchDocumentById = jest.fn()
     mockCountDocuments = jest.fn()
     mockDeleteConceptsFromDocument = jest.fn()
@@ -48,6 +50,7 @@ describe('DocumentService', () => {
     ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
       fetchDocuments: mockFetchDocuments,
       fetchOAYearDocuments: mockFetchOAYearDocuments,
+      fetchOldestPublicationYear: mockFetchOldestPublicationYear,
       fetchDocumentById: mockfetchDocumentById,
       deleteConceptsFromDocument: mockDeleteConceptsFromDocument,
       addConceptsToDocument: mockAddConceptsToDocument,
@@ -216,6 +219,7 @@ describe('DocumentService', () => {
     const mockResponse = {
       documents: [
         {
+          year: 2022,
           uid: 'doc-123',
           oaStatus: 'GREEN',
           publicationDate: '2022',
@@ -224,7 +228,6 @@ describe('DocumentService', () => {
             {
               person: {
                 uid: 'local-124',
-                displayName: 'John Doe',
               },
               affiliations: [
                 {
@@ -256,7 +259,6 @@ describe('DocumentService', () => {
               {
                 person: {
                   uid: 'local-124',
-                  displayName: 'John Doe',
                 },
                 affiliations: [
                   {
@@ -284,11 +286,52 @@ describe('DocumentService', () => {
     const contributorType = 'person' as AgentType
 
     await expect(
-      documentService.documentsPerYear(contributorUid, contributorType),
+      documentService.documentsPerYear(
+        contributorUid,
+        contributorType,
+        2020,
+        2024,
+      ),
     ).resolves.toEqual(returnValue)
 
     const contributorUids = [contributorUid]
-    expect(mockFetchOAYearDocuments).toHaveBeenCalledWith(contributorUids)
+    expect(mockFetchOAYearDocuments).toHaveBeenCalledWith(
+      contributorUids,
+      2020,
+      2024,
+    )
+  })
+
+  it('groups documents by the year computed from publicationDateStart', async () => {
+    const doc = {
+      uid: 'doc-1',
+      oaStatus: null,
+      // Display string disagrees with the start year: the start year wins.
+      publicationDate: '2021-12',
+      upwOAStatus: null,
+      contributions: [],
+    }
+    mockFetchOAYearDocuments.mockResolvedValue({
+      documents: [{ ...doc, year: 2022 }],
+    })
+
+    const { publicationsPerYear } = await documentService.documentsPerYear(
+      'local-124',
+      'person',
+      2020,
+      2024,
+    )
+
+    expect(publicationsPerYear).toEqual({ 2022: [doc] })
+  })
+
+  it('returns the oldest publication year of the perspective perimeter', async () => {
+    mockFetchOldestPublicationYear.mockResolvedValue(2009)
+
+    await expect(
+      documentService.oldestPublicationYear('local-124', 'person'),
+    ).resolves.toBe(2009)
+    expect(mockFetchOldestPublicationYear).toHaveBeenCalledWith(['local-124'])
   })
 
   it('should throw an error when documentsPerYear fails', async () => {
@@ -298,11 +341,20 @@ describe('DocumentService', () => {
     const contributorType = 'person' as AgentType
 
     await expect(
-      documentService.documentsPerYear(contributorUid, contributorType),
+      documentService.documentsPerYear(
+        contributorUid,
+        contributorType,
+        2020,
+        2024,
+      ),
     ).rejects.toThrow('Error fetching documents from service')
 
     const contributorUids = [contributorUid]
-    expect(mockFetchOAYearDocuments).toHaveBeenCalledWith(contributorUids)
+    expect(mockFetchOAYearDocuments).toHaveBeenCalledWith(
+      contributorUids,
+      2020,
+      2024,
+    )
   })
 
   it('should call deleteConceptsFromDocument with correct arguments', async () => {

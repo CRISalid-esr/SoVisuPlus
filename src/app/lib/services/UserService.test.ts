@@ -42,6 +42,7 @@ describe('UserService', () => {
     expect(userDAOMock.getUserByIdentifier).toHaveBeenCalledWith({
       type: 'local',
       value: 'local-johndoe',
+      validated: false,
     })
   })
 })

@@ -4,6 +4,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Alert,
   Box,
   Chip,
   CircularProgress,
@@ -18,15 +19,23 @@ import { AureHalAuthorDoc, IdHalKind } from '@/lib/services/AureHalAPIClient'
 type LoadState =
   | { status: 'idle' }
   | { status: 'loading' }
-  | { status: 'loaded'; data: AureHalAuthorDoc }
+  | { status: 'loaded'; data: AureHalAuthorPreview }
   | { status: 'not_found' }
+  | { status: 'hal_unavailable' }
   | { status: 'error' }
+
+/** Preview response: the author, plus whether another person holds it. */
+type AureHalAuthorPreview = AureHalAuthorDoc & {
+  usedByAnotherPerson?: boolean
+}
 
 type HalInfoBoxProps = {
   value: string
   kind: IdHalKind
+  /** Person the idHAL is added to; enables the "used by another person" check. */
+  personUid?: string
   forceOpen?: boolean
-  onReady?: () => void // called when data loaded or not found (ready for user decision)
+  onReady?: () => void // called when the user may save: author loaded and free, not found, or HAL unavailable
 }
 
 /**
@@ -37,6 +46,7 @@ type HalInfoBoxProps = {
 const HalInfoBox = ({
   value,
   kind,
+  personUid,
   forceOpen = false,
   onReady,
 }: HalInfoBoxProps) => {
@@ -50,21 +60,29 @@ const HalInfoBox = ({
     loadedKey.current = key
     setState({ status: 'loading' })
     try {
-      const res = await fetch(
-        `/api/aurehal/author?value=${encodeURIComponent(v)}&kind=${k}`,
-      )
+      const params = new URLSearchParams({ value: v, kind: k })
+      if (personUid) params.set('personUid', personUid)
+      const res = await fetch(`/api/aurehal/author?${params}`)
       if (res.status === 404) {
         setState({ status: 'not_found' })
         onReady?.()
         return
       }
+      // A HAL outage must not block the add: the server still checks the idHAL
+      if (res.status === 502) {
+        setState({ status: 'hal_unavailable' })
+        onReady?.()
+        return
+      }
+      // Any other failure (e.g. the usage check): keep Save disabled
       if (!res.ok) {
         setState({ status: 'error' })
         return
       }
-      const data: AureHalAuthorDoc = await res.json()
+      const data: AureHalAuthorPreview = await res.json()
       setState({ status: 'loaded', data })
-      onReady?.()
+      // An idHAL held by another person cannot be added: keep Save disabled
+      if (!data.usedByAnotherPerson) onReady?.()
     } catch {
       setState({ status: 'error' })
     }
@@ -131,14 +149,25 @@ const HalInfoBox = ({
           </Typography>
         )}
 
-        {state.status === 'error' && (
+        {state.status === 'hal_unavailable' && (
           <Typography variant='body2' color='error'>
             <Trans>hal_info_box_error</Trans>
           </Typography>
         )}
 
+        {state.status === 'error' && (
+          <Typography variant='body2' color='error'>
+            <Trans>hal_info_box_check_error</Trans>
+          </Typography>
+        )}
+
         {state.status === 'loaded' && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            {state.data.usedByAnotherPerson && (
+              <Alert severity='warning'>
+                <Trans>hal_info_box_used_by_another_person</Trans>
+              </Alert>
+            )}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography variant='body1' fontWeight='medium'>
                 {displayName(state.data)}

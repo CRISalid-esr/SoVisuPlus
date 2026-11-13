@@ -4,6 +4,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Alert,
   Box,
   Chip,
   CircularProgress,
@@ -20,12 +21,17 @@ import { OrcidPersonData } from '@/lib/services/OrcidPublicClient'
 type LoadState =
   | { status: 'idle' }
   | { status: 'loading' }
-  | { status: 'loaded'; data: OrcidPersonData }
+  | { status: 'loaded'; data: OrcidPersonPreview }
   | { status: 'not_found' }
   | { status: 'error' }
 
+/** Preview response: the profile, plus whether another person holds it. */
+type OrcidPersonPreview = OrcidPersonData & { usedByAnotherPerson?: boolean }
+
 type OrcidInfoBoxProps = {
   orcid: string
+  /** Person the ORCID is added to; enables the "used by another person" check. */
+  personUid?: string
   forceOpen?: boolean
   onReady?: () => void // called when data loaded or not found (ready for user decision)
 }
@@ -37,6 +43,7 @@ type OrcidInfoBoxProps = {
  */
 const OrcidInfoBox = ({
   orcid,
+  personUid,
   forceOpen = false,
   onReady,
 }: OrcidInfoBoxProps) => {
@@ -49,7 +56,10 @@ const OrcidInfoBox = ({
     loadedRef.current = id
     setState({ status: 'loading' })
     try {
-      const res = await fetch(`/api/orcid/person/${encodeURIComponent(id)}`)
+      const query = personUid ? `?${new URLSearchParams({ personUid })}` : ''
+      const res = await fetch(
+        `/api/orcid/person/${encodeURIComponent(id)}${query}`,
+      )
       if (res.status === 404) {
         setState({ status: 'not_found' })
         onReady?.()
@@ -59,9 +69,10 @@ const OrcidInfoBox = ({
         setState({ status: 'error' })
         return
       }
-      const data: OrcidPersonData = await res.json()
+      const data: OrcidPersonPreview = await res.json()
       setState({ status: 'loaded', data })
-      onReady?.()
+      // An ORCID held by another person cannot be added: keep Save disabled
+      if (!data.usedByAnotherPerson) onReady?.()
     } catch {
       setState({ status: 'error' })
     }
@@ -136,6 +147,11 @@ const OrcidInfoBox = ({
 
         {state.status === 'loaded' && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            {state.data.usedByAnotherPerson && (
+              <Alert severity='warning'>
+                <Trans>orcid_info_box_used_by_another_person</Trans>
+              </Alert>
+            )}
             <Typography variant='body1' fontWeight='medium'>
               {displayName(state.data)}
             </Typography>

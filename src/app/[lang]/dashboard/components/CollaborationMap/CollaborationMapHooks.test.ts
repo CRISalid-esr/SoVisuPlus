@@ -21,11 +21,11 @@ const documents: Record<number, DashboardDocumentData[]> = {
       upwOAStatus: null,
       contributions: [
         {
-          person: { uid: 'insider', displayName: 'Insider' },
+          person: { uid: 'insider' },
           affiliations: [affiliation('own-lab', 'Own Lab')],
         },
         {
-          person: { uid: 'outsider', displayName: 'Outsider' },
+          person: { uid: 'outsider' },
           affiliations: [affiliation('partner-lab', 'Partner Lab')],
         },
       ],
@@ -33,9 +33,13 @@ const documents: Record<number, DashboardDocumentData[]> = {
   ],
 }
 
-const filtered = (perimeterUids: string[], yearRange: [number, number] = [2020, 2023]) =>
-  renderHook(() => useFilteredData({ data: documents, yearRange, perimeterUids }))
-    .result.current
+const filtered = (
+  perimeterUids: string[],
+  yearRange: [number, number] = [2020, 2023],
+) =>
+  renderHook(() =>
+    useFilteredData({ data: documents, yearRange, perimeterUids }),
+  ).result.current
 
 describe('useFilteredData', () => {
   it('keeps affiliations of contributors outside the perimeter', () => {
