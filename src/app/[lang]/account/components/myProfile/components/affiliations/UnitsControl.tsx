@@ -6,14 +6,8 @@ import { Plural } from '@lingui/react/macro'
 import React from 'react'
 
 const UnitsControl = () => {
-  const { connectedUser, currentPerspective, ownPerspective } = useStore(
-    (state) => state.user,
-  )
-  // When viewing another person's account, read their affiliations from currentPerspective
-  const person =
-    ownPerspective || !currentPerspective || !isPerson(currentPerspective)
-      ? connectedUser?.person
-      : currentPerspective
+  const { currentPerspective } = useStore((state) => state.user)
+  const person = isPerson(currentPerspective) ? currentPerspective : null
   const units = person?.membershipAcronyms ?? []
   const nbUnits = units?.length || 0
 

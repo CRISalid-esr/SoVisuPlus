@@ -9,62 +9,31 @@ jest.mock('@/stores/global_store', () => ({
   default: jest.fn(),
 }))
 
-const mockState = {
-  user: {
-    connectedUser: {
-      id: '1',
-      person: {
-        uid: 'local-jdoe',
-        external: false,
-        displayName: 'John Doe',
-        firstName: 'John',
-        lastName: 'Doe',
-        memberships: [
-          {
-            id: 1,
-            personId: 1,
-            organizationUnitId: 1,
-            startDate: null,
-            endDate: null,
-            positionCode: null,
-            organizationUnit: {
-              id: 1,
-              uid: '12345',
-              acronym: 'ABC',
-              signature: 'ABC_Signature',
-              external: false,
-              slug: 'org:abc',
-            },
-          },
-          {
-            id: 2,
-            personId: 1,
-            organizationUnitId: 2,
-            startDate: null,
-            endDate: null,
-            positionCode: null,
-            organizationUnit: {
-              id: 2,
-              uid: '67890',
-              acronym: 'DEF',
-              signature: 'DEF_Signature',
-              external: false,
-              slug: 'org:def',
-            },
-          },
-        ],
-        membershipSignatures: ['ABC_Signature', 'DEF_Signature'],
-      },
-      type: 'person',
-      slug: 'person:john-doe',
-    },
-  },
+const connectedPerson = {
+  uid: 'local-jdoe',
+  type: 'person',
+  membershipSignatures: ['ABC_Signature', 'DEF_Signature'],
 }
 
-beforeEach(() => {
-  ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
-    selector(mockState),
+const mockStore = (currentPerspective: object | null) =>
+  (useStore as unknown as jest.Mock).mockImplementation((selector) =>
+    selector({
+      user: {
+        connectedUser: { id: '1', person: connectedPerson },
+        currentPerspective,
+      },
+    }),
   )
+
+const renderSignatureControl = () =>
+  render(
+    <I18nProvider i18n={i18n}>
+      <SignatureControl />
+    </I18nProvider>,
+  )
+
+beforeEach(() => {
+  mockStore(connectedPerson)
 
   Object.assign(navigator, {
     clipboard: {
@@ -79,42 +48,21 @@ beforeEach(() => {
 })
 
 describe('SignatureControl Component', () => {
-  it('displays signatures', async () => {
-    render(
-      <I18nProvider i18n={i18n}>
-        <SignatureControl />
-      </I18nProvider>,
-    )
+  it('displays signatures', () => {
+    renderSignatureControl()
     expect(
       screen.getByText(i18n.t('profile_affiliations_signature_label')),
     ).toBeInTheDocument()
-    expect(
-      screen.getByText(
-        mockState.user.connectedUser.person.membershipSignatures.join(),
-      ),
-    ).toBeInTheDocument()
+    expect(screen.getByText('ABC_Signature,DEF_Signature')).toBeInTheDocument()
   })
 
   it("displays the perspective person's signatures when viewing another account", () => {
-    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
-      selector({
-        user: {
-          ...mockState.user,
-          ownPerspective: false,
-          currentPerspective: {
-            uid: 'local-asmith',
-            type: 'person',
-            membershipSignatures: ['XYZ_Signature'],
-          },
-        },
-      }),
-    )
-
-    render(
-      <I18nProvider i18n={i18n}>
-        <SignatureControl />
-      </I18nProvider>,
-    )
+    mockStore({
+      uid: 'local-asmith',
+      type: 'person',
+      membershipSignatures: ['XYZ_Signature'],
+    })
+    renderSignatureControl()
     expect(screen.getByText('XYZ_Signature')).toBeInTheDocument()
     expect(
       screen.queryByText('ABC_Signature,DEF_Signature'),
@@ -122,13 +70,8 @@ describe('SignatureControl Component', () => {
   })
 
   it('signature copy button works', async () => {
-    render(
-      <I18nProvider i18n={i18n}>
-        <SignatureControl />
-      </I18nProvider>,
-    )
-    const copyButton = screen.getByRole('button')
-    fireEvent.click(copyButton)
+    renderSignatureControl()
+    fireEvent.click(screen.getByRole('button'))
     await waitFor(() => {
       expect(navigator.clipboard.writeText).toHaveBeenCalled()
       expect(
@@ -139,69 +82,21 @@ describe('SignatureControl Component', () => {
     })
   })
 
-  it('signature copy button removed and message displayed if no signature', async () => {
-    const mockStateWithNoSignature = {
-      user: {
-        connectedUser: {
-          id: '1',
-          person: {
-            uid: 'local-jdoe',
-            external: false,
-            displayName: 'John Doe',
-            firstName: 'John',
-            lastName: 'Doe',
-            memberships: [
-              {
-                id: 1,
-                personId: 1,
-                organizationUnitId: 1,
-                startDate: null,
-                endDate: null,
-                positionCode: null,
-                organizationUnit: {
-                  id: 1,
-                  uid: '12345',
-                  acronym: 'ABC',
-                  signature: '',
-                  external: false,
-                  slug: 'org:abc',
-                },
-              },
-              {
-                id: 2,
-                personId: 1,
-                organizationUnitId: 2,
-                startDate: null,
-                endDate: null,
-                positionCode: null,
-                organizationUnit: {
-                  id: 2,
-                  uid: '67890',
-                  acronym: 'DEF',
-                  signature: '',
-                  external: false,
-                  slug: 'org:def',
-                },
-              },
-            ],
-            membershipSignatures: [],
-          },
-          type: 'person',
-          slug: 'person:john-doe',
-        },
-      },
-    }
-    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
-      selector(mockStateWithNoSignature),
-    )
-    render(
-      <I18nProvider i18n={i18n}>
-        <SignatureControl />
-      </I18nProvider>,
-    )
-    const copyButton = screen.queryByRole('button')
-    expect(copyButton).not.toBeInTheDocument()
+  it("shows no signature when the perspective person has none, never the connected user's", () => {
+    mockStore({ uid: 'local-asmith', type: 'person', membershipSignatures: [] })
+    renderSignatureControl()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    expect(
+      screen.getByText(i18n.t('profile_affiliations_no_signature_message')),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText('ABC_Signature,DEF_Signature'),
+    ).not.toBeInTheDocument()
+  })
 
+  it('shows no signature when the perspective is not a person', () => {
+    mockStore(null)
+    renderSignatureControl()
     expect(
       screen.getByText(i18n.t('profile_affiliations_no_signature_message')),
     ).toBeInTheDocument()

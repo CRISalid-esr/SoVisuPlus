@@ -9,62 +9,31 @@ jest.mock('@/stores/global_store', () => ({
   default: jest.fn(),
 }))
 
-const mockState = {
-  user: {
-    connectedUser: {
-      id: '1',
-      person: {
-        uid: 'local-jdoe',
-        external: false,
-        displayName: 'John Doe',
-        firstName: 'John',
-        lastName: 'Doe',
-        memberships: [
-          {
-            id: 1,
-            personId: 1,
-            organizationUnitId: 1,
-            startDate: null,
-            endDate: null,
-            positionCode: null,
-            organizationUnit: {
-              id: 1,
-              uid: '12345',
-              acronym: 'ABC',
-              signature: 'ABC_Signature',
-              external: false,
-              slug: 'org:abc',
-            },
-          },
-          {
-            id: 2,
-            personId: 1,
-            organizationUnitId: 2,
-            startDate: null,
-            endDate: null,
-            positionCode: null,
-            organizationUnit: {
-              id: 2,
-              uid: '67890',
-              acronym: 'DEF',
-              signature: 'DEF_Signature',
-              external: false,
-              slug: 'org:def',
-            },
-          },
-        ],
-        membershipAcronyms: ['ABC', 'DEF'],
-      },
-      type: 'person',
-      slug: 'person:john-doe',
-    },
-  },
+const connectedPerson = {
+  uid: 'local-jdoe',
+  type: 'person',
+  membershipAcronyms: ['ABC', 'DEF'],
 }
 
-beforeEach(() => {
-  ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
-    selector(mockState),
+const mockStore = (currentPerspective: object | null) =>
+  (useStore as unknown as jest.Mock).mockImplementation((selector) =>
+    selector({
+      user: {
+        connectedUser: { id: '1', person: connectedPerson },
+        currentPerspective,
+      },
+    }),
   )
+
+const renderUnitsControl = () =>
+  render(
+    <I18nProvider i18n={i18n}>
+      <UnitsControl />
+    </I18nProvider>,
+  )
+
+beforeEach(() => {
+  mockStore(connectedPerson)
 
   act(() => {
     i18n.activate('en')
@@ -72,71 +41,37 @@ beforeEach(() => {
 })
 
 describe('UnitsControl Component', () => {
-  it('displays memberships acronym', async () => {
-    render(
-      <I18nProvider i18n={i18n}>
-        <UnitsControl />
-      </I18nProvider>,
-    )
+  it('displays memberships acronym', () => {
+    renderUnitsControl()
     expect(
       screen.getByText(i18n.t('profile_affiliations_units_label')),
     ).toBeInTheDocument()
-    expect(
-      screen.getByText(
-        mockState.user.connectedUser.person.membershipAcronyms.join(),
-      ),
-    ).toBeInTheDocument()
+    expect(screen.getByText('ABC,DEF')).toBeInTheDocument()
   })
 
   it("displays the perspective person's memberships when viewing another account", () => {
-    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
-      selector({
-        user: {
-          ...mockState.user,
-          ownPerspective: false,
-          currentPerspective: {
-            uid: 'local-asmith',
-            type: 'person',
-            membershipAcronyms: ['XYZ'],
-          },
-        },
-      }),
-    )
-
-    render(
-      <I18nProvider i18n={i18n}>
-        <UnitsControl />
-      </I18nProvider>,
-    )
+    mockStore({
+      uid: 'local-asmith',
+      type: 'person',
+      membershipAcronyms: ['XYZ'],
+    })
+    renderUnitsControl()
     expect(screen.getByText('XYZ')).toBeInTheDocument()
     expect(screen.queryByText('ABC,DEF')).not.toBeInTheDocument()
   })
 
-  it('displays message if no membership', async () => {
-    const mockStateWithoutUnits = {
-      ...mockState,
-      user: {
-        ...mockState.user,
-        connectedUser: {
-          ...mockState.user.connectedUser,
-          person: {
-            ...mockState.user.connectedUser.person,
-            memberships: [],
-            membershipAcronyms: [],
-          },
-        },
-      },
-    }
+  it("displays message if no membership, never the connected user's", () => {
+    mockStore({ uid: 'local-asmith', type: 'person', membershipAcronyms: [] })
+    renderUnitsControl()
+    expect(
+      screen.getByText(i18n.t('profile_affiliations_no_units')),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('ABC,DEF')).not.toBeInTheDocument()
+  })
 
-    ;(useStore as unknown as jest.Mock).mockImplementation((selector) =>
-      selector(mockStateWithoutUnits),
-    )
-
-    render(
-      <I18nProvider i18n={i18n}>
-        <UnitsControl />
-      </I18nProvider>,
-    )
+  it('displays message if the perspective is not a person', () => {
+    mockStore(null)
+    renderUnitsControl()
     expect(
       screen.getByText(i18n.t('profile_affiliations_no_units')),
     ).toBeInTheDocument()
