@@ -7,14 +7,8 @@ import { useState } from 'react'
 import { ContentCopy } from '@mui/icons-material'
 
 const SignatureControl = () => {
-  const { connectedUser, currentPerspective, ownPerspective } = useStore(
-    (state) => state.user,
-  )
-  // When viewing another person's account, read their affiliations from currentPerspective
-  const person =
-    ownPerspective || !currentPerspective || !isPerson(currentPerspective)
-      ? connectedUser?.person
-      : currentPerspective
+  const { currentPerspective } = useStore((state) => state.user)
+  const person = isPerson(currentPerspective) ? currentPerspective : null
   const signatures = person?.membershipSignatures ?? []
   const [open, setOpen] = useState<boolean>(false)
 
