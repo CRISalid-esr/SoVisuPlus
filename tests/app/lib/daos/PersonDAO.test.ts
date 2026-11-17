@@ -1748,6 +1748,59 @@ describe('PersonDAO Integration Tests', () => {
     ])
   })
 
+  describe('profile validation', () => {
+    const makePerson = (): Person =>
+      new Person(
+        'local-validation',
+        false,
+        'validation@example.com',
+        'Val Person',
+        'Val',
+        'Person',
+      )
+
+    it('starts non-validated and is validated once', async () => {
+      await personDAO.createOrUpdatePerson(makePerson())
+
+      expect(
+        (await personDAO.fetchPersonByUid('local-validation'))?.validated,
+      ).toBe(false)
+      expect(await personDAO.markPersonValidated('local-validation')).toBe(true)
+      expect(await personDAO.markPersonValidated('local-validation')).toBe(
+        false,
+      )
+      expect(
+        (await personDAO.fetchPersonByUid('local-validation'))?.validated,
+      ).toBe(true)
+    })
+
+    it.each([
+      ['a person message', { authoritative: true }],
+      ['a document contributor sync', undefined],
+    ])('keeps the validation across %s', async (_label, options) => {
+      await personDAO.createOrUpdatePerson(makePerson())
+      await personDAO.markPersonValidated('local-validation')
+
+      // The graph never carries the flag: the synced Person reports false
+      await personDAO.createOrUpdatePerson(makePerson(), options)
+
+      const stored = await prisma.person.findUnique({
+        where: { uid: 'local-validation' },
+      })
+      expect(stored?.validated).toBe(true)
+    })
+
+    it('is not hydrated outside account reads', async () => {
+      await personDAO.createOrUpdatePerson(makePerson())
+      await personDAO.markPersonValidated('local-validation')
+
+      const { people } = await personDAO.fetchPeople('Val Person', 1, false, 10)
+      expect(people.find((p) => p.uid === 'local-validation')?.validated).toBe(
+        false,
+      )
+    })
+  })
+
   describe('backfillNormalizedSearchColumns', () => {
     it('fills normalizedName from the display name or the name parts', async () => {
       await prisma.person.createMany({

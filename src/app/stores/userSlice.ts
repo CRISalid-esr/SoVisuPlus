@@ -34,6 +34,7 @@ export interface UserSlice {
       personUid: string,
       type: string,
     ) => Promise<{ success: boolean }>
+    validatePersonProfile: (personUid: string) => Promise<{ success: boolean }>
   }
 }
 
@@ -176,6 +177,21 @@ export const addUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
         return { success: true }
       } catch (error) {
         console.error('Failed to validate identifier', error)
+        return { success: false }
+      }
+    },
+    validatePersonProfile: async (personUid: string) => {
+      try {
+        const response = await fetch(`/api/person/${personUid}/validation`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ validated: true }),
+        })
+        if (!response.ok) return { success: false }
+        await get().user.refreshPerspective()
+        return { success: true }
+      } catch (error) {
+        console.error('Failed to validate profile', error)
         return { success: false }
       }
     },

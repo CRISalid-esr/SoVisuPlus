@@ -82,6 +82,7 @@ describe('PersonWorker', () => {
       lastName: 'Doe',
       normalizedName: 'john doe',
       external: false,
+      validated: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -142,6 +143,7 @@ describe('PersonWorker', () => {
       lastName: 'Doe',
       normalizedName: 'john doe',
       external: true,
+      validated: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     }

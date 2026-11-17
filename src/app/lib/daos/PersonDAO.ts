@@ -151,6 +151,8 @@ export class PersonDAO extends AbstractDAO {
         try {
           const dbPerson = await this.prismaClient.person.upsert({
             where: { uid: person.uid },
+            // `validated` is local-only (set from the account page): graph syncs
+            // must never write it, so it is left out of both branches.
             update: {
               email: person.email,
               displayName: person.displayName,
@@ -866,6 +868,17 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
+   * Mark a person's profile as validated. Returns false when it already was.
+   */
+  public async markPersonValidated(personUid: string): Promise<boolean> {
+    const { count } = await this.prismaClient.person.updateMany({
+      where: { uid: personUid, validated: false },
+      data: { validated: true },
+    })
+    return count > 0
+  }
+
+  /**
    * UIDs of internal persons holding at least one identifier of the given types.
    */
   public async fetchInternalPersonUidsWithIdentifierTypes(
@@ -1109,7 +1122,7 @@ export class PersonDAO extends AbstractDAO {
         return null
       }
 
-      return Person.fromDbPerson(dbPerson)
+      return Person.fromDbPerson(dbPerson, { withValidation: true })
     } catch (error) {
       console.error(`Error fetching person with slug ${slug}:`, error)
       throw new Error(`Failed to fetch person with slug ${slug}`)
@@ -1212,6 +1225,7 @@ export class PersonDAO extends AbstractDAO {
           displayName: true,
           firstName: true,
           lastName: true,
+          validated: true,
           identifiers: {
             select: {
               type: true,
@@ -1295,7 +1309,7 @@ export class PersonDAO extends AbstractDAO {
         return null
       }
 
-      return Person.fromDbPerson(dbPerson)
+      return Person.fromDbPerson(dbPerson, { withValidation: true })
     } catch (error) {
       console.error(`Error fetching person with uid ${uid}:`, error)
       throw new Error(`Failed to fetch person with uid ${uid}`)

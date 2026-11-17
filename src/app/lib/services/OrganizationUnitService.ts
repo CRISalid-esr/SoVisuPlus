@@ -419,7 +419,8 @@ export class OrganizationUnitService {
   /**
    * Set `canEditAccount` on each member: whether the viewer may edit the
    * person's identifiers (the account_editor right), with the same perimeter
-   * rule as the identifier routes. Meant for one page of members: the
+   * rule as the identifier routes, and `canSeeProfileValidation` (editable and
+   * wide-scoped). Meant for one page of members: the
    * memberships are only fetched when a scoped right has to be resolved.
    */
   async markEditableAccounts(
@@ -427,9 +428,17 @@ export class OrganizationUnitService {
     authz: AuthzContext = EMPTY_PRINCIPAL,
   ): Promise<void> {
     const ability = abilityFromAuthzContext(authz)
+    // The profile validation status is only shown to wide-scoped editors.
+    const isWide = hasWiderThanSelfPersonScope(
+      authz,
+      'update',
+      'Person',
+      'identifiers',
+    )
     const setAll = (canEdit: (member: StructureMember) => boolean) => {
       for (const member of members) {
         member.canEditAccount = canEdit(member)
+        member.canSeeProfileValidation = member.canEditAccount && isWide
       }
     }
 

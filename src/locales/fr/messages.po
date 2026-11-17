@@ -2468,6 +2468,34 @@ msgstr "Identifiant validé"
 msgid "identifier_validated_tooltip"
 msgstr "Validé"
 
+#: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
+msgid "profile_validate_button"
+msgstr "Valider le profil"
+
+#: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
+msgid "profile_validate_dialog_title"
+msgstr "Valider ce profil ?"
+
+#: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
+msgid "profile_validate_dialog_text"
+msgstr "Le profil sera marqué comme vérifié. Ses identifiants ne sont pas validés pour autant. Cette action ne peut pas être annulée."
+
+#: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
+msgid "profile_validate_dialog_confirm"
+msgstr "Valider"
+
+#: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
+msgid "profile_validate_failure"
+msgstr "Échec de la validation du profil"
+
+#: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
+msgid "profile_validate_success"
+msgstr "Profil validé"
+
+#: src/app/[lang]/account/components/profileValidation/ProfileValidatedBadge.tsx
+msgid "profile_validated_tooltip"
+msgstr "Profil validé"
+
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx:228
 msgid "idref_control_add_button"
 msgstr "Ajouter"

@@ -34,6 +34,7 @@ import {
 } from '@/types/PersonIdentifier'
 import { StructureMemberJson } from '@/types/StructureMember'
 import RateBar from './RateBar'
+import ProfileValidatedBadge from '@/app/[lang]/account/components/profileValidation/ProfileValidatedBadge'
 import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
 import { searchFieldProps } from '@/components/searchFieldProps'
 
@@ -175,10 +176,9 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
         grow: 2,
         Cell({ row }) {
           const member = row.original
-          if (!member.slug) {
-            return <Typography variant='body2'>{member.displayName}</Typography>
-          }
-          return (
+          const name = !member.slug ? (
+            <Typography variant='body2'>{member.displayName}</Typography>
+          ) : (
             <Typography
               variant='body2'
               color='primary'
@@ -192,6 +192,13 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
             >
               {member.displayName}
             </Typography>
+          )
+          if (!member.profileValidated) return name
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {name}
+              <ProfileValidatedBadge fontSize='small' />
+            </Box>
           )
         },
       }),

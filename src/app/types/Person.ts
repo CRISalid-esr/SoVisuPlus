@@ -30,6 +30,7 @@ interface PersonJson extends IAgentJson {
   uid: string
   slug: string | null
   external: boolean
+  validated?: boolean
   email?: string | null
   displayName?: string
   firstName?: string
@@ -54,6 +55,8 @@ class Person implements IAgent, Authorizable {
    */
   public unhydratedMembershipOrgUids: string[] = []
   public unhydratedEmploymentOrgUids: string[] = []
+  /** The profile was reviewed by a wide-scoped account editor (local only). */
+  public validated = false
 
   constructor(
     public uid: string,
@@ -223,7 +226,14 @@ class Person implements IAgent, Authorizable {
     return `${firstName ?? ''} ${lastName ?? ''}`.trim()
   }
 
-  static fromDbPerson(person: PersonWithRelations): Person {
+  /**
+   * @param options.withValidation hydrate the profile validation status; only
+   * account reads set it, and their routes mask it for unauthorised viewers.
+   */
+  static fromDbPerson(
+    person: PersonWithRelations,
+    options?: { withValidation?: boolean },
+  ): Person {
     const displayName = Person.computeDisplayName(
       person.firstName,
       person.lastName,
@@ -254,6 +264,8 @@ class Person implements IAgent, Authorizable {
       person.employments?.map((employment) =>
         PersonEmployment.fromDbPersonEmployment(employment),
       ) ?? []
+    hydrated.validated =
+      (options?.withValidation ?? false) && (person.validated ?? false)
     return hydrated
   }
 
@@ -306,6 +318,7 @@ class Person implements IAgent, Authorizable {
       json.records.map((record) => SourcePerson.fromJson(record)),
     )
     hydrated.employments = json.employments ?? []
+    hydrated.validated = json.validated ?? false
     return hydrated
   }
 

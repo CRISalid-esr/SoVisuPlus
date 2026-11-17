@@ -1,5 +1,7 @@
 import {
+  canSeeProfileValidation,
   canValidateIdentifier,
+  canValidateProfile,
   computeIdentifierCapabilities,
   identifierRemovalRequiresWideScope,
   identifierSupportsAuth,
@@ -160,5 +162,29 @@ describe('canValidateIdentifier', () => {
 
   it('already validated (or authenticated) → cannot validate again', () => {
     expect(canValidateIdentifier({ ...base, isValidated: true })).toBe(false)
+  })
+})
+
+describe('profile validation', () => {
+  const base = { canManage: true, isWide: true, isValidated: false }
+
+  it('wide-scoped editor in perimeter sees the status and can validate', () => {
+    expect(canSeeProfileValidation(base)).toBe(true)
+    expect(canValidateProfile(base)).toBe(true)
+  })
+
+  it('self-scoped editor neither sees nor validates', () => {
+    expect(canSeeProfileValidation({ ...base, isWide: false })).toBe(false)
+    expect(canValidateProfile({ ...base, isWide: false })).toBe(false)
+  })
+
+  it('out of perimeter → neither sees nor validates', () => {
+    expect(canSeeProfileValidation({ ...base, canManage: false })).toBe(false)
+    expect(canValidateProfile({ ...base, canManage: false })).toBe(false)
+  })
+
+  it('already validated → status visible, cannot validate again', () => {
+    expect(canSeeProfileValidation(base)).toBe(true)
+    expect(canValidateProfile({ ...base, isValidated: true })).toBe(false)
   })
 })

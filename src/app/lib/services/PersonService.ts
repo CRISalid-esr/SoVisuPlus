@@ -285,6 +285,20 @@ export class PersonService {
   }
 
   /**
+   * Mark a person's profile as validated. Local only: nothing is sent to the
+   * graph and the identifiers are left untouched.
+   */
+  async validateProfile(personUid: string): Promise<boolean> {
+    try {
+      return await this.personDAO.markPersonValidated(personUid)
+    } catch (error) {
+      const message = `Error validating profile (personUid=${personUid})`
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
+
+  /**
    * Remove an identifier and emit a REMOVE message per stored value (none when
    * nothing was stored). Removing an idHAL removes both its forms.
    */
