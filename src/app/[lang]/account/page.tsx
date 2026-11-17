@@ -13,11 +13,24 @@ import { isPerson } from '@/types/Person'
 import Authorizations from './components/authorizations/'
 import MyProfile from './components/myProfile'
 import Notifications from './components/notification'
+import ValidateProfileButton from './components/profileValidation/ValidateProfileButton'
+import ProfileValidatedBadge from './components/profileValidation/ProfileValidatedBadge'
+import { useProfileValidation } from './components/profileValidation/useProfileValidation'
 
 const MyAccountPage = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { currentPerspective, ownPerspective } = useStore((state) => state.user)
+  const { connectedUser, currentPerspective, ownPerspective } = useStore(
+    (state) => state.user,
+  )
+
+  // When viewing another person's account, use that person as the subject
+  const person =
+    ownPerspective || !currentPerspective || !isPerson(currentPerspective)
+      ? connectedUser?.person
+      : currentPerspective
+  const { isValidated, canSeeStatus, canValidate } =
+    useProfileValidation(person)
 
   const tabs = [
     {
@@ -82,8 +95,10 @@ const MyAccountPage = () => {
           },
         }}
       >
-        <Box>
-          <Typography variant='h4' gutterBottom>
+        <Box
+          sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: '0.35em' }}
+        >
+          <Typography variant='h4' sx={{ mb: 0 }}>
             {ownPerspective ||
             !currentPerspective ||
             !isPerson(currentPerspective) ? (
@@ -92,6 +107,12 @@ const MyAccountPage = () => {
               currentPerspective.getDisplayName()
             )}
           </Typography>
+          {canSeeStatus && isValidated && (
+            <ProfileValidatedBadge fontSize='large' />
+          )}
+          {person && (
+            <ValidateProfileButton personUid={person.uid} show={canValidate} />
+          )}
         </Box>
       </Box>
       <TabFilter

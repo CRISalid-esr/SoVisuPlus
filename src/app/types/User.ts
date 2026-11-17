@@ -34,7 +34,9 @@ class User {
   }
 
   static fromDbUser(db: UserWithRelations): User {
-    const person = db.person ? Person.fromDbPerson(db.person) : undefined
+    const person = db.person
+      ? Person.fromDbPerson(db.person, { withValidation: true })
+      : undefined
 
     const rolesAssignments: UserRoleAssignment[] = (db.roles ?? []).map(
       (ur) => ({

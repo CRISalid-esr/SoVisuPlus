@@ -13,6 +13,7 @@ import { ActionTargetType, ActionType } from '@/types/Action'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 import { AureHalAPIClient, idHalFormsOf } from '@/lib/services/AureHalAPIClient'
+import { VALIDATABLE_IDENTIFIER_TYPES } from '@/lib/identifiers/identifierCapabilities'
 
 export class PersonService {
   private personDAO: PersonDAO
@@ -279,6 +280,54 @@ export class PersonService {
       )
     } catch (error) {
       const message = `Error validating identifier (type=${type}, personUid=${personUid})`
+      console.error(message, error)
+      throw new Error(message)
+    }
+  }
+
+  /**
+   * Mark a person's profile as validated and validate its existing
+   * IdRef/ORCID/idHAL identifiers. The profile flag stays local; each newly
+   * validated identifier emits an UPDATE message (authenticated: false), as
+   * {@link validateIdentifier} does. Authenticated identifiers are already
+   * validated, so no message is sent for them. Returns false when the profile
+   * already was validated.
+   *
+   * @param validatedBy uid of the validator's person, null when they have none
+   */
+  async validateProfile(
+    personUid: string,
+    validatedBy: string | null,
+  ): Promise<boolean> {
+    try {
+      const person = await this.personDAO.fetchPersonByUid(personUid)
+      if (!person) {
+        throw new Error('Person not found')
+      }
+      const toValidate = person
+        .getIdentifiers()
+        .filter(
+          (identifier) =>
+            VALIDATABLE_IDENTIFIER_TYPES.includes(
+              identifier.type as PersonIdentifierType,
+            ) &&
+            !identifier.validated &&
+            !person.isIdentifierAuthenticated(
+              identifier.type as PersonIdentifierType,
+            ),
+        )
+      return await this.personDAO.markPersonValidated(
+        personUid,
+        validatedBy,
+        toValidate.map((identifier) => identifier.type as PersonIdentifierType),
+        toValidate.map((identifier) =>
+          this.identifierAction(personUid, ActionType.UPDATE, {
+            identifier: identifier.toMessagePayload(false),
+          }),
+        ),
+      )
+    } catch (error) {
+      const message = `Error validating profile (personUid=${personUid})`
       console.error(message, error)
       throw new Error(message)
     }

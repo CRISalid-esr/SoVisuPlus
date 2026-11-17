@@ -35,6 +35,11 @@ model Person {
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
   external       Boolean            @default(false)
+  validated      Boolean            @default(false)
+  /// Date of the profile validation
+  validatedAt    DateTime?
+  /// Uid of the person who validated the profile (no relation: kept if that person is removed)
+  validatedBy    String?
   user           User?
   contributions  Contribution[]
   memberships    Membership[]

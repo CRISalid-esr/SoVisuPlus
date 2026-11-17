@@ -151,6 +151,9 @@ export class PersonDAO extends AbstractDAO {
         try {
           const dbPerson = await this.prismaClient.person.upsert({
             where: { uid: person.uid },
+            // `validated`, `validatedAt` and `validatedBy` are local-only (set from
+            // the account page): graph syncs must never write them, so they are
+            // left out of both branches.
             update: {
               email: person.email,
               displayName: person.displayName,
@@ -866,6 +869,35 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
+   * Mark a person's profile as validated (with the date and the validator's
+   * person uid), along with the given identifiers, and record the actions in
+   * the same transaction. Returns false, changing nothing, when the profile
+   * already was validated.
+   */
+  public async markPersonValidated(
+    personUid: string,
+    validatedBy: string | null,
+    identifierTypes: PersonIdentifierType[] = [],
+    actions: CreateActionParams[] = [],
+  ): Promise<boolean> {
+    return this.prismaClient.$transaction(async (tx) => {
+      const { count } = await tx.person.updateMany({
+        where: { uid: personUid, validated: false },
+        data: { validated: true, validatedAt: new Date(), validatedBy },
+      })
+      if (count === 0) return false
+      if (identifierTypes.length > 0) {
+        await tx.personIdentifier.updateMany({
+          where: { person: { uid: personUid }, type: { in: identifierTypes } },
+          data: { validated: true },
+        })
+      }
+      await recordActions(tx, actions)
+      return true
+    })
+  }
+
+  /**
    * UIDs of internal persons holding at least one identifier of the given types.
    */
   public async fetchInternalPersonUidsWithIdentifierTypes(
@@ -1109,7 +1141,7 @@ export class PersonDAO extends AbstractDAO {
         return null
       }
 
-      return Person.fromDbPerson(dbPerson)
+      return Person.fromDbPerson(dbPerson, { withValidation: true })
     } catch (error) {
       console.error(`Error fetching person with slug ${slug}:`, error)
       throw new Error(`Failed to fetch person with slug ${slug}`)
@@ -1212,6 +1244,7 @@ export class PersonDAO extends AbstractDAO {
           displayName: true,
           firstName: true,
           lastName: true,
+          validated: true,
           identifiers: {
             select: {
               type: true,
@@ -1295,7 +1328,7 @@ export class PersonDAO extends AbstractDAO {
         return null
       }
 
-      return Person.fromDbPerson(dbPerson)
+      return Person.fromDbPerson(dbPerson, { withValidation: true })
     } catch (error) {
       console.error(`Error fetching person with uid ${uid}:`, error)
       throw new Error(`Failed to fetch person with uid ${uid}`)

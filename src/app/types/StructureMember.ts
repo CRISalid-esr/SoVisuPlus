@@ -13,6 +13,8 @@ export interface StructureMemberJson {
   halRate: number
   identifiers: PersonIdentifierJson[]
   canEditAccount: boolean
+  /** Only true when the viewer may see the profile validation status. */
+  profileValidated: boolean
 }
 
 const toIsoDate = (date: Date | null): string | null =>
@@ -31,6 +33,10 @@ export class StructureMember {
   public position: string | null = null
   /** Whether the viewer may edit this person's account, set by the service. */
   public canEditAccount = false
+  /** Whether the viewer may see the profile validation status, set by the service. */
+  public canSeeProfileValidation = false
+  /** The profile was validated by a wide-scoped account editor. */
+  public profileValidated = false
 
   constructor(
     public personId: number,
@@ -59,6 +65,7 @@ export class StructureMember {
       displayName: string | null
       firstName: string | null
       lastName: string | null
+      validated?: boolean
       identifiers: {
         type: DbPersonIdentifierType
         value: string
@@ -90,7 +97,7 @@ export class StructureMember {
     const displayName =
       person.displayName ??
       [person.firstName, person.lastName].filter(Boolean).join(' ')
-    return new StructureMember(
+    const member = new StructureMember(
       person.id,
       person.uid,
       person.slug,
@@ -111,6 +118,8 @@ export class StructureMember {
             ),
         ),
     )
+    member.profileValidated = person.validated ?? false
+    return member
   }
 
   toJson(): StructureMemberJson {
@@ -130,6 +139,7 @@ export class StructureMember {
         validated: this.canEditAccount && identifier.validated,
       })),
       canEditAccount: this.canEditAccount,
+      profileValidated: this.canSeeProfileValidation && this.profileValidated,
     }
   }
 }

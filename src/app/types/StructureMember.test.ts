@@ -98,3 +98,38 @@ describe('StructureMember.toJson validation disclosure', () => {
     expect(structureMember.toJson().identifiers[0].validated).toBe(true)
   })
 })
+
+describe('StructureMember profile validation', () => {
+  const validatedMember = (): StructureMember =>
+    StructureMember.fromDb({
+      startDate: null,
+      endDate: null,
+      positionCode: null,
+      person: {
+        id: 1,
+        uid: 'person-1',
+        slug: null,
+        displayName: 'Jane Doe',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        validated: true,
+        identifiers: [],
+      },
+    })
+
+  it('discloses the validation status to viewers allowed to see it', () => {
+    const structureMember = validatedMember()
+    structureMember.canSeeProfileValidation = true
+    expect(structureMember.toJson().profileValidated).toBe(true)
+  })
+
+  it('hides the validation status from other viewers', () => {
+    expect(validatedMember().toJson().profileValidated).toBe(false)
+  })
+
+  it('reports a non-validated profile as such', () => {
+    const structureMember = member([])
+    structureMember.canSeeProfileValidation = true
+    expect(structureMember.toJson().profileValidated).toBe(false)
+  })
+})

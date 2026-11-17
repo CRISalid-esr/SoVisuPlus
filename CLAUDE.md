@@ -18,6 +18,7 @@ Each major feature is backed by a spec document in `specs/<branch-name>/prompt.m
 | `882-no-self-deletion-of-idref-for-a-researcher`                    | [`specs/882-no-self-deletion-of-idref-for-a-researcher/prompt.md`](specs/882-no-self-deletion-of-idref-for-a-researcher/prompt.md)                                       |
 | `979-add-validation-button-in-account-page-for-account-editor-user` | [`specs/979-add-validation-button-in-account-page-for-account-editor-user/prompt.md`](specs/979-add-validation-button-in-account-page-for-account-editor-user/prompt.md) |
 | `870-allow-transient-sso`                                           | [`specs/870-allow-transient-sso/prompt.md`](specs/870-allow-transient-sso/prompt.md)                                                                                     |
+| `feat-profile-validation`                                           | [`specs/feat-profile-validation/prompt.md`](specs/feat-profile-validation/prompt.md)                                                                                     |
 
 ## Git commits
 

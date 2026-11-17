@@ -2468,6 +2468,34 @@ msgstr "Identifier validated"
 msgid "identifier_validated_tooltip"
 msgstr "Validated"
 
+#: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
+msgid "profile_validate_button"
+msgstr "Validate profile"
+
+#: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
+msgid "profile_validate_dialog_title"
+msgstr "Validate this profile?"
+
+#: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
+msgid "profile_validate_dialog_text"
+msgstr "The profile will be marked as reviewed and its IdRef, ORCID and IdHAL identifiers will be validated. This action cannot be undone."
+
+#: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
+msgid "profile_validate_dialog_confirm"
+msgstr "Validate"
+
+#: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
+msgid "profile_validate_failure"
+msgstr "Failed to validate the profile"
+
+#: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
+msgid "profile_validate_success"
+msgstr "Profile validated"
+
+#: src/app/[lang]/account/components/profileValidation/ProfileValidatedBadge.tsx
+msgid "profile_validated_tooltip"
+msgstr "Profile validated"
+
 #: src/app/[lang]/account/components/myProfile/components/identifiers/IdrefControl.tsx:228
 msgid "idref_control_add_button"
 msgstr "Add"

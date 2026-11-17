@@ -105,6 +105,7 @@ describe('WebSocketListener', () => {
         addPersonIdentifier: jest.fn(),
         removePersonIdentifier: jest.fn(),
         validatePersonIdentifier: jest.fn(),
+        validatePersonProfile: jest.fn(),
       },
       document: {
         selectedDocument: document,

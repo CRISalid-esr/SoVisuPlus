@@ -535,6 +535,9 @@ describe('OrganizationUnitService.markEditableAccounts (integration)', () => {
   const editableUids = () =>
     members.filter((member) => member.canEditAccount).map((m) => m.uid)
 
+  const validationVisibleUids = () =>
+    members.filter((member) => member.canSeeProfileValidation).map((m) => m.uid)
+
   beforeAll(() => {
     service = new OrganizationUnitService()
   })
@@ -679,5 +682,28 @@ describe('OrganizationUnitService.markEditableAccounts (integration)', () => {
     )
 
     expect(editableUids()).toEqual(['p-alice'])
+  })
+
+  it('shows the profile validation status to a wide-scoped editor, within their perimeter', async () => {
+    await service.markEditableAccounts(
+      members,
+      accountEditor([
+        { entityType: EntityType.ResearchUnit, entityUid: 'local-ru1' },
+      ]),
+    )
+
+    expect(validationVisibleUids()).toEqual(['p-alice'])
+  })
+
+  it('hides the profile validation status from a self-scoped editor', async () => {
+    await service.markEditableAccounts(
+      members,
+      accountEditor(
+        [{ entityType: EntityType.Person, entityUid: 'p-tom' }],
+        'p-tom',
+      ),
+    )
+
+    expect(validationVisibleUids()).toEqual([])
   })
 })

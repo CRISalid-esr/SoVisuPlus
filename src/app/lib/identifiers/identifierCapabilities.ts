@@ -31,6 +31,14 @@ export type IdentifierCapabilities = {
   canRemove: boolean
 }
 
+/** Identifier types that can be validated from the account page. */
+export const VALIDATABLE_IDENTIFIER_TYPES: PersonIdentifierType[] = [
+  PersonIdentifierType.idref,
+  PersonIdentifierType.orcid,
+  PersonIdentifierType.idhals,
+  PersonIdentifierType.idhali,
+]
+
 /** Whether an identifier type has an authentication workflow. */
 export const identifierSupportsAuth = (type: PersonIdentifierType): boolean =>
   type === PersonIdentifierType.orcid ||
@@ -89,3 +97,27 @@ export const canValidateIdentifier = ({
   isValidated,
 }: IdentifierValidationInput): boolean =>
   canManage && isWide && exists && !isValidated
+
+export type ProfileValidationInput = {
+  /** `ability.can(update, person, 'identifiers')` — encodes the scope perimeter. */
+  canManage: boolean
+  /** The user holds the permission through a scope wider than their own Person. */
+  isWide: boolean
+}
+
+/**
+ * Whether the viewer may see a person's profile validation status — wide-scoped
+ * editors only, on any account in their perimeter (including their own).
+ */
+export const canSeeProfileValidation = ({
+  canManage,
+  isWide,
+}: ProfileValidationInput): boolean => canManage && isWide
+
+/** Validate a profile — same audience as the status, once only (not undoable yet). */
+export const canValidateProfile = ({
+  canManage,
+  isWide,
+  isValidated,
+}: ProfileValidationInput & { isValidated: boolean }): boolean =>
+  canSeeProfileValidation({ canManage, isWide }) && !isValidated
