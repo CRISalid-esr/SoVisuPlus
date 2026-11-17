@@ -64,12 +64,38 @@ export const STRUCTURE_MEMBER_SORT_KEYS = [
 
 export type StructureMemberSortKey = (typeof STRUCTURE_MEMBER_SORT_KEYS)[number]
 
+export interface StructureMemberSort {
+  key: StructureMemberSortKey
+  desc: boolean
+}
+
+/** Members table default order: position, then name. */
+export const DEFAULT_STRUCTURE_MEMBER_SORT: StructureMemberSort[] = [
+  { key: 'position', desc: false },
+  { key: 'name', desc: false },
+]
+
+export const STRUCTURE_MEMBER_VALIDATION_FILTERS = [
+  'all',
+  'not_validated',
+] as const
+
+export type StructureMemberValidationFilter =
+  (typeof STRUCTURE_MEMBER_VALIDATION_FILTERS)[number]
+
 export interface StructureMembersQuery {
   uid: string
   present: boolean
   search: string
-  sortBy: StructureMemberSortKey
-  sortDesc: boolean
+  /** Sort criteria by priority; name always breaks the remaining ties. */
+  sort: StructureMemberSort[]
+  /**
+   * Profile validation filter. 'not_validated' only keeps the members whose
+   * status the viewer may see.
+   */
+  validation: StructureMemberValidationFilter
+  /** The viewer, to resolve which accounts they may edit. */
+  authz: AuthzContext
   /** 1-based */
   page: number
   pageSize: number
@@ -267,9 +293,11 @@ export class OrganizationUnitService {
    * rows (children's members are seen by selecting the child — no perimeter
    * aggregation, so the total may differ from the directory membersCount).
    *
-   * Filtering (presence, fuzzy name search), per-person KPIs over the directory
-   * window, sorting and pagination all happen here, in memory: member sets
-   * are at most a few thousand rows. Returns null for an unknown structure.
+   * Filtering (presence, fuzzy name search, profile validation), per-person
+   * KPIs over the directory window, multi-criteria sorting and pagination all
+   * happen here, in memory: member sets are at most a few thousand rows.
+   * Returned members are marked with the viewer's account rights (see
+   * markEditableAccounts). Returns null for an unknown structure.
    */
   async getStructureMembers(
     query: StructureMembersQuery,
@@ -307,6 +335,16 @@ export class OrganizationUnitService {
         )
       }
       members = members.filter((member) => searchScores.get(member)! > 0)
+    }
+
+    // The validation filter needs the viewer's rights on every member, not
+    // only on the displayed page.
+    const filterByValidation = query.validation !== 'all'
+    if (filterByValidation) {
+      await this.markEditableAccounts(members, query.authz)
+      members = members.filter(
+        (member) => member.canSeeProfileValidation && !member.profileValidated,
+      )
     }
 
     // Position: the corps code of the member's employment — the row itself
@@ -362,58 +400,74 @@ export class OrganizationUnitService {
       }
     }
 
-    const direction = query.sortDesc ? -1 : 1
-    const compareNullableDates = (a: string | null, b: string | null) => {
+    const compareByName = (a: StructureMember, b: StructureMember) =>
+      `${a.lastName} ${a.firstName} ${a.displayName}`.localeCompare(
+        `${b.lastName} ${b.firstName} ${b.displayName}`,
+        undefined,
+        { sensitivity: 'base' },
+      )
+    // Missing values always sink to the bottom, whatever the direction
+    const compareNullable = (
+      a: string | null,
+      b: string | null,
+      direction: number,
+      compare: (a: string, b: string) => number,
+    ) => {
       if (a === b) return 0
-      // missing dates always sink to the bottom, whatever the direction
       if (a === null) return 1
       if (b === null) return -1
-      return direction * a.localeCompare(b)
+      return direction * compare(a, b)
     }
-    // With a search and the default name order, best matches come first
-    // (name order breaks ties)
+    const compareBy = (
+      { key, desc }: StructureMemberSort,
+      a: StructureMember,
+      b: StructureMember,
+    ): number => {
+      const direction = desc ? -1 : 1
+      switch (key) {
+        case 'position':
+          return compareNullable(a.position, b.position, direction, (x, y) =>
+            x.localeCompare(y, undefined, { sensitivity: 'base' }),
+          )
+        case 'startDate':
+        case 'endDate':
+          return compareNullable(a[key], b[key], direction, (x, y) =>
+            x.localeCompare(y),
+          )
+        case 'publicationsCount':
+        case 'oaRate':
+        case 'halRate':
+          return direction * (a[key] - b[key])
+        default:
+          return direction * compareByName(a, b)
+      }
+    }
+    const sort =
+      query.sort.length > 0 ? query.sort : DEFAULT_STRUCTURE_MEMBER_SORT
+    // With a search and the default order, best matches come first (the
+    // sort criteria break ties)
     const rankBySearch =
-      isSearching && query.sortBy === 'name' && !query.sortDesc
+      isSearching &&
+      JSON.stringify(sort) === JSON.stringify(DEFAULT_STRUCTURE_MEMBER_SORT)
     members.sort((a, b) => {
       if (rankBySearch) {
         const byScore = searchScores.get(b)! - searchScores.get(a)!
         if (byScore !== 0) return byScore
       }
-      switch (query.sortBy) {
-        case 'position':
-          if (a.position === b.position) return 0
-          // members without a position sink to the bottom either way
-          if (a.position === null) return 1
-          if (b.position === null) return -1
-          return (
-            direction *
-            a.position.localeCompare(b.position, undefined, {
-              sensitivity: 'base',
-            })
-          )
-        case 'startDate':
-          return compareNullableDates(a.startDate, b.startDate)
-        case 'endDate':
-          return compareNullableDates(a.endDate, b.endDate)
-        case 'publicationsCount':
-        case 'oaRate':
-        case 'halRate':
-          return direction * (a[query.sortBy] - b[query.sortBy])
-        default:
-          return (
-            direction *
-            `${a.lastName} ${a.firstName} ${a.displayName}`.localeCompare(
-              `${b.lastName} ${b.firstName} ${b.displayName}`,
-              undefined,
-              { sensitivity: 'base' },
-            )
-          )
+      for (const criterion of sort) {
+        const result = compareBy(criterion, a, b)
+        if (result !== 0) return result
       }
+      return compareByName(a, b)
     })
 
     const total = members.length
     const start = (query.page - 1) * query.pageSize
-    return { members: members.slice(start, start + query.pageSize), total }
+    const page = members.slice(start, start + query.pageSize)
+    if (!filterByValidation) {
+      await this.markEditableAccounts(page, query.authz)
+    }
+    return { members: page, total }
   }
 
   /**

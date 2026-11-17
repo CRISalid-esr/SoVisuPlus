@@ -50,8 +50,9 @@ export interface StructureMembersQueryParams {
   pageSize: number
   present: boolean
   search: string
-  sortBy: string
-  sortDesc: boolean
+  /** Sort criteria by priority; empty for the server's default order. */
+  sort: { id: string; desc: boolean }[]
+  validation: 'all' | 'not_validated'
 }
 
 interface StructureMembersState {
@@ -188,10 +189,17 @@ export const addOrganizationUnitSlice: StateCreator<
         const { signal } = startMembersRequest()
         setMembers({ loading: true, error: null })
         try {
-          const { uid, ...params } = query
-          const queryString = new URLSearchParams(
-            Object.entries(params).map(([key, value]) => [key, String(value)]),
-          ).toString()
+          const { uid, sort, ...params } = query
+          const queryString = new URLSearchParams([
+            ...Object.entries(params).map(([key, value]) => [
+              key,
+              String(value),
+            ]),
+            [
+              'sort',
+              sort.map(({ id, desc }) => (desc ? `-${id}` : id)).join(','),
+            ],
+          ]).toString()
           const response = await fetch(
             `/api/organizations/${encodeURIComponent(uid)}/members?${queryString}`,
             { headers: { 'accept-language': i18n.locale }, signal },

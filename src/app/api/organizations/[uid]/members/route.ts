@@ -2,14 +2,37 @@ import { NextRequest, NextResponse } from 'next/server'
 import {
   OrganizationUnitService,
   STRUCTURE_MEMBER_SORT_KEYS,
+  STRUCTURE_MEMBER_VALIDATION_FILTERS,
+  StructureMemberSort,
   StructureMemberSortKey,
+  StructureMemberValidationFilter,
 } from '@/lib/services/OrganizationUnitService'
+import { EMPTY_PRINCIPAL } from '@/app/auth/ability'
 import { canManageStructureVisibility } from '@/app/auth/structureVisibility'
 import { requireSession } from '@/app/auth/requireSession'
 import { MAX_NAME_SEARCH_QUERY_LENGTH } from '@/utils/fuzzySearch/constants'
 import { searchQueryLengthError } from '@/utils/fuzzySearch/searchQueryLength'
 
 const PAGE_SIZES = [10, 20, 50]
+
+/**
+ * Parses `sort=position,-name`: comma-separated keys by priority, `-` for a
+ * descending order. Unknown and repeated keys are ignored.
+ */
+const parseSort = (value: string | null): StructureMemberSort[] => {
+  const sort: StructureMemberSort[] = []
+  for (const token of (value ?? '').split(',')) {
+    const desc = token.startsWith('-')
+    const key = desc ? token.slice(1) : token
+    if (
+      (STRUCTURE_MEMBER_SORT_KEYS as readonly string[]).includes(key) &&
+      !sort.some((criterion) => criterion.key === key)
+    ) {
+      sort.push({ key: key as StructureMemberSortKey, desc })
+    }
+  }
+  return sort
+}
 
 export const GET = async (
   req: NextRequest,
@@ -26,12 +49,12 @@ export const GET = async (
   const pageSize = PAGE_SIZES.includes(requestedPageSize)
     ? requestedPageSize
     : PAGE_SIZES[0]
-  const requestedSortBy = searchParams.get('sortBy') ?? ''
-  const sortBy = (STRUCTURE_MEMBER_SORT_KEYS as readonly string[]).includes(
-    requestedSortBy,
-  )
-    ? (requestedSortBy as StructureMemberSortKey)
-    : 'name'
+  const requestedValidation = searchParams.get('validation') ?? ''
+  const validation = (
+    STRUCTURE_MEMBER_VALIDATION_FILTERS as readonly string[]
+  ).includes(requestedValidation)
+    ? (requestedValidation as StructureMemberValidationFilter)
+    : 'all'
   const search = searchParams.get('search') ?? ''
 
   const searchLengthError = searchQueryLengthError(
@@ -61,8 +84,9 @@ export const GET = async (
       uid,
       present: searchParams.get('present') !== 'false',
       search,
-      sortBy,
-      sortDesc: searchParams.get('sortDesc') === 'true',
+      sort: parseSort(searchParams.get('sort')),
+      validation,
+      authz: session.user.authz ?? EMPTY_PRINCIPAL,
       page,
       pageSize,
     })
@@ -72,10 +96,6 @@ export const GET = async (
         { status: 404 },
       )
     }
-    await organizationUnitService.markEditableAccounts(
-      result.members,
-      session.user.authz,
-    )
     return NextResponse.json({
       members: result.members.map((member) => member.toJson()),
       total: result.total,

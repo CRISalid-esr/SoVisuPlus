@@ -142,10 +142,49 @@ describe('OrganizationUnitService.getStructureMembers (integration)', () => {
   const baseQuery = {
     present: true,
     search: '',
-    sortBy: 'name' as const,
-    sortDesc: false,
+    sort: [],
+    validation: 'all' as const,
+    authz: makeAuthzContext({}),
     page: 1,
     pageSize: 10,
+  }
+
+  const globalAccountEditor = makeAuthzContext({
+    roleAssignments: [
+      makeAssignment(
+        'account_editor',
+        [
+          {
+            action: PermissionAction.update,
+            subject: PermissionSubject.Person,
+            fields: ['identifiers'],
+          },
+        ],
+        [],
+      ),
+    ],
+  })
+
+  const addMember = async (
+    uid: string,
+    firstName: string,
+    lastName: string,
+  ) => {
+    const ru1 = await prisma.organizationUnit.findUnique({
+      where: { uid: 'local-ru1' },
+    })
+    const person = await prisma.person.create({
+      data: {
+        uid,
+        slug: uid,
+        firstName,
+        lastName,
+        displayName: `${firstName} ${lastName}`,
+      },
+    })
+    await prisma.membership.create({
+      data: { personId: person.id, organizationUnitId: ru1!.id },
+    })
   }
 
   beforeAll(() => {
@@ -255,7 +294,7 @@ describe('OrganizationUnitService.getStructureMembers (integration)', () => {
     expect(member.position).toBe('Maître de conférences')
   })
 
-  it('includes departed members when present is off, sorted by name', async () => {
+  it('includes departed members when present is off, sorted by position then name', async () => {
     const result = await service.getStructureMembers({
       ...baseQuery,
       uid: 'local-ru1',
@@ -307,22 +346,8 @@ describe('OrganizationUnitService.getStructureMembers (integration)', () => {
     expect(result!.members.map((m) => m.uid)).toEqual(['p-elodie'])
   })
 
-  it('ranks best matches first under the default name order', async () => {
-    const ru1 = await prisma.organizationUnit.findUnique({
-      where: { uid: 'local-ru1' },
-    })
-    const marta = await prisma.person.create({
-      data: {
-        uid: 'p-marta',
-        slug: 'marta-zeller',
-        firstName: 'Marta',
-        lastName: 'Zeller',
-        displayName: 'Marta Zeller',
-      },
-    })
-    await prisma.membership.create({
-      data: { personId: marta.id, organizationUnitId: ru1!.id },
-    })
+  it('ranks best matches first under the default order', async () => {
+    await addMember('p-marta', 'Marta', 'Zeller')
     // "marta" is an exact word for Zeller and a typo of Bob's "Marti(n)":
     // Zeller comes first although Martin sorts before Zeller by name
     const result = await service.getStructureMembers({
@@ -332,6 +357,79 @@ describe('OrganizationUnitService.getStructureMembers (integration)', () => {
       search: 'marta',
     })
     expect(result!.members.map((m) => m.uid)).toEqual(['p-marta', 'p-bob'])
+  })
+
+  it('sorts by position first, members without one last, then by name', async () => {
+    await addMember('p-marta', 'Marta', 'Zeller')
+    await addMember('p-alain', 'Alain', 'Zola')
+
+    const result = await service.getStructureMembers({
+      ...baseQuery,
+      uid: 'local-ru1',
+      present: false,
+    })
+    expect(result!.members.map((m) => m.uid)).toEqual([
+      'p-elodie',
+      'p-bob',
+      'p-marta',
+      'p-alain',
+    ])
+  })
+
+  it('combines sort criteria by priority, name breaking the remaining ties', async () => {
+    await addMember('p-marta', 'Marta', 'Zeller')
+
+    const result = await service.getStructureMembers({
+      ...baseQuery,
+      uid: 'local-ru1',
+      present: false,
+      sort: [
+        { key: 'startDate', desc: true },
+        { key: 'publicationsCount', desc: true },
+      ],
+    })
+    // Bob alone has a start date; Élodie has a publication, Marta none
+    expect(result!.members.map((m) => m.uid)).toEqual([
+      'p-bob',
+      'p-elodie',
+      'p-marta',
+    ])
+  })
+
+  it('keeps the not validated profiles for a wide-scoped account editor', async () => {
+    await prisma.person.update({
+      where: { uid: 'p-elodie' },
+      data: { validated: true },
+    })
+
+    const result = await service.getStructureMembers({
+      ...baseQuery,
+      uid: 'local-ru1',
+      present: false,
+      authz: globalAccountEditor,
+      validation: 'not_validated',
+    })
+    expect(result!.members.map((m) => m.uid)).toEqual(['p-bob'])
+    expect(result!.total).toBe(1)
+  })
+
+  it('keeps no member under the validation filter when the status is hidden from the viewer', async () => {
+    const result = await service.getStructureMembers({
+      ...baseQuery,
+      uid: 'local-ru1',
+      present: false,
+      validation: 'not_validated',
+    })
+    expect(result!.total).toBe(0)
+  })
+
+  it('marks the returned members with the viewer account rights', async () => {
+    const result = await service.getStructureMembers({
+      ...baseQuery,
+      uid: 'local-ru1',
+      authz: globalAccountEditor,
+    })
+    expect(result!.members.map((m) => m.canEditAccount)).toEqual([true])
   })
 
   it('paginates after sorting', async () => {

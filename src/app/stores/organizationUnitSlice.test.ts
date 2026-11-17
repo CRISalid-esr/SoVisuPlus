@@ -260,6 +260,34 @@ describe('addOrganizationUnitSlice', () => {
     expect(error).toBeNull()
   })
 
+  it('serializes the members sort criteria by priority', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ members: [], total: 0 }),
+    })
+    const { fetchStructureMembers } = store.getState().organization
+
+    await fetchStructureMembers({
+      uid: 'ru1',
+      page: 1,
+      pageSize: 10,
+      present: true,
+      search: '',
+      sort: [
+        { id: 'position', desc: true },
+        { id: 'name', desc: false },
+      ],
+      validation: 'not_validated',
+    })
+
+    const url = new URL(
+      (global.fetch as jest.Mock).mock.calls[0][0],
+      'http://localhost',
+    )
+    expect(url.searchParams.get('sort')).toBe('-position,name')
+    expect(url.searchParams.get('validation')).toBe('not_validated')
+  })
+
   it('ignores the members response of a replaced query', async () => {
     const pending = controllableFetch()
     const { fetchStructureMembers } = store.getState().organization
@@ -268,8 +296,8 @@ describe('addOrganizationUnitSlice', () => {
       page: 1,
       pageSize: 10,
       present: true,
-      sortBy: 'name',
-      sortDesc: false,
+      sort: [{ id: 'name', desc: false }],
+      validation: 'all' as const,
     }
     const older = fetchStructureMembers({ ...query, search: 'dur' })
     const newer = fetchStructureMembers({ ...query, search: 'durand' })
