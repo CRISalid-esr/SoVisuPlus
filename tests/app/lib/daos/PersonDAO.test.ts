@@ -1790,6 +1790,43 @@ describe('PersonDAO Integration Tests', () => {
       expect(stored?.validated).toBe(true)
     })
 
+    it('leaves the identifiers untouched when the actions cannot be recorded', async () => {
+      await personDAO.createOrUpdatePerson(
+        new Person(
+          'local-validation',
+          false,
+          'validation@example.com',
+          'Val Person',
+          'Val',
+          'Person',
+          [new PersonIdentifier(PersonIdentifierType.idref, '127220747')],
+        ),
+      )
+
+      await expect(
+        personDAO.markPersonValidated(
+          'local-validation',
+          [PersonIdentifierType.idref],
+          [
+            {
+              actionType: 'INVALID' as ActionType,
+              targetType: ActionTargetType.PERSON,
+              targetUid: 'local-validation',
+              parameters: {},
+              personUid: 'local-validation',
+            },
+          ],
+        ),
+      ).rejects.toThrow()
+
+      const stored = await prisma.person.findUniqueOrThrow({
+        where: { uid: 'local-validation' },
+        include: { identifiers: true },
+      })
+      expect(stored.validated).toBe(false)
+      expect(stored.identifiers.every((id) => !id.validated)).toBe(true)
+    })
+
     it('is not hydrated outside account reads', async () => {
       await personDAO.createOrUpdatePerson(makePerson())
       await personDAO.markPersonValidated('local-validation')

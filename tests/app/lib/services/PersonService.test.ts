@@ -391,6 +391,113 @@ describe('PersonService Integration Tests', () => {
     ).toBe(0)
   })
 
+  test('validateProfile validates the profile and its non-validated identifiers, with one UPDATE each', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-validate-profile',
+        email: 'validate-profile@example.com',
+        firstName: 'Paul',
+        lastName: 'Martin',
+        normalizedName: 'paul martin',
+        external: false,
+        identifiers: {
+          create: [
+            { type: PersonIdentifierType.idref, value: '127220747' },
+            {
+              type: PersonIdentifierType.orcid,
+              value: '0000-0001-2345-6789',
+              validated: true,
+            },
+            // Authenticated through hal_login: already validated
+            { type: PersonIdentifierType.idhals, value: 'paul-martin' },
+            { type: PersonIdentifierType.hal_login, value: 'pmartin' },
+            // Not managed from the account page
+            { type: PersonIdentifierType.scopus, value: '57190000000' },
+          ],
+        },
+      },
+    })
+
+    expect(await personService.validateProfile(person.uid)).toBe(true)
+
+    const stored = await prisma.person.findUniqueOrThrow({
+      where: { id: person.id },
+      include: { identifiers: true },
+    })
+    expect(stored.validated).toBe(true)
+    const validatedByType = Object.fromEntries(
+      stored.identifiers.map((identifier) => [
+        identifier.type,
+        identifier.validated,
+      ]),
+    )
+    expect(validatedByType).toMatchObject({
+      idref: true,
+      orcid: true,
+      idhals: false,
+      scopus: false,
+    })
+
+    const actions = await prisma.action.findMany({
+      where: { targetUid: person.uid, path: 'identifiers' },
+    })
+    expect(actions.map((action) => action.actionType)).toEqual([
+      ActionType.UPDATE,
+    ])
+    expect(actions[0].parameters).toEqual({
+      identifier: { type: 'idref', value: '127220747', authenticated: false },
+    })
+  })
+
+  test('validateProfile changes nothing when the profile already was validated', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-validate-profile-done',
+        email: 'validate-profile-done@example.com',
+        firstName: 'Paul',
+        lastName: 'Martin',
+        normalizedName: 'paul martin',
+        external: false,
+        validated: true,
+        identifiers: {
+          create: { type: PersonIdentifierType.idref, value: '127220747' },
+        },
+      },
+    })
+
+    expect(await personService.validateProfile(person.uid)).toBe(false)
+
+    const identifier = await prisma.personIdentifier.findFirstOrThrow({
+      where: { personId: person.id },
+    })
+    expect(identifier.validated).toBe(false)
+    expect(
+      await prisma.action.count({ where: { targetUid: person.uid } }),
+    ).toBe(0)
+  })
+
+  test('validateProfile validates a profile without identifiers', async () => {
+    const person = await prisma.person.create({
+      data: {
+        uid: 'person-validate-profile-empty',
+        email: 'validate-profile-empty@example.com',
+        firstName: 'Paul',
+        lastName: 'Martin',
+        normalizedName: 'paul martin',
+        external: false,
+      },
+    })
+
+    expect(await personService.validateProfile(person.uid)).toBe(true)
+    expect(
+      (await prisma.person.findUniqueOrThrow({ where: { id: person.id } }))
+        .validated,
+    ).toBe(true)
+    expect(
+      await prisma.action.count({ where: { targetUid: person.uid } }),
+    ).toBe(0)
+  })
+
   test('addIdentifier rejects a second identifier of the same type (remove-before-add)', async () => {
     const person = await prisma.person.create({
       data: {

@@ -868,14 +868,30 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Mark a person's profile as validated. Returns false when it already was.
+   * Mark a person's profile as validated, along with the given identifiers,
+   * and record the actions in the same transaction. Returns false, changing
+   * nothing, when the profile already was validated.
    */
-  public async markPersonValidated(personUid: string): Promise<boolean> {
-    const { count } = await this.prismaClient.person.updateMany({
-      where: { uid: personUid, validated: false },
-      data: { validated: true },
+  public async markPersonValidated(
+    personUid: string,
+    identifierTypes: PersonIdentifierType[] = [],
+    actions: CreateActionParams[] = [],
+  ): Promise<boolean> {
+    return this.prismaClient.$transaction(async (tx) => {
+      const { count } = await tx.person.updateMany({
+        where: { uid: personUid, validated: false },
+        data: { validated: true },
+      })
+      if (count === 0) return false
+      if (identifierTypes.length > 0) {
+        await tx.personIdentifier.updateMany({
+          where: { person: { uid: personUid }, type: { in: identifierTypes } },
+          data: { validated: true },
+        })
+      }
+      await recordActions(tx, actions)
+      return true
     })
-    return count > 0
   }
 
   /**

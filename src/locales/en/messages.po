@@ -2478,7 +2478,7 @@ msgstr "Validate this profile?"
 
 #: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
 msgid "profile_validate_dialog_text"
-msgstr "The profile will be marked as reviewed. Its identifiers are not validated. This action cannot be undone."
+msgstr "The profile will be marked as reviewed and its IdRef, ORCID and IdHAL identifiers will be validated. This action cannot be undone."
 
 #: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
 msgid "profile_validate_dialog_confirm"

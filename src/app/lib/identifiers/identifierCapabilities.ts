@@ -31,6 +31,14 @@ export type IdentifierCapabilities = {
   canRemove: boolean
 }
 
+/** Identifier types that can be validated from the account page. */
+export const VALIDATABLE_IDENTIFIER_TYPES: PersonIdentifierType[] = [
+  PersonIdentifierType.idref,
+  PersonIdentifierType.orcid,
+  PersonIdentifierType.idhals,
+  PersonIdentifierType.idhali,
+]
+
 /** Whether an identifier type has an authentication workflow. */
 export const identifierSupportsAuth = (type: PersonIdentifierType): boolean =>
   type === PersonIdentifierType.orcid ||

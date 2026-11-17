@@ -14,8 +14,18 @@ reviewed, even when identifiers are missing.
   (`src/app/lib/identifiers/identifierCapabilities.ts`), shared by the UI hook
   and the API route. `canManage` is `ability.can(update, person, 'identifiers')`.
 - Validation cannot be undone (for now).
-- Validating a profile does **not** validate its identifiers (under discussion).
-- Local only: no `Action`, nothing is sent to the graph.
+- Validating a profile also validates its existing IdRef, ORCID and idHAL
+  identifiers (`VALIDATABLE_IDENTIFIER_TYPES`) that are neither validated nor
+  authenticated. Authenticated identifiers are already validated, so no message
+  is sent for them (the IKG never clears `authenticated` anyway).
+- The profile flag itself is local: it is not sent to the graph. Each newly
+  validated identifier emits the same message as the identifier validation of
+  [`979`](../979-add-validation-button-in-account-page-for-account-editor-user/prompt.md):
+  `UPDATE` on `task.people.person.update` with
+  `{ identifier: { type, value, authenticated: false } }`.
+- The profile flag, the identifier flags and the actions are written in one
+  transaction (`PersonDAO.markPersonValidated`); nothing changes when the
+  profile already was validated.
 
 ## Persistence
 
@@ -47,5 +57,4 @@ Visibility is enforced server side: `GET /api/person/slug/[slug]` and
 ## Out of scope
 
 - Undoing a validation.
-- Sending the validation to the graph.
-- Validating the identifiers along with the profile.
+- Sending the profile validation itself to the graph.

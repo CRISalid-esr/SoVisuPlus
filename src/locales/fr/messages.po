@@ -2478,7 +2478,7 @@ msgstr "Valider ce profil ?"
 
 #: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
 msgid "profile_validate_dialog_text"
-msgstr "Le profil sera marqué comme vérifié. Ses identifiants ne sont pas validés pour autant. Cette action ne peut pas être annulée."
+msgstr "Le profil sera marqué comme vérifié et ses identifiants IdRef, ORCID et IdHAL seront validés. Cette action ne peut pas être annulée."
 
 #: src/app/[lang]/account/components/profileValidation/ValidateProfileButton.tsx
 msgid "profile_validate_dialog_confirm"
