@@ -56,6 +56,8 @@ describe('GET /api/route', () => {
         slug: 'test-user',
         external: false,
         validated: false,
+        validatedAt: null,
+        validatedBy: null,
         email: 'test',
         displayName: 'Test User',
         firstName: 'Test',

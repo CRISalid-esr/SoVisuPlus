@@ -151,8 +151,9 @@ export class PersonDAO extends AbstractDAO {
         try {
           const dbPerson = await this.prismaClient.person.upsert({
             where: { uid: person.uid },
-            // `validated` is local-only (set from the account page): graph syncs
-            // must never write it, so it is left out of both branches.
+            // `validated`, `validatedAt` and `validatedBy` are local-only (set from
+            // the account page): graph syncs must never write them, so they are
+            // left out of both branches.
             update: {
               email: person.email,
               displayName: person.displayName,
@@ -868,19 +869,21 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Mark a person's profile as validated, along with the given identifiers,
-   * and record the actions in the same transaction. Returns false, changing
-   * nothing, when the profile already was validated.
+   * Mark a person's profile as validated (with the date and the validator's
+   * person uid), along with the given identifiers, and record the actions in
+   * the same transaction. Returns false, changing nothing, when the profile
+   * already was validated.
    */
   public async markPersonValidated(
     personUid: string,
+    validatedBy: string | null,
     identifierTypes: PersonIdentifierType[] = [],
     actions: CreateActionParams[] = [],
   ): Promise<boolean> {
     return this.prismaClient.$transaction(async (tx) => {
       const { count } = await tx.person.updateMany({
         where: { uid: personUid, validated: false },
-        data: { validated: true },
+        data: { validated: true, validatedAt: new Date(), validatedBy },
       })
       if (count === 0) return false
       if (identifierTypes.length > 0) {

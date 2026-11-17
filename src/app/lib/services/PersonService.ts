@@ -292,8 +292,13 @@ export class PersonService {
    * {@link validateIdentifier} does. Authenticated identifiers are already
    * validated, so no message is sent for them. Returns false when the profile
    * already was validated.
+   *
+   * @param validatedBy uid of the validator's person, null when they have none
    */
-  async validateProfile(personUid: string): Promise<boolean> {
+  async validateProfile(
+    personUid: string,
+    validatedBy: string | null,
+  ): Promise<boolean> {
     try {
       const person = await this.personDAO.fetchPersonByUid(personUid)
       if (!person) {
@@ -313,6 +318,7 @@ export class PersonService {
         )
       return await this.personDAO.markPersonValidated(
         personUid,
+        validatedBy,
         toValidate.map((identifier) => identifier.type as PersonIdentifierType),
         toValidate.map((identifier) =>
           this.identifierAction(personUid, ActionType.UPDATE, {

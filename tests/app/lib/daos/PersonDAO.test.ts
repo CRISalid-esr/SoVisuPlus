@@ -1759,19 +1759,50 @@ describe('PersonDAO Integration Tests', () => {
         'Person',
       )
 
-    it('starts non-validated and is validated once', async () => {
+    const storedValidation = async () =>
+      prisma.person.findUniqueOrThrow({
+        where: { uid: 'local-validation' },
+        select: { validated: true, validatedAt: true, validatedBy: true },
+      })
+
+    it('starts non-validated and is validated once, with date and validator', async () => {
       await personDAO.createOrUpdatePerson(makePerson())
 
+      expect(await storedValidation()).toEqual({
+        validated: false,
+        validatedAt: null,
+        validatedBy: null,
+      })
+
+      const before = Date.now()
       expect(
-        (await personDAO.fetchPersonByUid('local-validation'))?.validated,
+        await personDAO.markPersonValidated('local-validation', 'validator-1'),
+      ).toBe(true)
+      const first = await storedValidation()
+      expect(first.validated).toBe(true)
+      expect(first.validatedBy).toBe('validator-1')
+      expect(first.validatedAt!.getTime()).toBeGreaterThanOrEqual(before)
+      expect(first.validatedAt!.getTime()).toBeLessThanOrEqual(Date.now())
+
+      // A second validation changes neither the date nor the validator
+      expect(
+        await personDAO.markPersonValidated('local-validation', 'validator-2'),
       ).toBe(false)
-      expect(await personDAO.markPersonValidated('local-validation')).toBe(true)
-      expect(await personDAO.markPersonValidated('local-validation')).toBe(
-        false,
-      )
+      expect(await storedValidation()).toEqual(first)
       expect(
         (await personDAO.fetchPersonByUid('local-validation'))?.validated,
       ).toBe(true)
+    })
+
+    it('stores no validator when the validating user has no person', async () => {
+      await personDAO.createOrUpdatePerson(makePerson())
+
+      await personDAO.markPersonValidated('local-validation', null)
+
+      const stored = await storedValidation()
+      expect(stored.validated).toBe(true)
+      expect(stored.validatedBy).toBeNull()
+      expect(stored.validatedAt).not.toBeNull()
     })
 
     it.each([
@@ -1779,15 +1810,13 @@ describe('PersonDAO Integration Tests', () => {
       ['a document contributor sync', undefined],
     ])('keeps the validation across %s', async (_label, options) => {
       await personDAO.createOrUpdatePerson(makePerson())
-      await personDAO.markPersonValidated('local-validation')
+      await personDAO.markPersonValidated('local-validation', 'validator-1')
+      const validated = await storedValidation()
 
-      // The graph never carries the flag: the synced Person reports false
+      // The graph never carries these fields: the synced Person reports none
       await personDAO.createOrUpdatePerson(makePerson(), options)
 
-      const stored = await prisma.person.findUnique({
-        where: { uid: 'local-validation' },
-      })
-      expect(stored?.validated).toBe(true)
+      expect(await storedValidation()).toEqual(validated)
     })
 
     it('leaves the identifiers untouched when the actions cannot be recorded', async () => {
@@ -1806,6 +1835,7 @@ describe('PersonDAO Integration Tests', () => {
       await expect(
         personDAO.markPersonValidated(
           'local-validation',
+          'validator-1',
           [PersonIdentifierType.idref],
           [
             {
@@ -1824,12 +1854,14 @@ describe('PersonDAO Integration Tests', () => {
         include: { identifiers: true },
       })
       expect(stored.validated).toBe(false)
+      expect(stored.validatedAt).toBeNull()
+      expect(stored.validatedBy).toBeNull()
       expect(stored.identifiers.every((id) => !id.validated)).toBe(true)
     })
 
     it('is not hydrated outside account reads', async () => {
       await personDAO.createOrUpdatePerson(makePerson())
-      await personDAO.markPersonValidated('local-validation')
+      await personDAO.markPersonValidated('local-validation', 'validator-1')
 
       const { people } = await personDAO.fetchPeople('Val Person', 1, false, 10)
       expect(people.find((p) => p.uid === 'local-validation')?.validated).toBe(

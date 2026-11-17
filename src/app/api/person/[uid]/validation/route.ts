@@ -55,7 +55,10 @@ export const PATCH = async (request: Request, context: RouteContext) => {
   }
 
   try {
-    const updated = await new PersonService().validateProfile(uid)
+    const updated = await new PersonService().validateProfile(
+      uid,
+      session.user.authz?.personUid ?? null,
+    )
     if (!updated) {
       // Validated concurrently since the person was fetched
       return NextResponse.json(

@@ -29,9 +29,15 @@ reviewed, even when identifiers are missing.
 
 ## Persistence
 
-- New column `Person.validated Boolean @default(false)`.
-- Graph syncs (`PersonDAO.createOrUpdatePerson`) never write the column, so the
-  validation survives them.
+- New columns on `Person`:
+  `validated Boolean @default(false)`,
+  `validatedAt DateTime?` (date of the validation) and
+  `validatedBy String?` (uid of the validator's `Person`, taken from `session.user.authz.personUid`; null when the
+  validator has none). `validatedBy` is a plain uid, not a relation, so it is
+  kept if the validator's person is removed. The three fields are written once,
+  in the validation transaction, and are not exposed to the client.
+- Graph syncs (`PersonDAO.createOrUpdatePerson`) never write these columns, so
+  the validation survives them.
 - `Person.fromDbPerson` hydrates `validated` only with `{ withValidation: true }`:
   account reads (`fetchPersonByUid`, `fetchPersonBySlug`, the connected user).
   Other reads (people search, document contributors) always report `false`.

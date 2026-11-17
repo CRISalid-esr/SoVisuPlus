@@ -102,7 +102,8 @@ describe('PATCH /api/person/[uid]/validation', () => {
 
     const res = await PATCH(req({ validated: true }), ctx('bob'))
     expect(res.status).toBe(200)
-    expect(mockValidateProfile).toHaveBeenCalledWith('bob')
+    // The validator is the person of the session user
+    expect(mockValidateProfile).toHaveBeenCalledWith('bob', 'librarian')
   })
 
   it('lets a wide editor validate their own profile', async () => {

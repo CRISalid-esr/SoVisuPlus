@@ -418,13 +418,17 @@ describe('PersonService Integration Tests', () => {
       },
     })
 
-    expect(await personService.validateProfile(person.uid)).toBe(true)
+    expect(await personService.validateProfile(person.uid, 'validator-1')).toBe(
+      true,
+    )
 
     const stored = await prisma.person.findUniqueOrThrow({
       where: { id: person.id },
       include: { identifiers: true },
     })
     expect(stored.validated).toBe(true)
+    expect(stored.validatedBy).toBe('validator-1')
+    expect(stored.validatedAt).not.toBeNull()
     const validatedByType = Object.fromEntries(
       stored.identifiers.map((identifier) => [
         identifier.type,
@@ -465,7 +469,9 @@ describe('PersonService Integration Tests', () => {
       },
     })
 
-    expect(await personService.validateProfile(person.uid)).toBe(false)
+    expect(await personService.validateProfile(person.uid, 'validator-1')).toBe(
+      false,
+    )
 
     const identifier = await prisma.personIdentifier.findFirstOrThrow({
       where: { personId: person.id },
@@ -488,7 +494,9 @@ describe('PersonService Integration Tests', () => {
       },
     })
 
-    expect(await personService.validateProfile(person.uid)).toBe(true)
+    expect(await personService.validateProfile(person.uid, 'validator-1')).toBe(
+      true,
+    )
     expect(
       (await prisma.person.findUniqueOrThrow({ where: { id: person.id } }))
         .validated,
