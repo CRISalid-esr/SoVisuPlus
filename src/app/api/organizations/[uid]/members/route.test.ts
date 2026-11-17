@@ -8,16 +8,15 @@ import { getServerSession } from 'next-auth'
 import { GET } from './route'
 
 const mockGetStructureMembers = jest.fn()
-const mockMarkEditableAccounts = jest.fn()
 
 jest.mock('@/lib/services/OrganizationUnitService', () => ({
-  STRUCTURE_MEMBER_SORT_KEYS: ['name'],
+  STRUCTURE_MEMBER_SORT_KEYS: ['name', 'position', 'startDate'],
+  STRUCTURE_MEMBER_VALIDATION_FILTERS: ['all', 'not_validated'],
   OrganizationUnitService: jest.fn().mockImplementation(() => ({
     fetchVisibilityState: jest.fn().mockResolvedValue({
       hiddenEffective: false,
     }),
     getStructureMembers: mockGetStructureMembers,
-    markEditableAccounts: mockMarkEditableAccounts,
   })),
 }))
 
@@ -35,11 +34,11 @@ jest.mock('next/server', () => ({
   },
 }))
 
-const call = (search: string) =>
+const call = (search: string, params: Record<string, string> = {}) =>
   GET(
     {
       nextUrl: new URL(
-        `http://localhost/api/organizations/ru1/members?${new URLSearchParams({ search })}`,
+        `http://localhost/api/organizations/ru1/members?${new URLSearchParams({ search, ...params })}`,
       ),
     } as unknown as NextRequest,
     { params: Promise.resolve({ uid: 'ru1' }) },
@@ -66,7 +65,7 @@ describe('GET /api/organizations/[uid]/members', () => {
     )
   })
 
-  it('marks the editable accounts with the session authorization context', async () => {
+  it('passes the session authorization context to the service', async () => {
     const authz = { personUid: 'p1', roleAssignments: [] }
     mockGetServerSession.mockResolvedValue({
       user: { username: 'jdupont', authz },
@@ -76,11 +75,46 @@ describe('GET /api/organizations/[uid]/members', () => {
 
     const response = await call('')
 
-    expect(mockMarkEditableAccounts).toHaveBeenCalledWith(members, authz)
+    expect(mockGetStructureMembers).toHaveBeenCalledWith(
+      expect.objectContaining({ authz }),
+    )
     expect(await response.json()).toEqual({
       members: [{ uid: 'p2', canEditAccount: true }],
       total: 1,
     })
+  })
+
+  it('parses the sort criteria in priority order, ignoring unknown and repeated keys', async () => {
+    await call('', { sort: '-position,bogus,name,-name' })
+
+    expect(mockGetStructureMembers).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: [
+          { key: 'position', desc: true },
+          { key: 'name', desc: false },
+        ],
+      }),
+    )
+  })
+
+  it('passes an empty sort when none is requested', async () => {
+    await call('')
+
+    expect(mockGetStructureMembers).toHaveBeenCalledWith(
+      expect.objectContaining({ sort: [] }),
+    )
+  })
+
+  it('passes the validation filter, defaulting unknown values to all', async () => {
+    await call('', { validation: 'not_validated' })
+    expect(mockGetStructureMembers).toHaveBeenLastCalledWith(
+      expect.objectContaining({ validation: 'not_validated' }),
+    )
+
+    await call('', { validation: 'validated' })
+    expect(mockGetStructureMembers).toHaveBeenLastCalledWith(
+      expect.objectContaining({ validation: 'all' }),
+    )
   })
 
   it('rejects a search longer than the name search limit', async () => {

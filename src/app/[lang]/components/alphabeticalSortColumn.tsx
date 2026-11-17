@@ -1,13 +1,15 @@
 import { t } from '@lingui/core/macro'
-import { Box } from '@mui/material'
 import {
   MRT_ColumnDef,
   MRT_Localization,
   MRT_RowData,
-  MRT_TableHeadCellSortLabel,
   MRT_TableInstance,
 } from 'material-react-table'
 import { cloneElement, isValidElement, ReactElement } from 'react'
+import {
+  HIDE_DEFAULT_SORT_LABEL_SX,
+  SortableHeader,
+} from '@/components/sortPriorityColumn'
 
 // Keys MRT assigns to the "sort ascending" / "sort descending" menu items
 const SORT_ASC_MENU_ITEM_KEY = '1'
@@ -46,29 +48,13 @@ export const alphabeticalSortColumn = <T extends MRT_RowData>(
 ): MRT_ColumnDef<T> => ({
   ...column,
   // Hide MRT's default sort label: the Header below renders its own
-  muiTableHeadCellProps: {
-    sx: {
-      '& .Mui-TableHeadCell-Content-Labels > .MuiBadge-root': {
-        display: 'none',
-      },
-    },
-  },
-  Header({ column: { columnDef }, header, table }) {
+  muiTableHeadCellProps: { sx: HIDE_DEFAULT_SORT_LABEL_SX },
+  Header({ header, table }) {
     return (
-      <Box component='span' sx={{ display: 'flex', alignItems: 'center' }}>
-        <Box
-          component='span'
-          sx={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
-        >
-          {columnDef.header}
-        </Box>
-        {header.column.getCanSort() && (
-          <MRT_TableHeadCellSortLabel
-            header={header}
-            table={withAlphabeticalSortLocalization(table)}
-          />
-        )}
-      </Box>
+      <SortableHeader
+        header={header}
+        table={withAlphabeticalSortLocalization(table)}
+      />
     )
   },
   renderColumnActionsMenuItems({ internalColumnMenuItems, table }) {

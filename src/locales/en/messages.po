@@ -2846,6 +2846,10 @@ msgstr "Position"
 msgid "research_structures_members_publications_tooltip"
 msgstr "View this person's publications"
 
+#: src/app/[lang]/research-structures/components/StructureMembersTable.tsx
+msgid "research_structures_members_switch_not_validated"
+msgstr "Not validated"
+
 #: src/app/[lang]/research-structures/components/StructureMembersTable.tsx:359
 msgid "research_structures_members_switch_present"
 msgstr "Currently present"
@@ -3234,6 +3238,10 @@ msgstr "Sort alphabetically"
 #: src/app/[lang]/components/alphabeticalSortColumn.tsx:21
 msgid "table_sort_alphabetical_desc"
 msgstr "Sort in reverse alphabetical order"
+
+#: src/app/[lang]/components/sortPriorityColumn.tsx
+msgid "table_sort_priority"
+msgstr "priority"
 
 #: src/app/[lang]/components/alphabeticalSortColumn.tsx:22
 msgid "table_sorted_alphabetical_asc"

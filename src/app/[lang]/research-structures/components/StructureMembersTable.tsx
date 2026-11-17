@@ -15,16 +15,23 @@ import { useTheme } from '@mui/material/styles'
 import {
   MaterialReactTable,
   MRT_ColumnDef,
+  MRT_ColumnSizingState,
   MRT_PaginationState,
   MRT_SortingState,
   useMaterialReactTable,
 } from 'material-react-table'
 import { alphabeticalSortColumn } from '@/components/alphabeticalSortColumn'
+import { sortPriorityColumn } from '@/components/sortPriorityColumn'
 import Image from 'next/image'
 import NextLink from 'next/link'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSession } from 'next-auth/react'
+import {
+  EMPTY_PRINCIPAL,
+  hasWiderThanSelfPersonScope,
+} from '@/app/auth/ability'
 import useStore from '@/stores/global_store'
 import { Localization } from '@/types/Localization'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
@@ -44,6 +51,40 @@ const IDENTIFIER_DISPLAY_ORDER: PersonIdentifierType[] = [
   PersonIdentifierType.idhals,
   PersonIdentifierType.idhali,
 ]
+
+/** Default order: position, then name (mirrors the server default). */
+const DEFAULT_SORTING: MRT_SortingState = [
+  { id: 'position', desc: false },
+  { id: 'name', desc: false },
+]
+
+/** Narrowest width a column can be fitted or resized to. */
+const MIN_COLUMN_SIZE = 50
+
+/**
+ * Scales the columns' default sizes down so they all fit in `width`
+ * (wider containers are filled by the grid layout's flex growth).
+ */
+const fitColumnSizes = (
+  columns: { id: string; size: number }[],
+  width: number,
+): MRT_ColumnSizingState => {
+  const total = columns.reduce((sum, column) => sum + column.size, 0)
+  const ratio = Math.min(1, width / total)
+  return Object.fromEntries(
+    columns.map(({ id, size }) => [
+      id,
+      Math.max(MIN_COLUMN_SIZE, Math.floor(size * ratio)),
+    ]),
+  )
+}
+
+/** Single-line text, cut with an ellipsis when the column is too narrow. */
+const CellText = ({ children }: { children: React.ReactNode }) => (
+  <Typography variant='body2' noWrap>
+    {children}
+  </Typography>
+)
 
 const formatDate = (value: string | null, locale: string): string =>
   value ? new Date(value).toLocaleDateString(locale) : '—'
@@ -124,8 +165,9 @@ export const MemberIdentifierIcons = ({
 
 /**
  * Paginated members table of the detail panel: Employment rows for
- * institutions, direct Membership rows otherwise. Pagination, sorting and
- * name search are server-side (/api/organizations/[uid]/members).
+ * institutions, direct Membership rows otherwise. Pagination, multi-column
+ * sorting, name search and filters are server-side
+ * (/api/organizations/[uid]/members).
  */
 const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
   const lang = Lingui.i18n.locale as ExtendedLanguageCode
@@ -139,11 +181,23 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
     pageIndex: 0,
     pageSize: 10,
   })
-  const [sorting, setSorting] = useState<MRT_SortingState>([
-    { id: 'name', desc: false },
-  ])
+  const [sorting, setSorting] = useState<MRT_SortingState>(DEFAULT_SORTING)
   const [globalFilter, setGlobalFilter] = useState('')
   const [present, setPresent] = useState(true)
+  const [notValidatedOnly, setNotValidatedOnly] = useState(false)
+  const [columnSizing, setColumnSizing] = useState<MRT_ColumnSizingState>({})
+  // Columns follow the container width until the user resizes one
+  const userResized = useRef(false)
+
+  // The profile validation status is only disclosed to wide-scoped account
+  // editors (UX only, the server applies the same rule per member)
+  const { data: session } = useSession()
+  const canFilterByValidation = hasWiderThanSelfPersonScope(
+    session?.user?.authz ?? EMPTY_PRINCIPAL,
+    'update',
+    'Person',
+    'identifiers',
+  )
 
   useEffect(() => {
     fetchStructureMembers({
@@ -152,8 +206,9 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
       pageSize: pagination.pageSize,
       present,
       search: globalFilter ?? '',
-      sortBy: sorting[0]?.id ?? 'name',
-      sortDesc: sorting[0]?.desc ?? false,
+      sort: sorting.map(({ id, desc }) => ({ id, desc })),
+      validation:
+        canFilterByValidation && notValidatedOnly ? 'not_validated' : 'all',
     }).catch((error) => {
       console.error('Error fetching the structure members:', error)
     })
@@ -164,6 +219,8 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
     sorting,
     globalFilter,
     present,
+    notValidatedOnly,
+    canFilterByValidation,
   ])
 
   const columns = useMemo<MRT_ColumnDef<StructureMemberJson>[]>(
@@ -177,10 +234,11 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
         Cell({ row }) {
           const member = row.original
           const name = !member.slug ? (
-            <Typography variant='body2'>{member.displayName}</Typography>
+            <CellText>{member.displayName}</CellText>
           ) : (
             <Typography
               variant='body2'
+              noWrap
               color='primary'
               sx={{
                 cursor: 'pointer',
@@ -195,7 +253,14 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
           )
           if (!member.profileValidated) return name
           return (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                minWidth: 0,
+              }}
+            >
               {name}
               <ProfileValidatedBadge fontSize='small' />
             </Box>
@@ -209,40 +274,28 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
         size: 160,
         grow: 1,
         Cell({ row }) {
-          return (
-            <Typography variant='body2'>
-              {row.original.position ?? '—'}
-            </Typography>
-          )
+          return <CellText>{row.original.position ?? '—'}</CellText>
         },
       }),
-      {
+      sortPriorityColumn<StructureMemberJson>({
         id: 'startDate',
         accessorKey: 'startDate',
         header: t`research_structures_members_column_arrival`,
         size: 110,
         Cell({ row }) {
-          return (
-            <Typography variant='body2'>
-              {formatDate(row.original.startDate, lang)}
-            </Typography>
-          )
+          return <CellText>{formatDate(row.original.startDate, lang)}</CellText>
         },
-      },
-      {
+      }),
+      sortPriorityColumn<StructureMemberJson>({
         id: 'endDate',
         accessorKey: 'endDate',
         header: t`research_structures_members_column_departure`,
         size: 110,
         Cell({ row }) {
-          return (
-            <Typography variant='body2'>
-              {formatDate(row.original.endDate, lang)}
-            </Typography>
-          )
+          return <CellText>{formatDate(row.original.endDate, lang)}</CellText>
         },
-      },
-      {
+      }),
+      sortPriorityColumn<StructureMemberJson>({
         id: 'publicationsCount',
         accessorKey: 'publicationsCount',
         header: t`research_structures_column_publications`,
@@ -282,8 +335,8 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
             </Tooltip>
           )
         },
-      },
-      {
+      }),
+      sortPriorityColumn<StructureMemberJson>({
         id: 'halRate',
         accessorKey: 'halRate',
         header: 'HAL',
@@ -296,8 +349,8 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
             />
           )
         },
-      },
-      {
+      }),
+      sortPriorityColumn<StructureMemberJson>({
         id: 'oaRate',
         accessorKey: 'oaRate',
         header: 'OA',
@@ -310,7 +363,7 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
             />
           )
         },
-      },
+      }),
       {
         id: 'identifiers',
         header: t`research_structures_members_column_identifiers`,
@@ -347,14 +400,26 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
     data: members.rows,
     manualPagination: true,
     manualSorting: true,
+    enableMultiSort: true,
+    // Every click adds, flips or removes that column's sort, keeping the others
+    isMultiSortEvent: () => true,
     manualFiltering: true,
     rowCount: members.total,
     enableGlobalFilter: true,
     enableColumnFilters: false,
     enableColumnActions: false,
     layoutMode: 'grid',
+    enableColumnResizing: true,
+    defaultColumn: { minSize: MIN_COLUMN_SIZE },
+    // Narrow columns cut their content instead of overflowing
+    muiTableBodyCellProps: { sx: { overflow: 'hidden' } },
+    onColumnSizingChange: (updater) => {
+      userResized.current = true
+      setColumnSizing(updater)
+    },
     localization: Localization[lang],
     state: {
+      columnSizing,
       pagination,
       sorting,
       globalFilter,
@@ -362,35 +427,91 @@ const StructureMembersTable = ({ structureUid }: { structureUid: string }) => {
       showProgressBars: members.loading,
     },
     onPaginationChange: setPagination,
-    onSortingChange: setSorting,
+    onSortingChange: (updater) => {
+      setSorting(updater)
+      setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+    },
     onGlobalFilterChange: (value: string | undefined) => {
       setGlobalFilter(value ?? '')
       setPagination((prev) => ({ ...prev, pageIndex: 0 }))
     },
     muiSearchTextFieldProps: searchFieldProps(MAX_NAME_SEARCH_QUERY_LENGTH),
     muiPaginationProps: { rowsPerPageOptions: [10, 20, 50] },
-    muiTablePaperProps: { variant: 'outlined', elevation: 0 },
+    muiTablePaperProps: {
+      variant: 'outlined',
+      elevation: 0,
+      sx: {
+        // Hide the sort priority numbers MRT shows on multi-sorted headers
+        '& thead .MuiBadge-badge': { display: 'none' },
+        // Thin column resize separators, none after the last column
+        '& .Mui-TableHeadCell-ResizeHandle-Divider': { borderWidth: '0.5px' },
+        '& thead th:last-of-type .Mui-TableHeadCell-ResizeHandle-Wrapper': {
+          display: 'none',
+        },
+      },
+    },
     renderTopToolbarCustomActions: () => (
-      <FormControlLabel
-        sx={{ ml: 0.5 }}
-        control={
-          <Switch
-            size='small'
-            checked={present}
-            onChange={(_, checked) => {
-              setPresent(checked)
-              setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-            }}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 0.5 }}>
+        <FormControlLabel
+          control={
+            <Switch
+              size='small'
+              checked={present}
+              onChange={(_, checked) => {
+                setPresent(checked)
+                setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+              }}
+            />
+          }
+          label={
+            <Typography variant='body2'>
+              {t`research_structures_members_switch_present`}
+            </Typography>
+          }
+        />
+        {canFilterByValidation && (
+          <FormControlLabel
+            control={
+              <Switch
+                size='small'
+                checked={notValidatedOnly}
+                onChange={(_, checked) => {
+                  setNotValidatedOnly(checked)
+                  setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+                }}
+              />
+            }
+            label={
+              <Typography variant='body2'>
+                {t`research_structures_members_switch_not_validated`}
+              </Typography>
+            }
           />
-        }
-        label={
-          <Typography variant='body2'>
-            {t`research_structures_members_switch_present`}
-          </Typography>
-        }
-      />
+        )}
+      </Box>
     ),
   })
+
+  // Fit every column in the panel width, following its changes, until the
+  // user resizes a column
+  const { tableContainerRef } = table.refs
+  useEffect(() => {
+    const container = tableContainerRef.current
+    if (!container) return
+    const defaultSizes = columns.map((column) => ({
+      id: column.id!,
+      size: column.size ?? 150,
+    }))
+    const fit = () => {
+      if (!userResized.current && container.clientWidth > 0) {
+        setColumnSizing(fitColumnSizes(defaultSizes, container.clientWidth))
+      }
+    }
+    fit()
+    const observer = new ResizeObserver(fit)
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [tableContainerRef, columns])
 
   return <MaterialReactTable table={table} />
 }
