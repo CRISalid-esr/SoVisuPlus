@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { DbClient } from '@/lib/daos/AbstractDAO'
 import {
   MAX_EXPANSION_CANDIDATE_ROWS,
   MAX_VARIANTS_PER_TOKEN,
@@ -35,7 +35,7 @@ const isExpandable = (token: string) =>
  * token maps to itself first; short or numeric tokens are not expanded.
  */
 export const expandSearchTokens = async (
-  prismaClient: PrismaClient,
+  prismaClient: DbClient,
   tokens: string[],
 ): Promise<Map<string, string[]>> => {
   const now = Date.now()

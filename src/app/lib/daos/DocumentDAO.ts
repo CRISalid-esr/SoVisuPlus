@@ -288,7 +288,7 @@ export class DocumentDAO extends AbstractDAO {
         })
       }
 
-      const conceptDAO = new ConceptDAO()
+      const conceptDAO = new ConceptDAO(this.prismaClient)
       for (const subject of subjects) {
         let concept: DbConcept
         try {
@@ -315,8 +315,10 @@ export class DocumentDAO extends AbstractDAO {
         }
       }
 
-      const personDAO = new PersonDAO()
-      const authorityOrganizationDAO = new AuthorityOrganizationDAO()
+      const personDAO = new PersonDAO(this.prismaClient)
+      const authorityOrganizationDAO = new AuthorityOrganizationDAO(
+        this.prismaClient,
+      )
       for (const contribution of contributions) {
         let person: DbPerson
         try {
@@ -404,7 +406,7 @@ export class DocumentDAO extends AbstractDAO {
         },
       })
 
-      const sourcePersonDAO = new SourcePersonDAO()
+      const sourcePersonDAO = new SourcePersonDAO(this.prismaClient)
 
       for (const record of records) {
         try {
@@ -595,7 +597,9 @@ export class DocumentDAO extends AbstractDAO {
           ...searchTokens.map((token): Prisma.DocumentWhereInput => ({
             OR: [
               {
-                titles: { some: containsAnyVariant('normalizedValue', token) },
+                titles: {
+                  some: containsAnyVariant('normalizedValue', token),
+                },
               },
               {
                 contributions: {
@@ -1351,7 +1355,7 @@ export class DocumentDAO extends AbstractDAO {
   }
 
   public async deleteDocumentByUid(uid: string): Promise<void> {
-    await this.prismaClient.$transaction(async (tx) => {
+    await this.transaction(async (tx) => {
       const doc = await tx.document.findUnique({
         where: { uid },
         select: { id: true },
@@ -1585,6 +1589,8 @@ export class DocumentDAO extends AbstractDAO {
         error instanceof PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
+        // A retry would run in an already-aborted transaction
+        if (this.inTransaction) throw error
         if (retries < 3) {
           console.warn('Retrying identifier upsert...')
           await this.upsertIdentifiers(

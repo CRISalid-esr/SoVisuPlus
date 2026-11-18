@@ -1,4 +1,5 @@
-import { Prisma, PrismaClient } from '@prisma/client'
+import { Prisma } from '@prisma/client'
+import { DbClient, runBatch } from '@/lib/daos/AbstractDAO'
 import { normalizeSearchText } from '@/utils/fuzzySearch/fuzzySearch'
 
 export const DEFAULT_BACKFILL_BATCH_SIZE = 500
@@ -10,7 +11,7 @@ export const DEFAULT_BACKFILL_BATCH_SIZE = 500
  * Returns the number of updated rows.
  */
 export const backfillNormalizedColumn = async (
-  prismaClient: PrismaClient,
+  prismaClient: DbClient,
   fetchBatch: (take: number) => Promise<{ id: number; source: string }[]>,
   updateRow: (id: number, normalized: string) => Prisma.PrismaPromise<unknown>,
   batchSize: number = DEFAULT_BACKFILL_BATCH_SIZE,
@@ -21,9 +22,10 @@ export const backfillNormalizedColumn = async (
     if (rows.length === 0) {
       return updated
     }
-    await prismaClient.$transaction(
-      rows.map((row) => updateRow(row.id, normalizeSearchText(row.source))),
+    const updates = rows.map((row) =>
+      updateRow(row.id, normalizeSearchText(row.source)),
     )
+    await runBatch(prismaClient, updates)
     updated += rows.length
   }
 }

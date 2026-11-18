@@ -217,7 +217,11 @@ export class PersonDAO extends AbstractDAO {
           // return value, so there is no need to re-fetch them here.
           return dbPerson
         } catch (error) {
-          if (isUniqueConstraintError(error) && baseSlug) {
+          if (
+            isUniqueConstraintError(error) &&
+            baseSlug &&
+            !this.inTransaction
+          ) {
             console.error(
               `Slug collision detected for '${uniqueSlug}', retrying...`,
             )
@@ -290,7 +294,7 @@ export class PersonDAO extends AbstractDAO {
           if (fields.some((field) => String(field).includes('uid'))) {
             throw new PersonAlreadyExistsError(person.uid)
           }
-          if (baseSlug) {
+          if (baseSlug && !this.inTransaction) {
             console.error(
               `Slug collision detected for '${uniqueSlug}', retrying...`,
             )
@@ -355,7 +359,7 @@ export class PersonDAO extends AbstractDAO {
     personId: number,
     replace?: { keepOrgUids: string[] },
   ): Promise<void> {
-    const organizationUnitDAO = new OrganizationUnitDAO()
+    const organizationUnitDAO = new OrganizationUnitDAO(this.prismaClient)
     const resolved: { unitId: number; membership: PersonMembership }[] = []
     for (const membership of memberships) {
       const dbOrganizationUnit =
@@ -405,7 +409,7 @@ export class PersonDAO extends AbstractDAO {
     }
 
     if (replace) {
-      await this.prismaClient.$transaction(write)
+      await this.transaction(write)
     } else {
       await write(this.prismaClient)
     }
@@ -426,7 +430,7 @@ export class PersonDAO extends AbstractDAO {
     personId: number,
     replace?: { keepOrgUids: string[] },
   ): Promise<void> {
-    const organizationUnitDAO = new OrganizationUnitDAO()
+    const organizationUnitDAO = new OrganizationUnitDAO(this.prismaClient)
     const resolved: { unitId: number; employment: PersonEmployment }[] = []
     for (const employment of employments) {
       const dbOrganizationUnit =
@@ -476,7 +480,7 @@ export class PersonDAO extends AbstractDAO {
     }
 
     if (replace) {
-      await this.prismaClient.$transaction(write)
+      await this.transaction(write)
     } else {
       await write(this.prismaClient)
     }
@@ -499,7 +503,7 @@ export class PersonDAO extends AbstractDAO {
     personId: number,
     replace = false,
   ): Promise<void> {
-    const sourcePersonDAO = new SourcePersonDAO()
+    const sourcePersonDAO = new SourcePersonDAO(this.prismaClient)
     for (const record of records) {
       await sourcePersonDAO.createOrUpdateSourcePerson(record, personId)
     }
@@ -581,7 +585,7 @@ export class PersonDAO extends AbstractDAO {
     retries = 0,
   ): Promise<void> {
     try {
-      await this.prismaClient.$transaction(async (tx) => {
+      await this.transaction(async (tx) => {
         const existing = await tx.personIdentifier.findMany({
           where: { personId },
           select: { id: true, type: true, value: true, validated: true },
@@ -664,6 +668,8 @@ export class PersonDAO extends AbstractDAO {
     } catch (error: unknown) {
       console.error('Error during identifier upsert:', error as Error)
       if (isUniqueConstraintError(error)) {
+        // A retry would run in an already-aborted transaction
+        if (this.inTransaction) throw error
         if (retries < 3) {
           console.warn('Retrying identifier upsert...')
           await this.upsertIdentifiers(
@@ -725,7 +731,7 @@ export class PersonDAO extends AbstractDAO {
       ...idHals,
     ]
     try {
-      await this.prismaClient.$transaction(async (tx) => {
+      await this.transaction(async (tx) => {
         for (const identifier of identifiers) {
           await tx.personIdentifier.upsert({
             where: { personId_type: { personId, type: identifier.type } },
@@ -770,7 +776,7 @@ export class PersonDAO extends AbstractDAO {
     }
 
     try {
-      await this.prismaClient.$transaction(async (tx) => {
+      await this.transaction(async (tx) => {
         await tx.personIdentifier.createMany({
           data: identifiers.map((identifier) => ({
             personId: person.id,
@@ -858,7 +864,7 @@ export class PersonDAO extends AbstractDAO {
     types: PersonIdentifierType[],
     actions: CreateActionParams[] = [],
   ): Promise<boolean> {
-    return this.prismaClient.$transaction(async (tx) => {
+    return this.transaction(async (tx) => {
       const { count } = await tx.personIdentifier.updateMany({
         where: { person: { uid: personUid }, type: { in: types } },
         data: { validated: true },
@@ -880,7 +886,7 @@ export class PersonDAO extends AbstractDAO {
     identifierTypes: PersonIdentifierType[] = [],
     actions: CreateActionParams[] = [],
   ): Promise<boolean> {
-    return this.prismaClient.$transaction(async (tx) => {
+    return this.transaction(async (tx) => {
       const { count } = await tx.person.updateMany({
         where: { uid: personUid, validated: false },
         data: { validated: true, validatedAt: new Date(), validatedBy },
@@ -972,7 +978,7 @@ export class PersonDAO extends AbstractDAO {
     }
 
     try {
-      await this.prismaClient.$transaction(async (tx) => {
+      await this.transaction(async (tx) => {
         const row = await tx.personIdentifier.upsert({
           where: {
             personId_type: {
@@ -1357,7 +1363,7 @@ export class PersonDAO extends AbstractDAO {
     const types: PersonIdentifierType[] = isIdHalType(type)
       ? [...ID_HAL_TYPES, PersonIdentifierType.hal_login]
       : [type]
-    await this.prismaClient.$transaction(async (tx) => {
+    await this.transaction(async (tx) => {
       await tx.personIdentifier.deleteMany({
         where: { personId: person.id, type: { in: types } },
       })
