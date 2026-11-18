@@ -2,12 +2,15 @@
 
 ## Intent
 
-A service that writes through two DAOs (e.g. `PersonDAO.upsertIdentifier` then
+A service that writes through two DAOs (e.g. a document write then
 `ActionDAO.createAction`) cannot make both writes atomic today: every DAO is bound to the
 Prisma singleton by `AbstractDAO`, and the only transactions in the codebase are private
-to a single DAO method. A crash between the two writes leaves an identifier change that
-is never forwarded to the graph, or an `Action` whose underlying change was never
-persisted.
+to a single DAO method. A crash between the two writes leaves a change that is never
+forwarded to the graph, or an `Action` whose underlying change was never persisted.
+
+The person-identifier flows work around this inside the DAO: `PersonDAO` methods take
+the `Action`s to record as a parameter and write them in their own transaction
+(`recordActions`). That only works when one DAO method owns the whole write.
 
 This feature lets a service run several DAO calls, across several DAOs, in one database
 transaction, without breaking the rule that services never use Prisma directly.
@@ -20,12 +23,18 @@ transaction, without breaking the rule that services never use Prisma directly.
     transaction and hands the transaction client to the callback.
   - Existing DAO-internal transactions and nested DAO instantiations are made
     transaction-aware so a DAO bound to a transaction client keeps working.
-- **First consumer**: the four identifier flows of `PersonService` (`addIdentifier`,
-  `authenticateOrcidIdentifier`, `authenticateHalIdentifier`, `removeIdentifier`) run
-  the identifier write and the `Action` creation in one transaction.
-- **Out of scope** (follow-up): the `createAction` call sites in `DocumentService` and
-  `api/documents/harvestings/route.ts`. They would benefit from the same treatment but
-  are not migrated here.
+- **No consumer yet**: `runInTransaction` is not called by production code in this
+  change. The `PersonService` identifier flows are not migrated: their identifier write
+  and `Action` creation are already atomic through the `actions` parameter of the
+  `PersonDAO` methods.
+- **Out of scope** (follow-up branch): adopting `runInTransaction`. Writes are grouped
+  in one transaction only when one makes no sense without the other: an `Action`
+  without the change it announces (or the reverse), or a partial write granting
+  unwarranted rights. Planned consumers: the `DocumentService` flows pairing a document
+  write with `createAction`, `RoleService.assignRoleToUser` (a `UserRole` without its
+  scope is a global role), `RoleDAO.setRolePermissions`, and the `PersonService`
+  identifier flows (moving `Action` creation back to `ActionDAO` and dropping
+  `recordActions`).
 
 ## Design
 
@@ -77,9 +86,9 @@ constructors, so services do not need to name its type.
 
 ```ts
 await runInTransaction(async (tx) => {
-  const personDAO = new PersonDAO(tx)
+  const documentDAO = new DocumentDAO(tx)
   const actionDAO = new ActionDAO(tx)
-  await personDAO.upsertIdentifier(identifier, personUid)
+  await documentDAO.deleteDocumentByUid(documentUid)
   await actionDAO.createAction({ ... })
 })
 ```
@@ -91,8 +100,10 @@ services must build their tx-bound DAOs at the outermost level.
 ### Making existing DAO code transaction-aware
 
 1. **DAO-internal transactions** — `PersonDAO` calls `this.prismaClient.$transaction`
-   in `upsertMemberships`, `upsertEmployments`, `upsertIdentifiers` and
-   `upsertHalIdentifiers`; so do `DocumentDAO.deleteDocumentByUid` and
+   in `upsertMemberships`, `upsertEmployments`, `upsertIdentifiers`,
+   `upsertHalIdentifiers`, `createIdentifiers`, `markIdentifiersValidated`,
+   `markPersonValidated`, `upsertAuthenticatedOrcidIdentifier` and `deleteIdentifier`
+   (the `Action`s these methods record join the same transaction); so do `DocumentDAO.deleteDocumentByUid` and
    `OrganizationUnitDAO.applyEffectiveHidden` (the latter in batch form, rewritten as
    an interactive callback). These become `this.transaction(...)`. When the DAO is bound
    to a transaction client the callback simply runs on that client, so the writes join
@@ -108,26 +119,19 @@ services must build their tx-bound DAOs at the outermost level.
    transaction client they run the statements sequentially on it instead. For
    `set_config(..., is_local = true)` the setting is then local to the enclosing
    transaction, which is the intended effect.
-4. **P2002 retry loops** — `createOrUpdatePerson` and `createPerson` (slug collision),
-   `upsertIdentifiers` and `upsertIdentifier` catch `P2002` and retry. On PostgreSQL the
+4. **P2002 retry loops** — `PersonDAO.createOrUpdatePerson`, `PersonDAO.createPerson`
+   and `OrganizationUnitDAO.createOrUpdateOrganizationUnit` (slug collision), and the
+   `upsertIdentifiers` methods of `PersonDAO`, `DocumentDAO` and `SourcePersonDAO`
+   catch `P2002` and retry. On PostgreSQL the
    first failed statement aborts the whole transaction, so a retry on the same
    transaction client would fail with "current transaction is aborted". When
-   `this.inTransaction` is true these methods do **not** retry: the error propagates, the
+   `this.inTransaction` is true these methods do **not** retry: the error propagates (the
+   `upsertIdentifiers` methods, which log and swallow it after the last retry on the
+   singleton, rethrow it at once), the
    outer transaction rolls back, and retrying the whole `runInTransaction` block is the
-   caller's decision. Behaviour on the singleton is unchanged.
-
-### `PersonService` identifier flows
-
-Each of the four methods wraps its existing body in `runInTransaction`, building
-`PersonDAO` and `ActionDAO` from the transaction client. `recordIdentifierAction` takes
-the `ActionDAO` to use as a parameter instead of reading `this.actionDAO`. The
-pre-check reads (`findIdentifierValue`) move inside the transaction as well, so the
-ADD/UPDATE decision and the write see the same snapshot. Error wrapping and messages are
-unchanged.
-
-Since the `Action` row is only visible after commit, the change poller
-(`ActionDispatchService`) can no longer pick up an action whose identifier write was
-rolled back.
+   caller's decision. Behaviour on the singleton is unchanged. The other `P2002`
+   handlers of `PersonDAO` do not retry (they throw `IdentifierConflictError`), so they
+   behave the same inside a transaction.
 
 ## Testing
 
@@ -139,7 +143,3 @@ rolled back.
   same `runInTransaction` client; when the callback throws after both writes, neither
   row exists; when it completes, both do. A tx-bound `PersonDAO` joining its internal
   transaction (`upsertHalIdentifiers`) commits with the outer transaction.
-- **Integration** (`tests/app/lib/services/PersonService.test.ts`): for each identifier
-  flow, when `ActionDAO.prototype.createAction` is made to throw, the identifier table is
-  unchanged; on success both the identifier and the `Action` row exist (existing
-  assertions).
