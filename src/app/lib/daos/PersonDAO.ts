@@ -668,7 +668,9 @@ export class PersonDAO extends AbstractDAO {
     } catch (error: unknown) {
       console.error('Error during identifier upsert:', error as Error)
       if (isUniqueConstraintError(error)) {
-        if (retries < 3 && !this.inTransaction) {
+        // A retry would run in an already-aborted transaction
+        if (this.inTransaction) throw error
+        if (retries < 3) {
           console.warn('Retrying identifier upsert...')
           await this.upsertIdentifiers(
             identifiers,

@@ -109,7 +109,8 @@ export class OrganizationUnitDAO extends AbstractDAO {
           if (
             error instanceof PrismaClientKnownRequestError &&
             error.code === 'P2002' && // Unique constraint violation
-            baseSlug
+            baseSlug &&
+            !this.inTransaction
           ) {
             console.error(
               `Slug collision detected for '${uniqueSlug}', retrying...`,

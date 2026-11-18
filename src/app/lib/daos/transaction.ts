@@ -8,9 +8,9 @@ import { DbClient } from '@/lib/daos/AbstractDAO'
  *
  * ```ts
  * await runInTransaction(async (tx) => {
- *   const personDAO = new PersonDAO(tx)
+ *   const documentDAO = new DocumentDAO(tx)
  *   const actionDAO = new ActionDAO(tx)
- *   await personDAO.upsertIdentifier(identifier, personUid)
+ *   await documentDAO.deleteDocumentByUid(documentUid)
  *   await actionDAO.createAction({ ... })
  * })
  * ```

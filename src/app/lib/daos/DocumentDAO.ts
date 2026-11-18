@@ -1589,6 +1589,8 @@ export class DocumentDAO extends AbstractDAO {
         error instanceof PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
+        // A retry would run in an already-aborted transaction
+        if (this.inTransaction) throw error
         if (retries < 3) {
           console.warn('Retrying identifier upsert...')
           await this.upsertIdentifiers(
