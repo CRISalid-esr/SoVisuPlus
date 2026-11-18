@@ -103,9 +103,8 @@ services must build their tx-bound DAOs at the outermost level.
    in `upsertMemberships`, `upsertEmployments`, `upsertIdentifiers`,
    `upsertHalIdentifiers`, `createIdentifiers`, `markIdentifiersValidated`,
    `markPersonValidated`, `upsertAuthenticatedOrcidIdentifier` and `deleteIdentifier`
-   (the `Action`s these methods record join the same transaction); so do `DocumentDAO.deleteDocumentByUid` and
-   `OrganizationUnitDAO.applyEffectiveHidden` (the latter in batch form, rewritten as
-   an interactive callback). These become `this.transaction(...)`. When the DAO is bound
+   (the `Action`s these methods record join the same transaction); so does
+   `DocumentDAO.deleteDocumentByUid`. These become `this.transaction(...)`. When the DAO is bound
    to a transaction client the callback simply runs on that client, so the writes join
    the outer transaction instead of failing to compile.
 2. **Nested DAO instantiation** — DAOs that create other DAOs internally
@@ -115,8 +114,10 @@ services must build their tx-bound DAOs at the outermost level.
 3. **Search helpers** — `withWordSimilarityThreshold` (`daos/search/trigramSearchSql.ts`),
    `expandSearchTokens` (`daos/search/SearchTermExpander.ts`) and
    `backfillNormalizedColumn` take a `PrismaClient`. Their parameter type widens to
-   `DbClient`. The first and last use the batch form `$transaction([...])`; when given a
-   transaction client they run the statements sequentially on it instead. For
+   `DbClient`. The first and last use the batch form `$transaction([...])`; so does
+   `OrganizationUnitDAO.applyEffectiveHidden`. All three go through `runBatch(client,
+queries)` (`AbstractDAO.ts`): a batch transaction on the singleton (unchanged
+   behaviour), the statements run sequentially on a transaction client. For
    `set_config(..., is_local = true)` the setting is then local to the enclosing
    transaction, which is the intended effect.
 4. **P2002 retry loops** — `PersonDAO.createOrUpdatePerson`, `PersonDAO.createPerson`

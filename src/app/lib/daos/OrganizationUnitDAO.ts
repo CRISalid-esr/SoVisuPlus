@@ -10,7 +10,7 @@ import {
 import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { organizationIdentifierTypeFromString } from '@/types/OrganizationUnitIdentifier'
 import { OrganizationGroup } from '@/types/IAgent'
-import { AbstractDAO } from '@/lib/daos/AbstractDAO'
+import { AbstractDAO, runBatch } from '@/lib/daos/AbstractDAO'
 import slugify from 'slugify'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import {
@@ -468,16 +468,16 @@ export class OrganizationUnitDAO extends AbstractDAO {
    * `hiddenUids` carry `hiddenEffective`, every other one does not.
    */
   public async applyEffectiveHidden(hiddenUids: string[]): Promise<void> {
-    await this.transaction(async (tx) => {
-      await tx.organizationUnit.updateMany({
+    await runBatch(this.prismaClient, [
+      this.prismaClient.organizationUnit.updateMany({
         where: { uid: { in: hiddenUids }, hiddenEffective: false },
         data: { hiddenEffective: true },
-      })
-      await tx.organizationUnit.updateMany({
+      }),
+      this.prismaClient.organizationUnit.updateMany({
         where: { uid: { notIn: hiddenUids }, hiddenEffective: true },
         data: { hiddenEffective: false },
-      })
-    })
+      }),
+    ])
   }
 
   /**

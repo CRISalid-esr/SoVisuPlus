@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import { DbClient, isPrismaClient } from '@/lib/daos/AbstractDAO'
+import { DbClient, runBatch } from '@/lib/daos/AbstractDAO'
 import {
   MIN_TRIGRAM_TOKEN_LENGTH,
   WORD_SIMILARITY_THRESHOLD,
@@ -96,17 +96,9 @@ export const withWordSimilarityThreshold = async <
   threshold: number = WORD_SIMILARITY_THRESHOLD,
 ): Promise<{ [K in keyof T]: Awaited<T[K]> }> => {
   const setThreshold = prismaClient.$queryRaw`SELECT set_config('pg_trgm.word_similarity_threshold', ${String(threshold)}, true)`
-  if (isPrismaClient(prismaClient)) {
-    const [, ...results] = await prismaClient.$transaction([
-      setThreshold,
-      ...queries,
-    ])
-    return results as { [K in keyof T]: Awaited<T[K]> }
-  }
-  await setThreshold
-  const results = []
-  for (const query of queries) {
-    results.push(await query)
-  }
+  const [, ...results] = await runBatch(prismaClient, [
+    setThreshold,
+    ...queries,
+  ])
   return results as { [K in keyof T]: Awaited<T[K]> }
 }

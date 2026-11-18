@@ -41,3 +41,24 @@ export class AbstractDAO {
 export function isPrismaClient(client: DbClient): client is PrismaClient {
   return '$transaction' in client
 }
+
+/**
+ * Run prepared queries atomically and return their results in order. On the
+ * singleton they run as a batch transaction; on a transaction client (which
+ * has no `$transaction`) they run sequentially and join that transaction.
+ */
+export async function runBatch<T extends Prisma.PrismaPromise<unknown>[]>(
+  client: DbClient,
+  queries: [...T],
+): Promise<{ [K in keyof T]: Awaited<T[K]> }> {
+  if (isPrismaClient(client)) {
+    return (await client.$transaction(queries)) as {
+      [K in keyof T]: Awaited<T[K]>
+    }
+  }
+  const results: unknown[] = []
+  for (const query of queries) {
+    results.push(await query)
+  }
+  return results as { [K in keyof T]: Awaited<T[K]> }
+}

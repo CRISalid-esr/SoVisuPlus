@@ -1,4 +1,10 @@
-import { AbstractDAO, DbClient, isPrismaClient } from '@/lib/daos/AbstractDAO'
+import {
+  AbstractDAO,
+  DbClient,
+  isPrismaClient,
+  runBatch,
+} from '@/lib/daos/AbstractDAO'
+import { Prisma } from '@prisma/client'
 import prisma from '@/lib/daos/prisma'
 
 jest.mock('@/lib/daos/prisma', () => ({
@@ -59,5 +65,26 @@ describe('AbstractDAO', () => {
   it('isPrismaClient() tells the singleton from a transaction client', () => {
     expect(isPrismaClient(prisma)).toBe(true)
     expect(isPrismaClient(txClient)).toBe(false)
+  })
+
+  describe('runBatch()', () => {
+    // Stand-ins for lazy Prisma queries
+    const queries = () =>
+      [Promise.resolve(1), Promise.resolve(2)] as unknown as [
+        Prisma.PrismaPromise<number>,
+        Prisma.PrismaPromise<number>,
+      ]
+
+    it('runs the queries as a batch transaction on the singleton', async () => {
+      const batch = queries()
+      ;(prisma.$transaction as jest.Mock).mockResolvedValueOnce([1, 2])
+      await expect(runBatch(prisma, batch)).resolves.toEqual([1, 2])
+      expect(prisma.$transaction).toHaveBeenCalledWith(batch)
+    })
+
+    it('runs the queries sequentially on a transaction client', async () => {
+      await expect(runBatch(txClient, queries())).resolves.toEqual([1, 2])
+      expect(prisma.$transaction).not.toHaveBeenCalled()
+    })
   })
 })
