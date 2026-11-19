@@ -13,6 +13,7 @@ import {
 } from '@/types/PersonIdentifier'
 import { IdentifierConflictError } from '@/lib/daos/PersonDAO'
 import { ActionType, ActionTargetType } from '@/types/Action'
+import { ActionDAO } from '@/lib/daos/ActionDAO'
 
 describe('PersonService Integration Tests', () => {
   let personService: PersonService
@@ -664,5 +665,154 @@ describe('PersonService Integration Tests', () => {
     await expect(
       personService.authenticateOrcidIdentifier(person.uid, identifier),
     ).rejects.toThrow(/Error authenticating ORCID identifier/i)
+  })
+
+  describe('identifier writes roll back when the action cannot be recorded', () => {
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    const createPerson = (
+      uid: string,
+      identifiers: { type: PersonIdentifierType; value: string }[] = [],
+    ) =>
+      prisma.person.create({
+        data: {
+          uid,
+          email: `${uid}@example.com`,
+          firstName: 'Atomic',
+          lastName: 'Test',
+          normalizedName: 'atomic test',
+          external: false,
+          identifiers: { create: identifiers },
+        },
+      })
+
+    const failActionCreation = () =>
+      jest
+        .spyOn(ActionDAO.prototype, 'createAction')
+        .mockRejectedValueOnce(new Error('action failure'))
+
+    const identifiersOf = (personId: number) =>
+      prisma.personIdentifier.findMany({
+        where: { personId },
+        select: { type: true, value: true, validated: true },
+        orderBy: { type: 'asc' },
+      })
+
+    test('addIdentifier', async () => {
+      const person = await createPerson('person-atomic-add')
+      failActionCreation()
+
+      await expect(
+        personService.addIdentifier(
+          person.uid,
+          new PersonIdentifier(PersonIdentifierType.idref, '127220747'),
+        ),
+      ).rejects.toThrow('Error adding identifier')
+
+      expect(await identifiersOf(person.id)).toEqual([])
+      expect(await prisma.action.count()).toBe(0)
+    })
+
+    test('authenticateOrcidIdentifier', async () => {
+      const person = await createPerson('person-atomic-orcid')
+      failActionCreation()
+
+      await expect(
+        personService.authenticateOrcidIdentifier(
+          person.uid,
+          new ORCIDIdentifier('0000-0001-2345-6789', {
+            accessToken: 'a',
+            refreshToken: 'r',
+            tokenType: 'bearer',
+            scope: ['/authenticate'],
+            obtainedAt: new Date('2026-01-01T00:00:00.000Z'),
+            expiresAt: new Date('2026-01-01T01:00:00.000Z'),
+          }),
+        ),
+      ).rejects.toThrow('Error authenticating ORCID identifier')
+
+      expect(await identifiersOf(person.id)).toEqual([])
+      expect(await prisma.orcidIdentifier.count()).toBe(0)
+      expect(await prisma.action.count()).toBe(0)
+    })
+
+    test('authenticateHalIdentifier', async () => {
+      const person = await createPerson('person-atomic-hal')
+      failActionCreation()
+
+      await expect(
+        personService.authenticateHalIdentifier(person.uid, {
+          halLogin: 'jdoe',
+          forms: { idhals: 'jane-doe', idhali: '12345' },
+        }),
+      ).rejects.toThrow('Error authenticating HAL identifier')
+
+      expect(await identifiersOf(person.id)).toEqual([])
+      expect(await prisma.action.count()).toBe(0)
+    })
+
+    test('validateIdentifier', async () => {
+      const person = await createPerson('person-atomic-validate', [
+        { type: PersonIdentifierType.idref, value: '127220747' },
+      ])
+      failActionCreation()
+
+      await expect(
+        personService.validateIdentifier(
+          person.uid,
+          PersonIdentifierType.idref,
+        ),
+      ).rejects.toThrow('Error validating identifier')
+
+      expect(await identifiersOf(person.id)).toEqual([
+        {
+          type: PersonIdentifierType.idref,
+          value: '127220747',
+          validated: false,
+        },
+      ])
+      expect(await prisma.action.count()).toBe(0)
+    })
+
+    test('validateProfile', async () => {
+      const person = await createPerson('person-atomic-profile', [
+        { type: PersonIdentifierType.idref, value: '127220747' },
+      ])
+      failActionCreation()
+
+      await expect(
+        personService.validateProfile(person.uid, null),
+      ).rejects.toThrow('Error validating profile')
+
+      const stored = await prisma.person.findUniqueOrThrow({
+        where: { id: person.id },
+      })
+      expect(stored.validated).toBe(false)
+      expect(stored.validatedAt).toBeNull()
+      expect(await identifiersOf(person.id)).toEqual([
+        {
+          type: PersonIdentifierType.idref,
+          value: '127220747',
+          validated: false,
+        },
+      ])
+      expect(await prisma.action.count()).toBe(0)
+    })
+
+    test('removeIdentifier', async () => {
+      const person = await createPerson('person-atomic-remove', [
+        { type: PersonIdentifierType.idref, value: '127220747' },
+      ])
+      failActionCreation()
+
+      await expect(
+        personService.removeIdentifier(person.uid, PersonIdentifierType.idref),
+      ).rejects.toThrow('Error removing identifier')
+
+      expect(await identifiersOf(person.id)).toHaveLength(1)
+      expect(await prisma.action.count()).toBe(0)
+    })
   })
 })

@@ -24,7 +24,6 @@ import {
   isEncryptedString,
 } from '@/utils/crypto/fieldEncryption'
 import { loadKeyringFromEnv } from '@/utils/crypto/keyring'
-import { CreateActionParams } from '@/lib/daos/ActionDAO'
 
 jest.mock('@prisma/client', () => {
   // avoid PersonIdentifierType to be mocked
@@ -62,9 +61,6 @@ jest.mock('@prisma/client', () => {
     orcidIdentifier: {
       upsert: jest.fn(),
       deleteMany: jest.fn(),
-    },
-    action: {
-      create: jest.fn(),
     },
     membership: {
       upsert: jest.fn(),
@@ -441,19 +437,10 @@ describe('PersonDAO', () => {
       })
     })
 
-    it('writes the ORCID row, its encrypted OAuth extension and the actions', async () => {
-      const action = {
-        actionType: 'ADD',
-        targetType: 'PERSON',
-        targetUid: 'local-johndoe',
-        parameters: {},
-        personUid: 'local-johndoe',
-      } as unknown as CreateActionParams
-
+    it('writes the ORCID row and its encrypted OAuth extension', async () => {
       await personDAO.upsertAuthenticatedOrcidIdentifier(
         'local-johndoe',
         authenticatedOrcid(),
-        [action],
       )
 
       expect(mockPrisma.personIdentifier.upsert).toHaveBeenCalledWith({
@@ -466,9 +453,6 @@ describe('PersonDAO', () => {
           type: PersonIdentifierType.orcid,
           value: '0000-0001-7990-9804',
         },
-      })
-      expect(mockPrisma.action.create).toHaveBeenCalledWith({
-        data: { path: null, ...action },
       })
 
       const calls = (mockPrisma.orcidIdentifier.upsert as jest.Mock).mock.calls
