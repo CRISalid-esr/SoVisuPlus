@@ -16,6 +16,12 @@ jest.mock('@/lib/daos/DocumentDAO')
 jest.mock('@/lib/daos/UserDAO')
 jest.mock('@/lib/daos/ActionDAO')
 jest.mock('@/lib/daos/ConceptDAO')
+// Run the transaction callback against a stand-in client: the DAOs are mocked
+jest.mock('@/lib/daos/transaction', () => ({
+  runInTransaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>) =>
+    fn({}),
+  ),
+}))
 
 describe('DocumentService', () => {
   let documentService: DocumentService
@@ -67,6 +73,9 @@ describe('DocumentService', () => {
     }))
     ;(ActionDAO as jest.Mock).mockImplementation(() => ({
       createAction: mockCreateAction,
+      createActions: async (actions: unknown[]) => {
+        for (const action of actions) await mockCreateAction(action)
+      },
     }))
     ;(ConceptDAO as jest.Mock).mockImplementation(() => ({
       createOrUpdateConcept: mockCreateOrUpdateConcept,
@@ -567,7 +576,7 @@ describe('DocumentService', () => {
   })
 
   it('should call modifyTitles with correct arguments', async () => {
-    mockModifyTitles.mockResolvedValue(undefined)
+    mockModifyTitles.mockResolvedValue([])
 
     const mockDocument: Document = new Document(
       'doc-123',
@@ -665,7 +674,10 @@ describe('DocumentService', () => {
   })
 
   it('should create an action corresponding to deleted and added titles', async () => {
-    mockModifyTitles.mockResolvedValue(undefined)
+    mockModifyTitles.mockResolvedValue([
+      new Literal('Sample Document Title', 'en'),
+      new Literal('Sample Second Title', 'fr'),
+    ])
 
     const mockDocument: Document = new Document(
       'doc-123',
@@ -749,8 +761,56 @@ describe('DocumentService', () => {
     })
   })
 
+  it('builds the REMOVE actions from the titles replaced in the transaction', async () => {
+    // Another edit changed the titles after the caller read the document
+    mockModifyTitles.mockResolvedValue([new Literal('Concurrent title', 'en')])
+
+    const mockDocument: Document = new Document(
+      'doc-123',
+      DocumentType.Document,
+      OAStatus.GREEN,
+      '2022',
+      new Date('2022-01-01T00:00:00.000Z'),
+      new Date('2022-12-31T23:59:59.000Z'),
+      OAStatus.GREEN,
+      [
+        new Literal('Sample Document Title', 'en'),
+        new Literal('Sample Second Title', 'fr'),
+      ],
+      [new Literal('Sample Abstract', 'fr')],
+      [], // empty subjects
+      [
+        new Contribution(
+          new InternalPerson(
+            'user-1234',
+            null,
+            'user-1234',
+            'First',
+            'Last',
+            [],
+          ),
+          [LocRelator.AUTHOR],
+        ),
+      ],
+    )
+
+    await documentService.modifyTitles(
+      mockDocument,
+      [{ language: 'es', value: 'El nuevo titulo' }],
+      'user-1234',
+    )
+
+    const removed = mockCreateAction.mock.calls
+      .map(([action]) => action)
+      .filter((action) => action.actionType === 'REMOVE')
+      .map((action) => action.parameters)
+    expect(removed).toEqual([
+      JSON.stringify(new Literal('Concurrent title', 'en')),
+    ])
+  })
+
   it('should call modifyAbstracts with correct arguments', async () => {
-    mockModifyAbstracts.mockResolvedValue(undefined)
+    mockModifyAbstracts.mockResolvedValue([])
 
     const mockDocument: Document = new Document(
       'doc-123',
@@ -848,7 +908,9 @@ describe('DocumentService', () => {
   })
 
   it('should create an action corresponding to deleted and added titles', async () => {
-    mockModifyAbstracts.mockResolvedValue(undefined)
+    mockModifyAbstracts.mockResolvedValue([
+      new Literal('Sample Abstract', 'fr'),
+    ])
 
     const mockDocument: Document = new Document(
       'doc-123',

@@ -23,6 +23,7 @@ import { Literal, LiteralJson } from '@/types/Literal'
 import { ContributionActionParameters } from '@/types/ContributionAction'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 import { DashboardDocumentData } from '@/types/DashboardDocumentData'
+import { runInTransaction } from '@/lib/daos/transaction'
 
 type ColumnFilter =
   | { id: 'date'; value: [string | null, string | null] }
@@ -55,17 +56,13 @@ interface CountDocumentsParams {
 export class DocumentService {
   private documentDAO: DocumentDAO
   private personDAO: PersonDAO
-  private actionDAO: ActionDAO
   private userDAO: UserDAO
-  private conceptDAO: ConceptDAO
   private halDepositDAO: HalDepositDAO
 
   constructor() {
     this.documentDAO = new DocumentDAO()
     this.personDAO = new PersonDAO()
-    this.actionDAO = new ActionDAO()
     this.userDAO = new UserDAO()
-    this.conceptDAO = new ConceptDAO()
     this.halDepositDAO = new HalDepositDAO()
   }
 
@@ -135,19 +132,22 @@ export class DocumentService {
         throw new Error(`User with username ${userName} not found`)
       }
 
-      await this.actionDAO.createAction({
-        actionType: ActionType.UPDATE,
-        targetType: ActionTargetType.DOCUMENT,
-        targetUid: documentUid,
-        path: 'contributions',
-        parameters: { contributions } as unknown as InputJsonValue,
-        personUid: user.person.uid,
-      })
+      const personUid = user.person.uid
+      await runInTransaction(async (tx) => {
+        await new ActionDAO(tx).createAction({
+          actionType: ActionType.UPDATE,
+          targetType: ActionTargetType.DOCUMENT,
+          targetUid: documentUid,
+          path: 'contributions',
+          parameters: { contributions } as unknown as InputJsonValue,
+          personUid,
+        })
 
-      // Flag the document as awaiting the graph round-trip. This freezes the
-      // Authors tab (and disables further mutations) until the graph re-writes
-      // the document, which resets the state back to `default`.
-      await this.documentDAO.markDocumentsWaitingForUpdate([documentUid])
+        // Flag the document as awaiting the graph round-trip. This freezes the
+        // Authors tab (and disables further mutations) until the graph re-writes
+        // the document, which resets the state back to `default`.
+        await new DocumentDAO(tx).markDocumentsWaitingForUpdate([documentUid])
+      })
     } catch (error) {
       const message = 'Error saving contributions'
       console.error(message, error)
@@ -335,18 +335,20 @@ export class DocumentService {
       if (!user?.person) {
         throw new Error(`User with username ${userName} not found`)
       }
-      await this.documentDAO.deleteConceptsFromDocument(
-        documentUid,
-        conceptUids,
-      )
-
-      await this.actionDAO.createAction({
-        actionType: ActionType.REMOVE,
-        targetType: ActionTargetType.DOCUMENT,
-        targetUid: documentUid,
-        path: 'subjects',
-        parameters: { conceptUids },
-        personUid: user.person?.uid,
+      const personUid = user.person.uid
+      await runInTransaction(async (tx) => {
+        await new DocumentDAO(tx).deleteConceptsFromDocument(
+          documentUid,
+          conceptUids,
+        )
+        await new ActionDAO(tx).createAction({
+          actionType: ActionType.REMOVE,
+          targetType: ActionTargetType.DOCUMENT,
+          targetUid: documentUid,
+          path: 'subjects',
+          parameters: { conceptUids },
+          personUid,
+        })
       })
     } catch (error) {
       const message = 'Error deleting concepts from document'
@@ -367,25 +369,24 @@ export class DocumentService {
       if (!user?.person) {
         throw new Error(`User with username ${userName} not found`)
       }
-      await Promise.all(
-        concepts.map((concept) =>
-          this.conceptDAO.createOrUpdateConcept(Concept.fromObject(concept)),
-        ),
-      )
-      await this.documentDAO.addConceptsToDocument(documentUid, concepts)
-
-      await Promise.all(
-        concepts.map((concept) =>
-          this.actionDAO.createAction({
+      const personUid = user.person.uid
+      await runInTransaction(async (tx) => {
+        const conceptDAO = new ConceptDAO(tx)
+        for (const concept of concepts) {
+          await conceptDAO.createOrUpdateConcept(Concept.fromObject(concept))
+        }
+        await new DocumentDAO(tx).addConceptsToDocument(documentUid, concepts)
+        await new ActionDAO(tx).createActions(
+          concepts.map((concept) => ({
             actionType: ActionType.ADD,
             targetType: ActionTargetType.DOCUMENT,
             targetUid: documentUid,
             path: 'subjects',
             parameters: JSON.stringify(concept),
-            personUid: user.person?.uid || '',
-          }),
-        ),
-      )
+            personUid,
+          })),
+        )
+      })
     } catch (error) {
       const message = 'Error adding concepts to document'
       console.error(message, error)
@@ -406,36 +407,29 @@ export class DocumentService {
         throw new Error(`User with username ${userName} not found`)
       }
 
-      const oldTitles = document.titles
+      const personUid = user.person.uid
       const convertedTitles = titles.map((title) => Literal.fromObject(title))
 
-      await this.documentDAO.modifyTitles(document.uid, convertedTitles)
-
-      await Promise.all(
-        oldTitles.map((title) =>
-          this.actionDAO.createAction({
-            actionType: ActionType.REMOVE,
-            targetType: ActionTargetType.DOCUMENT,
-            targetUid: document.uid,
-            path: 'titles',
-            parameters: JSON.stringify(title),
-            personUid: user.person?.uid || '',
-          }),
-        ),
-      )
-
-      await Promise.all(
-        convertedTitles.map((title) =>
-          this.actionDAO.createAction({
-            actionType: ActionType.ADD,
-            targetType: ActionTargetType.DOCUMENT,
-            targetUid: document.uid,
-            path: 'titles',
-            parameters: JSON.stringify(title),
-            personUid: user.person?.uid || '',
-          }),
-        ),
-      )
+      await runInTransaction(async (tx) => {
+        // The REMOVE actions announce the titles actually replaced, read in the
+        // transaction, not those the caller read before
+        const replaced = await new DocumentDAO(tx).modifyTitles(
+          document.uid,
+          convertedTitles,
+        )
+        const titleAction = (actionType: ActionType, title: Literal) => ({
+          actionType,
+          targetType: ActionTargetType.DOCUMENT,
+          targetUid: document.uid,
+          path: 'titles',
+          parameters: JSON.stringify(title),
+          personUid,
+        })
+        await new ActionDAO(tx).createActions([
+          ...replaced.map((title) => titleAction(ActionType.REMOVE, title)),
+          ...convertedTitles.map((title) => titleAction(ActionType.ADD, title)),
+        ])
+      })
     } catch (error) {
       const message = 'Error modifying titles of document'
       console.error(message, error)
@@ -456,38 +450,35 @@ export class DocumentService {
         throw new Error(`User with username ${userName} not found`)
       }
 
-      const oldAbstracts = document.abstracts
+      const personUid = user.person.uid
       const convertedAbstracts = abstracts.map((abstract) =>
         Literal.fromObject(abstract),
       )
 
-      await this.documentDAO.modifyAbstracts(document.uid, convertedAbstracts)
-
-      await Promise.all(
-        oldAbstracts.map((abstract) =>
-          this.actionDAO.createAction({
-            actionType: ActionType.REMOVE,
-            targetType: ActionTargetType.DOCUMENT,
-            targetUid: document.uid,
-            path: 'abstracts',
-            parameters: JSON.stringify(abstract),
-            personUid: user.person?.uid || '',
-          }),
-        ),
-      )
-
-      await Promise.all(
-        convertedAbstracts.map((abstract) =>
-          this.actionDAO.createAction({
-            actionType: ActionType.ADD,
-            targetType: ActionTargetType.DOCUMENT,
-            targetUid: document.uid,
-            path: 'abstracts',
-            parameters: JSON.stringify(abstract),
-            personUid: user.person?.uid || '',
-          }),
-        ),
-      )
+      await runInTransaction(async (tx) => {
+        // The REMOVE actions announce the abstracts actually replaced, read in
+        // the transaction, not those the caller read before
+        const replaced = await new DocumentDAO(tx).modifyAbstracts(
+          document.uid,
+          convertedAbstracts,
+        )
+        const abstractAction = (actionType: ActionType, abstract: Literal) => ({
+          actionType,
+          targetType: ActionTargetType.DOCUMENT,
+          targetUid: document.uid,
+          path: 'abstracts',
+          parameters: JSON.stringify(abstract),
+          personUid,
+        })
+        await new ActionDAO(tx).createActions([
+          ...replaced.map((abstract) =>
+            abstractAction(ActionType.REMOVE, abstract),
+          ),
+          ...convertedAbstracts.map((abstract) =>
+            abstractAction(ActionType.ADD, abstract),
+          ),
+        ])
+      })
     } catch (error) {
       const message = 'Error modifying abstracts of document'
       console.error(message, error)
@@ -507,19 +498,24 @@ export class DocumentService {
         throw new Error(`User with username ${userName} not found`)
       }
 
-      const updated =
-        await this.documentDAO.markDocumentsWaitingForUpdate(documentUids)
+      const personUid = user.person.uid
+      const updated = await runInTransaction(async (tx) => {
+        const updated = await new DocumentDAO(tx).markDocumentsWaitingForUpdate(
+          documentUids,
+        )
 
-      await this.actionDAO.createAction({
-        actionType: ActionType.MERGE,
-        targetType: ActionTargetType.DOCUMENT,
-        // for now, the primary document is elected by graph algorithm,
-        // not by user choice, thus the targetUid is simply the first in the list
-        // without any special meaning. The other merged documents are in parameters.
-        targetUid: documentUids[0],
-        path: null,
-        parameters: { mergedDocumentUids: documentUids.slice(1) },
-        personUid: user.person?.uid,
+        await new ActionDAO(tx).createAction({
+          actionType: ActionType.MERGE,
+          targetType: ActionTargetType.DOCUMENT,
+          // for now, the primary document is elected by graph algorithm,
+          // not by user choice, thus the targetUid is simply the first in the list
+          // without any special meaning. The other merged documents are in parameters.
+          targetUid: documentUids[0],
+          path: null,
+          parameters: { mergedDocumentUids: documentUids.slice(1) },
+          personUid,
+        })
+        return updated
       })
 
       return { updated }
@@ -543,15 +539,20 @@ export class DocumentService {
         throw new Error(`User with username ${userName} not found`)
       }
 
-      await this.documentDAO.updateDocumentTypeByUid(documentUid, documentType)
-
-      await this.actionDAO.createAction({
-        actionType: ActionType.UPDATE,
-        targetType: ActionTargetType.DOCUMENT,
-        targetUid: documentUid,
-        path: 'documentType',
-        parameters: { value: documentType },
-        personUid: user.person.uid,
+      const personUid = user.person.uid
+      await runInTransaction(async (tx) => {
+        await new DocumentDAO(tx).updateDocumentTypeByUid(
+          documentUid,
+          documentType,
+        )
+        await new ActionDAO(tx).createAction({
+          actionType: ActionType.UPDATE,
+          targetType: ActionTargetType.DOCUMENT,
+          targetUid: documentUid,
+          path: 'documentType',
+          parameters: { value: documentType },
+          personUid,
+        })
       })
     } catch (error) {
       const message = 'Error updating document type'
@@ -573,18 +574,20 @@ export class DocumentService {
         throw new Error(`User with username ${userName} not found`)
       }
 
-      await this.documentDAO.updatePublicationDateByUid(
-        documentUid,
-        publicationDate,
-      )
-
-      await this.actionDAO.createAction({
-        actionType: ActionType.UPDATE,
-        targetType: ActionTargetType.DOCUMENT,
-        targetUid: documentUid,
-        path: 'publicationDate',
-        parameters: { value: publicationDate },
-        personUid: user.person.uid,
+      const personUid = user.person.uid
+      await runInTransaction(async (tx) => {
+        await new DocumentDAO(tx).updatePublicationDateByUid(
+          documentUid,
+          publicationDate,
+        )
+        await new ActionDAO(tx).createAction({
+          actionType: ActionType.UPDATE,
+          targetType: ActionTargetType.DOCUMENT,
+          targetUid: documentUid,
+          path: 'publicationDate',
+          parameters: { value: publicationDate },
+          personUid,
+        })
       })
     } catch (error) {
       const message = 'Error updating publication date'
