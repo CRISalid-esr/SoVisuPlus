@@ -4,6 +4,7 @@ import { EntityType } from '@/types/UserRoleScope'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { PermissionAction, PermissionSubject } from '@/types/Permission'
 import { PersonIdentifierType } from '@/types/PersonIdentifier'
+import { runInTransaction } from '@/lib/daos/transaction'
 
 type AssignRoleInput = {
   roleName: string
@@ -105,19 +106,23 @@ export class RoleService {
     const role = await this.roleDAO.getRoleByName(input.roleName)
     if (!role) throw new Error(`Role "${input.roleName}" not found`)
 
-    await this.userDAO.createUserRoleIfNotExists(userId, role.id)
+    // A role without its scope is a global role: both writes are atomic
+    await runInTransaction(async (tx) => {
+      const userDAO = new UserDAO(tx)
+      await userDAO.createUserRoleIfNotExists(userId, role.id)
 
-    if (input.scope) {
-      await this.userDAO.createUserRoleScopeIfNotExists(
-        userId,
-        role.id,
-        input.scope.entityType,
-        input.scope.entityUid,
-      )
-    } else {
-      // Global role: remove any scoped roles for this user & role
-      await this.userDAO.deleteUserRoleScopes(userId, role.id)
-    }
+      if (input.scope) {
+        await userDAO.createUserRoleScopeIfNotExists(
+          userId,
+          role.id,
+          input.scope.entityType,
+          input.scope.entityUid,
+        )
+      } else {
+        // Global role: remove any scoped roles for this user & role
+        await userDAO.deleteUserRoleScopes(userId, role.id)
+      }
+    })
     return {
       userId,
       roleId: role.id,

@@ -1,6 +1,7 @@
 import { RoleService } from '@/lib/services/RoleService'
 import prisma from '@/lib/daos/prisma'
 import type { RolesFileSeed } from '@/lib/services/RoleConfigService'
+import { UserDAO } from '@/lib/daos/UserDAO'
 
 describe('RoleService Integration', () => {
   const svc = new RoleService()
@@ -287,6 +288,47 @@ describe('RoleService Integration', () => {
     expect(scopeSet).toEqual(
       new Set(['ResearchUnit:rs-uid-1', 'Institution:inst-42']),
     )
+  })
+
+  test('assignRoleToUser: grants no global role when the scope cannot be written', async () => {
+    await svc.reset({
+      roles: [
+        {
+          name: 'document_editor',
+          system: false,
+          description: 'Edit metadata',
+          permissions: [
+            { action: 'update', subject: 'Document', fields: ['titles'] },
+          ],
+        },
+      ],
+    })
+    const person = await prisma.person.create({
+      data: {
+        uid: 'local-bob',
+        firstName: 'Bob',
+        lastName: 'Doe',
+        displayName: 'Bob Doe',
+        external: false,
+        normalizedName: 'bob doe',
+      },
+    })
+    const user = await prisma.user.create({ data: { personId: person.id } })
+    const spy = jest
+      .spyOn(UserDAO.prototype, 'createUserRoleScopeIfNotExists')
+      .mockRejectedValueOnce(new Error('scope failure'))
+
+    await expect(
+      svc.assignRoleToUser({
+        roleName: 'document_editor',
+        scope: { entityType: 'ResearchUnit', entityUid: 'rs-uid-1' },
+        user: { personUid: 'local-bob' },
+      }),
+    ).rejects.toThrow('scope failure')
+    spy.mockRestore()
+
+    // A role row without its scope would be a global role
+    expect(await prisma.userRole.count({ where: { userId: user.id } })).toBe(0)
   })
 
   test('assignRoleToUser: unscoped (global) assignment creates link and clears any existing scopes', async () => {
