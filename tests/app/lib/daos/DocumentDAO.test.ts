@@ -583,9 +583,13 @@ describe('DocumentDAO Integration Tests', () => {
 
     // Modify titles of the document
     const dao = new DocumentDAO()
-    await dao.modifyTitles('doc-with-titles', [
+    const replaced = await dao.modifyTitles('doc-with-titles', [
       new Literal('El nuevo titulo', 'es'),
       new Literal('Le nouveau titre', 'fr'),
+    ])
+    expect(replaced.map((title) => title.value).sort()).toEqual([
+      'Sample Document Title',
+      'Sample Second Title',
     ])
 
     // Verify that old titles have been deleted and new ones have been added
@@ -606,6 +610,53 @@ describe('DocumentDAO Integration Tests', () => {
     expect(titles?.titles.map((title) => title.value)).toContain(
       'Le nouveau titre',
     )
+  })
+
+  test('modifyTitles keeps the old titles when the new ones cannot be written', async () => {
+    await prisma.document.create({
+      data: {
+        uid: 'doc-titles-rollback',
+        documentType: 'JournalArticle',
+        titles: { create: [{ language: 'fr', value: 'Titre conservé' }] },
+      },
+    })
+
+    // Two titles in the same language violate the (documentId, language) unique key
+    await expect(
+      new DocumentDAO().modifyTitles('doc-titles-rollback', [
+        new Literal('Premier', 'fr'),
+        new Literal('Second', 'fr'),
+      ]),
+    ).rejects.toThrow()
+
+    const stored = await prisma.documentTitle.findMany({
+      where: { document: { uid: 'doc-titles-rollback' } },
+    })
+    expect(stored.map((title) => title.value)).toEqual(['Titre conservé'])
+  })
+
+  test('modifyAbstracts keeps the old abstracts when the new ones cannot be written', async () => {
+    await prisma.document.create({
+      data: {
+        uid: 'doc-abstracts-rollback',
+        documentType: 'JournalArticle',
+        abstracts: { create: [{ language: 'fr', value: 'Résumé conservé' }] },
+      },
+    })
+
+    await expect(
+      new DocumentDAO().modifyAbstracts('doc-abstracts-rollback', [
+        new Literal('Premier', 'fr'),
+        new Literal('Second', 'fr'),
+      ]),
+    ).rejects.toThrow()
+
+    const stored = await prisma.documentAbstract.findMany({
+      where: { document: { uid: 'doc-abstracts-rollback' } },
+    })
+    expect(stored.map((abstract) => abstract.value)).toEqual([
+      'Résumé conservé',
+    ])
   })
 
   test('should modify abstracts from a document', async () => {
@@ -639,9 +690,12 @@ describe('DocumentDAO Integration Tests', () => {
 
     // Modify titles of the document
     const dao = new DocumentDAO()
-    await dao.modifyAbstracts('doc-with-abstracts', [
+    const replaced = await dao.modifyAbstracts('doc-with-abstracts', [
       new Literal('El nuevo abstract', 'es'),
       new Literal('Le nouveau abstract', 'fr'),
+    ])
+    expect(replaced.map((abstract) => abstract.value)).toEqual([
+      'Sample Abstract',
     ])
 
     // Verify that old titles have been deleted and new ones have been added

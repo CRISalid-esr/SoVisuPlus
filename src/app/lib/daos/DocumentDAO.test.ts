@@ -55,7 +55,11 @@ jest.mock('@/lib/daos/search/SearchTermExpander', () => ({
 jest.mock('@prisma/client', () => {
   const actualPrismaClient = jest.requireActual('@prisma/client')
 
-  const mockPrismaClient = {
+  const mockPrismaClient: Record<string, unknown> = {
+    // Interactive-transaction mock: run the callback against the same client
+    $transaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>) =>
+      fn(mockPrismaClient),
+    ),
     document: {
       findUnique: jest.fn(),
       create: jest.fn(),
@@ -1943,6 +1947,7 @@ describe('DocumentDAO', () => {
 
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue({
       id: mockDocId,
+      titles: [{ language: 'en', value: 'The old title' }],
     })
     ;(mockPrisma.documentTitle.deleteMany as jest.Mock).mockResolvedValue({})
     ;(mockPrisma.document.update as jest.Mock).mockResolvedValue({})
@@ -1953,11 +1958,18 @@ describe('DocumentDAO', () => {
       new Literal('Le nouveau titre', 'fr'),
     ]
 
-    await documentDAO.modifyTitles(documentUid, titles)
+    const replaced = await documentDAO.modifyTitles(documentUid, titles)
 
+    expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1)
     expect(mockPrisma.document.findUnique).toHaveBeenCalledWith({
       where: { uid: documentUid },
-      select: { id: true },
+      select: {
+        id: true,
+        titles: {
+          select: { language: true, value: true },
+          orderBy: { id: 'asc' },
+        },
+      },
     })
 
     expect(mockPrisma.documentTitle.deleteMany).toHaveBeenCalledWith({
@@ -1985,6 +1997,8 @@ describe('DocumentDAO', () => {
         },
       },
     })
+    // The replaced titles are returned
+    expect(replaced).toEqual([new Literal('The old title', 'en')])
   })
 
   it('should throw an error if document is not found when modifying titles', async () => {
@@ -2008,6 +2022,7 @@ describe('DocumentDAO', () => {
 
     ;(mockPrisma.document.findUnique as jest.Mock).mockResolvedValue({
       id: mockDocId,
+      abstracts: [{ language: 'en', value: 'The old abstract' }],
     })
     ;(mockPrisma.documentAbstract.deleteMany as jest.Mock).mockResolvedValue({})
     ;(mockPrisma.document.update as jest.Mock).mockResolvedValue({})
@@ -2018,11 +2033,18 @@ describe('DocumentDAO', () => {
       new Literal('Le nouveau abstract', 'fr'),
     ]
 
-    await documentDAO.modifyAbstracts(documentUid, abstracts)
+    const replaced = await documentDAO.modifyAbstracts(documentUid, abstracts)
 
+    expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1)
     expect(mockPrisma.document.findUnique).toHaveBeenCalledWith({
       where: { uid: documentUid },
-      select: { id: true },
+      select: {
+        id: true,
+        abstracts: {
+          select: { language: true, value: true },
+          orderBy: { id: 'asc' },
+        },
+      },
     })
 
     expect(mockPrisma.documentAbstract.deleteMany).toHaveBeenCalledWith({
@@ -2048,6 +2070,8 @@ describe('DocumentDAO', () => {
         },
       },
     })
+    // The replaced abstracts are returned
+    expect(replaced).toEqual([new Literal('The old abstract', 'en')])
   })
 
   it('should throw an error if document is not found when modifying abstracts', async () => {
