@@ -27,42 +27,48 @@ export class RoleDAO extends AbstractDAO {
     })
   }
 
+  /**
+   * Make the role's permissions exactly `desiredPermissionIds`, in one
+   * transaction so a permission meant to be removed is never left behind.
+   */
   async setRolePermissions(
     roleId: number,
     desiredPermissionIds: number[],
   ): Promise<void> {
-    const current = await this.prismaClient.role.findUnique({
-      where: { id: roleId },
-      include: { permissions: { select: { permissionId: true } } },
+    await this.transaction(async (tx) => {
+      const current = await tx.role.findUnique({
+        where: { id: roleId },
+        include: { permissions: { select: { permissionId: true } } },
+      })
+
+      const currentIds = new Set(
+        (current?.permissions ?? []).map((rp) => rp.permissionId),
+      )
+      const desiredIds = new Set(desiredPermissionIds)
+
+      const toAdd = [...desiredIds].filter((id) => !currentIds.has(id))
+      const toRemove = [...currentIds].filter((id) => !desiredIds.has(id))
+
+      if (toAdd.length) {
+        console.log(
+          `Adding ${toAdd.length} permissions to role ID ${roleId} : `,
+          toAdd,
+        )
+        await tx.rolePermission.createMany({
+          data: toAdd.map((permissionId) => ({ roleId, permissionId })),
+          skipDuplicates: true,
+        })
+      }
+
+      for (const permissionId of toRemove) {
+        console.log(
+          `Removing permission ID ${permissionId} from role ID ${roleId}`,
+        )
+        await tx.rolePermission.deleteMany({
+          where: { roleId, permissionId },
+        })
+      }
     })
-
-    const currentIds = new Set(
-      (current?.permissions ?? []).map((rp) => rp.permissionId),
-    )
-    const desiredIds = new Set(desiredPermissionIds)
-
-    const toAdd = [...desiredIds].filter((id) => !currentIds.has(id))
-    const toRemove = [...currentIds].filter((id) => !desiredIds.has(id))
-
-    if (toAdd.length) {
-      console.log(
-        `Adding ${toAdd.length} permissions to role ID ${roleId} : `,
-        toAdd,
-      )
-      await this.prismaClient.rolePermission.createMany({
-        data: toAdd.map((permissionId) => ({ roleId, permissionId })),
-        skipDuplicates: true,
-      })
-    }
-
-    for (const permissionId of toRemove) {
-      console.log(
-        `Removing permission ID ${permissionId} from role ID ${roleId}`,
-      )
-      await this.prismaClient.rolePermission.deleteMany({
-        where: { roleId, permissionId },
-      })
-    }
   }
 
   async findOrCreatePermission(params: {

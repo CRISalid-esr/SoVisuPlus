@@ -2,7 +2,11 @@ import { PrismaClient, Permission, Role } from '@prisma/client'
 import { RoleDAO } from '@/lib/daos/RoleDAO'
 
 jest.mock('@prisma/client', () => {
-  const mockPrismaClient = {
+  const mockPrismaClient: Record<string, unknown> = {
+    // Interactive-transaction mock: run the callback against the same client
+    $transaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>) =>
+      fn(mockPrismaClient),
+    ),
     role: {
       upsert: jest.fn(),
       findUnique: jest.fn(),
@@ -85,6 +89,8 @@ describe('RoleDAO', () => {
 
     await dao.setRolePermissions(9, [2, 3])
 
+    // Read and writes run in one transaction
+    expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1)
     expect(mockPrisma.rolePermission.createMany).toHaveBeenCalledWith({
       data: [{ roleId: 9, permissionId: 3 }],
       skipDuplicates: true,
