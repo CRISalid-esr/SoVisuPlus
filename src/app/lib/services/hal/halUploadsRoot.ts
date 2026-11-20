@@ -8,15 +8,18 @@ import path from 'node:path'
  * absolute path once.
  *
  * Layout:
- *   <root>/hal-files/<depositId>/<filename>   — user-uploaded attachments
+ *   <root>/hal-files/<uploadKey>/<filename>   — user-uploaded attachments
+ *   (a random key written before the deposit exists; older deposits used their id)
  *   <root>/hal-tei/<depositId>/art.xml|art.zip — generated TEI and archive
  */
 export const halUploadsRoot = (): string =>
-  path.resolve(process.env.HAL_UPLOADS_ROOT ?? path.join(process.cwd(), 'uploads'))
+  path.resolve(
+    process.env.HAL_UPLOADS_ROOT ?? path.join(process.cwd(), 'uploads'),
+  )
 
 /** Directory holding a deposit's uploaded attachment files. */
-export const halFilesDir = (depositId: number): string =>
-  path.join(halUploadsRoot(), 'hal-files', String(depositId))
+export const halFilesDir = (uploadKey: string): string =>
+  path.join(halUploadsRoot(), 'hal-files', uploadKey)
 
 /** Directory holding a deposit's generated TEI / ZIP artifacts. */
 export const halTeiDir = (depositId: number): string =>

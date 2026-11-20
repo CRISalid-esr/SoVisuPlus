@@ -44,7 +44,7 @@ export interface DepositResultUpdate {
 }
 
 export class HalDepositDAO extends AbstractDAO {
-  /** Create a deposit in `pending` status (files are added separately, after disk write). */
+  /** Create a deposit in `pending` status (its files are added with addFiles). */
   async createDeposit(params: CreateHalDepositParams): Promise<HalDeposit> {
     const db = await this.prismaClient.halDeposit.create({
       data: {
@@ -78,11 +78,6 @@ export class HalDepositDAO extends AbstractDAO {
       })
     }
     return this.requireById(depositId)
-  }
-
-  /** Cleanup helper when post-creation steps fail (orphan rows must not survive). */
-  async deleteDeposit(id: number): Promise<void> {
-    await this.prismaClient.halDeposit.delete({ where: { id } })
   }
 
   async findById(id: number): Promise<HalDeposit | null> {

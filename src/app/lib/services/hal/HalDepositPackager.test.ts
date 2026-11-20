@@ -86,7 +86,7 @@ describe('HalDepositPackager', () => {
   })
 
   it('builds a flat ZIP with the TEI and attachments when files exist (Case 2)', async () => {
-    const filesDir = halFilesDir(2)
+    const filesDir = halFilesDir('2')
     fs.mkdirSync(filesDir, { recursive: true })
     fs.writeFileSync(path.join(filesDir, 'doc.pdf'), 'PDF-DATA')
     fs.writeFileSync(path.join(filesDir, 'data.csv'), 'a,b,c')

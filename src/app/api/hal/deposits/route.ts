@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { NextResponse } from 'next/server'
@@ -72,7 +73,7 @@ export const POST = async (request: Request) => {
 
   const service = new DocumentService()
 
-  let deposit: { id: number } | null = null
+  let uploadDir: string | null = null
   try {
     const form = await request.formData()
     const raw = form.get('payload')
@@ -166,35 +167,24 @@ export const POST = async (request: Request) => {
       return bad('A main file is required', 'missing_main_file')
     }
 
-    // Create the deposit row first to get its id, then write files, then record file rows.
-    deposit = await service.createHalDeposit({
-      documentUid: payload.documentUid,
-      personUid: payload.personUid,
-      halDocumentType: payload.halDocumentType,
-      halDomains: payload.halDomains,
-      language: payload.language,
-      conferenceTitle: payload.conferenceTitle ?? null,
-      conferenceCity: payload.conferenceCity ?? null,
-      conferenceStartDate: payload.conferenceStartDate ?? null,
-      conferenceCountry: payload.conferenceCountry ?? null,
-      institution: payload.institution ?? null,
-      bookTitle: payload.bookTitle ?? null,
-      supervisor: payload.supervisor ?? null,
-    })
+    // Every announced file must be in the upload, before anything is written
+    const uploads: { meta: DepositFileMeta; file: File }[] = []
+    for (const meta of files) {
+      const file = form.get(meta.field)
+      if (!(file instanceof File))
+        return bad(`Missing file for ${meta.field}`, 'file_missing_from_upload')
+      uploads.push({ meta, file })
+    }
 
+    // Files are written before the transaction (no I/O inside it), in a
+    // directory keyed independently of the deposit id
     const fileInputs: HalDepositFileInput[] = []
-    if (files.length > 0) {
-      const dir = halFilesDir(deposit.id)
-      await fs.promises.mkdir(dir, { recursive: true })
-      for (const meta of files) {
-        const file = form.get(meta.field)
-        if (!(file instanceof File))
-          return bad(
-            `Missing file for ${meta.field}`,
-            'file_missing_from_upload',
-          )
+    if (uploads.length > 0) {
+      uploadDir = halFilesDir(randomUUID())
+      await fs.promises.mkdir(uploadDir, { recursive: true })
+      for (const { meta, file } of uploads) {
         const fileName = path.basename(file.name)
-        const filePath = path.join(dir, fileName)
+        const filePath = path.join(uploadDir, fileName)
         await fs.promises.writeFile(
           filePath,
           Buffer.from(await file.arrayBuffer()),
@@ -212,13 +202,32 @@ export const POST = async (request: Request) => {
       }
     }
 
-    const created = await service.attachDepositFiles(deposit.id, fileInputs)
+    const created = await service.createHalDepositWithFiles(
+      {
+        documentUid: payload.documentUid,
+        personUid: payload.personUid,
+        halDocumentType: payload.halDocumentType,
+        halDomains: payload.halDomains,
+        language: payload.language,
+        conferenceTitle: payload.conferenceTitle ?? null,
+        conferenceCity: payload.conferenceCity ?? null,
+        conferenceStartDate: payload.conferenceStartDate ?? null,
+        conferenceCountry: payload.conferenceCountry ?? null,
+        institution: payload.institution ?? null,
+        bookTitle: payload.bookTitle ?? null,
+        supervisor: payload.supervisor ?? null,
+      },
+      fileInputs,
+    )
     return NextResponse.json(created.toJson(), { status: 201 })
   } catch (error) {
     console.error('❌ Error creating HAL deposit:', error)
-    // Roll back the DB row if it was created (orphan files are acceptable, orphan rows are not).
-    if (deposit) {
-      await service.deleteHalDeposit(deposit.id).catch(() => undefined)
+    // The transaction rolled the deposit back; remove the files written for it
+    // (orphan files are acceptable, orphan rows are not)
+    if (uploadDir) {
+      await fs.promises
+        .rm(uploadDir, { recursive: true, force: true })
+        .catch(() => undefined)
     }
     return bad('Internal Server Error', 'internal_error', 500)
   }

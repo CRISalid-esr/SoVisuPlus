@@ -3,6 +3,7 @@ import prisma from '@/lib/daos/prisma'
 import { DocumentType } from '@/types/Document'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
+import { HalDepositDAO } from '@/lib/daos/HalDepositDAO'
 
 describe('DocumentService Integration Tests', () => {
   const service = new DocumentService()
@@ -276,6 +277,73 @@ describe('DocumentService Integration Tests', () => {
         where: { uid: 'doc-atomic-contributions' },
       })
       expect(document.state).toBe('default')
+    })
+  })
+
+  describe('createHalDepositWithFiles', () => {
+    afterEach(async () => {
+      jest.restoreAllMocks()
+      await prisma.halDeposit.deleteMany()
+    })
+
+    const createDocumentAndPerson = async () => {
+      await prisma.person.create({
+        data: {
+          uid: 'local-depositor',
+          firstName: 'Depositor',
+          lastName: 'Test',
+          normalizedName: 'depositor test',
+          external: false,
+        },
+      })
+      await prisma.document.create({
+        data: { uid: 'doc-deposit', documentType: 'JournalArticle' },
+      })
+    }
+
+    const params = {
+      documentUid: 'doc-deposit',
+      personUid: 'local-depositor',
+      halDocumentType: 'ART',
+      halDomains: ['shs.hisphilso'],
+      language: 'en',
+    }
+
+    const file = {
+      filePath: '/uploads/hal-files/key/doc.pdf',
+      fileName: 'doc.pdf',
+      isMain: true,
+      mimeType: 'application/pdf',
+      fileSource: 'author',
+      fileType: 'file',
+      visibility: 'now',
+      license: 'cc-by',
+    }
+
+    test('creates the deposit with its files', async () => {
+      await createDocumentAndPerson()
+
+      const deposit = await service.createHalDepositWithFiles(params, [file])
+
+      expect(deposit.status).toBe('pending')
+      expect(
+        await prisma.halDepositFile.count({
+          where: { halDepositId: deposit.id },
+        }),
+      ).toBe(1)
+    })
+
+    test('leaves no deposit when the files cannot be attached', async () => {
+      await createDocumentAndPerson()
+      jest
+        .spyOn(HalDepositDAO.prototype, 'addFiles')
+        .mockRejectedValueOnce(new Error('files failure'))
+
+      await expect(
+        service.createHalDepositWithFiles(params, [file]),
+      ).rejects.toThrow('files failure')
+
+      expect(await prisma.halDeposit.count()).toBe(0)
     })
   })
 })

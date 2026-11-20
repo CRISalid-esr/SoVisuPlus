@@ -75,22 +75,19 @@ export class DocumentService {
     return this.personDAO.fetchPersonByUid(uid)
   }
 
-  /** Create a deposit row in `pending` status (files are attached afterwards). */
-  async createHalDeposit(params: CreateHalDepositParams): Promise<HalDeposit> {
-    return this.halDepositDAO.createDeposit(params)
-  }
-
-  /** Attach uploaded files (already written to disk) to a deposit. */
-  async attachDepositFiles(
-    depositId: number,
+  /**
+   * Create a deposit in `pending` status with its files (already written to
+   * disk), in one transaction: the poller never sees a deposit without its files.
+   */
+  async createHalDepositWithFiles(
+    params: CreateHalDepositParams,
     files: HalDepositFileInput[],
   ): Promise<HalDeposit> {
-    return this.halDepositDAO.addFiles(depositId, files)
-  }
-
-  /** Remove a deposit (used to roll back when post-creation steps fail). */
-  async deleteHalDeposit(depositId: number): Promise<void> {
-    await this.halDepositDAO.deleteDeposit(depositId)
+    return runInTransaction(async (tx) => {
+      const halDepositDAO = new HalDepositDAO(tx)
+      const deposit = await halDepositDAO.createDeposit(params)
+      return halDepositDAO.addFiles(deposit.id, files)
+    })
   }
 
   async getHalDepositById(depositId: number): Promise<HalDeposit | null> {
