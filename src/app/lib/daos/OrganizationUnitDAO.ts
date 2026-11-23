@@ -443,17 +443,17 @@ export class OrganizationUnitDAO extends AbstractDAO {
     units: { uid: string; hidden: boolean }[]
     relations: { childUid: string; parentUid: string }[]
   }> {
-    const [units, relations] = await Promise.all([
-      this.prismaClient.organizationUnit.findMany({
-        select: { uid: true, hidden: true },
-      }),
-      this.prismaClient.organizationRelationship.findMany({
+    const units = await this.prismaClient.organizationUnit.findMany({
+      select: { uid: true, hidden: true },
+    })
+    const relations = await this.prismaClient.organizationRelationship.findMany(
+      {
         select: {
           child: { select: { uid: true } },
           parent: { select: { uid: true } },
         },
-      }),
-    ])
+      },
+    )
     return {
       units,
       relations: relations.map((relation) => ({
