@@ -92,6 +92,7 @@ await runInTransaction(async (tx) => {
 - The `PersonDAO` and `DocumentDAO` methods that write a user change are only called from their service, inside a `runInTransaction` that also creates the matching `Action`s.
 - No `Promise.all` and no I/O (HTTP, AMQP, disk) inside the callback; do I/O before or after.
 - Do not nest `runInTransaction` calls.
+- Every new transactional flow gets an integration test checking the rollback (a later write fails → the earlier ones are not persisted) and, when the service has unit tests, an `expectCalledInTransaction` assertion on each DAO call of the flow (see `DocumentService.test.ts`).
 
 See [`specs/fix-across-dao-transaction/prompt.md`](specs/fix-across-dao-transaction/prompt.md).
 

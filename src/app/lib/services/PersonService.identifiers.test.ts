@@ -17,6 +17,9 @@ const mockDeleteIdentifier = jest.fn()
 const mockIsAnyIdentifierHeldByAnotherPerson = jest.fn()
 const mockFindAuthorByIdHal = jest.fn()
 const mockCreateAction = jest.fn()
+const mockMarkIdentifiersValidated = jest.fn()
+const mockMarkPersonValidated = jest.fn()
+const mockFetchPersonByUid = jest.fn()
 
 jest.mock('@/lib/daos/PersonDAO', () => {
   class IdentifierConflictError extends Error {
@@ -30,7 +33,8 @@ jest.mock('@/lib/daos/PersonDAO', () => {
   }
   return {
     IdentifierConflictError,
-    PersonDAO: jest.fn().mockImplementation(() => ({
+    PersonDAO: jest.fn().mockImplementation((client) => ({
+      client,
       createIdentifiers: mockCreateIdentifiers,
       upsertHalIdentifiers: mockUpsertHalIdentifiers,
       upsertAuthenticatedOrcidIdentifier: mockUpsertAuthenticatedOrcid,
@@ -39,22 +43,29 @@ jest.mock('@/lib/daos/PersonDAO', () => {
       deleteIdentifier: mockDeleteIdentifier,
       isAnyIdentifierHeldByAnotherPerson:
         mockIsAnyIdentifierHeldByAnotherPerson,
+      markIdentifiersValidated: mockMarkIdentifiersValidated,
+      markPersonValidated: mockMarkPersonValidated,
+      fetchPersonByUid: mockFetchPersonByUid,
     })),
   }
 })
 
 jest.mock('@/lib/daos/ActionDAO', () => ({
-  ActionDAO: jest.fn().mockImplementation(() => ({
-    createActions: async (actions: unknown[]) => {
-      for (const action of actions) await mockCreateAction(action)
+  ActionDAO: jest.fn().mockImplementation((client) => ({
+    client,
+    createAction: mockCreateAction,
+    async createActions(this: { createAction: jest.Mock }, actions: unknown[]) {
+      for (const action of actions) await this.createAction(action)
     },
   })),
 }))
 
-// Run the transaction callback against a stand-in client: the DAOs are mocked
+// Stand-in transaction client, to tell the DAOs built in a transaction from
+// the service's own
+const mockTx = { transactionClient: true }
 jest.mock('@/lib/daos/transaction', () => ({
   runInTransaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>) =>
-    fn({}),
+    fn(mockTx),
   ),
 }))
 
@@ -80,6 +91,14 @@ const recordedActions = () =>
     action.actionType,
     action.parameters,
   ])
+
+/** Every call of `method` went through a DAO built with the transaction client */
+const expectCalledInTransaction = (method: jest.Mock) => {
+  expect(method).toHaveBeenCalled()
+  for (const dao of method.mock.contexts) {
+    expect((dao as { client: unknown }).client).toBe(mockTx)
+  }
+}
 
 describe('PersonService identifier operations', () => {
   let service: PersonService
@@ -493,6 +512,78 @@ describe('PersonService identifier operations', () => {
         [ActionType.REMOVE, { type: 'idhals', value: 'john-doe' }],
         [ActionType.REMOVE, { type: 'idhali', value: '12345' }],
       ])
+    })
+  })
+  describe('writes and the reads they depend on go through DAOs built in the transaction', () => {
+    const idref = () =>
+      new PersonIdentifier(PersonIdentifierType.idref, '123456789')
+
+    it('addIdentifier', async () => {
+      await service.addIdentifier('p1', idref())
+      expectCalledInTransaction(mockCreateIdentifiers)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('addIdentifier (idHAL conflict check)', async () => {
+      mockFindAuthorByIdHal.mockResolvedValue(null)
+      await service.addIdentifier(
+        'p1',
+        new PersonIdentifier(PersonIdentifierType.idhals, 'john-doe'),
+      )
+      expectCalledInTransaction(mockIsAnyIdentifierHeldByAnotherPerson)
+      expectCalledInTransaction(mockCreateIdentifiers)
+    })
+
+    it('authenticateOrcidIdentifier', async () => {
+      mockFindIdentifierValue.mockResolvedValue(null)
+      mockUpsertAuthenticatedOrcid.mockResolvedValue(undefined)
+      await service.authenticateOrcidIdentifier(
+        'p1',
+        new ORCIDIdentifier('0000-0002-1825-0097', orcidOauth()),
+      )
+      expectCalledInTransaction(mockFindIdentifierValue)
+      expectCalledInTransaction(mockUpsertAuthenticatedOrcid)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('authenticateHalIdentifier', async () => {
+      mockFindIdentifiers.mockResolvedValue([])
+      await service.authenticateHalIdentifier('p1', {
+        halLogin: 'jdoe',
+        forms: { idhals: 'john-doe' },
+      })
+      expectCalledInTransaction(mockIsAnyIdentifierHeldByAnotherPerson)
+      expectCalledInTransaction(mockFindIdentifiers)
+      expectCalledInTransaction(mockUpsertHalIdentifiers)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('validateIdentifier', async () => {
+      mockFindIdentifiers.mockResolvedValue([idref()])
+      await service.validateIdentifier('p1', PersonIdentifierType.idref)
+      expectCalledInTransaction(mockFindIdentifiers)
+      expectCalledInTransaction(mockMarkIdentifiersValidated)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('validateProfile', async () => {
+      mockFetchPersonByUid.mockResolvedValue({
+        getIdentifiers: () => [idref()],
+        isIdentifierAuthenticated: () => false,
+      })
+      mockMarkPersonValidated.mockResolvedValue(true)
+      await service.validateProfile('p1', null)
+      expectCalledInTransaction(mockFetchPersonByUid)
+      expectCalledInTransaction(mockMarkPersonValidated)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('removeIdentifier', async () => {
+      mockFindIdentifiers.mockResolvedValue([idref()])
+      await service.removeIdentifier('p1', PersonIdentifierType.idref)
+      expectCalledInTransaction(mockFindIdentifiers)
+      expectCalledInTransaction(mockDeleteIdentifier)
+      expectCalledInTransaction(mockCreateAction)
     })
   })
 })

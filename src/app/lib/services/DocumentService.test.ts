@@ -11,17 +11,29 @@ import { Literal } from '@/types/Literal'
 import { Contribution } from '@/types/Contribution'
 import { InternalPerson } from '@/types/InternalPerson'
 import { LocRelator } from '@/types/LocRelator'
+import { HalDepositDAO } from '@/lib/daos/HalDepositDAO'
 
 jest.mock('@/lib/daos/DocumentDAO')
 jest.mock('@/lib/daos/UserDAO')
 jest.mock('@/lib/daos/ActionDAO')
 jest.mock('@/lib/daos/ConceptDAO')
-// Run the transaction callback against a stand-in client: the DAOs are mocked
+jest.mock('@/lib/daos/HalDepositDAO')
+// Stand-in transaction client, to tell the DAOs built in a transaction from
+// the service's own
+const mockTx = { transactionClient: true }
 jest.mock('@/lib/daos/transaction', () => ({
   runInTransaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>) =>
-    fn({}),
+    fn(mockTx),
   ),
 }))
+
+/** Every call of `method` went through a DAO built with the transaction client */
+const expectCalledInTransaction = (method: jest.Mock) => {
+  expect(method).toHaveBeenCalled()
+  for (const dao of method.mock.contexts) {
+    expect((dao as { client: unknown }).client).toBe(mockTx)
+  }
+}
 
 describe('DocumentService', () => {
   let documentService: DocumentService
@@ -38,6 +50,9 @@ describe('DocumentService', () => {
   let mockCreateOrUpdateConcept: jest.Mock
   let mockMarkDocumentsWaitingForUpdate: jest.Mock
   let mockUpdateDocumentTypeByUid: jest.Mock
+  let mockUpdatePublicationDateByUid: jest.Mock
+  let mockCreateDeposit: jest.Mock
+  let mockAddFiles: jest.Mock
 
   beforeEach(() => {
     mockFetchDocuments = jest.fn()
@@ -53,7 +68,11 @@ describe('DocumentService', () => {
     mockCreateOrUpdateConcept = jest.fn()
     mockMarkDocumentsWaitingForUpdate = jest.fn()
     mockUpdateDocumentTypeByUid = jest.fn()
-    ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
+    mockUpdatePublicationDateByUid = jest.fn()
+    mockCreateDeposit = jest.fn()
+    mockAddFiles = jest.fn()
+    ;(DocumentDAO as jest.Mock).mockImplementation((client) => ({
+      client,
       fetchDocuments: mockFetchDocuments,
       fetchOAYearDocuments: mockFetchOAYearDocuments,
       fetchOldestPublicationYear: mockFetchOldestPublicationYear,
@@ -65,20 +84,31 @@ describe('DocumentService', () => {
       countDocuments: mockCountDocuments,
       markDocumentsWaitingForUpdate: mockMarkDocumentsWaitingForUpdate,
       updateDocumentTypeByUid: mockUpdateDocumentTypeByUid,
+      updatePublicationDateByUid: mockUpdatePublicationDateByUid,
     }))
     ;(UserDAO as jest.Mock).mockImplementation(() => ({
       getUserByIdentifier: jest.fn().mockResolvedValue({
         person: { uid: 'local-123' },
       }),
     }))
-    ;(ActionDAO as jest.Mock).mockImplementation(() => ({
+    ;(ActionDAO as jest.Mock).mockImplementation((client) => ({
+      client,
       createAction: mockCreateAction,
-      createActions: async (actions: unknown[]) => {
-        for (const action of actions) await mockCreateAction(action)
+      async createActions(
+        this: { createAction: jest.Mock },
+        actions: unknown[],
+      ) {
+        for (const action of actions) await this.createAction(action)
       },
     }))
-    ;(ConceptDAO as jest.Mock).mockImplementation(() => ({
+    ;(ConceptDAO as jest.Mock).mockImplementation((client) => ({
+      client,
       createOrUpdateConcept: mockCreateOrUpdateConcept,
+    }))
+    ;(HalDepositDAO as jest.Mock).mockImplementation((client) => ({
+      client,
+      createDeposit: mockCreateDeposit,
+      addFiles: mockAddFiles,
     }))
 
     documentService = new DocumentService()
@@ -1326,6 +1356,91 @@ describe('DocumentService', () => {
       await expect(
         documentService.saveContributions('doc-1', contributions, 'ghost'),
       ).rejects.toThrow('Error saving contributions')
+    })
+  })
+  describe('writes go through DAOs built in the transaction', () => {
+    const document = { uid: 'doc-1' } as Document
+
+    it('saveContributions', async () => {
+      await documentService.saveContributions('doc-1', [], 'user-1234')
+      expectCalledInTransaction(mockCreateAction)
+      expectCalledInTransaction(mockMarkDocumentsWaitingForUpdate)
+    })
+
+    it('deleteConceptsFromDocument', async () => {
+      await documentService.deleteConceptsFromDocument(
+        'doc-1',
+        ['c1'],
+        'user-1234',
+      )
+      expectCalledInTransaction(mockDeleteConceptsFromDocument)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('addConceptsToDocument', async () => {
+      await documentService.addConceptsToDocument(
+        'doc-1',
+        [{ uid: 'c1', uri: null, prefLabels: [], altLabels: [] }],
+        'user-1234',
+      )
+      expectCalledInTransaction(mockCreateOrUpdateConcept)
+      expectCalledInTransaction(mockAddConceptsToDocument)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('modifyTitles', async () => {
+      mockModifyTitles.mockResolvedValue([new Literal('Old', 'en')])
+      await documentService.modifyTitles(
+        document,
+        [{ language: 'en', value: 'New' }],
+        'user-1234',
+      )
+      expectCalledInTransaction(mockModifyTitles)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('modifyAbstracts', async () => {
+      mockModifyAbstracts.mockResolvedValue([new Literal('Old', 'en')])
+      await documentService.modifyAbstracts(
+        document,
+        [{ language: 'en', value: 'New' }],
+        'user-1234',
+      )
+      expectCalledInTransaction(mockModifyAbstracts)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('mergeDocuments', async () => {
+      mockMarkDocumentsWaitingForUpdate.mockResolvedValue([])
+      await documentService.mergeDocuments(['d1', 'd2'], 'user-1234')
+      expectCalledInTransaction(mockMarkDocumentsWaitingForUpdate)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('updateDocumentType', async () => {
+      await documentService.updateDocumentType(
+        'doc-1',
+        DocumentType.Book,
+        'user-1234',
+      )
+      expectCalledInTransaction(mockUpdateDocumentTypeByUid)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('updatePublicationDate', async () => {
+      await documentService.updatePublicationDate('doc-1', '2024', 'user-1234')
+      expectCalledInTransaction(mockUpdatePublicationDateByUid)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('createHalDepositWithFiles', async () => {
+      mockCreateDeposit.mockResolvedValue({ id: 1 })
+      await documentService.createHalDepositWithFiles(
+        {} as Parameters<DocumentService['createHalDepositWithFiles']>[0],
+        [],
+      )
+      expectCalledInTransaction(mockCreateDeposit)
+      expectCalledInTransaction(mockAddFiles)
     })
   })
 })
