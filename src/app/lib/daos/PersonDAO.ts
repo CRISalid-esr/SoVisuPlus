@@ -13,7 +13,7 @@ import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
-import { AbstractDAO } from '@/lib/daos/AbstractDAO'
+import { AbstractDAO, DbClient } from '@/lib/daos/AbstractDAO'
 import { identifiersWithOrcidGrantInclude } from '@/lib/daos/personIncludes'
 import {
   isUniqueConstraintError,
@@ -364,7 +364,8 @@ export class PersonDAO extends AbstractDAO {
       resolved.push({ unitId: dbOrganizationUnit.id, membership })
     }
 
-    const write = async (tx: Prisma.TransactionClient) => {
+    // A transaction client in replace mode, the bound client otherwise
+    const write = async (tx: DbClient) => {
       if (replace) {
         await tx.membership.deleteMany({
           where: {
@@ -435,7 +436,8 @@ export class PersonDAO extends AbstractDAO {
       resolved.push({ unitId: dbOrganizationUnit.id, employment })
     }
 
-    const write = async (tx: Prisma.TransactionClient) => {
+    // A transaction client in replace mode, the bound client otherwise
+    const write = async (tx: DbClient) => {
       if (replace) {
         await tx.employment.deleteMany({
           where: {

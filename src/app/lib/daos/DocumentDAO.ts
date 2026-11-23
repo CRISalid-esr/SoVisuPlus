@@ -1400,12 +1400,10 @@ export class DocumentDAO extends AbstractDAO {
         data: { subjects: { set: [] } },
       })
 
-      await Promise.all([
-        tx.documentRecord.deleteMany({ where: { documentId: doc.id } }),
-        tx.contribution.deleteMany({ where: { documentId: doc.id } }),
-        tx.documentTitle.deleteMany({ where: { documentId: doc.id } }),
-        tx.documentAbstract.deleteMany({ where: { documentId: doc.id } }),
-      ])
+      await tx.documentRecord.deleteMany({ where: { documentId: doc.id } })
+      await tx.contribution.deleteMany({ where: { documentId: doc.id } })
+      await tx.documentTitle.deleteMany({ where: { documentId: doc.id } })
+      await tx.documentAbstract.deleteMany({ where: { documentId: doc.id } })
 
       await tx.document.delete({ where: { id: doc.id } })
     })
