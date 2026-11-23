@@ -212,12 +212,11 @@ describe('DocumentService Integration Tests', () => {
     test('modifyTitles keeps the old titles when the action fails', async () => {
       const userName = await createUser()
       await createDocument('doc-atomic-titles')
-      const document = await service.fetchDocumentById('doc-atomic-titles')
       failActionCreation()
 
       await expect(
         service.modifyTitles(
-          document!,
+          'doc-atomic-titles',
           [{ language: 'en', value: 'New title' }],
           userName,
         ),

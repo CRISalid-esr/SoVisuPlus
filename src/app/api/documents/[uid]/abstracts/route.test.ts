@@ -137,7 +137,7 @@ describe('PUT /api/documents/[uid]/abstracts', () => {
     expect(await response.json()).toEqual({ success: true })
 
     expect(modifyAbstracts).toHaveBeenCalledWith(
-      document,
+      'doc-123',
       [
         { language: 'es', value: 'El nuevo abstract' },
         { language: 'fr', value: 'Le nouveau abstract' },

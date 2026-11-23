@@ -1,16 +1,12 @@
 import { DocumentService } from '@/lib/services/DocumentService'
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { AgentType } from '@/types/IAgent'
-import { Document, DocumentType } from '@/types/Document'
+import { DocumentType } from '@/types/Document'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import { Concept } from '@/types/Concept'
-import { OAStatus } from '@prisma/client'
 import { Literal } from '@/types/Literal'
-import { Contribution } from '@/types/Contribution'
-import { InternalPerson } from '@/types/InternalPerson'
-import { LocRelator } from '@/types/LocRelator'
 import { HalDepositDAO } from '@/lib/daos/HalDepositDAO'
 
 jest.mock('@/lib/daos/DocumentDAO')
@@ -608,38 +604,9 @@ describe('DocumentService', () => {
   it('should call modifyTitles with correct arguments', async () => {
     mockModifyTitles.mockResolvedValue([])
 
-    const mockDocument: Document = new Document(
-      'doc-123',
-      DocumentType.Document,
-      OAStatus.GREEN,
-      '2022',
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-12-31T23:59:59.000Z'),
-      OAStatus.GREEN,
-      [
-        new Literal('Sample Document Title', 'en'),
-        new Literal('Sample Second Title', 'fr'),
-      ],
-      [new Literal('Sample Abstract', 'fr')],
-      [], // empty subjects
-      [
-        new Contribution(
-          new InternalPerson(
-            'user-1234',
-            null,
-            'user-1234',
-            'First',
-            'Last',
-            [],
-          ),
-          [LocRelator.AUTHOR],
-        ),
-      ],
-    )
-
     await expect(
       documentService.modifyTitles(
-        mockDocument,
+        'doc-123',
         [
           { language: 'es', value: 'El nuevo titulo' },
           { language: 'fr', value: 'Le nouveau titre' },
@@ -657,38 +624,9 @@ describe('DocumentService', () => {
   it('should throw an error when modifyTitles fails', async () => {
     mockModifyTitles.mockRejectedValue(new Error('DB error'))
 
-    const mockDocument: Document = new Document(
-      'doc-123',
-      DocumentType.Document,
-      OAStatus.GREEN,
-      '2022',
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-12-31T23:59:59.000Z'),
-      OAStatus.GREEN,
-      [
-        new Literal('Sample Document Title', 'en'),
-        new Literal('Sample Second Title', 'fr'),
-      ],
-      [new Literal('Sample Abstract', 'fr')],
-      [], // empty subjects
-      [
-        new Contribution(
-          new InternalPerson(
-            'user-1234',
-            null,
-            'user-1234',
-            'First',
-            'Last',
-            [],
-          ),
-          [LocRelator.AUTHOR],
-        ),
-      ],
-    )
-
     await expect(
       documentService.modifyTitles(
-        mockDocument,
+        'doc-123',
         [
           { language: 'es', value: 'El nuevo titulo' },
           { language: 'fr', value: 'Le nouveau titre' },
@@ -709,38 +647,9 @@ describe('DocumentService', () => {
       new Literal('Sample Second Title', 'fr'),
     ])
 
-    const mockDocument: Document = new Document(
-      'doc-123',
-      DocumentType.Document,
-      OAStatus.GREEN,
-      '2022',
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-12-31T23:59:59.000Z'),
-      OAStatus.GREEN,
-      [
-        new Literal('Sample Document Title', 'en'),
-        new Literal('Sample Second Title', 'fr'),
-      ],
-      [new Literal('Sample Abstract', 'fr')],
-      [], // empty subjects
-      [
-        new Contribution(
-          new InternalPerson(
-            'user-1234',
-            null,
-            'user-1234',
-            'First',
-            'Last',
-            [],
-          ),
-          [LocRelator.AUTHOR],
-        ),
-      ],
-    )
-
     await expect(
       documentService.modifyTitles(
-        mockDocument,
+        'doc-123',
         [
           { language: 'es', value: 'El nuevo titulo' },
           { language: 'fr', value: 'Le nouveau titre' },
@@ -795,37 +704,8 @@ describe('DocumentService', () => {
     // Another edit changed the titles after the caller read the document
     mockModifyTitles.mockResolvedValue([new Literal('Concurrent title', 'en')])
 
-    const mockDocument: Document = new Document(
-      'doc-123',
-      DocumentType.Document,
-      OAStatus.GREEN,
-      '2022',
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-12-31T23:59:59.000Z'),
-      OAStatus.GREEN,
-      [
-        new Literal('Sample Document Title', 'en'),
-        new Literal('Sample Second Title', 'fr'),
-      ],
-      [new Literal('Sample Abstract', 'fr')],
-      [], // empty subjects
-      [
-        new Contribution(
-          new InternalPerson(
-            'user-1234',
-            null,
-            'user-1234',
-            'First',
-            'Last',
-            [],
-          ),
-          [LocRelator.AUTHOR],
-        ),
-      ],
-    )
-
     await documentService.modifyTitles(
-      mockDocument,
+      'doc-123',
       [{ language: 'es', value: 'El nuevo titulo' }],
       'user-1234',
     )
@@ -842,38 +722,9 @@ describe('DocumentService', () => {
   it('should call modifyAbstracts with correct arguments', async () => {
     mockModifyAbstracts.mockResolvedValue([])
 
-    const mockDocument: Document = new Document(
-      'doc-123',
-      DocumentType.Document,
-      OAStatus.GREEN,
-      '2022',
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-12-31T23:59:59.000Z'),
-      OAStatus.GREEN,
-      [
-        new Literal('Sample Document Title', 'en'),
-        new Literal('Sample Second Title', 'fr'),
-      ],
-      [new Literal('Sample Abstract', 'fr')],
-      [], // empty subjects
-      [
-        new Contribution(
-          new InternalPerson(
-            'user-1234',
-            null,
-            'user-1234',
-            'First',
-            'Last',
-            [],
-          ),
-          [LocRelator.AUTHOR],
-        ),
-      ],
-    )
-
     await expect(
       documentService.modifyAbstracts(
-        mockDocument,
+        'doc-123',
         [
           { language: 'es', value: 'El nuevo abstract' },
           { language: 'fr', value: 'Le nouveau abstract' },
@@ -891,38 +742,9 @@ describe('DocumentService', () => {
   it('should throw an error when modifyTitles fails', async () => {
     mockModifyAbstracts.mockRejectedValue(new Error('DB error'))
 
-    const mockDocument: Document = new Document(
-      'doc-123',
-      DocumentType.Document,
-      OAStatus.GREEN,
-      '2022',
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-12-31T23:59:59.000Z'),
-      OAStatus.GREEN,
-      [
-        new Literal('Sample Document Title', 'en'),
-        new Literal('Sample Second Title', 'fr'),
-      ],
-      [new Literal('Sample Abstract', 'fr')],
-      [], // empty subjects
-      [
-        new Contribution(
-          new InternalPerson(
-            'user-1234',
-            null,
-            'user-1234',
-            'First',
-            'Last',
-            [],
-          ),
-          [LocRelator.AUTHOR],
-        ),
-      ],
-    )
-
     await expect(
       documentService.modifyAbstracts(
-        mockDocument,
+        'doc-123',
         [
           { language: 'es', value: 'El nuevo abstract' },
           { language: 'fr', value: 'Le nouveau abstract' },
@@ -942,38 +764,9 @@ describe('DocumentService', () => {
       new Literal('Sample Abstract', 'fr'),
     ])
 
-    const mockDocument: Document = new Document(
-      'doc-123',
-      DocumentType.Document,
-      OAStatus.GREEN,
-      '2022',
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-12-31T23:59:59.000Z'),
-      OAStatus.GREEN,
-      [
-        new Literal('Sample Document Title', 'en'),
-        new Literal('Sample Second Title', 'fr'),
-      ],
-      [new Literal('Sample Abstract', 'fr')],
-      [], // empty subjects
-      [
-        new Contribution(
-          new InternalPerson(
-            'user-1234',
-            null,
-            'user-1234',
-            'First',
-            'Last',
-            [],
-          ),
-          [LocRelator.AUTHOR],
-        ),
-      ],
-    )
-
     await expect(
       documentService.modifyAbstracts(
-        mockDocument,
+        'doc-123',
         [
           { language: 'es', value: 'El nuevo abstract' },
           { language: 'fr', value: 'Le nouveau abstract' },
@@ -1359,8 +1152,6 @@ describe('DocumentService', () => {
     })
   })
   describe('writes go through DAOs built in the transaction', () => {
-    const document = { uid: 'doc-1' } as Document
-
     it('saveContributions', async () => {
       await documentService.saveContributions('doc-1', [], 'user-1234')
       expectCalledInTransaction(mockCreateAction)
@@ -1391,7 +1182,7 @@ describe('DocumentService', () => {
     it('modifyTitles', async () => {
       mockModifyTitles.mockResolvedValue([new Literal('Old', 'en')])
       await documentService.modifyTitles(
-        document,
+        'doc-1',
         [{ language: 'en', value: 'New' }],
         'user-1234',
       )
@@ -1402,7 +1193,7 @@ describe('DocumentService', () => {
     it('modifyAbstracts', async () => {
       mockModifyAbstracts.mockResolvedValue([new Literal('Old', 'en')])
       await documentService.modifyAbstracts(
-        document,
+        'doc-1',
         [{ language: 'en', value: 'New' }],
         'user-1234',
       )

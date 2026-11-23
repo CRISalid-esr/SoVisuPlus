@@ -9,7 +9,7 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { DocumentTypeService } from '@/lib/services/DocumentTypeService'
-import { DocumentType, Document } from '@/types/Document'
+import { DocumentType } from '@/types/Document'
 import { Concept, ConceptJson } from '@/types/Concept'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import {
@@ -392,7 +392,7 @@ export class DocumentService {
   }
 
   async modifyTitles(
-    document: Document,
+    documentUid: string,
     titles: LiteralJson[],
     userName: string,
   ): Promise<void> {
@@ -411,13 +411,13 @@ export class DocumentService {
         // The REMOVE actions announce the titles actually replaced, read in the
         // transaction, not those the caller read before
         const replaced = await new DocumentDAO(tx).modifyTitles(
-          document.uid,
+          documentUid,
           convertedTitles,
         )
         const titleAction = (actionType: ActionType, title: Literal) => ({
           actionType,
           targetType: ActionTargetType.DOCUMENT,
-          targetUid: document.uid,
+          targetUid: documentUid,
           path: 'titles',
           parameters: JSON.stringify(title),
           personUid,
@@ -435,7 +435,7 @@ export class DocumentService {
   }
 
   async modifyAbstracts(
-    document: Document,
+    documentUid: string,
     abstracts: LiteralJson[],
     userName: string,
   ): Promise<void> {
@@ -456,13 +456,13 @@ export class DocumentService {
         // The REMOVE actions announce the abstracts actually replaced, read in
         // the transaction, not those the caller read before
         const replaced = await new DocumentDAO(tx).modifyAbstracts(
-          document.uid,
+          documentUid,
           convertedAbstracts,
         )
         const abstractAction = (actionType: ActionType, abstract: Literal) => ({
           actionType,
           targetType: ActionTargetType.DOCUMENT,
-          targetUid: document.uid,
+          targetUid: documentUid,
           path: 'abstracts',
           parameters: JSON.stringify(abstract),
           personUid,

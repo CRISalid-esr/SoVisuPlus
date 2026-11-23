@@ -50,7 +50,7 @@ export const PUT = async (
         { status: 403 },
       )
     }
-    await documentService.modifyAbstracts(document, abstracts, userName)
+    await documentService.modifyAbstracts(uid, abstracts, userName)
 
     return NextResponse.json({ success: true })
   } catch (error) {
