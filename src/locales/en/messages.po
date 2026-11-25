@@ -2705,6 +2705,10 @@ msgstr "Public scientific and technological institution (EPST)"
 msgid "organization_national_type_fac"
 msgstr "Faculty"
 
+#: src/app/[lang]/components/organizationTypeLabels.ts:23
+msgid "organization_national_type_fdr"
+msgstr "Research federation (FDR)"
+
 #: src/app/[lang]/components/organizationTypeLabels.ts:15
 msgid "organization_national_type_ge"
 msgstr "Grand établissement"

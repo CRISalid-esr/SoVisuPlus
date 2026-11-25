@@ -200,8 +200,36 @@ describe('groupOf', () => {
     ).toBe('other')
   })
 
-  it('lets the first matching condition win', () => {
-    // UFR outranks the category, whatever that category would have given.
+  it('files UFR/FAC/FDR subdivisions under teaching and research', () => {
+    // UFR/FAC/FDR are institution subdivisions upstream, which would otherwise land in 'other'.
+    expect(
+      groupOf({
+        category: OrganizationCategory.institution_subdivision,
+        nationalType: 'UFR',
+      }),
+    ).toBe('teaching_research')
+    expect(
+      groupOf({
+        category: OrganizationCategory.institution_subdivision,
+        nationalType: 'ufr',
+      }),
+    ).toBe('teaching_research')
+    expect(
+      groupOf({
+        category: OrganizationCategory.institution_subdivision,
+        nationalType: 'FAC',
+      }),
+    ).toBe('teaching_research')
+    expect(
+      groupOf({
+        category: OrganizationCategory.institution_subdivision,
+        nationalType: 'fdr',
+      }),
+    ).toBe('teaching_research')
+  })
+
+  it('lets the national type outrank the category', () => {
+    // Combinations not produced upstream today: guards the evaluation order.
     expect(
       groupOf({
         category: OrganizationCategory.support_unit,
@@ -211,7 +239,7 @@ describe('groupOf', () => {
     expect(
       groupOf({
         category: OrganizationCategory.administrative_unit,
-        nationalType: 'ufr',
+        nationalType: 'FDR',
       }),
     ).toBe('teaching_research')
   })

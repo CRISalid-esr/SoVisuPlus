@@ -188,12 +188,14 @@ Nothing in the pipeline sorted anything before: sibling order was raw Postgres r
   Conditions are evaluated in order and the first match wins, so a structure appears exactly
   once. Empty groups are dropped.
 
-  | Order | Key                 | Matches                                                                    | fr                        | en                    |
-  | ----- | ------------------- | -------------------------------------------------------------------------- | ------------------------- | --------------------- |
-  | 1     | `teaching_research` | `nationalType === 'UFR'` **or** `category ∈ {teaching_unit, research_unit}` | Enseignement et recherche | Teaching and research |
-  | 2     | `libraries`         | `category === support_unit`                                                | Bibliothèques             | Libraries             |
-  | 3     | `general_services`  | `category === administrative_unit`                                         | Services centraux         | General services      |
-  | 4     | `other`             | everything else                                                            | Autres                    | Other                 |
+  | Order | Key                 | Matches                                                                                    | fr                        | en                    |
+  | ----- | ------------------- | ------------------------------------------------------------------------------------------ | ------------------------- | --------------------- |
+  | 1     | `teaching_research` | `nationalType ∈ {UFR, FAC, FDR}` **or** `category ∈ {teaching_unit, research_unit}`        | Enseignement et recherche | Teaching and research |
+  | 2     | `libraries`         | `category === support_unit`                                                                | Bibliothèques             | Libraries             |
+  | 3     | `general_services`  | `category === administrative_unit`                                                         | Services centraux         | General services      |
+  | 4     | `other`             | everything else                                                                            | Autres                    | Other                 |
+
+  `nationalType` is compared case-insensitively.
 
   Consequence of the rule as stated: `doctoral_school`, `institution_subdivision`,
   `unit_subdivision`, `team` and nested `institution` children of an institution land in

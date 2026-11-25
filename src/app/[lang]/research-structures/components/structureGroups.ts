@@ -36,6 +36,9 @@ export const groupNodeId = (
 export const isGroupNodeId = (nodeId: string): boolean =>
   nodeId.startsWith(`${STRUCTURE_GROUP_PREFIX}:`)
 
+/** National types always filed under teaching & research, whatever the category. */
+const TEACHING_RESEARCH_NATIONAL_TYPES = new Set(['UFR', 'FAC', 'FDR'])
+
 /**
  * Bucket a structure. Conditions are evaluated in order and the first match
  * wins, so a structure always appears in exactly one group.
@@ -48,7 +51,9 @@ export const groupOf = (row: {
   nationalType: string | null
 }): StructureGroupKey => {
   if (
-    row.nationalType?.toUpperCase() === 'UFR' ||
+    TEACHING_RESEARCH_NATIONAL_TYPES.has(
+      row.nationalType?.toUpperCase() ?? '',
+    ) ||
     row.category === OrganizationCategory.teaching_unit ||
     row.category === OrganizationCategory.research_unit
   ) {
