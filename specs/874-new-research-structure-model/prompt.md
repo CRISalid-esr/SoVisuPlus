@@ -463,7 +463,8 @@ Slug generation: keep the current collision-retry mechanism, with a single
   catalog. `organizationTypeLabels.ts` holds one static Lingui `msg` entry
   per known code (the extractor cannot see dynamic ids); unknown codes —
   the national list evolves upstream — fall back to the raw code until a
-  translation is added.
+  translation is added. The lookup is case-insensitive (the code is
+  free-form upstream), consistent with the tree grouping.
 - `IAgent.ts`: `AgentType` becomes the five perspective groups:
 
   ```ts

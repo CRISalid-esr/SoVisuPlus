@@ -20,13 +20,15 @@ const NATIONAL_TYPE_LABELS: Record<string, MessageDescriptor> = {
   IRL: msg`organization_national_type_irl`,
   UFR: msg`organization_national_type_ufr`,
   FAC: msg`organization_national_type_fac`,
+  FDR: msg`organization_national_type_fdr`,
   ED: msg`organization_national_type_ed`,
   TEAM: msg`organization_national_type_team`,
   THEME: msg`organization_national_type_theme`,
 }
 
 /**
- * Translate a national organization type code for display.
+ * Translate a national organization type code for display. The lookup is
+ * case-insensitive, like `groupOf`, since the code is free-form upstream.
  * @returns the translated label, the raw code for unknown values, or null
  */
 export const nationalTypeLabel = (
@@ -36,6 +38,6 @@ export const nationalTypeLabel = (
   if (!code) {
     return null
   }
-  const descriptor = NATIONAL_TYPE_LABELS[code]
+  const descriptor = NATIONAL_TYPE_LABELS[code.toUpperCase()]
   return descriptor ? i18n._(descriptor) : code
 }
