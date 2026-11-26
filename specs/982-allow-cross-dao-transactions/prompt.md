@@ -8,9 +8,11 @@ Prisma singleton by `AbstractDAO`, and the only transactions in the codebase are
 to a single DAO method. A crash between the two writes leaves a change that is never
 forwarded to the graph, or an `Action` whose underlying change was never persisted.
 
-The person-identifier flows work around this inside the DAO: `PersonDAO` methods take
-the `Action`s to record as a parameter and write them in their own transaction
-(`recordActions`). That only works when one DAO method owns the whole write.
+The person-identifier flows worked around this inside the DAO: `PersonDAO` methods took
+the `Action`s to record as a parameter and wrote them in their own transaction
+(`recordActions`). That only works when one DAO method owns the whole write. This
+workaround was removed when the mechanism was adopted (see
+[`fix-across-dao-transaction`](../fix-across-dao-transaction/prompt.md)).
 
 This feature lets a service run several DAO calls, across several DAOs, in one database
 transaction, without breaking the rule that services never use Prisma directly.
@@ -30,11 +32,9 @@ transaction, without breaking the rule that services never use Prisma directly.
 - **Out of scope** (follow-up branch): adopting `runInTransaction`. Writes are grouped
   in one transaction only when one makes no sense without the other: an `Action`
   without the change it announces (or the reverse), or a partial write granting
-  unwarranted rights. Planned consumers: the `DocumentService` flows pairing a document
-  write with `createAction`, `RoleService.assignRoleToUser` (a `UserRole` without its
-  scope is a global role), `RoleDAO.setRolePermissions`, and the `PersonService`
-  identifier flows (moving `Action` creation back to `ActionDAO` and dropping
-  `recordActions`).
+  unwarranted rights. Done in
+  [`fix-across-dao-transaction`](../fix-across-dao-transaction/prompt.md), which lists
+  the migrated flows.
 
 ## Design
 

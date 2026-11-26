@@ -10,6 +10,7 @@ import { employeeTypeLabel } from '@/lib/employeeTypes'
 import { createFuzzyScorer } from '@/utils/fuzzySearch/fuzzySearch'
 import { OrganizationDirectoryEntry } from '@/types/OrganizationDirectory'
 import { computeEffectiveHidden } from '@/lib/services/organizationVisibility'
+import { runInTransaction } from '@/lib/daos/transaction'
 import { Literal } from '@/types/Literal'
 import { AuthzContext } from '@/types/authz'
 import { PermissionAction } from '@/types/Permission'
@@ -113,12 +114,17 @@ export class OrganizationUnitService {
    * back. Called after a visibility toggle and after every ETL structure
    * upsert or deletion, since both change the parent relationships the
    * cascade is derived from.
+   *
+   * @param organizationUnitDAO - DAO to read and write through; pass one bound
+   *   to an open transaction to join it
    */
-  async recomputeEffectiveHidden(): Promise<void> {
+  async recomputeEffectiveHidden(
+    organizationUnitDAO: OrganizationUnitDAO = this.organizationUnitDAO,
+  ): Promise<void> {
     const { units, relations } =
-      await this.organizationUnitDAO.fetchVisibilityGraph()
+      await organizationUnitDAO.fetchVisibilityGraph()
     const hidden = computeEffectiveHidden(units, relations)
-    await this.organizationUnitDAO.applyEffectiveHidden([...hidden])
+    await organizationUnitDAO.applyEffectiveHidden([...hidden])
   }
 
   /** Both visibility flags of a single structure, or null when unknown. */
@@ -140,11 +146,18 @@ export class OrganizationUnitService {
     hidden: boolean
     hiddenEffective: boolean
   } | null> {
-    const exists = await this.organizationUnitDAO.setHidden(uid, hidden)
+    // The flag and the cascade it drives are written together
+    const exists = await runInTransaction(async (tx) => {
+      const organizationUnitDAO = new OrganizationUnitDAO(tx)
+      const exists = await organizationUnitDAO.setHidden(uid, hidden)
+      if (exists) {
+        await this.recomputeEffectiveHidden(organizationUnitDAO)
+      }
+      return exists
+    })
     if (!exists) {
       return null
     }
-    await this.recomputeEffectiveHidden()
     return this.organizationUnitDAO.fetchVisibilityState(uid)
   }
 

@@ -13,8 +13,7 @@ import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
-import { AbstractDAO } from '@/lib/daos/AbstractDAO'
-import { CreateActionParams } from '@/lib/daos/ActionDAO'
+import { AbstractDAO, DbClient } from '@/lib/daos/AbstractDAO'
 import { identifiersWithOrcidGrantInclude } from '@/lib/daos/personIncludes'
 import {
   isUniqueConstraintError,
@@ -77,16 +76,6 @@ const personDetailInclude = {
 const LOCAL_ONLY_IDENTIFIER_TYPES: PersonIdentifierType[] = [
   PersonIdentifierType.hal_login,
 ]
-
-/** Record outgoing actions inside a transaction, next to the change they announce. */
-const recordActions = async (
-  tx: Prisma.TransactionClient,
-  actions: CreateActionParams[],
-): Promise<void> => {
-  for (const action of actions) {
-    await tx.action.create({ data: { path: null, ...action } })
-  }
-}
 
 export class IdentifierConflictError extends Error {
   constructor(
@@ -375,7 +364,8 @@ export class PersonDAO extends AbstractDAO {
       resolved.push({ unitId: dbOrganizationUnit.id, membership })
     }
 
-    const write = async (tx: Prisma.TransactionClient) => {
+    // A transaction client in replace mode, the bound client otherwise
+    const write = async (tx: DbClient) => {
       if (replace) {
         await tx.membership.deleteMany({
           where: {
@@ -446,7 +436,8 @@ export class PersonDAO extends AbstractDAO {
       resolved.push({ unitId: dbOrganizationUnit.id, employment })
     }
 
-    const write = async (tx: Prisma.TransactionClient) => {
+    // A transaction client in replace mode, the bound client otherwise
+    const write = async (tx: DbClient) => {
       if (replace) {
         await tx.employment.deleteMany({
           where: {
@@ -697,13 +688,11 @@ export class PersonDAO extends AbstractDAO {
    * @param personUid - The UID of the person
    * @param idHals - The idHAL forms of the account (idhals and/or idhali)
    * @param halLogin - The HAL account login
-   * @param actions - Outgoing actions recorded in the same transaction
    */
   public async upsertHalIdentifiers(
     personUid: string,
     idHals: PersonIdentifier[],
     halLogin: string,
-    actions: CreateActionParams[] = [],
   ): Promise<void> {
     if (idHals.length === 0) {
       throw new Error('upsertHalIdentifiers called without any idHAL')
@@ -743,7 +732,6 @@ export class PersonDAO extends AbstractDAO {
             },
           })
         }
-        await recordActions(tx, actions)
       })
     } catch (error) {
       if (isUniqueConstraintError(error)) {
@@ -760,12 +748,11 @@ export class PersonDAO extends AbstractDAO {
    * {@link upsertIdentifier} this never overwrites an existing value: identifier
    * changes are handled as remove-then-add. Throws {@link IdentifierConflictError}
    * when a row of one of the types already exists for the person, or a value is
-   * already used elsewhere. The actions are recorded in the same transaction.
+   * already used elsewhere.
    */
   public async createIdentifiers(
     identifiers: PersonIdentifier[],
     personUid: string,
-    actions: CreateActionParams[] = [],
   ): Promise<void> {
     const person = await this.prismaClient.person.findUnique({
       where: { uid: personUid },
@@ -776,16 +763,13 @@ export class PersonDAO extends AbstractDAO {
     }
 
     try {
-      await this.transaction(async (tx) => {
-        await tx.personIdentifier.createMany({
-          data: identifiers.map((identifier) => ({
-            personId: person.id,
-            type: identifier.type as PersonIdentifierType,
-            value: identifier.value,
-            validated: identifier.validated,
-          })),
-        })
-        await recordActions(tx, actions)
+      await this.prismaClient.personIdentifier.createMany({
+        data: identifiers.map((identifier) => ({
+          personId: person.id,
+          type: identifier.type as PersonIdentifierType,
+          value: identifier.value,
+          validated: identifier.validated,
+        })),
       })
     } catch (error) {
       if (isUniqueConstraintError(error)) {
@@ -854,37 +838,29 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Mark a person's identifiers of the given types as validated. The actions
-   * are recorded in the same transaction so a flag is never set without its
-   * outgoing message.
+   * Mark a person's identifiers of the given types as validated.
    * @returns whether an identifier row was updated
    */
   public async markIdentifiersValidated(
     personUid: string,
     types: PersonIdentifierType[],
-    actions: CreateActionParams[] = [],
   ): Promise<boolean> {
-    return this.transaction(async (tx) => {
-      const { count } = await tx.personIdentifier.updateMany({
-        where: { person: { uid: personUid }, type: { in: types } },
-        data: { validated: true },
-      })
-      await recordActions(tx, actions)
-      return count > 0
+    const { count } = await this.prismaClient.personIdentifier.updateMany({
+      where: { person: { uid: personUid }, type: { in: types } },
+      data: { validated: true },
     })
+    return count > 0
   }
 
   /**
    * Mark a person's profile as validated (with the date and the validator's
-   * person uid), along with the given identifiers, and record the actions in
-   * the same transaction. Returns false, changing nothing, when the profile
-   * already was validated.
+   * person uid), along with the given identifiers, in one transaction.
+   * Returns false, changing nothing, when the profile already was validated.
    */
   public async markPersonValidated(
     personUid: string,
     validatedBy: string | null,
     identifierTypes: PersonIdentifierType[] = [],
-    actions: CreateActionParams[] = [],
   ): Promise<boolean> {
     return this.transaction(async (tx) => {
       const { count } = await tx.person.updateMany({
@@ -898,7 +874,6 @@ export class PersonDAO extends AbstractDAO {
           data: { validated: true },
         })
       }
-      await recordActions(tx, actions)
       return true
     })
   }
@@ -946,14 +921,13 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Persist an authenticated ORCID in a single transaction: the identifier row,
-   * its encrypted OAuth extension and the outgoing actions. Throws
+   * Persist an authenticated ORCID in a single transaction: the identifier row
+   * and its encrypted OAuth extension. Throws
    * {@link IdentifierConflictError} when another person holds the ORCID.
    */
   public async upsertAuthenticatedOrcidIdentifier(
     personUid: string,
     identifier: ORCIDIdentifier,
-    actions: CreateActionParams[] = [],
   ): Promise<void> {
     const oauth = identifier.oauth
     if (!oauth) {
@@ -1011,8 +985,6 @@ export class PersonDAO extends AbstractDAO {
           create: data,
           update: data,
         })
-
-        await recordActions(tx, actions)
       })
     } catch (error) {
       if (
@@ -1342,13 +1314,11 @@ export class PersonDAO extends AbstractDAO {
   }
 
   /**
-   * Delete a person's identifier and record the actions in the same
-   * transaction.
+   * Delete a person's identifier.
    */
   public async deleteIdentifier(
     personUid: string,
     type: PersonIdentifierType,
-    actions: CreateActionParams[] = [],
   ): Promise<void> {
     const person = await this.prismaClient.person.findUnique({
       where: { uid: personUid },
@@ -1363,11 +1333,8 @@ export class PersonDAO extends AbstractDAO {
     const types: PersonIdentifierType[] = isIdHalType(type)
       ? [...ID_HAL_TYPES, PersonIdentifierType.hal_login]
       : [type]
-    await this.transaction(async (tx) => {
-      await tx.personIdentifier.deleteMany({
-        where: { personId: person.id, type: { in: types } },
-      })
-      await recordActions(tx, actions)
+    await this.prismaClient.personIdentifier.deleteMany({
+      where: { personId: person.id, type: { in: types } },
     })
   }
 

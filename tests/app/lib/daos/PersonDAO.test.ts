@@ -8,12 +8,7 @@ import { OrganizationUnit } from '@/types/OrganizationUnit'
 import { Literal } from '@/types/Literal'
 import { OrganizationUnitDAO } from '@/lib/daos/OrganizationUnitDAO'
 import { SourcePerson } from '@/types/SourcePerson'
-import {
-  ActionTargetType,
-  ActionType,
-  OrganizationCategory,
-  OrganizationGenericType,
-} from '@prisma/client'
+import { OrganizationCategory, OrganizationGenericType } from '@prisma/client'
 import {
   idHalFormsToIdentifiers,
   PersonIdentifier,
@@ -1231,32 +1226,6 @@ describe('PersonDAO Integration Tests', () => {
       )
     })
 
-    test('markIdentifiersValidated leaves the flag unset when the action cannot be recorded', async () => {
-      const dbPerson = await personDAO.createOrUpdatePerson(
-        makeIdentifiedPerson([idhals]),
-      )
-
-      await expect(
-        personDAO.markIdentifiersValidated(
-          'local-identifiers',
-          [PersonIdentifierType.idhals],
-          [
-            {
-              actionType: 'INVALID' as ActionType,
-              targetType: ActionTargetType.PERSON,
-              targetUid: 'local-identifiers',
-              parameters: {},
-              personUid: 'local-identifiers',
-            },
-          ],
-        ),
-      ).rejects.toThrow()
-
-      expect(await validatedOf(dbPerson.id, PersonIdentifierType.idhals)).toBe(
-        false,
-      )
-    })
-
     test('the person message lowers a validation the graph does not report', async () => {
       const dbPerson = await personDAO.createOrUpdatePerson(
         makeIdentifiedPerson([idhals]),
@@ -1493,15 +1462,7 @@ describe('PersonDAO Integration Tests', () => {
     ).toBe(0)
   })
 
-  describe('identifier writes and their actions are atomic', () => {
-    const invalidAction = (personUid: string) => ({
-      actionType: 'INVALID' as ActionType,
-      targetType: ActionTargetType.PERSON,
-      targetUid: personUid,
-      parameters: {},
-      personUid,
-    })
-
+  describe('upsertAuthenticatedOrcidIdentifier', () => {
     const typesOf = async (personId: number) =>
       (
         await prisma.personIdentifier.findMany({
@@ -1512,42 +1473,6 @@ describe('PersonDAO Integration Tests', () => {
         .map((row) => row.type)
         .sort()
 
-    test('createIdentifiers writes nothing when an action cannot be recorded', async () => {
-      const dbPerson = await prisma.person.create({
-        data: { uid: 'local-atomic-add', email: 'atomic-add@example.com' },
-      })
-
-      await expect(
-        personDAO.createIdentifiers(
-          [
-            new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-dupont'),
-            new PersonIdentifier(PersonIdentifierType.idhali, '12345'),
-          ],
-          dbPerson.uid,
-          [invalidAction(dbPerson.uid)],
-        ),
-      ).rejects.toThrow()
-
-      expect(await typesOf(dbPerson.id)).toEqual([])
-    })
-
-    test('upsertHalIdentifiers writes nothing when an action cannot be recorded', async () => {
-      const dbPerson = await prisma.person.create({
-        data: { uid: 'local-atomic-hal', email: 'atomic-hal@example.com' },
-      })
-
-      await expect(
-        personDAO.upsertHalIdentifiers(
-          dbPerson.uid,
-          [new PersonIdentifier(PersonIdentifierType.idhals, 'jacques-dupont')],
-          'jdupont',
-          [invalidAction(dbPerson.uid)],
-        ),
-      ).rejects.toThrow()
-
-      expect(await typesOf(dbPerson.id)).toEqual([])
-    })
-
     const authenticatedOrcid = () =>
       new ORCIDIdentifier('0000-0001-2345-6789', {
         accessToken: 'access-token',
@@ -1557,23 +1482,6 @@ describe('PersonDAO Integration Tests', () => {
         obtainedAt: new Date('2026-01-01T00:00:00.000Z'),
         expiresAt: new Date('2026-01-01T01:00:00.000Z'),
       })
-
-    test('upsertAuthenticatedOrcidIdentifier writes nothing when an action cannot be recorded', async () => {
-      const dbPerson = await prisma.person.create({
-        data: { uid: 'local-atomic-orcid', email: 'atomic-orcid@example.com' },
-      })
-
-      await expect(
-        personDAO.upsertAuthenticatedOrcidIdentifier(
-          dbPerson.uid,
-          authenticatedOrcid(),
-          [invalidAction(dbPerson.uid)],
-        ),
-      ).rejects.toThrow()
-
-      expect(await typesOf(dbPerson.id)).toEqual([])
-      expect(await prisma.orcidIdentifier.count()).toBe(0)
-    })
 
     test('upsertAuthenticatedOrcidIdentifier reports an ORCID held by another person', async () => {
       await prisma.person.create({
@@ -1599,26 +1507,6 @@ describe('PersonDAO Integration Tests', () => {
         ),
       ).rejects.toMatchObject({ reason: 'used_by_another_person' })
       expect(await typesOf(dbPerson.id)).toEqual([])
-    })
-
-    test('deleteIdentifier keeps the identifier when an action cannot be recorded', async () => {
-      const dbPerson = await prisma.person.create({
-        data: {
-          uid: 'local-atomic-remove',
-          email: 'atomic-remove@example.com',
-          identifiers: {
-            create: { type: PersonIdentifierType.idref, value: '127220747' },
-          },
-        },
-      })
-
-      await expect(
-        personDAO.deleteIdentifier(dbPerson.uid, PersonIdentifierType.idref, [
-          invalidAction(dbPerson.uid),
-        ]),
-      ).rejects.toThrow()
-
-      expect(await typesOf(dbPerson.id)).toEqual([PersonIdentifierType.idref])
     })
   })
 
@@ -1817,46 +1705,6 @@ describe('PersonDAO Integration Tests', () => {
       await personDAO.createOrUpdatePerson(makePerson(), options)
 
       expect(await storedValidation()).toEqual(validated)
-    })
-
-    it('leaves the identifiers untouched when the actions cannot be recorded', async () => {
-      await personDAO.createOrUpdatePerson(
-        new Person(
-          'local-validation',
-          false,
-          'validation@example.com',
-          'Val Person',
-          'Val',
-          'Person',
-          [new PersonIdentifier(PersonIdentifierType.idref, '127220747')],
-        ),
-      )
-
-      await expect(
-        personDAO.markPersonValidated(
-          'local-validation',
-          'validator-1',
-          [PersonIdentifierType.idref],
-          [
-            {
-              actionType: 'INVALID' as ActionType,
-              targetType: ActionTargetType.PERSON,
-              targetUid: 'local-validation',
-              parameters: {},
-              personUid: 'local-validation',
-            },
-          ],
-        ),
-      ).rejects.toThrow()
-
-      const stored = await prisma.person.findUniqueOrThrow({
-        where: { uid: 'local-validation' },
-        include: { identifiers: true },
-      })
-      expect(stored.validated).toBe(false)
-      expect(stored.validatedAt).toBeNull()
-      expect(stored.validatedBy).toBeNull()
-      expect(stored.identifiers.every((id) => !id.validated)).toBe(true)
     })
 
     it('is not hydrated outside account reads', async () => {

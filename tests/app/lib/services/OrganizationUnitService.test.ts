@@ -605,6 +605,23 @@ describe('OrganizationUnitService structure visibility (integration)', () => {
   it('returns null for an unknown structure', async () => {
     expect(await service.setHidden('nope', true)).toBeNull()
   })
+
+  it('keeps the flag unchanged when the cascade cannot be written', async () => {
+    const spy = jest
+      .spyOn(OrganizationUnitDAO.prototype, 'applyEffectiveHidden')
+      .mockRejectedValueOnce(new Error('cascade failure'))
+
+    await expect(service.setHidden('local-up1', true)).rejects.toThrow(
+      'cascade failure',
+    )
+    spy.mockRestore()
+
+    expect(await service.fetchVisibilityState('local-up1')).toEqual({
+      uid: 'local-up1',
+      hidden: false,
+      hiddenEffective: false,
+    })
+  })
 })
 
 describe('OrganizationUnitService.markEditableAccounts (integration)', () => {

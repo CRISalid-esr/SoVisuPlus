@@ -67,6 +67,27 @@ describe('ActionDAO', () => {
     })
   })
 
+  it('creates several actions in order', async () => {
+    ;(mockPrisma.action.create as jest.Mock).mockResolvedValue(baseActionData)
+    const first = {
+      actionType: ActionType.REMOVE,
+      targetType: ActionTargetType.DOCUMENT,
+      targetUid: 'doc-001',
+      path: 'titles',
+      parameters: { value: 'Ancien titre' },
+      personUid: 'person-001',
+    }
+    const second = { ...first, actionType: ActionType.ADD }
+
+    await dao.createActions([first, second])
+
+    const calls = (mockPrisma.action.create as jest.Mock).mock.calls
+    expect(calls.map(([arg]) => arg.data.actionType)).toEqual([
+      ActionType.REMOVE,
+      ActionType.ADD,
+    ])
+  })
+
   it('should fetch undispatched actions', async () => {
     ;(mockPrisma.action.findMany as jest.Mock).mockResolvedValue([
       baseActionData,

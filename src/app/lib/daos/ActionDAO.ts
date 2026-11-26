@@ -41,6 +41,15 @@ export class ActionDAO extends AbstractDAO {
   }
 
   /**
+   * Create several Action entries, in order
+   */
+  async createActions(actions: CreateActionParams[]): Promise<void> {
+    for (const action of actions) {
+      await this.createAction(action)
+    }
+  }
+
+  /**
    * Get a DB action by its ID
    */
   async getDbActionById(id: string) {

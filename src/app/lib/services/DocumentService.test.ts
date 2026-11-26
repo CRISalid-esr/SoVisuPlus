@@ -1,21 +1,35 @@
 import { DocumentService } from '@/lib/services/DocumentService'
 import { DocumentDAO } from '@/lib/daos/DocumentDAO'
 import { AgentType } from '@/types/IAgent'
-import { Document, DocumentType } from '@/types/Document'
+import { DocumentType } from '@/types/Document'
 import { UserDAO } from '@/lib/daos/UserDAO'
 import { ActionDAO } from '@/lib/daos/ActionDAO'
 import { ConceptDAO } from '@/lib/daos/ConceptDAO'
 import { Concept } from '@/types/Concept'
-import { OAStatus } from '@prisma/client'
 import { Literal } from '@/types/Literal'
-import { Contribution } from '@/types/Contribution'
-import { InternalPerson } from '@/types/InternalPerson'
-import { LocRelator } from '@/types/LocRelator'
+import { HalDepositDAO } from '@/lib/daos/HalDepositDAO'
 
 jest.mock('@/lib/daos/DocumentDAO')
 jest.mock('@/lib/daos/UserDAO')
 jest.mock('@/lib/daos/ActionDAO')
 jest.mock('@/lib/daos/ConceptDAO')
+jest.mock('@/lib/daos/HalDepositDAO')
+// Stand-in transaction client, to tell the DAOs built in a transaction from
+// the service's own
+const mockTx = { transactionClient: true }
+jest.mock('@/lib/daos/transaction', () => ({
+  runInTransaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>) =>
+    fn(mockTx),
+  ),
+}))
+
+/** Every call of `method` went through a DAO built with the transaction client */
+const expectCalledInTransaction = (method: jest.Mock) => {
+  expect(method).toHaveBeenCalled()
+  for (const dao of method.mock.contexts) {
+    expect((dao as { client: unknown }).client).toBe(mockTx)
+  }
+}
 
 describe('DocumentService', () => {
   let documentService: DocumentService
@@ -32,6 +46,9 @@ describe('DocumentService', () => {
   let mockCreateOrUpdateConcept: jest.Mock
   let mockMarkDocumentsWaitingForUpdate: jest.Mock
   let mockUpdateDocumentTypeByUid: jest.Mock
+  let mockUpdatePublicationDateByUid: jest.Mock
+  let mockCreateDeposit: jest.Mock
+  let mockAddFiles: jest.Mock
 
   beforeEach(() => {
     mockFetchDocuments = jest.fn()
@@ -47,7 +64,11 @@ describe('DocumentService', () => {
     mockCreateOrUpdateConcept = jest.fn()
     mockMarkDocumentsWaitingForUpdate = jest.fn()
     mockUpdateDocumentTypeByUid = jest.fn()
-    ;(DocumentDAO as jest.Mock).mockImplementation(() => ({
+    mockUpdatePublicationDateByUid = jest.fn()
+    mockCreateDeposit = jest.fn()
+    mockAddFiles = jest.fn()
+    ;(DocumentDAO as jest.Mock).mockImplementation((client) => ({
+      client,
       fetchDocuments: mockFetchDocuments,
       fetchOAYearDocuments: mockFetchOAYearDocuments,
       fetchOldestPublicationYear: mockFetchOldestPublicationYear,
@@ -59,17 +80,31 @@ describe('DocumentService', () => {
       countDocuments: mockCountDocuments,
       markDocumentsWaitingForUpdate: mockMarkDocumentsWaitingForUpdate,
       updateDocumentTypeByUid: mockUpdateDocumentTypeByUid,
+      updatePublicationDateByUid: mockUpdatePublicationDateByUid,
     }))
     ;(UserDAO as jest.Mock).mockImplementation(() => ({
       getUserByIdentifier: jest.fn().mockResolvedValue({
         person: { uid: 'local-123' },
       }),
     }))
-    ;(ActionDAO as jest.Mock).mockImplementation(() => ({
+    ;(ActionDAO as jest.Mock).mockImplementation((client) => ({
+      client,
       createAction: mockCreateAction,
+      async createActions(
+        this: { createAction: jest.Mock },
+        actions: unknown[],
+      ) {
+        for (const action of actions) await this.createAction(action)
+      },
     }))
-    ;(ConceptDAO as jest.Mock).mockImplementation(() => ({
+    ;(ConceptDAO as jest.Mock).mockImplementation((client) => ({
+      client,
       createOrUpdateConcept: mockCreateOrUpdateConcept,
+    }))
+    ;(HalDepositDAO as jest.Mock).mockImplementation((client) => ({
+      client,
+      createDeposit: mockCreateDeposit,
+      addFiles: mockAddFiles,
     }))
 
     documentService = new DocumentService()
@@ -567,40 +602,11 @@ describe('DocumentService', () => {
   })
 
   it('should call modifyTitles with correct arguments', async () => {
-    mockModifyTitles.mockResolvedValue(undefined)
-
-    const mockDocument: Document = new Document(
-      'doc-123',
-      DocumentType.Document,
-      OAStatus.GREEN,
-      '2022',
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-12-31T23:59:59.000Z'),
-      OAStatus.GREEN,
-      [
-        new Literal('Sample Document Title', 'en'),
-        new Literal('Sample Second Title', 'fr'),
-      ],
-      [new Literal('Sample Abstract', 'fr')],
-      [], // empty subjects
-      [
-        new Contribution(
-          new InternalPerson(
-            'user-1234',
-            null,
-            'user-1234',
-            'First',
-            'Last',
-            [],
-          ),
-          [LocRelator.AUTHOR],
-        ),
-      ],
-    )
+    mockModifyTitles.mockResolvedValue([])
 
     await expect(
       documentService.modifyTitles(
-        mockDocument,
+        'doc-123',
         [
           { language: 'es', value: 'El nuevo titulo' },
           { language: 'fr', value: 'Le nouveau titre' },
@@ -618,38 +624,9 @@ describe('DocumentService', () => {
   it('should throw an error when modifyTitles fails', async () => {
     mockModifyTitles.mockRejectedValue(new Error('DB error'))
 
-    const mockDocument: Document = new Document(
-      'doc-123',
-      DocumentType.Document,
-      OAStatus.GREEN,
-      '2022',
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-12-31T23:59:59.000Z'),
-      OAStatus.GREEN,
-      [
-        new Literal('Sample Document Title', 'en'),
-        new Literal('Sample Second Title', 'fr'),
-      ],
-      [new Literal('Sample Abstract', 'fr')],
-      [], // empty subjects
-      [
-        new Contribution(
-          new InternalPerson(
-            'user-1234',
-            null,
-            'user-1234',
-            'First',
-            'Last',
-            [],
-          ),
-          [LocRelator.AUTHOR],
-        ),
-      ],
-    )
-
     await expect(
       documentService.modifyTitles(
-        mockDocument,
+        'doc-123',
         [
           { language: 'es', value: 'El nuevo titulo' },
           { language: 'fr', value: 'Le nouveau titre' },
@@ -665,40 +642,14 @@ describe('DocumentService', () => {
   })
 
   it('should create an action corresponding to deleted and added titles', async () => {
-    mockModifyTitles.mockResolvedValue(undefined)
-
-    const mockDocument: Document = new Document(
-      'doc-123',
-      DocumentType.Document,
-      OAStatus.GREEN,
-      '2022',
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-12-31T23:59:59.000Z'),
-      OAStatus.GREEN,
-      [
-        new Literal('Sample Document Title', 'en'),
-        new Literal('Sample Second Title', 'fr'),
-      ],
-      [new Literal('Sample Abstract', 'fr')],
-      [], // empty subjects
-      [
-        new Contribution(
-          new InternalPerson(
-            'user-1234',
-            null,
-            'user-1234',
-            'First',
-            'Last',
-            [],
-          ),
-          [LocRelator.AUTHOR],
-        ),
-      ],
-    )
+    mockModifyTitles.mockResolvedValue([
+      new Literal('Sample Document Title', 'en'),
+      new Literal('Sample Second Title', 'fr'),
+    ])
 
     await expect(
       documentService.modifyTitles(
-        mockDocument,
+        'doc-123',
         [
           { language: 'es', value: 'El nuevo titulo' },
           { language: 'fr', value: 'Le nouveau titre' },
@@ -749,41 +700,31 @@ describe('DocumentService', () => {
     })
   })
 
-  it('should call modifyAbstracts with correct arguments', async () => {
-    mockModifyAbstracts.mockResolvedValue(undefined)
+  it('builds the REMOVE actions from the titles replaced in the transaction', async () => {
+    // Another edit changed the titles after the caller read the document
+    mockModifyTitles.mockResolvedValue([new Literal('Concurrent title', 'en')])
 
-    const mockDocument: Document = new Document(
+    await documentService.modifyTitles(
       'doc-123',
-      DocumentType.Document,
-      OAStatus.GREEN,
-      '2022',
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-12-31T23:59:59.000Z'),
-      OAStatus.GREEN,
-      [
-        new Literal('Sample Document Title', 'en'),
-        new Literal('Sample Second Title', 'fr'),
-      ],
-      [new Literal('Sample Abstract', 'fr')],
-      [], // empty subjects
-      [
-        new Contribution(
-          new InternalPerson(
-            'user-1234',
-            null,
-            'user-1234',
-            'First',
-            'Last',
-            [],
-          ),
-          [LocRelator.AUTHOR],
-        ),
-      ],
+      [{ language: 'es', value: 'El nuevo titulo' }],
+      'user-1234',
     )
+
+    const removed = mockCreateAction.mock.calls
+      .map(([action]) => action)
+      .filter((action) => action.actionType === 'REMOVE')
+      .map((action) => action.parameters)
+    expect(removed).toEqual([
+      JSON.stringify(new Literal('Concurrent title', 'en')),
+    ])
+  })
+
+  it('should call modifyAbstracts with correct arguments', async () => {
+    mockModifyAbstracts.mockResolvedValue([])
 
     await expect(
       documentService.modifyAbstracts(
-        mockDocument,
+        'doc-123',
         [
           { language: 'es', value: 'El nuevo abstract' },
           { language: 'fr', value: 'Le nouveau abstract' },
@@ -801,38 +742,9 @@ describe('DocumentService', () => {
   it('should throw an error when modifyTitles fails', async () => {
     mockModifyAbstracts.mockRejectedValue(new Error('DB error'))
 
-    const mockDocument: Document = new Document(
-      'doc-123',
-      DocumentType.Document,
-      OAStatus.GREEN,
-      '2022',
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-12-31T23:59:59.000Z'),
-      OAStatus.GREEN,
-      [
-        new Literal('Sample Document Title', 'en'),
-        new Literal('Sample Second Title', 'fr'),
-      ],
-      [new Literal('Sample Abstract', 'fr')],
-      [], // empty subjects
-      [
-        new Contribution(
-          new InternalPerson(
-            'user-1234',
-            null,
-            'user-1234',
-            'First',
-            'Last',
-            [],
-          ),
-          [LocRelator.AUTHOR],
-        ),
-      ],
-    )
-
     await expect(
       documentService.modifyAbstracts(
-        mockDocument,
+        'doc-123',
         [
           { language: 'es', value: 'El nuevo abstract' },
           { language: 'fr', value: 'Le nouveau abstract' },
@@ -848,40 +760,13 @@ describe('DocumentService', () => {
   })
 
   it('should create an action corresponding to deleted and added titles', async () => {
-    mockModifyAbstracts.mockResolvedValue(undefined)
-
-    const mockDocument: Document = new Document(
-      'doc-123',
-      DocumentType.Document,
-      OAStatus.GREEN,
-      '2022',
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-12-31T23:59:59.000Z'),
-      OAStatus.GREEN,
-      [
-        new Literal('Sample Document Title', 'en'),
-        new Literal('Sample Second Title', 'fr'),
-      ],
-      [new Literal('Sample Abstract', 'fr')],
-      [], // empty subjects
-      [
-        new Contribution(
-          new InternalPerson(
-            'user-1234',
-            null,
-            'user-1234',
-            'First',
-            'Last',
-            [],
-          ),
-          [LocRelator.AUTHOR],
-        ),
-      ],
-    )
+    mockModifyAbstracts.mockResolvedValue([
+      new Literal('Sample Abstract', 'fr'),
+    ])
 
     await expect(
       documentService.modifyAbstracts(
-        mockDocument,
+        'doc-123',
         [
           { language: 'es', value: 'El nuevo abstract' },
           { language: 'fr', value: 'Le nouveau abstract' },
@@ -1264,6 +1149,89 @@ describe('DocumentService', () => {
       await expect(
         documentService.saveContributions('doc-1', contributions, 'ghost'),
       ).rejects.toThrow('Error saving contributions')
+    })
+  })
+  describe('writes go through DAOs built in the transaction', () => {
+    it('saveContributions', async () => {
+      await documentService.saveContributions('doc-1', [], 'user-1234')
+      expectCalledInTransaction(mockCreateAction)
+      expectCalledInTransaction(mockMarkDocumentsWaitingForUpdate)
+    })
+
+    it('deleteConceptsFromDocument', async () => {
+      await documentService.deleteConceptsFromDocument(
+        'doc-1',
+        ['c1'],
+        'user-1234',
+      )
+      expectCalledInTransaction(mockDeleteConceptsFromDocument)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('addConceptsToDocument', async () => {
+      await documentService.addConceptsToDocument(
+        'doc-1',
+        [{ uid: 'c1', uri: null, prefLabels: [], altLabels: [] }],
+        'user-1234',
+      )
+      expectCalledInTransaction(mockCreateOrUpdateConcept)
+      expectCalledInTransaction(mockAddConceptsToDocument)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('modifyTitles', async () => {
+      mockModifyTitles.mockResolvedValue([new Literal('Old', 'en')])
+      await documentService.modifyTitles(
+        'doc-1',
+        [{ language: 'en', value: 'New' }],
+        'user-1234',
+      )
+      expectCalledInTransaction(mockModifyTitles)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('modifyAbstracts', async () => {
+      mockModifyAbstracts.mockResolvedValue([new Literal('Old', 'en')])
+      await documentService.modifyAbstracts(
+        'doc-1',
+        [{ language: 'en', value: 'New' }],
+        'user-1234',
+      )
+      expectCalledInTransaction(mockModifyAbstracts)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('mergeDocuments', async () => {
+      mockMarkDocumentsWaitingForUpdate.mockResolvedValue([])
+      await documentService.mergeDocuments(['d1', 'd2'], 'user-1234')
+      expectCalledInTransaction(mockMarkDocumentsWaitingForUpdate)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('updateDocumentType', async () => {
+      await documentService.updateDocumentType(
+        'doc-1',
+        DocumentType.Book,
+        'user-1234',
+      )
+      expectCalledInTransaction(mockUpdateDocumentTypeByUid)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('updatePublicationDate', async () => {
+      await documentService.updatePublicationDate('doc-1', '2024', 'user-1234')
+      expectCalledInTransaction(mockUpdatePublicationDateByUid)
+      expectCalledInTransaction(mockCreateAction)
+    })
+
+    it('createHalDepositWithFiles', async () => {
+      mockCreateDeposit.mockResolvedValue({ id: 1 })
+      await documentService.createHalDepositWithFiles(
+        {} as Parameters<DocumentService['createHalDepositWithFiles']>[0],
+        [],
+      )
+      expectCalledInTransaction(mockCreateDeposit)
+      expectCalledInTransaction(mockAddFiles)
     })
   })
 })

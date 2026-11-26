@@ -1292,65 +1292,98 @@ export class DocumentDAO extends AbstractDAO {
     })
   }
 
-  async modifyTitles(documentUid: string, titles: Literal[]): Promise<void> {
-    const document = await this.prismaClient.document.findUnique({
-      where: { uid: documentUid },
-      select: { id: true },
-    })
-
-    if (!document) {
-      throw new Error(`Document with UID ${documentUid} not found`)
-    }
-
-    await this.prismaClient.documentTitle.deleteMany({
-      where: { documentId: document.id },
-    })
-
-    await this.prismaClient.document.update({
-      where: { id: document.id },
-      data: {
-        titles: {
-          createMany: {
-            data: titles.map((title) => ({
-              language: title.language,
-              value: title.value,
-              normalizedValue: normalizeSearchText(title.value),
-            })),
+  /**
+   * Replace a document's titles in one transaction.
+   * @returns the replaced titles, read in the same transaction
+   */
+  async modifyTitles(
+    documentUid: string,
+    titles: Literal[],
+  ): Promise<Literal[]> {
+    return this.transaction(async (tx) => {
+      const document = await tx.document.findUnique({
+        where: { uid: documentUid },
+        select: {
+          id: true,
+          titles: {
+            select: { language: true, value: true },
+            orderBy: { id: 'asc' },
           },
         },
-      },
+      })
+
+      if (!document) {
+        throw new Error(`Document with UID ${documentUid} not found`)
+      }
+
+      await tx.documentTitle.deleteMany({
+        where: { documentId: document.id },
+      })
+
+      await tx.document.update({
+        where: { id: document.id },
+        data: {
+          titles: {
+            createMany: {
+              data: titles.map((title) => ({
+                language: title.language,
+                value: title.value,
+                normalizedValue: normalizeSearchText(title.value),
+              })),
+            },
+          },
+        },
+      })
+
+      return document.titles.map((title) => Literal.fromDbLiteral(title))
     })
   }
 
+  /**
+   * Replace a document's abstracts in one transaction.
+   * @returns the replaced abstracts, read in the same transaction
+   */
   async modifyAbstracts(
     documentUid: string,
     abstracts: Literal[],
-  ): Promise<void> {
-    const document = await this.prismaClient.document.findUnique({
-      where: { uid: documentUid },
-      select: { id: true },
-    })
-
-    if (!document) {
-      throw new Error(`Document with UID ${documentUid} not found`)
-    }
-
-    await this.prismaClient.documentAbstract.deleteMany({
-      where: { documentId: document.id },
-    })
-
-    await this.prismaClient.document.update({
-      where: { id: document.id },
-      data: {
-        abstracts: {
-          createMany: {
-            data: abstracts.map((abstract) => ({
-              language: abstract.language,
-              value: abstract.value,
-            })),
+  ): Promise<Literal[]> {
+    return this.transaction(async (tx) => {
+      const document = await tx.document.findUnique({
+        where: { uid: documentUid },
+        select: {
+          id: true,
+          abstracts: {
+            select: { language: true, value: true },
+            orderBy: { id: 'asc' },
           },
         },
-      },
+      })
+
+      if (!document) {
+        throw new Error(`Document with UID ${documentUid} not found`)
+      }
+
+      await tx.documentAbstract.deleteMany({
+        where: { documentId: document.id },
+      })
+
+      await tx.document.update({
+        where: { id: document.id },
+        data: {
+          abstracts: {
+            createMany: {
+              data: abstracts.map((abstract) => ({
+                language: abstract.language,
+                value: abstract.value,
+              })),
+            },
+          },
+        },
+      })
+
+      return document.abstracts.map((abstract) =>
+        Literal.fromDbLiteral(abstract),
+      )
     })
   }
 
@@ -1367,12 +1400,10 @@ export class DocumentDAO extends AbstractDAO {
         data: { subjects: { set: [] } },
       })
 
-      await Promise.all([
-        tx.documentRecord.deleteMany({ where: { documentId: doc.id } }),
-        tx.contribution.deleteMany({ where: { documentId: doc.id } }),
-        tx.documentTitle.deleteMany({ where: { documentId: doc.id } }),
-        tx.documentAbstract.deleteMany({ where: { documentId: doc.id } }),
-      ])
+      await tx.documentRecord.deleteMany({ where: { documentId: doc.id } })
+      await tx.contribution.deleteMany({ where: { documentId: doc.id } })
+      await tx.documentTitle.deleteMany({ where: { documentId: doc.id } })
+      await tx.documentAbstract.deleteMany({ where: { documentId: doc.id } })
 
       await tx.document.delete({ where: { id: doc.id } })
     })

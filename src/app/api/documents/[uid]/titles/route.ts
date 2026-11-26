@@ -50,7 +50,7 @@ export const PUT = async (
         { status: 403 },
       )
     }
-    await documentService.modifyTitles(document, titles, userName)
+    await documentService.modifyTitles(uid, titles, userName)
 
     return NextResponse.json({ success: true })
   } catch (error) {

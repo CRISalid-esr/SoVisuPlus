@@ -8,7 +8,8 @@ import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
-import { CreateActionParams } from '@/lib/daos/ActionDAO'
+import { ActionDAO, CreateActionParams } from '@/lib/daos/ActionDAO'
+import { runInTransaction } from '@/lib/daos/transaction'
 import { ActionTargetType, ActionType } from '@/types/Action'
 import { ORCIDIdentifier } from '@/types/OrcidIdentifier'
 import { InputJsonValue } from '@prisma/client/runtime/library'
@@ -49,8 +50,8 @@ export class PersonService {
   }
 
   /**
-   * A person-identifier change as an outgoing action, recorded by the DAO in
-   * the same transaction as the change. The `authenticated` flag is derived
+   * A person-identifier change as an outgoing action, recorded in the same
+   * transaction as the change. The `authenticated` flag is derived
    * from the operation (manual add → false, authentication → true) and stamped
    * into the message payload — it is never persisted. See
    * specs/872-refactor-account-edition-workflow/prompt.md.
@@ -82,32 +83,43 @@ export class PersonService {
     personUid: string,
     identifier: PersonIdentifier,
   ): Promise<void> {
+    const isIdHal = isIdHalType(identifier.type as PersonIdentifierType)
     let identifiers = [identifier]
     try {
-      if (isIdHalType(identifier.type as PersonIdentifierType)) {
+      // AureHAL is called before the transaction
+      if (isIdHal) {
         identifiers = idHalFormsToIdentifiers(
           await this.resolveIdHalForms(
             identifier.type as PersonIdentifierType,
             identifier.value,
           ),
         )
+      }
+      await runInTransaction(async (tx) => {
+        const personDAO = new PersonDAO(tx)
         if (
-          await this.isAnyIdentifierUsedByAnotherPerson(personUid, identifiers)
+          isIdHal &&
+          (await personDAO.isAnyIdentifierHeldByAnotherPerson(
+            personUid,
+            identifiers,
+          ))
         ) {
           throw new IdentifierConflictError('used_by_another_person')
         }
-      }
-      await this.personDAO.createIdentifiers(
-        identifiers.map(
-          (added) => new PersonIdentifier(added.type, added.value, true),
-        ),
-        personUid,
-        identifiers.map((added) =>
-          this.identifierAction(personUid, ActionType.ADD, {
-            identifier: added.toMessagePayload(false),
-          }),
-        ),
-      )
+        await personDAO.createIdentifiers(
+          identifiers.map(
+            (added) => new PersonIdentifier(added.type, added.value, true),
+          ),
+          personUid,
+        )
+        await new ActionDAO(tx).createActions(
+          identifiers.map((added) =>
+            this.identifierAction(personUid, ActionType.ADD, {
+              identifier: added.toMessagePayload(false),
+            }),
+          ),
+        )
+      })
     } catch (error) {
       if (error instanceof IdentifierConflictError) throw error
       const message = `Error adding identifier (type=${identifier.type}, value=${identifier.value}, personUid=${personUid})`
@@ -168,23 +180,26 @@ export class PersonService {
     identifier: ORCIDIdentifier,
   ): Promise<void> {
     try {
-      const existed =
-        (await this.personDAO.findIdentifierValue(
-          personUid,
-          PersonIdentifierType.orcid,
-        )) !== null
+      await runInTransaction(async (tx) => {
+        const personDAO = new PersonDAO(tx)
+        const existed =
+          (await personDAO.findIdentifierValue(
+            personUid,
+            PersonIdentifierType.orcid,
+          )) !== null
 
-      await this.personDAO.upsertAuthenticatedOrcidIdentifier(
-        personUid,
-        identifier,
-        [
+        await personDAO.upsertAuthenticatedOrcidIdentifier(
+          personUid,
+          identifier,
+        )
+        await new ActionDAO(tx).createActions([
           this.identifierAction(
             personUid,
             existed ? ActionType.UPDATE : ActionType.ADD,
             { identifier: identifier.toMessagePayload(true) },
           ),
-        ],
-      )
+        ])
+      })
     } catch (error) {
       if (error instanceof IdentifierConflictError) throw error
       const message = `Error authenticating ORCID identifier (personUid=${personUid}, value=${identifier.value})`
@@ -213,36 +228,37 @@ export class PersonService {
     const { halLogin, forms } = params
     const idHals = idHalFormsToIdentifiers(forms)
     try {
-      // The HAL account is taken when another person holds one of its idHAL
-      // forms or has authenticated with the same login.
-      if (
-        await this.isAnyIdentifierUsedByAnotherPerson(personUid, [
-          ...idHals,
-          new PersonIdentifier(PersonIdentifierType.hal_login, halLogin),
-        ])
-      ) {
-        throw new IdentifierConflictError('used_by_another_person')
-      }
+      await runInTransaction(async (tx) => {
+        const personDAO = new PersonDAO(tx)
+        // The HAL account is taken when another person holds one of its idHAL
+        // forms or has authenticated with the same login.
+        if (
+          await personDAO.isAnyIdentifierHeldByAnotherPerson(personUid, [
+            ...idHals,
+            new PersonIdentifier(PersonIdentifierType.hal_login, halLogin),
+          ])
+        ) {
+          throw new IdentifierConflictError('used_by_another_person')
+        }
 
-      const storedTypes = new Set(
-        (await this.personDAO.findIdentifiers(personUid, ID_HAL_TYPES)).map(
-          (stored) => stored.type,
-        ),
-      )
-
-      // hal_login is written silently (no Action / no outgoing message).
-      await this.personDAO.upsertHalIdentifiers(
-        personUid,
-        idHals,
-        halLogin,
-        idHals.map((idHal) =>
-          this.identifierAction(
-            personUid,
-            storedTypes.has(idHal.type) ? ActionType.UPDATE : ActionType.ADD,
-            { identifier: idHal.toMessagePayload(true) },
+        const storedTypes = new Set(
+          (await personDAO.findIdentifiers(personUid, ID_HAL_TYPES)).map(
+            (stored) => stored.type,
           ),
-        ),
-      )
+        )
+
+        // hal_login is written silently (no Action / no outgoing message).
+        await personDAO.upsertHalIdentifiers(personUid, idHals, halLogin)
+        await new ActionDAO(tx).createActions(
+          idHals.map((idHal) =>
+            this.identifierAction(
+              personUid,
+              storedTypes.has(idHal.type) ? ActionType.UPDATE : ActionType.ADD,
+              { identifier: idHal.toMessagePayload(true) },
+            ),
+          ),
+        )
+      })
     } catch (error) {
       if (error instanceof IdentifierConflictError) throw error
       const message = `Error authenticating HAL identifier (idhals=${forms.idhals}, idhali=${forms.idhali}, personUid=${personUid})`
@@ -263,21 +279,28 @@ export class PersonService {
   ): Promise<void> {
     try {
       const types = isIdHalType(type) ? ID_HAL_TYPES : [type]
-      const stored = await this.personDAO.findIdentifiers(personUid, types)
-      if (stored.length === 0) {
-        throw new Error('Identifier not found')
-      }
-      const toValidate = stored.filter((identifier) => !identifier.validated)
-      if (toValidate.length === 0) return
-      await this.personDAO.markIdentifiersValidated(
-        personUid,
-        toValidate.map((identifier) => identifier.type as PersonIdentifierType),
-        toValidate.map((identifier) =>
-          this.identifierAction(personUid, ActionType.UPDATE, {
-            identifier: identifier.toMessagePayload(false),
-          }),
-        ),
-      )
+      await runInTransaction(async (tx) => {
+        const personDAO = new PersonDAO(tx)
+        const stored = await personDAO.findIdentifiers(personUid, types)
+        if (stored.length === 0) {
+          throw new Error('Identifier not found')
+        }
+        const toValidate = stored.filter((identifier) => !identifier.validated)
+        if (toValidate.length === 0) return
+        await personDAO.markIdentifiersValidated(
+          personUid,
+          toValidate.map(
+            (identifier) => identifier.type as PersonIdentifierType,
+          ),
+        )
+        await new ActionDAO(tx).createActions(
+          toValidate.map((identifier) =>
+            this.identifierAction(personUid, ActionType.UPDATE, {
+              identifier: identifier.toMessagePayload(false),
+            }),
+          ),
+        )
+      })
     } catch (error) {
       const message = `Error validating identifier (type=${type}, personUid=${personUid})`
       console.error(message, error)
@@ -300,32 +323,43 @@ export class PersonService {
     validatedBy: string | null,
   ): Promise<boolean> {
     try {
-      const person = await this.personDAO.fetchPersonByUid(personUid)
-      if (!person) {
-        throw new Error('Person not found')
-      }
-      const toValidate = person
-        .getIdentifiers()
-        .filter(
-          (identifier) =>
-            VALIDATABLE_IDENTIFIER_TYPES.includes(
-              identifier.type as PersonIdentifierType,
-            ) &&
-            !identifier.validated &&
-            !person.isIdentifierAuthenticated(
-              identifier.type as PersonIdentifierType,
-            ),
+      return await runInTransaction(async (tx) => {
+        const personDAO = new PersonDAO(tx)
+        const person = await personDAO.fetchPersonByUid(personUid)
+        if (!person) {
+          throw new Error('Person not found')
+        }
+        const toValidate = person
+          .getIdentifiers()
+          .filter(
+            (identifier) =>
+              VALIDATABLE_IDENTIFIER_TYPES.includes(
+                identifier.type as PersonIdentifierType,
+              ) &&
+              !identifier.validated &&
+              !person.isIdentifierAuthenticated(
+                identifier.type as PersonIdentifierType,
+              ),
+          )
+        const validated = await personDAO.markPersonValidated(
+          personUid,
+          validatedBy,
+          toValidate.map(
+            (identifier) => identifier.type as PersonIdentifierType,
+          ),
         )
-      return await this.personDAO.markPersonValidated(
-        personUid,
-        validatedBy,
-        toValidate.map((identifier) => identifier.type as PersonIdentifierType),
-        toValidate.map((identifier) =>
-          this.identifierAction(personUid, ActionType.UPDATE, {
-            identifier: identifier.toMessagePayload(false),
-          }),
-        ),
-      )
+        // An already validated profile changes nothing and sends nothing
+        if (validated) {
+          await new ActionDAO(tx).createActions(
+            toValidate.map((identifier) =>
+              this.identifierAction(personUid, ActionType.UPDATE, {
+                identifier: identifier.toMessagePayload(false),
+              }),
+            ),
+          )
+        }
+        return validated
+      })
     } catch (error) {
       const message = `Error validating profile (personUid=${personUid})`
       console.error(message, error)
@@ -343,17 +377,19 @@ export class PersonService {
   ): Promise<void> {
     try {
       const types = isIdHalType(type) ? ID_HAL_TYPES : [type]
-      const removed = await this.personDAO.findIdentifiers(personUid, types)
-      await this.personDAO.deleteIdentifier(
-        personUid,
-        type,
-        removed.map((identifier) =>
-          this.identifierAction(personUid, ActionType.REMOVE, {
-            type: identifier.type,
-            value: identifier.value,
-          }),
-        ),
-      )
+      await runInTransaction(async (tx) => {
+        const personDAO = new PersonDAO(tx)
+        const removed = await personDAO.findIdentifiers(personUid, types)
+        await personDAO.deleteIdentifier(personUid, type)
+        await new ActionDAO(tx).createActions(
+          removed.map((identifier) =>
+            this.identifierAction(personUid, ActionType.REMOVE, {
+              type: identifier.type,
+              value: identifier.value,
+            }),
+          ),
+        )
+      })
     } catch (error) {
       const message = `Error removing identifier (type=${type}, personUid=${personUid})`
       console.error(message, error)

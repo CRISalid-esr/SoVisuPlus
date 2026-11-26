@@ -2,7 +2,7 @@
  * @jest-environment node
  *
  * Focuses on the route mechanics that are new ground in this codebase: multipart `formData()`
- * parsing, writing uploaded `File`s to disk, and the create/attach/rollback flow. Auth, ability
+ * parsing, writing uploaded `File`s to disk, and the create/cleanup flow. Auth, ability
  * and the service layer are mocked so this is a fast unit test (no DB).
  */
 import fs from 'node:fs'
@@ -30,9 +30,7 @@ const can = jest.fn()
 const service = {
   getPersonByUid: jest.fn(),
   fetchDocumentById: jest.fn(),
-  createHalDeposit: jest.fn(),
-  attachDepositFiles: jest.fn(),
-  deleteHalDeposit: jest.fn(),
+  createHalDepositWithFiles: jest.fn(),
 }
 
 let root: string
@@ -68,9 +66,9 @@ beforeEach(() => {
   MockDocumentService.mockImplementation(() => service)
   service.getPersonByUid.mockResolvedValue({ uid: 'person-1' })
   service.fetchDocumentById.mockResolvedValue({ uid: 'doc-1' })
-  service.createHalDeposit.mockResolvedValue({ id: 42 })
-  service.attachDepositFiles.mockResolvedValue({ toJson: () => ({ id: 42 }) })
-  service.deleteHalDeposit.mockResolvedValue(undefined)
+  service.createHalDepositWithFiles.mockResolvedValue({
+    toJson: () => ({ id: 42 }),
+  })
 })
 
 afterEach(() => {
@@ -91,7 +89,7 @@ describe('POST /api/hal/deposits', () => {
     const res = await POST(buildRequest(basePayload))
     expect(res.status).toBe(403)
     expect(await res.json()).toMatchObject({ reason: 'forbidden' })
-    expect(service.createHalDeposit).not.toHaveBeenCalled()
+    expect(service.createHalDepositWithFiles).not.toHaveBeenCalled()
   })
 
   it('allows the deposit via deposit_hal_unauthenticated and passes the waiver to eligibility', async () => {
@@ -136,19 +134,46 @@ describe('POST /api/hal/deposits', () => {
     const res = await POST(buildRequest(payload, file))
 
     expect(res.status).toBe(201)
-    const onDisk = path.join(root, 'hal-files', '42', 'doc.pdf')
-    expect(fs.existsSync(onDisk)).toBe(true)
+    // The upload directory is keyed by a random key, not by the deposit id
+    const [uploadKey] = fs.readdirSync(path.join(root, 'hal-files'))
+    const onDisk = path.join(root, 'hal-files', uploadKey, 'doc.pdf')
     expect(fs.readFileSync(onDisk, 'utf-8')).toBe('PDF')
-    expect(service.attachDepositFiles).toHaveBeenCalledWith(42, [
-      expect.objectContaining({
-        fileName: 'doc.pdf',
-        isMain: true,
-        fileSource: 'author',
-        fileType: 'file',
-        license: 'cc-by',
-        filePath: onDisk,
-      }),
-    ])
+    expect(service.createHalDepositWithFiles).toHaveBeenCalledWith(
+      expect.objectContaining({ documentUid: 'doc-1', personUid: 'person-1' }),
+      [
+        expect.objectContaining({
+          fileName: 'doc.pdf',
+          isMain: true,
+          fileSource: 'author',
+          fileType: 'file',
+          license: 'cc-by',
+          filePath: onDisk,
+        }),
+      ],
+    )
+  })
+
+  it('rejects an announced file missing from the upload, before any write', async () => {
+    const payload = {
+      ...basePayload,
+      files: [
+        {
+          field: 'file0',
+          isMain: true,
+          fileSource: 'author',
+          fileType: 'file',
+          visibility: 'now',
+          license: 'cc-by',
+        },
+      ],
+    }
+    const res = await POST(buildRequest(payload))
+    expect(res.status).toBe(400)
+    expect(await res.json()).toMatchObject({
+      reason: 'file_missing_from_upload',
+    })
+    expect(service.createHalDepositWithFiles).not.toHaveBeenCalled()
+    expect(fs.existsSync(path.join(root, 'hal-files'))).toBe(false)
   })
 
   it('rejects more than one main file', async () => {
@@ -207,7 +232,7 @@ describe('POST /api/hal/deposits', () => {
     expect(await res.json()).toMatchObject({
       reason: 'missing_field:bookTitle',
     })
-    expect(service.createHalDeposit).not.toHaveBeenCalled()
+    expect(service.createHalDepositWithFiles).not.toHaveBeenCalled()
   })
 
   it('rejects a THESE/HDR deposit that has no main file', async () => {
@@ -236,7 +261,7 @@ describe('POST /api/hal/deposits', () => {
     }
     const res = await POST(buildRequest(payload))
     expect(res.status).toBe(201)
-    expect(service.createHalDeposit).toHaveBeenCalledWith(
+    expect(service.createHalDepositWithFiles).toHaveBeenCalledWith(
       expect.objectContaining({
         halDocumentType: 'COMM',
         conferenceTitle: 'My Conf',
@@ -244,11 +269,12 @@ describe('POST /api/hal/deposits', () => {
         conferenceStartDate: '2016-01',
         conferenceCountry: 'CZ',
       }),
+      [],
     )
   })
 
-  it('rolls back the deposit row when a post-creation step throws', async () => {
-    service.attachDepositFiles.mockRejectedValue(new Error('db down'))
+  it('removes the written files when the deposit cannot be created', async () => {
+    service.createHalDepositWithFiles.mockRejectedValue(new Error('db down'))
     const payload = {
       ...basePayload,
       files: [
@@ -265,6 +291,6 @@ describe('POST /api/hal/deposits', () => {
     const res = await POST(buildRequest(payload, new File(['x'], 'm.pdf')))
     expect(res.status).toBe(500)
     expect(await res.json()).toMatchObject({ reason: 'internal_error' })
-    expect(service.deleteHalDeposit).toHaveBeenCalledWith(42)
+    expect(fs.readdirSync(path.join(root, 'hal-files'))).toEqual([])
   })
 })
