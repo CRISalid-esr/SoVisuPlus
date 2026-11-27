@@ -11,13 +11,17 @@ import { nationalTypeLabel } from '@/app/[lang]/components/organizationTypeLabel
 
 /**
  * Parse the website URL, keeping only http(s) links so a stored value can
- * never inject another scheme (e.g. javascript:).
+ * never inject another scheme (e.g. javascript:). Credentials are dropped
+ * so they are neither sent to the site nor exposed in the page.
  */
 const safeWebsiteUrl = (value: string | null): URL | null => {
   if (!value) return null
   try {
     const url = new URL(value)
-    return url.protocol === 'http:' || url.protocol === 'https:' ? url : null
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null
+    url.username = ''
+    url.password = ''
+    return url
   } catch {
     return null
   }

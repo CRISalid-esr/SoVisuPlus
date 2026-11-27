@@ -100,6 +100,19 @@ describe('OrganizationUnitIdentityCard website link', () => {
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
 
+  it('drops credentials from the link', () => {
+    render(
+      <OrganizationUnitIdentityCard
+        organizationUnit={withWebsite('https://alice:secret@www.example.org/')}
+      />,
+    )
+
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      'https://www.example.org/',
+    )
+  })
+
   it.each([null, 'not a url', 'javascript:alert(1)'])(
     'shows no link for %p',
     (websiteUrl) => {
