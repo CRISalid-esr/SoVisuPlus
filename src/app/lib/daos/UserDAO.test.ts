@@ -143,6 +143,18 @@ describe('UserDAO', () => {
                 },
               },
             },
+            employments: {
+              include: {
+                organizationUnit: {
+                  include: {
+                    labels: true,
+                    parents: { include: { parent: true } },
+                    descriptions: true,
+                    identifiers: true,
+                  },
+                },
+              },
+            },
             records: {
               include: {
                 identifiers: true,
@@ -221,6 +233,18 @@ describe('UserDAO', () => {
               },
             },
             memberships: {
+              include: {
+                organizationUnit: {
+                  include: {
+                    labels: true,
+                    parents: { include: { parent: true } },
+                    descriptions: true,
+                    identifiers: true,
+                  },
+                },
+              },
+            },
+            employments: {
               include: {
                 organizationUnit: {
                   include: {

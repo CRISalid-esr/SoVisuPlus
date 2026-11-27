@@ -7,6 +7,7 @@ import PersonIdentityCard from './PersonIdentityCard'
 import { Person } from '@/types/Person'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { PersonMembership } from '@/types/PersonMembership'
+import { PersonEmployment } from '@/types/PersonEmployment'
 import { IAgent } from '@/types/IAgent'
 import { OrganizationCategory, PersonIdentifierType } from '@prisma/client'
 import { useSession } from 'next-auth/react'
@@ -105,6 +106,26 @@ const mkPerson = (): Person => {
   )
 }
 
+const mkEmployment = (
+  overrides: Partial<PersonEmployment['organizationUnit']> = {},
+  positionCode: string | null = 'MCF',
+): PersonEmployment =>
+  ({
+    positionCode,
+    organizationUnit: {
+      uid: 'inst1',
+      acronym: 'UP1',
+      slug: 'up1',
+      names: [
+        { value: 'Université Paris 1', language: 'fr' },
+        { value: 'Paris 1 University', language: 'en' },
+      ],
+      category: OrganizationCategory.institution,
+      hiddenEffective: false,
+      ...overrides,
+    },
+  }) as PersonEmployment
+
 // Session of a user holding account_editor scoped to the given research unit
 const mockAccountEditorSession = (researchUnitUid: string) => {
   ;(useSession as jest.Mock).mockReturnValue({
@@ -165,6 +186,45 @@ describe('PersonIdentityCard', () => {
       '/en/dashboard?foo=bar&perspective=irjs',
       { scroll: false },
     )
+  })
+
+  it('renders the position and employer of the first employment', () => {
+    const person = mkPerson()
+    person.employments = [
+      mkEmployment(),
+      mkEmployment({ uid: 'inst2', slug: 'other', names: [] }, 'PR'),
+    ]
+
+    render(<PersonIdentityCard person={person} />)
+
+    expect(screen.getByText('Maître de conférences')).toBeInTheDocument()
+    expect(screen.queryByText('Professeur')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('Paris 1 University'))
+    expect(pushMock).toHaveBeenCalledWith(
+      '/en/dashboard?foo=bar&perspective=up1',
+      { scroll: false },
+    )
+  })
+
+  it('renders the employer as plain text when it has no slug', () => {
+    const person = mkPerson()
+    person.employments = [mkEmployment({ slug: null })]
+
+    render(<PersonIdentityCard person={person} />)
+
+    fireEvent.click(screen.getByText('Paris 1 University'))
+    expect(pushMock).not.toHaveBeenCalled()
+  })
+
+  it('does not name a hidden employer but keeps the position', () => {
+    const person = mkPerson()
+    person.employments = [mkEmployment({ hiddenEffective: true })]
+
+    render(<PersonIdentityCard person={person} />)
+
+    expect(screen.getByText('Maître de conférences')).toBeInTheDocument()
+    expect(screen.queryByText('Paris 1 University')).not.toBeInTheDocument()
   })
 
   it('renders only preset identifiers with correct links', () => {

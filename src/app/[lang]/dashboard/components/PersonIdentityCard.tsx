@@ -25,6 +25,8 @@ import { useSession } from 'next-auth/react'
 import { t } from '@lingui/core/macro'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
+import { employeeTypeLabel } from '@/lib/employeeTypes'
+import { Literal } from '@/types/Literal'
 
 const IDENTIFIERS_TO_SHOW: DbPersonIdentifierType[] = [
   DbPersonIdentifierType.idhals,
@@ -37,6 +39,17 @@ const initialsFromDisplayName = (displayName: string): string => {
   const initials = parts.slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '')
   return initials.join('') || 'N/C'
 }
+
+// Employments may come from JSON, so the unit is read as a plain object.
+const organizationName = (
+  unit: { names?: Literal[]; acronym: string | null },
+  language: ExtendedLanguageCode,
+): string =>
+  unit.names?.find((name) => name.language === language)?.value ||
+  unit.names?.find((name) => name.language === 'en')?.value ||
+  unit.names?.[0]?.value ||
+  unit.acronym ||
+  ''
 
 const PersonIdentityCard = ({ person }: { person: IAgent }) => {
   if (!isPerson(person)) {
@@ -61,6 +74,18 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
     params.set('perspective', slug)
     router.push(`${pathname}?${params.toString()}`, { scroll: false })
   }
+  // Same rule as the members table: the first employment wins.
+  const employment = person.employments[0]
+  const position = employment?.positionCode
+    ? employeeTypeLabel(employment.positionCode)
+    : null
+  // A structure hidden from the directory is not named here either.
+  const employer =
+    employment && !employment.organizationUnit.hiddenEffective
+      ? employment.organizationUnit
+      : null
+  const employerName = employer ? organizationName(employer, lang) : ''
+
   const identifiersToDisplay = useMemo(() => {
     return person
       .getIdentifiers()
@@ -103,12 +128,54 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
               {initialsFromDisplayName(displayName)}
             </Box>
 
-            <Typography
-              align='center'
-              sx={{ fontWeight: 700, lineHeight: 1.25 }}
-            >
-              {displayName || 'N/C'}
-            </Typography>
+            <Stack spacing={0.5} alignItems='center' sx={{ px: 1 }}>
+              <Typography
+                align='center'
+                sx={{ fontWeight: 700, lineHeight: 1.25 }}
+              >
+                {displayName || 'N/C'}
+              </Typography>
+              {position && (
+                <Typography
+                  align='center'
+                  variant='body1'
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    lineHeight: 1.35,
+                  }}
+                >
+                  {position}
+                </Typography>
+              )}
+            </Stack>
+
+            {employerName && (
+              <Typography
+                align='center'
+                variant='body2'
+                sx={{
+                  color: theme.palette.text.primary,
+                  fontWeight: 700,
+                  lineHeight: 1.35,
+                  px: 1,
+                }}
+              >
+                {employer?.slug ? (
+                  <Box
+                    component='span'
+                    sx={{
+                      cursor: 'pointer',
+                      '&:hover': { textDecoration: 'underline' },
+                    }}
+                    onClick={() => navigateToPerspective(employer.slug!)}
+                  >
+                    {employerName}
+                  </Box>
+                ) : (
+                  employerName
+                )}
+              </Typography>
+            )}
 
             {person.memberships.length > 0 && (
               <Typography
@@ -118,6 +185,7 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
                   color: theme.palette.text.secondary,
                   lineHeight: 1.35,
                   px: 1,
+                  pt: 1,
                 }}
               >
                 {person.memberships
