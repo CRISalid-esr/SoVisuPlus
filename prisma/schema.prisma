@@ -635,6 +635,8 @@ model OrganizationUnit {
   localTypes        Json? // [{ value, language }] — display only
   /// HAL collection code (e.g. "ERC"), extracted from the collection URL sent by the graph
   halCollection     String?
+  /// Website URL. Not yet sent by the graph: never written by the ETL upsert.
+  websiteUrl        String?
 
   /// Explicit visibility toggle, set from the UI by a structure_manager.
   /// Never written by the ETL upsert, so it survives graph events.
