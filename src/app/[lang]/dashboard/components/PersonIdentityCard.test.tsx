@@ -1,14 +1,21 @@
 import '@testing-library/jest-dom'
 import React from 'react'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import * as Lingui from '@lingui/core'
 
 import PersonIdentityCard from './PersonIdentityCard'
 import { Person } from '@/types/Person'
 import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { PersonMembership } from '@/types/PersonMembership'
+import { PersonEmployment } from '@/types/PersonEmployment'
 import { IAgent } from '@/types/IAgent'
-import { OrganizationCategory, PersonIdentifierType } from '@prisma/client'
+import {
+  OrganizationCategory,
+  OrganizationGenericType,
+  PersonIdentifierType,
+} from '@prisma/client'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
+import { Literal } from '@/types/Literal'
 import { useSession } from 'next-auth/react'
 import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
 import { PermissionAction, PermissionSubject } from '@/types/Permission'
@@ -18,10 +25,7 @@ jest.mock('next-auth/react', () => ({
   useSession: jest.fn(() => ({ data: null })),
 }))
 
-const pushMock = jest.fn()
-
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({ push: pushMock }),
   usePathname: () => '/en/dashboard',
   useSearchParams: () => ({
     toString: () => 'foo=bar',
@@ -36,21 +40,24 @@ jest.mock('next/image', () => ({
   ),
 }))
 
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({
-    href,
-    children,
-    ...rest
-  }: {
-    href: string
-    children: React.ReactNode
-  }) => (
-    <a href={href} {...rest}>
-      {children}
-    </a>
-  ),
-}))
+// Forwards the ref like the real Link (MUI Link passes one) and drops the
+// Next-only `scroll` prop before it reaches the DOM.
+jest.mock('next/link', () => {
+  const MockLink = React.forwardRef<
+    HTMLAnchorElement,
+    { href: string; children: React.ReactNode; scroll?: boolean }
+  >(({ href, children, ...rest }, ref) => {
+    const anchorProps: Record<string, unknown> = { ...rest }
+    delete anchorProps.scroll
+    return (
+      <a ref={ref} href={href} {...anchorProps}>
+        {children}
+      </a>
+    )
+  })
+  MockLink.displayName = 'MockLink'
+  return { __esModule: true, default: MockLink }
+})
 
 // ---------- MUI theme mock ----------
 jest.mock('@mui/material/styles', () => ({
@@ -105,6 +112,39 @@ const mkPerson = (): Person => {
   )
 }
 
+const mkEmployment = (
+  {
+    slug = 'up1' as string | null,
+    names = [
+      Literal.fromObject({ value: 'Université Paris 1', language: 'fr' }),
+      Literal.fromObject({ value: 'Paris 1 University', language: 'en' }),
+    ],
+    hiddenEffective = false,
+  } = {},
+  positionCode: string | null = 'MCF',
+  endDate: string | null = null,
+): PersonEmployment =>
+  new PersonEmployment(
+    new OrganizationUnit(
+      'inst1',
+      'UP1',
+      names,
+      [],
+      OrganizationCategory.institution,
+      OrganizationGenericType.institution,
+      null,
+      [],
+      slug,
+      false,
+      [],
+      false,
+      hiddenEffective,
+    ),
+    null,
+    endDate,
+    positionCode,
+  )
+
 // Session of a user holding account_editor scoped to the given research unit
 const mockAccountEditorSession = (researchUnitUid: string) => {
   ;(useSession as jest.Mock).mockReturnValue({
@@ -139,7 +179,6 @@ const mockAccountEditorSession = (researchUnitUid: string) => {
 // ---------- tests ----------
 describe('PersonIdentityCard', () => {
   beforeEach(() => {
-    pushMock.mockClear()
     ;(useSession as jest.Mock).mockReturnValue({ data: null })
     Lingui.i18n.activate('en')
   })
@@ -153,18 +192,81 @@ describe('PersonIdentityCard', () => {
     expect(screen.getByText('Pascal Renard')).toBeInTheDocument()
   })
 
-  it('renders research unit acronym and navigates on click', () => {
+  it('links the research unit acronym to its perspective', () => {
     const person = mkPerson()
 
     render(<PersonIdentityCard person={person} />)
 
-    const acronym = screen.getByText('IRJS')
-    fireEvent.click(acronym)
-
-    expect(pushMock).toHaveBeenCalledWith(
+    expect(screen.getByRole('link', { name: 'IRJS' })).toHaveAttribute(
+      'href',
       '/en/dashboard?foo=bar&perspective=irjs',
-      { scroll: false },
     )
+  })
+
+  it('renders the position and employer of the first employment', () => {
+    const person = mkPerson()
+    person.employments = [
+      mkEmployment(),
+      mkEmployment({ slug: 'other', names: [] }, 'PR'),
+    ]
+
+    render(<PersonIdentityCard person={person} />)
+
+    expect(screen.getByText('Maître de conférences')).toBeInTheDocument()
+    expect(screen.queryByText('Professeur')).not.toBeInTheDocument()
+
+    expect(
+      screen.getByRole('link', { name: 'Paris 1 University' }),
+    ).toHaveAttribute('href', '/en/dashboard?foo=bar&perspective=up1')
+  })
+
+  it('renders the employer as plain text when it has no slug', () => {
+    const person = mkPerson()
+    person.employments = [mkEmployment({ slug: null })]
+
+    render(<PersonIdentityCard person={person} />)
+
+    expect(screen.getByText('Paris 1 University')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: 'Paris 1 University' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('does not name a hidden employer but keeps the position', () => {
+    const person = mkPerson()
+    person.employments = [mkEmployment({ hiddenEffective: true })]
+
+    render(<PersonIdentityCard person={person} />)
+
+    expect(screen.getByText('Maître de conférences')).toBeInTheDocument()
+    expect(screen.queryByText('Paris 1 University')).not.toBeInTheDocument()
+  })
+
+  it('skips ended employments', () => {
+    const person = mkPerson()
+    person.employments = [
+      mkEmployment({ names: [] }, 'PR', new Date(2000, 0, 1).toDateString()),
+      mkEmployment({}, 'MCF', new Date(2999, 11, 31).toDateString()),
+    ]
+
+    render(<PersonIdentityCard person={person} />)
+
+    expect(screen.queryByText('Professeur')).not.toBeInTheDocument()
+    expect(screen.queryByText('UP1')).not.toBeInTheDocument()
+    expect(screen.getByText('Maître de conférences')).toBeInTheDocument()
+    expect(screen.getByText('Paris 1 University')).toBeInTheDocument()
+  })
+
+  it('shows neither position nor employer when every employment has ended', () => {
+    const person = mkPerson()
+    person.employments = [
+      mkEmployment({}, 'MCF', new Date(2000, 0, 1).toDateString()),
+    ]
+
+    render(<PersonIdentityCard person={person} />)
+
+    expect(screen.queryByText('Maître de conférences')).not.toBeInTheDocument()
+    expect(screen.queryByText('Paris 1 University')).not.toBeInTheDocument()
   })
 
   it('renders only preset identifiers with correct links', () => {

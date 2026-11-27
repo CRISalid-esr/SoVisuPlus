@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react'
 import {
   Box,
+  Link as MuiLink,
   Card,
   CardContent,
   IconButton,
@@ -16,7 +17,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { isPerson } from '@/types/Person'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { IAgent } from '@/types/IAgent'
@@ -25,6 +26,8 @@ import { useSession } from 'next-auth/react'
 import { t } from '@lingui/core/macro'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
+import { employeeTypeLabel } from '@/lib/employeeTypes'
+import { PersonEmployment } from '@/types/PersonEmployment'
 
 const IDENTIFIERS_TO_SHOW: DbPersonIdentifierType[] = [
   DbPersonIdentifierType.idhals,
@@ -43,7 +46,6 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
     throw new Error('PersonIdentityCard: agent is not a Person')
   }
   const theme = useTheme()
-  const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const lang = (Lingui.i18n.locale || 'ul') as ExtendedLanguageCode
@@ -56,11 +58,28 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
   const canEditAccount =
     !!person.slug && ability.can(PermissionAction.update, person, 'identifiers')
 
-  const navigateToPerspective = (slug: string) => {
+  // Real links, so the structures are reachable with the keyboard
+  const perspectiveHref = (slug: string) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('perspective', slug)
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    return `${pathname}?${params.toString()}`
   }
+  // First current employment: an ended one no longer names the employer.
+  const employment = person.employments.find((e) =>
+    PersonEmployment.isCurrent(e),
+  )
+  const position = employment?.positionCode
+    ? employeeTypeLabel(employment.positionCode)
+    : null
+  // A structure hidden from the directory is not named here either.
+  const employer =
+    employment && !employment.organizationUnit.hiddenEffective
+      ? employment.organizationUnit
+      : null
+  const employerName = employer
+    ? employer.getDisplayName(lang) || employer.acronym || ''
+    : ''
+
   const identifiersToDisplay = useMemo(() => {
     return person
       .getIdentifiers()
@@ -103,12 +122,53 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
               {initialsFromDisplayName(displayName)}
             </Box>
 
-            <Typography
-              align='center'
-              sx={{ fontWeight: 700, lineHeight: 1.25 }}
-            >
-              {displayName || 'N/C'}
-            </Typography>
+            <Stack spacing={0.5} alignItems='center' sx={{ px: 1 }}>
+              <Typography
+                align='center'
+                sx={{ fontWeight: 700, lineHeight: 1.25 }}
+              >
+                {displayName || 'N/C'}
+              </Typography>
+              {position && (
+                <Typography
+                  align='center'
+                  variant='body1'
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    lineHeight: 1.35,
+                  }}
+                >
+                  {position}
+                </Typography>
+              )}
+            </Stack>
+
+            {employerName && (
+              <Typography
+                align='center'
+                variant='body2'
+                sx={{
+                  color: theme.palette.text.primary,
+                  fontWeight: 700,
+                  lineHeight: 1.35,
+                  px: 1,
+                }}
+              >
+                {employer?.slug ? (
+                  <MuiLink
+                    component={Link}
+                    href={perspectiveHref(employer.slug)}
+                    scroll={false}
+                    color='inherit'
+                    underline='hover'
+                  >
+                    {employerName}
+                  </MuiLink>
+                ) : (
+                  employerName
+                )}
+              </Typography>
+            )}
 
             {person.memberships.length > 0 && (
               <Typography
@@ -118,6 +178,7 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
                   color: theme.palette.text.secondary,
                   lineHeight: 1.35,
                   px: 1,
+                  pt: 1,
                 }}
               >
                 {person.memberships
@@ -133,22 +194,21 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
                   .map((m, index, arr) => {
                     const rs = m.organizationUnit!
                     return (
-                      <Box
-                        key={rs.uid}
-                        component='span'
-                        sx={{
-                          cursor: 'pointer',
-                          fontWeight: 500,
-                          color: theme.palette.primary.main,
-                          '&:hover': {
-                            textDecoration: 'underline',
-                          },
-                        }}
-                        onClick={() => navigateToPerspective(rs.slug!)}
-                      >
-                        {rs.acronym}
+                      <React.Fragment key={rs.uid}>
+                        <MuiLink
+                          component={Link}
+                          href={perspectiveHref(rs.slug!)}
+                          scroll={false}
+                          underline='hover'
+                          sx={{
+                            fontWeight: 500,
+                            color: theme.palette.primary.main,
+                          }}
+                        >
+                          {rs.acronym}
+                        </MuiLink>
                         {index < arr.length - 1 ? ', ' : ''}
-                      </Box>
+                      </React.Fragment>
                     )
                   })}
               </Typography>

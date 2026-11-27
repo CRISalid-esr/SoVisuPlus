@@ -4,7 +4,10 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
-import { identifiersWithOrcidGrantInclude } from '@/lib/daos/personIncludes'
+import {
+  identifiersWithOrcidGrantInclude,
+  organizationUnitWithParentsInclude,
+} from '@/lib/daos/personIncludes'
 import { User } from '@/types/User'
 import { EntityType } from '@/types/UserRoleScope'
 
@@ -54,14 +57,12 @@ export class UserDAO extends AbstractDAO {
               identifiers: identifiersWithOrcidGrantInclude,
               memberships: {
                 include: {
-                  organizationUnit: {
-                    include: {
-                      labels: true,
-                      parents: { include: { parent: true } },
-                      descriptions: true,
-                      identifiers: true,
-                    },
-                  },
+                  organizationUnit: organizationUnitWithParentsInclude,
+                },
+              },
+              employments: {
+                include: {
+                  organizationUnit: organizationUnitWithParentsInclude,
                 },
               },
               records: {

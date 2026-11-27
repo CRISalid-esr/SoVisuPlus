@@ -1,12 +1,31 @@
 'use client'
 
 import React from 'react'
-import { Card, CardContent, Chip, Stack, Typography } from '@mui/material'
+import { Card, CardContent, Chip, Link, Stack, Typography } from '@mui/material'
+import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { IAgent } from '@/types/IAgent'
 import { isOrganizationUnit, OrganizationUnit } from '@/types/OrganizationUnit'
 import { nationalTypeLabel } from '@/app/[lang]/components/organizationTypeLabels'
+
+/**
+ * Parse the website URL, keeping only http(s) links so a stored value can
+ * never inject another scheme (e.g. javascript:). Credentials are dropped
+ * so they are neither sent to the site nor exposed in the page.
+ */
+const safeWebsiteUrl = (value: string | null): URL | null => {
+  if (!value) return null
+  try {
+    const url = new URL(value)
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null
+    url.username = ''
+    url.password = ''
+    return url
+  } catch {
+    return null
+  }
+}
 
 const OrganizationUnitIdentityCard = ({
   organizationUnit,
@@ -33,6 +52,7 @@ const OrganizationUnitIdentityCard = ({
   const secondaryType = localTypeUsed
     ? nationalTypeLabel(Lingui.i18n, organization.nationalType)
     : null
+  const website = safeWebsiteUrl(organization.websiteUrl)
   return (
     <Card sx={{ borderRadius: 1, boxShadow: 1, width: '100%' }}>
       <CardContent sx={{ py: 3 }}>
@@ -52,6 +72,19 @@ const OrganizationUnitIdentityCard = ({
                 <Chip size='small' variant='outlined' label={secondaryType} />
               )}
             </Stack>
+          )}
+          {website && (
+            <Link
+              href={website.href}
+              target='_blank'
+              rel='noopener noreferrer'
+              variant='body2'
+              underline='hover'
+              sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+            >
+              <PublicOutlinedIcon fontSize='small' />
+              {website.host + website.pathname.replace(/\/$/, '')}
+            </Link>
           )}
         </Stack>
       </CardContent>

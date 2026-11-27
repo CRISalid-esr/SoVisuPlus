@@ -16,9 +16,15 @@ import {
   PersonIdentifier as DbPersonIdentifier,
   SourcePersonIdentifierType,
 } from '@prisma/client'
-import { PersonMembership } from '@/types/PersonMembership'
+import {
+  PersonMembership,
+  PersonMembershipJson,
+} from '@/types/PersonMembership'
 import { HalCollectionUnit } from '@/types/HalCollectionUnit'
-import { PersonEmployment } from '@/types/PersonEmployment'
+import {
+  PersonEmployment,
+  PersonEmploymentJson,
+} from '@/types/PersonEmployment'
 import { SourcePerson, SourcePersonJson } from '@/types/SourcePerson'
 import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
 import { normalizeSearchText } from '@/utils/fuzzySearch/fuzzySearch'
@@ -36,8 +42,8 @@ interface PersonJson extends IAgentJson {
   firstName?: string
   lastName?: string
   identifiers?: Array<PersonIdentifierJson | ORCIDIdentifierJson>
-  memberships?: PersonMembership[]
-  employments?: PersonEmployment[]
+  memberships?: PersonMembershipJson[]
+  employments?: PersonEmploymentJson[]
   records: SourcePersonJson[]
 }
 
@@ -312,12 +318,14 @@ class Person implements IAgent, Authorizable {
       json.firstName ?? '',
       json.lastName ?? '',
       (json.identifiers ?? []).map((x) => Person.identifiersFromJson(x)),
-      json.memberships ?? [],
+      (json.memberships ?? []).map(PersonMembership.fromJson),
       'person',
       json.slug ?? null,
       json.records.map((record) => SourcePerson.fromJson(record)),
     )
-    hydrated.employments = json.employments ?? []
+    hydrated.employments = (json.employments ?? []).map(
+      PersonEmployment.fromJson,
+    )
     hydrated.validated = json.validated ?? false
     return hydrated
   }

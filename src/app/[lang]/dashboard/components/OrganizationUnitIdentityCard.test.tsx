@@ -79,3 +79,50 @@ describe('OrganizationUnitIdentityCard type chip', () => {
     ).toThrow('agent is not an OrganizationUnit')
   })
 })
+
+describe('OrganizationUnitIdentityCard website link', () => {
+  const withWebsite = (websiteUrl: string | null) => {
+    const team = makeTeam({})
+    team.websiteUrl = websiteUrl
+    return team
+  }
+
+  it('opens the website in a new window', () => {
+    render(
+      <OrganizationUnitIdentityCard
+        organizationUnit={withWebsite('https://www.example.org/axe/')}
+      />,
+    )
+
+    const link = screen.getByRole('link', { name: 'www.example.org/axe' })
+    expect(link).toHaveAttribute('href', 'https://www.example.org/axe/')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
+  it('drops credentials from the link', () => {
+    render(
+      <OrganizationUnitIdentityCard
+        organizationUnit={withWebsite('https://alice:secret@www.example.org/')}
+      />,
+    )
+
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      'https://www.example.org/',
+    )
+  })
+
+  it.each([null, 'not a url', 'javascript:alert(1)'])(
+    'shows no link for %p',
+    (websiteUrl) => {
+      render(
+        <OrganizationUnitIdentityCard
+          organizationUnit={withWebsite(websiteUrl)}
+        />,
+      )
+
+      expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    },
+  )
+})

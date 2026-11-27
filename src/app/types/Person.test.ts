@@ -6,7 +6,15 @@ import { SourcePerson } from '@/types/SourcePerson'
 import { SourcePersonIdentifier } from '@/types/SourcePersonIdentifier'
 import { BibliographicPlatform } from '@/types/BibliographicPlatform'
 import { LocRelator } from '@/types/LocRelator'
-import { SourcePersonIdentifierType } from '@prisma/client'
+import {
+  OrganizationCategory,
+  OrganizationGenericType,
+  SourcePersonIdentifierType,
+} from '@prisma/client'
+import { PersonEmployment } from '@/types/PersonEmployment'
+import { PersonMembership } from '@/types/PersonMembership'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
+import { Literal } from '@/types/Literal'
 import { describe, expect, it } from '@jest/globals'
 import {
   PersonIdentifier,
@@ -415,5 +423,49 @@ describe('Person.displayIdentifiers', () => {
     ])
     const person = personWith([elsewhere])
     expect(pairs(person, documentWith([record('r1', [])]))).toEqual([])
+  })
+})
+
+describe('Person.fromJson', () => {
+  const university = () =>
+    new OrganizationUnit(
+      'inst1',
+      'UP1',
+      [Literal.fromObject({ value: 'Université Paris 1', language: 'fr' })],
+      [],
+      OrganizationCategory.institution,
+      OrganizationGenericType.institution,
+    )
+
+  it('hydrates memberships and employments sent by the API', () => {
+    const person = new Person(
+      'P1',
+      false,
+      null,
+      'Jane Doe',
+      'Jane',
+      'Doe',
+      [],
+      [new PersonMembership(university(), null, null, null)],
+    )
+    person.employments = [new PersonEmployment(university(), null, null, 'MCF')]
+
+    // Same round trip as an API route response read by a client store
+    const hydrated = Person.fromJson(JSON.parse(JSON.stringify(person)))
+
+    const [membership] = hydrated.memberships
+    expect(membership).toBeInstanceOf(PersonMembership)
+    expect(membership.organizationUnit).toBeInstanceOf(OrganizationUnit)
+    expect(membership.organizationUnit.getDisplayName('fr')).toBe(
+      'Université Paris 1',
+    )
+
+    const [employment] = hydrated.employments
+    expect(employment).toBeInstanceOf(PersonEmployment)
+    expect(employment.organizationUnit).toBeInstanceOf(OrganizationUnit)
+    expect(employment.organizationUnit.getDisplayName('fr')).toBe(
+      'Université Paris 1',
+    )
+    expect(employment.positionCode).toBe('MCF')
   })
 })

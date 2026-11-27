@@ -24,3 +24,17 @@ export const identifiersWithOrcidGrantInclude = {
     },
   },
 } satisfies Prisma.PersonIdentifierDefaultArgs
+
+/**
+ * Organization unit with the relations mapped by
+ * OrganizationUnit.fromDbOrganizationUnit, for person memberships and
+ * employments.
+ */
+export const organizationUnitWithParentsInclude = {
+  include: {
+    labels: true,
+    parents: { include: { parent: true } },
+    identifiers: true,
+    descriptions: true,
+  },
+} satisfies Prisma.OrganizationUnitDefaultArgs

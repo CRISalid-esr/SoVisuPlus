@@ -29,6 +29,7 @@ interface OrganizationUnitJson {
   hidden: boolean
   hiddenEffective: boolean
   halCollection: string | null
+  websiteUrl?: string | null
 }
 
 const ORGANIZATION_AGENT_TYPES = new Set<AgentType>([
@@ -70,6 +71,8 @@ class OrganizationUnit implements IAgent {
     public hiddenEffective: boolean = false,
     /** HAL collection code of the structure (e.g. "ERC"), null when unknown. */
     public halCollection: string | null = null,
+    /** Website URL of the structure, null when unknown. */
+    public websiteUrl: string | null = null,
   ) {
     this.identifiers = _identifiers
   }
@@ -187,6 +190,7 @@ class OrganizationUnit implements IAgent {
       organizationUnit.hidden,
       organizationUnit.hiddenEffective,
       organizationUnit.halCollection,
+      organizationUnit.websiteUrl,
     )
     hydrated.parents =
       organizationUnit.parents?.map(
@@ -231,6 +235,7 @@ class OrganizationUnit implements IAgent {
       organizationUnit.hidden,
       organizationUnit.hiddenEffective,
       organizationUnit.halCollection,
+      organizationUnit.websiteUrl,
     )
   }
 
@@ -250,6 +255,7 @@ class OrganizationUnit implements IAgent {
       organizationUnit.hidden || false,
       organizationUnit.hiddenEffective || false,
       organizationUnit.halCollection || null,
+      organizationUnit.websiteUrl || null,
     )
   }
 }
