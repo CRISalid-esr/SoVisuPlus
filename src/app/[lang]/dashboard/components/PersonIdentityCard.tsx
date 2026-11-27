@@ -27,7 +27,6 @@ import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { employeeTypeLabel } from '@/lib/employeeTypes'
 import { PersonEmployment } from '@/types/PersonEmployment'
-import { Literal } from '@/types/Literal'
 
 const IDENTIFIERS_TO_SHOW: DbPersonIdentifierType[] = [
   DbPersonIdentifierType.idhals,
@@ -40,17 +39,6 @@ const initialsFromDisplayName = (displayName: string): string => {
   const initials = parts.slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '')
   return initials.join('') || 'N/C'
 }
-
-// Employments may come from JSON, so the unit is read as a plain object.
-const organizationName = (
-  unit: { names?: Literal[]; acronym: string | null },
-  language: ExtendedLanguageCode,
-): string =>
-  unit.names?.find((name) => name.language === language)?.value ||
-  unit.names?.find((name) => name.language === 'en')?.value ||
-  unit.names?.[0]?.value ||
-  unit.acronym ||
-  ''
 
 const PersonIdentityCard = ({ person }: { person: IAgent }) => {
   if (!isPerson(person)) {
@@ -87,7 +75,9 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
     employment && !employment.organizationUnit.hiddenEffective
       ? employment.organizationUnit
       : null
-  const employerName = employer ? organizationName(employer, lang) : ''
+  const employerName = employer
+    ? employer.getDisplayName(lang) || employer.acronym || ''
+    : ''
 
   const identifiersToDisplay = useMemo(() => {
     return person

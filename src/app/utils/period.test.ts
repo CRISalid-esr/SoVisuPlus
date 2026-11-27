@@ -1,7 +1,6 @@
-// Tests which employments count as current for the identity card
-import { PersonEmployment } from '@/types/PersonEmployment'
+import { isCurrentPeriod } from '@/utils/period'
 
-describe('PersonEmployment.isCurrent', () => {
+describe('isCurrentPeriod', () => {
   const now = new Date(2026, 10, 5, 15, 30)
 
   it.each([
@@ -11,6 +10,6 @@ describe('PersonEmployment.isCurrent', () => {
     [new Date(2026, 10, 5).toDateString(), false],
     [new Date(2026, 10, 4).toDateString(), false],
   ])('endDate %j → %s', (endDate, expected) => {
-    expect(PersonEmployment.isCurrent({ endDate }, now)).toBe(expected)
+    expect(isCurrentPeriod(endDate, now)).toBe(expected)
   })
 })

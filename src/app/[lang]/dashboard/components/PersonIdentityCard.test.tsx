@@ -9,7 +9,13 @@ import { PersonIdentifier } from '@/types/PersonIdentifier'
 import { PersonMembership } from '@/types/PersonMembership'
 import { PersonEmployment } from '@/types/PersonEmployment'
 import { IAgent } from '@/types/IAgent'
-import { OrganizationCategory, PersonIdentifierType } from '@prisma/client'
+import {
+  OrganizationCategory,
+  OrganizationGenericType,
+  PersonIdentifierType,
+} from '@prisma/client'
+import { OrganizationUnit } from '@/types/OrganizationUnit'
+import { Literal } from '@/types/Literal'
 import { useSession } from 'next-auth/react'
 import { makeAssignment, makeAuthzContext } from '@/app/auth/context'
 import { PermissionAction, PermissionSubject } from '@/types/Permission'
@@ -107,26 +113,37 @@ const mkPerson = (): Person => {
 }
 
 const mkEmployment = (
-  overrides: Partial<PersonEmployment['organizationUnit']> = {},
+  {
+    slug = 'up1' as string | null,
+    names = [
+      Literal.fromObject({ value: 'Université Paris 1', language: 'fr' }),
+      Literal.fromObject({ value: 'Paris 1 University', language: 'en' }),
+    ],
+    hiddenEffective = false,
+  } = {},
   positionCode: string | null = 'MCF',
   endDate: string | null = null,
 ): PersonEmployment =>
-  ({
-    positionCode,
+  new PersonEmployment(
+    new OrganizationUnit(
+      'inst1',
+      'UP1',
+      names,
+      [],
+      OrganizationCategory.institution,
+      OrganizationGenericType.institution,
+      null,
+      [],
+      slug,
+      false,
+      [],
+      false,
+      hiddenEffective,
+    ),
+    null,
     endDate,
-    organizationUnit: {
-      uid: 'inst1',
-      acronym: 'UP1',
-      slug: 'up1',
-      names: [
-        { value: 'Université Paris 1', language: 'fr' },
-        { value: 'Paris 1 University', language: 'en' },
-      ],
-      category: OrganizationCategory.institution,
-      hiddenEffective: false,
-      ...overrides,
-    },
-  }) as PersonEmployment
+    positionCode,
+  )
 
 // Session of a user holding account_editor scoped to the given research unit
 const mockAccountEditorSession = (researchUnitUid: string) => {
@@ -194,7 +211,7 @@ describe('PersonIdentityCard', () => {
     const person = mkPerson()
     person.employments = [
       mkEmployment(),
-      mkEmployment({ uid: 'inst2', slug: 'other', names: [] }, 'PR'),
+      mkEmployment({ slug: 'other', names: [] }, 'PR'),
     ]
 
     render(<PersonIdentityCard person={person} />)

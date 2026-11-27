@@ -1,21 +1,15 @@
-import { Prisma, User as DbUser } from '@prisma/client'
+import { User as DbUser } from '@prisma/client'
 import {
   PersonIdentifier,
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { AbstractDAO } from '@/lib/daos/AbstractDAO'
-import { identifiersWithOrcidGrantInclude } from '@/lib/daos/personIncludes'
+import {
+  identifiersWithOrcidGrantInclude,
+  organizationUnitWithParentsInclude,
+} from '@/lib/daos/personIncludes'
 import { User } from '@/types/User'
 import { EntityType } from '@/types/UserRoleScope'
-
-const organizationUnitInclude = {
-  include: {
-    labels: true,
-    parents: { include: { parent: true } },
-    descriptions: true,
-    identifiers: true,
-  },
-} satisfies Prisma.OrganizationUnitDefaultArgs
 
 /** UserDAO: Handles operations related to User records */
 export class UserDAO extends AbstractDAO {
@@ -62,10 +56,14 @@ export class UserDAO extends AbstractDAO {
             include: {
               identifiers: identifiersWithOrcidGrantInclude,
               memberships: {
-                include: { organizationUnit: organizationUnitInclude },
+                include: {
+                  organizationUnit: organizationUnitWithParentsInclude,
+                },
               },
               employments: {
-                include: { organizationUnit: organizationUnitInclude },
+                include: {
+                  organizationUnit: organizationUnitWithParentsInclude,
+                },
               },
               records: {
                 include: {

@@ -1,5 +1,16 @@
-import { OrganizationUnit } from '@/types/OrganizationUnit'
+import {
+  OrganizationUnit,
+  OrganizationUnitJson,
+} from '@/types/OrganizationUnit'
 import { MembershipWithRelations } from '@/prisma-schema/extended-client'
+import { isCurrentPeriod } from '@/utils/period'
+
+interface PersonMembershipJson {
+  organizationUnit: OrganizationUnitJson
+  startDate?: string | null
+  endDate?: string | null
+  positionCode?: string | null
+}
 
 class PersonMembership {
   constructor(
@@ -17,15 +28,7 @@ class PersonMembership {
     membership: Pick<PersonMembership, 'endDate'>,
     now: Date = new Date(),
   ): boolean {
-    if (!membership.endDate) {
-      return true
-    }
-    const startOfToday = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-    )
-    return new Date(membership.endDate) > startOfToday
+    return isCurrentPeriod(membership.endDate, now)
   }
 
   static fromDbPersonMembership(
@@ -38,6 +41,16 @@ class PersonMembership {
       membership.positionCode,
     )
   }
+
+  static fromJson(membership: PersonMembershipJson): PersonMembership {
+    return new PersonMembership(
+      OrganizationUnit.fromJson(membership.organizationUnit),
+      membership.startDate ?? null,
+      membership.endDate ?? null,
+      membership.positionCode ?? null,
+    )
+  }
 }
 
 export { PersonMembership }
+export type { PersonMembershipJson }

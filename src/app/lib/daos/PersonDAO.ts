@@ -14,7 +14,10 @@ import {
   PersonIdentifierType,
 } from '@/types/PersonIdentifier'
 import { AbstractDAO, DbClient } from '@/lib/daos/AbstractDAO'
-import { identifiersWithOrcidGrantInclude } from '@/lib/daos/personIncludes'
+import {
+  identifiersWithOrcidGrantInclude,
+  organizationUnitWithParentsInclude,
+} from '@/lib/daos/personIncludes'
 import {
   isUniqueConstraintError,
   UniqueConstraintError,
@@ -39,21 +42,6 @@ import {
   withWordSimilarityThreshold,
 } from '@/lib/daos/search/trigramSearchSql'
 import { tokenizeSearchQuery } from '@/utils/fuzzySearch/fuzzySearch'
-/**
- * Thrown when an identifier cannot be created because one already exists —
- * either the person already has an identifier of that type, or the value is
- * already used by another person (`@@unique([type, value])`). Callers translate
- * this into a 409 (remove-before-add).
- */
-const organizationUnitWithParentsInclude = {
-  include: {
-    labels: true,
-    parents: { include: { parent: true } },
-    identifiers: true,
-    descriptions: true,
-  },
-} satisfies Prisma.OrganizationUnitDefaultArgs
-
 /** Relations mapped by Person.fromDbPerson for people search results. */
 const peopleSearchInclude = {
   memberships: {
@@ -77,6 +65,12 @@ const LOCAL_ONLY_IDENTIFIER_TYPES: PersonIdentifierType[] = [
   PersonIdentifierType.hal_login,
 ]
 
+/**
+ * Thrown when an identifier cannot be created because one already exists —
+ * either the person already has an identifier of that type, or the value is
+ * already used by another person (`@@unique([type, value])`). Callers translate
+ * this into a 409 (remove-before-add).
+ */
 export class IdentifierConflictError extends Error {
   constructor(
     public readonly reason: IdentifierConflictReason = 'slot_taken',
