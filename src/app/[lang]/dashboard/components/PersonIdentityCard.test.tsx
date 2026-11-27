@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom'
 import React from 'react'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import * as Lingui from '@lingui/core'
 
 import PersonIdentityCard from './PersonIdentityCard'
@@ -25,10 +25,7 @@ jest.mock('next-auth/react', () => ({
   useSession: jest.fn(() => ({ data: null })),
 }))
 
-const pushMock = jest.fn()
-
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({ push: pushMock }),
   usePathname: () => '/en/dashboard',
   useSearchParams: () => ({
     toString: () => 'foo=bar',
@@ -43,21 +40,24 @@ jest.mock('next/image', () => ({
   ),
 }))
 
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({
-    href,
-    children,
-    ...rest
-  }: {
-    href: string
-    children: React.ReactNode
-  }) => (
-    <a href={href} {...rest}>
-      {children}
-    </a>
-  ),
-}))
+// Forwards the ref like the real Link (MUI Link passes one) and drops the
+// Next-only `scroll` prop before it reaches the DOM.
+jest.mock('next/link', () => {
+  const MockLink = React.forwardRef<
+    HTMLAnchorElement,
+    { href: string; children: React.ReactNode; scroll?: boolean }
+  >(({ href, children, ...rest }, ref) => {
+    const anchorProps: Record<string, unknown> = { ...rest }
+    delete anchorProps.scroll
+    return (
+      <a ref={ref} href={href} {...anchorProps}>
+        {children}
+      </a>
+    )
+  })
+  MockLink.displayName = 'MockLink'
+  return { __esModule: true, default: MockLink }
+})
 
 // ---------- MUI theme mock ----------
 jest.mock('@mui/material/styles', () => ({
@@ -179,7 +179,6 @@ const mockAccountEditorSession = (researchUnitUid: string) => {
 // ---------- tests ----------
 describe('PersonIdentityCard', () => {
   beforeEach(() => {
-    pushMock.mockClear()
     ;(useSession as jest.Mock).mockReturnValue({ data: null })
     Lingui.i18n.activate('en')
   })
@@ -193,17 +192,14 @@ describe('PersonIdentityCard', () => {
     expect(screen.getByText('Pascal Renard')).toBeInTheDocument()
   })
 
-  it('renders research unit acronym and navigates on click', () => {
+  it('links the research unit acronym to its perspective', () => {
     const person = mkPerson()
 
     render(<PersonIdentityCard person={person} />)
 
-    const acronym = screen.getByText('IRJS')
-    fireEvent.click(acronym)
-
-    expect(pushMock).toHaveBeenCalledWith(
+    expect(screen.getByRole('link', { name: 'IRJS' })).toHaveAttribute(
+      'href',
       '/en/dashboard?foo=bar&perspective=irjs',
-      { scroll: false },
     )
   })
 
@@ -219,11 +215,9 @@ describe('PersonIdentityCard', () => {
     expect(screen.getByText('Maître de conférences')).toBeInTheDocument()
     expect(screen.queryByText('Professeur')).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByText('Paris 1 University'))
-    expect(pushMock).toHaveBeenCalledWith(
-      '/en/dashboard?foo=bar&perspective=up1',
-      { scroll: false },
-    )
+    expect(
+      screen.getByRole('link', { name: 'Paris 1 University' }),
+    ).toHaveAttribute('href', '/en/dashboard?foo=bar&perspective=up1')
   })
 
   it('renders the employer as plain text when it has no slug', () => {
@@ -232,8 +226,10 @@ describe('PersonIdentityCard', () => {
 
     render(<PersonIdentityCard person={person} />)
 
-    fireEvent.click(screen.getByText('Paris 1 University'))
-    expect(pushMock).not.toHaveBeenCalled()
+    expect(screen.getByText('Paris 1 University')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: 'Paris 1 University' }),
+    ).not.toBeInTheDocument()
   })
 
   it('does not name a hidden employer but keeps the position', () => {

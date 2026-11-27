@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react'
 import {
   Box,
+  Link as MuiLink,
   Card,
   CardContent,
   IconButton,
@@ -16,7 +17,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { isPerson } from '@/types/Person'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import * as Lingui from '@lingui/core'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { IAgent } from '@/types/IAgent'
@@ -45,7 +46,6 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
     throw new Error('PersonIdentityCard: agent is not a Person')
   }
   const theme = useTheme()
-  const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const lang = (Lingui.i18n.locale || 'ul') as ExtendedLanguageCode
@@ -58,10 +58,11 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
   const canEditAccount =
     !!person.slug && ability.can(PermissionAction.update, person, 'identifiers')
 
-  const navigateToPerspective = (slug: string) => {
+  // Real links, so the structures are reachable with the keyboard
+  const perspectiveHref = (slug: string) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('perspective', slug)
-    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    return `${pathname}?${params.toString()}`
   }
   // First current employment: an ended one no longer names the employer.
   const employment = person.employments.find((e) =>
@@ -154,16 +155,15 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
                 }}
               >
                 {employer?.slug ? (
-                  <Box
-                    component='span'
-                    sx={{
-                      cursor: 'pointer',
-                      '&:hover': { textDecoration: 'underline' },
-                    }}
-                    onClick={() => navigateToPerspective(employer.slug!)}
+                  <MuiLink
+                    component={Link}
+                    href={perspectiveHref(employer.slug)}
+                    scroll={false}
+                    color='inherit'
+                    underline='hover'
                   >
                     {employerName}
-                  </Box>
+                  </MuiLink>
                 ) : (
                   employerName
                 )}
@@ -194,22 +194,21 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
                   .map((m, index, arr) => {
                     const rs = m.organizationUnit!
                     return (
-                      <Box
-                        key={rs.uid}
-                        component='span'
-                        sx={{
-                          cursor: 'pointer',
-                          fontWeight: 500,
-                          color: theme.palette.primary.main,
-                          '&:hover': {
-                            textDecoration: 'underline',
-                          },
-                        }}
-                        onClick={() => navigateToPerspective(rs.slug!)}
-                      >
-                        {rs.acronym}
+                      <React.Fragment key={rs.uid}>
+                        <MuiLink
+                          component={Link}
+                          href={perspectiveHref(rs.slug!)}
+                          scroll={false}
+                          underline='hover'
+                          sx={{
+                            fontWeight: 500,
+                            color: theme.palette.primary.main,
+                          }}
+                        >
+                          {rs.acronym}
+                        </MuiLink>
                         {index < arr.length - 1 ? ', ' : ''}
-                      </Box>
+                      </React.Fragment>
                     )
                   })}
               </Typography>
