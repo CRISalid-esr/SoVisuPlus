@@ -2,6 +2,7 @@
 
 import {
   RefObject,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -11,8 +12,10 @@ import {
 import { Box, Card, CardContent, CircularProgress } from '@mui/material'
 import { ExtendedLanguageCode } from '@/types/ExtendLanguageCode'
 import { AgentType } from '@/types/IAgent'
-import { WordstreamData, WordstreamTopic } from '@/types/WordStream'
+import { WordItem, WordstreamData, WordstreamTopic } from '@/types/WordStream'
 import { t } from '@lingui/core/macro'
+import * as Lingui from '@lingui/core'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 type WordStreamProps = {
   uid: string
@@ -65,6 +68,35 @@ const WordStream = ({
   const [data, setData] = useState<WordstreamData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  /**
+   * Open the publications list filtered on the clicked co-author or keyword
+   * (every concept sharing its label) over the whole year range, with every
+   * other filter reset.
+   */
+  const navigateToWordPublications = useCallback(
+    (word: WordItem, uids: string[]) => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete('structures')
+      params.delete('tab')
+      params.set('years', `${fromYear ?? ''},${toYear ?? ''}`)
+      params.set('resetFilters', 'true')
+      if (word.topic === WordstreamTopic.CoAuthors) {
+        params.set('contributor', word.text)
+      } else {
+        params.set('concepts', JSON.stringify([{ name: word.text, uids }]))
+      }
+      router.push(`/${Lingui.i18n.locale}/documents?${params.toString()}`)
+    },
+    [fromYear, toYear, router, searchParams],
+  )
+  // Kept in a ref so that a new callback does not redraw the wordstream
+  const navigateRef = useRef(navigateToWordPublications)
+  useEffect(() => {
+    navigateRef.current = navigateToWordPublications
+  }, [navigateToWordPublications])
 
   useEffect(() => {
     if (ready) return
@@ -171,10 +203,20 @@ const WordStream = ({
     }
 
     window.wordstream(svg, data.slices, config)
+
+    // Replace the library click behaviours (stream highlighting) with ours
+    svg
+      .selectAll<SVGTextElement, WordItem>('.textData')
+      .on('click', function (this: SVGTextElement) {
+        const word = d3.select<SVGTextElement, WordItem>(this).datum()
+        navigateRef.current(word, data.uidsOf(word.text, word.topic))
+      })
+    svg.selectAll('path[topic]').on('click', null)
+
     onRenderedChange?.(true)
   }, [
     ready,
-    data?.slices,
+    data,
     autoSize,
     measured.w,
     measured.h,

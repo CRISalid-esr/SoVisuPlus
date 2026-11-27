@@ -1,7 +1,9 @@
 import dayjs from 'dayjs'
 import {
   COLUMN_FILTERS_KEY,
+  CONCEPTS_FILTER_KEY,
   readInitialColumnFilters,
+  readInitialConceptsFilter,
 } from '@/app/[lang]/documents/hooks/documentTable/utils/persistence'
 import {
   ALL_DOCUMENTS_TAB,
@@ -66,5 +68,26 @@ describe('readInitialColumnFilters', () => {
     expect(readInitialColumnFilters()).toEqual({
       [ALL_DOCUMENTS_TAB]: [{ id: 'type', value: ['Book'] }],
     })
+  })
+})
+
+describe('readInitialConceptsFilter', () => {
+  beforeEach(() => {
+    sessionStorage.clear()
+  })
+
+  it('returns an empty list when nothing is stored', () => {
+    expect(readInitialConceptsFilter()).toEqual([])
+  })
+
+  it('returns an empty list when the stored value is not valid JSON', () => {
+    sessionStorage.setItem(CONCEPTS_FILTER_KEY, '{oops')
+    expect(readInitialConceptsFilter()).toEqual([])
+  })
+
+  it('reads the stored keyword filters', () => {
+    const filters = [{ name: 'Urbanisme', uids: ['c-1', 'c-2'] }]
+    sessionStorage.setItem(CONCEPTS_FILTER_KEY, JSON.stringify(filters))
+    expect(readInitialConceptsFilter()).toEqual(filters)
   })
 })

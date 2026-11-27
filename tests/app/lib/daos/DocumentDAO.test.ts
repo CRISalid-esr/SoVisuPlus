@@ -809,19 +809,25 @@ describe('DocumentDAO Integration Tests', () => {
       uid: string,
       title: string,
       contributor: Person,
-      options: { abstract?: string; journal?: Journal; date?: string } = {},
+      options: {
+        abstract?: string
+        journal?: Journal
+        date?: string
+        period?: [Date, Date]
+        subjects?: Concept[]
+      } = {},
     ) =>
       new Document(
         uid,
         Document.documentTypeFromString('JournalArticle'),
         null,
         options.date ?? null,
-        null,
-        null,
+        options.period?.[0] ?? null,
+        options.period?.[1] ?? null,
         null,
         [new Literal(title, 'fr')],
         options.abstract ? [new Literal(options.abstract, 'en')] : [],
-        [],
+        options.subjects ?? [],
         [new Contribution(contributor, author)],
         [],
         undefined,
@@ -830,7 +836,7 @@ describe('DocumentDAO Integration Tests', () => {
 
     const search = async (
       searchTerm: string,
-      columnFilters: { id: string; value: string }[] = [],
+      columnFilters: { id: string; value: string | string[] }[] = [],
       contributorUids = ['p-dupont', 'p-curie'],
     ) => {
       const params = {
@@ -927,6 +933,62 @@ describe('DocumentDAO Integration Tests', () => {
       expect(
         await search('', [{ id: 'publishedIn', value: 'revue politque' }]),
       ).toEqual(['doc-learning'])
+    })
+
+    test('filters on any of the given concepts', async () => {
+      const concept = (uid: string) =>
+        new Concept(
+          uid,
+          [new Literal('Urbanisme', 'fr')],
+          [],
+          `http://example.com/${uid}`,
+        )
+      try {
+        await documentDAO.createOrUpdateDocument(
+          makeDocument('doc-urban-a', 'Villes moyennes', jean, {
+            date: '2020',
+            period: [
+              new Date('2020-01-01T00:00:00.000Z'),
+              new Date('2020-12-31T23:59:59.999Z'),
+            ],
+            subjects: [concept('c-urban-a')],
+          }),
+        )
+        await documentDAO.createOrUpdateDocument(
+          makeDocument('doc-urban-b', 'Villes nouvelles', marie, {
+            date: '2023',
+            period: [
+              new Date('2023-01-01T00:00:00.000Z'),
+              new Date('2023-12-31T23:59:59.999Z'),
+            ],
+            subjects: [concept('c-urban-b')],
+          }),
+        )
+        expect(
+          await search('', [
+            { id: 'concepts', value: ['c-urban-a', 'c-urban-b'] },
+          ]),
+        ).toEqual(['doc-urban-a', 'doc-urban-b'])
+        expect(
+          await search('', [{ id: 'concepts', value: ['c-urban-b'] }]),
+        ).toEqual(['doc-urban-b'])
+        expect(
+          await search('', [
+            { id: 'concepts', value: ['c-urban-a', 'c-urban-b'] },
+            {
+              id: 'date',
+              value: ['2019-01-01T00:00:00.000Z', '2021-12-31T23:59:59.999Z'],
+            },
+          ]),
+        ).toEqual(['doc-urban-a'])
+        expect(await search('', [{ id: 'concepts', value: [] }])).toHaveLength(
+          5,
+        )
+      } finally {
+        await prisma.concept.deleteMany({
+          where: { uid: { in: ['c-urban-a', 'c-urban-b'] } },
+        })
+      }
     })
 
     test('stays within the contributor perimeter', async () => {
