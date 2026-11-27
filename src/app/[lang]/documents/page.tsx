@@ -133,8 +133,14 @@ const DocumentsPage = () => {
 
     router.push(`/${lang}/documents?${params.toString()}`)
   }
-  const { table, selectedDocuments, structuresFilter, setStructuresFilter } =
-    usePublicationsTable(selectedTab, triggerReloadList, setOpenDialog)
+  const {
+    table,
+    selectedDocuments,
+    structuresFilter,
+    setStructuresFilter,
+    conceptsFilter,
+    setConceptsFilter,
+  } = usePublicationsTable(selectedTab, triggerReloadList, setOpenDialog)
 
   const onDeleteStructureFilter = useCallback(
     (structure: { uid: string; name: string }) => {
@@ -288,6 +294,23 @@ const DocumentsPage = () => {
             </Tooltip>
           )
         })}
+        {conceptsFilter.map((concept) => (
+          <Chip
+            key={concept.name}
+            sx={{ margin: '0 5px 10px 0' }}
+            label={
+              <Trans
+                id='documents_page_concept_filter_chip_label'
+                values={{ name: concept.name }}
+              />
+            }
+            onDelete={() =>
+              setConceptsFilter(
+                conceptsFilter.filter((c) => c.name !== concept.name),
+              )
+            }
+          />
+        ))}
       </Box>
       <MaterialReactTable<Document> table={table} />
       <MergeDialog

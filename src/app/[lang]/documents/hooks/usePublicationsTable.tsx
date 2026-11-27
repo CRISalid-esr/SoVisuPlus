@@ -76,8 +76,11 @@ import InfoIcon from '@mui/icons-material/Info'
 import {
   COLUMN_FILTERS_KEY,
   ColumnFiltersByTab,
+  CONCEPTS_FILTER_KEY,
+  ConceptFilter,
   DEFAULT_PAGINATION,
   readInitialColumnFilters,
+  readInitialConceptsFilter,
   readInitialGlobalFilter,
   readInitialPagination,
   readInitialSorting,
@@ -167,6 +170,7 @@ const usePublicationsTableStorage = (
   globalFilter: string,
   sorting: MRT_SortingState,
   structuresFilter: { uid: string; name: string }[],
+  conceptsFilter: ConceptFilter[],
   columnFiltersByTab: ColumnFiltersByTab,
   pagination: {
     pageIndex: number
@@ -185,6 +189,7 @@ const usePublicationsTableStorage = (
   setStructuresFilter: React.Dispatch<
     React.SetStateAction<{ uid: string; name: string }[]>
   >,
+  setConceptsFilter: React.Dispatch<React.SetStateAction<ConceptFilter[]>>,
 ) => {
   useEffect(() => {
     const id = setTimeout(() => {
@@ -213,6 +218,16 @@ const usePublicationsTableStorage = (
     }, 250)
     return () => clearTimeout(id)
   }, [structuresFilter])
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      sessionStorage.setItem(
+        CONCEPTS_FILTER_KEY,
+        JSON.stringify(conceptsFilter),
+      )
+    }, 250)
+    return () => clearTimeout(id)
+  }, [conceptsFilter])
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -249,12 +264,14 @@ const usePublicationsTableStorage = (
         // context (and any other filter) is meaningless under a new
         // perspective. Every tab is cleared, not just the one on screen.
         setStructuresFilter([])
+        setConceptsFilter([])
         setColumnFiltersByTab({})
         setGlobalFilter('')
         sessionStorage.setItem(
           'mrt_structuresFilter_publication_table',
           JSON.stringify([]),
         )
+        sessionStorage.setItem(CONCEPTS_FILTER_KEY, JSON.stringify([]))
         sessionStorage.setItem(COLUMN_FILTERS_KEY, JSON.stringify({}))
         sessionStorage.setItem(
           'mrt_global_publication_table',
@@ -274,12 +291,14 @@ const usePublicationsTableStorage = (
     setGlobalFilter,
     setColumnFiltersByTab,
     setStructuresFilter,
+    setConceptsFilter,
   ])
 }
 
 const usePublicationsTableDataFetching = (
   columnFiltersByTab: ColumnFiltersByTab,
   structuresFilter: { uid: string; name: string }[],
+  conceptsFilter: ConceptFilter[],
   globalFilter: string,
   sorting: MRT_SortingState,
   pagination: {
@@ -312,10 +331,14 @@ const usePublicationsTableDataFetching = (
         id: 'structures',
         value: structuresFilter.map((s) => s.uid),
       })
+      filters.push({
+        id: 'concepts',
+        value: conceptsFilter.flatMap((c) => c.uids),
+      })
 
       return applyTabScope(filters, tab)
     },
-    [columnFiltersByTab, structuresFilter],
+    [columnFiltersByTab, structuresFilter, conceptsFilter],
   )
 
   useEffect(() => {
@@ -459,6 +482,10 @@ export const usePublicationsTable = (
     { uid: string; name: string }[]
   >(readInitialStructuresFilter)
 
+  const [conceptsFilter, setConceptsFilter] = useState<ConceptFilter[]>(
+    readInitialConceptsFilter,
+  )
+
   const [yearsFilter, setYearsFilter] = useState<Dayjs[]>([])
 
   const initialPagination = useMemo(() => {
@@ -474,12 +501,14 @@ export const usePublicationsTable = (
     globalFilter,
     sorting,
     structuresFilter,
+    conceptsFilter,
     columnFiltersByTab,
     pagination,
     setPagination,
     setGlobalFilter,
     setColumnFiltersByTab,
     setStructuresFilter,
+    setConceptsFilter,
   )
 
   // Declared after usePublicationsTableStorage so that, in a commit where the
@@ -510,11 +539,21 @@ export const usePublicationsTable = (
         .map((date, index) =>
           index === 0 ? date.startOf('year') : date.endOf('year'),
         )
-      // Keep only the date filter when the link asks for a reset.
+      const contributor = searchParams.get('contributor')
+      const concepts: ConceptFilter[] = JSON.parse(
+        searchParams.get('concepts') || '[]',
+      )
+      // Keep only the filters carried by the link when it asks for a reset.
       if (searchParams.get('resetFilters') === 'true') {
         setColumnFiltersByTab({
-          [selectedTab]: [{ id: 'date', value: formattedYears }],
+          [selectedTab]: [
+            { id: 'date', value: formattedYears },
+            ...(contributor
+              ? [{ id: 'contributions', value: contributor }]
+              : []),
+          ],
         })
+        setConceptsFilter(concepts)
         setGlobalFilter('')
         setPagination((previous) => ({ ...previous, pageIndex: 0 }))
       } else {
@@ -524,6 +563,8 @@ export const usePublicationsTable = (
       params.delete('years')
       params.delete('structures')
       params.delete('resetFilters')
+      params.delete('contributor')
+      params.delete('concepts')
       router.replace(`/${lang}/documents?${params}`)
     }
   }, [currentPerspective, lang, router, searchParams, selectedTab])
@@ -575,6 +616,7 @@ export const usePublicationsTable = (
   usePublicationsTableDataFetching(
     columnFiltersByTab,
     structuresFilter,
+    conceptsFilter,
     globalFilter,
     sorting,
     pagination,
@@ -1061,11 +1103,16 @@ export const usePublicationsTable = (
     ],
   )
 
-  const table = useDocumentTable(tableOptions, () => setStructuresFilter([]))
+  const table = useDocumentTable(tableOptions, () => {
+    setStructuresFilter([])
+    setConceptsFilter([])
+  })
   return {
     table: table,
     selectedDocuments: selectedDocuments,
     structuresFilter: structuresFilter,
     setStructuresFilter: setStructuresFilter,
+    conceptsFilter: conceptsFilter,
+    setConceptsFilter: setConceptsFilter,
   }
 }

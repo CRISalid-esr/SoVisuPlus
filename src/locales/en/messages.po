@@ -125,6 +125,11 @@ msgid "documents_page_refresh_list_alert_other_perspective"
 msgstr "{name}'s publication list has changed"
 
 #. js-lingui-explicit-id
+#: src/app/[lang]/documents/page.tsx:303
+msgid "documents_page_concept_filter_chip_label"
+msgstr "Keyword: {name}"
+
+#. js-lingui-explicit-id
 #: src/app/[lang]/documents/page.tsx:230
 msgid "documents_page_synchronize_button"
 msgstr "Update all publications"

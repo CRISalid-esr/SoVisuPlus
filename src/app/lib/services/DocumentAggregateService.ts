@@ -64,7 +64,10 @@ export class DocumentAggregateService {
     // Intermediate frequencies storage
     const frequencies: Record<
       WordstreamTopic,
-      Record<number, Record<string, { text: string; frequency: number }>>
+      Record<
+        number,
+        Record<string, { text: string; frequency: number; uid: string }>
+      >
     > = {
       [WordstreamTopic.Concepts]: {},
       [WordstreamTopic.CoAuthors]: {},
@@ -104,6 +107,7 @@ export class DocumentAggregateService {
             year,
             tokenKey,
             label,
+            c.uid,
           )
         }
       }
@@ -122,6 +126,7 @@ export class DocumentAggregateService {
             year,
             tokenKey,
             label,
+            p.uid,
           )
         }
       }
@@ -177,6 +182,7 @@ export class DocumentAggregateService {
       {
         text: string
         frequency: number
+        uid: string
       }
     >,
     prev: Record<WordstreamTopic, Record<string, number>>,
@@ -194,6 +200,7 @@ export class DocumentAggregateService {
           sudden,
           topic,
           id: this.buildId(entry.text, topic, year),
+          uid: entry.uid,
         }
       },
     )
@@ -204,19 +211,23 @@ export class DocumentAggregateService {
   private updateFreqencies(
     frequencies: Record<
       WordstreamTopic,
-      Record<number, Record<string, { text: string; frequency: number }>>
+      Record<
+        number,
+        Record<string, { text: string; frequency: number; uid: string }>
+      >
     >,
     topic: WordstreamTopic,
     year: number,
     tokenKey: string,
     label: string,
+    uid: string,
   ) {
     if (!frequencies[topic][year]) {
       frequencies[topic][year] = {}
     }
     const bucket = frequencies[topic][year]
     if (!bucket[tokenKey]) {
-      bucket[tokenKey] = { text: label, frequency: 1 }
+      bucket[tokenKey] = { text: label, frequency: 1, uid }
     } else {
       bucket[tokenKey].frequency += 1
     }

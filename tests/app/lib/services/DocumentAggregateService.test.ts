@@ -220,12 +220,14 @@ describe('DocumentAggregateService Integration', () => {
     expect(c2020.map((w) => w.text)).toEqual(['Machine Learning'])
     expect(c2020[0].frequency).toBe(1)
     expect(c2020[0].sudden).toBe(1) // first appearance
+    expect(c2020[0].uid).toBe('c-ml')
 
     // 2020: Coauthors -> only Bob Coauthor
     const co2020 = s2020.words[WordstreamTopic.CoAuthors]!
     expect(co2020.map((w) => w.text)).toEqual(['Bob Coauthor'])
     expect(co2020[0].frequency).toBe(1)
     expect(co2020[0].sudden).toBe(1)
+    expect(co2020[0].uid).toBe('p-co1')
 
     // 2021: Concepts -> "Machine Learning" (again) + "Data Mining"; "Administration" excluded
     const c2021 = s2021.words[WordstreamTopic.Concepts]!

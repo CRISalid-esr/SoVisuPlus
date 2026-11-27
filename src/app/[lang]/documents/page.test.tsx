@@ -287,7 +287,10 @@ describe('DocumentsPage Component', () => {
         page: 1,
         pageSize: 10,
         searchTerm: '',
-        columnFilters: JSON.stringify([{ id: 'structures', value: [] }]),
+        columnFilters: JSON.stringify([
+          { id: 'structures', value: [] },
+          { id: 'concepts', value: [] },
+        ]),
         sorting: JSON.stringify([
           {
             id: 'date',
@@ -316,6 +319,7 @@ describe('DocumentsPage Component', () => {
         searchLang: 'en',
         columnFilters: JSON.stringify([
           { id: 'structures', value: [] },
+          { id: 'concepts', value: [] },
           { id: 'halStatus', value: ['outside_hal'] },
         ]),
         contributorType: 'person',

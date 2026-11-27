@@ -93,6 +93,20 @@ export const readInitialStructuresFilter = (): {
   }
 }
 
+export const CONCEPTS_FILTER_KEY = 'mrt_conceptsFilter_publication_table'
+
+/** A keyword filter: every concept uid sharing the displayed label. */
+export type ConceptFilter = { name: string; uids: string[] }
+
+export const readInitialConceptsFilter = (): ConceptFilter[] => {
+  try {
+    const raw = sessionStorage.getItem(CONCEPTS_FILTER_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
 export const readInitialSorting = (): MRT_SortingState => {
   try {
     const raw = sessionStorage.getItem('mrt_sorting_publication_table')

@@ -706,6 +706,19 @@ export class DocumentDAO extends AbstractDAO {
           }
         }
       }
+      if (
+        filter.id === 'concepts' &&
+        Array.isArray(filter.value) &&
+        filter.value.length > 0
+      ) {
+        where = {
+          ...where,
+          AND: [
+            ...this.computeExistingAnd(where),
+            { subjects: { some: { uid: { in: filter.value } } } },
+          ],
+        }
+      }
       if (filter.id === 'type' && Array.isArray(filter.value)) {
         where = {
           ...where,
