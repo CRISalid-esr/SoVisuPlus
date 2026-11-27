@@ -109,9 +109,11 @@ const mkPerson = (): Person => {
 const mkEmployment = (
   overrides: Partial<PersonEmployment['organizationUnit']> = {},
   positionCode: string | null = 'MCF',
+  endDate: string | null = null,
 ): PersonEmployment =>
   ({
     positionCode,
+    endDate,
     organizationUnit: {
       uid: 'inst1',
       acronym: 'UP1',
@@ -224,6 +226,33 @@ describe('PersonIdentityCard', () => {
     render(<PersonIdentityCard person={person} />)
 
     expect(screen.getByText('Maître de conférences')).toBeInTheDocument()
+    expect(screen.queryByText('Paris 1 University')).not.toBeInTheDocument()
+  })
+
+  it('skips ended employments', () => {
+    const person = mkPerson()
+    person.employments = [
+      mkEmployment({ names: [] }, 'PR', new Date(2000, 0, 1).toDateString()),
+      mkEmployment({}, 'MCF', new Date(2999, 11, 31).toDateString()),
+    ]
+
+    render(<PersonIdentityCard person={person} />)
+
+    expect(screen.queryByText('Professeur')).not.toBeInTheDocument()
+    expect(screen.queryByText('UP1')).not.toBeInTheDocument()
+    expect(screen.getByText('Maître de conférences')).toBeInTheDocument()
+    expect(screen.getByText('Paris 1 University')).toBeInTheDocument()
+  })
+
+  it('shows neither position nor employer when every employment has ended', () => {
+    const person = mkPerson()
+    person.employments = [
+      mkEmployment({}, 'MCF', new Date(2000, 0, 1).toDateString()),
+    ]
+
+    render(<PersonIdentityCard person={person} />)
+
+    expect(screen.queryByText('Maître de conférences')).not.toBeInTheDocument()
     expect(screen.queryByText('Paris 1 University')).not.toBeInTheDocument()
   })
 

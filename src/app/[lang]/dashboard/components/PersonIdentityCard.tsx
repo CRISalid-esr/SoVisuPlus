@@ -26,6 +26,7 @@ import { t } from '@lingui/core/macro'
 import { abilityFromAuthzContext } from '@/app/auth/ability'
 import { PermissionAction } from '@/types/Permission'
 import { employeeTypeLabel } from '@/lib/employeeTypes'
+import { PersonEmployment } from '@/types/PersonEmployment'
 import { Literal } from '@/types/Literal'
 
 const IDENTIFIERS_TO_SHOW: DbPersonIdentifierType[] = [
@@ -74,8 +75,10 @@ const PersonIdentityCard = ({ person }: { person: IAgent }) => {
     params.set('perspective', slug)
     router.push(`${pathname}?${params.toString()}`, { scroll: false })
   }
-  // Same rule as the members table: the first employment wins.
-  const employment = person.employments[0]
+  // First current employment: an ended one no longer names the employer.
+  const employment = person.employments.find((e) =>
+    PersonEmployment.isCurrent(e),
+  )
   const position = employment?.positionCode
     ? employeeTypeLabel(employment.positionCode)
     : null

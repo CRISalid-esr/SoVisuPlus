@@ -9,6 +9,26 @@ class PersonEmployment {
     public positionCode?: string | null,
   ) {}
 
+  /**
+   * An employment is current when it has no end date or ends after today
+   * (same rule as PersonMembership.isCurrent). Accepts plain JSON
+   * employments, which have no class methods.
+   */
+  static isCurrent(
+    employment: Pick<PersonEmployment, 'endDate'>,
+    now: Date = new Date(),
+  ): boolean {
+    if (!employment.endDate) {
+      return true
+    }
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    )
+    return new Date(employment.endDate) > startOfToday
+  }
+
   static fromDbPersonEmployment(
     employment: EmploymentWithRelations,
   ): PersonEmployment {
